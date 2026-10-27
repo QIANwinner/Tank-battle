@@ -2,12 +2,8 @@
 
 一个纯 HTML / CSS / JavaScript 实现的经典「坦克大战」游戏，单文件、零依赖，双击即可游玩。
 <p align="center">
-  <img src="title.png" width="520" alt="QIAN TANK BATTLE" />
+  <img src="title.png" width="650" alt="QIAN TANK BATTLE" />
 </p>
-<p align="center">
-  <img src="shot.png" width="50%" alt="gameplay" />
-</p>
-
 
 ## ✨ 特性
 
@@ -19,6 +15,9 @@
 - 🎵 Web Audio 合成音效（射击 / 命中 / 爆炸），一键静音
 - 💥 粒子爆炸、屏幕震动与击杀飘分特效
 - 📱 触屏设备自动显示虚拟方向键与开火按钮，高分屏清晰渲染
+<p align="center">
+  <img src="shot.png" width="100%" alt="gameplay" />
+</p>
 
 ## 🎮 操作
 
