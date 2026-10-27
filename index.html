@@ -4,22 +4,32 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>坦克大战 · Tank Battle</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='12' y='42' width='76' height='46' rx='10' fill='%23f5b942'/><rect x='30' y='52' width='40' height='26' rx='6' fill='%231a1304'/><rect x='44' y='10' width='12' height='36' fill='%23f5b942'/></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='12' y='42' width='76' height='46' rx='10' fill='%23002FA7'/><rect x='30' y='52' width='40' height='26' rx='6' fill='%230a1040'/><rect x='44' y='10' width='12' height='36' fill='%2300f0ff'/></svg>">
 <style>
   :root {
-    --bg: #0b0f14;
-    --panel: #141a22;
-    --border: #2a3542;
+    --bg: #05050a;
+    --panel: #0a0a18;
+    --border: #1a1a3a;
     --text: #e8eef4;
-    --muted: #8b98a6;
-    --accent: #f5b942;
-    --green: #57d977;
-    --red: #ff5c5c;
+    --muted: #5a6a8a;
+    --accent: #002FA7;
+    --neon-cyan: #00f0ff;
+    --neon-magenta: #ff00ff;
+    --neon-green: #39ff14;
+    --neon-blue: #4d9fff;
+    --green: #39ff14;
+    --red: #ff2d55;
+    --klein: #002FA7;
+    --klein-bright: #3355cc;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
     height: 100%;
-    background: radial-gradient(1200px 700px at 50% -10%, #16202b 0%, var(--bg) 60%);
+    background: var(--bg);
+    background-image:
+      linear-gradient(rgba(0, 47, 167, 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 47, 167, 0.06) 1px, transparent 1px);
+    background-size: 40px 40px;
     color: var(--text);
     font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
     -webkit-user-select: none; user-select: none;
@@ -35,13 +45,32 @@
     padding: 16px;
   }
   h1 {
-    font-size: 26px;
-    letter-spacing: 6px;
+    font-size: 28px;
+    letter-spacing: 8px;
     font-weight: 800;
-    color: var(--accent);
-    text-shadow: 0 2px 12px rgba(245, 185, 66, 0.35);
+    color: #fff;
+    text-shadow:
+      0 0 6px rgba(0, 240, 255, 0.8),
+      0 0 20px rgba(0, 240, 255, 0.5),
+      0 0 40px rgba(0, 47, 167, 0.6);
   }
-  h1 span { color: var(--muted); font-weight: 400; font-size: 14px; letter-spacing: 2px; }
+  h1 .brand {
+    color: var(--neon-cyan);
+    font-weight: 800;
+  }
+  h1 span {
+    color: var(--neon-cyan);
+    font-weight: 400; font-size: 13px; letter-spacing: 4px;
+    vertical-align: middle; margin-left: 8px;
+  }
+  .footer {
+    font-size: 11px;
+    letter-spacing: 6px;
+    color: var(--muted);
+    text-transform: uppercase;
+    opacity: .7;
+  }
+  .footer b { color: var(--neon-cyan); font-weight: 600; }
   .stage {
     display: flex;
     gap: 16px;
@@ -51,67 +80,91 @@
     width: 172px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
   }
   .card {
     background: var(--panel);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 12px 14px;
+    border-radius: 8px;
+    padding: 10px 12px;
+    box-shadow: 0 0 0 1px rgba(0, 47, 167, 0.15) inset, 0 0 12px rgba(0, 47, 167, 0.1);
+    position: relative;
   }
   .card h3 {
-    font-size: 12px;
-    letter-spacing: 2px;
-    color: var(--muted);
-    margin-bottom: 8px;
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--neon-cyan);
+    margin-bottom: 6px;
     text-transform: uppercase;
+    opacity: .8;
   }
-  .stat { font-size: 24px; font-weight: 800; }
+  .stat { font-size: 24px; font-weight: 800; color: #fff; }
+  .stat.best { color: var(--neon-cyan); }
   .lives { display: flex; gap: 6px; font-size: 20px; }
-  .lives .tank { opacity: .25; }
-  .lives .tank.on { opacity: 1; }
+  .lives .tank { opacity: .25; color: var(--muted); }
+  .lives .tank.on { opacity: 1; color: var(--neon-green); text-shadow: 0 0 6px rgba(57, 255, 20, 0.5); }
   canvas {
     display: block;
     width: 624px;
     max-width: 100%;
     height: auto;
-    border-radius: 12px;
-    border: 2px solid var(--border);
-    box-shadow: 0 10px 40px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.03) inset;
-    background: #0d1117;
+    border-radius: 6px;
+    border: 2px solid var(--klein);
+    box-shadow:
+      0 0 0 1px var(--border),
+      0 0 20px rgba(0, 47, 167, 0.4),
+      0 0 60px rgba(0, 47, 167, 0.2),
+      0 10px 40px rgba(0,0,0,.6);
+    background: #030308;
   }
   .controls { font-size: 12px; color: var(--muted); line-height: 1.8; }
-  .controls b { color: var(--text); font-weight: 600; }
+  .controls b { color: var(--neon-cyan); font-weight: 600; }
   kbd {
-    background: #1f2832; border: 1px solid var(--border);
-    border-bottom-width: 2px; border-radius: 5px;
-    padding: 1px 7px; font-size: 11px; color: var(--text);
+    background: rgba(0, 47, 167, 0.15); border: 1px solid var(--klein-bright);
+    border-bottom-width: 2px; border-radius: 4px;
+    padding: 1px 7px; font-size: 11px; color: var(--neon-cyan);
+    font-family: "Consolas", "Monaco", monospace;
   }
   .btns { display: flex; gap: 8px; }
   button {
     flex: 1;
-    background: var(--accent); color: #1a1304;
-    border: 0; border-radius: 9px;
+    background: var(--klein);
+    color: #fff;
+    border: 1px solid var(--klein-bright);
+    border-radius: 6px;
     padding: 10px 0; font-size: 14px; font-weight: 700;
-    cursor: pointer; letter-spacing: 1px;
-    transition: transform .06s ease, filter .12s ease;
+    cursor: pointer; letter-spacing: 2px;
+    transition: all .15s ease;
+    text-shadow: 0 0 4px rgba(255,255,255,0.3);
+    box-shadow: 0 0 8px rgba(0, 47, 167, 0.3);
   }
-  button:hover { filter: brightness(1.08); }
+  button:hover {
+    background: var(--klein-bright);
+    box-shadow: 0 0 16px rgba(0, 47, 167, 0.6), 0 0 32px rgba(0, 240, 255, 0.2);
+    border-color: var(--neon-cyan);
+  }
   button:active { transform: translateY(1px); }
   button.ghost {
-    background: transparent; color: var(--text);
-    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--neon-cyan);
+    border: 1px solid var(--klein-bright);
+    box-shadow: none;
+    text-shadow: none;
+  }
+  button.ghost:hover {
+    background: rgba(0, 47, 167, 0.2);
+    box-shadow: 0 0 12px rgba(0, 47, 167, 0.3);
   }
   /* 触屏虚拟按键（仅触摸设备显示） */
   .touch { display: none; align-items: center; gap: 30px; }
   .touch button { flex: 0 0 auto; }
   .tbtn {
     width: 54px; height: 54px; font-size: 17px; font-weight: 700;
-    border-radius: 12px; touch-action: none;
-    background: var(--panel); color: var(--text);
-    border: 1px solid var(--border);
+    border-radius: 8px; touch-action: none;
+    background: rgba(0, 47, 167, 0.2); color: var(--neon-cyan);
+    border: 1px solid var(--klein-bright);
   }
-  .tbtn:active { background: #26313f; }
+  .tbtn:active { background: var(--klein); box-shadow: 0 0 12px rgba(0, 47, 167, 0.5); }
   .dpad {
     display: grid; gap: 5px;
     grid-template-columns: repeat(3, 54px);
@@ -123,32 +176,37 @@
   #tDown { grid-column: 2; grid-row: 3; }
   .tfire {
     width: 88px; height: 88px; border-radius: 50%;
-    background: var(--accent); color: #1a1304; border: 0; font-size: 17px;
+    background: var(--neon-magenta); color: #fff; border: 2px solid #fff;
+    font-size: 17px; font-weight: 800;
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
   }
+  .tfire:active { box-shadow: 0 0 32px rgba(255, 0, 255, 0.8); }
   @media (pointer: coarse) {
     .touch { display: flex; }
   }
   .toast {
     position: fixed; top: 24px; left: 50%;
     transform: translateX(-50%);
-    background: var(--panel); border: 1px solid var(--border);
-    padding: 10px 18px; border-radius: 10px;
-    font-size: 14px; letter-spacing: 1px;
+    background: rgba(0, 47, 167, 0.9); border: 1px solid var(--neon-cyan);
+    padding: 10px 22px; border-radius: 8px;
+    font-size: 14px; letter-spacing: 1px; color: #fff;
     opacity: 0; pointer-events: none;
     transition: opacity .25s ease, transform .25s ease;
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(6px); }
   @media (max-width: 640px) {
     .stage { flex-direction: column; align-items: center; }
     .hud { width: 100%; flex-direction: row; flex-wrap: wrap; }
     .hud .card { flex: 1; min-width: 90px; }
-    h1 { font-size: 20px; }
+    h1 { font-size: 20px; letter-spacing: 5px; }
+    h1 span { display: block; margin-left: 0; }
   }
 </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>坦克大战 <span>TANK BATTLE</span></h1>
+    <h1><span class="brand">QIAN</span> · 坦克大战 <span>TANK BATTLE</span></h1>
     <div class="stage">
       <div class="hud">
         <div class="card">
@@ -157,7 +215,7 @@
         </div>
         <div class="card">
           <h3>最高分</h3>
-          <div class="stat" id="best">0</div>
+          <div class="stat best" id="best">0</div>
         </div>
         <div class="card">
           <h3>生命</h3>
@@ -194,6 +252,7 @@
       </div>
       <button class="tbtn tfire" id="tFire" aria-label="开火">开火</button>
     </div>
+    <div class="footer">DESIGNED BY <b>QIAN</b> · V1.1</div>
   </div>
   <div class="toast" id="toast"></div>
 
@@ -388,7 +447,7 @@
     const x = Math.floor(px / TILE), y = Math.floor(py / TILE);
     if (inside(x, y) && map[y][x] === TILE_BRICK) {
       map[y][x] = 0;
-      spawnParticles(x * TILE + TILE / 2, y * TILE + TILE / 2, '#c97b3d', 6);
+      spawnParticles(x * TILE + TILE / 2, y * TILE + TILE / 2, '#ff00ff', 6);
       return true;
     }
     return false;
@@ -406,7 +465,7 @@
     }
   }
 
-  function addText(x, y, str, color = '#ffd166') {
+  function addText(x, y, str, color = '#00f0ff') {
     texts.push({ x, y, str, color, life: 0.9, max: 0.9 });
   }
 
@@ -416,7 +475,7 @@
       x: BASE.x * TILE + (TILE - TANK_SIZE) / 2,
       y: (BASE.y + 1) * TILE + (TILE - TANK_SIZE) / 2,
       dir: DIR.UP, speed: PLAYER_SPEED,
-      cooldown: 0, isPlayer: true, color: '#f5b942'
+      cooldown: 0, isPlayer: true, color: '#002FA7'
     };
   }
 
@@ -429,7 +488,7 @@
   }
 
   function pickEnemyColor() {
-    const c = ['#ff5c5c', '#ff9f43', '#5c7cfa', '#57d977', '#c084fc'];
+    const c = ['#ff00ff', '#00f0ff', '#39ff14', '#ff2d55', '#4d9fff'];
     return c[randInt(0, c.length - 1)];
   }
 
@@ -531,7 +590,7 @@
         if (cx >= bx && cx <= bx + TILE && cy >= by && cy <= by + TILE) {
           baseAlive = false;
           b.dead = true; sfxBoom();
-          spawnParticles(bx + TILE / 2, by + TILE / 2, '#ff5c5c', 20);
+          spawnParticles(bx + TILE / 2, by + TILE / 2, '#ff2d55', 20);
           shake = 12;
           return;
         }
@@ -742,8 +801,17 @@
     if (shake > 0) ctx.translate(rand(-shake, shake) * 0.5, rand(-shake, shake) * 0.5);
 
     // 背景
-    ctx.fillStyle = '#0d1117';
+    ctx.fillStyle = '#030308';
     ctx.fillRect(0, 0, W, H);
+    // 赛博网格
+    ctx.strokeStyle = 'rgba(0, 47, 167, 0.12)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= W; i += TILE) {
+      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, H); ctx.stroke();
+    }
+    for (let i = 0; i <= H; i += TILE) {
+      ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(W, i); ctx.stroke();
+    }
 
     // 地块
     for (let y = 0; y < ROWS; y++) {
@@ -761,8 +829,17 @@
 
     // 子弹
     for (const b of bullets) {
-      ctx.fillStyle = b.owner.isPlayer ? '#fff' : '#ffd166';
+      if (b.owner.isPlayer) {
+        ctx.shadowColor = '#00f0ff';
+        ctx.shadowBlur = 8;
+        ctx.fillStyle = '#00f0ff';
+      } else {
+        ctx.shadowColor = '#ff00ff';
+        ctx.shadowBlur = 6;
+        ctx.fillStyle = '#ff00ff';
+      }
       ctx.fillRect(b.x, b.y, b.size, b.size);
+      ctx.shadowBlur = 0;
     }
 
     // 敌人
@@ -804,41 +881,50 @@
 
     // 覆盖层（开始 / 暂停 / 结束）
     if (!running || paused || gameOver) {
-      ctx.fillStyle = 'rgba(8, 11, 15, 0.72)';
+      ctx.fillStyle = 'rgba(3, 3, 8, 0.82)';
       ctx.fillRect(0, 0, W, H);
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       if (gameOver) {
-        ctx.fillStyle = '#f5b942';
+        ctx.shadowColor = won ? '#00f0ff' : '#ff2d55';
+        ctx.shadowBlur = 20;
+        ctx.fillStyle = won ? '#00f0ff' : '#ff2d55';
         ctx.font = '800 40px "Segoe UI", sans-serif';
         ctx.fillText(won ? '胜 利' : '游戏结束', W / 2, H / 2 - 20);
-        ctx.font = '16px "Segoe UI", sans-serif';
-        ctx.fillStyle = '#8b98a6';
-        ctx.fillText('得分 ' + score + ' · 最高分 ' + best, W / 2, H / 2 + 22);
-        ctx.fillText('点击「开始」再来一局', W / 2, H / 2 + 46);
+        ctx.shadowBlur = 0;
+        ctx.font = '14px "Consolas", monospace';
+        ctx.fillStyle = '#5a6a8a';
+        ctx.fillText('SCORE ' + score + '  ·  BEST ' + best, W / 2, H / 2 + 22);
+        ctx.fillText('PRESS START TO CONTINUE', W / 2, H / 2 + 44);
       } else if (paused) {
-        ctx.fillStyle = '#f5b942';
+        ctx.shadowColor = '#00f0ff';
+        ctx.shadowBlur = 16;
+        ctx.fillStyle = '#00f0ff';
         ctx.font = '800 40px "Segoe UI", sans-serif';
-        ctx.fillText('已暂停', W / 2, H / 2);
+        ctx.fillText('PAUSED', W / 2, H / 2);
+        ctx.shadowBlur = 0;
       } else {
-        ctx.fillStyle = '#f5b942';
+        ctx.shadowColor = '#00f0ff';
+        ctx.shadowBlur = 16;
+        ctx.fillStyle = '#fff';
         ctx.font = '800 34px "Segoe UI", sans-serif';
-        ctx.fillText('坦 克 大 战', W / 2, H / 2 - 10);
-        ctx.font = '16px "Segoe UI", sans-serif';
-        ctx.fillStyle = '#8b98a6';
-        ctx.fillText('按「开始」进入战斗', W / 2, H / 2 + 28);
+        ctx.fillText('QIAN · TANK BATTLE', W / 2, H / 2 - 14);
+        ctx.shadowBlur = 0;
+        ctx.font = '14px "Consolas", monospace';
+        ctx.fillStyle = '#00f0ff';
+        ctx.fillText('PRESS START', W / 2, H / 2 + 24);
       }
     }
   }
 
   function drawBrick(px, py) {
-    ctx.fillStyle = '#8c3b2e';
+    ctx.fillStyle = '#2a1520';
     ctx.fillRect(px, py, TILE, TILE);
-    ctx.strokeStyle = '#5f241c';
+    ctx.strokeStyle = '#1a0a12';
     ctx.lineWidth = 1;
     ctx.strokeRect(px + 0.5, py + 0.5, TILE - 1, TILE - 1);
     // 砖缝
-    ctx.fillStyle = '#a44a36';
+    ctx.fillStyle = '#3a2030';
     ctx.fillRect(px, py + 7, TILE, 2);
     ctx.fillRect(px, py + 15, TILE, 2);
     ctx.fillRect(px + 5, py, 2, 7);
@@ -850,18 +936,21 @@
   }
 
   function drawSteel(px, py) {
-    ctx.fillStyle = '#5b6672';
+    ctx.fillStyle = '#1a2030';
     ctx.fillRect(px, py, TILE, TILE);
-    ctx.fillStyle = '#8b98a6';
+    ctx.fillStyle = '#2a3548';
     ctx.fillRect(px + 3, py + 3, TILE - 6, TILE - 6);
-    ctx.fillStyle = '#c7d0da';
+    ctx.fillStyle = '#3a4860';
     ctx.fillRect(px + 8, py + 8, TILE - 16, TILE - 16);
+    // 高光条
+    ctx.fillStyle = 'rgba(0, 240, 255, 0.12)';
+    ctx.fillRect(px + 8, py + 8, TILE - 16, 2);
   }
 
   function drawWater(px, py) {
-    ctx.fillStyle = '#1e6fb8';
+    ctx.fillStyle = '#0a1530';
     ctx.fillRect(px, py, TILE, TILE);
-    ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+    ctx.strokeStyle = 'rgba(0, 240, 255, 0.35)';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(px + 2, py + 8); ctx.lineTo(px + 12, py + 8);
@@ -870,35 +959,47 @@
   }
 
   function drawTree(px, py) {
-    ctx.fillStyle = 'rgba(22, 46, 28, 0.85)';
+    ctx.fillStyle = 'rgba(10, 30, 20, 0.85)';
     ctx.fillRect(px, py, TILE, TILE);
-    ctx.fillStyle = '#2f6b3b';
+    ctx.fillStyle = '#1a4020';
     for (let i = 0; i < 3; i++) {
       ctx.beginPath();
       ctx.arc(px + 6 + i * 7, py + 8, 6, 0, Math.PI * 2);
       ctx.arc(px + 10 + i * 7, py + 15, 6, 0, Math.PI * 2);
       ctx.fill();
     }
+    // 霓虹点
+    ctx.fillStyle = 'rgba(57, 255, 20, 0.4)';
+    ctx.fillRect(px + 4, py + 4, 2, 2);
+    ctx.fillRect(px + 18, py + 14, 2, 2);
   }
 
   function drawBase() {
     const px = BASE.x * TILE, py = BASE.y * TILE;
     if (baseAlive) {
-      // 鹰徽
-      ctx.fillStyle = '#2a3542';
-      ctx.fillRect(px + 3, py + 3, TILE - 6, TILE - 6);
-      ctx.fillStyle = '#f5b942';
-      ctx.fillRect(px + 9, py + 10, 6, 6);
-      ctx.fillStyle = '#fff';
-      ctx.fillRect(px + 10, py + 11, 4, 2);
+      ctx.fillStyle = '#0a1040';
+      ctx.fillRect(px + 2, py + 2, TILE - 4, TILE - 4);
+      ctx.strokeStyle = '#002FA7';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(px + 2, py + 2, TILE - 4, TILE - 4);
+      // QIAN logo
+      ctx.fillStyle = '#00f0ff';
+      ctx.font = '700 8px "Consolas", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Q', px + TILE / 2, py + TILE / 2);
+      ctx.shadowColor = '#00f0ff';
+      ctx.shadowBlur = 6;
+      ctx.fillText('Q', px + TILE / 2, py + TILE / 2);
+      ctx.shadowBlur = 0;
     } else {
-      ctx.fillStyle = '#3a2a2a';
-      ctx.fillRect(px + 3, py + 3, TILE - 6, TILE - 6);
-      ctx.strokeStyle = '#ff5c5c';
+      ctx.fillStyle = '#1a0505';
+      ctx.fillRect(px + 2, py + 2, TILE - 4, TILE - 4);
+      ctx.strokeStyle = '#ff2d55';
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(px + 7, py + 7); ctx.lineTo(px + TILE - 7, py + TILE - 7);
-      ctx.moveTo(px + TILE - 7, py + 7); ctx.lineTo(px + 7, py + TILE - 7);
+      ctx.moveTo(px + 6, py + 6); ctx.lineTo(px + TILE - 6, py + TILE - 6);
+      ctx.moveTo(px + TILE - 6, py + 6); ctx.lineTo(px + 6, py + TILE - 6);
       ctx.stroke();
     }
   }
@@ -909,11 +1010,22 @@
     ctx.translate(cx, cy);
     ctx.rotate(t.dir * Math.PI / 2);
 
+    const isPlayer = t.isPlayer;
+
+    // 霓虹辉光
+    if (isPlayer) {
+      ctx.shadowColor = '#00f0ff';
+      ctx.shadowBlur = 10;
+    } else {
+      ctx.shadowColor = t.color;
+      ctx.shadowBlur = 8;
+    }
+
     // 履带
-    ctx.fillStyle = '#3a434e';
+    ctx.fillStyle = isPlayer ? '#0a1040' : '#1a1020';
     ctx.fillRect(-11, -10, 5, 20);
     ctx.fillRect(6, -10, 5, 20);
-    ctx.fillStyle = '#59636e';
+    ctx.fillStyle = isPlayer ? '#3355cc' : '#2a2035';
     ctx.fillRect(-11, -8, 5, 3);
     ctx.fillRect(-11, -3, 5, 3);
     ctx.fillRect(-11, 2, 5, 3);
@@ -927,12 +1039,13 @@
     ctx.fillStyle = t.color;
     ctx.fillRect(-6, -8, 12, 16);
     // 炮塔
-    ctx.fillStyle = shade(t.color, -25);
+    ctx.fillStyle = shade(t.color, isPlayer ? 30 : -25);
     ctx.fillRect(-4, -4, 8, 8);
     // 炮管
-    ctx.fillStyle = '#1d232b';
+    ctx.fillStyle = isPlayer ? '#00f0ff' : '#2a2035';
     ctx.fillRect(-2, -16, 4, 10);
 
+    ctx.shadowBlur = 0;
     ctx.restore();
   }
 
