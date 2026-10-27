@@ -1,8 +1,8 @@
 # QIAN科幻风坦克大战 · Tank Battle
 
 一个纯 HTML / CSS / JavaScript 实现的经典「坦克大战」游戏，单文件、零依赖，双击即可游玩。
-![游戏封面](tank_preview_v2.png)
-![游戏主界面](微信图片_2026-10-27_141036_158.png)
+![游戏封面](title.png)
+![游戏主界面](shot.png)
 
 ## ✨ 特性
 
