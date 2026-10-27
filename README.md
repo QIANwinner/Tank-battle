@@ -2,7 +2,6 @@
 
 一个纯 HTML / CSS / JavaScript 实现的经典「坦克大战」游戏，单文件、零依赖，双击即可游玩。
 
-![Tank Battle](https://img.shields.io/badge/HTML-CSS-JS-f5b942) ![No Dependencies](https://img.shields.io/badge/dependencies-none-brightgreen)
 
 ## ✨ 特性
 
