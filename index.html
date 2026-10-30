@@ -2,266 +2,304 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>坦克大战 · Tank Battle</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,minimum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="format-detection" content="telephone=no,email=no,address=no">
+<meta name="theme-color" content="#05050a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="QIAN 出品的坦克大战：手机打开就能玩，不用下载。守护基地、消灭敌军、连击得分、道具加成，每 5 关一只 BOSS。">
+<meta property="og:type" content="website">
+<meta property="og:title" content="QIAN 坦克大战 · 点开就能玩">
+<meta property="og:description" content="守护基地、消灭敌军、连击得分、道具加成，每 5 关一只 BOSS。手机浏览器直接开打。">
+<meta property="og:image" content="https://qianwinner.github.io/Tank-battle/title.png">
+<title>QIAN 坦克大战 · 点开就能玩</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='12' y='42' width='76' height='46' rx='10' fill='%23002FA7'/><rect x='30' y='52' width='40' height='26' rx='6' fill='%230a1040'/><rect x='44' y='10' width='12' height='36' fill='%2300f0ff'/></svg>">
 <style>
   :root {
     --bg: #05050a;
-    --panel: #0a0a18;
-    --border: #1a1a3a;
     --text: #e8eef4;
     --muted: #5a6a8a;
-    --accent: #002FA7;
-    --neon-cyan: #00f0ff;
-    --neon-magenta: #ff00ff;
-    --neon-green: #39ff14;
-    --neon-blue: #4d9fff;
-    --green: #39ff14;
-    --red: #ff2d55;
     --klein: #002FA7;
     --klein-bright: #3355cc;
+    --cyan: #00f0ff;
+    --magenta: #ff00ff;
+    --green: #39ff14;
+    --red: #ff2d55;
+    --hud-h: 54px;
+    --pad-h: 0px;
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body {
-    height: 100%;
+    margin: 0; padding: 0;
+    width: 100%; height: 100%;
+    position: fixed; inset: 0;
+    overflow: hidden;
     background: var(--bg);
-    background-image:
-      linear-gradient(rgba(0, 47, 167, 0.06) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 47, 167, 0.06) 1px, transparent 1px);
-    background-size: 40px 40px;
     color: var(--text);
-    font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
     -webkit-user-select: none; user-select: none;
-    overflow-x: hidden; overflow-y: auto;
+    -webkit-touch-callout: none;
+    overscroll-behavior: none;
+    touch-action: none;
   }
-  .wrap {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 14px;
-  }
-  h1 {
-    font-size: 28px;
-    letter-spacing: 8px;
-    font-weight: 800;
-    color: #fff;
-    text-shadow:
-      0 0 6px rgba(0, 240, 255, 0.8),
-      0 0 20px rgba(0, 240, 255, 0.5),
-      0 0 40px rgba(0, 47, 167, 0.6);
-  }
-  h1 .brand {
-    color: var(--neon-cyan);
-    font-weight: 800;
-  }
-  h1 span {
-    color: var(--neon-cyan);
-    font-weight: 400; font-size: 13px; letter-spacing: 4px;
-    vertical-align: middle; margin-left: 8px;
-  }
-  .footer {
-    font-size: 11px;
-    letter-spacing: 6px;
-    color: var(--muted);
-    text-transform: uppercase;
-    opacity: .7;
-  }
-  .footer b { color: var(--neon-cyan); font-weight: 600; }
-  .stage {
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-  }
-  .hud {
-    width: 172px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .card {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px 12px;
-    box-shadow: 0 0 0 1px rgba(0, 47, 167, 0.15) inset, 0 0 12px rgba(0, 47, 167, 0.1);
-    position: relative;
-  }
-  .card h3 {
-    font-size: 10px;
-    letter-spacing: 3px;
-    color: var(--neon-cyan);
-    margin-bottom: 4px;
-    text-transform: uppercase;
+  body::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      linear-gradient(rgba(0, 47, 167, 0.10) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 47, 167, 0.10) 1px, transparent 1px);
+    background-size: 36px 36px;
     opacity: .8;
   }
-  .stat { font-size: 22px; font-weight: 800; color: #fff; }
-  .stat.best { color: var(--neon-cyan); }
-  .stat.combo { color: var(--neon-cyan); }
-  .stat.combo.hot { color: var(--neon-magenta); text-shadow: 0 0 12px rgba(255, 0, 255, 0.8); }
-  .lives { display: flex; gap: 4px; font-size: 18px; flex-wrap: wrap; }
-  .lives .tank { opacity: .25; color: var(--muted); }
-  .lives .tank.on { opacity: 1; color: var(--neon-green); text-shadow: 0 0 6px rgba(57, 255, 20, 0.5); }
+
+  /* ---------- 舞台 ---------- */
+  #stage {
+    position: fixed; left: 0; right: 0;
+    top: var(--hud-h); bottom: var(--pad-h);
+    display: flex; align-items: center; justify-content: center;
+    padding: 0; z-index: 1;
+  }
   canvas {
     display: block;
-    width: 624px;
-    max-width: 100%;
-    height: auto;
-    border-radius: 6px;
-    border: 2px solid var(--klein);
-    box-shadow:
-      0 0 0 1px var(--border),
-      0 0 20px rgba(0, 47, 167, 0.4),
-      0 0 60px rgba(0, 47, 167, 0.2),
-      0 10px 40px rgba(0,0,0,.6);
+    border-radius: 10px;
+    border: 1px solid rgba(0, 47, 167, 0.85);
     background: #030308;
+    box-shadow:
+      0 0 0 1px rgba(0, 240, 255, 0.08),
+      0 0 26px rgba(0, 47, 167, 0.42),
+      0 0 70px rgba(0, 47, 167, 0.18);
+    touch-action: none;
   }
-  .controls { font-size: 11px; color: var(--muted); line-height: 1.7; }
-  .controls b { color: var(--neon-cyan); font-weight: 600; }
-  kbd {
-    background: rgba(0, 47, 167, 0.15); border: 1px solid var(--klein-bright);
-    border-bottom-width: 2px; border-radius: 4px;
-    padding: 0 6px; font-size: 10px; color: var(--neon-cyan);
-    font-family: "Consolas", "Monaco", monospace;
+
+  /* ---------- 顶部 HUD ---------- */
+  #hud {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 20;
+    height: var(--hud-h);
+    display: flex; align-items: center; gap: 5px;
+    padding: 0 8px;
+    padding-top: env(safe-area-inset-top);
+    background: linear-gradient(180deg, rgba(5, 5, 10, 0.95) 40%, rgba(5, 5, 10, 0));
+    pointer-events: none;
   }
-  .btns { display: flex; gap: 6px; }
-  button {
-    flex: 1;
-    background: var(--klein);
-    color: #fff;
-    border: 1px solid var(--klein-bright);
-    border-radius: 6px;
-    padding: 9px 0; font-size: 13px; font-weight: 700;
-    cursor: pointer; letter-spacing: 1px;
-    transition: all .15s ease;
-    text-shadow: 0 0 4px rgba(255,255,255,0.3);
-    box-shadow: 0 0 8px rgba(0, 47, 167, 0.3);
+  .pill {
+    display: flex; align-items: baseline; gap: 4px;
+    padding: 3px 8px; border-radius: 999px;
+    background: rgba(0, 47, 167, 0.18);
+    border: 1px solid rgba(77, 159, 255, 0.22);
+    white-space: nowrap; line-height: 1;
   }
-  button:hover {
-    background: var(--klein-bright);
-    box-shadow: 0 0 16px rgba(0, 47, 167, 0.6), 0 0 32px rgba(0, 240, 255, 0.2);
-    border-color: var(--neon-cyan);
+  .pill .k { font-size: 9px; letter-spacing: 1px; color: var(--muted); }
+  .pill .v {
+    font-size: 14px; font-weight: 800; color: #fff;
+    font-variant-numeric: tabular-nums;
   }
-  button:active { transform: translateY(1px); }
-  button.ghost {
-    background: transparent;
-    color: var(--neon-cyan);
-    border: 1px solid var(--klein-bright);
-    box-shadow: none;
-    text-shadow: none;
+  .pill.best .v { color: var(--cyan); }
+  .pill.combo { border-color: rgba(255, 0, 255, 0.5); background: rgba(255, 0, 255, 0.12); }
+  .pill.combo .v { color: var(--cyan); }
+  .pill.combo.hot .v { color: var(--magenta); text-shadow: 0 0 8px rgba(255, 0, 255, 0.9); }
+  #lives {
+    display: flex; gap: 1px; font-size: 12px; line-height: 1;
+    color: var(--green); margin-left: 2px;
   }
-  button.ghost:hover {
-    background: rgba(0, 47, 167, 0.2);
-    box-shadow: 0 0 12px rgba(0, 47, 167, 0.3);
+  #lives .off { opacity: .2; }
+  .hbtns { margin-left: auto; display: flex; gap: 6px; pointer-events: auto; }
+  .hbtn {
+    width: 34px; height: 34px; padding: 0;
+    display: grid; place-items: center;
+    border-radius: 10px; font-size: 15px; line-height: 1;
+    background: rgba(0, 47, 167, 0.28);
+    border: 1px solid rgba(77, 159, 255, 0.35);
+    color: var(--cyan);
+    cursor: pointer;
+    -webkit-appearance: none; appearance: none;
   }
-  /* 触屏虚拟按键（仅触摸设备显示） */
-  .touch { display: none; align-items: center; gap: 30px; }
-  .touch button { flex: 0 0 auto; }
-  .tbtn {
-    width: 54px; height: 54px; font-size: 17px; font-weight: 700;
-    border-radius: 8px; touch-action: none;
-    background: rgba(0, 47, 167, 0.2); color: var(--neon-cyan);
-    border: 1px solid var(--klein-bright);
+  .hbtn:active { background: var(--klein); }
+
+  /* ---------- 触屏按键 ---------- */
+  #pad {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+    height: var(--pad-h);
+    display: none;
+    align-items: center; justify-content: space-between;
+    padding: 0 16px calc(10px + env(safe-area-inset-bottom));
+    pointer-events: none;
   }
-  .tbtn:active { background: var(--klein); box-shadow: 0 0 12px rgba(0, 47, 167, 0.5); }
+  html.touch { --pad-h: 172px; }
+  html.touch #pad { display: flex; }
   .dpad {
     display: grid; gap: 5px;
-    grid-template-columns: repeat(3, 54px);
-    grid-template-rows: repeat(3, 54px);
+    grid-template-columns: repeat(3, 46px);
+    grid-template-rows: repeat(3, 46px);
+    pointer-events: auto;
   }
+  .tb {
+    padding: 0; border-radius: 12px;
+    background: rgba(0, 47, 167, 0.26);
+    border: 1px solid rgba(77, 159, 255, 0.4);
+    color: var(--cyan);
+    font-size: 15px; line-height: 1;
+    display: grid; place-items: center;
+    touch-action: none;
+    -webkit-appearance: none; appearance: none;
+  }
+  .tb.on { background: var(--klein); box-shadow: 0 0 14px rgba(0, 240, 255, 0.45); }
   #tUp { grid-column: 2; grid-row: 1; }
   #tLeft { grid-column: 1; grid-row: 2; }
   #tRight { grid-column: 3; grid-row: 2; }
   #tDown { grid-column: 2; grid-row: 3; }
-  .tfire {
-    width: 88px; height: 88px; border-radius: 50%;
-    background: var(--neon-magenta); color: #fff; border: 2px solid #fff;
-    font-size: 17px; font-weight: 800;
-    box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+  #tFire {
+    pointer-events: auto;
+    width: 86px; height: 86px; border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.55);
+    background: radial-gradient(circle at 50% 32%, #ff4dd2, #b80090);
+    color: #fff; font-size: 15px; font-weight: 800; letter-spacing: 2px;
+    box-shadow: 0 0 24px rgba(255, 0, 255, 0.45);
+    touch-action: none;
+    -webkit-appearance: none; appearance: none;
   }
-  .tfire:active { box-shadow: 0 0 32px rgba(255, 0, 255, 0.8); }
-  @media (pointer: coarse) {
-    .touch { display: flex; }
+  #tFire.on { transform: scale(0.94); box-shadow: 0 0 32px rgba(255, 0, 255, 0.8); }
+
+  /* 横屏：按键浮在画布两侧空白处，不再占用高度 */
+  html.touch.wide { --pad-h: 0px; }
+  html.touch.wide #pad {
+    height: auto; background: none;
+    align-items: flex-end;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
   }
-  .toast {
-    position: fixed; top: 24px; left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 47, 167, 0.9); border: 1px solid var(--neon-cyan);
-    padding: 10px 22px; border-radius: 8px;
-    font-size: 14px; letter-spacing: 1px; color: #fff;
+  html.touch.wide .dpad, html.touch.wide #tFire { opacity: .82; }
+  html.touch.wide .dpad { grid-template-columns: repeat(3, 42px); grid-template-rows: repeat(3, 42px); }
+  html.touch.wide #tFire { width: 74px; height: 74px; }
+
+  /* ---------- 开始 / 暂停 / 结算 遮罩 ---------- */
+  #overlay {
+    position: fixed; inset: 0; z-index: 30;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 10px; padding: 26px;
+    text-align: center;
+    background: radial-gradient(circle at 50% 42%, rgba(0, 47, 167, 0.28), rgba(4, 4, 10, 0.9) 62%);
+    -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+    transition: opacity .22s ease, visibility .22s;
+  }
+  #overlay.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+  #overlay .brand {
+    font-size: 12px; font-weight: 800; letter-spacing: 8px;
+    color: var(--cyan); opacity: .9;
+  }
+  #ovTitle {
+    font-size: 34px; font-weight: 800; letter-spacing: 6px; color: #fff;
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.75), 0 0 36px rgba(0, 47, 167, 0.85);
+    margin: 0;
+  }
+  #ovSub {
+    font-size: 12px; line-height: 1.7; letter-spacing: 1px;
+    color: #93a4c4; max-width: 300px; margin: 0;
+  }
+  #ovStats {
+    font-size: 12px; letter-spacing: 1px; color: #93a4c4;
+    font-variant-numeric: tabular-nums; min-height: 16px;
+  }
+  #ovStats b { color: var(--cyan); font-size: 15px; }
+  #btnPlay {
+    margin-top: 4px;
+    min-width: 176px; padding: 14px 30px;
+    border: 1px solid rgba(0, 240, 255, 0.55); border-radius: 999px;
+    background: linear-gradient(180deg, #0a3fd0, var(--klein));
+    color: #fff; font-size: 16px; font-weight: 800; letter-spacing: 3px;
+    box-shadow: 0 0 22px rgba(0, 47, 167, 0.7), 0 0 0 1px rgba(0, 240, 255, 0.18) inset;
+    cursor: pointer;
+    -webkit-appearance: none; appearance: none;
+  }
+  #btnPlay:active { transform: translateY(1px); filter: brightness(1.1); }
+  #ovTip {
+    font-size: 10px; letter-spacing: 1px; color: #4d5c7a;
+    line-height: 1.8; max-width: 300px;
+  }
+
+  /* ---------- toast ---------- */
+  #toast {
+    position: fixed; top: calc(var(--hud-h) + 8px); left: 50%;
+    transform: translateX(-50%) translateY(-6px);
+    z-index: 25;
+    padding: 8px 18px; border-radius: 999px;
+    background: rgba(0, 47, 167, 0.92);
+    border: 1px solid var(--cyan);
+    color: #fff; font-size: 13px; letter-spacing: 1px;
+    white-space: nowrap;
     opacity: 0; pointer-events: none;
-    transition: opacity .25s ease, transform .25s ease;
-    box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
-    z-index: 10;
+    transition: opacity .22s ease, transform .22s ease;
+    box-shadow: 0 0 18px rgba(0, 240, 255, 0.3);
   }
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(6px); }
-  @media (max-width: 640px) {
-    .stage { flex-direction: column; align-items: center; }
-    .hud { width: 100%; flex-direction: row; flex-wrap: wrap; }
-    .hud .card { flex: 1; min-width: 88px; }
-    h1 { font-size: 20px; letter-spacing: 5px; }
-    h1 span { display: block; margin-left: 0; }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ---------- 微信转发提示 ---------- */
+  #wxtip {
+    position: fixed; top: calc(var(--hud-h) + 12px); left: 50%;
+    transform: translateX(-50%) translateY(-8px);
+    z-index: 40;
+    padding: 10px 16px; border-radius: 12px;
+    background: rgba(8, 12, 30, 0.92);
+    border: 1px solid rgba(0, 240, 255, 0.45);
+    color: #dbe8ff; font-size: 12px; line-height: 1.6;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+    opacity: 0; pointer-events: none;
+    transition: opacity .3s ease, transform .3s ease;
+    text-align: center;
+  }
+  #wxtip.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #wxtip b { color: var(--cyan); }
+
+  /* ---------- 署名 ---------- */
+  #mark {
+    position: fixed; right: 10px; bottom: 8px; z-index: 15;
+    font-size: 9px; letter-spacing: 4px; color: rgba(90, 106, 138, 0.65);
+    pointer-events: none;
+  }
+  html.touch #mark { display: none; }
+
+  @media (max-width: 360px) {
+    .pill.best { display: none; }
+    #ovTitle { font-size: 28px; letter-spacing: 4px; }
   }
 </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1><span class="brand">QIAN</span> · 坦克大战 <span>TANK BATTLE</span></h1>
-    <div class="stage">
-      <div class="hud">
-        <div class="card">
-          <h3>得分</h3>
-          <div class="stat" id="score">0</div>
-        </div>
-        <div class="card">
-          <h3>最高分</h3>
-          <div class="stat best" id="best">0</div>
-        </div>
-        <div class="card">
-          <h3>连击</h3>
-          <div class="stat combo" id="combo">×1</div>
-        </div>
-        <div class="card">
-          <h3>生命</h3>
-          <div class="lives" id="lives"></div>
-        </div>
-        <div class="card">
-          <h3>关卡</h3>
-          <div class="stat" id="level">1</div>
-        </div>
-        <div class="card">
-          <h3>剩余敌人</h3>
-          <div class="stat" id="remaining">0</div>
-        </div>
-        <div class="card controls">
-          <h3>操作</h3>
-          <div><kbd>WASD</kbd>/<kbd>方向键</kbd> 移动</div>
-          <div><kbd>空格</kbd> 射击 · <kbd>P</kbd> 暂停</div>
-          <div><kbd>M</kbd> 静音</div>
-        </div>
-        <div class="btns">
-          <button id="startBtn">开始</button>
-          <button id="pauseBtn" class="ghost">暂停</button>
-          <button id="muteBtn" class="ghost">🔊 声音</button>
-        </div>
-      </div>
-      <canvas id="game" width="624" height="624"></canvas>
+  <div id="stage"><canvas id="game" width="624" height="624"></canvas></div>
+
+  <div id="hud">
+    <div class="pill"><span class="k">分数</span><span class="v" id="score">0</span></div>
+    <div class="pill best"><span class="k">最高</span><span class="v" id="best">0</span></div>
+    <div class="pill"><span class="k">关</span><span class="v" id="level">1</span></div>
+    <div class="pill"><span class="k">敌</span><span class="v" id="remaining">0</span></div>
+    <div class="pill combo" id="comboWrap" style="display:none"><span class="k">连击</span><span class="v" id="combo">×1</span></div>
+    <div id="lives"></div>
+    <div class="hbtns">
+      <button class="hbtn" id="pauseBtn" aria-label="暂停">⏸</button>
+      <button class="hbtn" id="muteBtn" aria-label="静音">🔊</button>
     </div>
-    <div class="touch">
-      <div class="dpad">
-        <button class="tbtn" id="tUp" aria-label="向上">▲</button>
-        <button class="tbtn" id="tLeft" aria-label="向左">◀</button>
-        <button class="tbtn" id="tDown" aria-label="向下">▼</button>
-        <button class="tbtn" id="tRight" aria-label="向右">▶</button>
-      </div>
-      <button class="tbtn tfire" id="tFire" aria-label="开火">开火</button>
-    </div>
-    <div class="footer">DESIGNED BY <b>QIAN</b> · V1.2</div>
   </div>
-  <div class="toast" id="toast"></div>
+
+  <div id="pad">
+    <div class="dpad">
+      <button class="tb" id="tUp" aria-label="向上">▲</button>
+      <button class="tb" id="tLeft" aria-label="向左">◀</button>
+      <button class="tb" id="tRight" aria-label="向右">▶</button>
+      <button class="tb" id="tDown" aria-label="向下">▼</button>
+    </div>
+    <button id="tFire" aria-label="开火">开火</button>
+  </div>
+
+  <div id="overlay">
+    <div class="brand">QIAN</div>
+    <h1 id="ovTitle">坦克大战</h1>
+    <p id="ovSub">守住基地 · 消灭敌军 · 点开即玩</p>
+    <div id="ovStats"></div>
+    <button id="btnPlay">开始游戏</button>
+    <div id="ovTip"></div>
+  </div>
+
+  <div id="toast"></div>
+  <div id="wxtip">点右上角 <b>···</b> → 发送给朋友</div>
+  <div id="mark">DESIGNED BY QIAN · V1.3</div>
 
 <script>
 (() => {
@@ -271,11 +309,6 @@
   const TILE = 24;                 // 每格像素
   const COLS = 26, ROWS = 26;      // 地图尺寸
   const W = COLS * TILE, H = ROWS * TILE;  // 逻辑尺寸
-  const canvas = document.getElementById('game');
-  const ctx = canvas.getContext('2d');
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);  // 高分屏清晰渲染
-  canvas.width = W * dpr;
-  canvas.height = H * dpr;
 
   const TILE_BRICK = 1;            // 砖墙（可摧毁）
   const TILE_STEEL = 2;            // 钢墙（不可摧毁）
@@ -291,6 +324,7 @@
   const PLAYER_SPEED = 2.4;
   const BULLET_SPEED = 5.2;
   const BASE = { x: 12, y: 23 };   // 基地格
+  const SPAWN = { x: BASE.x - 2, y: BASE.y + 1 };  // 玩家出生点（基地左侧，避免堵在基地下面）
 
   // 敌人类型（速度再乘关卡系数）
   const ENEMY_TYPES = {
@@ -484,11 +518,41 @@
     ],
   ];
 
-  // DOM 引用缓存（避免每帧查询）
+  // ===== DOM =====
   const $ = id => document.getElementById(id);
+  const canvas = $('game');
+  const ctx = canvas.getContext('2d');
+  const stage = $('stage');
   const elScore = $('score'), elBest = $('best'), elLevel = $('level'),
         elRemaining = $('remaining'), elLives = $('lives'), elCombo = $('combo'),
-        startBtn = $('startBtn'), pauseBtn = $('pauseBtn'), muteBtn = $('muteBtn');
+        elComboWrap = $('comboWrap'),
+        pauseBtn = $('pauseBtn'), muteBtn = $('muteBtn'),
+        overlay = $('overlay'), ovTitle = $('ovTitle'), ovSub = $('ovSub'),
+        ovStats = $('ovStats'), ovTip = $('ovTip'), btnPlay = $('btnPlay');
+
+  // ===== 自适应尺寸 =====
+  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+  let renderScale = 1;
+  const isTouch = (() => {
+    try { return window.matchMedia('(pointer: coarse)').matches; }
+    catch (e) { return 'ontouchstart' in window; }
+  })();
+  if (isTouch) document.documentElement.classList.add('touch');
+
+  function resize() {
+    const r = stage.getBoundingClientRect();
+    const size = Math.max(200, Math.floor(Math.min(r.width, r.height)) - 12);
+    canvas.style.width = size + 'px';
+    canvas.style.height = size + 'px';
+    const px = Math.round(size * DPR);
+    if (canvas.width !== px) { canvas.width = px; canvas.height = px; }
+    renderScale = px / W;
+    draw();
+  }
+  function layout() {
+    document.documentElement.classList.toggle('wide', window.innerWidth > window.innerHeight * 1.15);
+    resize();
+  }
 
   // 本地存储：最高分 / 静音偏好
   const LS_BEST = 'tank-battle-best', LS_MUTE = 'tank-battle-muted';
@@ -541,6 +605,10 @@
       if (audioCtx.state === 'suspended') audioCtx.resume();
     } catch (e) { /* 忽略 */ }
   }
+  // 微信 / iOS 需要用户手势后才能出声
+  document.addEventListener('WeixinJSBridgeReady', ensureAudio, false);
+  document.addEventListener('touchstart', ensureAudio, { passive: true });
+
   function beep(freq, dur, type = 'square', vol = 0.06) {
     if (muted) return;
     try {
@@ -598,7 +666,7 @@
       map[y][0] = TILE_STEEL; map[y][COLS - 1] = TILE_STEEL;
     }
     // 基地与护墙
-    map[BASE.y][BASE.x] = TILE_STEEL;
+    map[BASE.y][BASE.x] = 0;          // 基地格本身留空：子弹能打进来，坦克靠 isBlocked 拦
     map[BASE.y - 1][BASE.x] = TILE_BRICK;
     map[BASE.y - 2][BASE.x] = TILE_BRICK;
     map[BASE.y - 1][BASE.x - 1] = TILE_BRICK;
@@ -606,7 +674,7 @@
     map[BASE.y][BASE.x - 1] = TILE_BRICK;
     map[BASE.y][BASE.x + 1] = TILE_BRICK;
     // 出生点清空（只清精确内部格，不破坏外墙与基地）
-    [[1, 1], [COLS - 2, 1], [(COLS / 2) | 0, 1], [BASE.x, BASE.y + 1]]
+    [[1, 1], [COLS - 2, 1], [(COLS / 2) | 0, 1], [BASE.x, BASE.y + 1], [SPAWN.x, SPAWN.y]]
       .forEach(([x, y]) => { if (inside(x, y)) map[y][x] = 0; });
   }
 
@@ -630,6 +698,7 @@
           if (t === TILE_WATER) return false; // 子弹可越过水
         } else {
           if (t === TILE_BRICK || t === TILE_STEEL || t === TILE_WATER) return true;
+          if (x === BASE.x && y === BASE.y) return true;  // 基地格坦克不可驶入
         }
       }
     return false;
@@ -665,8 +734,8 @@
   // ===== 坦克 =====
   function makePlayer() {
     return {
-      x: BASE.x * TILE + (TILE - TANK_SIZE) / 2,
-      y: (BASE.y + 1) * TILE + (TILE - TANK_SIZE) / 2,
+      x: SPAWN.x * TILE + (TILE - TANK_SIZE) / 2,
+      y: SPAWN.y * TILE + (TILE - TANK_SIZE) / 2,
       dir: DIR.UP, speed: PLAYER_SPEED,
       cooldown: 0, isPlayer: true, color: '#002FA7',
       size: TANK_SIZE, spawnInv: 0, hitFlash: 0
@@ -1048,8 +1117,8 @@
       player.spawnInv = 120;
     }
     if (player) {
-      player.x = BASE.x * TILE + (TILE - TANK_SIZE) / 2;
-      player.y = (BASE.y + 1) * TILE + (TILE - TANK_SIZE) / 2;
+      player.x = SPAWN.x * TILE + (TILE - TANK_SIZE) / 2;
+      player.y = SPAWN.y * TILE + (TILE - TANK_SIZE) / 2;
       player.dir = DIR.UP;
     }
     lastLives = -1; lastCombo = -1;
@@ -1162,19 +1231,25 @@
       lastLives = lives;
       let html = '';
       const slots = Math.max(3, lives);
-      for (let i = 0; i < slots; i++) html += `<span class="tank ${i < lives ? 'on' : ''}">▲</span>`;
+      for (let i = 0; i < slots; i++) html += `<span class="${i < lives ? '' : 'off'}">▲</span>`;
       elLives.innerHTML = html;
     }
-    if (elCombo && combo !== lastCombo) {
+    if (combo !== lastCombo) {
       lastCombo = combo;
-      elCombo.textContent = '×' + Math.max(1, combo);
-      elCombo.classList.toggle('hot', combo >= 3);
+      if (combo >= 2) {
+        elComboWrap.style.display = '';
+        elCombo.textContent = '×' + combo;
+        elComboWrap.classList.toggle('hot', combo >= 3);
+      } else {
+        elComboWrap.style.display = 'none';
+      }
     }
   }
 
   // ===== 渲染 =====
   function draw() {
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (!map.length) return;
+    ctx.setTransform(renderScale, 0, 0, renderScale, 0, 0);
     ctx.save();
     if (shake > 0) ctx.translate(rand(-shake, shake) * 0.5, rand(-shake, shake) * 0.5);
 
@@ -1293,40 +1368,6 @@
     showFx('快速', fx.rapid, '#ffe600');
     showFx('双管', fx.double, '#ff00ff');
     showFx('冻结', fx.freeze, '#4d9fff');
-
-    // 覆盖层
-    if (!running || paused || gameOver) {
-      ctx.fillStyle = 'rgba(3, 3, 8, 0.82)';
-      ctx.fillRect(0, 0, W, H);
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      if (gameOver) {
-        ctx.shadowColor = won ? '#00f0ff' : '#ff2d55';
-        ctx.shadowBlur = 20;
-        ctx.fillStyle = won ? '#00f0ff' : '#ff2d55';
-        ctx.font = '800 40px "Segoe UI", sans-serif';
-        ctx.fillText(won ? '胜 利' : '游戏结束', W / 2, H / 2 - 20);
-        ctx.shadowBlur = 0;
-        ctx.font = '14px "Consolas", monospace';
-        ctx.fillStyle = '#5a6a8a';
-        ctx.fillText('SCORE ' + score + '  ·  BEST ' + best, W / 2, H / 2 + 22);
-        ctx.fillText('PRESS START TO CONTINUE', W / 2, H / 2 + 44);
-      } else if (paused) {
-        ctx.shadowColor = '#00f0ff'; ctx.shadowBlur = 16;
-        ctx.fillStyle = '#00f0ff';
-        ctx.font = '800 40px "Segoe UI", sans-serif';
-        ctx.fillText('PAUSED', W / 2, H / 2);
-        ctx.shadowBlur = 0;
-      } else {
-        ctx.shadowColor = '#00f0ff'; ctx.shadowBlur = 16;
-        ctx.fillStyle = '#fff';
-        ctx.font = '800 34px "Segoe UI", sans-serif';
-        ctx.fillText('QIAN · TANK BATTLE', W / 2, H / 2 - 14);
-        ctx.shadowBlur = 0;
-        ctx.font = '14px "Consolas", monospace';
-        ctx.fillStyle = '#00f0ff';
-        ctx.fillText('PRESS START', W / 2, H / 2 + 24);
-      }
-    }
   }
 
   function drawBrick(px, py) {
@@ -1560,6 +1601,40 @@
     toastTimer = setTimeout(() => el.classList.remove('show'), 1600);
   }
 
+  // ===== 遮罩层 =====
+  let overlayKind = 'title';
+
+  function showOverlay(kind) {
+    overlayKind = kind;
+    overlay.classList.remove('hide');
+    ovTitle.style.color = '';
+    ovSub.style.display = '';
+    ovTip.style.display = '';
+    if (kind === 'title') {
+      ovTitle.textContent = '坦克大战';
+      ovSub.textContent = '守住基地 · 消灭敌军 · 点开即玩';
+      ovStats.innerHTML = best > 0 ? `最高分 <b>${best}</b>` : '';
+      btnPlay.textContent = '开始游戏';
+      ovTip.textContent = isTouch
+        ? '左下方向盘移动 · 右下按钮开火'
+        : 'WASD / 方向键移动 · 空格开火 · P 暂停 · M 静音';
+    } else if (kind === 'paused') {
+      ovTitle.textContent = '已暂停';
+      ovSub.textContent = '';
+      ovStats.innerHTML = `得分 <b>${score}</b> · 第 <b>${level}</b> 关`;
+      btnPlay.textContent = '继续游戏';
+      ovTip.textContent = '';
+    } else {
+      ovTitle.textContent = won ? '胜 利' : '游戏结束';
+      ovTitle.style.color = won ? '#00f0ff' : '#ff2d55';
+      ovSub.textContent = won ? '基地守住了！' : '基地被摧毁了…';
+      ovStats.innerHTML = `得分 <b>${score}</b> · 最高 <b>${best}</b>`;
+      btnPlay.textContent = '再来一局';
+      ovTip.textContent = '达到第 ' + level + ' 关';
+    }
+  }
+  function hideOverlay() { overlay.classList.add('hide'); }
+
   // ===== 控制 =====
   function start() {
     score = 0; lives = 3; level = 1;
@@ -1570,8 +1645,8 @@
     player.spawnInv = 120;
     startLevel();
     running = true;
-    startBtn.textContent = '重新开始';
-    pauseBtn.textContent = '暂停';
+    hideOverlay();
+    pauseBtn.textContent = '⏸';
     showToast('第 1 关 · 守住基地！');
   }
 
@@ -1579,19 +1654,20 @@
     gameOver = true;
     running = false;
     won = win;
+    pauseBtn.textContent = '⏸';
+    showOverlay('over');
     if (score > bestAtStart) showToast('🏆 新纪录：' + score + ' 分！');
-    else showToast(win ? '🏆 胜利！你守住了基地！' : '💀 游戏结束');
-    startBtn.textContent = '重新开始';
   }
 
   function togglePause() {
     if (!running || gameOver) return;
     paused = !paused;
-    pauseBtn.textContent = paused ? '继续' : '暂停';
+    pauseBtn.textContent = paused ? '▶' : '⏸';
+    if (paused) showOverlay('paused'); else hideOverlay();
   }
 
   function applyMuteLabel() {
-    muteBtn.textContent = muted ? '🔇 静音' : '🔊 声音';
+    muteBtn.textContent = muted ? '🔇' : '🔊';
   }
 
   function toggleMute() {
@@ -1602,7 +1678,11 @@
   }
 
   // ===== 事件 =====
-  startBtn.addEventListener('click', (e) => { ensureAudio(); start(); e.currentTarget.blur(); });
+  btnPlay.addEventListener('click', () => {
+    ensureAudio();
+    if (overlayKind === 'paused') togglePause();
+    else start();
+  });
   pauseBtn.addEventListener('click', (e) => { togglePause(); e.currentTarget.blur(); });
   muteBtn.addEventListener('click', (e) => { toggleMute(); e.currentTarget.blur(); });
 
@@ -1610,36 +1690,76 @@
     keys[e.key] = true;
     if (e.key === 'p' || e.key === 'P') togglePause();
     if (e.key === 'm' || e.key === 'M') toggleMute();
+    if (e.key === 'Enter' && !overlay.classList.contains('hide')) {
+      if (overlayKind === 'paused') togglePause(); else start();
+    }
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
   });
   window.addEventListener('keyup', (e) => { keys[e.key] = false; });
 
   function loseFocus() {
     keys = {};
+    releaseTouch();
     if (running && !paused && !gameOver) togglePause();
   }
   window.addEventListener('blur', loseFocus);
   document.addEventListener('visibilitychange', () => { if (document.hidden) loseFocus(); });
 
-  // 触屏虚拟按键
+  // 触屏虚拟按键（pointer capture 保证手指滑出按钮也能正确抬起）
+  const touchKeys = new Set();
+  function releaseTouch() {
+    touchKeys.forEach(k => { keys[k] = false; });
+    touchKeys.clear();
+    document.querySelectorAll('.tb, #tFire').forEach(b => b.classList.remove('on'));
+  }
   [['tUp', 'ArrowUp'], ['tLeft', 'ArrowLeft'], ['tDown', 'ArrowDown'],
    ['tRight', 'ArrowRight'], ['tFire', ' ']].forEach(([id, key]) => {
     const el = $(id);
-    const press = (e) => { e.preventDefault(); keys[key] = true; };
-    const release = (e) => { e.preventDefault(); keys[key] = false; };
-    el.addEventListener('pointerdown', press);
-    el.addEventListener('pointerup', release);
-    el.addEventListener('pointerleave', release);
-    el.addEventListener('pointercancel', release);
+    const down = (e) => {
+      e.preventDefault();
+      ensureAudio();
+      try { el.setPointerCapture(e.pointerId); } catch (err) { /* 忽略 */ }
+      keys[key] = true;
+      touchKeys.add(key);
+      el.classList.add('on');
+    };
+    const up = (e) => {
+      e.preventDefault();
+      keys[key] = false;
+      touchKeys.delete(key);
+      el.classList.remove('on');
+    };
+    el.addEventListener('pointerdown', down);
+    el.addEventListener('pointerup', up);
+    el.addEventListener('pointercancel', up);
     el.addEventListener('contextmenu', (e) => e.preventDefault());
   });
+
+  // 点击画布也能开火（手机上很顺手）
+  canvas.addEventListener('pointerdown', (e) => { e.preventDefault(); ensureAudio(); keys[' '] = true; });
+  canvas.addEventListener('pointerup', () => { keys[' '] = false; });
+  canvas.addEventListener('pointercancel', () => { keys[' '] = false; });
+
+  // 尺寸 / 旋转
+  window.addEventListener('resize', layout);
+  window.addEventListener('orientationchange', () => setTimeout(layout, 150));
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', layout);
+
+  // 微信里提示转发
+  if (/MicroMessenger/i.test(navigator.userAgent)) {
+    const tip = $('wxtip');
+    setTimeout(() => tip.classList.add('show'), 1400);
+    setTimeout(() => tip.classList.remove('show'), 7000);
+    tip.addEventListener('click', () => tip.classList.remove('show'));
+  }
 
   // ===== 启动 =====
   applyMuteLabel();
   updateHud();
   bossLevel = false;
   generateMap();
-  draw();
+  layout();
+  showOverlay('title');
   lastTime = performance.now();
   rafId = requestAnimationFrame(tick);
 })();
