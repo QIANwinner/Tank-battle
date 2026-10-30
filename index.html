@@ -14,6 +14,8 @@
 <meta property="og:image" content="https://qianwinner.github.io/Tank-battle/title.png">
 <title>QIAN 坦克大战 · 点开就能玩</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect x='12' y='42' width='76' height='46' rx='10' fill='%23002FA7'/><rect x='30' y='52' width='40' height='26' rx='6' fill='%230a1040'/><rect x='44' y='10' width='12' height='36' fill='%2300f0ff'/></svg>">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>
   :root {
     --bg: #05050a;
@@ -287,6 +289,18 @@
     -webkit-appearance: none; appearance: none;
   }
   #btnPlay:active { transform: translateY(1px); filter: brightness(1.1); }
+  #btnDaily, #btnShare {
+    margin-top: -2px;
+    padding: 9px 22px;
+    border: 1px solid rgba(0, 240, 255, 0.4); border-radius: 999px;
+    background: rgba(0, 47, 167, 0.22);
+    color: #bfe4ff; font-size: 13px; font-weight: 700; letter-spacing: 2px;
+    cursor: pointer;
+    -webkit-appearance: none; appearance: none;
+  }
+  #btnDaily:active, #btnShare:active { background: var(--klein); transform: translateY(1px); }
+  #btnDaily { display: none; }
+  #btnShare { display: none; border-color: rgba(255, 0, 255, 0.5); color: #ffc4ff; box-shadow: 0 0 14px rgba(255, 0, 255, 0.18); }
   #ovTip {
     font-size: 10px; letter-spacing: 1px; color: #4d5c7a;
     line-height: 1.8; max-width: 300px;
@@ -379,12 +393,14 @@
     <p id="ovSub">守住基地 · 消灭敌军 · 点开即玩</p>
     <div id="ovStats"></div>
     <button id="btnPlay">开始游戏</button>
+    <button id="btnDaily">📅 每日挑战</button>
+    <button id="btnShare">📤 分享成绩 · 发起挑战</button>
     <div id="ovTip"></div>
   </div>
 
   <div id="toast"></div>
   <div id="wxtip">点右上角 <b>···</b> → 发送给朋友</div>
-  <div id="mark">DESIGNED BY QIAN · V1.5</div>
+  <div id="mark">DESIGNED BY QIAN · V1.6</div>
 
 <script>
 (() => {
@@ -613,7 +629,16 @@
         elComboWrap = $('comboWrap'),
         pauseBtn = $('pauseBtn'), muteBtn = $('muteBtn'),
         overlay = $('overlay'), ovTitle = $('ovTitle'), ovSub = $('ovSub'),
-        ovStats = $('ovStats'), ovTip = $('ovTip'), btnPlay = $('btnPlay');
+        ovStats = $('ovStats'), ovTip = $('ovTip'), btnPlay = $('btnPlay'),
+        btnDaily = $('btnDaily'), btnShare = $('btnShare');
+
+  // ===== URL 参数：好友挑战 (?ch=分数-关卡) / 每日挑战 (?daily=1) =====
+  const urlParams = (() => { try { return new URLSearchParams(location.search); } catch (e) { return new URLSearchParams(); } })();
+  const challenge = (() => {
+    const m = (urlParams.get('ch') || '').match(/^(\d{1,7})(?:-(\d{1,3}))?$/);
+    return m ? { score: Math.min(+m[1], 9999999), level: Math.min(+m[2] || 1, 999) } : null;
+  })();
+  const dailyInvited = urlParams.get('daily') === '1';
 
   // ===== 自适应尺寸 =====
   const DPR = Math.min(window.devicePixelRatio || 1, 2);
@@ -682,6 +707,26 @@
   let combo = 0, comboTimer = 0;
   let fx = { rapid: 0, double: 0, freeze: 0 };
 
+  // 打击感 / 提示
+  let hurtFlash = 0;   // 受击红边渐隐
+  let hitStop = 0;     // 击杀定格（秒）
+  let bossWarn = 0;    // Boss 出场警报计时（秒）
+
+  // 触觉反馈（iOS Safari 不支持，自动忽略）
+  const vibe = p => { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) { /* 忽略 */ } };
+
+  // 随机源：普通局用 Math.random；每日挑战用日期种子，同一天人人同序列
+  let rng = Math.random;
+  const mulberry32 = s => () => {
+    s |= 0; s = s + 0x6D2B79F5 | 0;
+    let t = Math.imul(s ^ s >>> 15, 1 | s);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+  const dailySeed = () => { const d = new Date(); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); };
+  let dailyMode = false;        // 本局是否每日挑战
+  let dailyRng = null;          // 每日挑战的种子随机序列
+
   // ===== 音效（Web Audio） =====
   let audioCtx = null;
   function ensureAudio() {
@@ -726,8 +771,10 @@
   }
 
   // ===== 地图 =====
-  function loadPresetMap(idx) {
-    const rows = PRESET_MAPS[idx % PRESET_MAPS.length];
+  function loadPresetMap(idx, flip) {
+    let rows = PRESET_MAPS[idx % PRESET_MAPS.length];
+    // 每日挑战变体：水平镜像（垂直翻转会让基地跑到顶部，禁用）
+    if (flip) rows = rows.map(r => r.split('').reverse().join(''));
     map = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
     for (let y = 0; y < ROWS; y++) {
       const row = rows[y] || '';
@@ -764,8 +811,15 @@
   }
 
   function generateMap() {
-    if (bossLevel) loadPresetMap(PRESET_MAPS.length - 1);   // Boss 场
-    else loadPresetMap((level - 1) % (PRESET_MAPS.length - 1));
+    if (bossLevel) { loadPresetMap(PRESET_MAPS.length - 1, 0); return; }   // Boss 场
+    if (dailyMode && dailyRng) {
+      // 每日挑战：日期种子决定地图与镜像，同一天所有人同图
+      const idx = Math.floor(dailyRng() * (PRESET_MAPS.length - 1));
+      const flip = dailyRng() < 0.5 ? 1 : 0;
+      loadPresetMap(idx, flip);
+      return;
+    }
+    loadPresetMap((level - 1) % (PRESET_MAPS.length - 1), 0);
   }
 
   function inside(x, y) { return x >= 0 && y >= 0 && x < COLS && y < ROWS; }
@@ -830,7 +884,7 @@
   function levelSpeedMul() { return Math.min(1 + (level - 1) * 0.06, 1.6); }
 
   function pickEnemyType() {
-    const r = Math.random();
+    const r = rng();
     if (level >= 7) {
       if (r < 0.10) return 'elite';
       if (r < 0.30) return 'armored';
@@ -879,7 +933,9 @@
       size: BOSS_SIZE, color: '#ff2d55',
       changeTimer: 90, shootTimer: 70, hitFlash: 0
     });
+    bossWarn = 1.8;                 // 全屏警报
     sfxBoss();
+    vibe([90, 60, 90, 60, 180]);
     showToast('⚠ BOSS 出现！');
   }
 
@@ -928,7 +984,7 @@
 
     if ((e.changeTimer -= k) <= 0) {
       e.changeTimer = randInt(50, 170);
-      if (Math.random() < 0.75) e.dir = randInt(0, 3);
+      if (rng() < 0.75) e.dir = randInt(0, 3);
     }
     const shootMin = Math.max(22, 60 - level * 4);
     const shootMax = Math.max(80, 150 - level * 6);
@@ -936,11 +992,12 @@
       e.shootTimer = randInt(shootMin, shootMax);
       fire(e);
     }
-    // 偶尔锁定玩家或基地
-    const r = Math.random();
+    // 偶尔锁定玩家或基地：精英/装甲更狡猾，锁定更频繁
+    const smart = e.type === 'elite' ? 0.09 : e.type === 'armored' ? 0.05 : 0.025;
+    const r = rng();
     let tx = null, ty = null;
-    if (player && !player.dead && r < 0.025) { tx = player.x; ty = player.y; }
-    else if (baseAlive && r >= 0.025 && r < 0.05) { tx = BASE.x * TILE; ty = BASE.y * TILE; }
+    if (player && !player.dead && r < smart) { tx = player.x; ty = player.y; }
+    else if (baseAlive && r < smart * 2) { tx = BASE.x * TILE; ty = BASE.y * TILE; }
     if (tx !== null) {
       const dx = tx - e.x, dy = ty - e.y;
       if (Math.abs(dx) > Math.abs(dy)) e.dir = dx > 0 ? DIR.RIGHT : DIR.LEFT;
@@ -953,7 +1010,7 @@
       e.x = nx; e.y = ny;
     } else {
       e.changeTimer = Math.min(e.changeTimer, 20);
-      e.dir = pickFreeDir(e);
+      e.dir = pickFreeDir(e, e.type === 'elite' ? 0.9 : e.type === 'armored' ? 0.65 : 0.45);
     }
   }
 
@@ -978,11 +1035,24 @@
     }
   }
 
-  function pickFreeDir(e) {
+  function pickFreeDir(e, chase) {
     const free = [0, 1, 2, 3].filter(d =>
       !isBlocked(e.x + DX[d] * TILE, e.y + DY[d] * TILE, e.size) &&
       !tankHitsTank(e.x + DX[d] * TILE, e.y + DY[d] * TILE, e.size, e));
-    return free.length ? free[randInt(0, free.length - 1)] : randInt(0, 3);
+    if (!free.length) return randInt(0, 3);
+    // 被挡住转向时：按 chase 概率优先朝目标（玩家 / 基地）走，其余随机游走
+    if (chase && rng() < chase) {
+      const goPlayer = player && !player.dead && e.type !== 'fast';
+      const tx = goPlayer ? player.x : BASE.x * TILE;
+      const ty = goPlayer ? player.y : BASE.y * TILE;
+      const dx = tx - e.x, dy = ty - e.y;
+      const prefs = Math.abs(dx) > Math.abs(dy)
+        ? [dx > 0 ? DIR.RIGHT : DIR.LEFT, dy > 0 ? DIR.DOWN : DIR.UP]
+        : [dy > 0 ? DIR.DOWN : DIR.UP, dx > 0 ? DIR.RIGHT : DIR.LEFT];
+      const good = free.filter(d => prefs.includes(d));
+      if (good.length) return good[0];
+    }
+    return free[randInt(0, free.length - 1)];
   }
 
   function tankHitsTank(nx, ny, size, self) {
@@ -1019,6 +1089,7 @@
         if (cx >= bx && cx <= bx + TILE && cy >= by && cy <= by + TILE) {
           baseAlive = false;
           b.dead = true; sfxBoom();
+          hurtFlash = 1; vibe([90, 50, 90]);
           spawnParticles(bx + TILE / 2, by + TILE / 2, '#ff2d55', 20);
           shake = 12;
           return;
@@ -1084,6 +1155,8 @@
     if (!player || player.dead) return;
     player.dead = true;
     sfxBoom();
+    hurtFlash = 1;
+    vibe([70, 40, 70]);
     spawnParticles(player.x + TANK_SIZE / 2, player.y + TANK_SIZE / 2, player.color, 18);
     shake = 10;
     lives--;
@@ -1103,6 +1176,8 @@
 
   function onEnemyKilled(e) {
     sfxBoom();
+    hitStop = e.isBoss ? 0.16 : 0.03;          // 击杀定格：打在肉上的停顿感
+    vibe(e.isBoss ? [60, 50, 130] : 15);
     spawnParticles(e.x + e.size / 2, e.y + e.size / 2, e.color, e.isBoss ? 48 : 16);
     shake = e.isBoss ? 16 : 6;
     addKillScore(e);
@@ -1125,7 +1200,7 @@
   function maybeDropPowerup(x, y, isBoss) {
     if (isBoss) {
       spawnPowerup(x - 20, y); spawnPowerup(x, y); spawnPowerup(x + 20, y);
-    } else if (Math.random() < 0.15) {
+    } else if (rng() < 0.15) {
       spawnPowerup(x, y);
     }
   }
@@ -1156,6 +1231,7 @@
 
   function applyPowerup(type) {
     sfxPickup();
+    vibe(10);
     const def = POWERUP_DEF[type];
     if (player) addText(player.x + TANK_SIZE / 2, player.y - 6, def.label, def.color);
     switch (type) {
@@ -1236,11 +1312,16 @@
 
     if (!running || paused) { draw(); return; }
 
+    // 击杀定格：世界短暂静止，只保留画面
+    if (hitStop > 0) { hitStop -= dt; draw(); return; }
+
     // 道具效果 / 连击计时（秒）
     if (fx.rapid > 0) fx.rapid -= dt;
     if (fx.double > 0) fx.double -= dt;
     if (fx.freeze > 0) fx.freeze -= dt;
     if (comboTimer > 0) { comboTimer -= dt; if (comboTimer <= 0) combo = 0; }
+    if (hurtFlash > 0) hurtFlash = Math.max(0, hurtFlash - dt * 2.2);
+    if (bossWarn > 0) bossWarn -= dt;
 
     updatePlayer(k);
     enemies.forEach(e => updateEnemy(e, k));
@@ -1453,6 +1534,33 @@
     showFx('快速', fx.rapid, '#ffe600');
     showFx('双管', fx.double, '#ff00ff');
     showFx('冻结', fx.freeze, '#4d9fff');
+
+    // 受击红闪：四边红色 vignette 渐隐
+    if (hurtFlash > 0) {
+      const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.28, W / 2, H / 2, H * 0.78);
+      g.addColorStop(0, 'rgba(255,45,85,0)');
+      g.addColorStop(1, 'rgba(255,45,85,' + (0.5 * hurtFlash).toFixed(3) + ')');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    // Boss 出场警报：红色扫描条 + 闪烁大字
+    if (bossWarn > 0) {
+      const blink = 0.55 + 0.45 * Math.sin(bossWarn * 20);
+      const bandY = H * 0.30;
+      ctx.fillStyle = 'rgba(255,45,85,' + (0.22 * blink).toFixed(3) + ')';
+      ctx.fillRect(0, bandY, W, 66);
+      ctx.fillStyle = '#ff2d55';
+      ctx.fillRect(0, bandY, W, 2);
+      ctx.fillRect(0, bandY + 64, W, 2);
+      ctx.globalAlpha = blink;
+      ctx.shadowColor = '#ff2d55'; ctx.shadowBlur = 18;
+      ctx.fillStyle = '#ff5c7a';
+      ctx.font = '900 26px "Segoe UI", sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('⚠ WARNING · BOSS 来袭 ⚠', W / 2, bandY + 33);
+      ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+    }
   }
 
   function drawBrick(px, py) {
@@ -1695,11 +1803,21 @@
     ovTitle.style.color = '';
     ovSub.style.display = '';
     ovTip.style.display = '';
+    btnShare.style.display = 'none';
+    btnDaily.style.display = (kind === 'title' && !dailyInvited) ? 'block' : 'none';
     if (kind === 'title') {
       ovTitle.textContent = '坦克大战';
-      ovSub.textContent = '守住基地 · 消灭敌军 · 点开即玩';
-      ovStats.innerHTML = best > 0 ? `最高分 <b>${best}</b>` : '';
-      btnPlay.textContent = '开始游戏';
+      if (challenge) {
+        ovSub.textContent = '⚔️ 好友向你发起挑战';
+        ovStats.innerHTML = `对方拿了 <b>${challenge.score}</b> 分 · 打到第 <b>${challenge.level}</b> 关 · 来超越！`;
+      } else if (dailyInvited) {
+        ovSub.textContent = '📅 每日挑战 · 同一天，全世界同一张图';
+        ovStats.innerHTML = best > 0 ? `你的最高分 <b>${best}</b>` : '';
+      } else {
+        ovSub.textContent = '守住基地 · 消灭敌军 · 点开即玩';
+        ovStats.innerHTML = best > 0 ? `最高分 <b>${best}</b>` : '';
+      }
+      btnPlay.textContent = dailyInvited ? '开始每日挑战' : '开始游戏';
       ovTip.textContent = isTouch
         ? '左下摇杆走位 · 右下按钮开火'
         : 'WASD / 方向键移动 · 空格开火 · P 暂停 · M 静音';
@@ -1713,26 +1831,38 @@
       ovTitle.textContent = won ? '胜 利' : '游戏结束';
       ovTitle.style.color = won ? '#00f0ff' : '#ff2d55';
       ovSub.textContent = won ? '基地守住了！' : '基地被摧毁了…';
-      ovStats.innerHTML = `得分 <b>${score}</b> · 最高 <b>${best}</b>`;
+      const beatChallenge = challenge && score > challenge.score;
+      ovStats.innerHTML = `得分 <b>${score}</b> · 最高 <b>${best}</b>`
+        + (beatChallenge ? ' · 🏅 挑战成功！' : '');
       btnPlay.textContent = '再来一局';
+      btnShare.style.display = 'block';      // 结算页可分享成绩、发起挑战
       ovTip.textContent = '达到第 ' + level + ' 关';
     }
   }
   function hideOverlay() { overlay.classList.add('hide'); }
 
   // ===== 控制 =====
-  function start() {
+  function start(isDaily) {
+    dailyMode = !!isDaily;
+    dailyRng = dailyMode ? mulberry32(dailySeed()) : null;
+    rng = dailyMode ? dailyRng : Math.random;
     score = 0; lives = 3; level = 1;
     gameOver = false; paused = false; won = false;
     bestAtStart = best;
     lastLives = -1; lastCombo = -1;
+    hurtFlash = 0; hitStop = 0; bossWarn = 0;
     player = makePlayer();
     player.spawnInv = 120;
     startLevel();
     running = true;
     hideOverlay();
     pauseBtn.textContent = '⏸';
-    showToast('第 1 关 · 守住基地！');
+    if (dailyMode) {
+      const d = new Date();
+      showToast('📅 每日挑战 · ' + (d.getMonth() + 1) + '月' + d.getDate() + '日 · 全网同图');
+    } else {
+      showToast('第 1 关 · 守住基地！');
+    }
   }
 
   function endGame(win) {
@@ -1762,12 +1892,46 @@
     if (!muted) sfxPickup();
   }
 
+  // ===== 分享成绩 / 好友挑战 =====
+  function copyText(t) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(t).then(() => true, () => copyFallback(t));
+    }
+    return Promise.resolve(copyFallback(t));
+  }
+  function copyFallback(t) {
+    const ta = document.createElement('textarea');
+    ta.value = t;
+    ta.style.cssText = 'position:fixed;top:-999px;opacity:0';
+    document.body.appendChild(ta);
+    ta.select();
+    let ok = false;
+    try { ok = document.execCommand('copy'); } catch (e) { /* 忽略 */ }
+    ta.remove();
+    return ok;
+  }
+  async function shareScore() {
+    const base = location.origin + location.pathname;
+    const link = base + (dailyMode ? '?daily=1&' : '?') + 'ch=' + score + '-' + level;
+    const text = '⚔️ 我在「QIAN 坦克大战」拿了 ' + score + ' 分、打到第 ' + level + ' 关，来超越我！';
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'QIAN 坦克大战', text, url: link });
+        return;
+      }
+      const ok = await copyText(text + ' ' + link);
+      showToast(ok ? '📋 挑战链接已复制，去粘贴给朋友！' : '复制失败，请手动复制地址栏链接');
+    } catch (e) { /* 用户取消分享，不提示 */ }
+  }
+
   // ===== 事件 =====
   btnPlay.addEventListener('click', () => {
     ensureAudio();
     if (overlayKind === 'paused') togglePause();
-    else start();
+    else start(dailyInvited);
   });
+  btnDaily.addEventListener('click', () => { ensureAudio(); start(true); });
+  btnShare.addEventListener('click', () => { ensureAudio(); shareScore(); });
   pauseBtn.addEventListener('click', (e) => { togglePause(); e.currentTarget.blur(); });
   muteBtn.addEventListener('click', (e) => { toggleMute(); e.currentTarget.blur(); });
 
@@ -1776,7 +1940,7 @@
     if (e.key === 'p' || e.key === 'P') togglePause();
     if (e.key === 'm' || e.key === 'M') toggleMute();
     if (e.key === 'Enter' && !overlay.classList.contains('hide')) {
-      if (overlayKind === 'paused') togglePause(); else start();
+      if (overlayKind === 'paused') togglePause(); else start(dailyInvited);
     }
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
   });
