@@ -123,29 +123,55 @@
     padding: 0 16px calc(10px + env(safe-area-inset-bottom));
     pointer-events: none;
   }
-  html.touch { --pad-h: 172px; }
+  html.touch { --pad-h: 178px; }
   html.touch #pad { display: flex; }
-  .dpad {
-    display: grid; gap: 5px;
-    grid-template-columns: repeat(3, 46px);
-    grid-template-rows: repeat(3, 46px);
+
+  /* 虚拟摇杆：外面一层更大的透明触摸区，手指落在圆边外也能拉 */
+  #stickZone {
     pointer-events: auto;
-  }
-  .tb {
-    padding: 0; border-radius: 12px;
-    background: rgba(0, 47, 167, 0.26);
-    border: 1px solid rgba(77, 159, 255, 0.4);
-    color: var(--cyan);
-    font-size: 15px; line-height: 1;
+    width: 158px; height: 158px;
     display: grid; place-items: center;
+    touch-action: none;
+  }
+  #stick {
+    pointer-events: none;
+    position: relative;
+    width: 126px; height: 126px;
+    border-radius: 50%;
+    display: grid; place-items: center;
+    background: radial-gradient(circle at 50% 40%,
+      rgba(0, 47, 167, 0.46), rgba(0, 47, 167, 0.15) 68%, rgba(0, 240, 255, 0.06));
+    border: 1px solid rgba(77, 159, 255, 0.42);
+    box-shadow: inset 0 0 26px rgba(0, 240, 255, 0.12), 0 0 20px rgba(0, 47, 167, 0.45);
     touch-action: none;
     -webkit-appearance: none; appearance: none;
   }
-  .tb.on { background: var(--klein); box-shadow: 0 0 14px rgba(0, 240, 255, 0.45); }
-  #tUp { grid-column: 2; grid-row: 1; }
-  #tLeft { grid-column: 1; grid-row: 2; }
-  #tRight { grid-column: 3; grid-row: 2; }
-  #tDown { grid-column: 2; grid-row: 3; }
+  #stick::before {
+    content: ''; position: absolute; inset: 17%;
+    border-radius: 50%; border: 1px dashed rgba(77, 159, 255, 0.20);
+  }
+  #stick::after {
+    content: ''; position: absolute; inset: 0; border-radius: 50%;
+    pointer-events: none;
+    background:
+      linear-gradient(to right, transparent calc(50% - 0.5px),
+        rgba(0, 240, 255, 0.10) calc(50% - 0.5px),
+        rgba(0, 240, 255, 0.10) calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+      linear-gradient(to bottom, transparent calc(50% - 0.5px),
+        rgba(0, 240, 255, 0.10) calc(50% - 0.5px),
+        rgba(0, 240, 255, 0.10) calc(50% + 0.5px), transparent calc(50% + 0.5px));
+  }
+  #stick.active { border-color: rgba(0, 240, 255, 0.7); box-shadow: inset 0 0 30px rgba(0, 240, 255, 0.2), 0 0 26px rgba(0, 240, 255, 0.35); }
+  #knob {
+    width: 58px; height: 58px; border-radius: 50%;
+    pointer-events: none;
+    background: radial-gradient(circle at 50% 32%, #7fb4ff, #002fa7 74%);
+    border: 1px solid rgba(150, 220, 255, 0.7);
+    box-shadow: 0 0 16px rgba(0, 240, 255, 0.35), inset 0 -4px 10px rgba(0, 0, 0, 0.35);
+    transition: transform 0.10s ease-out, box-shadow 0.12s ease;
+    will-change: transform;
+  }
+  #knob.on { box-shadow: 0 0 28px rgba(0, 240, 255, 0.85), inset 0 -4px 10px rgba(0, 0, 0, 0.3); }
   #tFire {
     pointer-events: auto;
     width: 86px; height: 86px; border-radius: 50%;
@@ -165,9 +191,10 @@
     align-items: flex-end;
     padding-bottom: calc(12px + env(safe-area-inset-bottom));
   }
-  html.touch.wide .dpad, html.touch.wide #tFire { opacity: .82; }
-  html.touch.wide .dpad { grid-template-columns: repeat(3, 42px); grid-template-rows: repeat(3, 42px); }
-  html.touch.wide #tFire { width: 74px; height: 74px; }
+  html.touch.wide #stickZone { width: 136px; height: 136px; }
+  html.touch.wide #stick { width: 104px; height: 104px; opacity: 0.85; }
+  html.touch.wide #knob { width: 50px; height: 50px; }
+  html.touch.wide #tFire { width: 74px; height: 74px; opacity: 0.85; }
 
   /* ---------- 开始 / 暂停 / 结算 遮罩 ---------- */
   #overlay {
@@ -279,11 +306,10 @@
   </div>
 
   <div id="pad">
-    <div class="dpad">
-      <button class="tb" id="tUp" aria-label="向上">▲</button>
-      <button class="tb" id="tLeft" aria-label="向左">◀</button>
-      <button class="tb" id="tRight" aria-label="向右">▶</button>
-      <button class="tb" id="tDown" aria-label="向下">▼</button>
+    <div id="stickZone">
+      <div id="stick" aria-label="方向摇杆">
+        <div id="knob"></div>
+      </div>
     </div>
     <button id="tFire" aria-label="开火">开火</button>
   </div>
@@ -299,7 +325,7 @@
 
   <div id="toast"></div>
   <div id="wxtip">点右上角 <b>···</b> → 发送给朋友</div>
-  <div id="mark">DESIGNED BY QIAN · V1.3</div>
+  <div id="mark">DESIGNED BY QIAN · V1.4</div>
 
 <script>
 (() => {
@@ -407,27 +433,27 @@
       "..........................",
       "..........................",
       "..........................",
+      "...WWWW..........WWWW.....",
+      "...WWWW..........WWWW.....",
+      "..........................",
+      ".....BBBB....BBBB.........",
+      ".....BBBB....BBBB.........",
+      "..........................",
+      "....SS....BBBB....SS......",
+      "..........BBBB............",
+      "..........................",
+      "..WWWWWW........WWWWWW....",
+      "..WWWWWW........WWWWWW....",
+      "..........................",
+      "..........BBBB............",
+      "......BBBBBBBBBBBB........",
+      "..........BBBB............",
+      "..........................",
+      "....WWWW......WWWW........",
+      "....WWWW......WWWW........",
+      "..........................",
       "...BB................BB...",
       "...BB................BB...",
-      "..........................",
-      ".....SS............SS.....",
-      ".WWWWSSWWWWWWWWWWWWSSWWWW.",
-      ".WWWWSSWWWWWWWWWWWWSSWWWW.",
-      ".....SS............SS.....",
-      "..........................",
-      "...........BBBB...........",
-      "...........BBBB...........",
-      "..........................",
-      "..........................",
-      "..........SS...SS.........",
-      ".WWWWWWWWWSSWWWSSWWWWWWWW.",
-      ".WWWWWWWWWSSWWWSSWWWWWWWW.",
-      "..........SS...SS.........",
-      "..........................",
-      "...BB................BB...",
-      "...BB................BB...",
-      "..........................",
-      "..........................",
       "..........................",
       "..........................",
     ],
@@ -1616,7 +1642,7 @@
       ovStats.innerHTML = best > 0 ? `最高分 <b>${best}</b>` : '';
       btnPlay.textContent = '开始游戏';
       ovTip.textContent = isTouch
-        ? '左下方向盘移动 · 右下按钮开火'
+        ? '左下摇杆走位 · 右下按钮开火'
         : 'WASD / 方向键移动 · 空格开火 · P 暂停 · M 静音';
     } else if (kind === 'paused') {
       ovTitle.textContent = '已暂停';
@@ -1705,35 +1731,91 @@
   window.addEventListener('blur', loseFocus);
   document.addEventListener('visibilitychange', () => { if (document.hidden) loseFocus(); });
 
-  // 触屏虚拟按键（pointer capture 保证手指滑出按钮也能正确抬起）
+  // ===== 触屏输入：左摇杆走位 + 右开火 =====
+  // STICK_KEYS 的下标与 DIR（UP 0 / RIGHT 1 / DOWN 2 / LEFT 3）一一对应
+  const STICK_KEYS = ['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft'];
+  const zone = $('stickZone'), stick = $('stick'), knob = $('knob'), fireBtn = $('tFire');
   const touchKeys = new Set();
+  let stickDir = -1;        // -1 = 回中不移动
+  let stickId = null;
+
+  function setStickDir(d) {
+    if (d === stickDir) return;
+    STICK_KEYS.forEach(k => { keys[k] = false; touchKeys.delete(k); });
+    stickDir = d;
+    if (d >= 0) { keys[STICK_KEYS[d]] = true; touchKeys.add(STICK_KEYS[d]); }
+  }
+
   function releaseTouch() {
     touchKeys.forEach(k => { keys[k] = false; });
     touchKeys.clear();
-    document.querySelectorAll('.tb, #tFire').forEach(b => b.classList.remove('on'));
+    stickDir = -1; stickId = null;
+    knob.style.transform = '';
+    knob.classList.remove('on');
+    stick.classList.remove('active');
+    fireBtn.classList.remove('on');
+    keys[' '] = false;
   }
-  [['tUp', 'ArrowUp'], ['tLeft', 'ArrowLeft'], ['tDown', 'ArrowDown'],
-   ['tRight', 'ArrowRight'], ['tFire', ' ']].forEach(([id, key]) => {
-    const el = $(id);
-    const down = (e) => {
-      e.preventDefault();
-      ensureAudio();
-      try { el.setPointerCapture(e.pointerId); } catch (err) { /* 忽略 */ }
-      keys[key] = true;
-      touchKeys.add(key);
-      el.classList.add('on');
-    };
-    const up = (e) => {
-      e.preventDefault();
-      keys[key] = false;
-      touchKeys.delete(key);
-      el.classList.remove('on');
-    };
-    el.addEventListener('pointerdown', down);
-    el.addEventListener('pointerup', up);
-    el.addEventListener('pointercancel', up);
-    el.addEventListener('contextmenu', (e) => e.preventDefault());
+
+  // 以底盘圆心为原点：拖动方向取主轴，决定行进方向；中心留死区
+  function stickTrack(e) {
+    const r = stick.getBoundingClientRect();
+    const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+    const max = r.width * 0.27;   // 摇杆可偏移半径（保证旋钮不越出底盘）
+    let dx = e.clientX - cx, dy = e.clientY - cy;
+    const len = Math.hypot(dx, dy);
+    if (len > max) { dx = dx / len * max; dy = dy / len * max; }
+    knob.style.transform = 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px)';
+    if (len < max * 0.34) { setStickDir(-1); return; }
+    if (Math.abs(dx) > Math.abs(dy)) setStickDir(dx > 0 ? DIR.RIGHT : DIR.LEFT);
+    else setStickDir(dy > 0 ? DIR.DOWN : DIR.UP);
+  }
+
+  zone.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    ensureAudio();
+    stickId = e.pointerId;
+    try { zone.setPointerCapture(e.pointerId); } catch (err) { /* 忽略 */ }
+    knob.classList.add('on');
+    stick.classList.add('active');
+    stickTrack(e);
   });
+  zone.addEventListener('pointermove', (e) => {
+    if (stickId !== e.pointerId) return;
+    e.preventDefault();
+    stickTrack(e);
+  });
+  function stickEnd(e) {
+    if (stickId === null || (e && e.pointerId !== stickId)) return;
+    stickId = null;
+    setStickDir(-1);
+    knob.style.transform = '';
+    knob.classList.remove('on');
+    stick.classList.remove('active');
+  }
+  zone.addEventListener('pointerup', stickEnd);
+  zone.addEventListener('pointercancel', stickEnd);
+  zone.addEventListener('lostpointercapture', stickEnd);
+  zone.addEventListener('contextmenu', (e) => e.preventDefault());
+
+  // 开火键
+  fireBtn.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    ensureAudio();
+    try { fireBtn.setPointerCapture(e.pointerId); } catch (err) { /* 忽略 */ }
+    keys[' '] = true;
+    touchKeys.add(' ');
+    fireBtn.classList.add('on');
+  });
+  const fireUp = () => {
+    keys[' '] = false;
+    touchKeys.delete(' ');
+    fireBtn.classList.remove('on');
+  };
+  fireBtn.addEventListener('pointerup', fireUp);
+  fireBtn.addEventListener('pointercancel', fireUp);
+  fireBtn.addEventListener('lostpointercapture', fireUp);
+  fireBtn.addEventListener('contextmenu', (e) => e.preventDefault());
 
   // 点击画布也能开火（手机上很顺手）
   canvas.addEventListener('pointerdown', (e) => { e.preventDefault(); ensureAudio(); keys[' '] = true; });
