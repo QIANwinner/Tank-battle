@@ -289,7 +289,7 @@
     -webkit-appearance: none; appearance: none;
   }
   #btnPlay:active { transform: translateY(1px); filter: brightness(1.1); }
-  #btnDaily, #btnShare {
+  #btnDaily, #btnShare, #btnReport {
     margin-top: -2px;
     padding: 9px 22px;
     border: 1px solid rgba(0, 240, 255, 0.4); border-radius: 999px;
@@ -298,9 +298,79 @@
     cursor: pointer;
     -webkit-appearance: none; appearance: none;
   }
-  #btnDaily:active, #btnShare:active { background: var(--klein); transform: translateY(1px); }
+  #btnDaily:active, #btnShare:active, #btnReport:active { background: var(--klein); transform: translateY(1px); }
   #btnDaily { display: none; }
   #btnShare { display: none; border-color: rgba(255, 0, 255, 0.5); color: #ffc4ff; box-shadow: 0 0 14px rgba(255, 0, 255, 0.18); }
+  #btnReport { display: none; border-color: rgba(57, 255, 20, 0.5); color: #c9ffd2; box-shadow: 0 0 14px rgba(57, 255, 20, 0.18); }
+  #ovStats .sub {
+    margin-top: 6px; font-size: 11px; letter-spacing: 1px; color: #7f92b5;
+    font-variant-numeric: tabular-nums;
+  }
+  #ovStats .achrow { margin-top: 6px; font-size: 11px; letter-spacing: 1px; color: #7f92b5; }
+  #ovStats .achrow b { color: var(--cyan); font-size: 13px; }
+  #ovStats .chip {
+    display: inline-block; margin: 3px 3px 0 0; padding: 3px 9px;
+    border-radius: 999px; border: 1px solid rgba(255, 230, 0, 0.55);
+    background: rgba(255, 230, 0, 0.12); color: #ffe600;
+    font-size: 10px; letter-spacing: 1px;
+    animation: chipPop .45s ease;
+  }
+  @keyframes chipPop {
+    0% { transform: scale(0.6); opacity: 0; }
+    70% { transform: scale(1.08); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+
+  /* ---------- 关卡过渡 ---------- */
+  #lvIntro {
+    position: fixed; inset: 0; z-index: 30;
+    display: none; align-items: center; justify-content: center;
+    background: rgba(3, 3, 10, 0.72);
+    pointer-events: none;
+  }
+  #lvIntro.show { display: flex; }
+  #lvIntro .lvT {
+    font-size: 42px; font-weight: 800; letter-spacing: 10px; color: #fff;
+    text-shadow: 0 0 16px rgba(0, 240, 255, 0.9), 0 0 48px rgba(0, 47, 167, 0.9);
+    animation: lvIn 1.45s ease both;
+  }
+  #lvIntro .lvT::before, #lvIntro .lvT::after {
+    content: ''; display: block; width: 132px; height: 2px; margin: 16px auto;
+    background: linear-gradient(90deg, transparent, #00f0ff, transparent);
+  }
+  @keyframes lvIn {
+    0% { opacity: 0; transform: scale(1.35); letter-spacing: 24px; }
+    22% { opacity: 1; transform: scale(1); letter-spacing: 10px; }
+    78% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(0.93); letter-spacing: 14px; }
+  }
+
+  /* ---------- 战绩图弹层 ---------- */
+  #reportBox {
+    position: fixed; inset: 0; z-index: 45;
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(2, 4, 12, 0.92);
+    padding: 16px;
+  }
+  #reportBox.show { display: flex; }
+  #reportBox img {
+    width: min(78vw, 330px); max-height: 64vh; object-fit: contain;
+    border: 1px solid rgba(0, 240, 255, 0.5); border-radius: 12px;
+    box-shadow: 0 0 34px rgba(0, 240, 255, 0.28);
+    -webkit-touch-callout: default;
+  }
+  #reportBox .tip {
+    margin: 12px 0 10px; color: #93a4c4;
+    font-size: 12px; letter-spacing: 2px;
+  }
+  #reportBox .btns { display: flex; gap: 10px; }
+  #reportBox button {
+    padding: 9px 20px; border-radius: 999px; cursor: pointer;
+    border: 1px solid rgba(0, 240, 255, 0.45); background: rgba(0, 47, 167, 0.3);
+    color: #bfe4ff; font-size: 13px; font-weight: 700; letter-spacing: 2px;
+    -webkit-appearance: none; appearance: none;
+  }
+  #reportBox button:active { background: var(--klein); transform: translateY(1px); }
   #ovTip {
     font-size: 10px; letter-spacing: 1px; color: #4d5c7a;
     line-height: 1.8; max-width: 300px;
@@ -395,12 +465,24 @@
     <button id="btnPlay">开始游戏</button>
     <button id="btnDaily">📅 每日挑战</button>
     <button id="btnShare">📤 分享成绩 · 发起挑战</button>
+    <button id="btnReport">🖼 生成战绩图</button>
     <div id="ovTip"></div>
+  </div>
+
+  <div id="lvIntro"><div class="lvT">第 1 关</div></div>
+
+  <div id="reportBox">
+    <img id="reportImg" alt="战绩图">
+    <div class="tip">长按图片保存 · 发给朋友</div>
+    <div class="btns">
+      <button id="btnReportShare">📤 分享图片</button>
+      <button id="btnReportClose">关闭</button>
+    </div>
   </div>
 
   <div id="toast"></div>
   <div id="wxtip">点右上角 <b>···</b> → 发送给朋友</div>
-  <div id="mark">DESIGNED BY QIAN · V1.6</div>
+  <div id="mark">DESIGNED BY QIAN · V1.7</div>
 
 <script>
 (() => {
@@ -630,7 +712,8 @@
         pauseBtn = $('pauseBtn'), muteBtn = $('muteBtn'),
         overlay = $('overlay'), ovTitle = $('ovTitle'), ovSub = $('ovSub'),
         ovStats = $('ovStats'), ovTip = $('ovTip'), btnPlay = $('btnPlay'),
-        btnDaily = $('btnDaily'), btnShare = $('btnShare');
+        btnDaily = $('btnDaily'), btnShare = $('btnShare'), btnReport = $('btnReport'),
+        reportBox = $('reportBox'), reportImg = $('reportImg');
 
   // ===== URL 参数：好友挑战 (?ch=分数-关卡) / 每日挑战 (?daily=1) =====
   const urlParams = (() => { try { return new URLSearchParams(location.search); } catch (e) { return new URLSearchParams(); } })();
@@ -711,6 +794,43 @@
   let hurtFlash = 0;   // 受击红边渐隐
   let hitStop = 0;     // 击杀定格（秒）
   let bossWarn = 0;    // Boss 出场警报计时（秒）
+  let lvIntroT = 0, lvIntroNext = false;   // 关卡过渡计时（秒）/ 结束后是否开新关
+  let tookHitThisLevel = false;            // 本关是否掉过命（无伤成就）
+
+  // ===== 局内统计（战绩图 / 分享） =====
+  let stat = { kills: 0, shots: 0, hits: 0, maxCombo: 0, bossKills: 0, deaths: 0 };
+  function resetStat() {
+    stat = { kills: 0, shots: 0, hits: 0, maxCombo: 0, bossKills: 0, deaths: 0 };
+  }
+
+  // ===== 成就徽章 =====
+  const LS_ACH = 'tank-battle-ach';
+  const ACHIEVE = [
+    { id: 'first',   icon: '🩸', name: '初战告捷', desc: '击毁第一辆敌军' },
+    { id: 'combo8',  icon: '🔥', name: '连击狂人', desc: '单次连击达到 8' },
+    { id: 'boss',    icon: '👹', name: 'Boss 猎手', desc: '首次击破 Boss' },
+    { id: 'nohit',   icon: '🛡️', name: '无伤战神', desc: '一关内不掉命过关' },
+    { id: 'daily',   icon: '📅', name: '每日挑战者', desc: '完成一次每日挑战' },
+    { id: 'score5k', icon: '💰', name: '五千分大关', desc: '单局得分达到 5000' },
+    { id: 'lv5',     icon: '🚀', name: '深入敌后', desc: '到达第 5 关' },
+    { id: 'surge',   icon: '🎯', name: '精准射手', desc: '单局命中率达到 70%（射击≥20）' }
+  ];
+  let achUnlocked = new Set();
+  let achNew = [];             // 本局新解锁（结算页展示）
+  try {
+    const raw = JSON.parse(localStorage.getItem(LS_ACH) || '[]');
+    if (Array.isArray(raw)) achUnlocked = new Set(raw);
+  } catch (e) { /* 忽略 */ }
+  function unlockAch(id) {
+    if (achUnlocked.has(id)) return;
+    achUnlocked.add(id);
+    achNew.push(id);
+    try { localStorage.setItem(LS_ACH, JSON.stringify([...achUnlocked])); } catch (e) { /* 忽略 */ }
+    const a = ACHIEVE.find(x => x.id === id);
+    if (a) showToast('🏆 成就解锁 · ' + a.name);
+    vibe(30);
+    sfxPickup();
+  }
 
   // 触觉反馈（iOS Safari 不支持，自动忽略）
   const vibe = p => { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) { /* 忽略 */ } };
@@ -743,20 +863,130 @@
     if (muted) return;
     try {
       ensureAudio();
+      const t = audioCtx.currentTime;
       const o = audioCtx.createOscillator();
       const g = audioCtx.createGain();
       o.type = type; o.frequency.value = freq;
-      g.gain.setValueAtTime(vol, audioCtx.currentTime);
-      g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
       o.connect(g); g.connect(audioCtx.destination);
-      o.start(); o.stop(audioCtx.currentTime + dur);
+      o.start(t); o.stop(t + dur);
     } catch (e) { /* 忽略音频错误 */ }
   }
-  const sfxShoot  = () => beep(880, 0.06, 'square', 0.03);
-  const sfxHit    = () => beep(220, 0.08, 'sawtooth', 0.05);
-  const sfxBoom   = () => { beep(120, 0.25, 'sawtooth', 0.09); beep(60, 0.3, 'sawtooth', 0.07); };
-  const sfxPickup = () => { beep(660, 0.08); setTimeout(() => beep(990, 0.1), 80); };
-  const sfxBoss   = () => { beep(90, 0.5, 'sawtooth', 0.12); beep(45, 0.7, 'sawtooth', 0.1); };
+
+  // 白噪声源（1 秒循环用）
+  let noiseBuf = null;
+  function getNoise() {
+    if (!noiseBuf) {
+      const len = Math.floor(audioCtx.sampleRate * 1);
+      noiseBuf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+      const d = noiseBuf.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    }
+    return noiseBuf;
+  }
+
+  // 白噪声爆破：低通扫频衰减
+  function noiseBurst(dur, vol, fFrom, fTo) {
+    if (muted) return;
+    try {
+      ensureAudio();
+      const t = audioCtx.currentTime;
+      const src = audioCtx.createBufferSource();
+      src.buffer = getNoise();
+      const f = audioCtx.createBiquadFilter();
+      f.type = 'lowpass';
+      f.frequency.setValueAtTime(fFrom, t);
+      f.frequency.exponentialRampToValueAtTime(Math.max(40, fTo), t + dur);
+      const g = audioCtx.createGain();
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      src.connect(f); f.connect(g); g.connect(audioCtx.destination);
+      src.start(t); src.stop(t + dur + 0.02);
+    } catch (e) { /* 忽略 */ }
+  }
+
+  // 扫频音：飞弹 / 亮音
+  function sweep(from, to, dur, type, vol) {
+    if (muted) return;
+    try {
+      ensureAudio();
+      const t = audioCtx.currentTime;
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(from, t);
+      o.frequency.exponentialRampToValueAtTime(Math.max(20, to), t + dur);
+      g.gain.setValueAtTime(vol, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.connect(g); g.connect(audioCtx.destination);
+      o.start(t); o.stop(t + dur + 0.02);
+    } catch (e) { /* 忽略 */ }
+  }
+
+  const sfxShoot  = () => sweep(920, 220, 0.09, 'square', 0.035);
+  const sfxHit    = () => { noiseBurst(0.12, 0.15, 900, 180); sweep(160, 70, 0.12, 'sine', 0.07); };
+  const sfxBoom   = () => { noiseBurst(0.38, 0.2, 2400, 160); sweep(140, 38, 0.32, 'triangle', 0.11); };
+  const sfxPickup = () => { sweep(523, 784, 0.07, 'triangle', 0.05); setTimeout(() => sweep(784, 1046, 0.09, 'triangle', 0.05), 70); };
+  const sfxBoss   = () => {
+    sweep(180, 420, 0.28, 'sawtooth', 0.08);
+    setTimeout(() => sweep(420, 160, 0.34, 'sawtooth', 0.08), 260);
+    noiseBurst(0.5, 0.09, 1200, 300);
+  };
+  const sfxLevel  = () => {
+    [392, 523, 659, 784].forEach((f, i) => setTimeout(() => sweep(f, f * 1.01, 0.12, 'square', 0.045), i * 90));
+  };
+
+  // ===== BGM：程序化 8-bit 循环（平静 / 战斗两首，可关） =====
+  const BGM_NOTES = {
+    C3: 130.81, D3: 146.83, E3: 164.81, F3: 174.61, G3: 196, A3: 220, B3: 246.94,
+    C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392, A4: 440, B4: 493.88,
+    C5: 523.25, D5: 587.33, E5: 659.25, G5: 783.99, R: 0
+  };
+  const BGM_CALM = {
+    bpm: 88,
+    bass: ['C3','R','G3','R','A3','R','E3','R','F3','R','C4','R','G3','R','G3','R'],
+    lead: ['E4','R','G4','R','C5','R','G4','R','A4','R','E4','R','D4','R','C4','R']
+  };
+  const BGM_BATTLE = {
+    bpm: 136,
+    bass: ['C3','C3','R','C3','G3','R','G3','R','A3','A3','R','A3','E3','R','G3','R'],
+    lead: ['C5','E5','G5','E5','C5','R','D5','E5','G5','E5','D5','C5','G4','R','E5','G5']
+  };
+  let bgmMode = 'off';        // 'off' | 'calm' | 'battle'
+  let bgmStep = 0, bgmNextTime = 0, bgmTimer = null;
+
+  function bgmNote(freq, time, dur, type, vol) {
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, time);
+    g.gain.linearRampToValueAtTime(vol, time + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, time + dur);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(time); o.stop(time + dur + 0.03);
+  }
+  function bgmTick() {
+    if (!audioCtx || bgmMode === 'off' || muted) return;
+    const pat = bgmMode === 'battle' ? BGM_BATTLE : BGM_CALM;
+    const stepDur = 60 / pat.bpm / 4;
+    if (bgmNextTime < audioCtx.currentTime) bgmNextTime = audioCtx.currentTime + 0.06;
+    while (bgmNextTime < audioCtx.currentTime + 0.18) {
+      const i = bgmStep % 16;
+      const b = BGM_NOTES[pat.bass[i]], l = BGM_NOTES[pat.lead[i]];
+      if (b) bgmNote(b, bgmNextTime, stepDur * 1.55, 'triangle', 0.042);
+      if (l) bgmNote(l, bgmNextTime, stepDur * 1.1, 'square', 0.025);
+      bgmNextTime += stepDur;
+      bgmStep++;
+    }
+  }
+  function setBgm(mode) {
+    if (bgmMode === mode) return;
+    bgmMode = mode;
+    bgmStep = 0;
+    if (audioCtx) bgmNextTime = audioCtx.currentTime + 0.06;
+    if (!bgmTimer) bgmTimer = setInterval(bgmTick, 70);
+  }
 
   // ===== 工具 =====
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -955,6 +1185,7 @@
     const cy = tank.y + tank.size / 2;
     const shoot = (ox, oy) => {
       bullets.push({ x: ox - 2, y: oy - 2, size: 4, dir: tank.dir, speed: BULLET_SPEED, owner: tank });
+      if (isP) stat.shots++;
     };
     if (isP && fx.double > 0) {
       if (tank.dir === DIR.UP || tank.dir === DIR.DOWN) { shoot(cx - 6, cy); shoot(cx + 6, cy); }
@@ -1101,6 +1332,7 @@
           if (e.dead) continue;
           if (cx >= e.x && cx <= e.x + e.size && cy >= e.y && cy <= e.y + e.size) {
             b.dead = true;
+            if (b.owner.isPlayer) stat.hits++;
             e.hp--; e.hitFlash = 6;
             if (e.hp <= 0) { e.dead = true; onEnemyKilled(e); }
             else { sfxHit(); spawnParticles(cx, cy, e.color, 6); }
@@ -1154,6 +1386,8 @@
   function killPlayer() {
     if (!player || player.dead) return;
     player.dead = true;
+    stat.deaths++;
+    tookHitThisLevel = true;
     sfxBoom();
     hurtFlash = 1;
     vibe([70, 40, 70]);
@@ -1180,14 +1414,19 @@
     vibe(e.isBoss ? [60, 50, 130] : 15);
     spawnParticles(e.x + e.size / 2, e.y + e.size / 2, e.color, e.isBoss ? 48 : 16);
     shake = e.isBoss ? 16 : 6;
+    stat.kills++;
+    if (e.isBoss) stat.bossKills++;
     addKillScore(e);
     maybeDropPowerup(e.x + e.size / 2, e.y + e.size / 2, e.isBoss);
-    if (e.isBoss) { bossHp = 0; showToast('💥 BOSS 击破！'); }
+    if (e.isBoss) { bossHp = 0; showToast('💥 BOSS 击破！'); unlockAch('boss'); }
+    if (stat.kills === 1) unlockAch('first');
   }
 
   function addKillScore(e) {
     combo++;
     comboTimer = 5;
+    if (combo > stat.maxCombo) stat.maxCombo = combo;
+    if (combo >= 8) unlockAch('combo8');
     const baseScore = e.isBoss ? 1000 * level : ENEMY_TYPES[e.type].score;
     const mult = 1 + (combo - 1) * 0.1;
     const gain = Math.round(baseScore * mult / 10) * 10;
@@ -1261,9 +1500,19 @@
     }
   }
 
+  function showLevelIntro(text) {
+    const el = $('lvIntro');
+    el.querySelector('.lvT').textContent = text;
+    el.classList.remove('show');
+    void el.offsetWidth;             // 强制重排以重放动画
+    el.classList.add('show');
+    lvIntroT = 1.5;
+  }
+
   // ===== 关卡 / 敌人生成 =====
   function startLevel() {
     bossLevel = (level % 5 === 0);
+    tookHitThisLevel = false;
     enemiesSpawned = 0;
     enemiesTotal = bossLevel ? 1 : (6 + level * 2);
     enemySpawnTimer = bossLevel ? 40 : 60;
@@ -1312,6 +1561,16 @@
 
     if (!running || paused) { draw(); return; }
 
+    // 关卡过渡：冻结世界，展示「第 N 关」大字
+    if (lvIntroT > 0) {
+      lvIntroT -= dt;
+      if (lvIntroT <= 0) {
+        $('lvIntro').classList.remove('show');
+        if (lvIntroNext) { lvIntroNext = false; startLevel(); }
+      }
+      draw(); return;
+    }
+
     // 击杀定格：世界短暂静止，只保留画面
     if (hitStop > 0) { hitStop -= dt; draw(); return; }
 
@@ -1352,15 +1611,21 @@
 
     if (!baseAlive) { endGame(false); return; }
 
-    // 敌人全灭 → 下一关（含过关奖励）
+    // 敌人全灭 → 过关奖励 + 关卡过渡（成就判定）
     if (running && enemies.length === 0 && enemiesSpawned >= enemiesTotal) {
       const bonus = 1000 + level * 200;
       score += bonus;
       addText(W / 2, H / 2 - 30, '+' + bonus, '#39ff14');
       showToast('🎉 第 ' + level + ' 关完成 · 奖励 +' + bonus);
+      if (!tookHitThisLevel) unlockAch('nohit');
+      if (score >= 5000) unlockAch('score5k');
       level++;
-      startLevel();
-      sfxPickup();
+      if (level >= 5) unlockAch('lv5');
+      sfxLevel();
+      // 过渡动画结束后再开下一关（tick 里 lvIntroT 归零时调 startLevel）
+      lvIntroNext = true;
+      showLevelIntro('第 ' + level + ' 关');
+      updateHud();
       return;
     }
 
@@ -1804,18 +2069,22 @@
     ovSub.style.display = '';
     ovTip.style.display = '';
     btnShare.style.display = 'none';
+    btnReport.style.display = 'none';
     btnDaily.style.display = (kind === 'title' && !dailyInvited) ? 'block' : 'none';
     if (kind === 'title') {
       ovTitle.textContent = '坦克大战';
       if (challenge) {
         ovSub.textContent = '⚔️ 好友向你发起挑战';
-        ovStats.innerHTML = `对方拿了 <b>${challenge.score}</b> 分 · 打到第 <b>${challenge.level}</b> 关 · 来超越！`;
+        ovStats.innerHTML = `对方拿了 <b>${challenge.score}</b> 分 · 打到第 <b>${challenge.level}</b> 关 · 来超越！`
+          + (achUnlocked.size ? `<div class="achrow">已解锁成就 <b>${achUnlocked.size}</b>/${ACHIEVE.length}</div>` : '');
       } else if (dailyInvited) {
         ovSub.textContent = '📅 每日挑战 · 同一天，全世界同一张图';
-        ovStats.innerHTML = best > 0 ? `你的最高分 <b>${best}</b>` : '';
+        ovStats.innerHTML = (best > 0 ? `你的最高分 <b>${best}</b>` : '')
+          + (achUnlocked.size ? `<div class="achrow">已解锁成就 <b>${achUnlocked.size}</b>/${ACHIEVE.length}</div>` : '');
       } else {
         ovSub.textContent = '守住基地 · 消灭敌军 · 点开即玩';
-        ovStats.innerHTML = best > 0 ? `最高分 <b>${best}</b>` : '';
+        ovStats.innerHTML = (best > 0 ? `最高分 <b>${best}</b>` : '')
+          + (achUnlocked.size ? `<div class="achrow">已解锁成就 <b>${achUnlocked.size}</b>/${ACHIEVE.length}</div>` : '');
       }
       btnPlay.textContent = dailyInvited ? '开始每日挑战' : '开始游戏';
       ovTip.textContent = isTouch
@@ -1832,10 +2101,19 @@
       ovTitle.style.color = won ? '#00f0ff' : '#ff2d55';
       ovSub.textContent = won ? '基地守住了！' : '基地被摧毁了…';
       const beatChallenge = challenge && score > challenge.score;
+      const acc = stat.shots > 0 ? Math.round(stat.hits / stat.shots * 100) : 0;
       ovStats.innerHTML = `得分 <b>${score}</b> · 最高 <b>${best}</b>`
-        + (beatChallenge ? ' · 🏅 挑战成功！' : '');
+        + (beatChallenge ? ' · 🏅 挑战成功！' : '')
+        + `<div class="sub">第 ${level} 关 · 击杀 <b>${stat.kills}</b> · 最长 <b>×${Math.max(1, stat.maxCombo)}</b> 连击 · 命中率 <b>${acc}%</b>${stat.bossKills ? ' · Boss <b>' + stat.bossKills + '</b>' : ''}</div>`
+        + (achNew.length
+            ? `<div class="achrow">本次解锁 ${achNew.map(id => {
+                const a = ACHIEVE.find(x => x.id === id);
+                return a ? `<span class="chip">${a.icon} ${a.name}</span>` : '';
+              }).join('')}</div>`
+            : (achUnlocked.size ? `<div class="achrow">已解锁成就 <b>${achUnlocked.size}</b>/${ACHIEVE.length}</div>` : ''));
       btnPlay.textContent = '再来一局';
       btnShare.style.display = 'block';      // 结算页可分享成绩、发起挑战
+      btnReport.style.display = 'block';     // 生成战绩图
       ovTip.textContent = '达到第 ' + level + ' 关';
     }
   }
@@ -1851,17 +2129,20 @@
     bestAtStart = best;
     lastLives = -1; lastCombo = -1;
     hurtFlash = 0; hitStop = 0; bossWarn = 0;
+    resetStat();
+    achNew = [];
     player = makePlayer();
     player.spawnInv = 120;
     startLevel();
     running = true;
     hideOverlay();
     pauseBtn.textContent = '⏸';
+    setBgm('battle');
+    lvIntroNext = false;
+    showLevelIntro(dailyMode ? '每日挑战' : '第 1 关');
     if (dailyMode) {
       const d = new Date();
       showToast('📅 每日挑战 · ' + (d.getMonth() + 1) + '月' + d.getDate() + '日 · 全网同图');
-    } else {
-      showToast('第 1 关 · 守住基地！');
     }
   }
 
@@ -1870,6 +2151,11 @@
     running = false;
     won = win;
     pauseBtn.textContent = '⏸';
+    setBgm('calm');
+    // 结算成就判定
+    if (dailyMode) unlockAch('daily');
+    if (score >= 5000) unlockAch('score5k');
+    if (stat.shots >= 20 && stat.hits / stat.shots >= 0.7) unlockAch('surge');
     showOverlay('over');
     if (score > bestAtStart) showToast('🏆 新纪录：' + score + ' 分！');
   }
@@ -1878,6 +2164,7 @@
     if (!running || gameOver) return;
     paused = !paused;
     pauseBtn.textContent = paused ? '▶' : '⏸';
+    setBgm(paused ? 'calm' : 'battle');
     if (paused) showOverlay('paused'); else hideOverlay();
   }
 
@@ -1913,7 +2200,10 @@
   async function shareScore() {
     const base = location.origin + location.pathname;
     const link = base + (dailyMode ? '?daily=1&' : '?') + 'ch=' + score + '-' + level;
-    const text = '⚔️ 我在「QIAN 坦克大战」拿了 ' + score + ' 分、打到第 ' + level + ' 关，来超越我！';
+    const acc = stat.shots > 0 ? Math.round(stat.hits / stat.shots * 100) : 0;
+    const text = '⚔️ 我在「QIAN 坦克大战」拿了 ' + score + ' 分、打到第 ' + level + ' 关'
+      + '（击杀 ' + stat.kills + ' · 最长 ×' + Math.max(1, stat.maxCombo) + ' 连击 · 命中率 ' + acc + '%'
+      + (stat.bossKills ? ' · Boss×' + stat.bossKills : '') + '），来超越我！';
     try {
       if (navigator.share) {
         await navigator.share({ title: 'QIAN 坦克大战', text, url: link });
@@ -1924,6 +2214,142 @@
     } catch (e) { /* 用户取消分享，不提示 */ }
   }
 
+  // ===== 战绩图（霓虹战报卡，长按保存 / 分享） =====
+  function buildReportCanvas() {
+    const W2 = 728, H2 = 1028;
+    const c = document.createElement('canvas');
+    c.width = W2; c.height = H2;
+    const g = c.getContext('2d');
+
+    // 背景：深空渐变 + 赛博网格
+    const bg = g.createLinearGradient(0, 0, 0, H2);
+    bg.addColorStop(0, '#060a1e'); bg.addColorStop(0.55, '#0a1140'); bg.addColorStop(1, '#04060f');
+    g.fillStyle = bg; g.fillRect(0, 0, W2, H2);
+    g.strokeStyle = 'rgba(0, 47, 167, 0.35)'; g.lineWidth = 1;
+    for (let x = 0; x <= W2; x += 48) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, H2); g.stroke(); }
+    for (let y = 0; y <= H2; y += 48) { g.beginPath(); g.moveTo(0, y); g.lineTo(W2, y); g.stroke(); }
+
+    // 顶部品牌
+    g.textAlign = 'center';
+    g.fillStyle = '#00f0ff';
+    g.font = '800 30px "Segoe UI", sans-serif';
+    g.shadowColor = 'rgba(0, 240, 255, 0.8)'; g.shadowBlur = 18;
+    g.fillText('QIAN · 坦克大战', W2 / 2, 86);
+    g.shadowBlur = 0;
+    g.fillStyle = 'rgba(157, 196, 232, 0.75)';
+    g.font = '600 18px "Segoe UI", sans-serif';
+    g.fillText('— 战 绩 报 告 —', W2 / 2, 122);
+
+    // 大分数
+    const acc = stat.shots > 0 ? Math.round(stat.hits / stat.shots * 100) : 0;
+    g.fillStyle = '#ffffff';
+    g.font = '800 128px "Segoe UI", sans-serif';
+    g.shadowColor = 'rgba(0, 240, 255, 0.85)'; g.shadowBlur = 34;
+    g.fillText(String(score), W2 / 2, 288);
+    g.shadowBlur = 0;
+    g.fillStyle = '#00f0ff';
+    g.font = '700 22px "Segoe UI", sans-serif';
+    g.fillText('TOTAL SCORE', W2 / 2, 328);
+
+    if (score > bestAtStart && score > 0) {
+      g.fillStyle = '#ffe600';
+      g.font = '800 24px "Segoe UI", sans-serif';
+      g.shadowColor = 'rgba(255, 230, 0, 0.8)'; g.shadowBlur = 16;
+      g.fillText('🏆 新 纪 录', W2 / 2, 372);
+      g.shadowBlur = 0;
+    }
+
+    // 统计卡
+    const stats = [
+      ['到达关卡', '第 ' + level + ' 关', '#00f0ff'],
+      ['击毁敌军', stat.kills + ' 辆', '#ff00ff'],
+      ['最长连击', '×' + Math.max(1, stat.maxCombo), '#ffe600'],
+      ['命中率', acc + '%', '#39ff14'],
+      ['Boss 击破', stat.bossKills + ' 只', '#ff2d55'],
+      ['阵亡', stat.deaths + ' 次', '#9dc4e8']
+    ];
+    const cardW = 288, cardH = 92, gapX = 28, gapY = 22;
+    const x0 = (W2 - cardW * 2 - gapX) / 2, y0 = 420;
+    stats.forEach((s, i) => {
+      const cx = x0 + (i % 2) * (cardW + gapX);
+      const cy = y0 + ((i / 2) | 0) * (cardH + gapY);
+      g.fillStyle = 'rgba(10, 20, 55, 0.85)';
+      g.strokeStyle = 'rgba(0, 240, 255, 0.35)';
+      g.lineWidth = 1.5;
+      roundRect(g, cx, cy, cardW, cardH, 14);
+      g.fill(); g.stroke();
+      g.fillStyle = 'rgba(157, 196, 232, 0.85)';
+      g.font = '600 17px "Segoe UI", sans-serif';
+      g.fillText(s[0], cx + cardW / 2, cy + 32);
+      g.fillStyle = s[2];
+      g.font = '800 30px "Segoe UI", sans-serif';
+      g.fillText(s[1], cx + cardW / 2, cy + 72);
+    });
+
+    // 成就徽章（本次解锁优先）
+    const showAch = achNew.length ? achNew : [...achUnlocked].slice(0, 4);
+    if (showAch.length) {
+      let ax = W2 / 2 - (showAch.length * 132 - 12) / 2;
+      const ay = y0 + 3 * (cardH + gapY) + 18;
+      showAch.slice(0, 4).forEach(id => {
+        const a = ACHIEVE.find(x => x.id === id);
+        if (!a) return;
+        g.fillStyle = 'rgba(255, 230, 0, 0.12)';
+        g.strokeStyle = 'rgba(255, 230, 0, 0.5)';
+        roundRect(g, ax, ay, 120, 44, 22);
+        g.fill(); g.stroke();
+        g.fillStyle = '#ffe600';
+        g.font = '700 16px "Segoe UI", sans-serif';
+        g.fillText(a.icon + ' ' + a.name, ax + 60, ay + 28);
+        ax += 132;
+      });
+    }
+
+    // 底部署名
+    g.fillStyle = 'rgba(120, 165, 215, 0.8)';
+    g.font = '600 18px "Segoe UI", sans-serif';
+    g.fillText('DESIGNED BY QIAN · V1.7', W2 / 2, H2 - 78);
+    const d = new Date();
+    const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    g.fillStyle = 'rgba(90, 106, 138, 0.7)';
+    g.font = '500 15px "Segoe UI", sans-serif';
+    g.fillText(ds + (dailyMode ? ' · 每日挑战' : ''), W2 / 2, H2 - 48);
+
+    return c;
+  }
+  function roundRect(g, x, y, w, h, r) {
+    g.beginPath();
+    g.moveTo(x + r, y);
+    g.arcTo(x + w, y, x + w, y + h, r);
+    g.arcTo(x + w, y + h, x, y + h, r);
+    g.arcTo(x, y + h, x, y, r);
+    g.arcTo(x, y, x + w, y, r);
+    g.closePath();
+  }
+
+  function openReport() {
+    try {
+      const c = buildReportCanvas();
+      reportImg.src = c.toDataURL('image/png');
+      reportBox.classList.add('show');
+    } catch (e) {
+      showToast('战绩图生成失败');
+    }
+  }
+  async function shareReport() {
+    try {
+      const blob = await (await fetch(reportImg.src)).blob();
+      const file = new File([blob], 'qian-tank-battle.png', { type: 'image/png' });
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'QIAN 坦克大战 · 战绩图' });
+        return;
+      }
+      showToast('长按图片保存，发给朋友');
+    } catch (e) {
+      showToast('长按图片保存，发给朋友');
+    }
+  }
+
   // ===== 事件 =====
   btnPlay.addEventListener('click', () => {
     ensureAudio();
@@ -1932,6 +2358,9 @@
   });
   btnDaily.addEventListener('click', () => { ensureAudio(); start(true); });
   btnShare.addEventListener('click', () => { ensureAudio(); shareScore(); });
+  btnReport.addEventListener('click', () => { ensureAudio(); openReport(); });
+  $('btnReportClose').addEventListener('click', () => reportBox.classList.remove('show'));
+  $('btnReportShare').addEventListener('click', () => { ensureAudio(); shareReport(); });
   pauseBtn.addEventListener('click', (e) => { togglePause(); e.currentTarget.blur(); });
   muteBtn.addEventListener('click', (e) => { toggleMute(); e.currentTarget.blur(); });
 
@@ -2065,8 +2494,45 @@
   generateMap();
   layout();
   showOverlay('title');
+  setBgm('calm');
   lastTime = performance.now();
   rafId = requestAnimationFrame(tick);
+
+  // ===== 测试钩子（仅 ?test=1 暴露，正常游玩不可见） =====
+  if (urlParams.get('test') === '1') {
+    window.__tbTest = {
+      stat: () => ({ ...stat }),
+      ach: () => [...achUnlocked],
+      achNew: () => [...achNew],
+      endGame: (w) => endGame(!!w),
+      openReport, setBgm, showLevelIntro,
+      kill: () => {
+        let e = enemies.find(x => !x.dead);
+        if (!e) {
+          // 尚无敌人（刷兵计时未到）：合成一个，走真实击杀路径
+          e = { x: 100, y: 100, size: TANK_SIZE, color: '#ff00ff', type: 'normal', hp: 1, maxHp: 1, isBoss: false, dead: false };
+        }
+        e.dead = true;
+        onEnemyKilled(e);
+        return true;
+      },
+      addScore: (n) => { score += n; },
+      forceClear: () => {
+        enemies.forEach(e => { e.dead = true; });
+        enemies = [];
+        enemiesSpawned = enemiesTotal;
+      },
+      addStat: (k, v) => { stat[k] = (stat[k] || 0) + v; }
+    };
+  }
+
+  // ===== Service Worker：离线可玩（http/https 环境注册） =====
+  if ('serviceWorker' in navigator &&
+      (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => { /* 注册失败不影响游戏 */ });
+    });
+  }
 })();
 </script>
 </body>
