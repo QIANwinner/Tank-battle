@@ -58,6 +58,7 @@
     display: flex; align-items: center; justify-content: center;
     padding: 0; z-index: 1;
   }
+  #frame { position: relative; display: flex; line-height: 0; }
   canvas {
     display: block;
     border-radius: 10px;
@@ -70,7 +71,43 @@
     touch-action: none;
   }
 
+  /* 画布右下角常驻署名：跟着画布走，桌面手机都在视野内 */
+  #wm {
+    position: absolute; right: 7px; bottom: 6px; z-index: 2;
+    display: flex; align-items: center; gap: 4px;
+    padding: 2px 6px 2px 5px; border-radius: 4px;
+    background: rgba(0, 47, 167, 0.5);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    box-shadow: 0 0 10px rgba(0, 47, 167, 0.5);
+    font-size: 9px; font-weight: 800; letter-spacing: 2px; line-height: 1.4;
+    color: #c9e9ff; pointer-events: none;
+    text-shadow: 0 0 6px rgba(0, 240, 255, 0.6);
+  }
+  #wm i {
+    font-style: normal; font-size: 8px; letter-spacing: 0;
+    color: var(--cyan); opacity: .9;
+  }
+
   /* ---------- 顶部 HUD ---------- */
+  /* 品牌徽章：一直挂在 HUD 最左，玩的时候也看得见 */
+  #brandTag {
+    flex: 0 0 auto;
+    display: flex; align-items: center; gap: 4px;
+    margin-right: 1px;
+  }
+  #brandTag .q {
+    width: 19px; height: 19px; border-radius: 5px;
+    display: grid; place-items: center;
+    font-size: 11px; font-weight: 900; font-style: normal; line-height: 1;
+    color: #02101f;
+    background: linear-gradient(160deg, #8bf6ff, var(--cyan) 55%, #008fbf);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.4) inset;
+  }
+  #brandTag .n {
+    font-size: 10px; font-weight: 800; letter-spacing: 2px; line-height: 1;
+    color: #d6ecff;
+    text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+  }
   #hud {
     position: fixed; top: 0; left: 0; right: 0; z-index: 20;
     height: var(--hud-h);
@@ -209,9 +246,22 @@
   }
   #overlay.hide { opacity: 0; visibility: hidden; pointer-events: none; }
   #overlay .brand {
-    font-size: 12px; font-weight: 800; letter-spacing: 8px;
-    color: var(--cyan); opacity: .9;
+    position: relative; align-self: center;
+    display: flex; align-items: baseline; gap: 6px;
+    font-size: 15px; font-weight: 800; letter-spacing: 8px;
+    color: var(--cyan);
+    text-shadow: 0 0 14px rgba(0, 240, 255, 0.8), 0 0 34px rgba(0, 47, 167, 0.9);
   }
+  #overlay .brand .b2 {
+    font-size: 10px; font-weight: 700; letter-spacing: 3px;
+    color: #9dc4e8; opacity: .85; text-shadow: none;
+  }
+  #overlay .brand::before, #overlay .brand::after {
+    content: ''; position: absolute; top: 50%; width: 24px; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.8));
+  }
+  #overlay .brand::before { right: calc(100% + 10px); }
+  #overlay .brand::after { left: calc(100% + 10px); transform: scaleX(-1); }
   #ovTitle {
     font-size: 34px; font-weight: 800; letter-spacing: 6px; color: #fff;
     text-shadow: 0 0 10px rgba(0, 240, 255, 0.75), 0 0 36px rgba(0, 47, 167, 0.85);
@@ -281,18 +331,27 @@
     font-size: 9px; letter-spacing: 4px; color: rgba(90, 106, 138, 0.65);
     pointer-events: none;
   }
+  /* 手机上底部被摇杆/开火占满，改由 HUD 徽章 + 画布水印署名 */
   html.touch #mark { display: none; }
 
   @media (max-width: 360px) {
     .pill.best { display: none; }
     #ovTitle { font-size: 28px; letter-spacing: 4px; }
   }
+  @media (max-width: 340px) {
+    #brandTag .n { display: none; }
+  }
+  /* 手机窄屏：最高分让位给品牌标识（结算面板里仍有最高分） */
+  @media (max-width: 430px) {
+    html.touch .pill.best { display: none; }
+  }
 </style>
 </head>
 <body>
-  <div id="stage"><canvas id="game" width="624" height="624"></canvas></div>
+  <div id="stage"><div id="frame"><canvas id="game" width="624" height="624"></canvas><div id="wm"><i>◆</i>QIAN</div></div></div>
 
   <div id="hud">
+    <div id="brandTag"><i class="q">Q</i><span class="n">QIAN</span></div>
     <div class="pill"><span class="k">分数</span><span class="v" id="score">0</span></div>
     <div class="pill best"><span class="k">最高</span><span class="v" id="best">0</span></div>
     <div class="pill"><span class="k">关</span><span class="v" id="level">1</span></div>
@@ -315,7 +374,7 @@
   </div>
 
   <div id="overlay">
-    <div class="brand">QIAN</div>
+    <div class="brand"><span class="b1">QIAN</span><span class="b2">出品</span></div>
     <h1 id="ovTitle">坦克大战</h1>
     <p id="ovSub">守住基地 · 消灭敌军 · 点开即玩</p>
     <div id="ovStats"></div>
@@ -325,7 +384,7 @@
 
   <div id="toast"></div>
   <div id="wxtip">点右上角 <b>···</b> → 发送给朋友</div>
-  <div id="mark">DESIGNED BY QIAN · V1.4</div>
+  <div id="mark">DESIGNED BY QIAN · V1.5</div>
 
 <script>
 (() => {
