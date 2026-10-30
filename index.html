@@ -498,9 +498,16 @@
   const TILE_WATER = 3;            // 水（坦克不能过，子弹可过）
   const TILE_TREE  = 4;            // 草丛（遮挡视觉）
 
-  const DIR = { UP: 0, RIGHT: 1, DOWN: 2, LEFT: 3 };
-  const DX = [0, 1, 0, -1];
-  const DY = [-1, 0, 1, 0];
+  // 八方向（0=上，顺时针每 45° 一档）：斜向分量为 ±√2/2，合速度与正向一致
+  const DIR = { UP: 0, UP_RIGHT: 1, RIGHT: 2, DOWN_RIGHT: 3, DOWN: 4, DOWN_LEFT: 5, LEFT: 6, UP_LEFT: 7 };
+  const DX = [0, Math.SQRT1_2, 1, Math.SQRT1_2, 0, -Math.SQRT1_2, -1, -Math.SQRT1_2];
+  const DY = [-1, -Math.SQRT1_2, 0, Math.SQRT1_2, 1, Math.SQRT1_2, 0, -Math.SQRT1_2];
+
+  // 向量 → 最近的八方向
+  function dirFromVec(dx, dy) {
+    const idx = Math.round((Math.atan2(dy, dx) + Math.PI / 2) / (Math.PI / 4));
+    return ((idx % 8) + 8) % 8;
+  }
 
   const TANK_SIZE = 22;
   const BOSS_SIZE = 44;
@@ -1188,8 +1195,9 @@
       if (isP) stat.shots++;
     };
     if (isP && fx.double > 0) {
-      if (tank.dir === DIR.UP || tank.dir === DIR.DOWN) { shoot(cx - 6, cy); shoot(cx + 6, cy); }
-      else { shoot(cx, cy - 6); shoot(cx, cy + 6); }
+      // 双管沿垂直于炮管方向展开（斜向同样成立）
+      const px = -DY[tank.dir] * 6, py = DX[tank.dir] * 6;
+      shoot(cx - px, cy - py); shoot(cx + px, cy + py);
     } else {
       shoot(cx, cy);
     }
@@ -1199,13 +1207,22 @@
 
   function bossFire(e) {
     const cx = e.x + e.size / 2, cy = e.y + e.size / 2;
-    const vertical = (e.dir === DIR.UP || e.dir === DIR.DOWN);
+    const px = -DY[e.dir], py = DX[e.dir];   // 垂直于炮管的展开方向
     for (const off of [-10, 0, 10]) {
-      const ox = vertical ? cx + off : cx;
-      const oy = vertical ? cy : cy + off;
+      const ox = cx + px * off, oy = cy + py * off;
       bullets.push({ x: ox - 2, y: oy - 2, size: 5, dir: e.dir, speed: BULLET_SPEED * 0.9, owner: e });
     }
     beep(300, 0.1, 'sawtooth', 0.04);
+  }
+
+  // 按当前八方向移动：x/y 轴独立碰撞，斜向可沿墙滑动；返回是否成功移动
+  function moveTank(t, k) {
+    const nx = t.x + DX[t.dir] * t.speed * k;
+    const ny = t.y + DY[t.dir] * t.speed * k;
+    let moved = false;
+    if (DX[t.dir] !== 0 && !isBlocked(nx, t.y, t.size) && !tankHitsTank(nx, t.y, t.size, t)) { t.x = nx; moved = true; }
+    if (DY[t.dir] !== 0 && !isBlocked(t.x, ny, t.size) && !tankHitsTank(t.x, ny, t.size, t)) { t.y = ny; moved = true; }
+    return moved;
   }
 
   // ===== 敌人 AI =====
@@ -1215,7 +1232,7 @@
 
     if ((e.changeTimer -= k) <= 0) {
       e.changeTimer = randInt(50, 170);
-      if (rng() < 0.75) e.dir = randInt(0, 3);
+      if (rng() < 0.75) e.dir = randInt(0, 7);
     }
     const shootMin = Math.max(22, 60 - level * 4);
     const shootMax = Math.max(80, 150 - level * 6);
@@ -1230,16 +1247,10 @@
     if (player && !player.dead && r < smart) { tx = player.x; ty = player.y; }
     else if (baseAlive && r < smart * 2) { tx = BASE.x * TILE; ty = BASE.y * TILE; }
     if (tx !== null) {
-      const dx = tx - e.x, dy = ty - e.y;
-      if (Math.abs(dx) > Math.abs(dy)) e.dir = dx > 0 ? DIR.RIGHT : DIR.LEFT;
-      else e.dir = dy > 0 ? DIR.DOWN : DIR.UP;
+      e.dir = dirFromVec(tx - e.x, ty - e.y);
     }
 
-    const nx = e.x + DX[e.dir] * e.speed * k;
-    const ny = e.y + DY[e.dir] * e.speed * k;
-    if (!isBlocked(nx, ny, e.size) && !tankHitsTank(nx, ny, e.size, e)) {
-      e.x = nx; e.y = ny;
-    } else {
+    if (!moveTank(e, k)) {
       e.changeTimer = Math.min(e.changeTimer, 20);
       e.dir = pickFreeDir(e, e.type === 'elite' ? 0.9 : e.type === 'armored' ? 0.65 : 0.45);
     }
@@ -1248,18 +1259,11 @@
   function updateBoss(e, k) {
     // 缓慢追踪玩家
     if (player && !player.dead) {
-      const dx = (player.x + TANK_SIZE / 2) - (e.x + e.size / 2);
-      const dy = (player.y + TANK_SIZE / 2) - (e.y + e.size / 2);
-      if (Math.abs(dx) > Math.abs(dy)) e.dir = dx > 0 ? DIR.RIGHT : DIR.LEFT;
-      else e.dir = dy > 0 ? DIR.DOWN : DIR.UP;
+      e.dir = dirFromVec(
+        (player.x + TANK_SIZE / 2) - (e.x + e.size / 2),
+        (player.y + TANK_SIZE / 2) - (e.y + e.size / 2));
     }
-    const nx = e.x + DX[e.dir] * e.speed * k;
-    const ny = e.y + DY[e.dir] * e.speed * k;
-    if (!isBlocked(nx, ny, e.size) && !tankHitsTank(nx, ny, e.size, e)) {
-      e.x = nx; e.y = ny;
-    } else {
-      e.dir = pickFreeDir(e);
-    }
+    if (!moveTank(e, k)) e.dir = pickFreeDir(e);
     if ((e.shootTimer -= k) <= 0) {
       e.shootTimer = Math.max(40, 70 - level * 2);
       bossFire(e);
@@ -1267,19 +1271,18 @@
   }
 
   function pickFreeDir(e, chase) {
-    const free = [0, 1, 2, 3].filter(d =>
+    const free = [0, 1, 2, 3, 4, 5, 6, 7].filter(d =>
       !isBlocked(e.x + DX[d] * TILE, e.y + DY[d] * TILE, e.size) &&
       !tankHitsTank(e.x + DX[d] * TILE, e.y + DY[d] * TILE, e.size, e));
-    if (!free.length) return randInt(0, 3);
+    if (!free.length) return randInt(0, 7);
     // 被挡住转向时：按 chase 概率优先朝目标（玩家 / 基地）走，其余随机游走
     if (chase && rng() < chase) {
       const goPlayer = player && !player.dead && e.type !== 'fast';
       const tx = goPlayer ? player.x : BASE.x * TILE;
       const ty = goPlayer ? player.y : BASE.y * TILE;
-      const dx = tx - e.x, dy = ty - e.y;
-      const prefs = Math.abs(dx) > Math.abs(dy)
-        ? [dx > 0 ? DIR.RIGHT : DIR.LEFT, dy > 0 ? DIR.DOWN : DIR.UP]
-        : [dy > 0 ? DIR.DOWN : DIR.UP, dx > 0 ? DIR.RIGHT : DIR.LEFT];
+      const want = dirFromVec(tx - e.x, ty - e.y);
+      // 期望方向不可走时，退而求其次：先两侧 45°，再对称方向
+      const prefs = [want, (want + 1) % 8, (want + 7) % 8, (want + 2) % 8, (want + 6) % 8];
       const good = free.filter(d => prefs.includes(d));
       if (good.length) return good[0];
     }
@@ -1308,10 +1311,11 @@
       if (b.x < 0 || b.y < 0 || b.x + b.size > W || b.y + b.size > H) { b.dead = true; return; }
       if (isBlocked(b.x, b.y, b.size, true)) {
         damageTile(cx, cy);
-        if (b.dir === DIR.UP) damageTile(cx, b.y);
-        else if (b.dir === DIR.DOWN) damageTile(cx, b.y + b.size);
-        else if (b.dir === DIR.LEFT) damageTile(b.x, cy);
-        else damageTile(b.x + b.size, cy);
+        // 沿运动方向补刀相邻格（斜向子弹两轴都补）
+        if (DY[b.dir] < 0) damageTile(cx, b.y);
+        else if (DY[b.dir] > 0) damageTile(cx, b.y + b.size);
+        if (DX[b.dir] < 0) damageTile(b.x, cy);
+        else if (DX[b.dir] > 0) damageTile(b.x + b.size, cy);
         b.dead = true; sfxHit(); return;
       }
       // 基地
@@ -1358,15 +1362,17 @@
   function updatePlayer(k) {
     if (!player || player.dead) return;
     if (player.cooldown > 0) player.cooldown -= k;
+    // 双轴独立读取：斜向键组合（如 W+D / 摇杆斜推）即走对角线
     let mx = 0, my = 0;
-    if (keys['ArrowUp'] || keys['w'] || keys['W']) my = -1;
-    else if (keys['ArrowDown'] || keys['s'] || keys['S']) my = 1;
-    else if (keys['ArrowLeft'] || keys['a'] || keys['A']) mx = -1;
-    else if (keys['ArrowRight'] || keys['d'] || keys['D']) mx = 1;
+    if (keys['ArrowUp'] || keys['w'] || keys['W']) my -= 1;
+    if (keys['ArrowDown'] || keys['s'] || keys['S']) my += 1;
+    if (keys['ArrowLeft'] || keys['a'] || keys['A']) mx -= 1;
+    if (keys['ArrowRight'] || keys['d'] || keys['D']) mx += 1;
 
     if (mx !== 0 || my !== 0) {
-      player.dir = mx !== 0 ? (mx > 0 ? DIR.RIGHT : DIR.LEFT) : (my > 0 ? DIR.DOWN : DIR.UP);
-      const step = player.speed * k;
+      player.dir = dirFromVec(mx, my);
+      // 斜向走 1/√2 速度，保证各方向合速度一致
+      const step = player.speed * k * ((mx !== 0 && my !== 0) ? Math.SQRT1_2 : 1);
       const nx = player.x + mx * step;
       const ny = player.y + my * step;
       if (mx !== 0 && !isBlocked(nx, player.y, TANK_SIZE) && !tankHitsTank(nx, player.y, TANK_SIZE, player))
@@ -1981,7 +1987,7 @@
     const cx = t.x + s / 2, cy = t.y + s / 2;
     ctx.save();
     ctx.translate(cx, cy);
-    ctx.rotate(t.dir * Math.PI / 2);
+    ctx.rotate(t.dir * Math.PI / 4);
     ctx.scale(scale, scale);
 
     const isPlayer = t.isPlayer;
@@ -2088,8 +2094,8 @@
       }
       btnPlay.textContent = dailyInvited ? '开始每日挑战' : '开始游戏';
       ovTip.textContent = isTouch
-        ? '左下摇杆走位 · 右下按钮开火'
-        : 'WASD / 方向键移动 · 空格开火 · P 暂停 · M 静音';
+        ? '左下摇杆八方向走位 · 右下按钮开火'
+        : 'WASD / 方向键移动（可斜向） · 空格开火 · P 暂停 · M 静音';
     } else if (kind === 'paused') {
       ovTitle.textContent = '已暂停';
       ovSub.textContent = '';
@@ -2383,9 +2389,13 @@
   window.addEventListener('blur', loseFocus);
   document.addEventListener('visibilitychange', () => { if (document.hidden) loseFocus(); });
 
-  // ===== 触屏输入：左摇杆走位 + 右开火 =====
-  // STICK_KEYS 的下标与 DIR（UP 0 / RIGHT 1 / DOWN 2 / LEFT 3）一一对应
-  const STICK_KEYS = ['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft'];
+  // ===== 触屏输入：左摇杆八方向走位 + 右开火 =====
+  // STICK_KEYS[i] = 八方向 i 对应要按下的方向键（斜向按两键，与键盘 W+D 同理）
+  const STICK_KEYS = [
+    ['ArrowUp'], ['ArrowUp', 'ArrowRight'], ['ArrowRight'], ['ArrowDown', 'ArrowRight'],
+    ['ArrowDown'], ['ArrowDown', 'ArrowLeft'], ['ArrowLeft'], ['ArrowUp', 'ArrowLeft']
+  ];
+  const STICK_ALL = ['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft'];
   const zone = $('stickZone'), stick = $('stick'), knob = $('knob'), fireBtn = $('tFire');
   const touchKeys = new Set();
   let stickDir = -1;        // -1 = 回中不移动
@@ -2393,9 +2403,14 @@
 
   function setStickDir(d) {
     if (d === stickDir) return;
-    STICK_KEYS.forEach(k => { keys[k] = false; touchKeys.delete(k); });
+    // 只清摇杆设过的键，不干扰键盘实体键
+    for (const k of STICK_ALL) {
+      if (touchKeys.has(k)) { keys[k] = false; touchKeys.delete(k); }
+    }
     stickDir = d;
-    if (d >= 0) { keys[STICK_KEYS[d]] = true; touchKeys.add(STICK_KEYS[d]); }
+    if (d >= 0) {
+      for (const k of STICK_KEYS[d]) { keys[k] = true; touchKeys.add(k); }
+    }
   }
 
   function releaseTouch() {
@@ -2409,7 +2424,7 @@
     keys[' '] = false;
   }
 
-  // 以底盘圆心为原点：拖动方向取主轴，决定行进方向；中心留死区
+  // 以底盘圆心为原点：按偏移角度映射八方向（各方位都能走），中心留死区
   function stickTrack(e) {
     const r = stick.getBoundingClientRect();
     const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
@@ -2419,8 +2434,7 @@
     if (len > max) { dx = dx / len * max; dy = dy / len * max; }
     knob.style.transform = 'translate(' + dx.toFixed(1) + 'px,' + dy.toFixed(1) + 'px)';
     if (len < max * 0.34) { setStickDir(-1); return; }
-    if (Math.abs(dx) > Math.abs(dy)) setStickDir(dx > 0 ? DIR.RIGHT : DIR.LEFT);
-    else setStickDir(dy > 0 ? DIR.DOWN : DIR.UP);
+    setStickDir(dirFromVec(dx, dy));
   }
 
   zone.addEventListener('pointerdown', (e) => {
@@ -2522,7 +2536,19 @@
         enemies = [];
         enemiesSpawned = enemiesTotal;
       },
-      addStat: (k, v) => { stat[k] = (stat[k] || 0) + v; }
+      addStat: (k, v) => { stat[k] = (stat[k] || 0) + v; },
+      // —— 八方向验证用 ——
+      state: () => ({
+        player: player ? { x: player.x, y: player.y, dir: player.dir, dead: player.dead } : null,
+        enemies: enemies.map(e => ({ dir: e.dir, isBoss: !!e.isBoss, x: e.x, y: e.y })),
+        bullets: bullets.map(b => ({ dir: b.dir, x: b.x, y: b.y, owner: b.owner.isPlayer ? 'p' : 'e' })),
+        level, running, paused
+      }),
+      setDir: (d) => { if (player) player.dir = d; },
+      fireOnce: () => { if (player) { player.cooldown = 0; fire(player); } },
+      setLevel: (lv) => { level = lv; startLevel(); },
+      respawn: () => { if (player) { player.dead = false; player.spawnInv = 120; } },
+      tp: (x, y) => { if (player) { player.x = x; player.y = y; player.dead = false; player.spawnInv = 120; } }
     };
   }
 
