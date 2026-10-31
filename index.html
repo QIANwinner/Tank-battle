@@ -345,6 +345,51 @@
     100% { opacity: 0; transform: scale(0.93); letter-spacing: 14px; }
   }
 
+  /* ---------- 过关强化三选一 ---------- */
+  #upgradeBox {
+    position: fixed; inset: 0; z-index: 40;
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    gap: 12px; padding: 20px;
+    background: radial-gradient(circle at 50% 40%, rgba(0, 47, 167, 0.34), rgba(3, 3, 10, 0.94) 65%);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  }
+  #upgradeBox.show { display: flex; }
+  #upgradeBox .upTitle {
+    font-size: 22px; font-weight: 800; letter-spacing: 4px; color: #fff;
+    text-shadow: 0 0 12px rgba(0, 240, 255, 0.75), 0 0 34px rgba(0, 47, 167, 0.9);
+  }
+  #upgradeBox .upSub { font-size: 12px; letter-spacing: 1px; color: #93a4c4; margin-bottom: 4px; }
+  #upgradeBox .upCards {
+    display: flex; gap: 12px; width: 100%; max-width: 560px;
+    justify-content: center; flex-wrap: wrap;
+  }
+  #upgradeBox .upCard {
+    flex: 1 1 150px; max-width: 172px; min-height: 176px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    padding: 16px 12px;
+    border: 1px solid rgba(0, 240, 255, 0.4); border-radius: 16px;
+    background: linear-gradient(180deg, rgba(0, 47, 167, 0.28), rgba(4, 6, 20, 0.85));
+    color: #fff; cursor: pointer;
+    -webkit-appearance: none; appearance: none;
+    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+  }
+  #upgradeBox .upCard:active { transform: translateY(2px) scale(0.98); }
+  #upgradeBox .upCard:hover, #upgradeBox .upCard:focus-visible {
+    border-color: #00f0ff;
+    box-shadow: 0 0 22px rgba(0, 240, 255, 0.35), 0 0 0 1px rgba(0, 240, 255, 0.3) inset;
+  }
+  #upgradeBox .upCard .uIcon { font-size: 34px; line-height: 1; filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.6)); }
+  #upgradeBox .upCard .uName { font-size: 15px; font-weight: 800; letter-spacing: 1px; color: #00f0ff; }
+  #upgradeBox .upCard .uDesc { font-size: 11px; line-height: 1.5; color: #aebbd8; min-height: 32px; }
+  #upgradeBox .upCard .uOwn { font-size: 10px; letter-spacing: 1px; color: #ffe600; }
+  #upgradeBox .upCard.locked { opacity: .55; }
+  #upgradeBox .upSkip {
+    margin-top: 6px; font-size: 12px; letter-spacing: 1px; color: #7f92b5;
+    padding: 8px 18px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.18);
+    cursor: pointer;
+  }
+  #upgradeBox .upSkip:active { background: rgba(255, 255, 255, 0.08); }
+
   /* ---------- 战绩图弹层 ---------- */
   #reportBox {
     position: fixed; inset: 0; z-index: 45;
@@ -440,6 +485,8 @@
     <div class="pill best"><span class="k">最高</span><span class="v" id="best">0</span></div>
     <div class="pill"><span class="k">关</span><span class="v" id="level">1</span></div>
     <div class="pill"><span class="k">敌</span><span class="v" id="remaining">0</span></div>
+    <div class="pill wave" id="waveWrap" style="display:none"><span class="k">波</span><span class="v" id="waveNum">1/1</span></div>
+    <div class="pill upg" id="upgWrap" style="display:none"><span class="k">强化</span><span class="v" id="upgNum">0</span></div>
     <div class="pill combo" id="comboWrap" style="display:none"><span class="k">连击</span><span class="v" id="combo">×1</span></div>
     <div id="lives"></div>
     <div class="hbtns">
@@ -482,7 +529,18 @@
 
   <div id="toast"></div>
   <div id="wxtip">点右上角 <b>···</b> → 发送给朋友</div>
-  <div id="mark">DESIGNED BY QIAN · V1.9</div>
+  <div id="mark">DESIGNED BY QIAN · V1.10</div>
+
+  <div id="upgradeBox">
+    <div class="upTitle">关卡完成 · 强化三选一</div>
+    <div class="upSub">选择一项能力，永久生效直到本局结束</div>
+    <div class="upCards">
+      <button class="upCard" data-i="0"><span class="uIcon"></span><span class="uName"></span><span class="uDesc"></span><span class="uOwn"></span></button>
+      <button class="upCard" data-i="1"><span class="uIcon"></span><span class="uName"></span><span class="uDesc"></span><span class="uOwn"></span></button>
+      <button class="upCard" data-i="2"><span class="uIcon"></span><span class="uName"></span><span class="uDesc"></span><span class="uOwn"></span></button>
+    </div>
+    <div class="upSkip" id="upSkip">跳过（不加强化）</div>
+  </div>
 
 <script>
 (() => {
@@ -497,6 +555,8 @@
   const TILE_STEEL = 2;            // 钢墙（不可摧毁）
   const TILE_WATER = 3;            // 水（坦克不能过，子弹可过）
   const TILE_TREE  = 4;            // 草丛（遮挡视觉）
+  const TILE_BARREL = 5;           // 可爆炸油桶（子弹命中即引爆，可连锁）
+  const TILE_PORTAL = 6;           // 传送门（成对出现，进入即传送）
 
   // 八方向（0=上，顺时针每 45° 一档）：斜向分量为 ±√2/2，合速度与正向一致
   const DIR = { UP: 0, UP_RIGHT: 1, RIGHT: 2, DOWN_RIGHT: 3, DOWN: 4, DOWN_LEFT: 5, LEFT: 6, UP_LEFT: 7 };
@@ -518,10 +578,13 @@
 
   // 敌人类型（速度再乘关卡系数）
   const ENEMY_TYPES = {
-    normal:  { speed: 1.15, hp: 1, score: 100, color: null,      label: '普通' },
-    fast:    { speed: 1.70, hp: 1, score: 150, color: '#ffe600', label: '快速' },
-    armored: { speed: 0.90, hp: 2, score: 200, color: '#4d9fff', label: '装甲' },
-    elite:   { speed: 1.30, hp: 3, score: 300, color: '#ff00ff', label: '精英' },
+    normal:   { speed: 1.15, hp: 1, score: 100, color: null,      label: '普通' },
+    fast:     { speed: 1.70, hp: 1, score: 150, color: '#ffe600', label: '快速' },
+    armored:  { speed: 0.90, hp: 2, score: 200, color: '#4d9fff', label: '装甲' },
+    elite:    { speed: 1.30, hp: 3, score: 300, color: '#ff00ff', label: '精英' },
+    sniper:   { speed: 0.80, hp: 1, score: 250, color: '#a06bff', label: '狙击' },
+    suicide:  { speed: 2.05, hp: 1, score: 150, color: '#ff6b35', label: '自爆' },
+    engineer: { speed: 1.00, hp: 2, score: 180, color: '#2ecc71', label: '工兵' },
   };
 
   // 道具定义
@@ -716,11 +779,14 @@
   const elScore = $('score'), elBest = $('best'), elLevel = $('level'),
         elRemaining = $('remaining'), elLives = $('lives'), elCombo = $('combo'),
         elComboWrap = $('comboWrap'),
+        elWaveWrap = $('waveWrap'), elWaveNum = $('waveNum'),
+        elUpgWrap = $('upgWrap'), elUpgNum = $('upgNum'),
         pauseBtn = $('pauseBtn'), muteBtn = $('muteBtn'),
         overlay = $('overlay'), ovTitle = $('ovTitle'), ovSub = $('ovSub'),
         ovStats = $('ovStats'), ovTip = $('ovTip'), btnPlay = $('btnPlay'),
         btnDaily = $('btnDaily'), btnShare = $('btnShare'), btnReport = $('btnReport'),
-        reportBox = $('reportBox'), reportImg = $('reportImg');
+        reportBox = $('reportBox'), reportImg = $('reportImg'),
+        upgradeBox = $('upgradeBox'), upSkip = $('upSkip');
 
   // ===== URL 参数：好友挑战 (?ch=分数-关卡) / 每日挑战 (?daily=1) =====
   const urlParams = (() => { try { return new URLSearchParams(location.search); } catch (e) { return new URLSearchParams(); } })();
@@ -729,6 +795,9 @@
     return m ? { score: Math.min(+m[1], 9999999), level: Math.min(+m[2] || 1, 999) } : null;
   })();
   const dailyInvited = urlParams.get('daily') === '1';
+
+  // 过关成长面板：跳过 → 直接开下一关
+  upSkip.addEventListener('click', () => { if (upgradeOpen) advanceLevel(); });
 
   // ===== 自适应尺寸 =====
   const DPR = Math.min(window.devicePixelRatio || 1, 2);
@@ -781,17 +850,53 @@
   let enemySpawnTimer = 0;
   let enemiesTotal = 0;
   let enemiesSpawned = 0;
+  let wave = 1, wavesTotal = 1;      // 波次：当前波 / 总波数
+  let waveSpawned = 0, waveGapT = 0; // 本波已刷 / 波间休整倒计时（帧）
+  let spawnWarnPt = null;            // 出生预告点（刷前 35 帧闪烁警示）
   let baseAlive = true;
   let shake = 0;
   let keys = {};
   let rafId = null;
-  let lastLives = -1, lastCombo = -1;
+  let lastLives = -1, lastCombo = -1, lastUpg = -1;
+
+  // 过关成长（三选一 Roguelite 强化）
+  let upgrades = {};             // 各强化已叠加次数，如 { rapid: 2 }
+  let upgTotal = 0;              // 已获得强化总数（HUD 显示）
+  let upgradeOpen = false;       // 强化面板是否弹出
+  // 每日挑战 modifier（每日词条规则）
+  let dailyMods = { _names: [] };
+
+  // ===== 过关成长强化池（三选一）=====
+  // 每项可叠加：count 为已选次数，stack 说明每次效果
+  const UPGRADE_POOL = [
+    { id: 'rapid',     icon: '🔥', name: '快速装填', desc: '开火冷却 -20%（可叠加）', tag: '射速' },
+    { id: 'speed',     icon: '⚡', name: '疾速履带', desc: '移动速度 +15%（可叠加）', tag: '机动' },
+    { id: 'shield',    icon: '🛡', name: '开局护盾', desc: '每关开场获得 3 秒护盾', tag: '生存' },
+    { id: 'hp',        icon: '❤', name: '装甲强化', desc: '本局最大生命 +1（即时回复）', tag: '生存' },
+    { id: 'bulletspd', icon: '🚀', name: '穿云弹头', desc: '子弹速度 +20%（可叠加）', tag: '火力' },
+    { id: 'double',    icon: '💥', name: '连击暴击', desc: '连击得分加成 +50%', tag: '得分' },
+    { id: 'greed',     icon: '💰', name: '战利品猎手', desc: '击杀得分 +25%（可叠加）', tag: '得分' },
+    { id: 'freeze',    icon: '❄', name: '冰冻子弹', desc: '命中几率冻住敌人 1 秒', tag: '控制' },
+  ];
+
+  // 每日挑战词条：由日期种子抽取 2~3 条，全服同一天一致
+  const DAILY_MODS = [
+    { id: 'fastonly',   name: '疾风骤雨', desc: '敌军只出快速型，如潮水般涌来', apply() { dailyMods.onlyFast = true; } },
+    { id: 'brawlers',   name: '猛兽出笼', desc: '敌军移动速度 +25%', apply() { dailyMods.speedMul = 1.25; } },
+    { id: 'doublepu',   name: '丰饶战场', desc: '道具掉落概率翻倍', apply() { dailyMods.doublePU = true; } },
+    { id: 'noheal',     name: '后勤休假', desc: '本局不再掉落生命道具', apply() { dailyMods.noHeal = true; } },
+    { id: 'ironwall',   name: '钢铁防线', desc: '地图钢墙大幅增多', apply() { dailyMods.ironWall = true; } },
+    { id: 'sniperrain', name: '狙击天团', desc: '狙击兵大量出现', apply() { dailyMods.sniperBoost = true; } },
+    { id: 'surge',      name: '敌军增援', desc: '每关敌军数量 +30%', apply() { dailyMods.surge = true; } },
+  ];
 
   let bossLevel = false;           // 本关是否 Boss 关
   let bossHp = 0, bossMaxHp = 0;   // Boss 血条
+  let portals = [];                // 传送门对（tile 坐标 [[x,y],[x,y]]）
 
   // 时间驱动（修复高刷屏速度翻倍）
   let lastTime = 0;
+  let animTime = 0;   // 累计动画时间（ms），驱动油桶/传送门/自爆闪烁
 
   // 连击 / 道具效果（秒计时）
   let combo = 0, comboTimer = 0;
@@ -956,6 +1061,7 @@
   const sfxChargeHit  = () => { noiseBurst(0.3, 0.2, 2400, 160); };
   const sfxBossBeam   = () => { sweep(130, 55, 0.6, 'triangle', 0.09); };
   const sfxClash      = () => { beep(880, 0.05, 'square', 0.03); };
+  const sfxPortal     = () => { sweep(300, 900, 0.18, 'sine', 0.06); sweep(900, 1400, 0.12, 'triangle', 0.04); };
   const sfxLevel  = () => {
     [392, 523, 659, 784].forEach((f, i) => setTimeout(() => sweep(f, f * 1.01, 0.12, 'square', 0.045), i * 90));
   };
@@ -1064,15 +1170,59 @@
   }
 
   function generateMap() {
-    if (bossLevel) { loadPresetMap(PRESET_MAPS.length - 1, 0); return; }   // Boss 场
-    if (dailyMode && dailyRng) {
+    if (bossLevel) { loadPresetMap(PRESET_MAPS.length - 1, 0); }   // Boss 场
+    else if (dailyMode && dailyRng) {
       // 每日挑战：日期种子决定地图与镜像，同一天所有人同图
       const idx = Math.floor(dailyRng() * (PRESET_MAPS.length - 1));
       const flip = dailyRng() < 0.5 ? 1 : 0;
       loadPresetMap(idx, flip);
-      return;
+    } else {
+      loadPresetMap((level - 1) % (PRESET_MAPS.length - 1), 0);
     }
-    loadPresetMap((level - 1) % (PRESET_MAPS.length - 1), 0);
+    applyIronWall();     // 每日词条：部分砖墙 → 钢墙
+    placeBarrels();      // 可爆炸油桶
+    placePortals();      // 传送门对
+  }
+
+  // 每日词条：钢铁防线 —— 约 22% 砖墙升级为钢墙（不可摧毁）
+  function applyIronWall() {
+    if (!dailyMods.ironWall) return;
+    for (let y = 0; y < ROWS; y++)
+      for (let x = 0; x < COLS; x++)
+        if (map[y][x] === TILE_BRICK && rng() < 0.22) map[y][x] = TILE_STEEL;
+  }
+
+  // 随机放置 N 个可爆炸油桶（避开出生区 / 基地 / 边缘）
+  function placeBarrels() {
+    if (bossLevel) return;
+    const empties = [];
+    for (let y = 3; y <= 20; y++)
+      for (let x = 2; x <= 23; x++)
+        if (map[y][x] === 0 && Math.abs(x - SPAWN.x) + Math.abs(y - SPAWN.y) > 4) empties.push([x, y]);
+    let n = 3;
+    while (n-- > 0 && empties.length) {
+      const i = Math.floor(rng() * empties.length);
+      const [x, y] = empties.splice(i, 1)[0];
+      map[y][x] = TILE_BARREL;
+    }
+  }
+
+  // 放置一对传送门（距离较远的两处空地）
+  function placePortals() {
+    portals = [];
+    if (bossLevel) return;
+    const empties = [];
+    for (let y = 3; y <= 20; y++)
+      for (let x = 2; x <= 23; x++)
+        if (map[y][x] === 0) empties.push([x, y]);
+    if (empties.length < 2) return;
+    const pick = () => empties[Math.floor(rng() * empties.length)];
+    let a = pick(), b = pick(), tries = 0;
+    while (Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) < 12 && tries++ < 60) b = pick();
+    if (Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) < 6) return;  // 太近放弃
+    map[a[1]][a[0]] = TILE_PORTAL;
+    map[b[1]][b[0]] = TILE_PORTAL;
+    portals = [a, b];
   }
 
   function inside(x, y) { return x >= 0 && y >= 0 && x < COLS && y < ROWS; }
@@ -1086,25 +1236,79 @@
         if (!inside(x, y)) return true;
         const t = map[y][x];
         if (isBullet) {
-          if (t === TILE_STEEL || t === TILE_BRICK) return true;
+          if (t === TILE_STEEL || t === TILE_BRICK || t === TILE_BARREL) return true;
           if (t === TILE_WATER) return false; // 子弹可越过水
         } else {
-          if (t === TILE_BRICK || t === TILE_STEEL || t === TILE_WATER) return true;
+          if (t === TILE_BRICK || t === TILE_STEEL || t === TILE_WATER || t === TILE_BARREL) return true;
           if (x === BASE.x && y === BASE.y) return true;  // 基地格坦克不可驶入
         }
       }
     return false;
   }
 
-  // 子弹击中砖块：摧毁命中的那一格
+  // 子弹击中砖块：摧毁命中的那一格；命中油桶则引爆
   function damageTile(px, py) {
     const x = Math.floor(px / TILE), y = Math.floor(py / TILE);
-    if (inside(x, y) && map[y][x] === TILE_BRICK) {
+    if (!inside(x, y)) return false;
+    if (map[y][x] === TILE_BARREL) { explodeBarrel(x, y); return true; }
+    if (map[y][x] === TILE_BRICK) {
       map[y][x] = 0;
       spawnParticles(x * TILE + TILE / 2, y * TILE + TILE / 2, '#ff00ff', 6);
       return true;
     }
     return false;
+  }
+
+  // 油桶爆炸：范围伤害敌人 + 连锁引爆相邻油桶
+  function explodeBarrel(x, y, visited) {
+    visited = visited || {};
+    const key = x + ',' + y;
+    if (visited[key]) return;
+    visited[key] = true;
+    if (!inside(x, y) || map[y][x] !== TILE_BARREL) return;
+    map[y][x] = 0;
+    const cxp = x * TILE + TILE / 2, cyp = y * TILE + TILE / 2;
+    spawnParticles(cxp, cyp, '#ffb300', 22);
+    spawnParticles(cxp, cyp, '#ff2d55', 12);
+    spawnParticles(cxp, cyp, '#fff', 6);
+    addText(cxp, cyp - 12, '💥', '#ffb300');
+    shake = Math.max(shake, 10);
+    sfxBoom();
+    vibe([120, 60, 120]);
+    const R = 2 * TILE;   // 爆炸半径 2 格
+    for (const e of enemies) {
+      if (e.dead || (e.isBoss && e.enterT > 0)) continue;
+      const ecx = e.x + e.size / 2, ecy = e.y + e.size / 2;
+      if (Math.hypot(ecx - cxp, ecy - cyp) <= R) {
+        e.hp -= 3; e.hitFlash = 6;
+        if (e.hp <= 0) { e.dead = true; onEnemyKilled(e); }
+        else { sfxHit(); spawnParticles(ecx, ecy, e.color, 6); }
+      }
+    }
+    // 连锁引爆周边油桶
+    for (let dy = -2; dy <= 2; dy++)
+      for (let dx = -2; dx <= 2; dx++) {
+        const nx = x + dx, ny = y + dy;
+        if (inside(nx, ny) && map[ny][nx] === TILE_BARREL) explodeBarrel(nx, ny, visited);
+      }
+  }
+
+  // 传送门：坦克中心进入门格即瞬移到另一端（带冷却防连穿）
+  function checkPortal(t) {
+    if (!portals.length || t.portalCd > 0) return;
+    const cx = t.x + t.size / 2, cy = t.y + t.size / 2;
+    const gx = Math.floor(cx / TILE), gy = Math.floor(cy / TILE);
+    if (!inside(gx, gy) || map[gy][gx] !== TILE_PORTAL) return;
+    const idx = portals.findIndex(p => p[0] === gx && p[1] === gy);
+    if (idx < 0) return;
+    const other = portals[1 - idx];
+    const ox = other[0] * TILE + (TILE - t.size) / 2;
+    const oy = other[1] * TILE + (TILE - t.size) / 2;
+    t.x = ox; t.y = oy;
+    t.portalCd = 45;   // 冷却 0.75 秒
+    spawnParticles(cx, cy, '#a06bff', 14);
+    spawnParticles(ox + t.size / 2, oy + t.size / 2, '#a06bff', 14);
+    sfxPortal();
   }
 
   // ===== 粒子 / 飘分 =====
@@ -1130,7 +1334,7 @@
       y: SPAWN.y * TILE + (TILE - TANK_SIZE) / 2,
       dir: DIR.UP, speed: PLAYER_SPEED,
       cooldown: 0, isPlayer: true, color: '#002FA7',
-      size: TANK_SIZE, spawnInv: 0, hitFlash: 0
+      size: TANK_SIZE, spawnInv: 0, hitFlash: 0, portalCd: 0
     };
   }
 
@@ -1138,19 +1342,38 @@
 
   function pickEnemyType() {
     const r = rng();
-    if (level >= 7) {
-      if (r < 0.10) return 'elite';
-      if (r < 0.30) return 'armored';
+    // 每日词条：疾风骤雨（只出快速）/ 狙击天团（大量狙击）
+    if (dailyMods.onlyFast) return 'fast';
+    if (dailyMods.sniperBoost && r < 0.35) return 'sniper';
+    // 波次推进让后期波更凶：有效难度 = 关卡 + 波次加成
+    const lvl = level + (wave - 1) * 0.6;
+    if (lvl >= 8) {
+      if (r < 0.08) return 'sniper';
+      if (r < 0.16) return 'suicide';
+      if (r < 0.24) return 'engineer';
+      if (r < 0.34) return 'elite';
+      if (r < 0.52) return 'armored';
+      if (r < 0.70) return 'fast';
+      return 'normal';
+    }
+    if (lvl >= 6) {
+      if (r < 0.08) return 'sniper';
+      if (r < 0.15) return 'suicide';
+      if (r < 0.22) return 'engineer';
+      if (r < 0.34) return 'armored';
       if (r < 0.55) return 'fast';
       return 'normal';
     }
-    if (level >= 5) {
-      if (r < 0.18) return 'armored';
-      if (r < 0.42) return 'fast';
+    if (lvl >= 4) {
+      if (r < 0.07) return 'sniper';
+      if (r < 0.14) return 'suicide';
+      if (r < 0.30) return 'armored';
+      if (r < 0.50) return 'fast';
       return 'normal';
     }
-    if (level >= 3) {
-      if (r < 0.25) return 'fast';
+    if (lvl >= 2) {
+      if (r < 0.06) return 'suicide';
+      if (r < 0.28) return 'fast';
       return 'normal';
     }
     return 'normal';
@@ -1165,12 +1388,12 @@
     const def = ENEMY_TYPES[type];
     enemies.push({
       x, y, dir: DIR.DOWN,
-      speed: def.speed * levelSpeedMul(),
+      speed: def.speed * levelSpeedMul() * (dailyMods.speedMul || 1),
       cooldown: 0, isPlayer: false,
       type, hp: def.hp, maxHp: def.hp, size: TANK_SIZE,
       color: def.color || pickEnemyColor(),
       changeTimer: randInt(60, 160), shootTimer: randInt(40, 140),
-      hitFlash: 0
+      hitFlash: 0, portalCd: 0
     });
   }
 
@@ -1184,7 +1407,7 @@
       cooldown: 0, isPlayer: false, isBoss: true,
       type: 'boss', hp: bossMaxHp, maxHp: bossMaxHp,
       size: BOSS_SIZE, color: '#ff2d55',
-      changeTimer: 90, shootTimer: 70, hitFlash: 0,
+      changeTimer: 90, shootTimer: 70, hitFlash: 0, portalCd: 0,
       enterT: 1.5,                     // 出场下降时间（秒），期间无敌
       enterY: 6 * TILE,                // 场中落点
       phase: 0,                        // 0 正常 / 1 狂暴(50%) / 2 狂暴·二段(25%)
@@ -1208,11 +1431,22 @@
     if (tank.cooldown > 0) return;
     const isP = tank.isPlayer;
     const rapid = isP && fx.rapid > 0;
-    tank.cooldown = isP ? (rapid ? 7 : 14) : (tank.isBoss ? 50 : 40);
+    const isSniper = !isP && tank.type === 'sniper';
+    if (isP) {
+      // 快速装填强化：冷却 ×0.8/层；道具双倍射速再 ×0.5
+      let cd = 14 * Math.pow(0.8, upgrades.rapid || 0);
+      if (rapid) cd *= 0.5;
+      tank.cooldown = Math.max(3, cd);
+    } else {
+      tank.cooldown = tank.isBoss ? 50 : (isSniper ? 55 : 40);
+    }
     const cx = tank.x + tank.size / 2;
     const cy = tank.y + tank.size / 2;
+    // 穿云弹头强化：玩家弹速 +20%/层；狙击弹慢速可躲
+    const bulletSpeed = isSniper ? BULLET_SPEED * 0.55 : BULLET_SPEED * (isP ? (1 + 0.2 * (upgrades.bulletspd || 0)) : 1);
+    const bsize = isSniper ? 5 : 4;
     const shoot = (ox, oy) => {
-      bullets.push({ x: ox - 2, y: oy - 2, size: 4, dir: tank.dir, speed: BULLET_SPEED, owner: tank });
+      bullets.push({ x: ox - 2, y: oy - 2, size: bsize, dir: tank.dir, speed: bulletSpeed, owner: tank });
       if (isP) stat.shots++;
     };
     if (isP && fx.double > 0) {
@@ -1285,13 +1519,39 @@
   }
 
   // ===== 敌人 AI =====
+  // 目标倾向：按兵种返回 'player' / 'base' / null（null=随机游走）
+  function enemyTarget(e) {
+    const r = rng();
+    switch (e.type) {
+      case 'elite':    return r < 0.16 ? 'player' : r < 0.26 ? 'base' : null;
+      case 'armored':  return r < 0.06 ? 'player' : r < 0.24 ? 'base' : null;
+      case 'engineer': return r < 0.04 ? 'player' : r < 0.30 ? 'base' : null;
+      case 'fast':     return r < 0.03 ? 'player' : r < 0.07 ? 'base' : null;
+      default:         return r < 0.025 ? 'player' : r < 0.05 ? 'base' : null;
+    }
+  }
+  // 撞墙转向时优先朝目标走的概率（按兵种分层）
+  function chaseChance(e) {
+    switch (e.type) {
+      case 'elite':    return 0.90;
+      case 'engineer': return 0.85;
+      case 'armored':  return 0.75;
+      case 'fast':     return 0.45;
+      default:         return 0.35;
+    }
+  }
+
   function updateEnemy(e, k) {
     if (fx.freeze > 0) return;              // 冻结：不动不射
+    if (e.freezeT > 0) { e.freezeT -= k; if (e.freezeT <= 0) e.freezeT = 0; return; }  // 冰冻子弹：单兵冻结中不动不射
     if (e.isBoss) { updateBoss(e, k); return; }
+    if (e.type === 'sniper')  { updateSniper(e, k); return; }    // 狙击：远处压制
+    if (e.type === 'suicide') { updateSuicide(e, k); return; }   // 自爆：贴脸引爆
+    if (e.type === 'engineer'){ updateEngineer(e, k); return; }  // 工兵：专拆基地
 
     if ((e.changeTimer -= k) <= 0) {
       e.changeTimer = randInt(50, 170);
-      if (rng() < 0.75) e.dir = randInt(0, 7);
+      if (rng() < 0.6) e.dir = randInt(0, 7);
     }
     const shootMin = Math.max(22, 60 - level * 4);
     const shootMax = Math.max(80, 150 - level * 6);
@@ -1299,19 +1559,67 @@
       e.shootTimer = randInt(shootMin, shootMax);
       fire(e);
     }
-    // 偶尔锁定玩家或基地：精英/装甲更狡猾，锁定更频繁
-    const smart = e.type === 'elite' ? 0.09 : e.type === 'armored' ? 0.05 : 0.025;
-    const r = rng();
-    let tx = null, ty = null;
-    if (player && !player.dead && r < smart) { tx = player.x; ty = player.y; }
-    else if (baseAlive && r < smart * 2) { tx = BASE.x * TILE; ty = BASE.y * TILE; }
-    if (tx !== null) {
-      e.dir = dirFromVec(tx - e.x, ty - e.y);
-    }
+    // 分层目标锁定：精英追玩家，装甲/工兵直冲基地，快速游走
+    const tgt = enemyTarget(e);
+    if (tgt === 'player' && player && !player.dead) e.dir = dirFromVec(player.x - e.x, player.y - e.y);
+    else if (tgt === 'base' && baseAlive) e.dir = dirFromVec(BASE.x * TILE - e.x, BASE.y * TILE - e.y);
 
     if (!moveTank(e, k)) {
       e.changeTimer = Math.min(e.changeTimer, 20);
-      e.dir = pickFreeDir(e, e.type === 'elite' ? 0.9 : e.type === 'armored' ? 0.65 : 0.45);
+      e.dir = pickFreeDir(e, chaseChance(e));
+    }
+  }
+
+  // —— 狙击兵：保持中距离压制，慢速精准弹，可走位躲避 ——
+  function updateSniper(e, k) {
+    if (player && !player.dead) {
+      const dx = player.x - e.x, dy = player.y - e.y;
+      const dist = Math.hypot(dx, dy);
+      let moveDir = null;
+      if (dist > 11 * TILE) moveDir = dirFromVec(dx, dy);          // 太远：靠近
+      else if (dist < 6 * TILE) moveDir = dirFromVec(-dx, -dy);    // 太近：拉开
+      if (moveDir !== null) {
+        e.dir = moveDir;
+        if (!moveTank(e, k)) e.dir = pickFreeDir(e, 0.5);
+      }
+      e.dir = dirFromVec(dx, dy);   // 始终面向玩家
+    } else if (baseAlive) {
+      e.dir = dirFromVec(BASE.x * TILE - e.x, BASE.y * TILE - e.y);
+    }
+    if ((e.shootTimer -= k) <= 0) {
+      e.shootTimer = randInt(Math.max(26, 80 - level * 2), Math.max(60, 130 - level * 4));
+      fire(e);
+    }
+  }
+
+  // —— 自爆兵：全速冲向玩家（无则基地），近身引爆 ——
+  function updateSuicide(e, k) {
+    let tx = BASE.x * TILE, ty = BASE.y * TILE;
+    if (player && !player.dead) { tx = player.x; ty = player.y; }
+    e.dir = dirFromVec(tx - e.x, ty - e.y);
+    if (!moveTank(e, k)) e.dir = pickFreeDir(e, 0.9);
+    const dist = Math.hypot(tx - e.x, ty - e.y);
+    if (dist < 1.2 * TILE) { e.dead = true; explodeSuicide(e); }
+  }
+  function explodeSuicide(e) {
+    const cx = e.x + TANK_SIZE / 2, cy = e.y + TANK_SIZE / 2;
+    spawnParticles(cx, cy, '#ff6b35', 26);
+    sfxBoom(); shake = Math.max(shake, 8); vibe(30);
+    // 近身伤害玩家（护盾/无敌期间免疫）
+    if (player && !player.dead && !(player.spawnInv > 0)) {
+      const d = Math.hypot(player.x + TANK_SIZE / 2 - cx, player.y + TANK_SIZE / 2 - cy);
+      if (d < 2.2 * TILE) killPlayer();
+    }
+  }
+
+  // —— 工兵：直冲基地，高射速专拆护墙 ——
+  function updateEngineer(e, k) {
+    const tx = BASE.x * TILE, ty = BASE.y * TILE;
+    e.dir = dirFromVec(tx - e.x, ty - e.y);
+    if (!moveTank(e, k)) e.dir = pickFreeDir(e, 0.9);
+    if ((e.shootTimer -= k) <= 0) {
+      e.shootTimer = randInt(40, 80);
+      fire(e);
     }
   }
 
@@ -1439,6 +1747,11 @@
             b.dead = true;
             stat.hits++;
             e.hp--; e.hitFlash = 6;
+            // 冰冻子弹：命中几率冻住 1 秒（每层 +15% 概率）
+            if (!e.isBoss && !(e.freezeT > 0) && rng() < 0.15 * (upgrades.freeze || 0)) {
+              e.freezeT = 60;
+              addText(cx, cy - 8, '❄', '#7fd7ff');
+            }
             if (e.isBoss) bossHitFlash = 0.18;      // Boss 血条受击闪白
             if (e.hp <= 0) { e.dead = true; onEnemyKilled(e); }
             else { sfxHit(); spawnParticles(cx, cy, e.color, 6); }
@@ -1475,8 +1788,9 @@
 
     if (mx !== 0 || my !== 0) {
       player.dir = dirFromVec(mx, my);
-      // 斜向走 1/√2 速度，保证各方向合速度一致
-      const step = player.speed * k * ((mx !== 0 && my !== 0) ? Math.SQRT1_2 : 1);
+      // 斜向走 1/√2 速度，保证各方向合速度一致；疾速履带强化 +15%/层
+      const spd = player.speed * (1 + 0.15 * (upgrades.speed || 0));
+      const step = spd * k * ((mx !== 0 && my !== 0) ? Math.SQRT1_2 : 1);
       const nx = player.x + mx * step;
       const ny = player.y + my * step;
       if (mx !== 0 && !isBlocked(nx, player.y, TANK_SIZE) && !tankHitsTank(nx, player.y, TANK_SIZE, player))
@@ -1486,6 +1800,8 @@
       clampPlayer();
     }
     if (keys[' '] || keys['Space'] || keys['j'] || keys['J']) fire(player);
+    if (player.portalCd > 0) player.portalCd -= k;
+    checkPortal(player);
   }
 
   function clampPlayer() {
@@ -1546,8 +1862,9 @@
     if (combo > stat.maxCombo) stat.maxCombo = combo;
     if (combo >= 8) unlockAch('combo8');
     const baseScore = e.isBoss ? 1000 * level : ENEMY_TYPES[e.type].score;
-    const mult = 1 + (combo - 1) * 0.1;
-    const gain = Math.round(baseScore * mult / 10) * 10;
+    // 连击暴击：连击系数加成 +50%；战利品猎手：基础分 +25%/层
+    const mult = 1 + (combo - 1) * 0.1 * (1 + 0.5 * (upgrades.double || 0));
+    const gain = Math.round(baseScore * mult * (1 + 0.25 * (upgrades.greed || 0)) / 10) * 10;
     score += gain;
     addText(e.x + e.size / 2, e.y - 4, '+' + gain, combo >= 3 ? '#ff00ff' : '#00f0ff');
     if (combo >= 3) addText(e.x + e.size / 2, e.y - 24, combo + ' 连击', '#ffe600');
@@ -1560,13 +1877,21 @@
       spawnPowerup(x - 20, y, 'shield');
       spawnPowerup(x + 20, y, 'life');
       spawnPowerup(x, y);
-    } else if (rng() < 0.15) {
+    } else if (rng() < (dailyMods.doublePU ? 0.30 : 0.15)) {
       spawnPowerup(x, y);
     }
   }
 
   function spawnPowerup(x, y, forceType) {
-    const type = forceType || POWERUP_LIST[randInt(0, POWERUP_LIST.length - 1)];
+    let type = forceType;
+    if (!type) {
+      type = POWERUP_LIST[randInt(0, POWERUP_LIST.length - 1)];
+      // 每日词条：后勤休假（不落生命道具）——重抽一次仍为生命则兜底为护盾
+      if (dailyMods.noHeal && type === 'life') {
+        type = POWERUP_LIST[randInt(0, POWERUP_LIST.length - 1)];
+        if (type === 'life') type = 'shield';
+      }
+    }
     powerups.push({
       x: clamp(x - 8, TILE, W - TILE - 16),
       y: clamp(y - 8, TILE, H - TILE - 16),
@@ -1630,13 +1955,70 @@
     lvIntroT = 1.5;
   }
 
+  // ===== 过关成长（三选一 Roguelite 强化） =====
+  function offerUpgrades() {
+    // 3 个不重复的强化（允许同项多选叠加，但本轮不重复）
+    const opts = [];
+    const pool = UPGRADE_POOL.slice();
+    while (opts.length < 3 && pool.length) {
+      const i = Math.floor(rng() * pool.length);
+      opts.push(pool.splice(i, 1)[0]);
+    }
+    if (upgradeOpen) hideUpgradeBox();
+    upgradeBox.querySelectorAll('.upCard').forEach((card, i) => {
+      const def = opts[i];
+      if (!def) { card.classList.add('locked'); card.style.display = 'none'; return; }
+      card.style.display = '';
+      card.classList.remove('locked');
+      const own = upgrades[def.id] || 0;
+      card.querySelector('.uIcon').textContent = def.icon;
+      card.querySelector('.uName').textContent = def.name;
+      card.querySelector('.uDesc').textContent = def.desc;
+      card.querySelector('.uOwn').textContent = own > 0 ? '已持有 ×' + own : def.tag;
+      card.onclick = () => { if (!upgradeOpen) return; applyUpgrade(def.id); };
+    });
+    upgradeBox.classList.add('show');
+    upgradeOpen = true;
+    sfxLevel();
+  }
+
+  function applyUpgrade(id) {
+    const def = UPGRADE_POOL.find(x => x.id === id);
+    if (!def) return;
+    upgrades[id] = (upgrades[id] || 0) + 1;
+    upgTotal++;
+    // 即时生效项
+    if (id === 'hp') { lives = Math.min(lives + 1, 9); lastLives = -1; }
+    if (id === 'shield' && player) player.spawnInv = Math.max(player.spawnInv || 0, 180);
+    showToast(def.icon + ' 强化 · ' + def.name);
+    sfxPickup();
+    advanceLevel();
+  }
+
+  function advanceLevel() {
+    hideUpgradeBox();
+    level++;
+    if (level >= 5) unlockAch('lv5');
+    lvIntroNext = true;
+    showLevelIntro('第 ' + level + ' 关');
+    updateHud();
+  }
+
+  function hideUpgradeBox() {
+    upgradeBox.classList.remove('show');
+    upgradeOpen = false;
+  }
+
   // ===== 关卡 / 敌人生成 =====
   function startLevel() {
     bossLevel = (level % 5 === 0);
     tookHitThisLevel = false;
     enemiesSpawned = 0;
-    enemiesTotal = bossLevel ? 1 : (6 + level * 2);
-    enemySpawnTimer = bossLevel ? 40 : 60;
+    enemiesTotal = bossLevel ? 1 : Math.round((6 + level * 2) * (dailyMods.surge ? 1.3 : 1));
+    // 波次：非 Boss 关拆成多波，波次越多越凶
+    wavesTotal = bossLevel ? 1 : Math.min(2 + Math.floor(level / 2), 8);
+    wave = 1; waveSpawned = 0; waveGapT = 0;
+    enemySpawnTimer = bossLevel ? 40 : 45;
     bullets = []; enemies = []; particles = []; texts = []; powerups = [];
     baseAlive = true;
     fx = { rapid: 0, double: 0, freeze: 0 };
@@ -1651,9 +2033,18 @@
       player.x = SPAWN.x * TILE + (TILE - TANK_SIZE) / 2;
       player.y = SPAWN.y * TILE + (TILE - TANK_SIZE) / 2;
       player.dir = DIR.UP;
+      // 开局护盾强化：每关开场 3 秒护盾
+      if (upgrades.shield > 0) player.spawnInv = Math.max(player.spawnInv || 0, 180);
     }
     lastLives = -1; lastCombo = -1;
     updateHud();
+  }
+
+  // 第 w 波应刷的数量（均匀分配总量，余数补给靠后波）
+  function waveSizeOf(w) {
+    const base = Math.floor(enemiesTotal / wavesTotal);
+    const rem = enemiesTotal - base * wavesTotal;
+    return base + (w > wavesTotal - rem ? 1 : 0);
   }
 
   function updateSpawning(k) {
@@ -1662,18 +2053,47 @@
       if ((enemySpawnTimer -= k) <= 0) { spawnBoss(); enemiesSpawned = 1; }
       return;
     }
-    if ((enemySpawnTimer -= k) > 0) return;
-    enemySpawnTimer = 90;
-    const pt = spawnPoints[randInt(0, 2)];
-    if (!enemies.some(e => !e.dead && Math.abs(e.x - pt[0]) < TILE && Math.abs(e.y - pt[1]) < TILE)) {
+    // 波间休整：清完一波稍作喘息，再提示下一波
+    if (waveGapT > 0) {
+      waveGapT -= k;
+      spawnWarnPt = null;
+      if (waveGapT <= 0) {
+        wave++;
+        waveSpawned = 0;
+        if (wave <= wavesTotal) { showToast('🌊 第 ' + wave + ' / ' + wavesTotal + ' 波'); sfxLevel(); }
+      }
+      return;
+    }
+    if (waveSpawned >= waveSizeOf(wave)) {
+      // 本波刷完：等待场上清空再进下一波
+      if (enemiesSpawned < enemiesTotal && !enemies.some(e => !e.dead)) waveGapT = 130;
+      spawnWarnPt = null;
+      return;
+    }
+    if ((enemySpawnTimer -= k) > 0) {
+      // 即将刷：预选出生点闪烁预告
+      if (enemySpawnTimer <= 35 && !spawnWarnPt) spawnWarnPt = spawnPoints[randInt(0, 2)];
+      return;
+    }
+    enemySpawnTimer = 60;
+    // 优先用预告点，被占则顺延其他空点
+    const tryPts = spawnWarnPt ? [spawnWarnPt].concat(spawnPoints) : spawnPoints;
+    let pt = null;
+    for (const c of tryPts) {
+      if (c && !enemies.some(e => !e.dead && Math.abs(e.x - c[0]) < TILE && Math.abs(e.y - c[1]) < TILE)) { pt = c; break; }
+    }
+    spawnWarnPt = null;
+    if (pt) {
       spawnEnemy(pt[0], pt[1], pickEnemyType());
       enemiesSpawned++;
+      waveSpawned++;
     }
   }
 
   // ===== 主循环（deltaTime 驱动） =====
   function tick(now) {
     rafId = requestAnimationFrame(tick);
+    animTime = now;
     let dt = (now - lastTime) / 1000;
     lastTime = now;
     if (!isFinite(dt) || dt <= 0) dt = 1 / 60;
@@ -1720,7 +2140,7 @@
     if (bossHitFlash > 0) bossHitFlash = Math.max(0, bossHitFlash - dt);
 
     updatePlayer(k);
-    enemies.forEach(e => updateEnemy(e, k));
+    enemies.forEach(e => { if (e.portalCd > 0) e.portalCd -= k; updateEnemy(e, k); checkPortal(e); });
     bullets.forEach(b => updateBullet(b, k));
     updatePowerups(dt);
 
@@ -1748,20 +2168,18 @@
 
     if (!baseAlive) { endGame(false); return; }
 
-    // 敌人全灭 → 过关奖励 + 关卡过渡（成就判定；Boss 需等死亡演出结束）
-    if (running && enemies.length === 0 && enemiesSpawned >= enemiesTotal && bossDeathT <= 0) {
+    // 敌人全灭 → 过关奖励 + 关卡过渡（成就判定；Boss 需等死亡演出结束；强化面板弹出时不再重复触发）
+    if (running && !upgradeOpen && enemies.length === 0 && enemiesSpawned >= enemiesTotal && bossDeathT <= 0) {
       const bonus = 1000 + level * 200;
       score += bonus;
       addText(W / 2, H / 2 - 30, '+' + bonus, '#39ff14');
       showToast('🎉 第 ' + level + ' 关完成 · 奖励 +' + bonus);
       if (!tookHitThisLevel) unlockAch('nohit');
       if (score >= 5000) unlockAch('score5k');
-      level++;
-      if (level >= 5) unlockAch('lv5');
       sfxLevel();
-      // 过渡动画结束后再开下一关（tick 里 lvIntroT 归零时调 startLevel）
-      lvIntroNext = true;
-      showLevelIntro('第 ' + level + ' 关');
+      // 过关成长：先弹三选一面板，选完（或跳过）再开下一关
+      lvIntroNext = false;
+      offerUpgrades();
       updateHud();
       return;
     }
@@ -1812,6 +2230,19 @@
         elComboWrap.style.display = 'none';
       }
     }
+    // 波次 HUD（Boss 关隐藏）
+    if (bossLevel) {
+      elWaveWrap.style.display = 'none';
+    } else {
+      elWaveWrap.style.display = '';
+      elWaveNum.textContent = Math.min(wave, wavesTotal) + '/' + wavesTotal;
+    }
+    // 强化计数 HUD
+    if (upgTotal !== lastUpg) {
+      lastUpg = upgTotal;
+      elUpgNum.textContent = upgTotal;
+      elUpgWrap.style.display = upgTotal > 0 ? '' : 'none';
+    }
   }
 
   // ===== 渲染 =====
@@ -1841,19 +2272,43 @@
         if (t === TILE_BRICK) drawBrick(px, py);
         else if (t === TILE_STEEL) drawSteel(px, py);
         else if (t === TILE_WATER) drawWater(px, py);
+        else if (t === TILE_BARREL) drawBarrel(px, py);
+        else if (t === TILE_PORTAL) drawPortal(px, py);
       }
     }
 
     drawBase();
 
-    // 子弹（霓虹辉光）
+    // 出生点标记 + 预告闪烁（非 Boss 关）
+    if (!bossLevel) {
+      for (const pt of spawnPoints) {
+        const px = pt[0] + TILE / 2, py = pt[1] + TILE / 2;
+        ctx.fillStyle = 'rgba(255,80,80,0.15)';
+        ctx.beginPath(); ctx.arc(px, py, 8, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(255,80,80,0.4)';
+        ctx.beginPath(); ctx.arc(px, py, 2.6, 0, Math.PI * 2); ctx.fill();
+      }
+      if (spawnWarnPt) {
+        const px = spawnWarnPt[0] + TILE / 2, py = spawnWarnPt[1] + TILE / 2;
+        const blink = Math.floor(enemySpawnTimer / 5) % 2 === 0;
+        ctx.save();
+        ctx.strokeStyle = '#ff3355';
+        ctx.lineWidth = 2.5;
+        ctx.globalAlpha = blink ? 0.95 : 0.4;
+        ctx.beginPath(); ctx.arc(px, py, 9 + (35 - Math.max(0, enemySpawnTimer)) * 0.35, 0, Math.PI * 2); ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    // 子弹（霓虹辉光；敌弹统一红色系，一眼识别敌我）
     for (const b of bullets) {
       if (b.owner.isPlayer) {
         ctx.shadowColor = '#00f0ff'; ctx.shadowBlur = 8; ctx.fillStyle = '#00f0ff';
       } else {
-        ctx.shadowColor = b.owner.isBoss ? '#ff2d55' : '#ff00ff';
-        ctx.shadowBlur = b.owner.isBoss ? 10 : 6;
-        ctx.fillStyle = b.owner.isBoss ? '#ff2d55' : '#ff00ff';
+        const isSnip = b.owner.type === 'sniper';
+        ctx.shadowColor = b.owner.isBoss ? '#ff2d55' : (isSnip ? '#ff1a2e' : '#ff3355');
+        ctx.shadowBlur = b.owner.isBoss ? 10 : (isSnip ? 9 : 6);
+        ctx.fillStyle = b.owner.isBoss ? '#ff2d55' : (isSnip ? '#ff1a2e' : '#ff3355');
       }
       ctx.fillRect(b.x, b.y, b.size, b.size);
       ctx.shadowBlur = 0;
@@ -2059,6 +2514,57 @@
     ctx.fillRect(px + 18, py + 14, 2, 2);
   }
 
+  // 可爆炸油桶：圆柱体 + 危险警示条 + 顶部引信
+  function drawBarrel(px, py) {
+    const cx = px + TILE / 2, cy = py + TILE / 2;
+    ctx.save();
+    // 桶身
+    ctx.fillStyle = '#6b4a16';
+    ctx.fillRect(px + 5, py + 3, TILE - 10, TILE - 6);
+    ctx.fillStyle = '#8a5f1e';
+    ctx.fillRect(px + 5, py + 3, TILE - 10, TILE - 14);
+    // 危险警示条
+    ctx.fillStyle = '#ffb300';
+    ctx.fillRect(px + 5, py + 13, TILE - 10, 5);
+    ctx.fillStyle = '#1a1206';
+    for (let i = 0; i < 4; i++) ctx.fillRect(px + 6 + i * 6, py + 13, 3, 5);
+    // 上下箍环
+    ctx.fillStyle = '#4a320e';
+    ctx.fillRect(px + 4, py + 3, TILE - 8, 2);
+    ctx.fillRect(px + 4, py + TILE - 7, TILE - 8, 2);
+    // 引信/危险标记
+    const blink = Math.floor(animTime / 350) % 2 === 0;
+    ctx.fillStyle = blink ? '#ff2d55' : '#8a1520';
+    ctx.beginPath(); ctx.arc(cx, cy - 5, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowColor = '#ffb300'; ctx.shadowBlur = blink ? 8 : 0;
+    ctx.strokeStyle = '#ffb300'; ctx.lineWidth = 1;
+    ctx.strokeRect(px + 6.5, py + 4.5, TILE - 13, TILE - 9);
+    ctx.restore();
+  }
+
+  // 传送门：旋转紫环 + 内芯
+  function drawPortal(px, py) {
+    const cx = px + TILE / 2, cy = py + TILE / 2;
+    const pulse = (Math.sin(animTime * 0.006) + 1) / 2;
+    ctx.save();
+    ctx.shadowColor = '#a06bff'; ctx.shadowBlur = 12 + pulse * 8;
+    ctx.fillStyle = 'rgba(160, 107, 255, 0.5)';
+    ctx.beginPath(); ctx.arc(cx, cy, TILE / 2 - 3, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(10, 6, 20, 0.88)';
+    ctx.beginPath(); ctx.arc(cx, cy, TILE / 2 - 9, 0, Math.PI * 2); ctx.fill();
+    // 旋转弧线
+    ctx.strokeStyle = '#c9a6ff'; ctx.lineWidth = 2;
+    for (let i = 0; i < 3; i++) {
+      const a = animTime * 0.004 + i * Math.PI * 2 / 3;
+      ctx.beginPath(); ctx.arc(cx, cy, TILE / 2 - 6, a, a + 1.1); ctx.stroke();
+    }
+    // 内芯辉光点
+    ctx.fillStyle = `rgba(233, 216, 255, ${0.5 + pulse * 0.4})`;
+    ctx.beginPath(); ctx.arc(cx, cy, 3 + pulse * 1.5, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
   function drawBase() {
     const px = BASE.x * TILE, py = BASE.y * TILE;
     if (baseAlive) {
@@ -2092,7 +2598,27 @@
     if (p.life < 3 && Math.floor(p.life * 6) % 2 === 0) return;
     const x = p.x, y = p.y + Math.sin(p.bob) * 2;
     const def = POWERUP_DEF[p.type];
+    const important = (p.type === 'shield' || p.type === 'life');
+    const lowHp = lives <= 1;   // 濒死时高亮关键道具
     ctx.save();
+    // 关键道具：光柱 + 下坠箭头指引，濒死时脉冲
+    if (important) {
+      const t = performance.now();
+      const pulse = lowHp ? (0.45 + 0.4 * Math.sin(t / 130)) : 0.28;
+      ctx.fillStyle = def.color;
+      ctx.globalAlpha = pulse;
+      ctx.shadowColor = def.color; ctx.shadowBlur = 14;
+      ctx.fillRect(x + size / 2 - 3, y - 68, 6, 68);
+      ctx.globalAlpha = 1;
+      const ay = y - 72 - (lowHp ? Math.abs(Math.sin(t / 200)) * 5 : 0);
+      ctx.beginPath();
+      ctx.moveTo(x + size / 2 - 6, ay);
+      ctx.lineTo(x + size / 2 + 6, ay);
+      ctx.lineTo(x + size / 2, ay - 8);
+      ctx.closePath();
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
     ctx.shadowColor = def.color; ctx.shadowBlur = 10;
     ctx.fillStyle = '#05050a';
     ctx.fillRect(x, y, size, size);
@@ -2193,6 +2719,45 @@
     // 炮管
     ctx.fillStyle = isPlayer ? '#00f0ff' : (t.isBoss ? '#ffaa00' : '#2a2035');
     ctx.fillRect(-2, -16, 4, 10);
+
+    // 兵种独特造型
+    if (!isPlayer && !t.isBoss) {
+      if (t.type === 'sniper') {
+        // 狙击：加长炮管 + 瞄准镜
+        ctx.fillStyle = '#a06bff';
+        ctx.fillRect(-1.5, -21, 3, 6);
+        ctx.fillStyle = '#e6d4ff';
+        ctx.fillRect(-1, -20, 2, 2);
+        ctx.fillStyle = 'rgba(160,107,255,0.5)';
+        ctx.fillRect(-4, -14, 8, 1.5);
+      } else if (t.type === 'suicide') {
+        // 自爆：红色警示灯闪烁 + 保险丝
+        const blink = Math.floor(animTime / 120) % 2 === 0;
+        ctx.fillStyle = blink ? '#ff2d55' : '#7a1520';
+        ctx.beginPath(); ctx.arc(0, -1, 3.4, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = blink ? '#ffb300' : '#5a1200';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(0, -1, 5.2, 0, Math.PI * 2); ctx.stroke();
+      } else if (t.type === 'engineer') {
+        // 工兵：绿色维修十字 + 警示条纹
+        ctx.strokeStyle = '#2ecc71'; ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(-3.5, 0); ctx.lineTo(3.5, 0);
+        ctx.moveTo(0, -3.5); ctx.lineTo(0, 3.5);
+        ctx.stroke();
+        ctx.fillStyle = '#1d4a2a';
+        ctx.fillRect(-6, -8, 12, 2);
+      } else if (t.type === 'fast') {
+        // 快速：两侧进气格栅（速度感）
+        ctx.fillStyle = 'rgba(255,230,0,0.55)';
+        ctx.fillRect(-6, -6, 2, 4);
+        ctx.fillRect(4, -6, 2, 4);
+      } else if (t.type === 'elite') {
+        // 精英：中央能量核
+        ctx.fillStyle = 'rgba(255,0,255,0.8)';
+        ctx.beginPath(); ctx.arc(0, 0, 2.2, 0, Math.PI * 2); ctx.fill();
+      }
+    }
 
     // 装甲/精英额外标记
     if (t.type === 'armored') {
@@ -2302,6 +2867,22 @@
     dailyRng = dailyMode ? mulberry32(dailySeed()) : null;
     rng = dailyMode ? dailyRng : Math.random;
     score = 0; lives = 3; level = 1;
+    // 重置过关成长与每日词条
+    upgrades = {}; upgTotal = 0;
+    dailyMods = { _names: [] };
+    hideUpgradeBox();
+    if (dailyMode) {
+      // 用当日种子抽 2~3 条词条，全服同一天完全一致
+      const pool = DAILY_MODS.slice();
+      const n = 2 + Math.floor(dailyRng() * 2);   // 2 或 3 条
+      for (let i = 0; i < n && pool.length; i++) {
+        const idx = Math.floor(dailyRng() * pool.length);
+        const m = pool.splice(idx, 1)[0];
+        dailyMods._names.push(m.name);
+        m.apply();
+      }
+      dailyMods._desc = dailyMods._names.join(' · ');
+    }
     gameOver = false; paused = false; won = false;
     bestAtStart = best;
     lastLives = -1; lastCombo = -1;
@@ -2320,6 +2901,7 @@
     if (dailyMode) {
       const d = new Date();
       showToast('📅 每日挑战 · ' + (d.getMonth() + 1) + '月' + d.getDate() + '日 · 全网同图');
+      if (dailyMods._desc) setTimeout(() => showToast('⚡ 词条：' + dailyMods._desc), 2200);
     }
   }
 
@@ -2702,6 +3284,7 @@
         return true;
       },
       addScore: (n) => { score += n; },
+      scoreNow: () => score,
       forceClear: () => {
         enemies.forEach(e => { e.dead = true; });
         enemies = [];
@@ -2728,7 +3311,57 @@
       fireOnce: () => { if (player) { player.cooldown = 0; fire(player); } },
       setLevel: (lv) => { level = lv; startLevel(); },
       respawn: () => { if (player) { player.dead = false; player.spawnInv = 120; } },
-      tp: (x, y) => { if (player) { player.x = x; player.y = y; player.dead = false; player.spawnInv = 120; } }
+      tp: (x, y) => { if (player) { player.x = x; player.y = y; player.dead = false; player.spawnInv = 120; } },
+      // —— 过关成长 / 每日词条验证 ——
+      upgrades: () => ({ ...upgrades, upgTotal }),
+      daily: () => ({ dailyMode, ...dailyMods }),
+      chooseUpgrade: (id) => applyUpgrade(id),
+      skipUpgrade: () => advanceLevel(),
+      offerUpgrades,
+      setDailyMods: (fn) => { dailyMods = { _names: [] }; fn(dailyMods); },
+      // —— 地图新元素验证 ——
+      mapInfo: () => {
+        const barrels = [], portalTiles = [];
+        for (let y = 0; y < ROWS; y++)
+          for (let x = 0; x < COLS; x++) {
+            if (map[y][x] === TILE_BARREL) barrels.push([x, y]);
+            else if (map[y][x] === TILE_PORTAL) portalTiles.push([x, y]);
+          }
+        return { barrels, portals: portals.map(p => [...p]), portalTiles };
+      },
+      explodeAll: () => {
+        for (let y = 0; y < ROWS; y++)
+          for (let x = 0; x < COLS; x++)
+            if (map[y][x] === TILE_BARREL) explodeBarrel(x, y);
+      },
+      spawnEnemyAt: (px, py, type = 'normal') => {
+        const def = ENEMY_TYPES[type] || ENEMY_TYPES.normal;
+        const e = { x: px, y: py, dir: 0, speed: 0, cooldown: 0, isPlayer: false,
+          type, hp: def.hp, maxHp: def.hp, size: TANK_SIZE,
+          color: def.color || '#ff00ff', changeTimer: 999, shootTimer: 999,
+          hitFlash: 0, portalCd: 0, __test: true };
+        enemies.push(e);
+        return e;
+      },
+      testEnemies: () => enemies.filter(e => e.__test).map(e => ({ x: e.x, y: e.y, hp: e.hp, dead: e.dead, type: e.type })),
+      invul: (ms = 9999) => { if (player) player.spawnInv = ms; },
+      skipIntro: () => { lvIntroT = 0; lvIntroNext = false; },
+      clearMap: () => { for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) map[y][x] = 0; },
+      setUpgrades: (o) => { upgrades = Object.assign({}, o); },
+      stopSpawn: () => { enemySpawnTimer = 999999; },
+      enemyNear: (px, py, r) => enemies.find(e => !e.dead && Math.hypot(e.x + e.size / 2 - px, e.y + e.size / 2 - py) <= r) || null,
+      playerPos: () => player ? { x: player.x, y: player.y, portalCd: player.portalCd } : null,
+      setPlayer: (x, y) => { if (player) { player.x = x; player.y = y; } },
+      // 诊断探针：玩家中心所在格是否为门格 + 手动触发一次传送
+      probePortal: () => {
+        const cx = player.x + player.size / 2, cy = player.y + player.size / 2;
+        const gx = Math.floor(cx / TILE), gy = Math.floor(cy / TILE);
+        const onPortal = inside(gx, gy) && map[gy][gx] === TILE_PORTAL;
+        const before = { x: player.x, y: player.y, portalCd: player.portalCd };
+        checkPortal(player);
+        const after = { x: player.x, y: player.y, portalCd: player.portalCd };
+        return { gx, gy, onPortal, portalsLen: portals.length, dead: player.dead, spawnInv: player.spawnInv, before, after };
+      }
     };
   }
 
