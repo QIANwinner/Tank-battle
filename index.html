@@ -408,6 +408,54 @@
   }
   #upgradeBox .upSkip:active { background: rgba(255, 255, 255, 0.08); }
 
+  /* ---------- 内测广告弹窗（第一关通过 · 一次性奖励） ---------- */
+  #adBox {
+    position: fixed; inset: 0; z-index: 42;
+    display: none; align-items: center; justify-content: center;
+    padding: 20px;
+    background: radial-gradient(circle at 50% 40%, rgba(255, 215, 0, 0.10), rgba(3, 3, 10, 0.94) 62%);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  }
+  #adBox.show { display: flex; }
+  #adBox .adCard {
+    position: relative; width: 100%; max-width: 380px;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    padding: 26px 22px 18px; border-radius: 20px;
+    border: 1px solid rgba(255, 215, 0, 0.55);
+    background: linear-gradient(180deg, rgba(0, 47, 167, 0.42), rgba(4, 6, 20, 0.96));
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.18), 0 0 0 1px rgba(255, 215, 0, 0.12) inset;
+    animation: adPop .3s ease;
+  }
+  @keyframes adPop { from { transform: scale(.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  #adBox .adBadge {
+    position: absolute; top: 10px; left: 12px;
+    font-size: 10px; letter-spacing: 2px; font-weight: 800; color: #0a0a12;
+    background: linear-gradient(135deg, #ffe066, #ffb400);
+    padding: 3px 9px; border-radius: 6px;
+  }
+  #adBox .adCoin {
+    width: 74px; height: 74px; border-radius: 50%; margin-top: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 40px;
+    background: radial-gradient(circle at 35% 30%, #fff3b0, #ffd700 55%, #c98a00);
+    box-shadow: 0 0 24px rgba(255, 215, 0, 0.75), inset 0 -4px 10px rgba(150, 90, 0, 0.45);
+    animation: adCoinFloat 1.6s ease-in-out infinite;
+  }
+  @keyframes adCoinFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+  #adBox .adTitle { font-size: 21px; font-weight: 800; letter-spacing: 1px; color: #fff; text-align: center; text-shadow: 0 0 14px rgba(255, 215, 0, 0.5); }
+  #adBox .adSub { font-size: 13px; letter-spacing: 2px; color: #ffd700; }
+  #adBox .adClaim {
+    margin-top: 8px; width: 100%; padding: 14px 0;
+    font-size: 16px; font-weight: 800; letter-spacing: 1px; color: #14100a;
+    border: none; border-radius: 12px; cursor: pointer;
+    background: linear-gradient(180deg, #ffe066, #ffb400);
+    box-shadow: 0 6px 18px rgba(255, 180, 0, 0.4);
+    transition: transform .1s ease, filter .1s ease;
+  }
+  #adBox .adClaim:active { transform: translateY(2px); filter: brightness(1.08); }
+  #adBox .adSkip { margin-top: 4px; font-size: 11px; letter-spacing: 1px; color: #7f92b5; padding: 6px 14px; cursor: pointer; }
+  #adBox .adSkip:hover { color: #aebbd8; }
+
   /* ---------- 金币 HUD pill ---------- */
   .pill.coin { border-color: rgba(255, 215, 0, 0.5); }
   .pill.coin .k { color: #ffd700; }
@@ -623,7 +671,7 @@
 
   <div id="toast"></div>
   <div id="wxtip">点右上角 <b>···</b> → 发送给朋友</div>
-  <div id="mark">DESIGNED BY QIAN · V1.12</div>
+  <div id="mark">DESIGNED BY QIAN · V1.13</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -634,6 +682,17 @@
       <button class="upCard" data-i="2"><span class="uIcon"></span><span class="uName"></span><span class="uDesc"></span><span class="uOwn"></span></button>
     </div>
     <div class="upSkip" id="upSkip">跳过（不加强化）</div>
+  </div>
+
+  <div id="adBox">
+    <div class="adCard">
+      <span class="adBadge">AD</span>
+      <div class="adCoin">🪙</div>
+      <div class="adTitle">恭喜你参与QIAN的内测</div>
+      <div class="adSub">赠送大量金币</div>
+      <button id="btnAdClaim" class="adClaim">🎁 领取 1000 金币</button>
+      <div class="adSkip" id="btnAdSkip">跳过（不领）</div>
+    </div>
   </div>
 
   <div id="shopBox">
@@ -894,6 +953,7 @@
         btnDaily = $('btnDaily'), btnShare = $('btnShare'), btnReport = $('btnReport'),
         reportBox = $('reportBox'), reportImg = $('reportImg'),
         upgradeBox = $('upgradeBox'), upSkip = $('upSkip'),
+        adBox = $('adBox'), btnAdClaim = $('btnAdClaim'), btnAdSkip = $('btnAdSkip'),
         shopBox = $('shopBox'), shopBody = $('shopBody'),
         btnShop = $('btnShop'), btnShopClose = $('btnShopClose'),
         tabBonus = $('tabBonus'), tabSkins = $('tabSkins');
@@ -908,6 +968,10 @@
 
   // 过关成长面板：跳过 → 直接开下一关
   upSkip.addEventListener('click', () => { if (upgradeOpen) advanceLevel(); });
+
+  // 内测广告弹窗：领取 / 跳过
+  btnAdClaim.addEventListener('click', () => { ensureAudio(); claimAd(); });
+  btnAdSkip.addEventListener('click', () => { ensureAudio(); skipAd(); });
 
   // ===== 自适应尺寸 =====
   const DPR = Math.min(window.devicePixelRatio || 1, 2);
@@ -944,7 +1008,8 @@
 
   // ===== 金币 / 局外养成（永久加成 + 角色皮肤）=====
   const LS_COINS = 'tank-battle-coins', LS_BONUS = 'tank-battle-bonus',
-        LS_SKINS = 'tank-battle-skins', LS_SKIN = 'tank-battle-skin';
+        LS_SKINS = 'tank-battle-skins', LS_SKIN = 'tank-battle-skin',
+        LS_AD1 = 'tank-battle-ad1';
   let coins = 0;                                                       // 金币余额
   let bonus = { lifeup: 0, cd: 0, spd: 0, coinup: 0, shield: 0 };      // 永久加成等级
   let ownedSkins = ['classic'];                                        // 已购皮肤
@@ -957,6 +1022,7 @@
     if (Array.isArray(s)) { ownedSkins = s.includes('classic') ? s.slice() : ['classic', ...s]; }
     const eq = localStorage.getItem(LS_SKIN);
     if (eq && ownedSkins.includes(eq)) equippedSkin = eq;
+    adClaimed = localStorage.getItem(LS_AD1) === '1';
   } catch (e) { /* 隐私模式下 localStorage 不可用 */ }
   function saveCoins() { try { localStorage.setItem(LS_COINS, String(coins)); } catch (e) {} }
   function saveBonus() { try { localStorage.setItem(LS_BONUS, JSON.stringify(bonus)); } catch (e) {} }
@@ -1017,6 +1083,8 @@
   let upgrades = {};             // 各强化已叠加次数，如 { rapid: 2 }
   let upgTotal = 0;              // 已获得强化总数（HUD 显示）
   let upgradeOpen = false;       // 强化面板是否弹出
+  let adClaimed = false;         // 内测广告奖励是否已领（一次性）
+  let adPending = false;         // 广告弹窗是否正挡住过关流程
   // 每日挑战 modifier（每日词条规则）
   let dailyMods = { _names: [] };
 
@@ -2236,6 +2304,35 @@
     upgradeOpen = false;
   }
 
+  // ===== 内测广告弹窗（第一关通过 · 一次性 1000 金币） =====
+  function maybeShowAdPopup() {
+    if (level === 1 && !adClaimed) { showAdPopup(); return true; }
+    return false;
+  }
+  function showAdPopup() {
+    adPending = true;
+    adBox.classList.add('show');
+  }
+  function hideAdPopup() {
+    adPending = false;
+    adBox.classList.remove('show');
+  }
+  function claimAd() {
+    if (!adPending) return;
+    adClaimed = true;
+    try { localStorage.setItem(LS_AD1, '1'); } catch (e) { /* 忽略 */ }
+    coins += 1000; saveCoins(); updateCoinHud();   // 固定 1000，不受金运影响
+    showToast('🎁 内测奖励 +1000 🪙');
+    sfxPickup();
+    hideAdPopup();
+    offerUpgrades();               // 领完继续强化三选一
+  }
+  function skipAd() {
+    if (!adPending) return;
+    hideAdPopup();
+    offerUpgrades();               // 跳过也继续过关流程
+  }
+
   // ===== 关卡 / 敌人生成 =====
   function startLevel() {
     bossLevel = (level % 5 === 0);
@@ -2406,6 +2503,8 @@
       sfxLevel();
       // 过关成长：先弹三选一面板，选完（或跳过）再开下一关
       lvIntroNext = false;
+      // 第一关通过 → 内测广告弹窗（一次性），领完/跳过再进强化面板
+      if (maybeShowAdPopup()) { updateHud(); return; }
       offerUpgrades();
       updateHud();
       return;
@@ -3829,6 +3928,13 @@
       // —— 皮肤定义验证（含限定） ——
       skinDefs: () => Object.keys(SKINS).map(id => ({ id, name: SKINS[id].name, price: SKINS[id].price, limited: !!SKINS[id].limited, fish: !!SKINS[id].fish })),
       isFishSkin: () => !!(SKINS[equippedSkin] && SKINS[equippedSkin].fish),
+      // —— 内测广告弹窗验证（第一关通过 · 一次性 1000 金币） ——
+      adState: () => ({ claimed: adClaimed, pending: adPending, shown: adBox.classList.contains('show'), level, coins, upgradeOpen }),
+      adCheck: () => maybeShowAdPopup(),
+      adClaim: () => claimAd(),
+      adSkip: () => skipAd(),
+      setAdClaimed: (v) => { adClaimed = !!v; try { localStorage.setItem(LS_AD1, v ? '1' : '0'); } catch (e) {} },
+      closeUpgrade: () => hideUpgradeBox(),
     };
   }
 
