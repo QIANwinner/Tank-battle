@@ -289,7 +289,7 @@
     -webkit-appearance: none; appearance: none;
   }
   #btnPlay:active { transform: translateY(1px); filter: brightness(1.1); }
-  #btnDaily, #btnShare, #btnReport {
+  #btnDaily, #btnShare, #btnReport, #btnShop {
     margin-top: -2px;
     padding: 9px 22px;
     border: 1px solid rgba(0, 240, 255, 0.4); border-radius: 999px;
@@ -298,10 +298,11 @@
     cursor: pointer;
     -webkit-appearance: none; appearance: none;
   }
-  #btnDaily:active, #btnShare:active, #btnReport:active { background: var(--klein); transform: translateY(1px); }
+  #btnDaily:active, #btnShare:active, #btnReport:active, #btnShop:active { background: var(--klein); transform: translateY(1px); }
   #btnDaily { display: none; }
   #btnShare { display: none; border-color: rgba(255, 0, 255, 0.5); color: #ffc4ff; box-shadow: 0 0 14px rgba(255, 0, 255, 0.18); }
   #btnReport { display: none; border-color: rgba(57, 255, 20, 0.5); color: #c9ffd2; box-shadow: 0 0 14px rgba(57, 255, 20, 0.18); }
+  #btnShop { border-color: rgba(255, 215, 0, 0.55); color: #ffe9a6; box-shadow: 0 0 14px rgba(255, 215, 0, 0.2); }
   #ovStats .sub {
     margin-top: 6px; font-size: 11px; letter-spacing: 1px; color: #7f92b5;
     font-variant-numeric: tabular-nums;
@@ -389,6 +390,73 @@
     cursor: pointer;
   }
   #upgradeBox .upSkip:active { background: rgba(255, 255, 255, 0.08); }
+
+  /* ---------- 金币 HUD pill ---------- */
+  .pill.coin { border-color: rgba(255, 215, 0, 0.5); }
+  .pill.coin .k { color: #ffd700; }
+  .pill.coin .v { color: #ffe066; text-shadow: 0 0 8px rgba(255, 215, 0, 0.6); }
+
+  /* ---------- 商店弹层 ---------- */
+  #shopBox {
+    position: fixed; inset: 0; z-index: 46;
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    gap: 14px; padding: 18px;
+    background: radial-gradient(circle at 50% 38%, rgba(0, 47, 167, 0.34), rgba(3, 3, 10, 0.95) 66%);
+    -webkit-backdrop-filter: blur(9px); backdrop-filter: blur(9px);
+  }
+  #shopBox.show { display: flex; }
+  .shopHead { display: flex; align-items: center; gap: 12px; width: 100%; max-width: 640px; }
+  .shopTitle {
+    flex: 1; font-size: 20px; font-weight: 800; letter-spacing: 3px; color: #fff;
+    text-shadow: 0 0 12px rgba(0, 240, 255, 0.7), 0 0 30px rgba(0, 47, 167, 0.9);
+  }
+  .shopWallet {
+    font-size: 15px; letter-spacing: 1px; color: #ffe066; font-variant-numeric: tabular-nums;
+    padding: 6px 14px; border-radius: 999px; border: 1px solid rgba(255, 215, 0, 0.45);
+    background: rgba(255, 215, 0, 0.08);
+  }
+  .shopWallet b { font-size: 17px; }
+  .shopClose {
+    width: 34px; height: 34px; border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.25); background: rgba(255, 255, 255, 0.06);
+    color: #cfe3ff; font-size: 16px; cursor: pointer; flex: none;
+  }
+  .shopClose:active { background: rgba(255, 255, 255, 0.14); }
+  .shopTabs { display: flex; gap: 8px; width: 100%; max-width: 640px; }
+  .shopTab {
+    flex: 1; padding: 9px 0; border-radius: 999px;
+    border: 1px solid rgba(0, 240, 255, 0.35); background: rgba(0, 47, 167, 0.18);
+    color: #9dc4e8; font-size: 13px; font-weight: 700; letter-spacing: 2px; cursor: pointer;
+  }
+  .shopTab.active {
+    background: linear-gradient(180deg, #0a3fd0, var(--klein));
+    color: #fff; border-color: rgba(0, 240, 255, 0.7);
+    box-shadow: 0 0 16px rgba(0, 47, 167, 0.6);
+  }
+  .shopBody {
+    width: 100%; max-width: 640px; max-height: 58vh; overflow-y: auto;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px; padding: 2px;
+  }
+  .shopItem {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    padding: 14px 12px; border-radius: 12px;
+    border: 1px solid rgba(0, 240, 255, 0.22); background: rgba(10, 20, 50, 0.5);
+  }
+  .shopItem .siIcon { font-size: 30px; line-height: 1; filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.5)); }
+  .shopItem .siName { font-size: 14px; font-weight: 800; letter-spacing: 1px; color: #00f0ff; }
+  .shopItem .siDesc { font-size: 11px; line-height: 1.5; color: #aebbd8; text-align: center; min-height: 32px; }
+  .shopItem .siMeta { font-size: 10px; letter-spacing: 1px; color: #ffe066; }
+  .shopItem .siBtn {
+    margin-top: 4px; width: 100%; padding: 8px 0; border-radius: 999px;
+    border: 1px solid rgba(0, 240, 255, 0.5); background: rgba(0, 47, 167, 0.3);
+    color: #bfe4ff; font-size: 12px; font-weight: 800; letter-spacing: 1px; cursor: pointer;
+  }
+  .shopItem .siBtn:active { background: var(--klein); transform: translateY(1px); }
+  .shopItem .siBtn.owned { border-color: rgba(255, 230, 0, 0.5); color: #ffe066; }
+  .shopItem .siBtn.equipped { border-color: rgba(57, 255, 20, 0.6); color: #a6ff8f; }
+  .shopItem .siBtn.disabled { opacity: .5; cursor: not-allowed; }
+  .shopItem.equipped { border-color: rgba(57, 255, 20, 0.6); box-shadow: 0 0 12px rgba(57, 255, 20, 0.2); }
 
   /* ---------- 战绩图弹层 ---------- */
   #reportBox {
@@ -487,6 +555,7 @@
     <div class="pill"><span class="k">敌</span><span class="v" id="remaining">0</span></div>
     <div class="pill wave" id="waveWrap" style="display:none"><span class="k">波</span><span class="v" id="waveNum">1/1</span></div>
     <div class="pill upg" id="upgWrap" style="display:none"><span class="k">强化</span><span class="v" id="upgNum">0</span></div>
+    <div class="pill coin"><span class="k">🪙</span><span class="v" id="coins">0</span></div>
     <div class="pill combo" id="comboWrap" style="display:none"><span class="k">连击</span><span class="v" id="combo">×1</span></div>
     <div id="lives"></div>
     <div class="hbtns">
@@ -511,6 +580,7 @@
     <div id="ovStats"></div>
     <button id="btnPlay">开始游戏</button>
     <button id="btnDaily">📅 每日挑战</button>
+    <button id="btnShop">🛒 商店</button>
     <button id="btnShare">📤 分享成绩 · 发起挑战</button>
     <button id="btnReport">🖼 生成战绩图</button>
     <div id="ovTip"></div>
@@ -540,6 +610,19 @@
       <button class="upCard" data-i="2"><span class="uIcon"></span><span class="uName"></span><span class="uDesc"></span><span class="uOwn"></span></button>
     </div>
     <div class="upSkip" id="upSkip">跳过（不加强化）</div>
+  </div>
+
+  <div id="shopBox">
+    <div class="shopHead">
+      <div class="shopTitle">🛒 军械商店</div>
+      <div class="shopWallet">🪙 <b id="shopCoins">0</b></div>
+      <button class="shopClose" id="btnShopClose" aria-label="关闭">✕</button>
+    </div>
+    <div class="shopTabs">
+      <button class="shopTab active" id="tabBonus">永久加成</button>
+      <button class="shopTab" id="tabSkins">角色皮肤</button>
+    </div>
+    <div class="shopBody" id="shopBody"></div>
   </div>
 
 <script>
@@ -780,13 +863,16 @@
         elRemaining = $('remaining'), elLives = $('lives'), elCombo = $('combo'),
         elComboWrap = $('comboWrap'),
         elWaveWrap = $('waveWrap'), elWaveNum = $('waveNum'),
-        elUpgWrap = $('upgWrap'), elUpgNum = $('upgNum'),
+        elUpgWrap = $('upgWrap'), elUpgNum = $('upgNum'), elCoins = $('coins'),
         pauseBtn = $('pauseBtn'), muteBtn = $('muteBtn'),
         overlay = $('overlay'), ovTitle = $('ovTitle'), ovSub = $('ovSub'),
         ovStats = $('ovStats'), ovTip = $('ovTip'), btnPlay = $('btnPlay'),
         btnDaily = $('btnDaily'), btnShare = $('btnShare'), btnReport = $('btnReport'),
         reportBox = $('reportBox'), reportImg = $('reportImg'),
-        upgradeBox = $('upgradeBox'), upSkip = $('upSkip');
+        upgradeBox = $('upgradeBox'), upSkip = $('upSkip'),
+        shopBox = $('shopBox'), shopBody = $('shopBody'),
+        btnShop = $('btnShop'), btnShopClose = $('btnShopClose'),
+        tabBonus = $('tabBonus'), tabSkins = $('tabSkins');
 
   // ===== URL 参数：好友挑战 (?ch=分数-关卡) / 每日挑战 (?daily=1) =====
   const urlParams = (() => { try { return new URLSearchParams(location.search); } catch (e) { return new URLSearchParams(); } })();
@@ -831,6 +917,48 @@
     muted = localStorage.getItem(LS_MUTE) === '1';
   } catch (e) { /* 隐私模式下 localStorage 不可用 */ }
   let bestAtStart = best;
+
+  // ===== 金币 / 局外养成（永久加成 + 角色皮肤）=====
+  const LS_COINS = 'tank-battle-coins', LS_BONUS = 'tank-battle-bonus',
+        LS_SKINS = 'tank-battle-skins', LS_SKIN = 'tank-battle-skin';
+  let coins = 0;                                                       // 金币余额
+  let bonus = { lifeup: 0, cd: 0, spd: 0, coinup: 0, shield: 0 };      // 永久加成等级
+  let ownedSkins = ['classic'];                                        // 已购皮肤
+  let equippedSkin = 'classic';                                        // 当前装备皮肤
+  try {
+    coins = parseInt(localStorage.getItem(LS_COINS) || '0', 10) || 0;
+    const b = JSON.parse(localStorage.getItem(LS_BONUS) || '{}');
+    if (b && typeof b === 'object') for (const k in bonus) bonus[k] = Math.max(0, parseInt(b[k], 10) || 0);
+    const s = JSON.parse(localStorage.getItem(LS_SKINS) || '[]');
+    if (Array.isArray(s)) { ownedSkins = s.includes('classic') ? s.slice() : ['classic', ...s]; }
+    const eq = localStorage.getItem(LS_SKIN);
+    if (eq && ownedSkins.includes(eq)) equippedSkin = eq;
+  } catch (e) { /* 隐私模式下 localStorage 不可用 */ }
+  function saveCoins() { try { localStorage.setItem(LS_COINS, String(coins)); } catch (e) {} }
+  function saveBonus() { try { localStorage.setItem(LS_BONUS, JSON.stringify(bonus)); } catch (e) {} }
+  function saveSkins() { try { localStorage.setItem(LS_SKINS, JSON.stringify(ownedSkins)); } catch (e) {} }
+  function saveSkin() { try { localStorage.setItem(LS_SKIN, equippedSkin); } catch (e) {} }
+
+  // 角色皮肤定义（玩家坦克配色，经典免费）
+  const SKINS = {
+    classic: { name: '经典 QIAN', icon: '🔵', price: 0,   body: '#3355cc', track: '#0a1040', barrel: '#00f0ff', glow: '#00f0ff' },
+    crimson: { name: '烈焰红',   icon: '🔴', price: 80,  body: '#e0304f', track: '#3a0a14', barrel: '#ff7a8a', glow: '#ff3355' },
+    violet:  { name: '赛博紫',   icon: '🟣', price: 80,  body: '#8a2be2', track: '#1a0a30', barrel: '#c86bff', glow: '#b45bff' },
+    emerald: { name: '翡翠绿',   icon: '🟢', price: 100, body: '#2ecc71', track: '#0a3018', barrel: '#6bffa8', glow: '#2ecc71' },
+    ghost:   { name: '幽灵白',   icon: '⚪', price: 120, body: '#e8eef8', track: '#2a3550', barrel: '#ffffff', glow: '#cfd8ff' },
+    gold:    { name: '黄金圣骑', icon: '🟡', price: 150, body: '#f5b800', track: '#4a3600', barrel: '#ffe066', glow: '#ffd700' },
+    onyx:    { name: '暗黑曜石', icon: '⬛', price: 200, body: '#23262e', track: '#0a0c10', barrel: '#ffd700', glow: '#ffd700' },
+  };
+  const SKIN_LIST = Object.keys(SKINS);
+
+  // 永久加成定义（price 数组按等级递增；unit 为显示单位）
+  const BONUS_DEF = [
+    { id: 'lifeup', icon: '❤', name: '装甲储备', desc: '开局生命 +1',     max: 2, unit: '级', price: [60, 180] },
+    { id: 'cd',     icon: '🔥', name: '快速装填', desc: '射速 +5%',        max: 3, unit: '级', price: [50, 120, 260] },
+    { id: 'spd',    icon: '⚡', name: '履带增压', desc: '移动速度 +5%',    max: 3, unit: '级', price: [50, 120, 260] },
+    { id: 'coinup', icon: '🍀', name: '金运',     desc: '金币获取 +15%',   max: 3, unit: '级', price: [60, 140, 300] },
+    { id: 'shield', icon: '🛡', name: '常备护盾', desc: '每关开场 2 秒护盾', max: 1, unit: '项', price: [120] },
+  ];
 
   // ===== 状态 =====
   let map = [];
@@ -877,6 +1005,12 @@
     { id: 'double',    icon: '💥', name: '连击暴击', desc: '连击得分加成 +50%', tag: '得分' },
     { id: 'greed',     icon: '💰', name: '战利品猎手', desc: '击杀得分 +25%（可叠加）', tag: '得分' },
     { id: 'freeze',    icon: '❄', name: '冰冻子弹', desc: '命中几率冻住敌人 1 秒', tag: '控制' },
+    { id: 'pierce',    icon: '🔱', name: '穿透弹头', desc: '子弹可穿透 1 个敌人（可叠加）', tag: '火力' },
+    { id: 'spread',    icon: '🎇', name: '三向散射', desc: '开火时两侧追加斜射弹', tag: '火力' },
+    { id: 'bomb',      icon: '🧨', name: '爆破弹头', desc: '命中时小范围爆炸，波及周围敌人', tag: '火力' },
+    { id: 'bigbullet', icon: '💠', name: '巨弹头',   desc: '弹头更大，对多血敌人额外伤害', tag: '火力' },
+    { id: 'vampire',   icon: '🧛', name: '吸血装甲', desc: '击杀有几率回复 1 生命', tag: '生存' },
+    { id: 'fortune',   icon: '🍀', name: '金运',     desc: '金币获取 +30%（可叠加）', tag: '经济' },
   ];
 
   // 每日挑战词条：由日期种子抽取 2~3 条，全服同一天一致
@@ -1433,8 +1567,8 @@
     const rapid = isP && fx.rapid > 0;
     const isSniper = !isP && tank.type === 'sniper';
     if (isP) {
-      // 快速装填强化：冷却 ×0.8/层；道具双倍射速再 ×0.5
-      let cd = 14 * Math.pow(0.8, upgrades.rapid || 0);
+      // 快速装填强化：冷却 ×0.8/层；道具双倍射速再 ×0.5；永久加成射速 -5%/级
+      let cd = 14 * Math.pow(0.8, upgrades.rapid || 0) * (1 - 0.05 * (bonus.cd || 0));
       if (rapid) cd *= 0.5;
       tank.cooldown = Math.max(3, cd);
     } else {
@@ -1444,17 +1578,28 @@
     const cy = tank.y + tank.size / 2;
     // 穿云弹头强化：玩家弹速 +20%/层；狙击弹慢速可躲
     const bulletSpeed = isSniper ? BULLET_SPEED * 0.55 : BULLET_SPEED * (isP ? (1 + 0.2 * (upgrades.bulletspd || 0)) : 1);
-    const bsize = isSniper ? 5 : 4;
-    const shoot = (ox, oy) => {
-      bullets.push({ x: ox - 2, y: oy - 2, size: bsize, dir: tank.dir, speed: bulletSpeed, owner: tank });
+    // 巨弹头强化：弹头更大（更容易命中、更醒目）
+    const bsize = isSniper ? 5 : (4 + (isP && (upgrades.bigbullet || 0) > 0 ? 2 : 0));
+    const pen = isP ? (upgrades.pierce || 0) : 0;   // 穿透弹头：可穿透敌人次数
+    const shoot = (ox, oy, dir) => {
+      bullets.push({ x: ox - 2, y: oy - 2, size: bsize, dir: dir, speed: bulletSpeed, owner: tank, pen, bomb: (upgrades.bomb || 0) > 0 });
       if (isP) stat.shots++;
     };
     if (isP && fx.double > 0) {
       // 双管沿垂直于炮管方向展开（斜向同样成立）
       const px = -DY[tank.dir] * 6, py = DX[tank.dir] * 6;
-      shoot(cx - px, cy - py); shoot(cx + px, cy + py);
+      shoot(cx - px, cy - py, tank.dir); shoot(cx + px, cy + py, tank.dir);
     } else {
-      shoot(cx, cy);
+      shoot(cx, cy, tank.dir);
+    }
+    // 三向散射强化：沿两侧 ±s 方向追加斜射弹（每层 +1 对）
+    if (isP && (upgrades.spread || 0) > 0) {
+      for (let s = 1; s <= (upgrades.spread || 0); s++) {
+        for (const d of [(tank.dir + s) % 8, (tank.dir + 8 - s) % 8]) {
+          const sx = cx + DX[d] * 15, sy = cy + DY[d] * 15;
+          shoot(sx, sy, d);
+        }
+      }
     }
     if (isP) sfxShoot();
     else beep(500, 0.05, 'square', 0.02);
@@ -1744,17 +1889,23 @@
           if (e.dead) continue;
           if (e.isBoss && e.enterT > 0) continue;   // Boss 出场下降中无敌
           if (cx >= e.x && cx <= e.x + e.size && cy >= e.y && cy <= e.y + e.size) {
-            b.dead = true;
             stat.hits++;
-            e.hp--; e.hitFlash = 6;
+            // 巨弹头强化：对多血敌人额外 -1 伤害
+            const extra = ((upgrades.bigbullet || 0) > 0 && e.hp > 1) ? 1 : 0;
+            e.hp -= 1 + extra; e.hitFlash = 6;
             // 冰冻子弹：命中几率冻住 1 秒（每层 +15% 概率）
             if (!e.isBoss && !(e.freezeT > 0) && rng() < 0.15 * (upgrades.freeze || 0)) {
               e.freezeT = 60;
               addText(cx, cy - 8, '❄', '#7fd7ff');
             }
             if (e.isBoss) bossHitFlash = 0.18;      // Boss 血条受击闪白
+            // 爆破弹头：命中时小范围溅射（波及周围敌人，不重复伤及直接命中者）
+            if (b.bomb) blastBullet(cx, cy, e);
             if (e.hp <= 0) { e.dead = true; onEnemyKilled(e); }
             else { sfxHit(); spawnParticles(cx, cy, e.color, 6); }
+            // 穿透弹头：有穿透余量则继续飞行（同一帧可连中），否则销毁
+            if (b.pen > 0) { b.pen--; continue; }
+            b.dead = true;
             return;
           }
         }
@@ -1788,8 +1939,8 @@
 
     if (mx !== 0 || my !== 0) {
       player.dir = dirFromVec(mx, my);
-      // 斜向走 1/√2 速度，保证各方向合速度一致；疾速履带强化 +15%/层
-      const spd = player.speed * (1 + 0.15 * (upgrades.speed || 0));
+      // 斜向走 1/√2 速度，保证各方向合速度一致；疾速履带强化 +15%/层；永久加成移速 +5%/级
+      const spd = player.speed * (1 + 0.15 * (upgrades.speed || 0)) * (1 + 0.05 * (bonus.spd || 0));
       const step = spd * k * ((mx !== 0 && my !== 0) ? Math.SQRT1_2 : 1);
       const nx = player.x + mx * step;
       const ny = player.y + my * step;
@@ -1834,6 +1985,38 @@
     }, 700);
   }
 
+  // ===== 金币 =====
+  function enemyGold(e) {
+    return e.isBoss ? 60 + level * 10 : Math.round(ENEMY_TYPES[e.type].score / 10);
+  }
+  function addGold(n, x, y) {
+    // 金运永久加成 +15%/级；金运强化 +30%/层
+    const gain = Math.max(1, Math.round(n * (1 + 0.15 * (bonus.coinup || 0)) * (1 + 0.3 * (upgrades.fortune || 0))));
+    coins += gain; saveCoins(); updateCoinHud();
+    if (x !== undefined && y !== undefined) addText(x, y, '+' + gain + '🪙', '#ffd700');
+    return gain;
+  }
+  function updateCoinHud() {
+    if (elCoins) elCoins.textContent = coins;
+    const sc = $('shopCoins'); if (sc) sc.textContent = coins;
+  }
+
+  // 爆破弹头溅射：命中点小范围爆炸，伤及周围敌人（exclude 为被直接命中者，不重复扣血）
+  function blastBullet(cx, cy, exclude) {
+    const R = TILE * 1.3;
+    sfxBoom();
+    spawnParticles(cx, cy, '#ff9f43', 14);
+    shake = Math.max(shake, 5);
+    for (const e of enemies) {
+      if (e.dead || e === exclude) continue;
+      const ex = e.x + e.size / 2, ey = e.y + e.size / 2;
+      if (Math.hypot(ex - cx, ey - cy) <= R) {
+        e.hp--; e.hitFlash = 6;
+        if (e.hp <= 0) { e.dead = true; onEnemyKilled(e); }
+      }
+    }
+  }
+
   function onEnemyKilled(e) {
     sfxBoom();
     hitStop = e.isBoss ? 0.06 : 0.03;          // 击杀定格（Boss 用慢动作替代长定格）
@@ -1843,6 +2026,16 @@
     stat.kills++;
     if (e.isBoss) stat.bossKills++;
     addKillScore(e);
+    // 金币掉落：不同敌人金币不同，受金运加成
+    addGold(enemyGold(e), e.x + e.size / 2, e.y + e.size / 2 - 14);
+    // 吸血装甲：击杀有 35%/层 几率回复 1 生命
+    if ((upgrades.vampire || 0) > 0 && rng() < 0.35 * (upgrades.vampire || 0)) {
+      lives = Math.min(lives + 1, 9); lastLives = -1;
+      const hx = player ? player.x + TANK_SIZE / 2 : e.x + e.size / 2;
+      const hy = player ? player.y - 6 : e.y - 8;
+      addText(hx, hy, '+1 ❤', '#ff6b81');
+      updateHud();
+    }
     maybeDropPowerup(e.x + e.size / 2, e.y + e.size / 2, e.isBoss);
     if (e.isBoss) {
       bossHp = 0;
@@ -1999,6 +2192,9 @@
     hideUpgradeBox();
     level++;
     if (level >= 5) unlockAch('lv5');
+    // 过关奖励金币（随关卡提升，受金运加成）
+    const g = addGold(20 + level * 5);
+    showToast('🪙 过关奖励 +' + g);
     lvIntroNext = true;
     showLevelIntro('第 ' + level + ' 关');
     updateHud();
@@ -2689,18 +2885,20 @@
 
     const isPlayer = t.isPlayer;
     const flashing = t.hitFlash > 0;
+    // 装备皮肤（仅玩家）：按当前装备的皮肤配色绘制
+    const skin = isPlayer ? (SKINS[equippedSkin] || SKINS.classic) : null;
 
-    if (isPlayer) { ctx.shadowColor = '#00f0ff'; ctx.shadowBlur = 10; }
+    if (isPlayer) { ctx.shadowColor = skin.glow; ctx.shadowBlur = 10; }
     else if (t.isBoss) { ctx.shadowColor = '#ff2d55'; ctx.shadowBlur = 18; }
     else { ctx.shadowColor = t.color; ctx.shadowBlur = 8; }
 
-    const bodyColor = flashing ? '#ffffff' : t.color;
+    const bodyColor = flashing ? '#ffffff' : (isPlayer ? skin.body : t.color);
 
     // 履带
-    ctx.fillStyle = isPlayer ? '#0a1040' : (t.isBoss ? '#2a0810' : '#1a1020');
+    ctx.fillStyle = isPlayer ? skin.track : (t.isBoss ? '#2a0810' : '#1a1020');
     ctx.fillRect(-11, -10, 5, 20);
     ctx.fillRect(6, -10, 5, 20);
-    ctx.fillStyle = isPlayer ? '#3355cc' : (t.isBoss ? '#ff2d55' : '#2a2035');
+    ctx.fillStyle = isPlayer ? skin.body : (t.isBoss ? '#ff2d55' : '#2a2035');
     ctx.fillRect(-11, -8, 5, 3);
     ctx.fillRect(-11, -3, 5, 3);
     ctx.fillRect(-11, 2, 5, 3);
@@ -2714,10 +2912,10 @@
     ctx.fillStyle = bodyColor;
     ctx.fillRect(-6, -8, 12, 16);
     // 炮塔
-    ctx.fillStyle = flashing ? '#dddddd' : shade(t.color, isPlayer ? 30 : -25);
+    ctx.fillStyle = flashing ? '#dddddd' : (isPlayer ? shade(skin.body, 30) : shade(t.color, -25));
     ctx.fillRect(-4, -4, 8, 8);
     // 炮管
-    ctx.fillStyle = isPlayer ? '#00f0ff' : (t.isBoss ? '#ffaa00' : '#2a2035');
+    ctx.fillStyle = isPlayer ? skin.barrel : (t.isBoss ? '#ffaa00' : '#2a2035');
     ctx.fillRect(-2, -16, 4, 10);
 
     // 兵种独特造型
@@ -2866,7 +3064,7 @@
     dailyMode = !!isDaily;
     dailyRng = dailyMode ? mulberry32(dailySeed()) : null;
     rng = dailyMode ? dailyRng : Math.random;
-    score = 0; lives = 3; level = 1;
+    score = 0; lives = 3 + (bonus.lifeup || 0); level = 1;   // 装甲储备：开局额外生命
     // 重置过关成长与每日词条
     upgrades = {}; upgTotal = 0;
     dailyMods = { _names: [] };
@@ -2890,7 +3088,8 @@
     resetStat();
     achNew = [];
     player = makePlayer();
-    player.spawnInv = 120;
+    // 常备护盾：每关开场 2 秒护盾（120 帧 ≈ 2 秒）
+    player.spawnInv = bonus.shield > 0 ? 120 : 0;
     startLevel();
     running = true;
     hideOverlay();
@@ -2915,8 +3114,85 @@
     if (dailyMode) unlockAch('daily');
     if (score >= 5000) unlockAch('score5k');
     if (stat.shots >= 20 && stat.hits / stat.shots >= 0.7) unlockAch('surge');
+    // 每日挑战通关：额外金币奖励
+    if (win && dailyMode) {
+      const g = addGold(50);
+      showToast('📅 每日挑战通关 · 奖励 🪙' + g);
+    }
     showOverlay('over');
     if (score > bestAtStart) showToast('🏆 新纪录：' + score + ' 分！');
+  }
+
+  // ===== 商店（永久加成 + 角色皮肤）=====
+  let shopTab = 'bonus';
+  function openShop() { shopBox.classList.add('show'); renderShop(); }
+  function closeShop() { shopBox.classList.remove('show'); }
+  function renderShop() {
+    const sc = $('shopCoins'); if (sc) sc.textContent = coins;
+    shopBody.innerHTML = '';
+    if (shopTab === 'bonus') {
+      for (const def of BONUS_DEF) {
+        const lv = bonus[def.id] || 0;
+        const maxed = lv >= def.max;
+        const price = maxed ? 0 : def.price[lv];
+        const item = document.createElement('div');
+        item.className = 'shopItem';
+        item.innerHTML = '<span class="siIcon">' + def.icon + '</span>' +
+          '<span class="siName">' + def.name + '</span>' +
+          '<span class="siDesc">' + def.desc + '</span>' +
+          '<span class="siMeta">' + (maxed ? '已满级' : '等级 ' + lv + '/' + def.max + ' · 下一级 🪙' + price) + '</span>' +
+          '<button class="siBtn' + (maxed ? ' owned disabled' : '') + '">' + (maxed ? '已满级' : '🪙 购买 ' + price) + '</button>';
+        const btn = item.querySelector('.siBtn');
+        if (!maxed) btn.onclick = () => buyBonus(def.id);
+        shopBody.appendChild(item);
+      }
+    } else {
+      for (const id of SKIN_LIST) {
+        const sk = SKINS[id];
+        const owned = ownedSkins.includes(id);
+        const equipped = equippedSkin === id;
+        const item = document.createElement('div');
+        item.className = 'shopItem' + (equipped ? ' equipped' : '');
+        item.innerHTML = '<span class="siIcon">' + sk.icon + '</span>' +
+          '<span class="siName">' + sk.name + '</span>' +
+          '<span class="siDesc">玩家坦克外观配色</span>' +
+          '<span class="siMeta">' + (owned ? (equipped ? '已装备' : '已拥有') : '🪙 ' + sk.price) + '</span>' +
+          '<button class="siBtn ' + (equipped ? 'equipped' : (owned ? 'owned' : '')) + '">' + (equipped ? '已装备' : (owned ? '装备' : '🪙 购买 ' + sk.price)) + '</button>';
+        const btn = item.querySelector('.siBtn');
+        btn.onclick = () => {
+          if (equipped) return;
+          if (owned) equipSkin(id); else buySkin(id);
+        };
+        shopBody.appendChild(item);
+      }
+    }
+  }
+  function buyBonus(id) {
+    const def = BONUS_DEF.find(x => x.id === id);
+    if (!def) return;
+    const lv = bonus[id] || 0;
+    if (lv >= def.max) return;
+    const price = def.price[lv];
+    if (coins < price) { showToast('🪙 金币不足'); beep(180, 0.12, 'square', 0.05); return; }
+    coins -= price; bonus[id] = lv + 1;
+    saveCoins(); saveBonus(); renderShop(); updateCoinHud();
+    showToast(def.icon + ' 购买成功 · ' + def.name);
+    sfxPickup();
+  }
+  function buySkin(id) {
+    const sk = SKINS[id];
+    if (!sk || ownedSkins.includes(id)) return;
+    if (coins < sk.price) { showToast('🪙 金币不足'); beep(180, 0.12, 'square', 0.05); return; }
+    coins -= sk.price; ownedSkins.push(id); equippedSkin = id;
+    saveCoins(); saveSkins(); saveSkin(); renderShop(); updateCoinHud();
+    showToast(sk.icon + ' 皮肤已购买并装备 · ' + sk.name);
+    sfxPickup();
+  }
+  function equipSkin(id) {
+    if (!ownedSkins.includes(id)) return;
+    equippedSkin = id; saveSkin(); renderShop();
+    showToast(SKINS[id].icon + ' 已装备 · ' + SKINS[id].name);
+    sfxPickup();
   }
 
   function togglePause() {
@@ -3116,6 +3392,10 @@
     else start(dailyInvited);
   });
   btnDaily.addEventListener('click', () => { ensureAudio(); start(true); });
+  btnShop.addEventListener('click', () => { ensureAudio(); openShop(); });
+  btnShopClose.addEventListener('click', closeShop);
+  tabBonus.addEventListener('click', () => { shopTab = 'bonus'; tabBonus.classList.add('active'); tabSkins.classList.remove('active'); renderShop(); });
+  tabSkins.addEventListener('click', () => { shopTab = 'skins'; tabSkins.classList.add('active'); tabBonus.classList.remove('active'); renderShop(); });
   btnShare.addEventListener('click', () => { ensureAudio(); shareScore(); });
   btnReport.addEventListener('click', () => { ensureAudio(); openReport(); });
   $('btnReportClose').addEventListener('click', () => reportBox.classList.remove('show'));
@@ -3257,6 +3537,7 @@
   // ===== 启动 =====
   applyMuteLabel();
   updateHud();
+  updateCoinHud();
   bossLevel = false;
   generateMap();
   layout();
@@ -3361,7 +3642,27 @@
         checkPortal(player);
         const after = { x: player.x, y: player.y, portalCd: player.portalCd };
         return { gx, gy, onPortal, portalsLen: portals.length, dead: player.dead, spawnInv: player.spawnInv, before, after };
-      }
+      },
+      // —— 金币 / 商店验证 ——
+      coins: () => coins,
+      setCoins: (n) => { coins = Math.max(0, n | 0); saveCoins(); updateCoinHud(); },
+      addGold,
+      enemyGold,
+      bonus: () => ({ ...bonus }),
+      skins: () => ({ owned: ownedSkins.slice(), equipped: equippedSkin }),
+      setBonus: (o) => { bonus = Object.assign({ lifeup: 0, cd: 0, spd: 0, coinup: 0, shield: 0 }, o); saveBonus(); },
+      setSkins: (o) => { ownedSkins = o.owned || ['classic']; equippedSkin = o.equipped || 'classic'; saveSkins(); saveSkin(); },
+      buyBonus, buySkin, equipSkin, renderShop,
+      shopState: () => ({ tab: shopTab, open: shopBox.classList.contains('show') }),
+      setShopTab: (t) => { shopTab = t; },
+      bullets: () => bullets.map(b => ({ dir: b.dir, x: b.x, y: b.y, size: b.size, pen: b.pen, bomb: b.bomb, owner: b.owner.isPlayer ? 'p' : 'e' })),
+      // —— 局外养成验证 ——
+      startGame: () => start(false),
+      livesNow: () => lives,
+      setLives: (n) => { lives = Math.max(0, n | 0); lastLives = -1; },
+      hudCoins: () => elCoins ? elCoins.textContent : null,
+      lsGet: (k) => localStorage.getItem(k),
+      renderOnce: () => { draw(); },
     };
   }
 
