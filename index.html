@@ -482,7 +482,7 @@
 
   <div id="toast"></div>
   <div id="wxtip">点右上角 <b>···</b> → 发送给朋友</div>
-  <div id="mark">DESIGNED BY QIAN · V1.8</div>
+  <div id="mark">DESIGNED BY QIAN · V1.9</div>
 
 <script>
 (() => {
@@ -801,6 +801,11 @@
   let hurtFlash = 0;   // 受击红边渐隐
   let hitStop = 0;     // 击杀定格（秒）
   let bossWarn = 0;    // Boss 出场警报计时（秒）
+  let timeScale = 1;       // 全局慢动作（Boss 死亡演出）
+  let whiteFlash = 0;      // 白闪（Boss 死亡）
+  let bossHitFlash = 0;    // Boss 血条受击闪白
+  let bossDeathT = 0, bossDeathX = 0, bossDeathY = 0;  // Boss 死亡演出计时/爆点
+  let bossDeathBurst = 0;  // 死亡演出已触发的爆炸段
   let lvIntroT = 0, lvIntroNext = false;   // 关卡过渡计时（秒）/ 结束后是否开新关
   let tookHitThisLevel = false;            // 本关是否掉过命（无伤成就）
 
@@ -940,6 +945,17 @@
     setTimeout(() => sweep(420, 160, 0.34, 'sawtooth', 0.08), 260);
     noiseBurst(0.5, 0.09, 1200, 300);
   };
+  const sfxBossDie  = () => {
+    noiseBurst(0.6, 0.26, 3200, 120);
+    sweep(200, 40, 0.55, 'sawtooth', 0.12);
+    setTimeout(() => sweep(90, 30, 0.45, 'sine', 0.1), 200);
+    setTimeout(() => noiseBurst(0.4, 0.16, 2000, 200), 280);
+  };
+  const sfxBossRage   = () => { sweep(300, 950, 0.3, 'sawtooth', 0.1); noiseBurst(0.3, 0.1, 1500, 400); };
+  const sfxChargeWarn = () => { sweep(620, 170, 0.5, 'square', 0.045); };
+  const sfxChargeHit  = () => { noiseBurst(0.3, 0.2, 2400, 160); };
+  const sfxBossBeam   = () => { sweep(130, 55, 0.6, 'triangle', 0.09); };
+  const sfxClash      = () => { beep(880, 0.05, 'square', 0.03); };
   const sfxLevel  = () => {
     [392, 523, 659, 784].forEach((f, i) => setTimeout(() => sweep(f, f * 1.01, 0.12, 'square', 0.045), i * 90));
   };
@@ -1159,16 +1175,21 @@
   }
 
   function spawnBoss() {
-    bossMaxHp = 10 + level;
+    bossMaxHp = 12 + Math.floor(level * 1.5);      // 难度曲线更陡
     bossHp = bossMaxHp;
     enemies.push({
       x: W / 2 - BOSS_SIZE / 2,
-      y: 3 * TILE,
+      y: -BOSS_SIZE - 8,               // 屏幕外上方，出场缓缓降下
       dir: DIR.DOWN, speed: 0.7,
       cooldown: 0, isPlayer: false, isBoss: true,
       type: 'boss', hp: bossMaxHp, maxHp: bossMaxHp,
       size: BOSS_SIZE, color: '#ff2d55',
-      changeTimer: 90, shootTimer: 70, hitFlash: 0
+      changeTimer: 90, shootTimer: 70, hitFlash: 0,
+      enterT: 1.5,                     // 出场下降时间（秒），期间无敌
+      enterY: 6 * TILE,                // 场中落点
+      phase: 0,                        // 0 正常 / 1 狂暴(50%) / 2 狂暴·二段(25%)
+      skillTimer: 200,                 // 首次技能倒计时（帧）
+      state: 'idle', chargeT: 0, chargeDir: 0   // idle / charge_warn / charge
     });
     bossWarn = 1.8;                 // 全屏警报
     sfxBoss();
@@ -1205,14 +1226,52 @@
     else beep(500, 0.05, 'square', 0.02);
   }
 
-  function bossFire(e) {
+  function bossFire(e, phase) {
     const cx = e.x + e.size / 2, cy = e.y + e.size / 2;
     const px = -DY[e.dir], py = DX[e.dir];   // 垂直于炮管的展开方向
-    for (const off of [-10, 0, 10]) {
+    // 狂暴后扇形更宽（5 连发）、子弹更大更快
+    const offsets = phase >= 1 ? [-14, -7, 0, 7, 14] : [-10, 0, 10];
+    const spd = phase >= 1 ? 1.0 : 0.9;
+    for (const off of offsets) {
       const ox = cx + px * off, oy = cy + py * off;
-      bullets.push({ x: ox - 2, y: oy - 2, size: 5, dir: e.dir, speed: BULLET_SPEED * 0.9, owner: e });
+      bullets.push({ x: ox - 2, y: oy - 2, size: phase >= 1 ? 6 : 5, dir: e.dir, speed: BULLET_SPEED * spd, owner: e });
     }
-    beep(300, 0.1, 'sawtooth', 0.04);
+    beep(phase >= 1 ? 240 : 300, 0.1, 'sawtooth', 0.05);
+  }
+
+  // —— Boss 技能池（按关卡解锁：5/10/15 关分别 1/2/3 种） ——
+  function bossUnlockedSkills() {
+    const pool = ['ring', 'charge', 'summon'];
+    return pool.slice(0, level >= 15 ? 3 : level >= 10 ? 2 : 1);
+  }
+  function bossSkill(e) {
+    const pool = bossUnlockedSkills();
+    const s = pool[randInt(0, pool.length - 1)];
+    if (s === 'ring') ringShot(e);
+    else if (s === 'charge') {
+      if (player && !player.dead) e.chargeDir = dirFromVec(player.x - e.x, player.y - e.y);
+      e.state = 'charge_warn'; e.chargeT = 40; sfxChargeWarn();
+    } else summonMinions(e);
+  }
+  function ringShot(e) {
+    const cx = e.x + e.size / 2, cy = e.y + e.size / 2;
+    for (let d = 0; d < 8; d++) {
+      bullets.push({ x: cx - 2, y: cy - 2, size: 4, dir: d, speed: BULLET_SPEED * 0.85, owner: e });
+    }
+    beep(220, 0.14, 'sawtooth', 0.05);
+    showToast('🌀 环形弹幕！');
+  }
+  function summonMinions(e) {
+    const n = level >= 15 ? 2 : 1;
+    let added = 0;
+    for (let i = 0; i < n; i++) {
+      if (enemies.length >= 6) break;
+      const pt = spawnPoints[randInt(0, 2)];
+      if (enemies.some(x => !x.dead && Math.abs(x.x - pt[0]) < TILE && Math.abs(x.y - pt[1]) < TILE)) continue;
+      spawnEnemy(pt[0], pt[1], pickEnemyType());
+      added++;
+    }
+    if (added) { showToast('👾 敌军增援！'); beep(340, 0.08, 'square', 0.04); }
   }
 
   // 按当前八方向移动：x/y 轴独立碰撞，斜向可沿墙滑动；返回是否成功移动
@@ -1257,16 +1316,57 @@
   }
 
   function updateBoss(e, k) {
-    // 缓慢追踪玩家
+    // 出场下降：无敌、不攻击，缓动降落到场中
+    if (e.enterT > 0) {
+      e.enterT -= k / 60;
+      e.y += (e.enterY - e.y) * 0.045 * k;
+      if (e.enterT <= 0) { e.y = e.enterY; sfxBossBeam(); shake = Math.max(shake, 7); }
+      return;
+    }
+    // 狂暴阶段判定（血量分段 50% / 25%）
+    const ratio = e.hp / e.maxHp;
+    const newPhase = ratio <= 0.25 ? 2 : ratio <= 0.5 ? 1 : 0;
+    if (newPhase > e.phase) {
+      e.phase = newPhase;
+      sfxBossRage();
+      bossHitFlash = 0.3;
+      shake = Math.max(shake, 8);
+      showToast(newPhase === 2 ? '🔥 BOSS 狂暴·二段！' : '🔥 BOSS 狂暴！');
+      vibe(newPhase === 2 ? [80, 40, 80, 40, 200] : [60, 40, 120]);
+    }
+    // 冲锋：预警后直线高速撞击（撞墙/撞坦克自停）
+    if (e.state === 'charge') {
+      e.chargeT -= k;
+      const sp = 3.6;
+      const nx = e.x + DX[e.chargeDir] * sp * k;
+      const ny = e.y + DY[e.chargeDir] * sp * k;
+      if (isBlocked(nx, ny, e.size) || tankHitsTank(nx, ny, e.size, e)) {
+        e.state = 'idle'; e.chargeT = 0; sfxChargeHit(); shake = Math.max(shake, 10);
+      } else { e.x = nx; e.y = ny; }
+      return;
+    }
+    if (e.state === 'charge_warn') {
+      e.chargeT -= k;
+      if (e.chargeT <= 0) { e.state = 'charge'; e.chargeT = 26; }
+      return;
+    }
+    // 追踪玩家
     if (player && !player.dead) {
       e.dir = dirFromVec(
         (player.x + TANK_SIZE / 2) - (e.x + e.size / 2),
         (player.y + TANK_SIZE / 2) - (e.y + e.size / 2));
     }
+    e.speed = e.phase >= 1 ? 0.95 : 0.7;   // 狂暴加速
     if (!moveTank(e, k)) e.dir = pickFreeDir(e);
+    // 射击：狂暴越狠越密
     if ((e.shootTimer -= k) <= 0) {
-      e.shootTimer = Math.max(40, 70 - level * 2);
-      bossFire(e);
+      e.shootTimer = e.phase >= 2 ? 30 : e.phase >= 1 ? 36 : Math.max(40, 70 - level * 2);
+      bossFire(e, e.phase);
+    }
+    // 技能释放
+    if ((e.skillTimer -= k) <= 0) {
+      e.skillTimer = randInt(230, 340);
+      bossSkill(e);
     }
   }
 
@@ -1334,10 +1434,12 @@
       if (b.owner.isPlayer) {
         for (const e of enemies) {
           if (e.dead) continue;
+          if (e.isBoss && e.enterT > 0) continue;   // Boss 出场下降中无敌
           if (cx >= e.x && cx <= e.x + e.size && cy >= e.y && cy <= e.y + e.size) {
             b.dead = true;
-            if (b.owner.isPlayer) stat.hits++;
+            stat.hits++;
             e.hp--; e.hitFlash = 6;
+            if (e.isBoss) bossHitFlash = 0.18;      // Boss 血条受击闪白
             if (e.hp <= 0) { e.dead = true; onEnemyKilled(e); }
             else { sfxHit(); spawnParticles(cx, cy, e.color, 6); }
             return;
@@ -1348,11 +1450,13 @@
           b.dead = true; killPlayer(); return;
         }
       }
-      // 子弹互撞
+      // 子弹互撞（玩家弹拦截 Boss 弹有反馈）
       for (const o of bullets) {
         if (o === b || o.dead || o.owner.isPlayer === b.owner.isPlayer) continue;
         if (cx >= o.x && cx <= o.x + o.size && cy >= o.y && cy <= o.y + o.size) {
-          b.dead = true; o.dead = true; return;
+          b.dead = true; o.dead = true;
+          if (o.owner.isBoss) { sfxClash(); score += 20; addText(cx, cy, '+20', '#ffe600'); }
+          return;
         }
       }
     }
@@ -1416,7 +1520,7 @@
 
   function onEnemyKilled(e) {
     sfxBoom();
-    hitStop = e.isBoss ? 0.16 : 0.03;          // 击杀定格：打在肉上的停顿感
+    hitStop = e.isBoss ? 0.06 : 0.03;          // 击杀定格（Boss 用慢动作替代长定格）
     vibe(e.isBoss ? [60, 50, 130] : 15);
     spawnParticles(e.x + e.size / 2, e.y + e.size / 2, e.color, e.isBoss ? 48 : 16);
     shake = e.isBoss ? 16 : 6;
@@ -1424,7 +1528,15 @@
     if (e.isBoss) stat.bossKills++;
     addKillScore(e);
     maybeDropPowerup(e.x + e.size / 2, e.y + e.size / 2, e.isBoss);
-    if (e.isBoss) { bossHp = 0; showToast('💥 BOSS 击破！'); unlockAch('boss'); }
+    if (e.isBoss) {
+      bossHp = 0;
+      // 死亡演出：连环爆炸 + 慢动作 + 白闪
+      bossDeathT = 1.15; bossDeathX = e.x + e.size / 2; bossDeathY = e.y + e.size / 2;
+      bossDeathBurst = 0;
+      whiteFlash = 0.3; timeScale = 0.35;
+      sfxBossDie();
+      showToast('💥 BOSS 击破！'); unlockAch('boss');
+    }
     if (stat.kills === 1) unlockAch('first');
   }
 
@@ -1444,14 +1556,17 @@
   // ===== 道具 =====
   function maybeDropPowerup(x, y, isBoss) {
     if (isBoss) {
-      spawnPowerup(x - 20, y); spawnPowerup(x, y); spawnPowerup(x + 20, y);
+      // Boss 固定掉落：护盾 + 生命 + 随机，保证战后能回血
+      spawnPowerup(x - 20, y, 'shield');
+      spawnPowerup(x + 20, y, 'life');
+      spawnPowerup(x, y);
     } else if (rng() < 0.15) {
       spawnPowerup(x, y);
     }
   }
 
-  function spawnPowerup(x, y) {
-    const type = POWERUP_LIST[randInt(0, POWERUP_LIST.length - 1)];
+  function spawnPowerup(x, y, forceType) {
+    const type = forceType || POWERUP_LIST[randInt(0, POWERUP_LIST.length - 1)];
     powerups.push({
       x: clamp(x - 8, TILE, W - TILE - 16),
       y: clamp(y - 8, TILE, H - TILE - 16),
@@ -1563,7 +1678,7 @@
     lastTime = now;
     if (!isFinite(dt) || dt <= 0) dt = 1 / 60;
     if (dt > 0.05) dt = 0.05;      // 切窗恢复后限制单帧步长
-    const k = dt * 60;             // 以 60fps 为基准的系数
+    const k = dt * 60 * timeScale; // 以 60fps 为基准的系数（含 Boss 死亡慢动作）
 
     if (!running || paused) { draw(); return; }
 
@@ -1587,6 +1702,22 @@
     if (comboTimer > 0) { comboTimer -= dt; if (comboTimer <= 0) combo = 0; }
     if (hurtFlash > 0) hurtFlash = Math.max(0, hurtFlash - dt * 2.2);
     if (bossWarn > 0) bossWarn -= dt;
+
+    // Boss 死亡演出：连环爆炸 + 慢动作回弹 + 白闪渐隐
+    if (bossDeathT > 0) {
+      bossDeathT -= dt;
+      const seg = [1.15, 0.9, 0.66, 0.42, 0.18];
+      if (bossDeathBurst < seg.length && bossDeathT <= seg[bossDeathBurst]) {
+        spawnParticles(bossDeathX + rand(-62, 62), bossDeathY + rand(-62, 62),
+          randInt(0, 1) ? '#ff2d55' : '#ffaa00', 22);
+        shake = Math.max(shake, 10);
+        noiseBurst(0.25, 0.15, 2200, 200);
+        bossDeathBurst++;
+      }
+    }
+    if (timeScale < 1) timeScale = Math.min(1, timeScale + dt * 1.3);
+    if (whiteFlash > 0) whiteFlash = Math.max(0, whiteFlash - dt * 1.7);
+    if (bossHitFlash > 0) bossHitFlash = Math.max(0, bossHitFlash - dt);
 
     updatePlayer(k);
     enemies.forEach(e => updateEnemy(e, k));
@@ -1617,8 +1748,8 @@
 
     if (!baseAlive) { endGame(false); return; }
 
-    // 敌人全灭 → 过关奖励 + 关卡过渡（成就判定）
-    if (running && enemies.length === 0 && enemiesSpawned >= enemiesTotal) {
+    // 敌人全灭 → 过关奖励 + 关卡过渡（成就判定；Boss 需等死亡演出结束）
+    if (running && enemies.length === 0 && enemiesSpawned >= enemiesTotal && bossDeathT <= 0) {
       const bonus = 1000 + level * 200;
       score += bonus;
       addText(W / 2, H / 2 - 30, '+' + bonus, '#39ff14');
@@ -1728,6 +1859,9 @@
       ctx.shadowBlur = 0;
     }
 
+    // Boss 出场光柱 / 冲锋预警（画在敌人下层）
+    drawBossFx();
+
     // 敌人
     for (const e of enemies) drawTank(e);
 
@@ -1768,22 +1902,24 @@
 
     ctx.restore();
 
-    // Boss 血条
+    // Boss 血条（受击闪白 / 狂暴变色 / 显示关卡）
     if (bossHp > 0 && bossMaxHp > 0) {
       const bw = 300, bh = 10, bx = (W - bw) / 2, by = 8;
+      const ratio = clamp(bossHp / bossMaxHp, 0, 1);
+      const rage = ratio <= 0.5;
+      const bar = bossHitFlash > 0 ? '#ffffff' : (rage ? '#ffaa00' : '#ff2d55');
       ctx.fillStyle = 'rgba(3,3,8,0.85)';
       ctx.fillRect(bx - 3, by - 3, bw + 6, bh + 6);
-      ctx.fillStyle = 'rgba(255,45,85,0.2)';
+      ctx.fillStyle = rage ? 'rgba(255,170,0,0.2)' : 'rgba(255,45,85,0.2)';
       ctx.fillRect(bx, by, bw, bh);
-      const ratio = clamp(bossHp / bossMaxHp, 0, 1);
-      ctx.fillStyle = '#ff2d55';
-      ctx.shadowColor = '#ff2d55'; ctx.shadowBlur = 10;
+      ctx.fillStyle = bar;
+      ctx.shadowColor = bar; ctx.shadowBlur = 10;
       ctx.fillRect(bx, by, bw * ratio, bh);
       ctx.shadowBlur = 0;
       ctx.fillStyle = '#fff';
       ctx.font = '700 10px "Consolas", monospace';
       ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-      ctx.fillText('BOSS  ' + bossHp + ' / ' + bossMaxHp, W / 2, by + bh + 6);
+      ctx.fillText('LV.' + level + ' BOSS  ' + bossHp + ' / ' + bossMaxHp + (rage ? '  ⚡狂暴' : ''), W / 2, by + bh + 6);
     }
 
     // 道具效果状态（左下）
@@ -1831,6 +1967,41 @@
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText('⚠ WARNING · BOSS 来袭 ⚠', W / 2, bandY + 33);
       ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+    }
+
+    // Boss 死亡白闪
+    if (whiteFlash > 0) {
+      ctx.fillStyle = 'rgba(255,255,255,' + (0.85 * whiteFlash).toFixed(3) + ')';
+      ctx.fillRect(0, 0, W, H);
+    }
+  }
+
+  // Boss 出场光柱 + 冲锋预警线（覆盖层，画在敌人下层）
+  function drawBossFx() {
+    for (const e of enemies) {
+      if (!e.isBoss) continue;
+      const cx = e.x + e.size / 2;
+      if (e.enterT > 0) {
+        const g = ctx.createLinearGradient(0, 0, 0, e.y + e.size);
+        g.addColorStop(0, 'rgba(255,45,85,0)');
+        g.addColorStop(1, 'rgba(255,45,85,0.4)');
+        ctx.fillStyle = g;
+        ctx.fillRect(cx - 32, 0, 64, Math.max(0, e.y + e.size));
+        ctx.strokeStyle = 'rgba(255,45,85,' + (0.45 + 0.3 * Math.sin(e.enterT * 12)).toFixed(3) + ')';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(cx, e.y + e.size, 18 + (1.5 - e.enterT) * 22, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      if (e.state === 'charge_warn') {
+        const cy = e.y + e.size / 2;
+        const ex = cx + DX[e.chargeDir] * 800, ey = cy + DY[e.chargeDir] * 800;
+        ctx.strokeStyle = 'rgba(255,90,0,' + (0.5 + 0.4 * Math.sin(e.chargeT * 0.5)).toFixed(3) + ')';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([10, 8]);
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ex, ey); ctx.stroke();
+        ctx.setLineDash([]);
+      }
     }
   }
 
@@ -2314,7 +2485,7 @@
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V1.8', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.9', W2 / 2, H2 - 78);
     const d = new Date();
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -2537,11 +2708,20 @@
         enemiesSpawned = enemiesTotal;
       },
       addStat: (k, v) => { stat[k] = (stat[k] || 0) + v; },
+      // —— Boss 验证用 ——
+      setBossHp: (n) => { const b = enemies.find(e => e.isBoss && !e.dead); if (b) b.hp = n; },
+      bossSkillNow: () => { const b = enemies.find(e => e.isBoss && !e.dead); if (b) b.skillTimer = 1; },
+      bossInfo: () => {
+        const b = enemies.find(e => e.isBoss && !e.dead);
+        return b ? { x: b.x, y: b.y, hp: b.hp, max: b.maxHp, phase: b.phase, state: b.state, enterT: b.enterT, enterY: b.enterY } : null;
+      },
+      powerups: () => powerups.map(p => p.type),
       // —— 八方向验证用 ——
       state: () => ({
         player: player ? { x: player.x, y: player.y, dir: player.dir, dead: player.dead } : null,
-        enemies: enemies.map(e => ({ dir: e.dir, isBoss: !!e.isBoss, x: e.x, y: e.y })),
+        enemies: enemies.map(e => ({ dir: e.dir, isBoss: !!e.isBoss, x: e.x, y: e.y, hp: e.hp, phase: e.phase || 0, state: e.state || 'idle', enterT: e.enterT || 0 })),
         bullets: bullets.map(b => ({ dir: b.dir, x: b.x, y: b.y, owner: b.owner.isPlayer ? 'p' : 'e' })),
+        boss: { hp: bossHp, max: bossMaxHp, deathT: bossDeathT, timeScale, whiteFlash, level, bossLevel },
         level, running, paused
       }),
       setDir: (d) => { if (player) player.dir = d; },
