@@ -303,6 +303,23 @@
   #btnShare { display: none; border-color: rgba(255, 0, 255, 0.5); color: #ffc4ff; box-shadow: 0 0 14px rgba(255, 0, 255, 0.18); }
   #btnReport { display: none; border-color: rgba(57, 255, 20, 0.5); color: #c9ffd2; box-shadow: 0 0 14px rgba(57, 255, 20, 0.18); }
   #btnShop { border-color: rgba(255, 215, 0, 0.55); color: #ffe9a6; box-shadow: 0 0 14px rgba(255, 215, 0, 0.2); }
+  #btnRevive {
+    display: none;
+    margin-top: 4px;
+    padding: 11px 26px;
+    border: 1px solid rgba(255, 215, 0, 0.75); border-radius: 999px;
+    background: linear-gradient(180deg, rgba(255, 200, 0, 0.24), rgba(255, 160, 0, 0.10));
+    color: #ffe9a6; font-size: 14px; font-weight: 800; letter-spacing: 2px;
+    box-shadow: 0 0 18px rgba(255, 200, 0, 0.35);
+    cursor: pointer;
+    animation: revivePulse 1.4s ease infinite;
+    -webkit-appearance: none; appearance: none;
+  }
+  #btnRevive:active { transform: translateY(1px); filter: brightness(1.15); }
+  @keyframes revivePulse {
+    0%, 100% { box-shadow: 0 0 14px rgba(255, 200, 0, 0.25); }
+    50% { box-shadow: 0 0 24px rgba(255, 200, 0, 0.55); }
+  }
   #ovStats .sub {
     margin-top: 6px; font-size: 11px; letter-spacing: 1px; color: #7f92b5;
     font-variant-numeric: tabular-nums;
@@ -445,6 +462,12 @@
   }
   .shopItem .siIcon { font-size: 30px; line-height: 1; filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.5)); }
   .shopItem .siName { font-size: 14px; font-weight: 800; letter-spacing: 1px; color: #00f0ff; }
+  .shopItem .siName .lim {
+    display: inline-block; margin-left: 5px; padding: 1px 6px; border-radius: 6px;
+    background: linear-gradient(90deg, #ff6a00, #ffb300); color: #1a0a00;
+    font-size: 9px; font-weight: 900; letter-spacing: 1px; vertical-align: 1px;
+    box-shadow: 0 0 8px rgba(255, 170, 0, 0.6);
+  }
   .shopItem .siDesc { font-size: 11px; line-height: 1.5; color: #aebbd8; text-align: center; min-height: 32px; }
   .shopItem .siMeta { font-size: 10px; letter-spacing: 1px; color: #ffe066; }
   .shopItem .siBtn {
@@ -579,6 +602,7 @@
     <p id="ovSub">守住基地 · 消灭敌军 · 点开即玩</p>
     <div id="ovStats"></div>
     <button id="btnPlay">开始游戏</button>
+    <button id="btnRevive">🪙 花金币复活基地</button>
     <button id="btnDaily">📅 每日挑战</button>
     <button id="btnShop">🛒 商店</button>
     <button id="btnShare">📤 分享成绩 · 发起挑战</button>
@@ -599,7 +623,7 @@
 
   <div id="toast"></div>
   <div id="wxtip">点右上角 <b>···</b> → 发送给朋友</div>
-  <div id="mark">DESIGNED BY QIAN · V1.10</div>
+  <div id="mark">DESIGNED BY QIAN · V1.12</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -948,6 +972,7 @@
     ghost:   { name: '幽灵白',   icon: '⚪', price: 120, body: '#e8eef8', track: '#2a3550', barrel: '#ffffff', glow: '#cfd8ff' },
     gold:    { name: '黄金圣骑', icon: '🟡', price: 150, body: '#f5b800', track: '#4a3600', barrel: '#ffe066', glow: '#ffd700' },
     onyx:    { name: '暗黑曜石', icon: '⬛', price: 200, body: '#23262e', track: '#0a0c10', barrel: '#ffd700', glow: '#ffd700' },
+    fish:    { name: '蓝色大肥鱼', icon: '🐟', price: 500, limited: true, fish: true, body: '#2e7fff', track: '#0a2a5a', barrel: '#7fd4ff', glow: '#4da6ff' },
   };
   const SKIN_LIST = Object.keys(SKINS);
 
@@ -982,6 +1007,7 @@
   let waveSpawned = 0, waveGapT = 0; // 本波已刷 / 波间休整倒计时（帧）
   let spawnWarnPt = null;            // 出生预告点（刷前 35 帧闪烁警示）
   let baseAlive = true;
+  let reviveCount = 0;       // 本局金币复活次数（成本递增）
   let shake = 0;
   let keys = {};
   let rafId = null;
@@ -2001,6 +2027,11 @@
     const sc = $('shopCoins'); if (sc) sc.textContent = coins;
   }
 
+  // 金币复活：基地被毁后可花金币重建基地继续战斗（成本随关卡与复活次数递增）
+  function reviveCost() {
+    return 100 + level * 25 + reviveCount * 60;
+  }
+
   // 爆破弹头溅射：命中点小范围爆炸，伤及周围敌人（exclude 为被直接命中者，不重复扣血）
   function blastBullet(cx, cy, exclude) {
     const R = TILE * 1.3;
@@ -2892,6 +2923,14 @@
     else if (t.isBoss) { ctx.shadowColor = '#ff2d55'; ctx.shadowBlur = 18; }
     else { ctx.shadowColor = t.color; ctx.shadowBlur = 8; }
 
+    // 限定皮肤「蓝色大肥鱼」：专属鱼形造型（坦克仍开炮）
+    if (isPlayer && skin.fish) {
+      drawFishTank(flashing, skin);
+      ctx.shadowBlur = 0;
+      ctx.restore();
+      return;
+    }
+
     const bodyColor = flashing ? '#ffffff' : (isPlayer ? skin.body : t.color);
 
     // 履带
@@ -2989,6 +3028,54 @@
     }
   }
 
+  // 限定皮肤「蓝色大肥鱼」专属绘制：调用方已 translate/rotate/scale，前方 = -y
+  function drawFishTank(flashing, skin) {
+    const body = flashing ? '#ffffff' : skin.body;
+    const dark = shade(skin.body, -20);
+    // 尾鳍（后方 V 形，双鳍）
+    ctx.fillStyle = dark;
+    ctx.beginPath();
+    ctx.moveTo(0, 6.5);
+    ctx.lineTo(-6, 12); ctx.lineTo(-2.5, 7.5);
+    ctx.lineTo(0, 13); ctx.lineTo(2.5, 7.5);
+    ctx.lineTo(6, 12);
+    ctx.closePath(); ctx.fill();
+    // 背鳍（前上方）
+    ctx.beginPath();
+    ctx.moveTo(-2, -6); ctx.lineTo(0, -12); ctx.lineTo(2, -6);
+    ctx.closePath(); ctx.fill();
+    // 身体（大肥鱼椭圆）
+    ctx.fillStyle = body;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 10, 8.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // 鳞纹（横向弧线）
+    ctx.strokeStyle = 'rgba(255,255,255,0.20)';
+    ctx.lineWidth = 1;
+    for (let i = -1; i <= 1; i++) {
+      ctx.beginPath();
+      ctx.arc(0, i * 3.4, 7.4, Math.PI * 0.18, Math.PI * 0.82, true);
+      ctx.stroke();
+    }
+    // 鳃线（头部弧）
+    ctx.strokeStyle = 'rgba(0,20,60,0.5)';
+    ctx.beginPath();
+    ctx.arc(0, -3, 7.2, -Math.PI * 0.78, -Math.PI * 0.22);
+    ctx.stroke();
+    // 眼睛（头部两侧）
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(-4.6, -4.4, 2.1, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(4.6, -4.4, 2.1, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#0a1020';
+    ctx.beginPath(); ctx.arc(-4.6, -4.7, 1.05, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(4.6, -4.7, 1.05, 0, Math.PI * 2); ctx.fill();
+    // 鱼嘴炮管（短粗坦克炮，吐弹不吐泡）
+    ctx.fillStyle = flashing ? '#eeeeee' : skin.barrel;
+    ctx.fillRect(-2.5, -17, 5, 8);
+    ctx.fillStyle = 'rgba(0,20,60,0.4)';
+    ctx.fillRect(-2.5, -17, 5, 2);
+  }
+
   // ===== 提示 =====
   let toastTimer = null;
   function showToast(msg) {
@@ -3010,6 +3097,7 @@
     ovTip.style.display = '';
     btnShare.style.display = 'none';
     btnReport.style.display = 'none';
+    btnRevive.style.display = 'none';
     btnDaily.style.display = (kind === 'title' && !dailyInvited) ? 'block' : 'none';
     if (kind === 'title') {
       ovTitle.textContent = '坦克大战';
@@ -3054,6 +3142,12 @@
       btnPlay.textContent = '再来一局';
       btnShare.style.display = 'block';      // 结算页可分享成绩、发起挑战
       btnReport.style.display = 'block';     // 生成战绩图
+      // 金币复活：基地被毁但金币足够时，可花金币重建基地继续战斗
+      const rc = reviveCost();
+      if (coins >= rc) {
+        btnRevive.style.display = 'block';
+        btnRevive.textContent = '🪙 花 ' + rc + ' 金币复活基地';
+      }
       ovTip.textContent = '达到第 ' + level + ' 关';
     }
   }
@@ -3065,6 +3159,7 @@
     dailyRng = dailyMode ? mulberry32(dailySeed()) : null;
     rng = dailyMode ? dailyRng : Math.random;
     score = 0; lives = 3 + (bonus.lifeup || 0); level = 1;   // 装甲储备：开局额外生命
+    reviveCount = 0;                                         // 本局复活次数清零
     // 重置过关成长与每日词条
     upgrades = {}; upgTotal = 0;
     dailyMods = { _names: [] };
@@ -3123,6 +3218,61 @@
     if (score > bestAtStart) showToast('🏆 新纪录：' + score + ' 分！');
   }
 
+  // ===== 金币复活：基地被毁后花金币重建基地继续战斗 =====
+  function rebuildBaseWalls() {
+    // 重建基地护墙（若被炸毁则恢复砖墙）
+    const cells = [
+      [BASE.y - 1, BASE.x], [BASE.y - 2, BASE.x],
+      [BASE.y - 1, BASE.x - 1], [BASE.y - 1, BASE.x + 1],
+      [BASE.y, BASE.x - 1], [BASE.y, BASE.x + 1]
+    ];
+    for (const [gy, gx] of cells) {
+      if (inside(gx, gy)) map[gy][gx] = TILE_BRICK;
+    }
+  }
+  function clearEnemiesNearBase(r) {
+    // 清除基地周围威胁（避免复活瞬间再被毁）；不给金币，防刷币
+    const bx = BASE.x * TILE + TILE / 2, by = BASE.y * TILE + TILE / 2;
+    for (const e of enemies) {
+      if (e.dead) continue;
+      if (Math.hypot(e.x + e.size / 2 - bx, e.y + e.size / 2 - by) <= r) {
+        e.dead = true;
+        spawnParticles(e.x + e.size / 2, e.y + e.size / 2, e.color, 14);
+      }
+    }
+    enemies = enemies.filter(e => !e.dead);
+  }
+  function revive() {
+    if (!gameOver || won) return;
+    const cost = reviveCost();
+    if (coins < cost) { showToast('🪙 金币不足'); beep(180, 0.12, 'square', 0.05); return; }
+    coins -= cost; saveCoins(); updateCoinHud();
+    reviveCount++;
+    // 重建基地 + 护墙 + 清除周边威胁
+    baseAlive = true;
+    rebuildBaseWalls();
+    clearEnemiesNearBase(TILE * 2.2);
+    // 玩家复活到出生点，短暂无敌（若本局已无生命也保底 1 命）
+    if (!player) player = makePlayer();
+    player.x = SPAWN.x * TILE + (TILE - TANK_SIZE) / 2;
+    player.y = SPAWN.y * TILE + (TILE - TANK_SIZE) / 2;
+    player.dir = DIR.UP;
+    player.dead = false;
+    player.spawnInv = 180;                 // 3 秒无敌
+    player.hitFlash = 0;
+    if (lives < 1) { lives = 1; lastLives = -1; }
+    // 清理受击 / 演出状态
+    hurtFlash = 0; shake = 0; bossDeathT = 0; whiteFlash = 0; hitStop = 0;
+    // 恢复运行
+    gameOver = false; running = true;
+    hideOverlay(); hideUpgradeBox();
+    setBgm('battle');
+    updateHud();
+    showToast('🪙 基地重建 · 花 ' + cost + ' 金币，继续战斗！');
+    sfxPickup();
+    vibe([30, 40, 30]);
+  }
+
   // ===== 商店（永久加成 + 角色皮肤）=====
   let shopTab = 'bonus';
   function openShop() { shopBox.classList.add('show'); renderShop(); }
@@ -3153,9 +3303,11 @@
         const equipped = equippedSkin === id;
         const item = document.createElement('div');
         item.className = 'shopItem' + (equipped ? ' equipped' : '');
+        const lim = sk.limited ? '<b class="lim">限定</b>' : '';
+        const desc = sk.fish ? '🐟 限定版 · 专属肥鱼造型' : '玩家坦克外观配色';
         item.innerHTML = '<span class="siIcon">' + sk.icon + '</span>' +
-          '<span class="siName">' + sk.name + '</span>' +
-          '<span class="siDesc">玩家坦克外观配色</span>' +
+          '<span class="siName">' + sk.name + lim + '</span>' +
+          '<span class="siDesc">' + desc + '</span>' +
           '<span class="siMeta">' + (owned ? (equipped ? '已装备' : '已拥有') : '🪙 ' + sk.price) + '</span>' +
           '<button class="siBtn ' + (equipped ? 'equipped' : (owned ? 'owned' : '')) + '">' + (equipped ? '已装备' : (owned ? '装备' : '🪙 购买 ' + sk.price)) + '</button>';
         const btn = item.querySelector('.siBtn');
@@ -3391,6 +3543,7 @@
     if (overlayKind === 'paused') togglePause();
     else start(dailyInvited);
   });
+  btnRevive.addEventListener('click', () => { ensureAudio(); revive(); });
   btnDaily.addEventListener('click', () => { ensureAudio(); start(true); });
   btnShop.addEventListener('click', () => { ensureAudio(); openShop(); });
   btnShopClose.addEventListener('click', closeShop);
@@ -3663,6 +3816,19 @@
       hudCoins: () => elCoins ? elCoins.textContent : null,
       lsGet: (k) => localStorage.getItem(k),
       renderOnce: () => { draw(); },
+      // —— 金币复活验证 ——
+      reviveCost: () => reviveCost(),
+      revive: () => revive(),
+      reviveCount: () => reviveCount,
+      destroyBase: () => { baseAlive = false; },
+      baseAliveNow: () => baseAlive,
+      reviveBtn: () => ({ display: btnRevive.style.display, text: btnRevive.textContent }),
+      setLevel2: (lv) => { level = lv; },
+      tileAt: (x, y) => (inside(x, y) ? map[y][x] : -1),
+      tileBrick: () => TILE_BRICK,
+      // —— 皮肤定义验证（含限定） ——
+      skinDefs: () => Object.keys(SKINS).map(id => ({ id, name: SKINS[id].name, price: SKINS[id].price, limited: !!SKINS[id].limited, fish: !!SKINS[id].fish })),
+      isFishSkin: () => !!(SKINS[equippedSkin] && SKINS[equippedSkin].fish),
     };
   }
 
