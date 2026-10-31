@@ -671,7 +671,7 @@
 
   <div id="toast"></div>
   <div id="wxtip">点右上角 <b>···</b> → 发送给朋友</div>
-  <div id="mark">DESIGNED BY QIAN · V1.13</div>
+  <div id="mark">DESIGNED BY QIAN · V1.14</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -1573,8 +1573,8 @@
     // 每日词条：疾风骤雨（只出快速）/ 狙击天团（大量狙击）
     if (dailyMods.onlyFast) return 'fast';
     if (dailyMods.sniperBoost && r < 0.35) return 'sniper';
-    // 波次推进让后期波更凶：有效难度 = 关卡 + 波次加成
-    const lvl = level + (wave - 1) * 0.6;
+    // 有效难度 = 关卡（已改单波，无波次加成）
+    const lvl = level;
     if (lvl >= 8) {
       if (r < 0.08) return 'sniper';
       if (r < 0.16) return 'suicide';
@@ -2339,10 +2339,10 @@
     tookHitThisLevel = false;
     enemiesSpawned = 0;
     enemiesTotal = bossLevel ? 1 : Math.round((6 + level * 2) * (dailyMods.surge ? 1.3 : 1));
-    // 波次：非 Boss 关拆成多波，波次越多越凶
-    wavesTotal = bossLevel ? 1 : Math.min(2 + Math.floor(level / 2), 8);
+    // 单波洪流：所有敌人一波刷完，不再分拨分批
+    wavesTotal = 1;
     wave = 1; waveSpawned = 0; waveGapT = 0;
-    enemySpawnTimer = bossLevel ? 40 : 45;
+    enemySpawnTimer = bossLevel ? 40 : 30;
     bullets = []; enemies = []; particles = []; texts = []; powerups = [];
     baseAlive = true;
     fx = { rapid: 0, double: 0, freeze: 0 };
@@ -2364,12 +2364,7 @@
     updateHud();
   }
 
-  // 第 w 波应刷的数量（均匀分配总量，余数补给靠后波）
-  function waveSizeOf(w) {
-    const base = Math.floor(enemiesTotal / wavesTotal);
-    const rem = enemiesTotal - base * wavesTotal;
-    return base + (w > wavesTotal - rem ? 1 : 0);
-  }
+  // 单波洪流：已取消分波，所有敌人一波刷完（波次分配函数不再使用）
 
   function updateSpawning(k) {
     if (enemiesSpawned >= enemiesTotal) return;
@@ -2377,29 +2372,13 @@
       if ((enemySpawnTimer -= k) <= 0) { spawnBoss(); enemiesSpawned = 1; }
       return;
     }
-    // 波间休整：清完一波稍作喘息，再提示下一波
-    if (waveGapT > 0) {
-      waveGapT -= k;
-      spawnWarnPt = null;
-      if (waveGapT <= 0) {
-        wave++;
-        waveSpawned = 0;
-        if (wave <= wavesTotal) { showToast('🌊 第 ' + wave + ' / ' + wavesTotal + ' 波'); sfxLevel(); }
-      }
-      return;
-    }
-    if (waveSpawned >= waveSizeOf(wave)) {
-      // 本波刷完：等待场上清空再进下一波
-      if (enemiesSpawned < enemiesTotal && !enemies.some(e => !e.dead)) waveGapT = 130;
-      spawnWarnPt = null;
-      return;
-    }
+    // 单波洪流：连续刷完全部敌人（0.5s/只），不再分拨休整
     if ((enemySpawnTimer -= k) > 0) {
       // 即将刷：预选出生点闪烁预告
       if (enemySpawnTimer <= 35 && !spawnWarnPt) spawnWarnPt = spawnPoints[randInt(0, 2)];
       return;
     }
-    enemySpawnTimer = 60;
+    enemySpawnTimer = 30;
     // 优先用预告点，被占则顺延其他空点
     const tryPts = spawnWarnPt ? [spawnWarnPt].concat(spawnPoints) : spawnPoints;
     let pt = null;
@@ -2410,7 +2389,6 @@
     if (pt) {
       spawnEnemy(pt[0], pt[1], pickEnemyType());
       enemiesSpawned++;
-      waveSpawned++;
     }
   }
 
@@ -2556,13 +2534,8 @@
         elComboWrap.style.display = 'none';
       }
     }
-    // 波次 HUD（Boss 关隐藏）
-    if (bossLevel) {
-      elWaveWrap.style.display = 'none';
-    } else {
-      elWaveWrap.style.display = '';
-      elWaveNum.textContent = Math.min(wave, wavesTotal) + '/' + wavesTotal;
-    }
+    // 波次 HUD：已改单波洪流，波次指示不再有意义，隐藏
+    elWaveWrap.style.display = 'none';
     // 强化计数 HUD
     if (upgTotal !== lastUpg) {
       lastUpg = upgTotal;
@@ -3882,6 +3855,9 @@
       clearMap: () => { for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) map[y][x] = 0; },
       setUpgrades: (o) => { upgrades = Object.assign({}, o); },
       stopSpawn: () => { enemySpawnTimer = 999999; },
+      // —— 单波洪流验证 ——
+      spawnState: () => ({ enemiesTotal, enemiesSpawned, wavesTotal, wave, bossLevel, spawnTimer: enemySpawnTimer }),
+      aliveEnemies: () => enemies.filter(e => !e.dead).length,
       enemyNear: (px, py, r) => enemies.find(e => !e.dead && Math.hypot(e.x + e.size / 2 - px, e.y + e.size / 2 - py) <= r) || null,
       playerPos: () => player ? { x: player.x, y: player.y, portalCd: player.portalCd } : null,
       setPlayer: (x, y) => { if (player) { player.x = x; player.y = y; } },
