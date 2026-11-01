@@ -280,6 +280,7 @@
     align-items: center; justify-content: center;
     gap: 10px; padding: 26px;
     text-align: center;
+    overflow-y: auto;
     background: radial-gradient(circle at 50% 42%, rgba(0, 47, 167, 0.28), rgba(4, 4, 10, 0.9) 62%);
     -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
     transition: opacity .22s ease, visibility .22s;
@@ -411,6 +412,42 @@
     min-width: 40px; text-align: right; color: #bfe4ff;
     font-size: 12px; font-weight: 700; letter-spacing: 1px;
     font-variant-numeric: tabular-nums;
+  }
+  /* ===== v0.2.0 设置面板 ===== */
+  .settings {
+    display: none; flex-direction: column; gap: 10px;
+    margin-top: 12px; padding: 14px 16px;
+    border-radius: 14px; border: 1px solid rgba(0, 240, 255, 0.22);
+    background: rgba(0, 16, 34, 0.55);
+    backdrop-filter: blur(8px);
+  }
+  .setRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .setLabel { font-size: 12px; letter-spacing: 1px; color: #9dc4e8; font-weight: 700; white-space: nowrap; }
+  .setLabel .hint { display: block; font-size: 10px; color: #5f7ba0; letter-spacing: 0.5px; margin-top: 2px; }
+  .seg { display: flex; gap: 5px; }
+  .seg button {
+    padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(0, 240, 255, 0.3);
+    background: rgba(0, 30, 60, 0.5); color: #bfe4ff;
+    font: 700 11px "Segoe UI", sans-serif; letter-spacing: 1px; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .seg button.active { background: var(--cyan); color: #030308; border-color: var(--cyan); box-shadow: 0 0 10px rgba(0, 240, 255, 0.6); }
+  .seg button:active { transform: translateY(1px); }
+  .setRow input[type=range] {
+    flex: 1; width: auto; height: 4px; -webkit-appearance: none; appearance: none;
+    background: linear-gradient(90deg, var(--cyan), rgba(0, 240, 255, 0.15));
+    border-radius: 4px; outline: none; cursor: pointer;
+  }
+  .setRow input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 15px; height: 15px; border-radius: 50%;
+    background: #fff; border: 2px solid var(--cyan);
+    box-shadow: 0 0 8px rgba(0, 240, 255, 0.8); cursor: pointer;
+  }
+  .setRow input[type=range]::-moz-range-thumb {
+    width: 13px; height: 13px; border-radius: 50%;
+    background: #fff; border: 2px solid var(--cyan);
+    box-shadow: 0 0 8px rgba(0, 240, 255, 0.8); cursor: pointer;
   }
   #ovStats .sub {
     margin-top: 6px; font-size: 11px; letter-spacing: 1px; color: #7f92b5;
@@ -841,6 +878,7 @@
     <div class="hbtns">
       <button class="hbtn" id="pauseBtn" aria-label="暂停">⏸</button>
       <button class="hbtn" id="muteBtn" aria-label="静音">🔊</button>
+      <button class="hbtn" id="fullBtn" aria-label="全屏">⛶</button>
     </div>
   </div>
 
@@ -873,6 +911,36 @@
       <input id="volSlider" type="range" min="0" max="100" value="100" aria-label="主音量">
       <span class="volPct" id="volPct">100%</span>
     </div>
+    <div class="settings" id="settings">
+      <div class="setRow">
+        <span class="setLabel">🎵 音乐<span class="hint">BGM 分音量</span></span>
+        <input id="bgmSlider" type="range" min="0" max="100" value="100" aria-label="音乐音量">
+      </div>
+      <div class="setRow">
+        <span class="setLabel">🔊 音效<span class="hint">SFX 分音量</span></span>
+        <input id="sfxSlider" type="range" min="0" max="100" value="100" aria-label="音效音量">
+      </div>
+      <div class="setRow">
+        <span class="setLabel">🖥 画质<span class="hint">性能档位</span></span>
+        <div class="seg" id="perfSeg">
+          <button data-perf="high">高</button>
+          <button data-perf="medium">中</button>
+          <button data-perf="low">低</button>
+        </div>
+      </div>
+      <div class="setRow">
+        <span class="setLabel">🌀 动效<span class="hint">减弱动态效果</span></span>
+        <div class="seg" id="motionSeg">
+          <button data-motion="auto">自动</button>
+          <button data-motion="on">开</button>
+          <button data-motion="off">关</button>
+        </div>
+      </div>
+      <div class="setRow">
+        <span class="setLabel">⛶ 全屏<span class="hint">沉浸模式</span></span>
+        <div class="seg"><button id="settingsFullBtn">进入全屏</button></div>
+      </div>
+    </div>
   </div>
 
   <div id="lvIntro"><div class="lvT">第 1 关</div></div>
@@ -897,7 +965,7 @@
 
   <div id="toast"></div>
   <div id="wxtip">点右上角 <b>···</b> → 发送给朋友</div>
-  <div id="mark">DESIGNED BY QIAN · V1.19</div>
+  <div id="mark">DESIGNED BY QIAN · V2.0</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -1173,7 +1241,7 @@
         elComboWrap = $('comboWrap'),
         elWaveWrap = $('waveWrap'), elWaveNum = $('waveNum'),
         elUpgWrap = $('upgWrap'), elUpgNum = $('upgNum'), elCoins = $('coins'),
-        pauseBtn = $('pauseBtn'), muteBtn = $('muteBtn'),
+        pauseBtn = $('pauseBtn'), muteBtn = $('muteBtn'), fullBtn = $('fullBtn'),
         overlay = $('overlay'), ovTitle = $('ovTitle'), ovSub = $('ovSub'),
         ovStats = $('ovStats'), ovTip = $('ovTip'), btnPlay = $('btnPlay'),
         btnDaily = $('btnDaily'), btnShare = $('btnShare'), btnReport = $('btnReport'),
@@ -1185,7 +1253,9 @@
         tabBonus = $('tabBonus'), tabSkins = $('tabSkins'),
         btnRestart = $('btnRestart'), btnQuit = $('btnQuit'),
         btnAch = $('btnAch'), achBox = $('achBox'), achBody = $('achBody'), achCount = $('achCount'),
-        volRow = $('volRow'), volSlider = $('volSlider'), volPct = $('volPct'), volIcon = $('volIcon');
+        volRow = $('volRow'), volSlider = $('volSlider'), volPct = $('volPct'), volIcon = $('volIcon'),
+        settings = $('settings'), bgmSlider = $('bgmSlider'), sfxSlider = $('sfxSlider'),
+        perfSeg = $('perfSeg'), motionSeg = $('motionSeg'), settingsFullBtn = $('settingsFullBtn');
 
   // ===== URL 参数：好友挑战 (?ch=分数-关卡) / 每日挑战 (?daily=1) =====
   const urlParams = (() => { try { return new URLSearchParams(location.search); } catch (e) { return new URLSearchParams(); } })();
@@ -1203,7 +1273,35 @@
   btnAdSkip.addEventListener('click', () => { ensureAudio(); skipAd(); });
 
   // ===== 自适应尺寸 =====
-  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+  // —— v0.2.0 性能档位 / 减弱动效 / 分音量设置 ——
+  const LS_PERF = 'tank-battle-perf', LS_MOTION = 'tank-battle-motion',
+        LS_BGM = 'tank-battle-bgm', LS_SFX = 'tank-battle-sfx';
+  let perfQuality = 'high';        // 'high' | 'medium' | 'low'
+  let reduceMotion = 'auto';       // 'auto' | 'on' | 'off'
+  let bgmVol = 1, sfxVol = 1;      // 音乐 / 音效分音量 0..1
+  try {
+    const p = localStorage.getItem(LS_PERF);
+    if (p === 'medium' || p === 'low') perfQuality = p;
+    const m = localStorage.getItem(LS_MOTION);
+    if (m === 'on' || m === 'off') reduceMotion = m;
+    bgmVol = parseFloat(localStorage.getItem(LS_BGM) || '1');
+    if (!isFinite(bgmVol)) bgmVol = 1; bgmVol = Math.min(1, Math.max(0, bgmVol));
+    sfxVol = parseFloat(localStorage.getItem(LS_SFX) || '1');
+    if (!isFinite(sfxVol)) sfxVol = 1; sfxVol = Math.min(1, Math.max(0, sfxVol));
+  } catch (e) { /* 隐私模式下 localStorage 不可用 */ }
+  // 画质档位决定 DPR 上限（高=2 / 中=1.5 / 低=1），像素量是最大性能杠杆
+  const DPR_MAX = 2;
+  let DPR = computeDpr();
+  function computeDpr() {
+    const cap = perfQuality === 'high' ? 2 : (perfQuality === 'medium' ? 1.5 : 1);
+    return Math.min(window.devicePixelRatio || 1, cap);
+  }
+  // 减弱动效（系统偏好 + 用户覆盖）：返回是否应削减/关闭画面动效
+  function reduced() {
+    if (reduceMotion === 'on') return true;
+    if (reduceMotion === 'off') return false;
+    try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; }
+  }
   let renderScale = 1;
   const isTouch = (() => {
     try { if (window.matchMedia('(pointer: coarse)').matches) return true; } catch (e) { /* ignore */ }
@@ -1218,6 +1316,7 @@
     canvas.style.height = size + 'px';
     const px = Math.round(size * DPR);
     if (canvas.width !== px) { canvas.width = px; canvas.height = px; }
+    mapDirty = true;   // 画布尺寸变化 → 静态层需按新分辨率重烘焙
     renderScale = px / W;
     draw();
   }
@@ -1311,6 +1410,10 @@
 
   // ===== 状态 =====
   let map = [];
+  // v0.2.0 静态地图离屏缓存：背景+网格+砖/钢/水 烘焙一次，每帧只 drawImage，油桶/传送门/草丛/实体仍动态
+  let mapStaticCanvas = document.createElement('canvas');
+  let mapStaticCtx = null;
+  let mapDirty = true;
   let player = null;
   let bullets = [];
   let enemies = [];
@@ -1436,7 +1539,8 @@
   }
 
   // 触觉反馈（iOS Safari 不支持，自动忽略）
-  const vibe = p => { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) { /* 忽略 */ } };
+  // 减弱动效：手机震动属于画面动效，开启减弱时完全抑制
+  const vibe = p => { try { if (!reduced() && navigator.vibrate) navigator.vibrate(p); } catch (e) { /* 忽略 */ } };
 
   // 随机源：普通局用 Math.random；每日挑战用日期种子，同一天人人同序列
   let rng = Math.random;
@@ -1470,7 +1574,7 @@
       const o = audioCtx.createOscillator();
       const g = audioCtx.createGain();
       o.type = type; o.frequency.value = freq;
-      g.gain.setValueAtTime(vol * masterVol, t);
+      g.gain.setValueAtTime(vol * masterVol * sfxVol, t);
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
       o.connect(g); g.connect(audioCtx.destination);
       o.start(t); o.stop(t + dur);
@@ -1502,7 +1606,7 @@
       f.frequency.setValueAtTime(fFrom, t);
       f.frequency.exponentialRampToValueAtTime(Math.max(40, fTo), t + dur);
       const g = audioCtx.createGain();
-      g.gain.setValueAtTime(vol * masterVol, t);
+      g.gain.setValueAtTime(vol * masterVol * sfxVol, t);
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
       src.connect(f); f.connect(g); g.connect(audioCtx.destination);
       src.start(t); src.stop(t + dur + 0.02);
@@ -1520,7 +1624,7 @@
       o.type = type;
       o.frequency.setValueAtTime(from, t);
       o.frequency.exponentialRampToValueAtTime(Math.max(20, to), t + dur);
-      g.gain.setValueAtTime(vol * masterVol, t);
+      g.gain.setValueAtTime(vol * masterVol * sfxVol, t);
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
       o.connect(g); g.connect(audioCtx.destination);
       o.start(t); o.stop(t + dur + 0.02);
@@ -1576,7 +1680,7 @@
     const g = audioCtx.createGain();
     o.type = type; o.frequency.value = freq;
     g.gain.setValueAtTime(0.0001, time);
-    g.gain.linearRampToValueAtTime(vol * masterVol, time + 0.012);
+    g.gain.linearRampToValueAtTime(vol * masterVol * bgmVol, time + 0.012);
     g.gain.exponentialRampToValueAtTime(0.0001, time + dur);
     o.connect(g); g.connect(audioCtx.destination);
     o.start(time); o.stop(time + dur + 0.03);
@@ -1632,6 +1736,7 @@
       }
     }
     decorateMap();
+    markMapDirty();
   }
 
   function decorateMap() {
@@ -1674,6 +1779,7 @@
     for (let y = 0; y < ROWS; y++)
       for (let x = 0; x < COLS; x++)
         if (map[y][x] === TILE_BRICK && rng() < 0.22) map[y][x] = TILE_STEEL;
+    markMapDirty();
   }
 
   // 随机放置 N 个可爆炸油桶（避开出生区 / 基地 / 边缘）
@@ -1689,6 +1795,7 @@
       const [x, y] = empties.splice(i, 1)[0];
       map[y][x] = TILE_BARREL;
     }
+    markMapDirty();
   }
 
   // 放置一对传送门（距离较远的两处空地）
@@ -1707,6 +1814,7 @@
     map[a[1]][a[0]] = TILE_PORTAL;
     map[b[1]][b[0]] = TILE_PORTAL;
     portals = [a, b];
+    markMapDirty();
   }
 
   function inside(x, y) { return x >= 0 && y >= 0 && x < COLS && y < ROWS; }
@@ -1737,6 +1845,7 @@
     if (map[y][x] === TILE_BARREL) { explodeBarrel(x, y); return true; }
     if (map[y][x] === TILE_BRICK) {
       map[y][x] = 0;
+      markMapDirty();
       spawnParticles(x * TILE + TILE / 2, y * TILE + TILE / 2, '#ff00ff', 6);
       return true;
     }
@@ -1751,6 +1860,7 @@
     visited[key] = true;
     if (!inside(x, y) || map[y][x] !== TILE_BARREL) return;
     map[y][x] = 0;
+    markMapDirty();
     const cxp = x * TILE + TILE / 2, cyp = y * TILE + TILE / 2;
     spawnParticles(cxp, cyp, '#ffb300', 22);
     spawnParticles(cxp, cyp, '#ff2d55', 12);
@@ -1796,7 +1906,20 @@
   }
 
   // ===== 粒子 / 飘分 =====
+  // 性能档位 → 粒子量系数（低画质减半；减弱动效再减半）
+  function particleMul() {
+    let m = perfQuality === 'low' ? 0.5 : 1;
+    if (reduced()) m *= 0.5;
+    return m;
+  }
+  // 霓虹辉光：低画质档直接关掉 shadowBlur（每帧高频路径的最大开销）
+  function glowBlur(blur) { return perfQuality === 'low' ? 0 : blur; }
+  function setGlow(color, blur) {
+    ctx.shadowColor = color;
+    ctx.shadowBlur = glowBlur(blur);
+  }
   function spawnParticles(x, y, color, n = 8) {
+    n = Math.max(0, Math.round(n * particleMul()));
     for (let i = 0; i < n; i++) {
       particles.push({
         x, y,
@@ -2375,7 +2498,7 @@
 
   function onEnemyKilled(e) {
     sfxBoom();
-    hitStop = e.isBoss ? 0.06 : 0.03;          // 击杀定格（Boss 用慢动作替代长定格）
+    hitStop = reduced() ? 0 : (e.isBoss ? 0.06 : 0.03);   // 击杀定格（减弱动效时关闭；Boss 用慢动作替代长定格）
     vibe(e.isBoss ? [60, 50, 130] : 15);
     spawnParticles(e.x + e.size / 2, e.y + e.size / 2, e.color, e.isBoss ? 48 : 16);
     shake = e.isBoss ? 16 : 6;
@@ -2398,7 +2521,7 @@
       // 死亡演出：连环爆炸 + 慢动作 + 白闪
       bossDeathT = 1.15; bossDeathX = e.x + e.size / 2; bossDeathY = e.y + e.size / 2;
       bossDeathBurst = 0;
-      whiteFlash = 0.3; timeScale = 0.35;
+      whiteFlash = reduced() ? 0.12 : 0.3; timeScale = reduced() ? 0.7 : 0.35;
       sfxBossDie();
       showToast('💥 BOSS 击破！'); unlockAch('boss');
     }
@@ -2802,34 +2925,54 @@
   }
 
   // ===== 渲染 =====
+  // 烘焙静态地图层（背景+网格+砖/钢/水）到离屏 canvas，尺寸与主画布一致（device px）
+  function bakeStaticMap() {
+    if (mapStaticCanvas.width !== canvas.width || mapStaticCanvas.height !== canvas.height) {
+      mapStaticCanvas.width = canvas.width;
+      mapStaticCanvas.height = canvas.height;
+    }
+    if (!mapStaticCtx) mapStaticCtx = mapStaticCanvas.getContext('2d');
+    const c = mapStaticCtx;
+    const prev = ctx; ctx = c;   // 复用 drawBrick/drawSteel/drawWater（临时切换全局 ctx）
+    try {
+      c.setTransform(renderScale, 0, 0, renderScale, 0, 0);
+      c.clearRect(0, 0, W, H);
+      // 背景 + 赛博网格
+      c.fillStyle = '#030308';
+      c.fillRect(0, 0, W, H);
+      c.strokeStyle = 'rgba(0, 47, 167, 0.12)';
+      c.lineWidth = 1;
+      for (let i = 0; i <= W; i += TILE) { c.beginPath(); c.moveTo(i, 0); c.lineTo(i, H); c.stroke(); }
+      for (let i = 0; i <= H; i += TILE) { c.beginPath(); c.moveTo(0, i); c.lineTo(W, i); c.stroke(); }
+      // 静态地块：砖/钢/水（油桶闪烁、传送门旋转属动态层，不烘焙）
+      for (let y = 0; y < ROWS; y++)
+        for (let x = 0; x < COLS; x++) {
+          const t = map[y][x];
+          if (t === TILE_BRICK) drawBrick(x * TILE, y * TILE);
+          else if (t === TILE_STEEL) drawSteel(x * TILE, y * TILE);
+          else if (t === TILE_WATER) drawWater(x * TILE, y * TILE);
+        }
+    } finally { ctx = prev; }
+    mapDirty = false;
+  }
+  function markMapDirty() { mapDirty = true; }
+
   function draw() {
     if (!map.length) return;
     ctx.setTransform(renderScale, 0, 0, renderScale, 0, 0);
     ctx.save();
-    if (shake > 0) ctx.translate(rand(-shake, shake) * 0.5, rand(-shake, shake) * 0.5);
+    if (shake > 0) { const shk = shake * (reduced() ? 0.25 : 1); ctx.translate(rand(-shk, shk) * 0.5, rand(-shk, shk) * 0.5); }
 
-    // 背景 + 赛博网格
-    ctx.fillStyle = '#030308';
-    ctx.fillRect(0, 0, W, H);
-    ctx.strokeStyle = 'rgba(0, 47, 167, 0.12)';
-    ctx.lineWidth = 1;
-    for (let i = 0; i <= W; i += TILE) {
-      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, H); ctx.stroke();
-    }
-    for (let i = 0; i <= H; i += TILE) {
-      ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(W, i); ctx.stroke();
-    }
+    // 静态层（背景+网格+砖/钢/水）：离屏烘焙，脏时重烘焙，每帧一次 drawImage
+    if (mapDirty) bakeStaticMap();
+    ctx.drawImage(mapStaticCanvas, 0, 0, W, H);
 
-    // 地块
+    // 动态地块：油桶（警示灯闪烁）/ 传送门（旋转脉冲）
     for (let y = 0; y < ROWS; y++) {
       for (let x = 0; x < COLS; x++) {
         const t = map[y][x];
-        const px = x * TILE, py = y * TILE;
-        if (t === TILE_BRICK) drawBrick(px, py);
-        else if (t === TILE_STEEL) drawSteel(px, py);
-        else if (t === TILE_WATER) drawWater(px, py);
-        else if (t === TILE_BARREL) drawBarrel(px, py);
-        else if (t === TILE_PORTAL) drawPortal(px, py);
+        if (t === TILE_BARREL) drawBarrel(x * TILE, y * TILE);
+        else if (t === TILE_PORTAL) drawPortal(x * TILE, y * TILE);
       }
     }
 
@@ -2859,11 +3002,11 @@
     // 子弹（霓虹辉光；敌弹统一红色系，一眼识别敌我）
     for (const b of bullets) {
       if (b.owner.isPlayer) {
-        ctx.shadowColor = '#00f0ff'; ctx.shadowBlur = 8; ctx.fillStyle = '#00f0ff';
+        setGlow('#00f0ff', 8); ctx.fillStyle = '#00f0ff';
       } else {
         const isSnip = b.owner.type === 'sniper';
-        ctx.shadowColor = b.owner.isBoss ? '#ff2d55' : (isSnip ? '#ff1a2e' : '#ff3355');
-        ctx.shadowBlur = b.owner.isBoss ? 10 : (isSnip ? 9 : 6);
+        setGlow(b.owner.isBoss ? '#ff2d55' : (isSnip ? '#ff1a2e' : '#ff3355'),
+                b.owner.isBoss ? 10 : (isSnip ? 9 : 6));
         ctx.fillStyle = b.owner.isBoss ? '#ff2d55' : (isSnip ? '#ff1a2e' : '#ff3355');
       }
       ctx.fillRect(b.x, b.y, b.size, b.size);
@@ -2924,7 +3067,7 @@
       ctx.fillStyle = rage ? 'rgba(255,170,0,0.2)' : 'rgba(255,45,85,0.2)';
       ctx.fillRect(bx, by, bw, bh);
       ctx.fillStyle = bar;
-      ctx.shadowColor = bar; ctx.shadowBlur = 10;
+      setGlow(bar, 10);
       ctx.fillRect(bx, by, bw * ratio, bh);
       ctx.shadowBlur = 0;
       ctx.fillStyle = '#fff';
@@ -2955,9 +3098,10 @@
 
     // 受击红闪：四边红色 vignette 渐隐
     if (hurtFlash > 0) {
+      const hf = hurtFlash * (reduced() ? 0.5 : 1);
       const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.28, W / 2, H / 2, H * 0.78);
       g.addColorStop(0, 'rgba(255,45,85,0)');
-      g.addColorStop(1, 'rgba(255,45,85,' + (0.5 * hurtFlash).toFixed(3) + ')');
+      g.addColorStop(1, 'rgba(255,45,85,' + (0.5 * hf).toFixed(3) + ')');
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, W, H);
     }
@@ -2972,7 +3116,7 @@
       ctx.fillRect(0, bandY, W, 2);
       ctx.fillRect(0, bandY + 64, W, 2);
       ctx.globalAlpha = blink;
-      ctx.shadowColor = '#ff2d55'; ctx.shadowBlur = 18;
+      setGlow('#ff2d55', 18);
       ctx.fillStyle = '#ff5c7a';
       ctx.font = '900 26px "Segoe UI", sans-serif';
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -2982,7 +3126,7 @@
 
     // Boss 死亡白闪
     if (whiteFlash > 0) {
-      ctx.fillStyle = 'rgba(255,255,255,' + (0.85 * whiteFlash).toFixed(3) + ')';
+      ctx.fillStyle = 'rgba(255,255,255,' + (0.85 * whiteFlash * (reduced() ? 0.4 : 1)).toFixed(3) + ')';
       ctx.fillRect(0, 0, W, H);
     }
   }
@@ -3092,7 +3236,7 @@
     const blink = Math.floor(animTime / 350) % 2 === 0;
     ctx.fillStyle = blink ? '#ff2d55' : '#8a1520';
     ctx.beginPath(); ctx.arc(cx, cy - 5, 3, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowColor = '#ffb300'; ctx.shadowBlur = blink ? 8 : 0;
+    ctx.shadowColor = '#ffb300'; ctx.shadowBlur = glowBlur(blink ? 8 : 0);
     ctx.strokeStyle = '#ffb300'; ctx.lineWidth = 1;
     ctx.strokeRect(px + 6.5, py + 4.5, TILE - 13, TILE - 9);
     ctx.restore();
@@ -3103,7 +3247,7 @@
     const cx = px + TILE / 2, cy = py + TILE / 2;
     const pulse = (Math.sin(animTime * 0.006) + 1) / 2;
     ctx.save();
-    ctx.shadowColor = '#a06bff'; ctx.shadowBlur = 12 + pulse * 8;
+    ctx.shadowColor = '#a06bff'; ctx.shadowBlur = glowBlur(12 + pulse * 8);
     ctx.fillStyle = 'rgba(160, 107, 255, 0.5)';
     ctx.beginPath(); ctx.arc(cx, cy, TILE / 2 - 3, 0, Math.PI * 2); ctx.fill();
     ctx.shadowBlur = 0;
@@ -3133,7 +3277,7 @@
       ctx.font = '700 8px "Consolas", monospace';
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText('Q', px + TILE / 2, py + TILE / 2);
-      ctx.shadowColor = '#00f0ff'; ctx.shadowBlur = 6;
+      setGlow('#00f0ff', 6);
       ctx.fillText('Q', px + TILE / 2, py + TILE / 2);
       ctx.shadowBlur = 0;
     } else {
@@ -3163,7 +3307,7 @@
       const pulse = lowHp ? (0.45 + 0.4 * Math.sin(t / 130)) : 0.28;
       ctx.fillStyle = def.color;
       ctx.globalAlpha = pulse;
-      ctx.shadowColor = def.color; ctx.shadowBlur = 14;
+      setGlow(def.color, 14);
       ctx.fillRect(x + size / 2 - 3, y - 68, 6, 68);
       ctx.globalAlpha = 1;
       const ay = y - 72 - (lowHp ? Math.abs(Math.sin(t / 200)) * 5 : 0);
@@ -3175,7 +3319,7 @@
       ctx.fill();
       ctx.shadowBlur = 0;
     }
-    ctx.shadowColor = def.color; ctx.shadowBlur = 10;
+    setGlow(def.color, 10);
     ctx.fillStyle = '#05050a';
     ctx.fillRect(x, y, size, size);
     ctx.strokeStyle = def.color; ctx.lineWidth = 2;
@@ -3248,9 +3392,9 @@
     // 装备皮肤（仅玩家）：按当前装备的皮肤配色绘制
     const skin = isPlayer ? (SKINS[equippedSkin] || SKINS.classic) : null;
 
-    if (isPlayer) { ctx.shadowColor = skin.glow; ctx.shadowBlur = 10; }
-    else if (t.isBoss) { ctx.shadowColor = '#ff2d55'; ctx.shadowBlur = 18; }
-    else { ctx.shadowColor = t.color; ctx.shadowBlur = 8; }
+    if (isPlayer) setGlow(skin.glow, 10);
+    else if (t.isBoss) setGlow('#ff2d55', 18);
+    else setGlow(t.color, 8);
 
     // 限定皮肤「蓝色大肥鱼」：专属鱼形造型（坦克仍开炮）
     if (isPlayer && skin.fish) {
@@ -3483,11 +3627,14 @@
     btnQuit.style.display = 'none';
     btnAch.style.display = 'none';
     volRow.style.display = 'none';
+    settings.style.display = 'none';
     btnDaily.style.display = (kind === 'title' && !dailyInvited) ? 'block' : 'none';
     if (kind === 'title') {
       btnAch.style.display = 'block';
       volRow.style.display = 'flex';
+      settings.style.display = 'flex';
       applyVolUI();
+      applySettingsUI();
       ovTitle.textContent = '坦克大战';
       if (challenge) {
         ovSub.textContent = '⚔️ 好友向你发起挑战';
@@ -3510,7 +3657,9 @@
       btnRestart.style.display = 'block';
       btnQuit.style.display = 'block';
       volRow.style.display = 'flex';
+      settings.style.display = 'flex';
       applyVolUI();
+      applySettingsUI();
       ovTitle.textContent = '已暂停';
       ovSub.textContent = '';
       ovStats.innerHTML = `得分 <b>${score}</b> · 第 <b>${level}</b> 关`;
@@ -3617,6 +3766,7 @@
       const gy = BASE.y + dy, gx = BASE.x + dx;
       if (inside(gx, gy)) map[gy][gx] = TILE_BRICK;
     }
+    markMapDirty();
   }
   function clearEnemiesNearBase(r) {
     // 清除基地周围威胁（避免复活瞬间再被毁）；不给金币，防刷币
@@ -3816,6 +3966,26 @@
     if (!muted) sfxPickup();
   }
 
+  // ===== 全屏沉浸模式（v0.2.0）=====
+  function isFullscreen() { return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+  function applyFullscreenLabel() {
+    if (fullBtn) fullBtn.textContent = isFullscreen() ? '🗗' : '⛶';
+  }
+  function toggleFullscreen() {
+    try {
+      if (isFullscreen()) {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      } else {
+        const el = document.documentElement;
+        if (el.requestFullscreen) el.requestFullscreen();
+        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+      }
+    } catch (e) { showToast('⚠ 当前环境不支持全屏'); }
+  }
+  document.addEventListener('fullscreenchange', applyFullscreenLabel);
+  document.addEventListener('webkitfullscreenchange', applyFullscreenLabel);
+
   // ===== 主音量 =====
   function applyVolUI() {
     const p = Math.round(masterVol * 100);
@@ -3828,6 +3998,50 @@
     try { localStorage.setItem(LS_VOL, String(masterVol)); } catch (e) { /* 忽略 */ }
     applyVolUI();
     if (!muted && masterVol > 0) sfxPickup();
+  }
+
+  // ===== v0.2.0 设置：画质档位 / 减弱动效 / 分音量 =====
+  function applySettingsUI() {
+    if (bgmSlider) bgmSlider.value = Math.round(bgmVol * 100);
+    if (sfxSlider) sfxSlider.value = Math.round(sfxVol * 100);
+    if (perfSeg) {
+      for (const b of perfSeg.querySelectorAll('button'))
+        b.classList.toggle('active', b.dataset.perf === perfQuality);
+    }
+    if (motionSeg) {
+      for (const b of motionSeg.querySelectorAll('button'))
+        b.classList.toggle('active', b.dataset.motion === reduceMotion);
+    }
+    if (settingsFullBtn) settingsFullBtn.textContent = isFullscreen() ? '退出全屏' : '进入全屏';
+  }
+  function setPerf(q) {
+    if (q !== 'high' && q !== 'medium' && q !== 'low') return;
+    perfQuality = q;
+    try { localStorage.setItem(LS_PERF, q); } catch (e) { /* 忽略 */ }
+    // DPR 随档位变化：需按新上限重算并重烘焙静态层
+    DPR = computeDpr();
+    resize();
+    applySettingsUI();
+    sfxPickup();
+  }
+  function setMotion(m) {
+    if (m !== 'auto' && m !== 'on' && m !== 'off') return;
+    reduceMotion = m;
+    try { localStorage.setItem(LS_MOTION, m); } catch (e) { /* 忽略 */ }
+    applySettingsUI();
+    sfxPickup();
+  }
+  function setBgmVol(v) {
+    bgmVol = Math.min(1, Math.max(0, v));
+    try { localStorage.setItem(LS_BGM, String(bgmVol)); } catch (e) { /* 忽略 */ }
+    applySettingsUI();
+    if (!muted && bgmVol > 0) sfxPickup();
+  }
+  function setSfxVol(v) {
+    sfxVol = Math.min(1, Math.max(0, v));
+    try { localStorage.setItem(LS_SFX, String(sfxVol)); } catch (e) { /* 忽略 */ }
+    applySettingsUI();
+    if (!muted && sfxVol > 0) sfxPickup();
   }
 
   // ===== 成就墙 =====
@@ -3926,7 +4140,7 @@
     g.textAlign = 'center';
     g.fillStyle = '#00f0ff';
     g.font = '800 30px "Segoe UI", sans-serif';
-    g.shadowColor = 'rgba(0, 240, 255, 0.8)'; g.shadowBlur = 18;
+    g.shadowColor = 'rgba(0, 240, 255, 0.8)'; g.shadowBlur = glowBlur(18);
     g.fillText('QIAN · 坦克大战', W2 / 2, 86);
     g.shadowBlur = 0;
     g.fillStyle = 'rgba(157, 196, 232, 0.75)';
@@ -3937,7 +4151,7 @@
     const acc = stat.shots > 0 ? Math.round(stat.hits / stat.shots * 100) : 0;
     g.fillStyle = '#ffffff';
     g.font = '800 128px "Segoe UI", sans-serif';
-    g.shadowColor = 'rgba(0, 240, 255, 0.85)'; g.shadowBlur = 34;
+    g.shadowColor = 'rgba(0, 240, 255, 0.85)'; g.shadowBlur = glowBlur(34);
     g.fillText(String(score), W2 / 2, 288);
     g.shadowBlur = 0;
     g.fillStyle = '#00f0ff';
@@ -3947,7 +4161,7 @@
     if (score > bestAtStart && score > 0) {
       g.fillStyle = '#ffe600';
       g.font = '800 24px "Segoe UI", sans-serif';
-      g.shadowColor = 'rgba(255, 230, 0, 0.8)'; g.shadowBlur = 16;
+      g.shadowColor = 'rgba(255, 230, 0, 0.8)'; g.shadowBlur = glowBlur(16);
       g.fillText('🏆 新 纪 录', W2 / 2, 372);
       g.shadowBlur = 0;
     }
@@ -4001,7 +4215,7 @@
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V1.9', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V2.0', W2 / 2, H2 - 78);
     const d = new Date();
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -4061,12 +4275,23 @@
   $('btnReportShare').addEventListener('click', () => { ensureAudio(); shareReport(); });
   pauseBtn.addEventListener('click', (e) => { togglePause(); e.currentTarget.blur(); });
   muteBtn.addEventListener('click', (e) => { toggleMute(); e.currentTarget.blur(); });
+  fullBtn.addEventListener('click', (e) => { toggleFullscreen(); e.currentTarget.blur(); });
   btnRestart.addEventListener('click', () => { ensureAudio(); const d = dailyMode; start(d); });
   btnQuit.addEventListener('click', () => { ensureAudio(); quitToMenu(); });
   btnAch.addEventListener('click', () => { ensureAudio(); openAch(); });
   $('btnAchClose').addEventListener('click', closeAch);
   achBox.addEventListener('click', (e) => { if (e.target === achBox) closeAch(); });
   volSlider.addEventListener('input', (e) => setMasterVol(parseFloat(e.target.value) / 100));
+  // v0.2.0 设置面板
+  bgmSlider.addEventListener('input', (e) => setBgmVol(parseFloat(e.target.value) / 100));
+  sfxSlider.addEventListener('input', (e) => setSfxVol(parseFloat(e.target.value) / 100));
+  perfSeg.addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (b) setPerf(b.dataset.perf);
+  });
+  motionSeg.addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (b) setMotion(b.dataset.motion);
+  });
+  settingsFullBtn.addEventListener('click', () => { ensureAudio(); toggleFullscreen(); });
   // 键盘 Enter 在暂停/标题下支持音量行；成就墙可 Esc 关闭
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && achBox.classList.contains('show')) closeAch();
@@ -4076,6 +4301,7 @@
     keys[e.key] = true;
     if (e.key === 'p' || e.key === 'P') togglePause();
     if (e.key === 'm' || e.key === 'M') toggleMute();
+    if (e.key === 'f' || e.key === 'F') toggleFullscreen();
     if (e.key === 'Enter' && !overlay.classList.contains('hide')) {
       if (overlayKind === 'paused') togglePause(); else start(dailyInvited);
     }
@@ -4297,7 +4523,7 @@
       testEnemies: () => enemies.filter(e => e.__test).map(e => ({ x: e.x, y: e.y, hp: e.hp, dead: e.dead, type: e.type })),
       invul: (ms = 9999) => { if (player) player.spawnInv = ms; },
       skipIntro: () => { lvIntroT = 0; lvIntroNext = false; },
-      clearMap: () => { for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) map[y][x] = 0; },
+      clearMap: () => { for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) map[y][x] = 0; markMapDirty(); },
       setUpgrades: (o) => { upgrades = Object.assign({}, o); },
       stopSpawn: () => { enemySpawnTimer = 999999; },
       // —— 单波洪流验证 ——
@@ -4368,6 +4594,35 @@
       setMasterVol, applyVolUI,
       masterVolNow: () => masterVol,
       achCountNow: () => ({ total: ACHIEVE.length, unlocked: achUnlocked.size }),
+      // —— v0.2.0 验证：性能档位 / 减弱动效 / 分音量 / 静态地图缓存 / 全屏 ——
+      perfNow: () => perfQuality,
+      motionNow: () => reduceMotion,
+      setPerf, setMotion,
+      setBgmVol, setSfxVol,
+      bgmVolNow: () => bgmVol,
+      sfxVolNow: () => sfxVol,
+      dprNow: () => DPR,
+      reducedNow: () => reduced(),
+      glowBlurNow: (blur) => glowBlur(blur),
+      mapBake: () => ({ dirty: mapDirty, w: mapStaticCanvas.width, h: mapStaticCanvas.height, hasCtx: !!mapStaticCtx }),
+      // 采样静态层像素：统计显著偏离背景色的像素数（证明砖/钢/水真的被烘进去了）
+      mapBakeSample: () => {
+        const c = mapStaticCtx; if (!c) return null;
+        const img = c.getImageData(0, 0, mapStaticCanvas.width, mapStaticCanvas.height).data;
+        const w = mapStaticCanvas.width;
+        const bg = [3, 3, 8];
+        let lit = 0, total = 0;
+        for (let y = 0; y < mapStaticCanvas.height; y += 3) {
+          for (let x = 0; x < w; x += 3) {
+            const idx = (y * w + x) * 4;
+            const d = Math.abs(img[idx] - bg[0]) + Math.abs(img[idx + 1] - bg[1]) + Math.abs(img[idx + 2] - bg[2]);
+            if (d > 40) lit++;
+            total++;
+          }
+        }
+        return { lit, total };
+      },
+      fullscreenNow: () => isFullscreen(),
     };
   }
 
