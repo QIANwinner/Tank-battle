@@ -165,6 +165,28 @@
   html.touch { --pad-h: 178px; }
   html.touch #pad { display: flex; }
 
+  /* ---------- 移动端 HUD：精简次要信息 + 加大触控按钮 ---------- */
+  html.touch { --hud-h: 60px; }
+  html.touch #hud {
+    height: auto; min-height: var(--hud-h);
+    gap: 4px; padding: 0 6px;
+    padding-top: calc(6px + env(safe-area-inset-top));
+    background: linear-gradient(180deg, rgba(5, 5, 10, 0.72), rgba(5, 5, 10, 0.35) 62%, transparent);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+  html.touch #brandTag { display: none; }              /* 手机端隐藏品牌标，腾出空间（画布右下有 #wm 署名） */
+  html.touch .pill.m-hide { display: none; }           /* 隐藏 最高/敌 等次要 pill，防溢出 */
+  html.touch .pill { padding: 4px 8px; }
+  html.touch .hbtn {
+    width: 42px; height: 42px; border-radius: 13px;
+    font-size: 18px;
+    background: rgba(0, 47, 167, 0.45);
+    border-color: rgba(77, 159, 255, 0.55);
+    box-shadow: 0 0 14px rgba(0, 47, 167, 0.4);
+  }
+  html.touch .hbtns { gap: 8px; }
+
   /* 虚拟摇杆：外面一层更大的透明触摸区，手指落在圆边外也能拉 */
   #stickZone {
     pointer-events: auto;
@@ -223,13 +245,29 @@
   }
   #tFire.on { transform: scale(0.94); box-shadow: 0 0 32px rgba(255, 0, 255, 0.8); }
 
+  /* 竖屏：控制区底部渐变分离画布，开火按钮加大拇指易点 */
+  html.touch #pad {
+    background: linear-gradient(0deg, rgba(3, 3, 8, 0.92), rgba(3, 3, 8, 0.55) 66%, transparent);
+  }
+  html.touch #tFire { width: 92px; height: 92px; font-size: 16px; }
+  html.touch #stick { opacity: 0.95; }
+
   /* 横屏：按键浮在画布两侧空白处，不再占用高度 */
-  html.touch.wide { --pad-h: 0px; }
+  html.touch.wide { --pad-h: 0px; --hud-h: 54px; }
   html.touch.wide #pad {
     height: auto; background: none;
     align-items: flex-end;
     padding-bottom: calc(12px + env(safe-area-inset-bottom));
   }
+  html.touch.wide #hud {
+    height: var(--hud-h); min-height: 0;
+    padding-top: env(safe-area-inset-top);
+    background: linear-gradient(180deg, rgba(5, 5, 10, 0.95) 40%, rgba(5, 5, 10, 0));
+    -webkit-backdrop-filter: none; backdrop-filter: none;
+  }
+  html.touch.wide #brandTag { display: flex; }          /* 横屏空间足，恢复品牌标与次要信息 */
+  html.touch.wide .pill.m-hide { display: flex; }
+  html.touch.wide .hbtn { width: 38px; height: 38px; }
   html.touch.wide #stickZone { width: 136px; height: 136px; }
   html.touch.wide #stick { width: 104px; height: 104px; opacity: 0.85; }
   html.touch.wide #knob { width: 50px; height: 50px; }
@@ -792,9 +830,9 @@
   <div id="hud">
     <div id="brandTag"><i class="q">Q</i><span class="n">QIAN</span></div>
     <div class="pill"><span class="k">分数</span><span class="v" id="score">0</span></div>
-    <div class="pill best"><span class="k">最高</span><span class="v" id="best">0</span></div>
+    <div class="pill best m-hide"><span class="k">最高</span><span class="v" id="best">0</span></div>
     <div class="pill"><span class="k">关</span><span class="v" id="level">1</span></div>
-    <div class="pill"><span class="k">敌</span><span class="v" id="remaining">0</span></div>
+    <div class="pill m-hide"><span class="k">敌</span><span class="v" id="remaining">0</span></div>
     <div class="pill wave" id="waveWrap" style="display:none"><span class="k">波</span><span class="v" id="waveNum">1/1</span></div>
     <div class="pill upg" id="upgWrap" style="display:none"><span class="k">强化</span><span class="v" id="upgNum">0</span></div>
     <div class="pill coin"><span class="k">🪙</span><span class="v" id="coins">0</span></div>
@@ -859,7 +897,7 @@
 
   <div id="toast"></div>
   <div id="wxtip">点右上角 <b>···</b> → 发送给朋友</div>
-  <div id="mark">DESIGNED BY QIAN · V1.18</div>
+  <div id="mark">DESIGNED BY QIAN · V1.19</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -1168,8 +1206,8 @@
   const DPR = Math.min(window.devicePixelRatio || 1, 2);
   let renderScale = 1;
   const isTouch = (() => {
-    try { return window.matchMedia('(pointer: coarse)').matches; }
-    catch (e) { return 'ontouchstart' in window; }
+    try { if (window.matchMedia('(pointer: coarse)').matches) return true; } catch (e) { /* ignore */ }
+    try { return (navigator.maxTouchPoints || 0) > 0 || 'ontouchstart' in window; } catch (e) { return false; }
   })();
   if (isTouch) document.documentElement.classList.add('touch');
 
