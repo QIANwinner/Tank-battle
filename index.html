@@ -135,6 +135,11 @@
   .pill.combo { border-color: rgba(255, 0, 255, 0.5); background: rgba(255, 0, 255, 0.12); }
   .pill.combo .v { color: var(--cyan); }
   .pill.combo.hot .v { color: var(--magenta); text-shadow: 0 0 8px rgba(255, 0, 255, 0.9); }
+  .pill.timer { border-color: rgba(255, 230, 0, 0.4); background: rgba(255, 200, 0, 0.1); }
+  .pill.timer .v { color: #ffe066; }
+  .pill.timer.low { border-color: rgba(255, 45, 85, 0.6); background: rgba(255, 45, 85, 0.16); }
+  .pill.timer.low .v { color: #ff6b7d; text-shadow: 0 0 8px rgba(255, 45, 85, 0.8); animation: pulseRed 0.6s ease infinite; }
+  @keyframes pulseRed { 0%,100% { opacity: 1; } 50% { opacity: 0.55; } }
   #lives {
     display: flex; gap: 1px; font-size: 12px; line-height: 1;
     color: var(--green); margin-left: 2px;
@@ -328,7 +333,7 @@
     -webkit-appearance: none; appearance: none;
   }
   #btnPlay:active { transform: translateY(1px); filter: brightness(1.1); }
-  #btnDaily, #btnShare, #btnReport, #btnShop {
+  #btnDaily, #btnShare, #btnReport, #btnShop, #btnTimed {
     margin-top: -2px;
     padding: 9px 22px;
     border: 1px solid rgba(0, 240, 255, 0.4); border-radius: 999px;
@@ -337,8 +342,9 @@
     cursor: pointer;
     -webkit-appearance: none; appearance: none;
   }
-  #btnDaily:active, #btnShare:active, #btnReport:active, #btnShop:active { background: var(--klein); transform: translateY(1px); }
+  #btnDaily:active, #btnShare:active, #btnReport:active, #btnShop:active, #btnTimed:active { background: var(--klein); transform: translateY(1px); }
   #btnDaily { display: none; }
+  #btnTimed { display: none; border-color: rgba(255, 170, 0, 0.6); color: #ffe0a3; box-shadow: 0 0 14px rgba(255, 170, 0, 0.22); }
   #btnShare { display: none; border-color: rgba(255, 0, 255, 0.5); color: #ffc4ff; box-shadow: 0 0 14px rgba(255, 0, 255, 0.18); }
   #btnReport { display: none; border-color: rgba(57, 255, 20, 0.5); color: #c9ffd2; box-shadow: 0 0 14px rgba(57, 255, 20, 0.18); }
   #btnShop { border-color: rgba(255, 215, 0, 0.55); color: #ffe9a6; box-shadow: 0 0 14px rgba(255, 215, 0, 0.2); }
@@ -467,6 +473,18 @@
     70% { transform: scale(1.08); opacity: 1; }
     100% { transform: scale(1); }
   }
+  /* ---------- v0.2.3 难度选择 ---------- */
+  #diffRow {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    margin: 10px auto 2px;
+  }
+  #diffRow .diffLabel { color: #8ea0b8; font-size: 11px; font-weight: 700; letter-spacing: 2px; }
+  #diffSeg { gap: 4px; }
+  #diffSeg button {
+    padding: 5px 11px; font-size: 11px; border-radius: 8px;
+  }
+  #diffSeg button[data-diff="easy"].active { background: #39ff14; border-color: #39ff14; color: #04260a; box-shadow: 0 0 10px rgba(57,255,20,.55); }
+  #diffSeg button[data-diff="hard"].active { background: #ff2d55; border-color: #ff2d55; color: #2b0209; box-shadow: 0 0 10px rgba(255,45,85,.55); }
 
   /* ---------- 关卡过渡 ---------- */
   #lvIntro {
@@ -490,6 +508,71 @@
     22% { opacity: 1; transform: scale(1); letter-spacing: 10px; }
     78% { opacity: 1; transform: scale(1); }
     100% { opacity: 0; transform: scale(0.93); letter-spacing: 14px; }
+  }
+
+  /* ---------- v0.2.3 里程碑庆典 ---------- */
+  #milestone {
+    position: fixed; inset: 0; z-index: 60;
+    display: none; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 50% 42%, rgba(20, 10, 60, 0.72), rgba(3, 3, 10, 0.9));
+    overflow: hidden;
+  }
+  #milestone.show { display: flex; animation: miloIn 0.4s ease both; }
+  #milestone .miloFire { position: absolute; inset: 0; pointer-events: none; }
+  #milestone .miloFire::before, #milestone .miloFire::after {
+    content: ''; position: absolute; border-radius: 50%;
+    filter: blur(1px);
+  }
+  #milestone .miloFire::before {
+    width: 10px; height: 10px; left: 18%; top: 26%;
+    background: #ff2d55; box-shadow: 0 0 18px 4px #ff2d55;
+    animation: miloBurst 1.8s ease-out infinite;
+  }
+  #milestone .miloFire::after {
+    width: 10px; height: 10px; right: 20%; top: 32%;
+    background: #00f0ff; box-shadow: 0 0 18px 4px #00f0ff;
+    animation: miloBurst 1.8s ease-out 0.7s infinite;
+  }
+  #milestone .miloFire i {
+    position: absolute; width: 8px; height: 8px; border-radius: 50%;
+    animation: miloSpark 2s ease-out infinite;
+  }
+  #milestone .miloBody {
+    position: relative; text-align: center; padding: 26px 34px;
+    background: rgba(6, 6, 18, 0.82);
+    border: 1px solid rgba(0, 240, 255, 0.35); border-radius: 18px;
+    box-shadow: 0 0 44px rgba(0, 47, 167, 0.55);
+    animation: miloPop 0.55s cubic-bezier(0.18, 1.4, 0.4, 1) both;
+  }
+  #milestone .miloBadge {
+    font-size: 54px; line-height: 1; margin-bottom: 8px;
+    animation: miloSpin 3.2s linear infinite;
+    filter: drop-shadow(0 0 14px rgba(255, 215, 0, 0.9));
+  }
+  #milestone .miloTitle {
+    font-size: 28px; font-weight: 900; letter-spacing: 4px; color: #ffe066;
+    text-shadow: 0 0 16px rgba(255, 215, 0, 0.7);
+  }
+  #milestone .miloSub {
+    font-size: 15px; color: #bfe4ff; letter-spacing: 2px; margin: 8px 0 16px;
+  }
+  #milestone .miloBtn {
+    padding: 10px 26px; border: 1px solid rgba(0, 240, 255, 0.5); border-radius: 999px;
+    background: rgba(0, 47, 167, 0.4); color: #fff; font-size: 14px; font-weight: 800; letter-spacing: 2px;
+    cursor: pointer;
+  }
+  #milestone .miloBtn:active { background: var(--klein); transform: translateY(1px); }
+  @keyframes miloIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes miloPop { 0% { transform: scale(0.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+  @keyframes miloSpin { 0% { transform: rotate(-12deg); } 50% { transform: rotate(12deg); } 100% { transform: rotate(-12deg); } }
+  @keyframes miloBurst {
+    0% { transform: scale(1); opacity: 1; }
+    60% { transform: scale(3.2); opacity: 0.5; }
+    100% { transform: scale(5); opacity: 0; }
+  }
+  @keyframes miloSpark {
+    0% { transform: translate(0, 0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--dx, 40px), var(--dy, -60px)) scale(0.2); opacity: 0; }
   }
 
   /* ---------- 过关强化三选一 ---------- */
@@ -791,6 +874,47 @@
   #achBox .achItem.locked .aState {
     color: #8ea0b8; border-color: rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.04);
   }
+  /* ---------- v0.2.3 存档备份/恢复 ---------- */
+  #saveBox {
+    position: fixed; inset: 0; z-index: 45;
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: rgba(2, 4, 12, 0.92);
+    padding: 16px;
+  }
+  #saveBox.show { display: flex; }
+  #saveBox .saveBody {
+    width: min(92vw, 380px);
+    max-height: 62vh; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 10px;
+    padding: 14px 16px 16px;
+    background: rgba(4, 8, 18, 0.85);
+    border: 1px solid rgba(127, 212, 255, 0.35); border-radius: 0 0 14px 14px;
+  }
+  #saveBox .saveTip { color: #8ea0b8; font-size: 11px; line-height: 1.6; letter-spacing: 0.4px; }
+  #saveBox .saveArea {
+    width: 100%; min-height: 76px; box-sizing: border-box;
+    padding: 9px 11px; border-radius: 10px; resize: none;
+    background: rgba(0, 0, 0, 0.35); color: #9fffc9;
+    border: 1px solid rgba(57, 255, 20, 0.3);
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 10.5px; line-height: 1.5; word-break: break-all;
+    -webkit-appearance: none; appearance: none;
+  }
+  #saveBox .saveArea.import { color: #cfe4ff; border-color: rgba(127, 212, 255, 0.4); }
+  #saveBox .saveRow { display: flex; gap: 8px; flex-wrap: wrap; }
+  #saveBox .saveRow button {
+    flex: 1; min-width: 96px; padding: 10px 12px; border-radius: 10px; cursor: pointer;
+    border: 1px solid rgba(127, 212, 255, 0.35); background: rgba(0, 40, 90, 0.35);
+    color: #cfeeff; font-size: 13px; font-weight: 700; letter-spacing: 1px;
+    -webkit-appearance: none; appearance: none;
+  }
+  #saveBox .saveRow button.danger {
+    border-color: rgba(255, 77, 109, 0.5); background: rgba(120, 10, 30, 0.4); color: #ffb3c0;
+  }
+  #saveBox .saveRow button.ok {
+    border-color: rgba(57, 255, 20, 0.5); background: rgba(10, 90, 20, 0.35); color: #c8ffd8;
+  }
   /* ---------- 皮肤卡实车预览 ---------- */
   .shopItem .siIcon.skinPrev {
     width: 48px; height: 48px; flex: none;
@@ -922,6 +1046,7 @@
     <div class="pill"><span class="k">分数</span><span class="v" id="score">0</span></div>
     <div class="pill best m-hide"><span class="k">最高</span><span class="v" id="best">0</span></div>
     <div class="pill"><span class="k">关</span><span class="v" id="level">1</span></div>
+    <div class="pill timer" id="timerWrap" style="display:none"><span class="k">⏱</span><span class="v" id="timerNum">0:00</span></div>
     <div class="pill m-hide"><span class="k">敌</span><span class="v" id="remaining">0</span></div>
     <div class="pill wave" id="waveWrap" style="display:none"><span class="k">波</span><span class="v" id="waveNum">1/1</span></div>
     <div class="pill upg" id="upgWrap" style="display:none"><span class="k">强化</span><span class="v" id="upgNum">0</span></div>
@@ -949,11 +1074,20 @@
     <h1 id="ovTitle">坦克大战</h1>
     <p id="ovSub">守住基地 · 消灭敌军 · 点开即玩</p>
     <div id="ovStats"></div>
+    <div class="diffRow" id="diffRow">
+      <span class="diffLabel">难度</span>
+      <div class="seg" id="diffSeg">
+        <button data-diff="easy">😌 轻松</button>
+        <button data-diff="normal">⚖ 标准</button>
+        <button data-diff="hard">🔥 硬核</button>
+      </div>
+    </div>
     <button id="btnPlay">开始游戏</button>
     <button id="btnRestart">🔄 重新开始本局</button>
     <button id="btnQuit">🏠 回到主菜单</button>
     <button id="btnRevive">🪙 花金币复活基地</button>
     <button id="btnDaily">📅 每日挑战</button>
+    <button id="btnTimed">⏱ 限时冲分</button>
     <button id="btnInstall">📲 安装到桌面</button>
     <button id="btnAch">🏆 成就</button>
     <button id="btnShop">🛒 商店</button>
@@ -995,10 +1129,28 @@
         <span class="setLabel">⛶ 全屏<span class="hint">沉浸模式</span></span>
         <div class="seg"><button id="settingsFullBtn">进入全屏</button></div>
       </div>
+      <div class="setRow">
+        <span class="setLabel">💾 存档<span class="hint">备份 / 迁移进度</span></span>
+        <div class="seg">
+          <button id="btnSaveExport">导出存档码</button>
+          <button id="btnSaveImport">导入恢复</button>
+        </div>
+      </div>
     </div>
   </div>
 
   <div id="lvIntro"><div class="lvT">第 1 关</div></div>
+
+  <!-- v0.2.3 里程碑庆典：每通关 10 关全屏礼花 + 成就徽章 -->
+  <div id="milestone">
+    <div class="miloFire" id="miloFire"></div>
+    <div class="miloBody">
+      <div class="miloBadge">🏆</div>
+      <div class="miloTitle" id="miloTitle">里程碑达成！</div>
+      <div class="miloSub" id="miloSub">第 10 关</div>
+      <button class="miloBtn" id="btnMiloOk">继续战斗</button>
+    </div>
+  </div>
 
   <div id="reportBox">
     <img id="reportImg" alt="战绩图">
@@ -1016,6 +1168,15 @@
       <button class="achClose" id="btnAchClose" aria-label="关闭">✕</button>
     </div>
     <div class="achBody" id="achBody"></div>
+  </div>
+
+  <!-- v0.2.3 存档备份/恢复 -->
+  <div id="saveBox">
+    <div class="achHead">
+      <div class="achTitle">💾 存档</div>
+      <button class="achClose" id="btnSaveClose" aria-label="关闭">✕</button>
+    </div>
+    <div class="saveBody" id="saveBody"></div>
   </div>
 
   <div id="toast"></div>
@@ -1040,7 +1201,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V2.2</div>
+  <div id="mark">DESIGNED BY QIAN · V2.3</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -1344,21 +1505,28 @@
         elComboWrap = $('comboWrap'),
         elWaveWrap = $('waveWrap'), elWaveNum = $('waveNum'),
         elUpgWrap = $('upgWrap'), elUpgNum = $('upgNum'), elCoins = $('coins'),
+        elTimerWrap = $('timerWrap'), elTimerNum = $('timerNum'),
         pauseBtn = $('pauseBtn'), muteBtn = $('muteBtn'), fullBtn = $('fullBtn'),
         overlay = $('overlay'), ovTitle = $('ovTitle'), ovSub = $('ovSub'),
         ovStats = $('ovStats'), ovTip = $('ovTip'), btnPlay = $('btnPlay'),
         btnDaily = $('btnDaily'), btnShare = $('btnShare'), btnReport = $('btnReport'),
+        btnTimed = $('btnTimed'),
         reportBox = $('reportBox'), reportImg = $('reportImg'),
         upgradeBox = $('upgradeBox'), upSkip = $('upSkip'),
         adBox = $('adBox'), btnAdClaim = $('btnAdClaim'), btnAdSkip = $('btnAdSkip'),
         shopBox = $('shopBox'), shopBody = $('shopBody'),
         btnShop = $('btnShop'), btnShopClose = $('btnShopClose'),
         tabBonus = $('tabBonus'), tabSkins = $('tabSkins'),
+        // v0.2.3 里程碑庆典
+        milestone = $('milestone'), miloFire = $('miloFire'),
+        miloTitle = $('miloTitle'), miloSub = $('miloSub'),
         btnRestart = $('btnRestart'), btnQuit = $('btnQuit'),
         btnAch = $('btnAch'), achBox = $('achBox'), achBody = $('achBody'), achCount = $('achCount'),
+        saveBox = $('saveBox'), saveBody = $('saveBody'),
         volRow = $('volRow'), volSlider = $('volSlider'), volPct = $('volPct'), volIcon = $('volIcon'),
         settings = $('settings'), bgmSlider = $('bgmSlider'), sfxSlider = $('sfxSlider'),
-        perfSeg = $('perfSeg'), motionSeg = $('motionSeg'), settingsFullBtn = $('settingsFullBtn');
+        perfSeg = $('perfSeg'), motionSeg = $('motionSeg'), settingsFullBtn = $('settingsFullBtn'),
+        diffSeg = $('diffSeg');
 
   // ===== URL 参数：好友挑战 (?ch=分数-关卡) / 每日挑战 (?daily=1) =====
   const urlParams = (() => { try { return new URLSearchParams(location.search); } catch (e) { return new URLSearchParams(); } })();
@@ -1392,6 +1560,18 @@
     sfxVol = parseFloat(localStorage.getItem(LS_SFX) || '1');
     if (!isFinite(sfxVol)) sfxVol = 1; sfxVol = Math.min(1, Math.max(0, sfxVol));
   } catch (e) { /* 隐私模式下 localStorage 不可用 */ }
+  // —— v0.2.3 难度选择：轻松 / 标准 / 硬核 ——
+  const LS_DIFF = 'tank-battle-diff';
+  let difficulty = 'normal';          // 'easy' | 'normal' | 'hard'
+  try {
+    const d = localStorage.getItem(LS_DIFF);
+    if (d === 'easy' || d === 'normal' || d === 'hard') difficulty = d;
+  } catch (e) { /* 忽略 */ }
+  function diffMul() {
+    if (difficulty === 'easy') return { spd: 0.85, hp: 1, reward: 1.15, score: 1 };
+    if (difficulty === 'hard') return { spd: 1.18, hp: 1.3, reward: 0.85, score: 1.2 };
+    return { spd: 1, hp: 1, reward: 1, score: 1 };
+  }
   // 画质档位决定 DPR 上限（高=2 / 中=1.5 / 低=1），像素量是最大性能杠杆
   // —— v0.2.1 自适应画质：auto 档监控实际 FPS，持续低帧自动降档、回升自动升档 ——
   const DPR_MAX = 2;
@@ -1674,6 +1854,16 @@
   const dailySeed = () => { const d = new Date(); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); };
   let dailyMode = false;        // 本局是否每日挑战
   let dailyRng = null;          // 每日挑战的种子随机序列
+
+  // —— v0.2.3 限时冲分模式：固定时间内拼分数 ——
+  let timedMode = false;        // 本局是否限时冲分
+  let timeLimit = 120;          // 限时（秒）
+  let timeLeft = 0;             // 剩余时间（秒）
+  const timedInvited = /(^|[?&])time=(\d{1,4})/.exec(location.search);   // ?time=120 直达
+  if (timedInvited) {
+    const n = parseInt(timedInvited[2], 10);
+    if (n >= 30 && n <= 9999) timeLimit = n;   // 有效区间，避免 0 或超大值
+  }
 
   // ===== 音效（Web Audio） =====
   let audioCtx = null;
@@ -2114,11 +2304,13 @@
 
   function spawnEnemy(x, y, type) {
     const def = ENEMY_TYPES[type];
+    const DM = diffMul();
+    const hp = Math.max(1, Math.ceil(def.hp * DM.hp));
     enemies.push({
       x, y, dir: DIR.DOWN,
-      speed: def.speed * levelSpeedMul() * (dailyMods.speedMul || 1),
+      speed: def.speed * levelSpeedMul() * (dailyMods.speedMul || 1) * DM.spd,
       cooldown: 0, isPlayer: false,
-      type, hp: def.hp, maxHp: def.hp, size: TANK_SIZE,
+      type, hp: hp, maxHp: hp, size: TANK_SIZE,
       color: def.color || pickEnemyColor(),
       changeTimer: randInt(60, 160), shootTimer: randInt(40, 140),
       hitFlash: 0, portalCd: 0
@@ -2126,7 +2318,7 @@
   }
 
   function spawnBoss() {
-    bossMaxHp = 12 + Math.floor(level * 1.5);      // 难度曲线更陡
+    bossMaxHp = Math.round((12 + Math.floor(level * 1.5)) * diffMul().hp);   // 难度曲线更陡 × 难度血量
     bossHp = bossMaxHp;
     enemies.push({
       x: W / 2 - BOSS_SIZE / 2,
@@ -2581,7 +2773,8 @@
 
   // ===== 金币 =====
   function enemyGold(e) {
-    return e.isBoss ? 60 + level * 10 : Math.round(ENEMY_TYPES[e.type].score / 10);
+    const base = e.isBoss ? 60 + level * 10 : Math.round(ENEMY_TYPES[e.type].score / 10);
+    return Math.max(1, Math.round(base * diffMul().reward));
   }
   function addGold(n, x, y) {
     // 金运永久加成 +15%/级；金运强化 +30%/层
@@ -2793,11 +2986,13 @@
     hideUpgradeBox();
     level++;
     if (level >= 5) unlockAch('lv5');
-    // 过关奖励金币（随关卡提升，受金运加成；战地补给 +20%/级 加成基数）
-    const g = addGold(Math.round((20 + level * 5) * (1 + 0.2 * (bonus.supply || 0))));
+    // v0.2.3 里程碑：刚打完 10/20/30... 关，全屏庆典
+    if (level > 1 && (level - 1) % 10 === 0) triggerMilestone();
+    // 过关奖励金币（随关卡提升，受金运加成；战地补给 +20%/级 加成基数；难度系数）
+    const g = addGold(Math.round((20 + level * 5) * (1 + 0.2 * (bonus.supply || 0)) * diffMul().reward));
     showToast('🪙 过关奖励 +' + g);
     lvIntroNext = true;
-    showLevelIntro('第 ' + level + ' 关');
+    showLevelIntro('第 ' + level + ' 关' + (difficulty !== 'normal' ? ' · ' + ({ easy: '轻松', hard: '硬核' })[difficulty] : ''));
     updateHud();
   }
 
@@ -2922,6 +3117,9 @@
 
     if (!running || paused) { draw(); return; }
 
+    // v0.2.3 里程碑庆典：冻结世界，仅保留画面
+    if (milestoneOpen) { draw(); return; }
+
     // 关卡过渡：冻结世界，展示「第 N 关」大字
     if (lvIntroT > 0) {
       lvIntroT -= dt;
@@ -2934,6 +3132,18 @@
 
     // 击杀定格：世界短暂静止，只保留画面
     if (hitStop > 0) { hitStop -= dt; draw(); return; }
+
+    // —— v0.2.3 限时冲分倒计时：按真实时间递减（不受慢动作影响） ——
+    if (timedMode && running && !paused && !gameOver) {
+      timeLeft -= dt;
+      if (timeLeft <= 0) {
+        timeLeft = 0;
+        updateTimerHud();
+        endGame(true);   // 时间到 → 结算（胜利）
+        return;
+      }
+      updateTimerHud();
+    }
 
     // 道具效果 / 连击计时（秒）
     if (fx.rapid > 0) fx.rapid -= dt;
@@ -3026,6 +3236,17 @@
   }
 
   // ===== HUD =====
+  function fmtTime(s) {
+    s = Math.max(0, Math.ceil(s));
+    return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  }
+  function updateTimerHud() {
+    if (!elTimerWrap || !elTimerNum) return;
+    elTimerWrap.style.display = timedMode ? '' : 'none';
+    if (!timedMode) return;
+    elTimerNum.textContent = fmtTime(timeLeft);
+    elTimerWrap.classList.toggle('low', timeLeft <= 10);
+  }
   function updateHud() {
     if (score > best) {
       best = score;
@@ -3035,6 +3256,7 @@
     elBest.textContent = best;
     elLevel.textContent = level;
     elRemaining.textContent = Math.max(0, enemiesTotal - enemiesSpawned + enemies.length);
+    updateTimerHud();
     if (lives !== lastLives) {
       lastLives = lives;
       let html = '';
@@ -3064,6 +3286,65 @@
 
   // ===== 渲染 =====
   // 烘焙静态地图层（背景+网格+砖/钢/水）到离屏 canvas，尺寸与主画布一致（device px）
+  // ===== v0.2.3 主题渐变：地图配色随关卡缓慢渐变换色 =====
+  // 每 10 关一段主题，段内 0→1 线性插值到下一主题；跨段回环
+  const THEMES = [
+    { bg: [3, 3, 8],    grid: [0, 47, 167],  accent: [0, 240, 255] },   // 深空蓝（默认）
+    { bg: [8, 3, 14],   grid: [120, 0, 180], accent: [255, 0, 200] },   // 紫罗兰
+    { bg: [4, 8, 12],   grid: [0, 110, 110], accent: [0, 255, 180] },   // 青绿
+    { bg: [11, 6, 3],   grid: [200, 90, 0],  accent: [255, 170, 0] },   // 琥珀
+    { bg: [3, 8, 10],   grid: [0, 90, 200],  accent: [80, 200, 255] },  // 冰蓝
+  ];
+  const _lerp = (a, b, t) => a + (b - a) * t;
+  const _mix = (c1, c2, t) => [Math.round(_lerp(c1[0], c2[0], t)), Math.round(_lerp(c1[1], c2[1], t)), Math.round(_lerp(c1[2], c2[2], t))];
+  function themeColors(lv) {
+    const idx = Math.max(0, (lv || 1) - 1);
+    const seg = Math.floor(idx / 10) % THEMES.length;
+    const A = THEMES[seg], B = THEMES[(seg + 1) % THEMES.length];
+    const t = (idx % 10) / 10;
+    const bg = _mix(A.bg, B.bg, t);
+    const grid = _mix(A.grid, B.grid, t);
+    const accent = _mix(A.accent, B.accent, t);
+    return {
+      bg: bg, grid: grid, accent: accent,
+      bgStr: 'rgb(' + bg.join(',') + ')',
+      gridStr: 'rgba(' + grid.join(',') + ',0.12)',
+      accentStr: 'rgb(' + accent.join(',') + ')'
+    };
+  }
+
+  // ===== v0.2.3 里程碑庆典：每通关 10 关全屏礼花 =====
+  let milestoneOpen = false;   // 庆典期间冻结世界
+  const MILO_COLORS = ['#ff2d55', '#00f0ff', '#ffe066', '#ff00ff', '#39ff14', '#ff8c00', '#7aa2ff'];
+  function triggerMilestone() {
+    if (!milestone) return;
+    milestoneOpen = true;
+    // 随机礼花火花（CSS 变量驱动飞行轨迹）
+    miloFire.innerHTML = '';
+    for (let i = 0; i < 16; i++) {
+      const s = document.createElement('i');
+      const col = MILO_COLORS[i % MILO_COLORS.length];
+      s.style.left = (8 + Math.random() * 84) + '%';
+      s.style.top = (14 + Math.random() * 58) + '%';
+      s.style.background = col;
+      s.style.boxShadow = '0 0 12px 2px ' + col;
+      s.style.setProperty('--dx', (Math.random() * 180 - 90).toFixed(0) + 'px');
+      s.style.setProperty('--dy', (Math.random() * -150 - 20).toFixed(0) + 'px');
+      s.style.animationDelay = (Math.random() * 1.3).toFixed(2) + 's';
+      s.style.animationDuration = (1.6 + Math.random() * 1.2).toFixed(2) + 's';
+      miloFire.appendChild(s);
+    }
+    miloTitle.textContent = '里程碑达成！';
+    miloSub.textContent = '第 ' + level + ' 关 · 目前 ' + score + ' 分';
+    milestone.classList.add('show');
+    sfxLevel();
+  }
+  function closeMilestone() {
+    if (!milestone) return;
+    milestoneOpen = false;
+    milestone.classList.remove('show');
+  }
+
   function bakeStaticMap() {
     if (mapStaticCanvas.width !== canvas.width || mapStaticCanvas.height !== canvas.height) {
       mapStaticCanvas.width = canvas.width;
@@ -3075,10 +3356,11 @@
     try {
       c.setTransform(renderScale, 0, 0, renderScale, 0, 0);
       c.clearRect(0, 0, W, H);
-      // 背景 + 赛博网格
-      c.fillStyle = '#030308';
+      // 背景 + 赛博网格（v0.2.3 主题渐变）
+      const th = themeColors(level);
+      c.fillStyle = th.bgStr;
       c.fillRect(0, 0, W, H);
-      c.strokeStyle = 'rgba(0, 47, 167, 0.12)';
+      c.strokeStyle = th.gridStr;
       c.lineWidth = 1;
       for (let i = 0; i <= W; i += TILE) { c.beginPath(); c.moveTo(i, 0); c.lineTo(i, H); c.stroke(); }
       for (let i = 0; i <= H; i += TILE) { c.beginPath(); c.moveTo(0, i); c.lineTo(W, i); c.stroke(); }
@@ -3834,6 +4116,8 @@
     volRow.style.display = 'none';
     settings.style.display = 'none';
     btnDaily.style.display = (kind === 'title' && !dailyInvited) ? 'block' : 'none';
+    // v0.2.3 限时冲分入口：仅标题页且非 ?time= 直达时显示
+    if (btnTimed) btnTimed.style.display = (kind === 'title' && !timedInvited) ? 'block' : 'none';
     // v0.2.1 PWA 安装按钮：仅标题页且浏览器支持安装时显示
     if (btnInstall) btnInstall.style.display = (kind === 'title' && deferredInstall) ? 'block' : 'none';
     if (kind === 'title') {
@@ -3902,10 +4186,14 @@
   function hideOverlay() { overlay.classList.add('hide'); }
 
   // ===== 控制 =====
-  function start(isDaily) {
-    dailyMode = !!isDaily;
+  function start(mode) {
+    dailyMode = mode === 'daily';
+    timedMode = mode === 'timed';
     dailyRng = dailyMode ? mulberry32(dailySeed()) : null;
     rng = dailyMode ? dailyRng : Math.random;
+    // 限时冲分：保留 URL ?time=N 指定的限时，否则用默认 120 秒
+    if (timedMode && !timedInvited) timeLimit = 120;
+    timeLeft = timedMode ? timeLimit : 0;
     score = 0; lives = 3 + (bonus.lifeup || 0); level = 1;   // 装甲储备：开局额外生命
     reviveCount = 0;                                         // 本局复活次数清零
     // 重置过关成长与每日词条
@@ -3939,11 +4227,14 @@
     pauseBtn.textContent = '⏸';
     setBgm('battle');
     lvIntroNext = false;
-    showLevelIntro(dailyMode ? '每日挑战' : '第 1 关');
+    showLevelIntro(dailyMode ? '每日挑战' : (timedMode ? '⏱ 限时冲分' : '第 1 关'));
+    updateTimerHud();
     if (dailyMode) {
       const d = new Date();
       showToast('📅 每日挑战 · ' + (d.getMonth() + 1) + '月' + d.getDate() + '日 · 全网同图');
       if (dailyMods._desc) setTimeout(() => showToast('⚡ 词条：' + dailyMods._desc), 2200);
+    } else if (timedMode) {
+      showToast('⏱ 限时冲分 · ' + timeLimit + ' 秒 · 分数越高奖励越多');
     }
   }
 
@@ -3961,6 +4252,11 @@
     if (win && dailyMode) {
       const g = addGold(50);
       showToast('📅 每日挑战通关 · 奖励 🪙' + g);
+    }
+    // 限时冲分：时间到即结算，按得分发放奖励（无论胜负，跑分就有回报）
+    if (timedMode) {
+      const g = addGold(Math.max(5, Math.round(10 + score / 100)));
+      showToast('⏱ 限时冲分' + (win ? '完成' : '结束') + ' · 结算 🪙' + g);
     }
     showOverlay('over');
     if (score > bestAtStart) showToast('🏆 新纪录：' + score + ' 分！');
@@ -4222,7 +4518,18 @@
       for (const b of motionSeg.querySelectorAll('button'))
         b.classList.toggle('active', b.dataset.motion === reduceMotion);
     }
+    if (diffSeg) {
+      for (const b of diffSeg.querySelectorAll('button'))
+        b.classList.toggle('active', b.dataset.diff === difficulty);
+    }
     if (settingsFullBtn) settingsFullBtn.textContent = isFullscreen() ? '退出全屏' : '进入全屏';
+  }
+  function setDifficulty(d) {
+    if (d !== 'easy' && d !== 'normal' && d !== 'hard') return;
+    difficulty = d;
+    try { localStorage.setItem(LS_DIFF, d); } catch (e) { /* 忽略 */ }
+    applySettingsUI();
+    sfxPickup();
   }
   function setPerf(q) {
     if (q !== 'auto' && q !== 'high' && q !== 'medium' && q !== 'low') return;
@@ -4262,6 +4569,103 @@
     applySettingsUI();
     if (!muted && sfxVol > 0) sfxPickup();
   }
+
+  // ===== v0.2.3 存档备份 / 恢复 =====
+  const SAVE_VER = 1;
+  function collectSave() {
+    return {
+      v: SAVE_VER, t: 'QTB',
+      coins: coins, bonus: Object.assign({}, bonus), base: baseLevel,
+      skins: ownedSkins.slice(), skin: equippedSkin, best: best,
+      perf: perfQuality, motion: reduceMotion,
+      bgm: bgmVol, sfx: sfxVol, mute: muted, vol: masterVol, diff: difficulty,
+      ach: [...achUnlocked]
+    };
+  }
+  function encodeSave(obj) {
+    try { return 'QTB1.' + btoa(unescape(encodeURIComponent(JSON.stringify(obj)))); }
+    catch (e) { return ''; }
+  }
+  function decodeSave(code) {
+    try {
+      const b64 = (code || '').trim();
+      if (!/^QTB1\./.test(b64)) return { ok: false, err: '存档码格式不对（应以 QTB1. 开头）' };
+      const obj = JSON.parse(decodeURIComponent(escape(atob(b64.slice(5)))));
+      if (!obj || obj.t !== 'QTB') return { ok: false, err: '存档码已损坏或来源不明' };
+      return { ok: true, data: obj };
+    } catch (e) { return { ok: false, err: '解析失败：' + (e && e.message || e) }; }
+  }
+  function applySave(o) {
+    if (typeof o.coins === 'number' && isFinite(o.coins)) { coins = Math.max(0, Math.floor(o.coins)); saveCoins(); }
+    if (o.bonus && typeof o.bonus === 'object') {
+      for (const k in bonus) if (typeof o.bonus[k] === 'number') bonus[k] = Math.max(0, Math.floor(o.bonus[k]));
+      saveBonus();
+    }
+    if (typeof o.base === 'number') { baseLevel = Math.min(Math.max(0, Math.floor(o.base)), BASE_LEVELS.length - 1); saveBase(); }
+    if (Array.isArray(o.skins)) {
+      const s = o.skins.filter(x => typeof x === 'string');
+      ownedSkins = s.includes('classic') ? s.slice() : ['classic', ...s];
+      saveSkins();
+    }
+    if (typeof o.skin === 'string' && ownedSkins.includes(o.skin)) { equippedSkin = o.skin; try { localStorage.setItem(LS_SKIN, equippedSkin); } catch (e) {} }
+    if (typeof o.best === 'number' && isFinite(o.best)) { best = Math.max(0, Math.floor(o.best)); try { localStorage.setItem(LS_BEST, String(best)); } catch (e) {} bestAtStart = best; }
+    if (o.perf === 'auto' || o.perf === 'high' || o.perf === 'medium' || o.perf === 'low') { perfQuality = o.perf; try { localStorage.setItem(LS_PERF, perfQuality); } catch (e) {} }
+    if (o.motion === 'auto' || o.motion === 'on' || o.motion === 'off') { reduceMotion = o.motion; try { localStorage.setItem(LS_MOTION, reduceMotion); } catch (e) {} }
+    if (typeof o.bgm === 'number' && isFinite(o.bgm)) { bgmVol = Math.min(1, Math.max(0, o.bgm)); try { localStorage.setItem(LS_BGM, String(bgmVol)); } catch (e) {} }
+    if (typeof o.sfx === 'number' && isFinite(o.sfx)) { sfxVol = Math.min(1, Math.max(0, o.sfx)); try { localStorage.setItem(LS_SFX, String(sfxVol)); } catch (e) {} }
+    if (typeof o.mute === 'boolean') { muted = o.mute; try { localStorage.setItem(LS_MUTE, muted ? '1' : '0'); } catch (e) {} }
+    if (typeof o.vol === 'number' && isFinite(o.vol)) { masterVol = Math.min(1, Math.max(0, o.vol)); try { localStorage.setItem(LS_VOL, String(masterVol)); } catch (e) {} }
+    if (o.diff === 'easy' || o.diff === 'normal' || o.diff === 'hard') { difficulty = o.diff; try { localStorage.setItem(LS_DIFF, difficulty); } catch (e) {} }
+    if (Array.isArray(o.ach)) {
+      achUnlocked = new Set(o.ach.filter(x => typeof x === 'string'));
+      try { localStorage.setItem(LS_ACH, JSON.stringify([...achUnlocked])); } catch (e) {}
+    }
+    // 刷新界面
+    DPR = computeDpr();
+    applySettingsUI();
+    const sc = $('shopCoins'); if (sc) sc.textContent = coins;
+    showOverlay(overlayKind);
+  }
+  function openSaveBox(mode) {
+    if (!saveBox || !saveBody) return;
+    saveBox.classList.add('show');
+    const isExp = mode === 'export';
+    saveBody.innerHTML =
+      (isExp
+        ? '<div class="saveTip">把下面的存档码复制保存好。换设备 / 清缓存后，用它「导入恢复」即可拿回全部进度。</div>' +
+          '<textarea class="saveArea" id="saveCode" readonly></textarea>' +
+          '<div class="saveRow"><button class="ok" id="btnCopyCode">📋 复制存档码</button><button id="btnCloseSave">关闭</button></div>'
+        : '<div class="saveTip">粘贴之前导出的存档码，点击「确认恢复」将<b>覆盖</b>当前进度（金币/皮肤/加成/基地/最高分/成就/设置）。此操作不可撤销。</div>' +
+          '<textarea class="saveArea import" id="saveCode" placeholder="QTB1.xxxx…"></textarea>' +
+          '<div class="saveRow"><button class="danger" id="btnApplyImport">⚠ 确认恢复</button><button id="btnCloseSave">关闭</button></div>');
+    if (isExp) {
+      const code = encodeSave(collectSave());
+      const ta = document.getElementById('saveCode');
+      if (ta) ta.value = code;
+      const copy = document.getElementById('btnCopyCode');
+      if (copy) copy.addEventListener('click', () => {
+        const c = document.getElementById('saveCode');
+        if (c) { c.select(); try { document.execCommand('copy'); } catch (e) {} }
+        try { navigator.clipboard && navigator.clipboard.writeText(code); } catch (e) {}
+        copy.textContent = '✅ 已复制';
+        setTimeout(() => { copy.textContent = '📋 复制存档码'; }, 1600);
+      });
+    } else {
+      const apply = document.getElementById('btnApplyImport');
+      if (apply) apply.addEventListener('click', () => {
+        const c = document.getElementById('saveCode');
+        const r = decodeSave(c ? c.value : '');
+        if (!r.ok) { showToast('⚠ ' + r.err); return; }
+        applySave(r.data);
+        saveBox.classList.remove('show');
+        showToast('✅ 存档已恢复');
+        sfxPickup();
+      });
+    }
+    const close = document.getElementById('btnCloseSave');
+    if (close) close.addEventListener('click', () => { saveBox.classList.remove('show'); });
+  }
+  function closeSaveBox() { if (saveBox) saveBox.classList.remove('show'); }
 
   // ===== 成就墙 =====
   function openAch() {
@@ -4434,7 +4838,7 @@
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V2.2', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V2.3', W2 / 2, H2 - 78);
     const d = new Date();
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -4480,10 +4884,14 @@
   btnPlay.addEventListener('click', () => {
     ensureAudio();
     if (overlayKind === 'paused') togglePause();
-    else start(dailyInvited);
+    else start(dailyInvited ? 'daily' : 'normal');
   });
   btnRevive.addEventListener('click', () => { ensureAudio(); revive(); });
-  btnDaily.addEventListener('click', () => { ensureAudio(); start(true); });
+  btnDaily.addEventListener('click', () => { ensureAudio(); start('daily'); });
+  btnTimed.addEventListener('click', () => { ensureAudio(); start('timed'); });
+  // v0.2.3 里程碑庆典：继续战斗
+  document.getElementById('btnMiloOk').addEventListener('click', () => { ensureAudio(); closeMilestone(); });
+  milestone.addEventListener('click', (e) => { if (e.target === milestone) closeMilestone(); });
   btnShop.addEventListener('click', () => { ensureAudio(); openShop(); });
   btnShopClose.addEventListener('click', closeShop);
   tabBonus.addEventListener('click', () => { shopTab = 'bonus'; tabBonus.classList.add('active'); tabSkins.classList.remove('active'); renderShop(); });
@@ -4510,10 +4918,20 @@
   motionSeg.addEventListener('click', (e) => {
     const b = e.target.closest('button'); if (b) setMotion(b.dataset.motion);
   });
+  diffSeg.addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (b) setDifficulty(b.dataset.diff);
+  });
   settingsFullBtn.addEventListener('click', () => { ensureAudio(); toggleFullscreen(); });
+  // v0.2.3 存档备份 / 恢复
+  document.getElementById('btnSaveExport').addEventListener('click', () => { ensureAudio(); openSaveBox('export'); });
+  document.getElementById('btnSaveImport').addEventListener('click', () => { ensureAudio(); openSaveBox('import'); });
+  document.getElementById('btnSaveClose').addEventListener('click', closeSaveBox);
+  saveBox.addEventListener('click', (e) => { if (e.target === saveBox) closeSaveBox(); });
   // 键盘 Enter 在暂停/标题下支持音量行；成就墙可 Esc 关闭
   window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && achBox.classList.contains('show')) closeAch();
+    if (e.key === 'Escape' && saveBox.classList.contains('show')) closeSaveBox();
+    if (e.key === 'Escape' && milestone.classList.contains('show')) closeMilestone();
   });
 
   window.addEventListener('keydown', (e) => {
@@ -4522,7 +4940,7 @@
     if (e.key === 'm' || e.key === 'M') toggleMute();
     if (e.key === 'f' || e.key === 'F') toggleFullscreen();
     if (e.key === 'Enter' && !overlay.classList.contains('hide')) {
-      if (overlayKind === 'paused') togglePause(); else start(dailyInvited);
+      if (overlayKind === 'paused') togglePause(); else start(dailyInvited ? 'daily' : 'normal');
     }
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) e.preventDefault();
   });
@@ -4668,7 +5086,7 @@
     tutDone = true;
     if (tutBox) tutBox.classList.remove('show');
   }
-  if (tutBtn) tutBtn.addEventListener('click', () => { ensureAudio(); dismissTutorial(); start(dailyInvited); });
+  if (tutBtn) tutBtn.addEventListener('click', () => { ensureAudio(); dismissTutorial(); start(dailyInvited ? 'daily' : 'normal'); });
   if (tutBox) tutBox.addEventListener('click', (e) => { if (e.target === tutBox) dismissTutorial(); });
   if (errReloadBtn) errReloadBtn.addEventListener('click', () => { try { location.reload(); } catch (e) { /* 忽略 */ } });
 
@@ -4706,6 +5124,11 @@
   showTutorial();
   lastTime = performance.now();
   rafId = requestAnimationFrame(tick);
+
+  // ===== v0.2.3 ?time=N 直达限时冲分：自动开局 =====
+  if (timedInvited) {
+    setTimeout(() => { try { start('timed'); } catch (e) { /* 忽略 */ } }, 400);
+  }
 
   // ===== 测试钩子（仅 ?test=1 暴露，正常游玩不可见） =====
   if (urlParams.get('test') === '1') {
@@ -4835,7 +5258,7 @@
       setShopTab: (t) => { shopTab = t; },
       bullets: () => bullets.map(b => ({ dir: b.dir, x: b.x, y: b.y, size: b.size, speed: b.speed, pen: b.pen, bomb: b.bomb, owner: b.owner.isPlayer ? 'p' : 'e' })),
       // —— 局外养成验证 ——
-      startGame: () => start(false),
+      startGame: () => start('normal'),
       livesNow: () => lives,
       setLives: (n) => { lives = Math.max(0, n | 0); lastLives = -1; },
       hudCoins: () => elCoins ? elCoins.textContent : null,
@@ -4928,6 +5351,20 @@
         return { lit, total };
       },
       fullscreenNow: () => isFullscreen(),
+      // —— v0.2.3 里程碑庆典 / 主题渐变 ——
+      milestoneOpenNow: () => milestoneOpen,
+      triggerMilestone, closeMilestone,
+      themeNow: () => themeColors(level),
+      setLevel: (lv) => { level = Math.max(1, lv | 0); startLevel(); return { bossLevel, enemiesTotal }; },
+      // —— v0.2.3 存档备份 / 恢复 ——
+      saveExport: () => encodeSave(collectSave()),
+      saveImport: (code) => { const r = decodeSave(code); if (r.ok) applySave(r.data); return r; },
+      saveState: () => ({ coins, difficulty, equippedSkin, ownedSkins: ownedSkins.slice(), base: baseLevel, ach: [...achUnlocked] }),
+      // —— v0.2.3 难度选择 ——
+      setDifficulty, diffNow: () => difficulty, diffMulNow: () => diffMul(),
+      // —— v0.2.3 限时冲分 ——
+      startMode: (m) => start(m),
+      timedState: () => ({ timedMode, timeLimit, timeLeft, shown: !!(elTimerWrap && elTimerWrap.style.display !== 'none') }),
     };
   }
 
