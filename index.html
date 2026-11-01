@@ -1201,7 +1201,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V2.3</div>
+  <div id="mark">DESIGNED BY QIAN · V2.4</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -1568,8 +1568,9 @@
     if (d === 'easy' || d === 'normal' || d === 'hard') difficulty = d;
   } catch (e) { /* 忽略 */ }
   function diffMul() {
+    // —— v0.2.4 硬核经济回调：奖励 0.85→1.0（得分 1.2 已作补偿），硬核不再金币劝退 ——
     if (difficulty === 'easy') return { spd: 0.85, hp: 1, reward: 1.15, score: 1 };
-    if (difficulty === 'hard') return { spd: 1.18, hp: 1.3, reward: 0.85, score: 1.2 };
+    if (difficulty === 'hard') return { spd: 1.18, hp: 1.3, reward: 1.0, score: 1.2 };
     return { spd: 1, hp: 1, reward: 1, score: 1 };
   }
   // 画质档位决定 DPR 上限（高=2 / 中=1.5 / 低=1），像素量是最大性能杠杆
@@ -1676,6 +1677,10 @@
     magma:   { name: '熔岩之心', icon: '🌋', price: 260, rarity: 'legendary', fx: 'magma', body: '#ff5a1f', track: '#3a0c00', barrel: '#ffb347', glow: '#ff6a00' },
     void:    { name: '虚空漩涡', icon: '🌀', price: 340, rarity: 'legendary', fx: 'void', body: '#7b2ff7', track: '#14042e', barrel: '#b388ff', glow: '#a855f7' },
     storm:   { name: '雷霆风暴', icon: '⚡', price: 200, rarity: 'epic', fx: 'storm', body: '#2e9fff', track: '#0a1a3a', barrel: '#aee6ff', glow: '#4dc3ff' },
+    // —— v0.2.4 更多花哨皮肤 ——
+    frost:   { name: '冰霜王座', icon: '❄️', price: 280, rarity: 'legendary', fx: 'frost', body: '#7fd8ff', track: '#0a2a44', barrel: '#e6f7ff', glow: '#aee6ff' },
+    plasma:  { name: '等离子核心', icon: '🔮', price: 300, rarity: 'legendary', fx: 'plasma', body: '#c86bff', track: '#1a0a3a', barrel: '#f0d8ff', glow: '#d88bff' },
+    jade:    { name: '翡翠龙鳞', icon: '🐲', price: 220, rarity: 'epic', fx: 'jade', body: '#34d399', track: '#083026', barrel: '#a7f3d0', glow: '#34d399' },
   };
   const SKIN_LIST = Object.keys(SKINS);
   const RARITY_ORDER = { rare: 0, epic: 1, legendary: 2, limited: 3 };
@@ -1747,6 +1752,9 @@
   let upgradeOpen = false;       // 强化面板是否弹出
   let adClaimed = false;         // 内测广告奖励是否已领（一次性）
   let adPending = false;         // 广告弹窗是否正挡住过关流程
+  // —— v0.2.4 存档主动提醒：节流标记（只提醒一次，防止每次结算都弹） ——
+  let backupTipShown = false;
+  try { backupTipShown = localStorage.getItem('tank-battle-backup-tip') === '1'; } catch (e) { /* 忽略 */ }
   // 每日挑战 modifier（每日词条规则）
   let dailyMods = { _names: [] };
 
@@ -1820,13 +1828,23 @@
     { id: 'daily',   icon: '📅', name: '每日挑战者', desc: '完成一次每日挑战' },
     { id: 'score5k', icon: '💰', name: '五千分大关', desc: '单局得分达到 5000' },
     { id: 'lv5',     icon: '🚀', name: '深入敌后', desc: '到达第 5 关' },
-    { id: 'surge',   icon: '🎯', name: '精准射手', desc: '单局命中率达到 70%（射击≥20）' }
+    { id: 'surge',   icon: '🎯', name: '精准射手', desc: '单局命中率达到 70%（射击≥20）' },
+    // —— v0.2.4 新玩法成就：限时冲分 / 硬核 / 里程碑 / 存档备份 / 每日打卡 / 金库 ——
+    { id: 'timed',   icon: '⏱', name: '限时猎手', desc: '限时冲分单局达 800 分' },
+    { id: 'hard',    icon: '💀', name: '硬核征服', desc: '硬核难度下通过一关' },
+    { id: 'milo20',  icon: '🎖', name: '里程碑之路', desc: '到达第 20 关' },
+    { id: 'save',    icon: '💾', name: '存档达人', desc: '首次导出备份存档码' },
+    { id: 'daily3',  icon: '🗓', name: '坚持打卡', desc: '累计完成 3 次每日挑战' },
+    { id: 'rich',    icon: '🏦', name: '金库富翁', desc: '金币余额达到 3000' }
   ];
   let achUnlocked = new Set();
   let achNew = [];             // 本局新解锁（结算页展示）
+  // —— v0.2.4 每日挑战累计通关次数（成就「坚持打卡」用，持久化） ——
+  let dailyCount = 0;
   try {
     const raw = JSON.parse(localStorage.getItem(LS_ACH) || '[]');
     if (Array.isArray(raw)) achUnlocked = new Set(raw);
+    dailyCount = parseInt(localStorage.getItem('tank-battle-dailycount') || '0', 10) || 0;
   } catch (e) { /* 忽略 */ }
   function unlockAch(id) {
     if (achUnlocked.has(id)) return;
@@ -1859,6 +1877,7 @@
   let timedMode = false;        // 本局是否限时冲分
   let timeLimit = 120;          // 限时（秒）
   let timeLeft = 0;             // 剩余时间（秒）
+  let lastCountdownSec = -1;    // —— v0.2.4 倒计时滴答追踪（整数秒边界触发） ——
   const timedInvited = /(^|[?&])time=(\d{1,4})/.exec(location.search);   // ?time=120 直达
   if (timedInvited) {
     const n = parseInt(timedInvited[2], 10);
@@ -1965,6 +1984,18 @@
   const sfxPortal     = () => { sweep(300, 900, 0.18, 'sine', 0.06); sweep(900, 1400, 0.12, 'triangle', 0.04); };
   const sfxLevel  = () => {
     [392, 523, 659, 784].forEach((f, i) => setTimeout(() => sweep(f, f * 1.01, 0.12, 'square', 0.045), i * 90));
+  };
+
+  // —— v0.2.4 专属音效：里程碑礼花连响（上扬音符 + 噪声爆裂） ——
+  const sfxMilestone = () => {
+    const notes = [523, 659, 784, 1046, 1318];
+    notes.forEach((f, i) => setTimeout(() => sweep(f, f * 1.02, 0.16, 'square', 0.05), i * 70));
+    [0, 140, 300, 460].forEach((d, i) => setTimeout(() => noiseBurst(0.09, 0.035 + i * 0.01, 2400, 300), d));
+  };
+  // —— v0.2.4 专属音效：限时冲分倒计时滴答（≤10s 每整数秒，≤3s 更快更响） ——
+  const sfxCountdown = (sec) => {
+    const urgent = sec <= 3;
+    beep(urgent ? 1320 : 880, urgent ? 0.07 : 0.05, 'square', urgent ? 0.06 : 0.04);
   };
 
   // ===== BGM：程序化 8-bit 循环（平静 / 战斗两首，可关） =====
@@ -2780,6 +2811,8 @@
     // 金运永久加成 +15%/级；金运强化 +30%/层
     const gain = Math.max(1, Math.round(n * (1 + 0.15 * (bonus.coinup || 0)) * (1 + 0.3 * (upgrades.fortune || 0))));
     coins += gain; saveCoins(); updateCoinHud();
+    // —— v0.2.4 成就：金库余额达 3000 ——
+    if (coins >= 3000) unlockAch('rich');
     if (x !== undefined && y !== undefined) addText(x, y, '+' + gain + '🪙', '#ffd700');
     return gain;
   }
@@ -2986,6 +3019,8 @@
     hideUpgradeBox();
     level++;
     if (level >= 5) unlockAch('lv5');
+    // —— v0.2.4 成就：里程碑之路 第 20 关 ——
+    if (level >= 20) unlockAch('milo20');
     // v0.2.3 里程碑：刚打完 10/20/30... 关，全屏庆典
     if (level > 1 && (level - 1) % 10 === 0) triggerMilestone();
     // 过关奖励金币（随关卡提升，受金运加成；战地补给 +20%/级 加成基数；难度系数）
@@ -3141,6 +3176,12 @@
         updateTimerHud();
         endGame(true);   // 时间到 → 结算（胜利）
         return;
+      }
+      // —— v0.2.4 最后 10 秒整数秒滴答（≤3 秒更急促） ——
+      const cs = Math.ceil(timeLeft);
+      if (cs <= 10 && cs !== lastCountdownSec) {
+        lastCountdownSec = cs;
+        sfxCountdown(cs);
       }
       updateTimerHud();
     }
@@ -3337,7 +3378,8 @@
     miloTitle.textContent = '里程碑达成！';
     miloSub.textContent = '第 ' + level + ' 关 · 目前 ' + score + ' 分';
     milestone.classList.add('show');
-    sfxLevel();
+    // —— v0.2.4 里程碑专属礼花音效（替换通用通关音） ——
+    sfxMilestone();
   }
   function closeMilestone() {
     if (!milestone) return;
@@ -4002,6 +4044,78 @@
             ctx.stroke();
           }
         }
+      } else if (skin.fx === 'frost') {
+        // 冰霜王座：冷冽冰环 + 飘落雪花 + 冻结结晶
+        const fa = 0.5 + 0.3 * Math.sin(ph * 3);
+        ctx.strokeStyle = 'rgba(174,230,255,' + fa + ')';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(0, 0, 12.5 + Math.sin(ph * 3) * 1.2, 0, Math.PI * 2); ctx.stroke();
+        // 六向冰晶（缓慢旋转）
+        ctx.save();
+        ctx.rotate(ph * 0.8);
+        ctx.strokeStyle = 'rgba(230,247,255,0.75)';
+        ctx.lineWidth = 1.1;
+        for (let i = 0; i < 6; i++) {
+          const ang = i * Math.PI / 3;
+          ctx.beginPath();
+          ctx.moveTo(Math.cos(ang) * 7, Math.sin(ang) * 7);
+          ctx.lineTo(Math.cos(ang) * 12, Math.sin(ang) * 12);
+          ctx.stroke();
+        }
+        ctx.restore();
+        // 飘落雪花（确定性）
+        for (let i = 0; i < 4; i++) {
+          const fy = ((ph * 16 + i * 11) % 20) - 1;
+          const fx2 = Math.sin(ph * 2.5 + i * 1.9) * 6;
+          ctx.fillStyle = 'rgba(255,255,255,' + (0.75 * (1 - fy / 20)) + ')';
+          ctx.beginPath(); ctx.arc(fx2, -6 - fy, 1.1, 0, Math.PI * 2); ctx.fill();
+        }
+      } else if (skin.fx === 'plasma') {
+        // 等离子核心：高速旋转等离子涡流 + 轨道光点
+        ctx.save();
+        ctx.rotate(ph * 3.4);
+        ctx.strokeStyle = 'rgba(216,139,255,0.5)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(0, 0, 13, 0, Math.PI * 2); ctx.stroke();
+        for (let i = 0; i < 4; i++) {
+          const ang = i * Math.PI / 2;
+          ctx.strokeStyle = 'hsla(' + (285 + i * 15) + ',100%,72%,0.45)';
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.arc(0, 0, 9.5, ang, ang + 1.0);
+          ctx.stroke();
+        }
+        // 轨道光点
+        for (let i = 0; i < 3; i++) {
+          const oa = ph * 5 + i * 2.1;
+          ctx.fillStyle = 'rgba(240,216,255,0.95)';
+          ctx.beginPath();
+          ctx.arc(Math.cos(oa) * 12.5, Math.sin(oa) * 12.5, 1.3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.restore();
+        // 核心辉光（脉动）
+        const pa = 0.25 + 0.2 * Math.sin(ph * 6);
+        ctx.fillStyle = 'rgba(200,107,255,' + pa + ')';
+        ctx.beginPath(); ctx.arc(0, 0, 5, 0, Math.PI * 2); ctx.fill();
+      } else if (skin.fx === 'jade') {
+        // 翡翠龙鳞：脉动玉环 + 鳞状弧线 + 青绿辉光
+        const ja = 0.5 + 0.35 * Math.sin(ph * 4);
+        ctx.strokeStyle = 'rgba(52,211,153,' + ja + ')';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath(); ctx.arc(0, 0, 12.6 + Math.sin(ph * 4) * 1.3, 0, Math.PI * 2); ctx.stroke();
+        // 鳞状弧线（同心错位）
+        ctx.strokeStyle = 'rgba(167,243,208,0.5)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < 3; i++) {
+          const rr = 8 + i * 2;
+          const off = ph * (1 + i * 0.4);
+          ctx.beginPath(); ctx.arc(0, 0, rr, off, off + 1.8); ctx.stroke();
+        }
+        // 顶部玉珠
+        const ja2 = 0.4 + 0.3 * Math.sin(ph * 5);
+        ctx.fillStyle = 'rgba(52,211,153,' + ja2 + ')';
+        ctx.beginPath(); ctx.arc(0, -11, 1.6, 0, Math.PI * 2); ctx.fill();
       }
     }
 
@@ -4194,6 +4308,7 @@
     // 限时冲分：保留 URL ?time=N 指定的限时，否则用默认 120 秒
     if (timedMode && !timedInvited) timeLimit = 120;
     timeLeft = timedMode ? timeLimit : 0;
+    lastCountdownSec = -1;   // —— v0.2.4 重置倒计时滴答边界 ——
     score = 0; lives = 3 + (bonus.lifeup || 0); level = 1;   // 装甲储备：开局额外生命
     reviveCount = 0;                                         // 本局复活次数清零
     // 重置过关成长与每日词条
@@ -4238,6 +4353,14 @@
     }
   }
 
+  // —— v0.2.4 存档主动提醒：首次通关或金币达阈值时提醒备份（节流一次） ——
+  function maybeBackupTip() {
+    if (backupTipShown) return;
+    backupTipShown = true;
+    try { localStorage.setItem('tank-battle-backup-tip', '1'); } catch (e) { /* 忽略 */ }
+    setTimeout(() => showToast('💾 记得备份存档 · 设置 → 💾 存档'), 1600);
+  }
+
   function endGame(win) {
     gameOver = true;
     running = false;
@@ -4248,6 +4371,17 @@
     if (dailyMode) unlockAch('daily');
     if (score >= 5000) unlockAch('score5k');
     if (stat.shots >= 20 && stat.hits / stat.shots >= 0.7) unlockAch('surge');
+    // —— v0.2.4 新玩法成就：限时冲分 800 分 / 硬核通关 / 每日打卡累计 / 金库余额 ——
+    if (timedMode && score >= 800) unlockAch('timed');
+    if (win && difficulty === 'hard') unlockAch('hard');
+    if (win && dailyMode) {
+      dailyCount++;
+      try { localStorage.setItem('tank-battle-dailycount', String(dailyCount)); } catch (e) { /* 忽略 */ }
+      if (dailyCount >= 3) unlockAch('daily3');
+    }
+    if (coins >= 3000) unlockAch('rich');
+    // —— v0.2.4 存档主动提醒：首次通关或金币达 2000 ——
+    if (win || coins >= 2000) maybeBackupTip();
     // 每日挑战通关：额外金币奖励
     if (win && dailyMode) {
       const g = addGold(50);
@@ -4373,6 +4507,9 @@
     if (fx === 'magma') return '🌋 熔岩脉动 · 灼热裂纹+火星';
     if (fx === 'void') return '🌀 虚空漩涡 · 吸积旋臂+引力暗点';
     if (fx === 'storm') return '⚡ 雷霆风暴 · 随机电弧闪击';
+    if (fx === 'frost') return '❄️ 冰霜王座 · 冰晶环+飘落雪花';
+    if (fx === 'plasma') return '🔮 等离子核心 · 涡流+轨道光点';
+    if (fx === 'jade') return '🐲 翡翠龙鳞 · 玉环+鳞状弧线';
     return '玩家坦克外观配色';
   }
   // 基地升级卡：当前等级 + 护墙阵法缩略预览 + 下一级购买
@@ -4639,6 +4776,8 @@
           '<textarea class="saveArea import" id="saveCode" placeholder="QTB1.xxxx…"></textarea>' +
           '<div class="saveRow"><button class="danger" id="btnApplyImport">⚠ 确认恢复</button><button id="btnCloseSave">关闭</button></div>');
     if (isExp) {
+      // —— v0.2.4 成就：首次导出备份存档码 ——
+      unlockAch('save');
       const code = encodeSave(collectSave());
       const ta = document.getElementById('saveCode');
       if (ta) ta.value = code;
@@ -4838,7 +4977,7 @@
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V2.3', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V2.4', W2 / 2, H2 - 78);
     const d = new Date();
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -5365,6 +5504,18 @@
       // —— v0.2.3 限时冲分 ——
       startMode: (m) => start(m),
       timedState: () => ({ timedMode, timeLimit, timeLeft, shown: !!(elTimerWrap && elTimerWrap.style.display !== 'none') }),
+      // —— v0.2.4 成就系统扩展 / 存档提醒 / 音效 / 皮肤描述 ——
+      achHas: (id) => achUnlocked.has(id),
+      achAll: () => [...achUnlocked],
+      resetAch: () => { achUnlocked = new Set(); achNew = []; try { localStorage.setItem(LS_ACH, '[]'); } catch (e) {} },
+      dailyCountNow: () => dailyCount,
+      setDailyCount: (n) => { dailyCount = Math.max(0, n | 0); try { localStorage.setItem('tank-battle-dailycount', String(dailyCount)); } catch (e) {} },
+      advanceLevelNow: () => advanceLevel(),
+      openSaveNow: () => openSaveBox('export'),
+      backupTipNow: () => backupTipShown,
+      resetBackupTip: () => { backupTipShown = false; try { localStorage.removeItem('tank-battle-backup-tip'); } catch (e) {} },
+      sfxNow: () => ({ milestone: typeof sfxMilestone === 'function', countdown: typeof sfxCountdown === 'function' }),
+      fxDescNow: (fx) => fxDesc(fx),
     };
   }
 
