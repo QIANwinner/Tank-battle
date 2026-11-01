@@ -555,8 +555,9 @@
   .shopItem.baseCard .siName { font-size: 15px; color: #ffe066; }
   .shopItem.baseCard .siDesc { min-height: 0; text-align: left; margin-top: 2px; }
   .shopItem.baseCard .siBtn { width: auto; min-width: 118px; margin-top: 0; flex: none; }
-  .baseWallPrev { display: flex; gap: 2px; padding: 4px; border-radius: 8px; background: rgba(0, 0, 0, 0.4); }
-  .baseWallPrev .bw { width: 9px; height: 9px; border-radius: 2px; }
+  .baseWallPrev { display: flex; flex-direction: column; gap: 2px; padding: 5px; border-radius: 8px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); }
+  .baseWallPrev .bwRow { display: flex; gap: 2px; }
+  .baseWallPrev .bw { width: 10px; height: 10px; border-radius: 2px; }
   .baseWallPrev .bw.on  { background: #ff9f43; box-shadow: 0 0 4px rgba(255, 159, 67, 0.8); }
   .baseWallPrev .bw.core { background: #00f0ff; box-shadow: 0 0 5px rgba(0, 240, 255, 0.9); }
   .baseWallPrev .bw.off { background: rgba(255, 255, 255, 0.08); }
@@ -703,7 +704,7 @@
 
   <div id="toast"></div>
   <div id="wxtip">点右上角 <b>···</b> → 发送给朋友</div>
-  <div id="mark">DESIGNED BY QIAN · V1.15</div>
+  <div id="mark">DESIGNED BY QIAN · V1.16</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -3501,12 +3502,13 @@
     const maxDy = 5, maxDx = 2; // 预览网格范围（含基地中心）
     let prev = '<div class="baseWallPrev">';
     for (let dy = -maxDy; dy <= 0; dy++) {
+      prev += '<div class="bwRow">';
       for (let dx = -maxDx; dx <= maxDx; dx++) {
         const on = cells.some(([a, b]) => a === dy && b === dx);
         const core = dy === 0 && dx === 0;
         prev += '<div class="bw ' + (core ? 'core' : (on ? 'on' : 'off')) + '"></div>';
       }
-      prev += '<div style="width:2px"></div>';
+      prev += '</div>';
     }
     prev += '</div>';
     item.innerHTML = '<span class="siIcon">🏰</span>' +
