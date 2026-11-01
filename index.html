@@ -320,6 +320,60 @@
     0%, 100% { box-shadow: 0 0 14px rgba(255, 200, 0, 0.25); }
     50% { box-shadow: 0 0 24px rgba(255, 200, 0, 0.55); }
   }
+  /* 暂停菜单：重开 / 回主菜单 */
+  #btnRestart, #btnQuit {
+    display: none;
+    margin-top: -2px;
+    padding: 9px 22px;
+    border: 1px solid rgba(0, 240, 255, 0.4); border-radius: 999px;
+    background: rgba(0, 47, 167, 0.22);
+    color: #bfe4ff; font-size: 13px; font-weight: 700; letter-spacing: 2px;
+    cursor: pointer;
+    -webkit-appearance: none; appearance: none;
+  }
+  #btnRestart:active, #btnQuit:active { background: var(--klein); transform: translateY(1px); }
+  #btnQuit { border-color: rgba(255, 255, 255, 0.28); color: #b8c6dd; }
+  #btnAch {
+    display: none;
+    margin-top: -2px;
+    padding: 9px 22px;
+    border: 1px solid rgba(255, 230, 0, 0.5); border-radius: 999px;
+    background: rgba(255, 190, 0, 0.10);
+    color: #ffe9a6; font-size: 13px; font-weight: 700; letter-spacing: 2px;
+    cursor: pointer;
+    box-shadow: 0 0 14px rgba(255, 230, 0, 0.18);
+    -webkit-appearance: none; appearance: none;
+  }
+  #btnAch:active { background: var(--klein); transform: translateY(1px); }
+  /* 主音量滑块 */
+  .volRow {
+    display: none; align-items: center; gap: 10px;
+    margin-top: 10px; padding: 8px 16px;
+    border-radius: 999px; border: 1px solid rgba(0, 240, 255, 0.25);
+    background: rgba(0, 20, 40, 0.45);
+  }
+  .volRow .volIcon { font-size: 14px; }
+  .volRow input[type=range] {
+    width: 150px; height: 4px; -webkit-appearance: none; appearance: none;
+    background: linear-gradient(90deg, var(--cyan), rgba(0, 240, 255, 0.15));
+    border-radius: 4px; outline: none; cursor: pointer;
+  }
+  .volRow input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 16px; height: 16px; border-radius: 50%;
+    background: #fff; border: 2px solid var(--cyan);
+    box-shadow: 0 0 8px rgba(0, 240, 255, 0.8); cursor: pointer;
+  }
+  .volRow input[type=range]::-moz-range-thumb {
+    width: 14px; height: 14px; border-radius: 50%;
+    background: #fff; border: 2px solid var(--cyan);
+    box-shadow: 0 0 8px rgba(0, 240, 255, 0.8); cursor: pointer;
+  }
+  .volRow .volPct {
+    min-width: 40px; text-align: right; color: #bfe4ff;
+    font-size: 12px; font-weight: 700; letter-spacing: 1px;
+    font-variant-numeric: tabular-nums;
+  }
   #ovStats .sub {
     margin-top: 6px; font-size: 11px; letter-spacing: 1px; color: #7f92b5;
     font-variant-numeric: tabular-nums;
@@ -603,6 +657,75 @@
     -webkit-appearance: none; appearance: none;
   }
   #reportBox button:active { background: var(--klein); transform: translateY(1px); }
+  /* ---------- 成就墙面板 ---------- */
+  #achBox {
+    position: fixed; inset: 0; z-index: 45;
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: rgba(2, 4, 12, 0.92);
+    padding: 16px;
+  }
+  #achBox.show { display: flex; }
+  #achBox .achHead {
+    width: min(90vw, 360px);
+    display: flex; align-items: center; gap: 10px;
+    padding: 13px 16px;
+    background: linear-gradient(180deg, rgba(60, 45, 8, 0.5), rgba(10, 20, 50, 0.6));
+    border: 1px solid rgba(255, 230, 0, 0.45); border-bottom: none;
+    border-radius: 14px 14px 0 0;
+  }
+  #achBox .achTitle { flex: 1; color: #ffe066; font-size: 15px; font-weight: 800; letter-spacing: 2px; }
+  #achBox .achCount { color: #ffe9a6; font-size: 12px; font-weight: 700; letter-spacing: 1px; font-variant-numeric: tabular-nums; }
+  #achBox .achClose {
+    width: 26px; height: 26px; border-radius: 8px; cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(0, 0, 0, 0.3);
+    color: #bfe4ff; font-size: 13px; line-height: 1;
+    -webkit-appearance: none; appearance: none;
+  }
+  #achBox .achBody {
+    width: min(90vw, 360px);
+    max-height: 58vh; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 8px;
+    padding: 12px 14px;
+    background: rgba(4, 8, 18, 0.85);
+    border: 1px solid rgba(255, 230, 0, 0.35); border-radius: 0 0 14px 14px;
+  }
+  #achBox .achItem {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+  }
+  #achBox .achItem.locked { opacity: 0.55; filter: grayscale(0.7); }
+  #achBox .achItem .aIcon {
+    width: 36px; height: 36px; flex: none; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 19px; background: rgba(255, 230, 0, 0.1);
+    border: 1px solid rgba(255, 230, 0, 0.3);
+  }
+  #achBox .achItem.locked .aIcon { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.15); }
+  #achBox .achItem .aInfo { flex: 1; min-width: 0; }
+  #achBox .achItem .aName { color: #ffe066; font-size: 13px; font-weight: 700; letter-spacing: 1px; }
+  #achBox .achItem .aDesc { color: #8ea0b8; font-size: 11px; margin-top: 2px; letter-spacing: 0.5px; }
+  #achBox .achItem .aState {
+    flex: none; padding: 3px 10px; border-radius: 999px;
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    color: #9fffc9; border: 1px solid rgba(57, 255, 20, 0.45);
+    background: rgba(57, 255, 20, 0.08);
+  }
+  #achBox .achItem.locked .aState {
+    color: #8ea0b8; border-color: rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.04);
+  }
+  /* ---------- 皮肤卡实车预览 ---------- */
+  .shopItem .siIcon.skinPrev {
+    width: 48px; height: 48px; flex: none;
+    padding: 0; border-radius: 12px;
+    background: radial-gradient(circle at 50% 35%, rgba(40, 80, 140, 0.4), rgba(6, 12, 30, 0.7));
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow: inset 0 0 12px rgba(0, 240, 255, 0.10);
+    filter: none;
+  }
+  .shopItem .siIcon.skinPrev canvas { display: block; width: 48px; height: 48px; }
   #ovTip {
     font-size: 10px; letter-spacing: 1px; color: #4d5c7a;
     line-height: 1.8; max-width: 300px;
@@ -698,12 +821,20 @@
     <p id="ovSub">守住基地 · 消灭敌军 · 点开即玩</p>
     <div id="ovStats"></div>
     <button id="btnPlay">开始游戏</button>
+    <button id="btnRestart">🔄 重新开始本局</button>
+    <button id="btnQuit">🏠 回到主菜单</button>
     <button id="btnRevive">🪙 花金币复活基地</button>
     <button id="btnDaily">📅 每日挑战</button>
+    <button id="btnAch">🏆 成就</button>
     <button id="btnShop">🛒 商店</button>
     <button id="btnShare">📤 分享成绩 · 发起挑战</button>
     <button id="btnReport">🖼 生成战绩图</button>
     <div id="ovTip"></div>
+    <div class="volRow" id="volRow">
+      <span class="volIcon" id="volIcon">🔊</span>
+      <input id="volSlider" type="range" min="0" max="100" value="100" aria-label="主音量">
+      <span class="volPct" id="volPct">100%</span>
+    </div>
   </div>
 
   <div id="lvIntro"><div class="lvT">第 1 关</div></div>
@@ -717,9 +848,18 @@
     </div>
   </div>
 
+  <div id="achBox">
+    <div class="achHead">
+      <div class="achTitle">🏆 成就墙</div>
+      <div class="achCount" id="achCount">0/8</div>
+      <button class="achClose" id="btnAchClose" aria-label="关闭">✕</button>
+    </div>
+    <div class="achBody" id="achBody"></div>
+  </div>
+
   <div id="toast"></div>
   <div id="wxtip">点右上角 <b>···</b> → 发送给朋友</div>
-  <div id="mark">DESIGNED BY QIAN · V1.17</div>
+  <div id="mark">DESIGNED BY QIAN · V1.18</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -988,7 +1128,7 @@
   // ===== DOM =====
   const $ = id => document.getElementById(id);
   const canvas = $('game');
-  const ctx = canvas.getContext('2d');
+  let ctx = canvas.getContext('2d');   // drawSkinPrev 会临时切换预览画布上下文
   const stage = $('stage');
   const elScore = $('score'), elBest = $('best'), elLevel = $('level'),
         elRemaining = $('remaining'), elLives = $('lives'), elCombo = $('combo'),
@@ -1004,7 +1144,10 @@
         adBox = $('adBox'), btnAdClaim = $('btnAdClaim'), btnAdSkip = $('btnAdSkip'),
         shopBox = $('shopBox'), shopBody = $('shopBody'),
         btnShop = $('btnShop'), btnShopClose = $('btnShopClose'),
-        tabBonus = $('tabBonus'), tabSkins = $('tabSkins');
+        tabBonus = $('tabBonus'), tabSkins = $('tabSkins'),
+        btnRestart = $('btnRestart'), btnQuit = $('btnQuit'),
+        btnAch = $('btnAch'), achBox = $('achBox'), achBody = $('achBody'), achCount = $('achCount'),
+        volRow = $('volRow'), volSlider = $('volSlider'), volPct = $('volPct'), volIcon = $('volIcon');
 
   // ===== URL 参数：好友挑战 (?ch=分数-关卡) / 每日挑战 (?daily=1) =====
   const urlParams = (() => { try { return new URLSearchParams(location.search); } catch (e) { return new URLSearchParams(); } })();
@@ -1045,12 +1188,15 @@
     resize();
   }
 
-  // 本地存储：最高分 / 静音偏好
-  const LS_BEST = 'tank-battle-best', LS_MUTE = 'tank-battle-muted';
-  let best = 0, muted = false;
+  // 本地存储：最高分 / 静音偏好 / 主音量
+  const LS_BEST = 'tank-battle-best', LS_MUTE = 'tank-battle-muted', LS_VOL = 'tank-battle-vol';
+  let best = 0, muted = false, masterVol = 1;
   try {
     best = parseInt(localStorage.getItem(LS_BEST) || '0', 10) || 0;
     muted = localStorage.getItem(LS_MUTE) === '1';
+    masterVol = parseFloat(localStorage.getItem(LS_VOL) || '1');
+    if (!isFinite(masterVol)) masterVol = 1;
+    masterVol = Math.min(1, Math.max(0, masterVol));
   } catch (e) { /* 隐私模式下 localStorage 不可用 */ }
   let bestAtStart = best;
 
@@ -1286,7 +1432,7 @@
       const o = audioCtx.createOscillator();
       const g = audioCtx.createGain();
       o.type = type; o.frequency.value = freq;
-      g.gain.setValueAtTime(vol, t);
+      g.gain.setValueAtTime(vol * masterVol, t);
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
       o.connect(g); g.connect(audioCtx.destination);
       o.start(t); o.stop(t + dur);
@@ -1318,7 +1464,7 @@
       f.frequency.setValueAtTime(fFrom, t);
       f.frequency.exponentialRampToValueAtTime(Math.max(40, fTo), t + dur);
       const g = audioCtx.createGain();
-      g.gain.setValueAtTime(vol, t);
+      g.gain.setValueAtTime(vol * masterVol, t);
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
       src.connect(f); f.connect(g); g.connect(audioCtx.destination);
       src.start(t); src.stop(t + dur + 0.02);
@@ -1336,7 +1482,7 @@
       o.type = type;
       o.frequency.setValueAtTime(from, t);
       o.frequency.exponentialRampToValueAtTime(Math.max(20, to), t + dur);
-      g.gain.setValueAtTime(vol, t);
+      g.gain.setValueAtTime(vol * masterVol, t);
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
       o.connect(g); g.connect(audioCtx.destination);
       o.start(t); o.stop(t + dur + 0.02);
@@ -1392,7 +1538,7 @@
     const g = audioCtx.createGain();
     o.type = type; o.frequency.value = freq;
     g.gain.setValueAtTime(0.0001, time);
-    g.gain.linearRampToValueAtTime(vol, time + 0.012);
+    g.gain.linearRampToValueAtTime(vol * masterVol, time + 0.012);
     g.gain.exponentialRampToValueAtTime(0.0001, time + dur);
     o.connect(g); g.connect(audioCtx.destination);
     o.start(time); o.stop(time + dur + 0.03);
@@ -3256,6 +3402,23 @@
     ctx.fillRect(-2.5, -17, 5, 2);
   }
 
+  // 皮肤卡实车预览：在独立 48×48 canvas 上按皮肤配色绘制迷你坦克。
+  // 复用 drawTank 的矢量逻辑——临时把全局 ctx 指向预览画布、equippedSkin 指向目标皮肤，绘制后恢复。
+  function drawSkinPrev(canvas, skinId) {
+    const c = canvas.getContext('2d');
+    const s = canvas.width;
+    c.clearRect(0, 0, s, s);
+    const prevCtx = ctx, prevSkin = equippedSkin;
+    ctx = c; equippedSkin = skinId;
+    try {
+      // 居中一台上向玩家坦克（size=28 时直径约 35px，48px 画布内留边）
+      const t = { x: -14, y: -14, size: 28, dir: 0, isPlayer: true, isBoss: false, hitFlash: 0, color: '#fff', hp: 1, maxHp: 1 };
+      drawTank(t);
+    } finally {
+      ctx = prevCtx; equippedSkin = prevSkin;
+    }
+  }
+
   // ===== 提示 =====
   let toastTimer = null;
   function showToast(msg) {
@@ -3278,8 +3441,15 @@
     btnShare.style.display = 'none';
     btnReport.style.display = 'none';
     btnRevive.style.display = 'none';
+    btnRestart.style.display = 'none';
+    btnQuit.style.display = 'none';
+    btnAch.style.display = 'none';
+    volRow.style.display = 'none';
     btnDaily.style.display = (kind === 'title' && !dailyInvited) ? 'block' : 'none';
     if (kind === 'title') {
+      btnAch.style.display = 'block';
+      volRow.style.display = 'flex';
+      applyVolUI();
       ovTitle.textContent = '坦克大战';
       if (challenge) {
         ovSub.textContent = '⚔️ 好友向你发起挑战';
@@ -3299,6 +3469,10 @@
         ? '左下摇杆八方向走位 · 右下按钮开火'
         : 'WASD / 方向键移动（可斜向） · 空格开火 · P 暂停 · M 静音';
     } else if (kind === 'paused') {
+      btnRestart.style.display = 'block';
+      btnQuit.style.display = 'block';
+      volRow.style.display = 'flex';
+      applyVolUI();
       ovTitle.textContent = '已暂停';
       ovSub.textContent = '';
       ovStats.innerHTML = `得分 <b>${score}</b> · 第 <b>${level}</b> 关`;
@@ -3484,11 +3658,13 @@
         item.className = 'shopItem rar-' + rar + (equipped ? ' equipped' : '');
         const rarBadge = '<b class="rar ' + rar + '">' + RARITY_NAME[rar] + '</b>';
         const desc = sk.fish ? '🐟 限定版 · 专属肥鱼造型' : (sk.fx ? fxDesc(sk.fx) : '玩家坦克外观配色');
-        item.innerHTML = '<span class="siIcon">' + sk.icon + '</span>' +
+        item.innerHTML = '<span class="siIcon skinPrev"><canvas width="48" height="48"></canvas></span>' +
           '<span class="siName">' + sk.name + rarBadge + '</span>' +
           '<span class="siDesc">' + desc + '</span>' +
           '<span class="siMeta">' + (owned ? (equipped ? '已装备' : '已拥有') : '🪙 ' + sk.price) + '</span>' +
           '<button class="siBtn ' + (equipped ? 'equipped' : (owned ? 'owned' : '')) + '">' + (equipped ? '已装备' : (owned ? '装备' : '🪙 购买 ' + sk.price)) + '</button>';
+        const prev = item.querySelector('.siIcon canvas');
+        if (prev) drawSkinPrev(prev, id);
         const btn = item.querySelector('.siBtn');
         btn.onclick = () => {
           if (equipped) return;
@@ -3598,7 +3774,64 @@
     muted = !muted;
     try { localStorage.setItem(LS_MUTE, muted ? '1' : '0'); } catch (e) { /* 忽略 */ }
     applyMuteLabel();
+    applyVolUI();
     if (!muted) sfxPickup();
+  }
+
+  // ===== 主音量 =====
+  function applyVolUI() {
+    const p = Math.round(masterVol * 100);
+    if (volSlider) volSlider.value = p;
+    if (volPct) volPct.textContent = p + '%';
+    if (volIcon) volIcon.textContent = muted ? '🔇' : (p === 0 ? '🔈' : (p < 60 ? '🔉' : '🔊'));
+  }
+  function setMasterVol(v) {
+    masterVol = Math.min(1, Math.max(0, v));
+    try { localStorage.setItem(LS_VOL, String(masterVol)); } catch (e) { /* 忽略 */ }
+    applyVolUI();
+    if (!muted && masterVol > 0) sfxPickup();
+  }
+
+  // ===== 成就墙 =====
+  function openAch() {
+    if (!achBox || !achBody) return;
+    achBox.classList.add('show');
+    const got = achUnlocked.size;
+    if (achCount) achCount.textContent = got + '/' + ACHIEVE.length;
+    achBody.innerHTML = '';
+    for (const a of ACHIEVE) {
+      const on = achUnlocked.has(a.id);
+      const row = document.createElement('div');
+      row.className = 'achItem' + (on ? '' : ' locked');
+      row.innerHTML = '<span class="aIcon">' + a.icon + '</span>' +
+        '<span class="aInfo"><span class="aName">' + a.name + '</span><span class="aDesc">' + a.desc + '</span></span>' +
+        '<span class="aState">' + (on ? '已解锁' : '未解锁') + '</span>';
+      achBody.appendChild(row);
+    }
+  }
+  function closeAch() { if (achBox) achBox.classList.remove('show'); }
+
+  // ===== 回到主菜单（暂停时退出） =====
+  function quitToMenu() {
+    player = null; bullets = []; enemies = []; particles = []; texts = []; powerups = [];
+    score = 0; lives = 3; level = 1; combo = 0; comboTimer = 0;
+    running = false; paused = false; gameOver = false; won = false;
+    bossLevel = false; bossHp = 0; bossMaxHp = 0;
+    baseAlive = true;
+    fx = { rapid: 0, double: 0, freeze: 0 };
+    upgrades = {}; upgTotal = 0; upgradeOpen = false;
+    dailyMode = false; dailyMods = { _names: [] };
+    reviveCount = 0; adPending = false;
+    enemySpawnTimer = 0; lvIntroT = 0; lvIntroNext = false;
+    lastLives = -1; lastCombo = -1; hitStop = 0;
+    hideUpgradeBox();
+    resetStat();
+    pauseBtn.textContent = '⏸';
+    setBgm('calm');
+    generateMap();
+    showOverlay('title');
+    updateHud();
+    updateCoinHud();
   }
 
   // ===== 分享成绩 / 好友挑战 =====
@@ -3790,6 +4023,16 @@
   $('btnReportShare').addEventListener('click', () => { ensureAudio(); shareReport(); });
   pauseBtn.addEventListener('click', (e) => { togglePause(); e.currentTarget.blur(); });
   muteBtn.addEventListener('click', (e) => { toggleMute(); e.currentTarget.blur(); });
+  btnRestart.addEventListener('click', () => { ensureAudio(); const d = dailyMode; start(d); });
+  btnQuit.addEventListener('click', () => { ensureAudio(); quitToMenu(); });
+  btnAch.addEventListener('click', () => { ensureAudio(); openAch(); });
+  $('btnAchClose').addEventListener('click', closeAch);
+  achBox.addEventListener('click', (e) => { if (e.target === achBox) closeAch(); });
+  volSlider.addEventListener('input', (e) => setMasterVol(parseFloat(e.target.value) / 100));
+  // 键盘 Enter 在暂停/标题下支持音量行；成就墙可 Esc 关闭
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && achBox.classList.contains('show')) closeAch();
+  });
 
   window.addEventListener('keydown', (e) => {
     keys[e.key] = true;
@@ -3924,6 +4167,7 @@
 
   // ===== 启动 =====
   applyMuteLabel();
+  applyVolUI();
   updateHud();
   updateCoinHud();
   bossLevel = false;
@@ -4080,6 +4324,12 @@
       adSkip: () => skipAd(),
       setAdClaimed: (v) => { adClaimed = !!v; try { localStorage.setItem(LS_AD1, v ? '1' : '0'); } catch (e) {} },
       closeUpgrade: () => hideUpgradeBox(),
+      // —— v0.1.18 UI 验证：暂停菜单 / 成就墙 / 主音量 ——
+      showOverlay: (k) => showOverlay(k),
+      openAch, closeAch,
+      setMasterVol, applyVolUI,
+      masterVolNow: () => masterVol,
+      achCountNow: () => ({ total: ACHIEVE.length, unlocked: achUnlocked.size }),
     };
   }
 
