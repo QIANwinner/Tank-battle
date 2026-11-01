@@ -545,22 +545,37 @@
 
   /* ---------- 基地升级卡（商店 bonus tab 顶部） ---------- */
   .shopItem.baseCard {
-    grid-column: 1 / -1; flex-direction: row; align-items: center; gap: 14px;
-    padding: 14px 16px; border-color: rgba(255, 215, 0, 0.5);
-    background: linear-gradient(180deg, rgba(60, 45, 8, 0.45), rgba(10, 20, 50, 0.5));
-    box-shadow: 0 0 16px rgba(255, 215, 0, 0.12);
+    grid-column: 1 / -1; flex-direction: row; align-items: center; gap: 12px;
+    min-height: 108px; padding: 12px 14px; border-color: rgba(255, 215, 0, 0.55);
+    background: linear-gradient(180deg, rgba(66, 50, 10, 0.5), rgba(8, 16, 40, 0.55));
+    box-shadow: 0 0 18px rgba(255, 215, 0, 0.14);
   }
-  .shopItem.baseCard .siIcon { font-size: 38px; }
-  .shopItem.baseCard .baseInfo { flex: 1; text-align: left; }
-  .shopItem.baseCard .siName { font-size: 15px; color: #ffe066; }
-  .shopItem.baseCard .siDesc { min-height: 0; text-align: left; margin-top: 2px; }
+  .shopItem.baseCard .baseIcon {
+    width: 48px; height: 48px; flex: none; border-radius: 13px;
+    display: flex; align-items: center; justify-content: center; font-size: 25px;
+    background: radial-gradient(circle at 50% 32%, rgba(255, 222, 96, 0.4), rgba(16, 26, 54, 0.65));
+    border: 1px solid rgba(255, 215, 0, 0.5);
+    box-shadow: inset 0 0 12px rgba(255, 215, 0, 0.16);
+  }
+  .shopItem.baseCard .baseInfo { flex: 1; text-align: left; min-width: 0; }
+  .shopItem.baseCard .baseNameRow { display: flex; align-items: center; gap: 7px; }
+  .shopItem.baseCard .siName { font-size: 15px; color: #ffe066; font-weight: 800; }
+  .shopItem.baseCard .baseLv {
+    font-size: 9px; font-weight: 900; letter-spacing: 1px; color: #171000;
+    background: linear-gradient(90deg, #ffd700, #ffa800); padding: 2px 7px; border-radius: 999px;
+  }
+  .shopItem.baseCard .siDesc { margin-top: 4px; font-size: 11px; color: #a9c3e8; line-height: 1.4; }
   .shopItem.baseCard .siBtn { width: auto; min-width: 118px; margin-top: 0; flex: none; }
-  .baseWallPrev { display: flex; flex-direction: column; gap: 2px; padding: 5px; border-radius: 8px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); }
-  .baseWallPrev .bwRow { display: flex; gap: 2px; }
-  .baseWallPrev .bw { width: 10px; height: 10px; border-radius: 2px; }
-  .baseWallPrev .bw.on  { background: #ff9f43; box-shadow: 0 0 4px rgba(255, 159, 67, 0.8); }
-  .baseWallPrev .bw.core { background: #00f0ff; box-shadow: 0 0 5px rgba(0, 240, 255, 0.9); }
-  .baseWallPrev .bw.off { background: rgba(255, 255, 255, 0.08); }
+  .baseWallPrev {
+    display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+    gap: 3px; padding: 6px; flex: none; min-height: 99px;
+    border-radius: 11px; background: rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 215, 0, 0.28);
+  }
+  .baseWallPrev .bwRow { display: flex; gap: 3px; }
+  .baseWallPrev .bw { width: 12px; height: 12px; border-radius: 3px; }
+  .baseWallPrev .bw.on  { background: linear-gradient(180deg, #ffc35c, #ff8f2f); box-shadow: 0 0 5px rgba(255, 159, 67, 0.7); }
+  .baseWallPrev .bw.core { background: linear-gradient(180deg, #38f6ff, #00b8de); box-shadow: 0 0 8px rgba(0, 240, 255, 0.95); }
+  .baseWallPrev .bw.off { background: rgba(255, 255, 255, 0.06); }
 
   /* ---------- 战绩图弹层 ---------- */
   #reportBox {
@@ -704,7 +719,7 @@
 
   <div id="toast"></div>
   <div id="wxtip">点右上角 <b>···</b> → 发送给朋友</div>
-  <div id="mark">DESIGNED BY QIAN · V1.16</div>
+  <div id="mark">DESIGNED BY QIAN · V1.17</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -3498,12 +3513,13 @@
     const next = maxed ? null : BASE_LEVELS[lv + 1];
     const item = document.createElement('div');
     item.className = 'shopItem baseCard';
+    // 阵法预览：只渲染实际需要的 3 列（dx -1..1）× 动态行，核心在底部中央，塔状向上生长
     const cells = def.walls;
-    const maxDy = 5, maxDx = 2; // 预览网格范围（含基地中心）
+    const minDy = Math.min(0, ...cells.map(c => c[0]));
     let prev = '<div class="baseWallPrev">';
-    for (let dy = -maxDy; dy <= 0; dy++) {
+    for (let dy = minDy; dy <= 0; dy++) {
       prev += '<div class="bwRow">';
-      for (let dx = -maxDx; dx <= maxDx; dx++) {
+      for (let dx = -1; dx <= 1; dx++) {
         const on = cells.some(([a, b]) => a === dy && b === dx);
         const core = dy === 0 && dx === 0;
         prev += '<div class="bw ' + (core ? 'core' : (on ? 'on' : 'off')) + '"></div>';
@@ -3511,10 +3527,14 @@
       prev += '</div>';
     }
     prev += '</div>';
-    item.innerHTML = '<span class="siIcon">🏰</span>' +
+    const lvTxt = 'Lv' + lv + (maxed ? '·MAX' : '');
+    const desc = maxed
+      ? ('基地护墙 ' + def.walls.length + ' 格 · 已满级，最坚固的堡垒')
+      : ('基地护墙 ' + def.walls.length + ' 格 → 下一级 ' + next.name + '（' + next.walls.length + ' 格）');
+    item.innerHTML = '<span class="baseIcon">🏰</span>' +
       '<div class="baseInfo">' +
-        '<span class="siName">基地 · ' + def.name + '</span>' +
-        '<span class="siDesc">基地护墙 ' + def.walls.length + ' 格 · 阵法 Lv' + lv + '（' + (maxed ? '已满级' : '下一级 ' + next.name + ' · ' + next.walls.length + ' 格') + '）</span>' +
+        '<div class="baseNameRow"><span class="siName">基地 · ' + def.name + '</span><span class="baseLv">' + lvTxt + '</span></div>' +
+        '<span class="siDesc">' + desc + '</span>' +
       '</div>' + prev +
       '<button class="siBtn' + (maxed ? ' owned disabled' : '') + '">' + (maxed ? '已满级' : '🪙 升级 ' + next.price) + '</button>';
     const btn = item.querySelector('.siBtn');
