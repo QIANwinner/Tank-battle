@@ -1040,7 +1040,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V2.1</div>
+  <div id="mark">DESIGNED BY QIAN · V2.2</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -1456,7 +1456,7 @@
         LS_BASE = 'tank-battle-base',
         LS_AD1 = 'tank-battle-ad1';
   let coins = 0;                                                       // 金币余额
-  let bonus = { lifeup: 0, cd: 0, spd: 0, coinup: 0, shield: 0 };      // 永久加成等级
+  let bonus = { lifeup: 0, cd: 0, spd: 0, coinup: 0, shield: 0, revive: 0, combo: 0, bulletspd: 0, pierce: 0, supply: 0, focus: 0 };      // 永久加成等级
   let baseLevel = 0;                                                   // 基地升级等级（护墙阵法）
   let ownedSkins = ['classic'];                                        // 已购皮肤
   let equippedSkin = 'classic';                                        // 当前装备皮肤
@@ -1492,6 +1492,10 @@
     prism:   { name: '极光棱镜', icon: '🌈', price: 240, rarity: 'legendary', fx: 'prism', body: '#7fd4ff', track: '#0a1a3a', barrel: '#e0f0ff', glow: '#7fd4ff' },
     dragon:  { name: '圣龙之鳞', icon: '🐉', price: 320, rarity: 'legendary', fx: 'dragon', body: '#ff7a2e', track: '#3a1000', barrel: '#ffd700', glow: '#ff9f43' },
     neon:    { name: '霓虹脉冲', icon: '💜', price: 180, rarity: 'epic', fx: 'neon', body: '#ff2d95', track: '#2a0020', barrel: '#ff6bd5', glow: '#ff2d95' },
+    // —— v0.2.2 更多花哨皮肤 ——
+    magma:   { name: '熔岩之心', icon: '🌋', price: 260, rarity: 'legendary', fx: 'magma', body: '#ff5a1f', track: '#3a0c00', barrel: '#ffb347', glow: '#ff6a00' },
+    void:    { name: '虚空漩涡', icon: '🌀', price: 340, rarity: 'legendary', fx: 'void', body: '#7b2ff7', track: '#14042e', barrel: '#b388ff', glow: '#a855f7' },
+    storm:   { name: '雷霆风暴', icon: '⚡', price: 200, rarity: 'epic', fx: 'storm', body: '#2e9fff', track: '#0a1a3a', barrel: '#aee6ff', glow: '#4dc3ff' },
   };
   const SKIN_LIST = Object.keys(SKINS);
   const RARITY_ORDER = { rare: 0, epic: 1, legendary: 2, limited: 3 };
@@ -1519,6 +1523,10 @@
     { id: 'revive',  icon: '🔧', name: '工程回收', desc: '金币复活成本 -15%', max: 3, unit: '级', price: [90, 200, 420] },
     { id: 'combo',   icon: '🎯', name: '连击大师', desc: '连击得分 +10%',   max: 3, unit: '级', price: [70, 160, 340] },
     { id: 'bulletspd', icon: '🚀', name: '弹道学', desc: '子弹速度 +5%',    max: 3, unit: '级', price: [60, 140, 300] },
+    // v0.2.2 扩充：技能加强
+    { id: 'pierce',  icon: '🎯', name: '穿甲弹头', desc: '子弹穿透 1 个敌人', max: 2, unit: '级', price: [120, 280] },
+    { id: 'supply',  icon: '📦', name: '战地补给', desc: '过关奖励金币 +20%', max: 3, unit: '级', price: [70, 160, 340] },
+    { id: 'focus',   icon: '🔍', name: '连击专注', desc: '连击窗口 +25%',   max: 3, unit: '级', price: [60, 140, 300] },
   ];
 
   // ===== 状态 =====
@@ -2166,7 +2174,7 @@
     const bulletSpeed = isSniper ? BULLET_SPEED * 0.55 : BULLET_SPEED * (isP ? (1 + 0.2 * (upgrades.bulletspd || 0)) * (1 + 0.05 * (bonus.bulletspd || 0)) : 1);
     // 巨弹头强化：弹头更大（更容易命中、更醒目）
     const bsize = isSniper ? 5 : (4 + (isP && (upgrades.bigbullet || 0) > 0 ? 2 : 0));
-    const pen = isP ? (upgrades.pierce || 0) : 0;   // 穿透弹头：可穿透敌人次数
+    const pen = isP ? (upgrades.pierce || 0) + (bonus.pierce || 0) : 0;   // 穿透弹头：可穿透敌人次数（强化 + 穿甲弹头永久加成）
     const shoot = (ox, oy, dir) => {
       bullets.push({ x: ox - 2, y: oy - 2, size: bsize, dir: dir, speed: bulletSpeed, owner: tank, pen, bomb: (upgrades.bomb || 0) > 0 });
       if (isP) stat.shots++;
@@ -2643,7 +2651,8 @@
 
   function addKillScore(e) {
     combo++;
-    comboTimer = 5;
+    // 连击窗口：连击专注永久加成 +25%/级
+    comboTimer = 5 * (1 + 0.25 * (bonus.focus || 0));
     if (combo > stat.maxCombo) stat.maxCombo = combo;
     if (combo >= 8) unlockAch('combo8');
     const baseScore = e.isBoss ? 1000 * level : ENEMY_TYPES[e.type].score;
@@ -2784,8 +2793,8 @@
     hideUpgradeBox();
     level++;
     if (level >= 5) unlockAch('lv5');
-    // 过关奖励金币（随关卡提升，受金运加成）
-    const g = addGold(20 + level * 5);
+    // 过关奖励金币（随关卡提升，受金运加成；战地补给 +20%/级 加成基数）
+    const g = addGold(Math.round((20 + level * 5) * (1 + 0.2 * (bonus.supply || 0))));
     showToast('🪙 过关奖励 +' + g);
     lvIntroNext = true;
     showLevelIntro('第 ' + level + ' 关');
@@ -3644,6 +3653,73 @@
         ctx.beginPath(); ctx.arc(0, 0, 12 + Math.sin(ph * 4) * 1.5, 0, Math.PI * 2); ctx.stroke();
         ctx.fillStyle = 'rgba(255,107,213,' + (a * 0.5) + ')';
         ctx.beginPath(); ctx.arc(0, 0, 6, 0, Math.PI * 2); ctx.fill();
+      } else if (skin.fx === 'magma') {
+        // 熔岩之心：脉动熔岩外圈 + 灼热裂纹 + 上升火星
+        const a = 0.55 + 0.35 * Math.sin(ph * 5);
+        ctx.strokeStyle = 'rgba(255,106,0,' + a + ')';
+        ctx.lineWidth = 2.4;
+        ctx.beginPath(); ctx.arc(0, 0, 12.5 + Math.sin(ph * 5) * 1.4, 0, Math.PI * 2); ctx.stroke();
+        // 灼热裂纹（放射状折线，随机相位）
+        ctx.strokeStyle = 'rgba(255,200,80,0.6)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < 5; i++) {
+          const ang = ph * 1.2 + i * 1.26;
+          const r0 = 4 + Math.sin(ph * 6 + i * 2) * 1;
+          ctx.beginPath();
+          ctx.moveTo(Math.cos(ang) * r0, Math.sin(ang) * r0);
+          ctx.lineTo(Math.cos(ang) * (r0 + 4), Math.sin(ang) * (r0 + 4));
+          ctx.stroke();
+        }
+        // 上升火星
+        for (let i = 0; i < 3; i++) {
+          const fy = ((ph * 22 + i * 13) % 22) - 2;
+          const fx2 = Math.sin(ph * 3 + i * 2.1) * 5;
+          ctx.fillStyle = 'rgba(255,150,40,' + (0.7 * (1 - fy / 22)) + ')';
+          ctx.beginPath(); ctx.arc(fx2, -6 - fy, 1, 0, Math.PI * 2); ctx.fill();
+        }
+      } else if (skin.fx === 'void') {
+        // 虚空漩涡：旋转吸积环 + 内圈吸积旋臂 + 中心暗点
+        ctx.save();
+        ctx.rotate(ph * 2.2);
+        ctx.strokeStyle = 'rgba(168,85,247,0.55)';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath(); ctx.arc(0, 0, 13.5, 0, Math.PI * 2); ctx.stroke();
+        for (let i = 0; i < 3; i++) {
+          ctx.strokeStyle = 'hsla(' + (265 + i * 12) + ',100%,70%,0.4)';
+          ctx.lineWidth = 1.1;
+          ctx.beginPath();
+          ctx.arc(0, 0, 9, i * 2.1, i * 2.1 + 1.4);
+          ctx.stroke();
+        }
+        ctx.restore();
+        // 中心引力暗点（轻微脉动）
+        const va = 0.35 + 0.25 * Math.sin(ph * 4);
+        ctx.fillStyle = 'rgba(20,4,46,' + va + ')';
+        ctx.beginPath(); ctx.arc(0, 0, 4.5, 0, Math.PI * 2); ctx.fill();
+      } else if (skin.fx === 'storm') {
+        // 雷霆风暴：随机电弧闪电 + 高压电蓝光环
+        const blink = Math.floor(ph * 6) % 2 === 0;
+        ctx.strokeStyle = blink ? 'rgba(174,230,255,0.9)' : 'rgba(77,195,255,0.35)';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath(); ctx.arc(0, 0, 12.8, 0, Math.PI * 2); ctx.stroke();
+        if (blink) {
+          // 两道折线电弧（确定性伪随机，避免每帧乱闪）
+          ctx.strokeStyle = 'rgba(210,245,255,0.95)';
+          ctx.lineWidth = 1.2;
+          for (let i = 0; i < 2; i++) {
+            const ang = ph * 1.5 + i * Math.PI;
+            let px = Math.cos(ang) * 6, py = Math.sin(ang) * 6;
+            ctx.beginPath(); ctx.moveTo(px, py);
+            for (let seg = 1; seg <= 3; seg++) {
+              const rr = 6 + seg * 2.4;
+              const jag = Math.sin(ph * 30 + i * 5 + seg * 3) * 2.2;
+              px = Math.cos(ang) * rr - Math.sin(ang) * jag;
+              py = Math.sin(ang) * rr + Math.cos(ang) * jag;
+              ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+          }
+        }
       }
     }
 
@@ -3998,6 +4074,9 @@
     if (fx === 'prism') return '🌈 极光流光 · 动态棱镜辉光';
     if (fx === 'dragon') return '🐉 圣龙鳞纹 · 龙息余焰';
     if (fx === 'neon') return '💜 霓虹脉冲 · 呼吸光晕';
+    if (fx === 'magma') return '🌋 熔岩脉动 · 灼热裂纹+火星';
+    if (fx === 'void') return '🌀 虚空漩涡 · 吸积旋臂+引力暗点';
+    if (fx === 'storm') return '⚡ 雷霆风暴 · 随机电弧闪击';
     return '玩家坦克外观配色';
   }
   // 基地升级卡：当前等级 + 护墙阵法缩略预览 + 下一级购买
@@ -4355,7 +4434,7 @@
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V2.1', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V2.2', W2 / 2, H2 - 78);
     const d = new Date();
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -4672,6 +4751,15 @@
       }),
       setDir: (d) => { if (player) player.dir = d; },
       fireOnce: () => { if (player) { player.cooldown = 0; fire(player); } },
+      // —— v0.2.2 技能加强验证 ——
+      lastBulletPen: () => bullets.length ? bullets[bullets.length - 1].pen : null,
+      comboTimerNow: () => comboTimer,
+      killTestEnemy: () => {
+        const e = enemies.find(x => x.__test && !x.dead);
+        if (!e) return null;
+        e.dead = true; onEnemyKilled(e); return comboTimer;
+      },
+      levelRewardCalc: () => Math.round((20 + (level + 1) * 5) * (1 + 0.2 * (bonus.supply || 0))),
       setLevel: (lv) => { level = lv; startLevel(); },
       respawn: () => { if (player) { player.dead = false; player.spawnInv = 120; } },
       tp: (x, y) => { if (player) { player.x = x; player.y = y; player.dead = false; player.spawnInv = 120; } },
@@ -4735,7 +4823,7 @@
       enemyGold,
       bonus: () => ({ ...bonus }),
       skins: () => ({ owned: ownedSkins.slice(), equipped: equippedSkin }),
-      setBonus: (o) => { bonus = Object.assign({ lifeup: 0, cd: 0, spd: 0, coinup: 0, shield: 0, revive: 0, combo: 0, bulletspd: 0 }, o); saveBonus(); },
+      setBonus: (o) => { bonus = Object.assign({ lifeup: 0, cd: 0, spd: 0, coinup: 0, shield: 0, revive: 0, combo: 0, bulletspd: 0, pierce: 0, supply: 0, focus: 0 }, o); saveBonus(); },
       setSkins: (o) => { ownedSkins = o.owned || ['classic']; equippedSkin = o.equipped || 'classic'; saveSkins(); saveSkin(); },
       buyBonus, buySkin, equipSkin, renderShop,
       // —— 基地升级验证 ——
