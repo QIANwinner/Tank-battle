@@ -308,6 +308,59 @@
   }
   #overlay .brand::before { right: calc(100% + 10px); }
   #overlay .brand::after { left: calc(100% + 10px); transform: scaleX(-1); }
+  /* ===== v0.2.5 主界面装饰元素：透视网格 / 上升粒子 / 四角HUD / 扫描线 ===== */
+  #overlay .decor { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+  #overlay .decor .d-grid {
+    position: absolute; left: -35%; right: -35%; bottom: -14%; height: 54%;
+    background-image:
+      linear-gradient(rgba(0, 240, 255, 0.13) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 240, 255, 0.13) 1px, transparent 1px);
+    background-size: 46px 46px;
+    transform: perspective(340px) rotateX(60deg);
+    transform-origin: center bottom;
+    -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.95) 18%, transparent 90%);
+    mask-image: linear-gradient(to top, rgba(0, 0, 0, 0.95) 18%, transparent 90%);
+    animation: decorGrid 2.8s linear infinite;
+  }
+  @keyframes decorGrid { from { background-position: 0 0; } to { background-position: 0 46px; } }
+  #overlay .decor .d-spark {
+    position: absolute; inset: 0; opacity: 0.55;
+    background-image:
+      radial-gradient(2px 2px at 22px 34px, rgba(0, 240, 255, 0.9), transparent 62%),
+      radial-gradient(1.5px 1.5px at 74px 96px, rgba(255, 0, 255, 0.75), transparent 62%),
+      radial-gradient(2.4px 2.4px at 118px 142px, rgba(0, 240, 255, 0.7), transparent 62%),
+      radial-gradient(1px 1px at 48px 150px, rgba(255, 255, 255, 0.55), transparent 62%),
+      radial-gradient(1.6px 1.6px at 138px 52px, rgba(120, 200, 255, 0.7), transparent 62%);
+    background-size: 160px 178px; background-repeat: repeat;
+    animation: decorSpark 13s linear infinite;
+  }
+  @keyframes decorSpark { from { background-position: 0 178px; } to { background-position: 0 0; } }
+  #overlay .decor .d-corner {
+    position: absolute; width: 44px; height: 44px;
+    border: 2px solid rgba(0, 240, 255, 0.42);
+    filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.5));
+    animation: decorCorner 3.4s ease-in-out infinite;
+  }
+  #overlay .decor .c-tl { top: 14px; left: 14px; border-right: none; border-bottom: none; }
+  #overlay .decor .c-tr { top: 14px; right: 14px; border-left: none; border-bottom: none; }
+  #overlay .decor .c-bl { bottom: 14px; left: 14px; border-right: none; border-top: none; }
+  #overlay .decor .c-br { bottom: 14px; right: 14px; border-left: none; border-top: none; }
+  @keyframes decorCorner { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+  #overlay .decor .d-scan {
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0) 0 2px, rgba(0, 240, 255, 0.028) 2px 4px);
+    opacity: 0.7;
+  }
+  #overlay .decor .d-beam {
+    position: absolute; left: 0; right: 0; top: 0; height: 64px;
+    background: linear-gradient(180deg, transparent, rgba(0, 240, 255, 0.055), transparent);
+    animation: decorBeam 8s linear infinite;
+  }
+  @keyframes decorBeam { from { transform: translateY(-80px); } to { transform: translateY(110vh); } }
+  /* 减弱动效（系统偏好 / 用户关闭）时冻结全部装饰动画 */
+  html.motion-off #overlay .decor *,
+  #overlay.motion-off .decor * { animation: none !important; }
+  @media (prefers-reduced-motion: reduce) { #overlay .decor * { animation: none !important; } }
   #ovTitle {
     font-size: 34px; font-weight: 800; letter-spacing: 6px; color: #fff;
     text-shadow: 0 0 10px rgba(0, 240, 255, 0.75), 0 0 36px rgba(0, 47, 167, 0.85);
@@ -874,6 +927,63 @@
   #achBox .achItem.locked .aState {
     color: #8ea0b8; border-color: rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.04);
   }
+  /* ---------- v0.2.5 战绩档案（生涯统计 + 排行榜） ---------- */
+  #careerBox {
+    position: fixed; inset: 0; z-index: 45;
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: rgba(2, 4, 12, 0.92);
+    padding: 16px;
+  }
+  #careerBox.show { display: flex; }
+  #careerBox .carHead {
+    width: min(92vw, 380px);
+    display: flex; align-items: center; gap: 10px;
+    padding: 13px 16px;
+    background: linear-gradient(180deg, rgba(0, 45, 60, 0.5), rgba(10, 20, 50, 0.6));
+    border: 1px solid rgba(0, 240, 255, 0.45); border-bottom: none;
+    border-radius: 14px 14px 0 0;
+  }
+  #careerBox .carTitle { flex: 1; color: #00f0ff; font-size: 15px; font-weight: 800; letter-spacing: 2px; }
+  #careerBox .carSub { color: #9fdce8; font-size: 11px; font-weight: 700; letter-spacing: 1px; font-variant-numeric: tabular-nums; }
+  #careerBox .carClose {
+    width: 26px; height: 26px; border-radius: 8px; cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(0, 0, 0, 0.3);
+    color: #bfe4ff; font-size: 13px; line-height: 1;
+    -webkit-appearance: none; appearance: none;
+  }
+  #careerBox .carBody {
+    width: min(92vw, 380px);
+    max-height: 62vh; overflow-y: auto;
+    padding: 12px 14px 16px;
+    background: rgba(4, 8, 18, 0.85);
+    border: 1px solid rgba(0, 240, 255, 0.35); border-radius: 0 0 14px 14px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  #careerBox .carSec { color: #00f0ff; font-size: 12px; font-weight: 800; letter-spacing: 1.5px; margin-top: 4px; }
+  #careerBox .carGrid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  }
+  #careerBox .carStat {
+    padding: 9px 10px; border-radius: 10px; text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(255, 255, 255, 0.04);
+  }
+  #careerBox .carStat b { display: block; color: #eafcff; font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  #careerBox .carStat span { color: #8ea0b8; font-size: 10px; letter-spacing: 1px; margin-top: 2px; display: block; }
+  #careerBox .carRow {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08); background: rgba(255, 255, 255, 0.04);
+  }
+  #careerBox .carRow.top1 { border-color: rgba(255, 210, 80, 0.6); background: rgba(255, 210, 80, 0.08); }
+  #careerBox .carRow .rk { flex: none; width: 24px; height: 24px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: #0a1220; background: #3a4a66; }
+  #careerBox .carRow.top1 .rk { background: #ffd250; }
+  #careerBox .carRow.top2 .rk { background: #cdd6e0; }
+  #careerBox .carRow.top3 .rk { background: #e0975a; }
+  #careerBox .carRow .sc { flex: 1; color: #eafcff; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  #careerBox .carRow .mi { color: #8ea0b8; font-size: 10px; letter-spacing: 0.5px; }
+  #careerBox .carRow .md { flex: none; font-size: 10px; font-weight: 700; letter-spacing: 1px; padding: 2px 8px; border-radius: 999px; color: #9fdce8; border: 1px solid rgba(0, 240, 255, 0.4); }
+  #careerBox .carEmpty { color: #5b6b82; font-size: 11px; text-align: center; padding: 10px 0; letter-spacing: 0.5px; }
   /* ---------- v0.2.3 存档备份/恢复 ---------- */
   #saveBox {
     position: fixed; inset: 0; z-index: 45;
@@ -1070,6 +1180,17 @@
   </div>
 
   <div id="overlay">
+    <!-- v0.2.5 主界面装饰元素：透视网格 / 上升粒子 / 四角HUD / 扫描线 -->
+    <div class="decor" id="menuDecor" aria-hidden="true">
+      <div class="d-grid"></div>
+      <div class="d-spark"></div>
+      <span class="d-corner c-tl"></span>
+      <span class="d-corner c-tr"></span>
+      <span class="d-corner c-bl"></span>
+      <span class="d-corner c-br"></span>
+      <div class="d-scan"></div>
+      <div class="d-beam"></div>
+    </div>
     <div class="brand"><span class="b1">QIAN</span><span class="b2">出品</span></div>
     <h1 id="ovTitle">坦克大战</h1>
     <p id="ovSub">守住基地 · 消灭敌军 · 点开即玩</p>
@@ -1090,6 +1211,7 @@
     <button id="btnTimed">⏱ 限时冲分</button>
     <button id="btnInstall">📲 安装到桌面</button>
     <button id="btnAch">🏆 成就</button>
+    <button id="btnCareer">📊 战绩档案</button>
     <button id="btnShop">🛒 商店</button>
     <button id="btnShare">📤 分享成绩 · 发起挑战</button>
     <button id="btnReport">🖼 生成战绩图</button>
@@ -1123,6 +1245,20 @@
           <button data-motion="auto">自动</button>
           <button data-motion="on">开</button>
           <button data-motion="off">关</button>
+        </div>
+      </div>
+      <div class="setRow">
+        <span class="setLabel">⚡ 高对比<span class="hint">描边增强可见度</span></span>
+        <div class="seg" id="contrastSeg">
+          <button data-contrast="0">关</button>
+          <button data-contrast="1">开</button>
+        </div>
+      </div>
+      <div class="setRow">
+        <span class="setLabel">🌈 色弱友好<span class="hint">重映射冲突色</span></span>
+        <div class="seg" id="cbSeg">
+          <button data-cb="0">关</button>
+          <button data-cb="1">开</button>
         </div>
       </div>
       <div class="setRow">
@@ -1170,6 +1306,16 @@
     <div class="achBody" id="achBody"></div>
   </div>
 
+  <!-- v0.2.5 战绩档案：生涯累计 + 本地排行榜 -->
+  <div id="careerBox">
+    <div class="carHead">
+      <div class="carTitle">📊 战绩档案</div>
+      <div class="carSub" id="carSub"></div>
+      <button class="carClose" id="btnCarClose" aria-label="关闭">✕</button>
+    </div>
+    <div class="carBody" id="carBody"></div>
+  </div>
+
   <!-- v0.2.3 存档备份/恢复 -->
   <div id="saveBox">
     <div class="achHead">
@@ -1201,7 +1347,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V2.4</div>
+  <div id="mark">DESIGNED BY QIAN · V2.5</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -1296,6 +1442,15 @@
   const TANK_SIZE = 22;
   const BOSS_SIZE = 44;
   const PLAYER_SPEED = 2.4;
+
+  // —— v0.2.5 Boss 多样化：三种类型（不同血条样式 + 专属技能） ——
+  // bar: 'segment' 分段血条 / 'drain' 能量渐变条 / 'solid' 标准实心条
+  // skill: 'scatter' 散射弹幕 / 'laser' 激光扫射 / 'split' 分裂召唤
+  const BOSS_TYPES = [
+    { id: 'bastion',  name: '壁垒',   desc: '重甲·散射弹幕', color: '#ff5c2a', accent: '#ffb300', bar: 'segment', skill: 'scatter', hpMul: 1.35, speed: 0.5,  size: 46 },
+    { id: 'hunter',   name: '猎手',   desc: '迅捷·激光扫射', color: '#ff2d55', accent: '#ffaa00', bar: 'drain',   skill: 'laser',   hpMul: 0.92, speed: 1.1,  size: 44 },
+    { id: 'splitter', name: '分裂者', desc: '增殖·分裂召唤', color: '#c86bff', accent: '#ff9f43', bar: 'solid',   skill: 'split',   hpMul: 1.05, speed: 0.78, size: 44 }
+  ];
   const BULLET_SPEED = 5.2;
   const BASE = { x: 12, y: 23 };   // 基地格
   const SPAWN = { x: BASE.x - 2, y: BASE.y + 1 };  // 玩家出生点（基地左侧，避免堵在基地下面）
@@ -1522,10 +1677,12 @@
         miloTitle = $('miloTitle'), miloSub = $('miloSub'),
         btnRestart = $('btnRestart'), btnQuit = $('btnQuit'),
         btnAch = $('btnAch'), achBox = $('achBox'), achBody = $('achBody'), achCount = $('achCount'),
+        btnCareer = $('btnCareer'), carBox = $('careerBox'), carBody = $('carBody'), carSub = $('carSub'),
         saveBox = $('saveBox'), saveBody = $('saveBody'),
         volRow = $('volRow'), volSlider = $('volSlider'), volPct = $('volPct'), volIcon = $('volIcon'),
         settings = $('settings'), bgmSlider = $('bgmSlider'), sfxSlider = $('sfxSlider'),
         perfSeg = $('perfSeg'), motionSeg = $('motionSeg'), settingsFullBtn = $('settingsFullBtn'),
+        contrastSeg = $('contrastSeg'), cbSeg = $('cbSeg'),
         diffSeg = $('diffSeg');
 
   // ===== URL 参数：好友挑战 (?ch=分数-关卡) / 每日挑战 (?daily=1) =====
@@ -1546,10 +1703,17 @@
   // ===== 自适应尺寸 =====
   // —— v0.2.0 性能档位 / 减弱动效 / 分音量设置 ——
   const LS_PERF = 'tank-battle-perf', LS_MOTION = 'tank-battle-motion',
-        LS_BGM = 'tank-battle-bgm', LS_SFX = 'tank-battle-sfx';
+        LS_BGM = 'tank-battle-bgm', LS_SFX = 'tank-battle-sfx',
+        LS_CONTRAST = 'tank-battle-contrast', LS_CB = 'tank-battle-colorblind';   // —— v0.2.5 辅助模式 ——
   let perfQuality = 'auto';        // 'auto' | 'high' | 'medium' | 'low'（v0.2.1 新增自动档，默认自适应）
   let reduceMotion = 'auto';       // 'auto' | 'on' | 'off'
   let bgmVol = 1, sfxVol = 1;      // 音乐 / 音效分音量 0..1
+  // —— v0.2.5 辅助模式：高对比描边 / 色弱友好配色（配合减弱动效） ——
+  let highContrast = false, colorBlind = false;
+  try {
+    highContrast = localStorage.getItem(LS_CONTRAST) === '1';
+    colorBlind = localStorage.getItem(LS_CB) === '1';
+  } catch (e) { /* 忽略 */ }
   try {
     const p = localStorage.getItem(LS_PERF);
     if (p === 'high' || p === 'medium' || p === 'low' || p === 'auto') perfQuality = p;
@@ -1790,6 +1954,10 @@
 
   let bossLevel = false;           // 本关是否 Boss 关
   let bossHp = 0, bossMaxHp = 0;   // Boss 血条
+  // —— v0.2.5 Boss 多样化：当前 Boss 类型 + 出场计数（轮换）+ 激光实体 ——
+  let bossType = BOSS_TYPES[0];    // 当前关 Boss 类型（血条样式/专属技能）
+  let bossCount = 0;               // 已出场 Boss 数（按出场顺序轮换类型）
+  let lasers = [];                 // 猎手激光扫射实体 { x,y,angle,spin,t,dur,len,thick,owner,hitDone }
   let portals = [];                // 传送门对（tile 坐标 [[x,y],[x,y]]）
 
   // 时间驱动（修复高刷屏速度翻倍）
@@ -1818,24 +1986,66 @@
     stat = { kills: 0, shots: 0, hits: 0, maxCombo: 0, bossKills: 0, deaths: 0 };
   }
 
+  // ===== v0.2.5 战绩档案：生涯累计 + 本地排行榜 =====
+  const LS_CAREER = 'tank-battle-career', LS_BOARD = 'tank-battle-board';
+  let career = { games: 0, kills: 0, playSec: 0, bestDaily: 0, bestTimed: 0, bestHard: 0, bestScore: 0 };
+  let board = [];                    // 本地前十：{ score, level, mode, date }
+  let playSecRun = 0;                // 本局已玩秒数（战绩档案用）
+  try {
+    const c = JSON.parse(localStorage.getItem(LS_CAREER) || '{}');
+    if (c && typeof c === 'object') {
+      career.games = Math.max(0, parseInt(c.games, 10) || 0);
+      career.kills = Math.max(0, parseInt(c.kills, 10) || 0);
+      career.playSec = Math.max(0, parseInt(c.playSec, 10) || 0);
+      career.bestDaily = Math.max(0, parseInt(c.bestDaily, 10) || 0);
+      career.bestTimed = Math.max(0, parseInt(c.bestTimed, 10) || 0);
+      career.bestHard = Math.max(0, parseInt(c.bestHard, 10) || 0);
+      career.bestScore = Math.max(0, parseInt(c.bestScore, 10) || 0);
+    }
+    const bd = JSON.parse(localStorage.getItem(LS_BOARD) || '[]');
+    if (Array.isArray(bd)) board = bd.slice(0, 10);
+  } catch (e) { /* 忽略 */ }
+  function saveCareer() { try { localStorage.setItem(LS_CAREER, JSON.stringify(career)); } catch (e) { /* 忽略 */ } }
+  function saveBoard() { try { localStorage.setItem(LS_BOARD, JSON.stringify(board)); } catch (e) { /* 忽略 */ } }
+  function boardRank() { return board.findIndex(b => b.uid === career.lastUid); }
+  // 一局结束：累计生涯 + 更新各模式最佳 + 写入排行榜（仅在得分>0 时上榜）
+  function recordGame(win) {
+    career.games++;
+    career.kills += stat.kills;
+    career.playSec += Math.round(playSecRun);
+    career.bestScore = Math.max(career.bestScore, score);
+    if (dailyMode) career.bestDaily = Math.max(career.bestDaily, score);
+    if (timedMode) career.bestTimed = Math.max(career.bestTimed, score);
+    if (difficulty === 'hard') career.bestHard = Math.max(career.bestHard, score);
+    saveCareer();
+    if (score > 0) {
+      const rec = { score: score, level: level, mode: dailyMode ? 'daily' : (timedMode ? 'timed' : 'normal'), date: Date.now(), uid: Date.now() + '' + Math.floor(Math.random() * 1e6) };
+      board.push(rec);
+      board.sort((a, b) => b.score - a.score);
+      if (board.length > 10) board = board.slice(0, 10);
+      career.lastUid = rec.uid;
+      saveBoard();
+    }
+  }
+
   // ===== 成就徽章 =====
   const LS_ACH = 'tank-battle-ach';
   const ACHIEVE = [
-    { id: 'first',   icon: '🩸', name: '初战告捷', desc: '击毁第一辆敌军' },
-    { id: 'combo8',  icon: '🔥', name: '连击狂人', desc: '单次连击达到 8' },
-    { id: 'boss',    icon: '👹', name: 'Boss 猎手', desc: '首次击破 Boss' },
-    { id: 'nohit',   icon: '🛡️', name: '无伤战神', desc: '一关内不掉命过关' },
-    { id: 'daily',   icon: '📅', name: '每日挑战者', desc: '完成一次每日挑战' },
-    { id: 'score5k', icon: '💰', name: '五千分大关', desc: '单局得分达到 5000' },
-    { id: 'lv5',     icon: '🚀', name: '深入敌后', desc: '到达第 5 关' },
-    { id: 'surge',   icon: '🎯', name: '精准射手', desc: '单局命中率达到 70%（射击≥20）' },
+    { id: 'first',   icon: '🩸', name: '初战告捷', desc: '击毁第一辆敌军', reward: 50 },
+    { id: 'combo8',  icon: '🔥', name: '连击狂人', desc: '单次连击达到 8', reward: 120 },
+    { id: 'boss',    icon: '👹', name: 'Boss 猎手', desc: '首次击破 Boss', reward: 120 },
+    { id: 'nohit',   icon: '🛡️', name: '无伤战神', desc: '一关内不掉命过关', reward: 120 },
+    { id: 'daily',   icon: '📅', name: '每日挑战者', desc: '完成一次每日挑战', reward: 50 },
+    { id: 'score5k', icon: '💰', name: '五千分大关', desc: '单局得分达到 5000', reward: 300 },
+    { id: 'lv5',     icon: '🚀', name: '深入敌后', desc: '到达第 5 关', reward: 120 },
+    { id: 'surge',   icon: '🎯', name: '精准射手', desc: '单局命中率达到 70%（射击≥20）', reward: 120 },
     // —— v0.2.4 新玩法成就：限时冲分 / 硬核 / 里程碑 / 存档备份 / 每日打卡 / 金库 ——
-    { id: 'timed',   icon: '⏱', name: '限时猎手', desc: '限时冲分单局达 800 分' },
-    { id: 'hard',    icon: '💀', name: '硬核征服', desc: '硬核难度下通过一关' },
-    { id: 'milo20',  icon: '🎖', name: '里程碑之路', desc: '到达第 20 关' },
-    { id: 'save',    icon: '💾', name: '存档达人', desc: '首次导出备份存档码' },
-    { id: 'daily3',  icon: '🗓', name: '坚持打卡', desc: '累计完成 3 次每日挑战' },
-    { id: 'rich',    icon: '🏦', name: '金库富翁', desc: '金币余额达到 3000' }
+    { id: 'timed',   icon: '⏱', name: '限时猎手', desc: '限时冲分单局达 800 分', reward: 120 },
+    { id: 'hard',    icon: '💀', name: '硬核征服', desc: '硬核难度下通过一关', reward: 120 },
+    { id: 'milo20',  icon: '🎖', name: '里程碑之路', desc: '到达第 20 关', reward: 300 },
+    { id: 'save',    icon: '💾', name: '存档达人', desc: '首次导出备份存档码', reward: 50 },
+    { id: 'daily3',  icon: '🗓', name: '坚持打卡', desc: '累计完成 3 次每日挑战', reward: 120 },
+    { id: 'rich',    icon: '🏦', name: '金库富翁', desc: '金币余额达到 3000', reward: 300 }
   ];
   let achUnlocked = new Set();
   let achNew = [];             // 本局新解锁（结算页展示）
@@ -1852,7 +2062,11 @@
     achNew.push(id);
     try { localStorage.setItem(LS_ACH, JSON.stringify([...achUnlocked])); } catch (e) { /* 忽略 */ }
     const a = ACHIEVE.find(x => x.id === id);
-    if (a) showToast('🏆 成就解锁 · ' + a.name);
+    // —— v0.2.5 成就奖励金币：解锁即发奖，形成「成就→金币→商店」闭环 ——
+    if (a) {
+      showToast('🏆 成就解锁 · ' + a.name + '  +' + a.reward + '🪙');
+      if (a.reward > 0) addGold(a.reward);
+    }
     vibe(30);
     sfxPickup();
   }
@@ -2059,6 +2273,14 @@
     let r = (n >> 16) + amt, g = ((n >> 8) & 0xff) + amt, b = (n & 0xff) + amt;
     r = clamp(r, 0, 255); g = clamp(g, 0, 255); b = clamp(b, 0, 255);
     return `rgb(${r},${g},${b})`;
+  }
+  // 十六进制色 → rgba 字符串（供 Boss 血条底/激光半透明用）
+  function hexA(hex, a) {
+    if (!hex) return 'rgba(255,45,85,' + a + ')';
+    const h = hex.replace('#', '');
+    if (h.length !== 6) return 'rgba(255,45,85,' + a + ')';
+    const r = parseInt(h.substring(0, 2), 16), g = parseInt(h.substring(2, 4), 16), b = parseInt(h.substring(4, 6), 16);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
   }
 
   // ===== 地图 =====
@@ -2349,15 +2571,19 @@
   }
 
   function spawnBoss() {
-    bossMaxHp = Math.round((12 + Math.floor(level * 1.5)) * diffMul().hp);   // 难度曲线更陡 × 难度血量
+    // —— v0.2.5 Boss 多样化：按出场顺序轮换类型（壁垒→猎手→分裂者→……） ——
+    bossType = BOSS_TYPES[bossCount % BOSS_TYPES.length];
+    bossCount++;
+    bossMaxHp = Math.round((12 + Math.floor(level * 1.5)) * bossType.hpMul * diffMul().hp);   // 类型血量系数 × 难度曲线 × 难度血量
     bossHp = bossMaxHp;
     enemies.push({
-      x: W / 2 - BOSS_SIZE / 2,
-      y: -BOSS_SIZE - 8,               // 屏幕外上方，出场缓缓降下
-      dir: DIR.DOWN, speed: 0.7,
+      x: W / 2 - bossType.size / 2,
+      y: -bossType.size - 8,               // 屏幕外上方，出场缓缓降下
+      dir: DIR.DOWN, speed: bossType.speed,
       cooldown: 0, isPlayer: false, isBoss: true,
-      type: 'boss', hp: bossMaxHp, maxHp: bossMaxHp,
-      size: BOSS_SIZE, color: '#ff2d55',
+      type: 'boss', bossId: bossType.id,
+      hp: bossMaxHp, maxHp: bossMaxHp,
+      size: bossType.size, color: bossType.color,
       changeTimer: 90, shootTimer: 70, hitFlash: 0, portalCd: 0,
       enterT: 1.5,                     // 出场下降时间（秒），期间无敌
       enterY: 6 * TILE,                // 场中落点
@@ -2368,7 +2594,7 @@
     bossWarn = 1.8;                 // 全屏警报
     sfxBoss();
     vibe([90, 60, 90, 60, 180]);
-    showToast('⚠ BOSS 出现！');
+    showToast('⚠ ' + bossType.name + ' BOSS 出现！');
   }
 
   const spawnPoints = [
@@ -2435,19 +2661,43 @@
     beep(phase >= 1 ? 240 : 300, 0.1, 'sawtooth', 0.05);
   }
 
-  // —— Boss 技能池（按关卡解锁：5/10/15 关分别 1/2/3 种） ——
-  function bossUnlockedSkills() {
-    const pool = ['ring', 'charge', 'summon'];
-    return pool.slice(0, level >= 15 ? 3 : level >= 10 ? 2 : 1);
-  }
+  // —— v0.2.5 Boss 专属技能（按 Boss 类型派发：散射弹幕 / 激光扫射 / 分裂召唤） ——
   function bossSkill(e) {
-    const pool = bossUnlockedSkills();
-    const s = pool[randInt(0, pool.length - 1)];
-    if (s === 'ring') ringShot(e);
-    else if (s === 'charge') {
-      if (player && !player.dead) e.chargeDir = dirFromVec(player.x - e.x, player.y - e.y);
-      e.state = 'charge_warn'; e.chargeT = 40; sfxChargeWarn();
-    } else summonMinions(e);
+    const def = (e.bossId && BOSS_TYPES.find(x => x.id === e.bossId)) || bossType;
+    if (def.skill === 'scatter') scatterShot(e);
+    else if (def.skill === 'laser') laserShot(e);
+    else splitSummon(e);
+  }
+  // 壁垒·散射弹幕：朝玩家方向三波扇形弹，逐波加速错落
+  function scatterShot(e) {
+    const cx = e.x + e.size / 2, cy = e.y + e.size / 2;
+    let aim = DIR.DOWN;
+    if (player && !player.dead) aim = dirFromVec((player.x + TANK_SIZE / 2) - cx, (player.y + TANK_SIZE / 2) - cy);
+    const spread = [-2, -1, 0, 1, 2];
+    for (let wave = 0; wave < 3; wave++) {
+      const off = wave === 0 ? 0 : (wave === 1 ? 1 : -1);   // 逐波微移，形成错落扇面
+      for (const s of spread) {
+        const d = (aim + s + off + 8) % 8;
+        bullets.push({ x: cx - 2, y: cy - 2, size: wave === 2 ? 6 : 5, dir: d, speed: BULLET_SPEED * (0.85 + wave * 0.12), owner: e });
+      }
+    }
+    beep(200, 0.18, 'sawtooth', 0.06);
+    showToast('🎯 散射弹幕！');
+  }
+  // 猎手·激光扫射：一道能量束绕 Boss 旋转扫过（触碰玩家即受伤）
+  function laserShot(e) {
+    const cx = e.x + e.size / 2, cy = e.y + e.size / 2;
+    let aim = 0;
+    if (player && !player.dead) aim = Math.atan2((player.y + TANK_SIZE / 2) - cy, (player.x + TANK_SIZE / 2) - cx);
+    lasers.push({ x: cx, y: cy, angle: aim, spin: (Math.random() < 0.5 ? -1 : 1) * 0.9, t: 0, dur: 1.6, len: 760, thick: 7, owner: e, hitDone: false });
+    beep(160, 0.3, 'sawtooth', 0.07);
+    showToast('⚡ 激光扫射！');
+  }
+  // 分裂者·分裂召唤：环形弹幕 + 召唤增援（增殖压迫）
+  function splitSummon(e) {
+    ringShot(e);
+    summonMinions(e);
+    showToast('🧬 分裂召唤！');
   }
   function ringShot(e) {
     const cx = e.x + e.size / 2, cy = e.y + e.size / 2;
@@ -2455,7 +2705,6 @@
       bullets.push({ x: cx - 2, y: cy - 2, size: 4, dir: d, speed: BULLET_SPEED * 0.85, owner: e });
     }
     beep(220, 0.14, 'sawtooth', 0.05);
-    showToast('🌀 环形弹幕！');
   }
   function summonMinions(e) {
     const n = level >= 15 ? 2 : 1;
@@ -2467,7 +2716,44 @@
       spawnEnemy(pt[0], pt[1], pickEnemyType());
       added++;
     }
-    if (added) { showToast('👾 敌军增援！'); beep(340, 0.08, 'square', 0.04); }
+    if (added) { beep(340, 0.08, 'square', 0.04); }
+  }
+
+  // —— v0.2.5 猎手激光：旋转扫射更新 + 命中判定（每束仅命中一次） ——
+  function updateLasers(k) {
+    for (let i = lasers.length - 1; i >= 0; i--) {
+      const L = lasers[i];
+      L.t += k / 60;
+      L.angle += L.spin * (k / 60);
+      if (!L.hitDone && player && !player.dead && !(player.spawnInv > 0)) {
+        const ex = L.x + Math.cos(L.angle) * L.len, ey = L.y + Math.sin(L.angle) * L.len;
+        let hit = false;
+        for (let s = 0; s <= 1; s += 0.05) {
+          const sx = L.x + (ex - L.x) * s, sy = L.y + (ey - L.y) * s;
+          if (sx >= player.x - L.thick && sx <= player.x + TANK_SIZE + L.thick &&
+              sy >= player.y - L.thick && sy <= player.y + TANK_SIZE + L.thick) { hit = true; break; }
+        }
+        if (hit) { L.hitDone = true; killPlayer(); }
+      }
+      if (L.t >= L.dur) lasers.splice(i, 1);
+    }
+  }
+  function drawLasers() {
+    for (const L of lasers) {
+      const ex = L.x + Math.cos(L.angle) * L.len, ey = L.y + Math.sin(L.angle) * L.len;
+      const a = clamp(1 - L.t / L.dur, 0, 1);
+      ctx.strokeStyle = hexA('#ff2d55', 0.35 * a);
+      ctx.lineWidth = L.thick + 6;
+      ctx.beginPath(); ctx.moveTo(L.x, L.y); ctx.lineTo(ex, ey); ctx.stroke();
+      setGlow('#ff2d55', 14);
+      ctx.strokeStyle = hexA('#ff2d55', 0.9 * a);
+      ctx.lineWidth = L.thick;
+      ctx.beginPath(); ctx.moveTo(L.x, L.y); ctx.lineTo(ex, ey); ctx.stroke();
+      ctx.strokeStyle = 'rgba(255,255,255,' + (0.85 * a).toFixed(3) + ')';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(L.x, L.y); ctx.lineTo(ex, ey); ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
   }
 
   // 按当前八方向移动：x/y 轴独立碰撞，斜向可沿墙滑动；返回是否成功移动
@@ -2626,7 +2912,7 @@
         (player.x + TANK_SIZE / 2) - (e.x + e.size / 2),
         (player.y + TANK_SIZE / 2) - (e.y + e.size / 2));
     }
-    e.speed = e.phase >= 1 ? 0.95 : 0.7;   // 狂暴加速
+    e.speed = e.phase >= 1 ? bossType.speed * 1.4 : bossType.speed;   // 类型基准速度 × 狂暴加速
     if (!moveTank(e, k)) e.dir = pickFreeDir(e);
     // 射击：狂暴越狠越密
     if ((e.shootTimer -= k) <= 0) {
@@ -3076,6 +3362,7 @@
     wave = 1; waveSpawned = 0; waveGapT = 0;
     enemySpawnTimer = bossLevel ? 40 : 30;
     bullets = []; enemies = []; particles = []; texts = []; powerups = [];
+    lasers = [];                 // —— v0.2.5 Boss 多样化：换关清空激光 ——
     baseAlive = true;
     fx = { rapid: 0, double: 0, freeze: 0 };
     combo = 0; comboTimer = 0;
@@ -3152,6 +3439,9 @@
 
     if (!running || paused) { draw(); return; }
 
+    // —— v0.2.5 局内计时（战绩档案累计时长） ——
+    playSecRun += dt;
+
     // v0.2.3 里程碑庆典：冻结世界，仅保留画面
     if (milestoneOpen) { draw(); return; }
 
@@ -3213,6 +3503,7 @@
     updatePlayer(k);
     enemies.forEach(e => { if (e.portalCd > 0) e.portalCd -= k; updateEnemy(e, k); checkPortal(e); });
     bullets.forEach(b => updateBullet(b, k));
+    updateLasers(k);        // —— v0.2.5 猎手激光扫射 ——
     updatePowerups(dt);
 
     bullets = bullets.filter(b => !b.dead);
@@ -3467,11 +3758,14 @@
         setGlow('#00f0ff', 8); ctx.fillStyle = '#00f0ff';
       } else {
         const isSnip = b.owner.type === 'sniper';
-        setGlow(b.owner.isBoss ? '#ff2d55' : (isSnip ? '#ff1a2e' : '#ff3355'),
-                b.owner.isBoss ? 10 : (isSnip ? 9 : 6));
-        ctx.fillStyle = b.owner.isBoss ? '#ff2d55' : (isSnip ? '#ff1a2e' : '#ff3355');
+        // —— v0.2.5 色弱友好：重映射敌方子弹冲突色；Boss 弹用其类型色 ——
+        const bcol = cbColor(b.owner.isBoss ? (b.owner.color || '#ff2d55') : (isSnip ? '#ff1a2e' : '#ff3355'));
+        setGlow(bcol, b.owner.isBoss ? 10 : (isSnip ? 9 : 6));
+        ctx.fillStyle = bcol;
       }
       ctx.fillRect(b.x, b.y, b.size, b.size);
+      // —— v0.2.5 高对比：子弹描边 ——
+      if (highContrast) { ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 1; ctx.strokeRect(b.x - 0.5, b.y - 0.5, b.size + 1, b.size + 1); }
       ctx.shadowBlur = 0;
     }
 
@@ -3487,6 +3781,9 @@
         // 闪烁隐藏
       } else drawTank(player);
     }
+
+    // —— v0.2.5 猎手激光扫射（覆盖在坦克之上） ——
+    drawLasers();
 
     // 草丛（覆盖上层）
     for (let y = 0; y < ROWS; y++)
@@ -3518,24 +3815,50 @@
 
     ctx.restore();
 
-    // Boss 血条（受击闪白 / 狂暴变色 / 显示关卡）
+    // Boss 血条（受击闪白 / 狂暴变色 / 显示关卡 / v0.2.5 按类型样式：分段·渐变·标准）
     if (bossHp > 0 && bossMaxHp > 0) {
       const bw = 300, bh = 10, bx = (W - bw) / 2, by = 8;
       const ratio = clamp(bossHp / bossMaxHp, 0, 1);
       const rage = ratio <= 0.5;
-      const bar = bossHitFlash > 0 ? '#ffffff' : (rage ? '#ffaa00' : '#ff2d55');
+      const bcol = cbColor(bossType.color);
+      const bar = bossHitFlash > 0 ? '#ffffff' : (rage ? '#ffaa00' : bcol);
       ctx.fillStyle = 'rgba(3,3,8,0.85)';
       ctx.fillRect(bx - 3, by - 3, bw + 6, bh + 6);
-      ctx.fillStyle = rage ? 'rgba(255,170,0,0.2)' : 'rgba(255,45,85,0.2)';
+      ctx.fillStyle = rage ? 'rgba(255,170,0,0.2)' : hexA(bcol, 0.2);
       ctx.fillRect(bx, by, bw, bh);
-      ctx.fillStyle = bar;
-      setGlow(bar, 10);
-      ctx.fillRect(bx, by, bw * ratio, bh);
-      ctx.shadowBlur = 0;
+      if (bossType.bar === 'segment') {
+        // 分段血条：5 段，满段实心、空段暗格
+        const segs = 5, gap = 2;
+        const segW = (bw - (segs - 1) * gap) / segs;
+        const filled = Math.ceil(ratio * segs);
+        setGlow(bar, 8);
+        for (let i = 0; i < segs; i++) {
+          if (i < filled) { ctx.fillStyle = bar; ctx.fillRect(bx + i * (segW + gap), by, segW, bh); }
+          else { ctx.fillStyle = 'rgba(255,255,255,0.12)'; ctx.fillRect(bx + i * (segW + gap), by, segW, bh); }
+        }
+        ctx.shadowBlur = 0;
+      } else if (bossType.bar === 'drain') {
+        // 能量渐变条：青→品红渐变 + 前端亮点
+        const g = ctx.createLinearGradient(bx, 0, bx + bw, 0);
+        g.addColorStop(0, '#00f0ff'); g.addColorStop(1, '#ff2dff');
+        ctx.fillStyle = g;
+        setGlow('#00f0ff', 10);
+        ctx.fillRect(bx, by, bw * ratio, bh);
+        ctx.shadowBlur = 0;
+        const ex2 = bx + bw * ratio;
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(ex2 - 2, by - 1, 2, bh + 2);
+      } else {
+        // 标准实心条
+        ctx.fillStyle = bar;
+        setGlow(bar, 10);
+        ctx.fillRect(bx, by, bw * ratio, bh);
+        ctx.shadowBlur = 0;
+      }
       ctx.fillStyle = '#fff';
       ctx.font = '700 10px "Consolas", monospace';
       ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-      ctx.fillText('LV.' + level + ' BOSS  ' + bossHp + ' / ' + bossMaxHp + (rage ? '  ⚡狂暴' : ''), W / 2, by + bh + 6);
+      ctx.fillText('LV.' + level + ' ' + bossType.name + '  ' + bossHp + ' / ' + bossMaxHp + (rage ? '  ⚡狂暴' : ''), W / 2, by + bh + 6);
     }
 
     // 道具效果状态（左下）
@@ -3572,17 +3895,18 @@
     if (bossWarn > 0) {
       const blink = 0.55 + 0.45 * Math.sin(bossWarn * 20);
       const bandY = H * 0.30;
-      ctx.fillStyle = 'rgba(255,45,85,' + (0.22 * blink).toFixed(3) + ')';
+      const wcol = cbColor(bossType.color);
+      ctx.fillStyle = hexA(wcol, 0.22 * blink);
       ctx.fillRect(0, bandY, W, 66);
-      ctx.fillStyle = '#ff2d55';
+      ctx.fillStyle = wcol;
       ctx.fillRect(0, bandY, W, 2);
       ctx.fillRect(0, bandY + 64, W, 2);
       ctx.globalAlpha = blink;
-      setGlow('#ff2d55', 18);
+      setGlow(wcol, 18);
       ctx.fillStyle = '#ff5c7a';
       ctx.font = '900 26px "Segoe UI", sans-serif';
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('⚠ WARNING · BOSS 来袭 ⚠', W / 2, bandY + 33);
+      ctx.fillText('⚠ WARNING · ' + bossType.name + ' BOSS 来袭 ⚠', W / 2, bandY + 33);
       ctx.globalAlpha = 1; ctx.shadowBlur = 0;
     }
 
@@ -3599,12 +3923,13 @@
       if (!e.isBoss) continue;
       const cx = e.x + e.size / 2;
       if (e.enterT > 0) {
+        const bcol = cbColor(e.color || bossType.color);
         const g = ctx.createLinearGradient(0, 0, 0, e.y + e.size);
-        g.addColorStop(0, 'rgba(255,45,85,0)');
-        g.addColorStop(1, 'rgba(255,45,85,0.4)');
+        g.addColorStop(0, hexA(bcol, 0));
+        g.addColorStop(1, hexA(bcol, 0.4));
         ctx.fillStyle = g;
         ctx.fillRect(cx - 32, 0, 64, Math.max(0, e.y + e.size));
-        ctx.strokeStyle = 'rgba(255,45,85,' + (0.45 + 0.3 * Math.sin(e.enterT * 12)).toFixed(3) + ')';
+        ctx.strokeStyle = hexA(bcol, 0.45 + 0.3 * Math.sin(e.enterT * 12));
         ctx.lineWidth = 2;
         ctx.beginPath();
         ctx.arc(cx, e.y + e.size, 18 + (1.5 - e.enterT) * 22, 0, Math.PI * 2);
@@ -3760,6 +4085,8 @@
     if (p.life < 3 && Math.floor(p.life * 6) % 2 === 0) return;
     const x = p.x, y = p.y + Math.sin(p.bob) * 2;
     const def = POWERUP_DEF[p.type];
+    // —— v0.2.5 色弱友好：道具配色重映射 ——
+    const dcol = cbColor(def.color);
     const important = (p.type === 'shield' || p.type === 'life');
     const lowHp = lives <= 1;   // 濒死时高亮关键道具
     ctx.save();
@@ -3767,9 +4094,9 @@
     if (important) {
       const t = performance.now();
       const pulse = lowHp ? (0.45 + 0.4 * Math.sin(t / 130)) : 0.28;
-      ctx.fillStyle = def.color;
+      ctx.fillStyle = dcol;
       ctx.globalAlpha = pulse;
-      setGlow(def.color, 14);
+      setGlow(dcol, 14);
       ctx.fillRect(x + size / 2 - 3, y - 68, 6, 68);
       ctx.globalAlpha = 1;
       const ay = y - 72 - (lowHp ? Math.abs(Math.sin(t / 200)) * 5 : 0);
@@ -3781,12 +4108,12 @@
       ctx.fill();
       ctx.shadowBlur = 0;
     }
-    setGlow(def.color, 10);
+    setGlow(dcol, 10);
     ctx.fillStyle = '#05050a';
     ctx.fillRect(x, y, size, size);
-    ctx.strokeStyle = def.color; ctx.lineWidth = 2;
+    ctx.strokeStyle = dcol; ctx.lineWidth = 2;
     ctx.strokeRect(x + 0.5, y + 0.5, size - 1, size - 1);
-    drawPowerupIcon(p.type, x + size / 2, y + size / 2, def.color);
+    drawPowerupIcon(p.type, x + size / 2, y + size / 2, dcol);
     ctx.restore();
   }
 
@@ -3855,7 +4182,7 @@
     const skin = isPlayer ? (SKINS[equippedSkin] || SKINS.classic) : null;
 
     if (isPlayer) setGlow(skin.glow, 10);
-    else if (t.isBoss) setGlow('#ff2d55', 18);
+    else if (t.isBoss) setGlow(cbColor(t.color), 18);
     else setGlow(t.color, 8);
 
     // 限定皮肤「蓝色大肥鱼」：专属鱼形造型（坦克仍开炮）
@@ -3866,13 +4193,13 @@
       return;
     }
 
-    const bodyColor = flashing ? '#ffffff' : (isPlayer ? skin.body : t.color);
+    const bodyColor = flashing ? '#ffffff' : (isPlayer ? skin.body : cbColor(t.color));
 
     // 履带
     ctx.fillStyle = isPlayer ? skin.track : (t.isBoss ? '#2a0810' : '#1a1020');
     ctx.fillRect(-11, -10, 5, 20);
     ctx.fillRect(6, -10, 5, 20);
-    ctx.fillStyle = isPlayer ? skin.body : (t.isBoss ? '#ff2d55' : '#2a2035');
+    ctx.fillStyle = isPlayer ? skin.body : (t.isBoss ? cbColor(t.color) : '#2a2035');
     ctx.fillRect(-11, -8, 5, 3);
     ctx.fillRect(-11, -3, 5, 3);
     ctx.fillRect(-11, 2, 5, 3);
@@ -3889,7 +4216,7 @@
     ctx.fillStyle = flashing ? '#dddddd' : (isPlayer ? shade(skin.body, 30) : shade(t.color, -25));
     ctx.fillRect(-4, -4, 8, 8);
     // 炮管
-    ctx.fillStyle = isPlayer ? skin.barrel : (t.isBoss ? '#ffaa00' : '#2a2035');
+    ctx.fillStyle = isPlayer ? skin.barrel : (t.isBoss ? bossType.accent : '#2a2035');
     ctx.fillRect(-2, -16, 4, 10);
 
     // 兵种独特造型
@@ -3938,11 +4265,14 @@
       ctx.strokeRect(-7, -9, 14, 18);
     }
     if (t.type === 'elite' || t.isBoss) {
-      ctx.strokeStyle = t.isBoss ? 'rgba(255,45,85,0.55)' : 'rgba(255,0,255,0.45)';
+      // v0.2.5 Boss 环用类型配色（色弱重映射后以 globalAlpha 控制透明度）
+      ctx.strokeStyle = t.isBoss ? cbColor(t.color) : 'rgba(255,0,255,0.45)';
+      ctx.globalAlpha = t.isBoss ? 0.55 : 1;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.arc(0, 0, 13, 0, Math.PI * 2);
       ctx.stroke();
+      ctx.globalAlpha = 1;
     }
 
     // 花哨皮肤专属特效（仅玩家）
@@ -4120,6 +4450,14 @@
     }
 
     ctx.shadowBlur = 0;
+
+    // —— v0.2.5 高对比描边：增强坦克轮廓可见度（玩家/敌人均适用） ——
+    if (highContrast) {
+      ctx.strokeStyle = 'rgba(255,255,255,0.92)';
+      ctx.lineWidth = 1.6;
+      ctx.strokeRect(-11, -10, 22, 20);
+    }
+
     ctx.restore();
 
     // 多血敌人：头顶血点（Boss 用顶部血条）
@@ -4130,7 +4468,7 @@
       let dx = t.x + s / 2 - totalW / 2;
       const dy = t.y - 5;
       for (let i = 0; i < dots; i++) {
-        ctx.fillStyle = i < t.hp ? t.color : 'rgba(255,255,255,0.15)';
+        ctx.fillStyle = i < t.hp ? cbColor(t.color) : 'rgba(255,255,255,0.15)';
         ctx.fillRect(dx, dy, dw, 3);
         dx += dw + gap;
       }
@@ -4227,6 +4565,7 @@
     btnRestart.style.display = 'none';
     btnQuit.style.display = 'none';
     btnAch.style.display = 'none';
+    if (btnCareer) btnCareer.style.display = 'none';
     volRow.style.display = 'none';
     settings.style.display = 'none';
     btnDaily.style.display = (kind === 'title' && !dailyInvited) ? 'block' : 'none';
@@ -4236,6 +4575,7 @@
     if (btnInstall) btnInstall.style.display = (kind === 'title' && deferredInstall) ? 'block' : 'none';
     if (kind === 'title') {
       btnAch.style.display = 'block';
+      if (btnCareer) btnCareer.style.display = 'block';
       volRow.style.display = 'flex';
       settings.style.display = 'flex';
       applyVolUI();
@@ -4303,6 +4643,8 @@
   function start(mode) {
     dailyMode = mode === 'daily';
     timedMode = mode === 'timed';
+    // —— v0.2.5 战绩档案：本局计时清零 ——
+    playSecRun = 0;
     dailyRng = dailyMode ? mulberry32(dailySeed()) : null;
     rng = dailyMode ? dailyRng : Math.random;
     // 限时冲分：保留 URL ?time=N 指定的限时，否则用默认 120 秒
@@ -4380,6 +4722,8 @@
       if (dailyCount >= 3) unlockAch('daily3');
     }
     if (coins >= 3000) unlockAch('rich');
+    // —— v0.2.5 战绩档案：一局结束累计生涯 + 更新排行榜 ——
+    recordGame(win);
     // —— v0.2.4 存档主动提醒：首次通关或金币达 2000 ——
     if (win || coins >= 2000) maybeBackupTip();
     // 每日挑战通关：额外金币奖励
@@ -4645,6 +4989,8 @@
 
   // ===== v0.2.0 设置：画质档位 / 减弱动效 / 分音量 =====
   function applySettingsUI() {
+    // v0.2.5 主界面装饰元素：减弱动效时冻结装饰动画
+    document.documentElement.classList.toggle('motion-off', reduced());
     if (bgmSlider) bgmSlider.value = Math.round(bgmVol * 100);
     if (sfxSlider) sfxSlider.value = Math.round(sfxVol * 100);
     if (perfSeg) {
@@ -4654,6 +5000,14 @@
     if (motionSeg) {
       for (const b of motionSeg.querySelectorAll('button'))
         b.classList.toggle('active', b.dataset.motion === reduceMotion);
+    }
+    if (contrastSeg) {
+      for (const b of contrastSeg.querySelectorAll('button'))
+        b.classList.toggle('active', b.dataset.contrast === (highContrast ? '1' : '0'));
+    }
+    if (cbSeg) {
+      for (const b of cbSeg.querySelectorAll('button'))
+        b.classList.toggle('active', b.dataset.cb === (colorBlind ? '1' : '0'));
     }
     if (diffSeg) {
       for (const b of diffSeg.querySelectorAll('button'))
@@ -4693,6 +5047,29 @@
     try { localStorage.setItem(LS_MOTION, m); } catch (e) { /* 忽略 */ }
     applySettingsUI();
     sfxPickup();
+  }
+  // —— v0.2.5 辅助模式：高对比描边 / 色弱友好配色 ——
+  function setContrast(v) {
+    highContrast = v === '1';
+    try { localStorage.setItem(LS_CONTRAST, highContrast ? '1' : '0'); } catch (e) { /* 忽略 */ }
+    applySettingsUI();
+    markMapDirty();          // 静态层重烘焙（描边影响地图渲染）
+    sfxPickup();
+  }
+  function setColorBlind(v) {
+    colorBlind = v === '1';
+    try { localStorage.setItem(LS_CB, colorBlind ? '1' : '0'); } catch (e) { /* 忽略 */ }
+    applySettingsUI();
+    sfxPickup();
+  }
+  // 色弱友好配色：重映射红/绿/黄冲突色（红→蓝紫，绿→青，黄→橙）
+  function cbColor(c) {
+    if (!colorBlind) return c;
+    const l = c.toLowerCase();
+    if (l === '#ff2d55' || l === '#ff0000' || l === '#ff3333') return '#c86bff';      // 敌红/受伤红 → 紫
+    if (l === '#39ff14' || l === '#2ecc71' || l === '#00ff00') return '#00e0ff';      // 绿 → 青
+    if (l === '#ffe600' || l === '#ffd700' || l === '#ff9f43') return '#ffa940';      // 黄/橙保留偏橙
+    return c;
   }
   function setBgmVol(v) {
     bgmVol = Math.min(1, Math.max(0, v));
@@ -4819,11 +5196,56 @@
       row.className = 'achItem' + (on ? '' : ' locked');
       row.innerHTML = '<span class="aIcon">' + a.icon + '</span>' +
         '<span class="aInfo"><span class="aName">' + a.name + '</span><span class="aDesc">' + a.desc + '</span></span>' +
-        '<span class="aState">' + (on ? '已解锁' : '未解锁') + '</span>';
+        '<span class="aState">' + (on ? '已解锁' : ('+' + a.reward + '🪙')) + '</span>';
       achBody.appendChild(row);
     }
   }
   function closeAch() { if (achBox) achBox.classList.remove('show'); }
+
+  // ===== v0.2.5 战绩档案 =====
+  const fmtPlay = s => {
+    if (s < 60) return s + ' 秒';
+    const m = Math.floor(s / 60), r = s % 60;
+    if (m < 60) return m + ' 分' + (r ? ' ' + r + ' 秒' : '');
+    const h = Math.floor(m / 60), mm = m % 60;
+    return h + ' 小时' + (mm ? ' ' + mm + ' 分' : '');
+  };
+  const MODE_NAME = { normal: '标准', daily: '每日', timed: '限时' };
+  function openCareer() {
+    if (!carBox || !carBody) return;
+    carBox.classList.add('show');
+    if (carSub) carSub.textContent = '共 ' + career.games + ' 局';
+    const rows = [];
+    // 生涯累计
+    rows.push('<div class="carSec">生涯累计</div><div class="carGrid">' +
+      '<div class="carStat"><b>' + career.games + '</b><span>总场次</span></div>' +
+      '<div class="carStat"><b>' + career.kills + '</b><span>总击杀</span></div>' +
+      '<div class="carStat"><b>' + fmtPlay(career.playSec) + '</b><span>总时长</span></div>' +
+      '</div>');
+    // 各模式最佳
+    rows.push('<div class="carSec">各模式最佳</div><div class="carGrid">' +
+      '<div class="carStat"><b>' + career.bestScore + '</b><span>最高分</span></div>' +
+      '<div class="carStat"><b>' + career.bestDaily + '</b><span>每日挑战</span></div>' +
+      '<div class="carStat"><b>' + career.bestHard + '</b><span>硬核难度</span></div>' +
+      '</div>');
+    // 本地排行榜
+    rows.push('<div class="carSec">本地排行榜 · 前十</div>');
+    if (!board.length) {
+      rows.push('<div class="carEmpty">暂无记录 · 打一局上榜吧</div>');
+    } else {
+      board.forEach((b, i) => {
+        const top = i < 3 ? ' top' + (i + 1) : '';
+        const d = new Date(b.date);
+        const ds = (d.getMonth() + 1) + '/' + d.getDate();
+        rows.push('<div class="carRow' + top + '"><span class="rk">' + (i + 1) + '</span>' +
+          '<span class="sc">' + b.score + '</span>' +
+          '<span class="mi">第' + b.level + '关 · ' + ds + '</span>' +
+          '<span class="md">' + (MODE_NAME[b.mode] || '标准') + '</span></div>');
+      });
+    }
+    carBody.innerHTML = rows.join('');
+  }
+  function closeCareer() { if (carBox) carBox.classList.remove('show'); }
 
   // ===== 回到主菜单（暂停时退出） =====
   function quitToMenu() {
@@ -4831,6 +5253,8 @@
     score = 0; lives = 3; level = 1; combo = 0; comboTimer = 0;
     running = false; paused = false; gameOver = false; won = false;
     bossLevel = false; bossHp = 0; bossMaxHp = 0;
+    // —— v0.2.5 Boss 多样化：退出回菜单重置轮换与激光 ——
+    bossType = BOSS_TYPES[0]; bossCount = 0; lasers = [];
     baseAlive = true;
     fx = { rapid: 0, double: 0, freeze: 0 };
     upgrades = {}; upgTotal = 0; upgradeOpen = false;
@@ -4977,7 +5401,7 @@
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V2.4', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V2.5', W2 / 2, H2 - 78);
     const d = new Date();
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -5047,6 +5471,9 @@
   btnAch.addEventListener('click', () => { ensureAudio(); openAch(); });
   $('btnAchClose').addEventListener('click', closeAch);
   achBox.addEventListener('click', (e) => { if (e.target === achBox) closeAch(); });
+  btnCareer.addEventListener('click', () => { ensureAudio(); openCareer(); });
+  $('btnCarClose').addEventListener('click', closeCareer);
+  carBox.addEventListener('click', (e) => { if (e.target === carBox) closeCareer(); });
   volSlider.addEventListener('input', (e) => setMasterVol(parseFloat(e.target.value) / 100));
   // v0.2.0 设置面板
   bgmSlider.addEventListener('input', (e) => setBgmVol(parseFloat(e.target.value) / 100));
@@ -5056,6 +5483,12 @@
   });
   motionSeg.addEventListener('click', (e) => {
     const b = e.target.closest('button'); if (b) setMotion(b.dataset.motion);
+  });
+  contrastSeg.addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (b) setContrast(b.dataset.contrast);
+  });
+  cbSeg.addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (b) setColorBlind(b.dataset.cb);
   });
   diffSeg.addEventListener('click', (e) => {
     const b = e.target.closest('button'); if (b) setDifficulty(b.dataset.diff);
@@ -5255,7 +5688,16 @@
   applyVolUI();
   updateHud();
   updateCoinHud();
+  // —— v0.2.5 主界面装饰元素：初始应用减弱动效 class + 监听系统偏好变化 ——
+  document.documentElement.classList.toggle('motion-off', reduced());
+  try {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const onMq = () => document.documentElement.classList.toggle('motion-off', reduced());
+    if (mq.addEventListener) mq.addEventListener('change', onMq);
+    else if (mq.addListener) mq.addListener(onMq);
+  } catch (e) { /* 忽略 */ }
   bossLevel = false;
+  bossType = BOSS_TYPES[0]; bossCount = 0; lasers = [];   // —— v0.2.5 Boss 多样化：启动重置 ——
   generateMap();
   layout();
   showOverlay('title');
@@ -5300,13 +5742,28 @@
       bossSkillNow: () => { const b = enemies.find(e => e.isBoss && !e.dead); if (b) b.skillTimer = 1; },
       bossInfo: () => {
         const b = enemies.find(e => e.isBoss && !e.dead);
-        return b ? { x: b.x, y: b.y, hp: b.hp, max: b.maxHp, phase: b.phase, state: b.state, enterT: b.enterT, enterY: b.enterY } : null;
+        return b ? { x: b.x, y: b.y, hp: b.hp, max: b.maxHp, phase: b.phase, state: b.state, enterT: b.enterT, enterY: b.enterY,
+          // —— v0.2.5 Boss 多样化 ——
+          bossId: b.bossId, color: b.color, size: b.size,
+          type: bossType.id, bar: bossType.bar, skill: bossType.skill, name: bossType.name } : null;
       },
+      // —— v0.2.5 Boss 多样化：轮换类型信息 / 强制技能 / 激光数 ——
+      bossTypesNow: () => BOSS_TYPES.map(t => ({ id: t.id, bar: t.bar, skill: t.skill, name: t.name, color: t.color, hpMul: t.hpMul, speed: t.speed, size: t.size })),
+      bossTypeNow: () => ({ id: bossType.id, name: bossType.name, bar: bossType.bar, skill: bossType.skill }),
+      bossCountNow: () => bossCount,
+      fireBossSkill: (kind) => {
+        const b = enemies.find(e => e.isBoss && !e.dead); if (!b) return false;
+        if (kind === 'scatter') scatterShot(b); else if (kind === 'laser') laserShot(b); else splitSummon(b);
+        return true;
+      },
+      laserCountNow: () => lasers.length,
+      // —— v0.2.5 强制刷出 Boss（同步，用于轮换/技能验证） ——
+      forceSpawnBoss: () => { spawnBoss(); return { id: bossType.id, name: bossType.name, bar: bossType.bar, skill: bossType.skill, color: bossType.color, hpMul: bossType.hpMul }; },
       powerups: () => powerups.map(p => p.type),
       // —— 八方向验证用 ——
       state: () => ({
         player: player ? { x: player.x, y: player.y, dir: player.dir, dead: player.dead } : null,
-        enemies: enemies.map(e => ({ dir: e.dir, isBoss: !!e.isBoss, x: e.x, y: e.y, hp: e.hp, phase: e.phase || 0, state: e.state || 'idle', enterT: e.enterT || 0 })),
+        enemies: enemies.map(e => ({ dir: e.dir, isBoss: !!e.isBoss, x: e.x, y: e.y, hp: e.hp, phase: e.phase || 0, state: e.state || 'idle', enterT: e.enterT || 0, bossId: e.bossId || null })),
         bullets: bullets.map(b => ({ dir: b.dir, x: b.x, y: b.y, owner: b.owner.isPlayer ? 'p' : 'e' })),
         boss: { hp: bossHp, max: bossMaxHp, deathT: bossDeathT, timeScale, whiteFlash, level, bossLevel },
         level, running, paused
@@ -5516,6 +5973,43 @@
       resetBackupTip: () => { backupTipShown = false; try { localStorage.removeItem('tank-battle-backup-tip'); } catch (e) {} },
       sfxNow: () => ({ milestone: typeof sfxMilestone === 'function', countdown: typeof sfxCountdown === 'function' }),
       fxDescNow: (fx) => fxDesc(fx),
+      // —— v0.2.5 成就奖励金币 / 战绩档案 ——
+      achReward: (id) => { const a = ACHIEVE.find(x => x.id === id); return a ? a.reward : 0; },
+      unlockAch: (id) => unlockAch(id),
+      setScore: (n) => { score = Math.max(0, n | 0); },
+      careerNow: () => ({ ...career, board: board.slice() }),
+      resetCareer: () => { career = { games: 0, kills: 0, playSec: 0, bestDaily: 0, bestTimed: 0, bestHard: 0, bestScore: 0 }; board = []; playSecRun = 0; try { localStorage.removeItem(LS_CAREER); localStorage.removeItem(LS_BOARD); } catch (e) {} },
+      recordGameNow: (win) => recordGame(win),
+      careerOpenNow: () => !!(carBox && carBox.classList.contains('show')),
+      // —— v0.2.5 辅助模式 ——
+      assistNow: () => ({ contrast: highContrast, colorBlind }),
+      setContrast: (v) => setContrast(v === '1' ? '1' : '0'),
+      setColorBlind: (v) => setColorBlind(v === '1' ? '1' : '0'),
+      cbMap: (c) => cbColor(c),
+      // —— v0.2.5 主界面装饰元素：结构探针（元素存在性 / 动画开启 / 动效冻结态） ——
+      menuDecorNow: () => {
+        const d = document.getElementById('menuDecor');
+        const o = document.getElementById('overlay');
+        if (!d) return { exists: false };
+        const anims = d.querySelectorAll('.d-grid, .d-spark, .d-corner, .d-beam');
+        let animOn = 0;
+        for (const el of anims) {
+          const st = getComputedStyle(el);
+          if (st.animationName && st.animationName !== 'none') animOn++;
+        }
+        return {
+          exists: true,
+          grid: !!d.querySelector('.d-grid'),
+          sparks: d.querySelectorAll('.d-spark').length,
+          corners: d.querySelectorAll('.d-corner').length,
+          scan: !!d.querySelector('.d-scan'),
+          beam: !!d.querySelector('.d-beam'),
+          animTotal: anims.length,
+          animOn,
+          overlayVisible: !!(o && !o.classList.contains('hide')),
+          motionOff: document.documentElement.classList.contains('motion-off'),
+        };
+      },
     };
   }
 
