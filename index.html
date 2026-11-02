@@ -927,6 +927,35 @@
     color: #bfe4ff; font-size: 12px; font-weight: 800; letter-spacing: 1px; cursor: pointer;
   }
   .shopItem .siBtn:active { background: var(--klein); transform: translateY(1px); }
+  /* ---------- v0.2.9 金币经济：抽奖箱 / 强化重置 / 成就徽章框 ---------- */
+  .gachaCard {
+    grid-column: 1 / -1; display: flex; align-items: center; gap: 14px;
+    padding: 16px 14px; border-radius: 14px;
+    border: 1px solid rgba(255, 215, 0, 0.4); background: linear-gradient(135deg, rgba(255, 180, 0, 0.14), rgba(255, 90, 0, 0.08));
+  }
+  .gachaIcon { font-size: 40px; line-height: 1; filter: drop-shadow(0 0 10px rgba(255, 200, 0, 0.8)); }
+  .gachaInfo { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .gachaName { font-size: 15px; font-weight: 900; letter-spacing: 1px; color: #ffd24a; }
+  .gachaDesc { font-size: 11px; line-height: 1.5; color: #cbbfa0; }
+  .gachaMeta { font-size: 10px; letter-spacing: 1px; color: #ffe066; }
+  .gachaBtn {
+    flex: none; padding: 12px 18px; border-radius: 999px; cursor: pointer;
+    border: 1px solid rgba(255, 215, 0, 0.7); background: linear-gradient(180deg, #ffb300, #ff7a00);
+    color: #1a0a00; font-size: 13px; font-weight: 900; letter-spacing: 1px;
+    box-shadow: 0 0 14px rgba(255, 170, 0, 0.6);
+  }
+  .gachaBtn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none; }
+  .gachaResult { text-align: center; font-size: 13px; font-weight: 800; letter-spacing: 1px; color: #ffd24a; min-height: 20px; }
+  .achBadgeWrap { grid-column: 1 / -1; }
+  .achBadgeTitle { font-size: 12px; font-weight: 800; letter-spacing: 2px; color: #9dc4e8; margin-bottom: 8px; }
+  .achBadgeRow { display: flex; flex-wrap: wrap; gap: 8px; }
+  .achBadge {
+    width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    font-size: 20px; border: 1px solid rgba(0, 240, 255, 0.4); background: rgba(0, 47, 167, 0.3);
+    box-shadow: 0 0 8px rgba(0, 240, 255, 0.35); cursor: pointer;
+  }
+  .achBadge:hover { transform: translateY(-2px); background: rgba(0, 47, 167, 0.55); }
+  .achBadge.none { filter: grayscale(1) opacity(0.35); cursor: default; box-shadow: none; }
   .shopItem .siBtn.owned { border-color: rgba(255, 230, 0, 0.5); color: #ffe066; }
   .shopItem .siBtn.equipped { border-color: rgba(57, 255, 20, 0.6); color: #a6ff8f; }
   .shopItem .siBtn.disabled { opacity: .5; cursor: not-allowed; }
@@ -1678,6 +1707,13 @@
         </div>
       </div>
       <div class="setRow">
+        <span class="setLabel">🗺 随机地图<span class="hint">每局程序化新图</span></span>
+        <div class="seg" id="randMapSeg">
+          <button data-rand="0">关</button>
+          <button data-rand="1">开</button>
+        </div>
+      </div>
+      <div class="setRow">
         <span class="setLabel">⛶ 全屏<span class="hint">沉浸模式</span></span>
         <div class="seg"><button id="settingsFullBtn">进入全屏</button></div>
       </div>
@@ -1842,7 +1878,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V2.8</div>
+  <div id="mark">DESIGNED BY QIAN · V2.9</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -1891,6 +1927,7 @@
     <div class="shopTabs">
       <button class="shopTab active" id="tabBonus">永久加成</button>
       <button class="shopTab" id="tabSkins">角色皮肤</button>
+      <button class="shopTab" id="tabGacha">🎰 抽奖</button>
     </div>
     <div class="shopBody" id="shopBody"></div>
   </div>
@@ -2187,6 +2224,7 @@
         shopBox = $('shopBox'), shopBody = $('shopBody'),
         btnShop = $('btnShop'), btnShopClose = $('btnShopClose'),
         tabBonus = $('tabBonus'), tabSkins = $('tabSkins'),
+        tabGacha = $('tabGacha'),   // v0.2.9 抽奖箱 tab
         // v0.2.3 里程碑庆典
         milestone = $('milestone'), miloFire = $('miloFire'),
         miloTitle = $('miloTitle'), miloSub = $('miloSub'),
@@ -2208,6 +2246,7 @@
         settings = $('settings'), bgmSlider = $('bgmSlider'), sfxSlider = $('sfxSlider'),
         perfSeg = $('perfSeg'), motionSeg = $('motionSeg'), settingsFullBtn = $('settingsFullBtn'),
         contrastSeg = $('contrastSeg'), cbSeg = $('cbSeg'),
+        randMapSeg = $('randMapSeg'),     // —— v0.2.9 随机地图开关 ——
         diffSeg = $('diffSeg');
 
   // ===== URL 参数：好友挑战 (?ch=分数-关卡) / 每日挑战 (?daily=1) =====
@@ -2229,15 +2268,19 @@
   // —— v0.2.0 性能档位 / 减弱动效 / 分音量设置 ——
   const LS_PERF = 'tank-battle-perf', LS_MOTION = 'tank-battle-motion',
         LS_BGM = 'tank-battle-bgm', LS_SFX = 'tank-battle-sfx',
-        LS_CONTRAST = 'tank-battle-contrast', LS_CB = 'tank-battle-colorblind';   // —— v0.2.5 辅助模式 ——
+        LS_CONTRAST = 'tank-battle-contrast', LS_CB = 'tank-battle-colorblind',   // —— v0.2.5 辅助模式 ——
+        LS_RANDMAP = 'tank-battle-randmap';                                       // —— v0.2.9 随机地图 ——
   let perfQuality = 'auto';        // 'auto' | 'high' | 'medium' | 'low'（v0.2.1 新增自动档，默认自适应）
   let reduceMotion = 'auto';       // 'auto' | 'on' | 'off'
   let bgmVol = 1, sfxVol = 1;      // 音乐 / 音效分音量 0..1
   // —— v0.2.5 辅助模式：高对比描边 / 色弱友好配色（配合减弱动效） ——
   let highContrast = false, colorBlind = false;
+  // —— v0.2.9 随机地图：默认开启（经典/无尽每局程序化新图，每日/自制/Boss 不受影响） ——
+  let randMaps = true;
   try {
     highContrast = localStorage.getItem(LS_CONTRAST) === '1';
     colorBlind = localStorage.getItem(LS_CB) === '1';
+    randMaps = localStorage.getItem(LS_RANDMAP) !== '0';   // 默认开，显式 '0' 才关
   } catch (e) { /* 忽略 */ }
   try {
     const p = localStorage.getItem(LS_PERF);
@@ -2327,7 +2370,9 @@
         LS_AD1 = 'tank-battle-ad1',
         LS_STARS = 'tank-battle-stars',      // —— v0.2.6 关卡星级 {level: 0-3} ——
         LS_MAXLV = 'tank-battle-maxlv',      // —— v0.2.6 已解锁最高关 ——
-        LS_BESTWAVE = 'tank-battle-bestwave';// —— v0.2.6 无尽模式最高波次 ——
+        LS_BESTWAVE = 'tank-battle-bestwave',// —— v0.2.6 无尽模式最高波次 ——
+        LS_GACHA = 'tank-battle-gacha',      // —— v0.2.9 抽奖箱累计次数 ——
+        LS_BONUSSPENT = 'tank-battle-bonus-spent'; // —— v0.2.9 强化累计投入（重置返还用） ——
   let coins = 0;                                                       // 金币余额
   let bonus = { lifeup: 0, cd: 0, spd: 0, coinup: 0, shield: 0, revive: 0, combo: 0, bulletspd: 0, pierce: 0, supply: 0, focus: 0 };      // 永久加成等级
   let baseLevel = 0;                                                   // 基地升级等级（护墙阵法）
@@ -2336,6 +2381,8 @@
   let levelStars = {};                                                 // —— v0.2.6 关卡星级（1-3 星） ——
   let maxUnlocked = 1;                                                 // —— v0.2.6 已解锁最高关卡（默认第 1 关） ——
   let bestWave = 0;                                                    // —— v0.2.6 无尽模式历史最高波次 ——
+  let gachaCount = 0;                                                  // —— v0.2.9 抽奖箱累计次数 ——
+  let bonusSpent = 0;                                                  // —— v0.2.9 强化累计投入（重置返还 50%） ——
   try {
     coins = parseInt(localStorage.getItem(LS_COINS) || '0', 10) || 0;
     const b = JSON.parse(localStorage.getItem(LS_BONUS) || '{}');
@@ -2351,6 +2398,9 @@
     if (st && typeof st === 'object') for (const k in st) { const v = parseInt(st[k], 10); if (v >= 1 && v <= 3) levelStars[k] = v; }
     maxUnlocked = Math.max(1, parseInt(localStorage.getItem(LS_MAXLV) || '1', 10) || 1);
     bestWave = Math.max(0, parseInt(localStorage.getItem(LS_BESTWAVE) || '0', 10) || 0);
+    // —— v0.2.9 抽奖箱 / 强化重置状态 ——
+    gachaCount = Math.max(0, parseInt(localStorage.getItem(LS_GACHA) || '0', 10) || 0);
+    bonusSpent = Math.max(0, parseInt(localStorage.getItem(LS_BONUSSPENT) || '0', 10) || 0);
   } catch (e) { /* 隐私模式下 localStorage 不可用 */ }
   function saveCoins() { try { localStorage.setItem(LS_COINS, String(coins)); } catch (e) {} }
   function saveBonus() { try { localStorage.setItem(LS_BONUS, JSON.stringify(bonus)); } catch (e) {} }
@@ -2360,6 +2410,8 @@
   function saveStars() { try { localStorage.setItem(LS_STARS, JSON.stringify(levelStars)); } catch (e) {} }
   function saveMaxLv() { try { localStorage.setItem(LS_MAXLV, String(maxUnlocked)); } catch (e) {} }
   function saveBestWave() { try { localStorage.setItem(LS_BESTWAVE, String(bestWave)); } catch (e) {} }
+  function saveGacha() { try { localStorage.setItem(LS_GACHA, String(gachaCount)); } catch (e) {} }
+  function saveBonusSpent() { try { localStorage.setItem(LS_BONUSSPENT, String(bonusSpent)); } catch (e) {} }
   // —— v0.2.6 关卡星级算法：无伤 / 剩余生命 / 用时 各 +1，至少 1 星 ——
   function starsForLevel(lv, nohit, livesLeft, secs) {
     let s = 1;
@@ -2883,11 +2935,11 @@
     beep(urgent ? 1320 : 880, urgent ? 0.07 : 0.05, 'square', urgent ? 0.06 : 0.04);
   };
 
-  // ===== BGM：程序化 8-bit 循环（平静 / 战斗两首，可关） =====
+  // ===== BGM：程序化 8-bit 循环（平静 / 战斗 / Boss / 无尽紧迫 四首，可关） =====
   const BGM_NOTES = {
-    C3: 130.81, D3: 146.83, E3: 164.81, F3: 174.61, G3: 196, A3: 220, B3: 246.94,
+    G2: 98, C3: 130.81, D3: 146.83, E3: 164.81, F3: 174.61, G3: 196, A3: 220, B3: 246.94,
     C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392, A4: 440, B4: 493.88,
-    C5: 523.25, D5: 587.33, E5: 659.25, G5: 783.99, R: 0
+    C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99, A5: 880, R: 0
   };
   const BGM_CALM = {
     bpm: 88,
@@ -2899,7 +2951,19 @@
     bass: ['C3','C3','R','C3','G3','R','G3','R','A3','A3','R','A3','E3','R','G3','R'],
     lead: ['C5','E5','G5','E5','C5','R','D5','E5','G5','E5','D5','C5','G4','R','E5','G5']
   };
-  let bgmMode = 'off';        // 'off' | 'calm' | 'battle'
+  // —— v0.2.9 新增：Boss 专属（小调张力 + 半音导音） / 无尽紧迫（快速琶音） ——
+  const BGM_BOSS = {
+    bpm: 150,
+    bass: ['C3','C3','C3','R','C3','C3','C3','R','G2','G2','G2','R','G2','G2','G2','R'],
+    lead: ['C5','R','C5','D5','C5','R','B4','D5','E5','R','E5','F5','E5','R','D5','B4']
+  };
+  const BGM_RUSH = {
+    bpm: 160,
+    bass: ['E3','E3','E3','E3','A3','A3','A3','A3','G3','G3','G3','G3','B3','B3','B3','B3'],
+    lead: ['E5','G5','A5','G5','E5','R','D5','E5','G5','A5','G5','E5','R','R','E5','G5']
+  };
+  const BGM_TRACKS = { calm: BGM_CALM, battle: BGM_BATTLE, boss: BGM_BOSS, rush: BGM_RUSH };
+  let bgmMode = 'off';        // 'off' | 'calm' | 'battle' | 'boss' | 'rush'
   let bgmStep = 0, bgmNextTime = 0, bgmTimer = null;
 
   function bgmNote(freq, time, dur, type, vol) {
@@ -2912,9 +2976,34 @@
     o.connect(g); g.connect(audioCtx.destination);
     o.start(time); o.stop(time + dur + 0.03);
   }
+  // —— v0.2.9 自动曲目决策：Boss 战 / 无尽高波次 / 暂停 / 结束 的动态切换 ——
+  const BGM_RUSH_WAVE = 5;   // 无尽模式从第 5 波起进入紧迫曲目
+  let bgmAutoTick = 0;       // 自动检测节流计数（每 7 tick ≈ 0.5s 检查一次）
+  // 可选 st 状态覆盖参数：生产调用无参；测试传入 {running,paused,gameOver,wave,endless,bossLevel,bossWarn,bossAlive} 避免副作用
+  function computeTargetBgm(st) {
+    st = st || {};
+    const run = st.running !== undefined ? st.running : running;
+    const pau = st.paused !== undefined ? st.paused : paused;
+    const go  = st.gameOver !== undefined ? st.gameOver : gameOver;
+    const wv  = st.wave !== undefined ? st.wave : wave;
+    const em  = st.endless !== undefined ? st.endless : endlessMode;
+    const bl  = st.bossLevel !== undefined ? st.bossLevel : bossLevel;
+    const bw  = st.bossWarn !== undefined ? st.bossWarn : bossWarn;
+    const bossAlive = st.bossAlive !== undefined ? st.bossAlive : enemies.some(e => e.isBoss && !e.dead);
+    if (pau || !run || go) return 'calm';
+    if (bossAlive || (bl && bw > 0)) return 'boss';
+    if (em && wv >= BGM_RUSH_WAVE) return 'rush';
+    return 'battle';
+  }
   function bgmTick() {
     if (!audioCtx || bgmMode === 'off' || muted) return;
-    const pat = bgmMode === 'battle' ? BGM_BATTLE : BGM_CALM;
+    // —— v0.2.9 自动曲目切换（节流，避免每帧 enemies.some 开销）——
+    if (++bgmAutoTick >= 7) {
+      bgmAutoTick = 0;
+      const target = computeTargetBgm();
+      if (target !== bgmMode) setBgm(target);
+    }
+    const pat = BGM_TRACKS[bgmMode] || BGM_CALM;
     const stepDur = 60 / pat.bpm / 4;
     if (bgmNextTime < audioCtx.currentTime) bgmNextTime = audioCtx.currentTime + 0.06;
     while (bgmNextTime < audioCtx.currentTime + 0.18) {
@@ -3025,6 +3114,9 @@
       const idx = Math.floor(dailyRng() * (PRESET_MAPS.length - 1));
       const flip = dailyRng() < 0.5 ? 1 : 0;
       loadPresetMap(idx, flip);
+    } else if (randMaps) {
+      // —— v0.2.9 随机地图：经典/无尽每局程序化新图（每日/自制/Boss 场不受影响） ——
+      loadRandomMap(nextMapSeed());
     } else {
       loadPresetMap((level - 1) % (PRESET_MAPS.length - 1), 0);
     }
@@ -3074,6 +3166,86 @@
     map[a[1]][a[0]] = TILE_PORTAL;
     map[b[1]][b[0]] = TILE_PORTAL;
     portals = [a, b];
+    markMapDirty();
+  }
+
+  // —— v0.2.9 随机地图生成（Roguelike）：程序化生成 26×26 地图 ——
+  // 敌人出生点（格坐标，与 spawnPoints 像素坐标 [x*TILE, y*TILE] 一致）
+  const ENEMY_SPAWN_CELLS = [[1, 1], [COLS - 2, 1], [(COLS / 2) | 0, 1]];
+  let randMapCounter = 0;                        // 递增种子计数器
+  let randMapCalls = 0;                          // loadRandomMap 实际调用次数（验证 generateMap 分支用）
+  // 下一张随机图种子：时间戳 ^ 计数器散列（黄金比常数），同一帧多次调用/跨局均不同
+  function nextMapSeed() {
+    return ((Date.now() ^ (randMapCounter++ * 0x9E3779B9)) >>> 0);
+  }
+  // 坦克可走判定：空地/树可走；砖/钢/水/油桶/传送门不可走（子弹可越水，坦克不行）
+  function tileWalkable(t) { return t === 0 || t === TILE_TREE; }
+  // 从 (sx,sy) 洪泛：返回可达标记 Uint8Array + 可达可走格数（4 邻接 BFS）
+  function bfsReachable(sx, sy) {
+    const seen = new Uint8Array(ROWS * COLS), q = [[sx, sy]];
+    seen[sy * COLS + sx] = 1;
+    let count = 0;
+    for (let h = 0; h < q.length; h++) {
+      const x = q[h][0], y = q[h][1]; count++;
+      for (let d = 0; d < 4; d++) {
+        const nx = x + [0, 1, 0, -1][d], ny = y + [-1, 0, 1, 0][d];
+        if (nx < 0 || ny < 0 || nx >= COLS || ny >= ROWS) continue;
+        const i = ny * COLS + nx;
+        if (seen[i] || !tileWalkable(map[ny][nx])) continue;
+        seen[i] = 1; q.push([nx, ny]);
+      }
+    }
+    return { seen, count };
+  }
+  // 清空某格周围 radius 的障碍（保留外围钢墙），保证关键枢纽通畅
+  function clearHub(gx, gy, radius) {
+    for (let y = gy - radius; y <= gy + radius; y++)
+      for (let x = gx - radius; x <= gx + radius; x++)
+        if (x > 0 && y > 0 && x < COLS - 1 && y < ROWS - 1) map[y][x] = 0;
+  }
+  // 程序化生成一张保证连通性的随机地图（seed 相同则地图完全相同，可确定性测试）
+  function loadRandomMap(seed) {
+    randMapCalls++;
+    const rr = mulberry32(seed >>> 0);
+    let ok = false;
+    for (let attempt = 0; attempt < 16 && !ok; attempt++) {
+      map = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+      // 随机地形（内部 y 2..23 / x 2..23，比例：砖 18% 钢 6% 水 6% 树 8%）
+      for (let y = 2; y < ROWS - 2; y++)
+        for (let x = 2; x < COLS - 2; x++) {
+          const r = rr();
+          if (r < 0.18) map[y][x] = TILE_BRICK;
+          else if (r < 0.24) map[y][x] = TILE_STEEL;
+          else if (r < 0.30) map[y][x] = TILE_WATER;
+          else if (r < 0.38) map[y][x] = TILE_TREE;
+        }
+      // 关键枢纽清障：基地护墙外圈 / 玩家出生区 / 三个敌人出生带（护墙本身由 decorateMap 后画，不受影响）
+      clearHub(BASE.x, BASE.y, 2);
+      clearHub(SPAWN.x, SPAWN.y, 2);
+      for (const c of ENEMY_SPAWN_CELLS) clearHub(c[0], c[1], 1);
+      // 外墙 + 基地护墙 + 清出生点（覆盖部分枢纽，与预设图装饰逻辑一致）
+      decorateMap();
+      // 连通性校验：SPAWN 可达三个敌人出生点 + 基地邻格至少一格可走可达
+      const r = bfsReachable(SPAWN.x, SPAWN.y);
+      let conn = true;
+      for (const c of ENEMY_SPAWN_CELLS)
+        if (!r.seen[c[1] * COLS + c[0]]) { conn = false; break; }
+      let baseReach = false;
+      for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const bx = BASE.x + dx, by = BASE.y + dy;
+        if (inside(bx, by) && tileWalkable(map[by][bx]) && r.seen[by * COLS + bx]) { baseReach = true; break; }
+      }
+      // 可达可走格数下限：保证可玩空间，防一堵墙封死大半图
+      ok = conn && baseReach && r.count >= 240;
+      if (ok) {
+        // 不可达可走格填砖：封死死区，避免"看着能走实则不能走"的空洞
+        for (let y = 0; y < ROWS; y++)
+          for (let x = 0; x < COLS; x++)
+            if (tileWalkable(map[y][x]) && !r.seen[y * COLS + x]) map[y][x] = TILE_BRICK;
+      }
+    }
+    // 兜底：多次失败回退到预设图（保证必出图）
+    if (!ok) loadPresetMap((seed >>> 0) % (PRESET_MAPS.length - 1), 0);
     markMapDirty();
   }
 
@@ -5649,7 +5821,7 @@
     running = true;
     hideOverlay();
     pauseBtn.textContent = '⏸';
-    setBgm('battle');
+    setBgm(computeTargetBgm());   // v0.2.9 开局即按模式/Boss/波次选曲
     lvIntroNext = false;
     // —— v0.2.6 关卡选择 / 无尽模式标题文案 ——
     let introTxt = '第 ' + level + ' 关';
@@ -5782,7 +5954,7 @@
     // 恢复运行
     gameOver = false; running = true;
     hideOverlay(); hideUpgradeBox();
-    setBgm('battle');
+    setBgm(computeTargetBgm());   // v0.2.9 复活后按当前 Boss/波次选曲
     updateHud();
     showToast('🪙 基地重建 · 花 ' + cost + ' 金币，继续战斗！');
     sfxPickup();
@@ -5814,6 +5986,9 @@
         if (!maxed) btn.onclick = () => buyBonus(def.id);
         shopBody.appendChild(item);
       }
+    } else if (shopTab === 'gacha') {
+      // —— v0.2.9 金币消费中心：抽奖箱 + 强化重置 + 成就徽章展示框 ——
+      renderGacha();
     } else {
       for (const id of SKIN_LIST) {
         const sk = SKINS[id];
@@ -5909,8 +6084,8 @@
     if (lv >= def.max) return;
     const price = def.price[lv];
     if (coins < price) { showToast('🪙 金币不足'); beep(180, 0.12, 'square', 0.05); return; }
-    coins -= price; bonus[id] = lv + 1;
-    saveCoins(); saveBonus(); renderShop(); updateCoinHud();
+    coins -= price; bonus[id] = lv + 1; bonusSpent += price;   // v0.2.9 追踪强化累计投入
+    saveCoins(); saveBonus(); saveBonusSpent(); renderShop(); updateCoinHud();
     showToast(def.icon + ' 购买成功 · ' + def.name);
     sfxPickup();
   }
@@ -5931,11 +6106,109 @@
     sfxPickup();
   }
 
+  // ===== v0.2.9 金币经济补全：抽奖箱 / 强化重置 / 成就徽章展示框 =====
+  const GACHA_COST = 500;      // 单次抽奖价格
+  const GACHA_POOL = [         // 奖励池（权重 + 效果）
+    { w: 30, label: '🪙 +600',    coins: 600 },
+    { w: 20, label: '🪙 +1000',   coins: 1000 },
+    { w: 25, label: '⚡ 随机强化 +1 级', bonus: true },
+    { w: 15, label: '🪙 +300',    coins: 300 },
+    { w: 10, label: '💰 超级大奖 +3000', coins: 3000 },
+  ];
+  function pickGacha() {
+    const total = GACHA_POOL.reduce((s, x) => s + x.w, 0);
+    let r = Math.random() * total;
+    for (const x of GACHA_POOL) { r -= x.w; if (r < 0) return x; }
+    return GACHA_POOL[0];
+  }
+  function drawGacha() {
+    if (coins < GACHA_COST) { showToast('🪙 金币不足，需要 ' + GACHA_COST); beep(180, 0.12, 'square', 0.05); return null; }
+    coins -= GACHA_COST; gachaCount++;
+    const win = pickGacha();
+    let detail = '';
+    if (win.coins) { coins += win.coins; detail = '🪙 +' + win.coins; }
+    else if (win.bonus) {
+      const cands = BONUS_DEF.filter(d => (bonus[d.id] || 0) < d.max);
+      if (cands.length) {
+        const d = cands[Math.floor(Math.random() * cands.length)];
+        bonus[d.id] = (bonus[d.id] || 0) + 1;
+        detail = d.icon + ' ' + d.name + ' Lv' + bonus[d.id];
+        saveBonus();
+      } else { coins += GACHA_COST; detail = '⚡ 强化已全满级 → 返还成本'; }
+    }
+    saveCoins(); saveGacha(); renderShop(); updateCoinHud();
+    sfxPickup();
+    return { label: win.label, coins: win.coins || 0, bonus: win.bonus || false, detail, balance: coins, count: gachaCount };
+  }
+  function resetBonus() {
+    const RESET_COST = 200;
+    if (coins < RESET_COST) { showToast('🪙 金币不足（重置需 ' + RESET_COST + '）'); beep(180, 0.12, 'square', 0.05); return null; }
+    const totalLv = Object.values(bonus).reduce((s, v) => s + v, 0);
+    if (bonusSpent <= 0 && totalLv <= 0) { showToast('暂无强化可重置'); beep(180, 0.12, 'square', 0.05); return null; }
+    coins -= RESET_COST;
+    const refund = Math.floor(bonusSpent * 0.5);
+    coins += refund;
+    for (const k in bonus) bonus[k] = 0;
+    bonusSpent = 0;
+    saveCoins(); saveBonus(); saveBonusSpent(); renderShop(); updateCoinHud();
+    sfxPickup();
+    showToast('🔄 强化已重置 · 返还 🪙' + refund);
+    return { refund, balance: coins };
+  }
+  function achBadgeRow() {
+    const wrap = document.createElement('div');
+    wrap.className = 'achBadgeWrap';
+    let html = '<div class="achBadgeTitle">🏅 已解锁成就徽章 · ' + achUnlocked.size + '/' + ACHIEVE.length + '</div><div class="achBadgeRow">';
+    for (const a of ACHIEVE) {
+      const got = achUnlocked.has(a.id);
+      html += '<div class="achBadge' + (got ? '' : ' none') + '" title="' + a.name + (got ? '' : '（未解锁）') + '">' + a.icon + '</div>';
+    }
+    html += '</div>';
+    wrap.innerHTML = html;
+    const badge = wrap.querySelector('.achBadge');
+    if (badge) badge.onclick = () => openAch();
+    return wrap;
+  }
+  function renderGacha() {
+    shopBody.innerHTML = '';
+    shopBody.appendChild(achBadgeRow());
+    const gc = document.createElement('div');
+    gc.className = 'gachaCard';
+    const afford = coins >= GACHA_COST;
+    gc.innerHTML = '<span class="gachaIcon">🎰</span>' +
+      '<div class="gachaInfo">' +
+        '<div class="gachaName">幸运抽奖箱</div>' +
+        '<div class="gachaDesc">消耗 🪙' + GACHA_COST + ' 抽一次 · 可能获得大额金币 / 随机强化 +1 级 / 超级大奖</div>' +
+        '<div class="gachaMeta">已抽 ' + gachaCount + ' 次 · 余额 🪙' + coins + '</div>' +
+      '</div>' +
+      '<button class="gachaBtn" ' + (afford ? '' : 'disabled') + '>🎲 抽奖 ' + GACHA_COST + '</button>';
+    const btn = gc.querySelector('.gachaBtn');
+    if (afford) btn.onclick = () => {
+      const r = drawGacha();
+      if (r) showToast('🎰 抽中：' + r.label + (r.detail ? ' · ' + r.detail : ''));
+    };
+    shopBody.appendChild(gc);
+    const rc = document.createElement('div');
+    rc.className = 'gachaCard';
+    const totalLv = Object.values(bonus).reduce((s, v) => s + v, 0);
+    const canReset = totalLv > 0 && coins >= 200;
+    rc.innerHTML = '<span class="gachaIcon">🔄</span>' +
+      '<div class="gachaInfo">' +
+        '<div class="gachaName">强化重置</div>' +
+        '<div class="gachaDesc">花费 🪙200 返还已投入 50%（🪙' + Math.floor(bonusSpent * 0.5) + '）· 清空全部永久加成等级</div>' +
+        '<div class="gachaMeta">累计投入 🪙' + bonusSpent + ' · 当前总等级 ' + totalLv + '</div>' +
+      '</div>' +
+      '<button class="gachaBtn" ' + (canReset ? '' : 'disabled') + '>🔄 重置</button>';
+    const rbtn = rc.querySelector('.gachaBtn');
+    if (canReset) rbtn.onclick = () => { const r = resetBonus(); if (r) showToast('🔄 已重置 · 返还 🪙' + r.refund); };
+    shopBody.appendChild(rc);
+  }
+
   function togglePause() {
     if (!running || gameOver) return;
     paused = !paused;
     pauseBtn.textContent = paused ? '▶' : '⏸';
-    setBgm(paused ? 'calm' : 'battle');
+    setBgm(paused ? 'calm' : computeTargetBgm());   // v0.2.9 恢复时按 Boss/波次选曲
     if (paused) showOverlay('paused'); else hideOverlay();
   }
 
@@ -6007,6 +6280,10 @@
       for (const b of cbSeg.querySelectorAll('button'))
         b.classList.toggle('active', b.dataset.cb === (colorBlind ? '1' : '0'));
     }
+    if (randMapSeg) {
+      for (const b of randMapSeg.querySelectorAll('button'))
+        b.classList.toggle('active', b.dataset.rand === (randMaps ? '1' : '0'));
+    }
     if (diffSeg) {
       for (const b of diffSeg.querySelectorAll('button'))
         b.classList.toggle('active', b.dataset.diff === difficulty);
@@ -6057,6 +6334,13 @@
   function setColorBlind(v) {
     colorBlind = v === '1';
     try { localStorage.setItem(LS_CB, colorBlind ? '1' : '0'); } catch (e) { /* 忽略 */ }
+    applySettingsUI();
+    sfxPickup();
+  }
+  // —— v0.2.9 随机地图：开启后经典/无尽每局程序化新图 ——
+  function setRandomMaps(v) {
+    randMaps = v === '1';
+    try { localStorage.setItem(LS_RANDMAP, randMaps ? '1' : '0'); } catch (e) { /* 忽略 */ }
     applySettingsUI();
     sfxPickup();
   }
@@ -6878,7 +7162,7 @@
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V2.8', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V2.9', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -6953,8 +7237,9 @@
   milestone.addEventListener('click', (e) => { if (e.target === milestone) closeMilestone(); });
   btnShop.addEventListener('click', () => { ensureAudio(); openShop(); });
   btnShopClose.addEventListener('click', closeShop);
-  tabBonus.addEventListener('click', () => { shopTab = 'bonus'; tabBonus.classList.add('active'); tabSkins.classList.remove('active'); renderShop(); });
-  tabSkins.addEventListener('click', () => { shopTab = 'skins'; tabSkins.classList.add('active'); tabBonus.classList.remove('active'); renderShop(); });
+  tabBonus.addEventListener('click', () => { shopTab = 'bonus'; tabBonus.classList.add('active'); tabSkins.classList.remove('active'); tabGacha.classList.remove('active'); renderShop(); });
+  tabSkins.addEventListener('click', () => { shopTab = 'skins'; tabSkins.classList.add('active'); tabBonus.classList.remove('active'); tabGacha.classList.remove('active'); renderShop(); });
+  tabGacha.addEventListener('click', () => { shopTab = 'gacha'; tabGacha.classList.add('active'); tabBonus.classList.remove('active'); tabSkins.classList.remove('active'); renderShop(); });
   btnShare.addEventListener('click', () => { ensureAudio(); shareScore(); });
   btnReport.addEventListener('click', () => { ensureAudio(); openReport(); });
   // —— v0.2.6 过关结算：继续按钮 ——
@@ -7044,6 +7329,9 @@
   });
   cbSeg.addEventListener('click', (e) => {
     const b = e.target.closest('button'); if (b) setColorBlind(b.dataset.cb);
+  });
+  randMapSeg.addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (b) setRandomMaps(b.dataset.rand);
   });
   diffSeg.addEventListener('click', (e) => {
     const b = e.target.closest('button'); if (b) setDifficulty(b.dataset.diff);
@@ -7544,6 +7832,20 @@
       setBgmVol, setSfxVol,
       bgmVolNow: () => bgmVol,
       sfxVolNow: () => sfxVol,
+      // —— v0.2.9 BGM 曲库扩充验证钩子（?test=1 暴露） ——
+      bgmModeNow: () => bgmMode,
+      setBgmNow: (m) => { setBgm(m); return bgmMode; },
+      computeTargetNow: (st) => computeTargetBgm(st),
+      bgmTracksNow: () => Object.keys(BGM_TRACKS),
+      bgmRushWaveNow: () => BGM_RUSH_WAVE,
+      // —— v0.2.9 金币经济补全验证钩子（?test=1 暴露） ——
+      gachaNow: () => drawGacha(),
+      gachaState: () => ({ cost: GACHA_COST, count: gachaCount, coins, bonusSpent,
+        totalLv: Object.values(bonus).reduce((s, v) => s + v, 0) }),
+      setCoinsNow: (n) => { coins = Math.max(0, Math.floor(n)); saveCoins(); return coins; },
+      resetBonusNow: () => resetBonus(),
+      bonusSpentNow: () => bonusSpent,
+      achBadgeCount: () => ({ total: ACHIEVE.length, unlocked: achUnlocked.size }),
       dprNow: () => DPR,
       reducedNow: () => reduced(),
       glowBlurNow: (blur) => glowBlur(blur),
@@ -7796,6 +8098,31 @@
       keySet: (k, v) => { keys[k] = !!v; return keys[k]; },
       quit: () => { quitToMenu(); return { multiMode, p2: !!player2 }; },
       p2LivesHud: () => (elLives2 ? elLives2.textContent : null),
+      // —— v0.2.9 随机地图验证钩子（?test=1 暴露） ——
+      randMapNow: () => randMaps,
+      setRandomMapsNow: (v) => { setRandomMaps(v === '1' ? '1' : '0'); return randMaps; },
+      nextMapSeedNow: () => nextMapSeed(),
+      loadRandomMapNow: (seed) => { loadRandomMap(seed >>> 0); return map.map(r => r.slice()); },
+      bfsReachableNow: (sx, sy) => { const r = bfsReachable(sx, sy); return { count: r.count, seen: Array.from(r.seen) }; },
+      mapSnapshot: () => map.map(r => r.slice()),
+      mapStats: () => {
+        const s = { empty: 0, brick: 0, steel: 0, water: 0, tree: 0, other: 0 };
+        for (let y = 0; y < ROWS; y++)
+          for (let x = 0; x < COLS; x++) {
+            const t = map[y][x];
+            if (t === 0) s.empty++;
+            else if (t === TILE_BRICK) s.brick++;
+            else if (t === TILE_STEEL) s.steel++;
+            else if (t === TILE_WATER) s.water++;
+            else if (t === TILE_TREE) s.tree++;
+            else s.other++;
+          }
+        return s;
+      },
+      spawnCellsNow: () => ENEMY_SPAWN_CELLS.map(c => [...c]),
+      mapDimsNow: () => ({ ROWS, COLS }),
+      gridPointsNow: () => ({ SPAWN: { x: SPAWN.x, y: SPAWN.y }, BASE: { x: BASE.x, y: BASE.y } }),
+      randMapCallsNow: () => randMapCalls,
     };
   }
 

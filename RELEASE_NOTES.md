@@ -1,3 +1,32 @@
+# v0.2.9 · 随机地图 + BGM 曲库扩充 + 金币经济补全
+
+> v0.2.9 是 v0.2.8 之后三个方向的增强：**随机地图生成**（种子随机 Roguelike 地图 + 连通性校验）、**BGM 曲库扩充**（2→4 首，Boss 战 / 无尽高波动态切换）、**金币经济补全**（抽奖箱 / 强化重置 / 成就徽章展示框）。回归：主套件 169/169 全过 + 新增 v0.2.9 专项冒烟 20/20 全过。
+
+## 🅰 随机地图生成（#99）
+
+- 设置面板新增「🗺 随机地图」开关（默认开启），`setRandomMaps()` / `randMaps` 持久化 `tank-battle-randmap`
+- `mulberry32(seed)` 种子随机（确定性可复现）+ `nextMapSeed()`（时间戳 ^ 计数器 × 黄金比散列）——同种子生成同图、异种子生成异图
+- `loadRandomMap(seed)` 最多 16 次尝试：砖 18% / 钢 6% / 水 6% / 树 8% 比例随机铺图，`decorateMap()` 补外墙 + 护墙 + 清出生点
+- 连通性校验：`bfsReachable()` 4 邻接 BFS 洪泛返回 `{seen,count}`，`clearHub()` 清障关键枢纽——要求 SPAWN 可达 3 敌出生点 + 基地邻格可达 + 可走格 ≥240，失败自动回退预设图
+- `generateMap()` 分支接入：经典 / 无尽在 `randMaps` 开启时走随机图，每日 / 自制 / Boss 不受影响
+- 测试钩子 `__tbTest` 新增 11 项（`randMapNow` / `setRandomMapsNow` / `nextMapSeedNow` / `loadRandomMapNow` / `bfsReachableNow` / `mapSnapshot` / `mapStats` / `spawnCellsNow` / `mapDimsNow` / `gridPointsNow` / `randMapCallsNow`）+ `randMapCalls` 计数器
+
+## 🅱 BGM 曲库扩充（#100）
+
+- 程序化 Web Audio 合成，曲目从 2 首扩至 **4 首**：`BGM_CALM`（bpm88）、`BGM_BATTLE`（bpm136）、新增 **`BGM_BOSS`**（bpm150 小调张力 + 半音导音 B4/F5）、新增 **`BGM_RUSH`**（bpm160 快速琶音 A5 高音）
+- 音符表扩展 G2/F5/A5；`BGM_TRACKS = {calm, battle, boss, rush}` 查表
+- `computeTargetBgm(st?)` 自动曲目决策：暂停/结束→calm；Boss 存活或 `bossLevel+bossWarn>0`→boss；无尽 wave≥5→rush；否则→battle（可选 st 状态覆盖参数供测试无副作用）
+- `bgmTick()` 节流自动检测（每 7 tick≈0.5s）；开局/复活/暂停恢复改为 `setBgm(computeTargetBgm())` 即时选曲
+
+## 🅲 金币经济补全（#101）
+
+- 商店新增第 3 个「🎰 抽奖」tab（`tabGacha`）；`GACHA_COST=500`
+- `GACHA_POOL` 加权奖励池：30% +600 / 20% +1000 / 25% 随机强化+1级 / 15% +300 / 10% 超级大奖+3000；`pickGacha()` 权重随机 + `drawGacha()` 扣 500 发奖（金币或随机强化，强化满级返还成本），`gachaCount` 持久化 `tank-battle-gacha`
+- `resetBonus()` 花 200 清空全部永久加成、返还已投入 50%（`bonusSpent` 追踪 `tank-battle-bonus-spent`，`buyBonus` 累计）
+- `achBadgeRow()` 渲染全部成就徽章（已解锁彩显 / 未解锁灰显），点击打开成就墙；`renderGacha()` 组装徽章框 + 抽奖卡 + 重置卡
+
+---
+
 # v0.2.8 · 双人触控 + 存档云备份导出 + 内容扩展 + 音效增强
 
 > v0.2.8 是 v0.2.7 之后四个方向的增强：**双人触控**（触屏设备双人同屏独立触控层，双摇杆 + 双开火）、**存档云备份导出/导入**（存档码升至 v2，纳入 v0.2.6/v0.2.7 全部新数据，老 v1 码向后兼容）、**内容扩展**（基地新增王城/龙巢两级 + 玫瑰金传奇皮肤）、**音效增强**（成就/装备/双人开局四个专属音效）。回归：主套件 151/151 全过 + 新增 v0.2.8 专项冒烟 15/15 全过。
