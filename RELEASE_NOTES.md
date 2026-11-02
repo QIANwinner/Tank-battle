@@ -1,3 +1,42 @@
+# v0.2.6 · 无尽/生存模式 + 关卡选择星级 + 过关结算界面 + 战绩图增强
+
+> v0.2.6 是 v0.2.5 之后的四个方向的收尾增强：**无尽/生存模式**（波次无限推进、敌人指数增长、2 枚新成就）、**关卡选择 + 星级**（已解锁关卡任选开局、1-3 星评级持久化）、**过关结算界面**（星级 + 额外金币，节奏更清晰）、**战绩图增强**（星级渲染 + 复制图片 + 战绩档案复用）。回归 151/151 全过。
+
+## 🅰 无尽/生存模式（#83）
+
+- 标题页新增「🌊 无尽」入口（`btnEndless`），`start('endless')` 设 `endlessMode=true`，波次从 1 无限推进
+- 敌人指数成长（`endlessInfo().enemyMul`）：血量 `1 + level*0.35`、速度 `min(1.8, 1 + level*0.04)`、数量 `min(2.5, 1 + level*0.05)`，Boss 血随波次 `1 + level*0.3`
+- 过关金币随波次 `1 + level*0.1` 递增；最高波次持久化 `tank-battle-bestwave`（`bestWave`）
+- 新增 2 枚无尽成就：**深潜者**（endless10，到达第 10 波）、**深渊猎手**（endless30，到达第 30 波），成就总数 14→16
+- 失败/结算文案适配：`ovTip` 显示「无尽模式 · 到达第 N 波」
+
+## 🅱 关卡选择 + 星级（#84）
+
+- 主菜单新增「🗺 关卡」入口（`btnLevels`），`openLevelSelect()` 渲染卡片网格（3 列，`#lvGrid`），展示已解锁 + 4 关预览（至少 5 张、最多 99 张）
+- 卡片含关卡号 / 图标（Boss 关 👑 / 已解锁 🛡 / 锁定 🔒）/ 星级行（`★`×N + `☆`×(3-N)）；锁定卡 `locked` 类置灰 + `disabled` 禁用
+- `start(mode, startLv)` 新增第二参数 `startLv`，`startAtLevel(n)` 关闭面板后从第 n 关开局
+- `maxUnlocked` 持久化 `tank-battle-maxlv`（`setMaxLv`/`saveMaxLv`）；`levelStars` 持久化 `tank-battle-stars`
+- 星级算法 `starsForLevel(lv, nohit, livesLeft, secs)`：无伤 +1、剩余生命 ≥2 +1、用时 ≤75+lv×12 秒 +1，至少 1 星、封顶 3 星
+
+## 🅲 过关结算界面 + 额外金币（#82）
+
+- 每关清场先弹 `#lvResult` 结算面板（`showLvResult()`），显示关卡号 / 用时 / 评级星（逐颗动画点亮）/ 星级奖励金币 `25×lvStarsNow`
+- 点「继续 ▶」（`claimLvResult()`）发放星级金币 + Toast「⭐ N 星 · 星级奖励 🪙+X」，再进三选一强化 / 内测广告弹窗，节奏更清晰
+- `lvResultPending` 防重复弹出；结算后 `levelStars[level]` 更新为最高星级
+
+## 🅳 战绩图增强（#85）
+
+- `buildReportCanvas(src)` 重构为接受可选快照源参数；`endGame()` 捕获本局快照 `lastRun`（score/level/kills/maxCombo/acc/bossKills/deaths/ach/stars/bestAtStart/daily/timed/endless/won/date）
+- 战绩图分数下方渲染星级（`★`×stars + `☆`×(3-stars)）+「第 N 关 · 模式」；版本署名 **V2.6**
+- 新增「📋 复制图片」（`#btnReportCopy` → `copyReport()`，Clipboard API 写 PNG）；战绩档案新增「🖼 生成战绩图」（`#btnCarReport` → `openReport(true)`，无快照时提示「先打一局」）
+
+## 🅴 回归保障
+
+- CDP 回归套件从 133 项扩到 **151 项**（新增 Y/Z/AA/AB 四组 18 项：无尽模式 6 项、结算界面 2 项、关卡选择星级 6 项、战绩图增强 4 项），一次跑通 **151/151**
+- 版本标记 `DESIGNED BY QIAN · V2.6`（页脚 + 标题页双署），Service Worker 缓存名升级 `tank-battle-v0206`
+
+---
+
 # v0.2.5 · 经济闭环 + 战绩档案 + 辅助模式 + Boss 多样化 + 主界面装饰
 
 > v0.2.5 是 v0.2.4 之后的五个方向的收尾增强：**成就奖励金币**（解锁按稀有度发币，打通「成就→金币→商店」闭环）、**战绩档案**（生涯累计 + 本地前十排行榜）、**辅助模式**（高对比描边 / 色弱友好配色）、**Boss 多样化**（三种轮换 Boss，血条样式 + 专属技能 + 属性差异化）、**主界面装饰元素**（赛博氛围装饰层，随减弱动效冻结）。回归 133/133 全过。

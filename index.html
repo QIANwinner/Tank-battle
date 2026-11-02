@@ -673,6 +673,44 @@
   }
   #upgradeBox .upSkip:active { background: rgba(255, 255, 255, 0.08); }
 
+  /* ---------- v0.2.6 过关结算界面（星级 + 额外金币） ---------- */
+  #lvResult {
+    position: fixed; inset: 0; z-index: 41;
+    display: none; align-items: center; justify-content: center;
+    background: rgba(4, 10, 24, 0.78); backdrop-filter: blur(6px);
+  }
+  #lvResult.show { display: flex; }
+  #lvResult .lvCard {
+    width: min(340px, 88vw); padding: 22px 20px 18px; text-align: center;
+    background: linear-gradient(160deg, #101b36, #0a1226);
+    border: 1px solid rgba(0, 240, 255, 0.35); border-radius: 16px;
+    box-shadow: 0 0 40px rgba(0, 240, 255, 0.15), inset 0 0 30px rgba(0, 240, 255, 0.05);
+  }
+  #lvResult .lvTitle { font-size: 18px; font-weight: 800; letter-spacing: 2px; color: #00f0ff; }
+  #lvResult .lvTitle b { color: #ffe600; }
+  #lvResult .lvStars { margin: 10px 0 2px; font-size: 34px; letter-spacing: 6px; line-height: 1; }
+  #lvResult .lvStars span { color: rgba(255, 255, 255, 0.16); text-shadow: none; transition: color .3s, text-shadow .3s; }
+  #lvResult .lvStars span.on { color: #ffd700; text-shadow: 0 0 14px rgba(255, 215, 0, 0.8); animation: lvStarPop .45s ease both; }
+  #lvResult .lvStars span:nth-child(2).on { animation-delay: .18s; }
+  #lvResult .lvStars span:nth-child(3).on { animation-delay: .36s; }
+  @keyframes lvStarPop { 0% { transform: scale(0.2); opacity: 0; } 60% { transform: scale(1.3); } 100% { transform: scale(1); opacity: 1; } }
+  #lvResult .lvSub { font-size: 12px; letter-spacing: 2px; color: #93a4c4; margin-bottom: 12px; }
+  #lvResult .lvRows { display: flex; flex-direction: column; gap: 7px; margin: 4px 0 14px; }
+  #lvResult .lvRow {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 7px 12px; border-radius: 9px; font-size: 13px;
+    background: rgba(255, 255, 255, 0.045); color: #aebbd8;
+  }
+  #lvResult .lvRow b { color: #eaf2ff; font-variant-numeric: tabular-nums; }
+  #lvResult .lvRow.gold { background: rgba(255, 215, 0, 0.1); border: 1px solid rgba(255, 215, 0, 0.3); }
+  #lvResult .lvRow.gold b { color: #ffd700; }
+  #lvResult .lvNext {
+    width: 100%; padding: 11px; border-radius: 11px; border: none; cursor: pointer;
+    font-size: 15px; font-weight: 800; letter-spacing: 2px; color: #04101f;
+    background: linear-gradient(90deg, #00f0ff, #6bffd8);
+  }
+  #lvResult .lvNext:active { transform: translateY(1px); }
+
   /* ---------- 内测广告弹窗（第一关通过 · 一次性奖励） ---------- */
   #adBox {
     position: fixed; inset: 0; z-index: 42;
@@ -984,6 +1022,61 @@
   #careerBox .carRow .mi { color: #8ea0b8; font-size: 10px; letter-spacing: 0.5px; }
   #careerBox .carRow .md { flex: none; font-size: 10px; font-weight: 700; letter-spacing: 1px; padding: 2px 8px; border-radius: 999px; color: #9fdce8; border: 1px solid rgba(0, 240, 255, 0.4); }
   #careerBox .carEmpty { color: #5b6b82; font-size: 11px; text-align: center; padding: 10px 0; letter-spacing: 0.5px; }
+  #careerBox .carReport {
+    width: min(92vw, 380px);
+    margin-top: 10px;
+    padding: 11px 16px; border-radius: 12px; cursor: pointer;
+    border: 1px solid rgba(57, 255, 20, 0.5); background: rgba(57, 255, 20, 0.08);
+    color: #c9ffd2; font-size: 13px; font-weight: 800; letter-spacing: 1px; font-family: inherit;
+    -webkit-appearance: none; appearance: none;
+  }
+  #careerBox .carReport:active { background: rgba(57, 255, 20, 0.2); transform: translateY(1px); }
+  /* ---------- v0.2.6 关卡选择 ---------- */
+  #lvSelect {
+    position: fixed; inset: 0; z-index: 45;
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    background: rgba(2, 4, 12, 0.92);
+    padding: 16px;
+  }
+  #lvSelect.show { display: flex; }
+  #lvSelect .lvHead {
+    width: min(92vw, 420px);
+    display: flex; align-items: center; gap: 10px;
+    padding: 13px 16px;
+    background: linear-gradient(180deg, rgba(60, 40, 0, 0.5), rgba(30, 20, 50, 0.6));
+    border: 1px solid rgba(255, 210, 80, 0.45); border-bottom: none;
+    border-radius: 14px 14px 0 0;
+  }
+  #lvSelect .lvTitle { flex: 1; color: #ffd250; font-size: 15px; font-weight: 800; letter-spacing: 2px; }
+  #lvSelect .lvSub { color: #ffe9a6; font-size: 11px; font-weight: 700; letter-spacing: 1px; font-variant-numeric: tabular-nums; }
+  #lvSelect .lvClose {
+    width: 26px; height: 26px; border-radius: 8px; cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(0, 0, 0, 0.3);
+    color: #ffe9a6; font-size: 13px; line-height: 1;
+    -webkit-appearance: none; appearance: none;
+  }
+  #lvSelect .lvGrid {
+    width: min(92vw, 420px);
+    max-height: 62vh; overflow-y: auto;
+    padding: 12px 14px 16px;
+    background: rgba(4, 8, 18, 0.85);
+    border: 1px solid rgba(255, 210, 80, 0.35); border-radius: 0 0 14px 14px;
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  }
+  #lvSelect .lvCard {
+    position: relative;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 12px 6px 10px; border-radius: 10px; cursor: pointer;
+    border: 1px solid rgba(255, 210, 80, 0.35); background: rgba(255, 210, 80, 0.06);
+    color: #eafcff; font-family: inherit;
+    -webkit-appearance: none; appearance: none;
+  }
+  #lvSelect .lvCard.locked { opacity: 0.4; cursor: default; filter: grayscale(0.8); border-color: rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.03); }
+  #lvSelect .lvCard .lvNum { font-size: 20px; font-weight: 800; }
+  #lvSelect .lvCard .lvStar { font-size: 14px; }
+  #lvSelect .lvCard .lvStarRow { font-size: 11px; letter-spacing: 1px; color: #ffd250; }
+  #lvSelect .lvCard.locked .lvStarRow { color: #5b6b82; }
   /* ---------- v0.2.3 存档备份/恢复 ---------- */
   #saveBox {
     position: fixed; inset: 0; z-index: 45;
@@ -1209,9 +1302,11 @@
     <button id="btnRevive">🪙 花金币复活基地</button>
     <button id="btnDaily">📅 每日挑战</button>
     <button id="btnTimed">⏱ 限时冲分</button>
+    <button id="btnEndless">🌊 无尽模式</button>
     <button id="btnInstall">📲 安装到桌面</button>
     <button id="btnAch">🏆 成就</button>
     <button id="btnCareer">📊 战绩档案</button>
+    <button id="btnLevels">🗺 关卡选择</button>
     <button id="btnShop">🛒 商店</button>
     <button id="btnShare">📤 分享成绩 · 发起挑战</button>
     <button id="btnReport">🖼 生成战绩图</button>
@@ -1292,6 +1387,7 @@
     <img id="reportImg" alt="战绩图">
     <div class="tip">长按图片保存 · 发给朋友</div>
     <div class="btns">
+      <button id="btnReportCopy">📋 复制图片</button>
       <button id="btnReportShare">📤 分享图片</button>
       <button id="btnReportClose">关闭</button>
     </div>
@@ -1314,6 +1410,17 @@
       <button class="carClose" id="btnCarClose" aria-label="关闭">✕</button>
     </div>
     <div class="carBody" id="carBody"></div>
+    <button class="carReport" id="btnCarReport">🖼 生成战绩图</button>
+  </div>
+
+  <!-- v0.2.6 关卡选择 + 星级 -->
+  <div id="lvSelect">
+    <div class="lvHead">
+      <div class="lvTitle">🗺 关卡选择</div>
+      <div class="lvSub" id="lvSelSub"></div>
+      <button class="lvClose" id="btnLvSelClose" aria-label="关闭">✕</button>
+    </div>
+    <div class="lvGrid" id="lvGrid"></div>
   </div>
 
   <!-- v0.2.3 存档备份/恢复 -->
@@ -1347,7 +1454,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V2.5</div>
+  <div id="mark">DESIGNED BY QIAN · V2.6</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -1358,6 +1465,22 @@
       <button class="upCard" data-i="2"><span class="uIcon"></span><span class="uName"></span><span class="uDesc"></span><span class="uOwn"></span></button>
     </div>
     <div class="upSkip" id="upSkip">跳过（不加强化）</div>
+  </div>
+
+  <div id="lvResult">
+    <div class="lvCard">
+      <div class="lvTitle">第 <b id="lvNum">1</b> 关 · 通关</div>
+      <div class="lvStars"><span>★</span><span>★</span><span>★</span></div>
+      <div class="lvSub" id="lvStarTxt">评价 · 达成</div>
+      <div class="lvRows">
+        <div class="lvRow"><span>通关用时</span><b id="lvTime">0s</b></div>
+        <div class="lvRow"><span>本关击杀</span><b id="lvKills">0</b></div>
+        <div class="lvRow"><span>剩余生命</span><b id="lvLives">0</b></div>
+        <div class="lvRow"><span>基础奖励</span><b id="lvBase">+0 🪙</b></div>
+        <div class="lvRow gold"><span>⭐ 星级加成</span><b id="lvStarGold">+0 🪙</b></div>
+      </div>
+      <button id="btnLvNext" class="lvNext">继续 ▶</button>
+    </div>
   </div>
 
   <div id="adBox">
@@ -1665,10 +1788,14 @@
         overlay = $('overlay'), ovTitle = $('ovTitle'), ovSub = $('ovSub'),
         ovStats = $('ovStats'), ovTip = $('ovTip'), btnPlay = $('btnPlay'),
         btnDaily = $('btnDaily'), btnShare = $('btnShare'), btnReport = $('btnReport'),
-        btnTimed = $('btnTimed'),
+        btnTimed = $('btnTimed'), btnEndless = $('btnEndless'), btnLevels = $('btnLevels'),
         reportBox = $('reportBox'), reportImg = $('reportImg'),
         upgradeBox = $('upgradeBox'), upSkip = $('upSkip'),
         adBox = $('adBox'), btnAdClaim = $('btnAdClaim'), btnAdSkip = $('btnAdSkip'),
+        // —— v0.2.6 过关结算界面 ——
+        lvResult = $('lvResult'), lvNum = $('lvNum'), lvStarTxt = $('lvStarTxt'),
+        lvTime = $('lvTime'), lvKills = $('lvKills'), lvLives = $('lvLives'),
+        lvBase = $('lvBase'), lvStarGoldEl = $('lvStarGold'), btnLvNext = $('btnLvNext'),
         shopBox = $('shopBox'), shopBody = $('shopBody'),
         btnShop = $('btnShop'), btnShopClose = $('btnShopClose'),
         tabBonus = $('tabBonus'), tabSkins = $('tabSkins'),
@@ -1678,6 +1805,8 @@
         btnRestart = $('btnRestart'), btnQuit = $('btnQuit'),
         btnAch = $('btnAch'), achBox = $('achBox'), achBody = $('achBody'), achCount = $('achCount'),
         btnCareer = $('btnCareer'), carBox = $('careerBox'), carBody = $('carBody'), carSub = $('carSub'),
+        // —— v0.2.6 关卡选择 ——
+        lvSelect = $('lvSelect'), lvGrid = $('lvGrid'), lvSelSub = $('lvSelSub'),
         saveBox = $('saveBox'), saveBody = $('saveBody'),
         volRow = $('volRow'), volSlider = $('volSlider'), volPct = $('volPct'), volIcon = $('volIcon'),
         settings = $('settings'), bgmSlider = $('bgmSlider'), sfxSlider = $('sfxSlider'),
@@ -1799,12 +1928,18 @@
   const LS_COINS = 'tank-battle-coins', LS_BONUS = 'tank-battle-bonus',
         LS_SKINS = 'tank-battle-skins', LS_SKIN = 'tank-battle-skin',
         LS_BASE = 'tank-battle-base',
-        LS_AD1 = 'tank-battle-ad1';
+        LS_AD1 = 'tank-battle-ad1',
+        LS_STARS = 'tank-battle-stars',      // —— v0.2.6 关卡星级 {level: 0-3} ——
+        LS_MAXLV = 'tank-battle-maxlv',      // —— v0.2.6 已解锁最高关 ——
+        LS_BESTWAVE = 'tank-battle-bestwave';// —— v0.2.6 无尽模式最高波次 ——
   let coins = 0;                                                       // 金币余额
   let bonus = { lifeup: 0, cd: 0, spd: 0, coinup: 0, shield: 0, revive: 0, combo: 0, bulletspd: 0, pierce: 0, supply: 0, focus: 0 };      // 永久加成等级
   let baseLevel = 0;                                                   // 基地升级等级（护墙阵法）
   let ownedSkins = ['classic'];                                        // 已购皮肤
   let equippedSkin = 'classic';                                        // 当前装备皮肤
+  let levelStars = {};                                                 // —— v0.2.6 关卡星级（1-3 星） ——
+  let maxUnlocked = 1;                                                 // —— v0.2.6 已解锁最高关卡（默认第 1 关） ——
+  let bestWave = 0;                                                    // —— v0.2.6 无尽模式历史最高波次 ——
   try {
     coins = parseInt(localStorage.getItem(LS_COINS) || '0', 10) || 0;
     const b = JSON.parse(localStorage.getItem(LS_BONUS) || '{}');
@@ -1815,12 +1950,29 @@
     const eq = localStorage.getItem(LS_SKIN);
     if (eq && ownedSkins.includes(eq)) equippedSkin = eq;
     adClaimed = localStorage.getItem(LS_AD1) === '1';
+    // —— v0.2.6 关卡星级 / 最高解锁 / 无尽最高波次 ——
+    const st = JSON.parse(localStorage.getItem(LS_STARS) || '{}');
+    if (st && typeof st === 'object') for (const k in st) { const v = parseInt(st[k], 10); if (v >= 1 && v <= 3) levelStars[k] = v; }
+    maxUnlocked = Math.max(1, parseInt(localStorage.getItem(LS_MAXLV) || '1', 10) || 1);
+    bestWave = Math.max(0, parseInt(localStorage.getItem(LS_BESTWAVE) || '0', 10) || 0);
   } catch (e) { /* 隐私模式下 localStorage 不可用 */ }
   function saveCoins() { try { localStorage.setItem(LS_COINS, String(coins)); } catch (e) {} }
   function saveBonus() { try { localStorage.setItem(LS_BONUS, JSON.stringify(bonus)); } catch (e) {} }
   function saveBase() { try { localStorage.setItem(LS_BASE, String(baseLevel)); } catch (e) {} }
   function saveSkins() { try { localStorage.setItem(LS_SKINS, JSON.stringify(ownedSkins)); } catch (e) {} }
   function saveSkin() { try { localStorage.setItem(LS_SKIN, equippedSkin); } catch (e) {} }
+  function saveStars() { try { localStorage.setItem(LS_STARS, JSON.stringify(levelStars)); } catch (e) {} }
+  function saveMaxLv() { try { localStorage.setItem(LS_MAXLV, String(maxUnlocked)); } catch (e) {} }
+  function saveBestWave() { try { localStorage.setItem(LS_BESTWAVE, String(bestWave)); } catch (e) {} }
+  // —— v0.2.6 关卡星级算法：无伤 / 剩余生命 / 用时 各 +1，至少 1 星 ——
+  function starsForLevel(lv, nohit, livesLeft, secs) {
+    let s = 1;
+    if (nohit) s++;
+    const need = livesLeft >= 2;      // 剩余生命 ≥2 视为稳守
+    if (need) s++;
+    if (secs >= 0 && secs <= 75 + lv * 12) s++;
+    return Math.min(3, s);
+  }
 
   // 角色皮肤定义（玩家坦克配色，经典免费）
   // rarity: rare稀有(蓝) / epic史诗(紫) / legendary传奇(橙) / limited限定(红)
@@ -1982,6 +2134,8 @@
 
   // ===== 局内统计（战绩图 / 分享） =====
   let stat = { kills: 0, shots: 0, hits: 0, maxCombo: 0, bossKills: 0, deaths: 0 };
+  // —— v0.2.6 战绩图：保存上一局快照（供战绩档案「生成战绩图」复用） ——
+  let lastRun = null;
   function resetStat() {
     stat = { kills: 0, shots: 0, hits: 0, maxCombo: 0, bossKills: 0, deaths: 0 };
   }
@@ -1991,6 +2145,10 @@
   let career = { games: 0, kills: 0, playSec: 0, bestDaily: 0, bestTimed: 0, bestHard: 0, bestScore: 0 };
   let board = [];                    // 本地前十：{ score, level, mode, date }
   let playSecRun = 0;                // 本局已玩秒数（战绩档案用）
+  let levelSecs = 0;                 // —— v0.2.6 本关用时（结算界面） ——
+  let lvResultPending = false;       // —— v0.2.6 结算面板是否弹出 ——
+  let lvStarsNow = 0;                // —— v0.2.6 本关评级星数 ——
+  let levelKills = 0;                // —— v0.2.6 本关击杀数（结算界面） ——
   try {
     const c = JSON.parse(localStorage.getItem(LS_CAREER) || '{}');
     if (c && typeof c === 'object') {
@@ -2045,7 +2203,10 @@
     { id: 'milo20',  icon: '🎖', name: '里程碑之路', desc: '到达第 20 关', reward: 300 },
     { id: 'save',    icon: '💾', name: '存档达人', desc: '首次导出备份存档码', reward: 50 },
     { id: 'daily3',  icon: '🗓', name: '坚持打卡', desc: '累计完成 3 次每日挑战', reward: 120 },
-    { id: 'rich',    icon: '🏦', name: '金库富翁', desc: '金币余额达到 3000', reward: 300 }
+    { id: 'rich',    icon: '🏦', name: '金库富翁', desc: '金币余额达到 3000', reward: 300 },
+    // —— v0.2.6 无尽模式波次成就 ——
+    { id: 'endless10', icon: '🌊', name: '深潜者', desc: '无尽模式到达第 10 波', reward: 150 },
+    { id: 'endless30', icon: '🌀', name: '深渊猎手', desc: '无尽模式到达第 30 波', reward: 300 }
   ];
   let achUnlocked = new Set();
   let achNew = [];             // 本局新解锁（结算页展示）
@@ -2085,6 +2246,7 @@
   };
   const dailySeed = () => { const d = new Date(); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); };
   let dailyMode = false;        // 本局是否每日挑战
+  let endlessMode = false;       // —— v0.2.6 无尽/生存模式（波次指数增长） ——
   let dailyRng = null;          // 每日挑战的种子随机序列
 
   // —— v0.2.3 限时冲分模式：固定时间内拼分数 ——
@@ -2558,10 +2720,13 @@
   function spawnEnemy(x, y, type) {
     const def = ENEMY_TYPES[type];
     const DM = diffMul();
-    const hp = Math.max(1, Math.ceil(def.hp * DM.hp));
+    // —— v0.2.6 无尽模式：敌人属性随波次指数增长 ——
+    const emHp = endlessMode ? (1 + level * 0.35) : 1;
+    const emSpd = endlessMode ? Math.min(1.8, 1 + level * 0.04) : 1;
+    const hp = Math.max(1, Math.ceil(def.hp * DM.hp * emHp));
     enemies.push({
       x, y, dir: DIR.DOWN,
-      speed: def.speed * levelSpeedMul() * (dailyMods.speedMul || 1) * DM.spd,
+      speed: def.speed * levelSpeedMul() * (dailyMods.speedMul || 1) * DM.spd * emSpd,
       cooldown: 0, isPlayer: false,
       type, hp: hp, maxHp: hp, size: TANK_SIZE,
       color: def.color || pickEnemyColor(),
@@ -2574,7 +2739,8 @@
     // —— v0.2.5 Boss 多样化：按出场顺序轮换类型（壁垒→猎手→分裂者→……） ——
     bossType = BOSS_TYPES[bossCount % BOSS_TYPES.length];
     bossCount++;
-    bossMaxHp = Math.round((12 + Math.floor(level * 1.5)) * bossType.hpMul * diffMul().hp);   // 类型血量系数 × 难度曲线 × 难度血量
+    const emBoss = endlessMode ? (1 + level * 0.3) : 1;   // —— v0.2.6 无尽模式 Boss 血量随波次 ——
+    bossMaxHp = Math.round((12 + Math.floor(level * 1.5)) * bossType.hpMul * diffMul().hp * emBoss);   // 类型血量系数 × 难度曲线 × 难度血量
     bossHp = bossMaxHp;
     enemies.push({
       x: W / 2 - bossType.size / 2,
@@ -3136,6 +3302,7 @@
     spawnParticles(e.x + e.size / 2, e.y + e.size / 2, e.color, e.isBoss ? 48 : 16);
     shake = e.isBoss ? 16 : 6;
     stat.kills++;
+    levelKills++;                                   // —— v0.2.6 本关击杀（结算界面） ——
     if (e.isBoss) stat.bossKills++;
     addKillScore(e);
     // 金币掉落：不同敌人金币不同，受金运加成
@@ -3310,7 +3477,9 @@
     // v0.2.3 里程碑：刚打完 10/20/30... 关，全屏庆典
     if (level > 1 && (level - 1) % 10 === 0) triggerMilestone();
     // 过关奖励金币（随关卡提升，受金运加成；战地补给 +20%/级 加成基数；难度系数）
-    const g = addGold(Math.round((20 + level * 5) * (1 + 0.2 * (bonus.supply || 0)) * diffMul().reward));
+    // —— v0.2.6 无尽模式：过关金币随波次递增 ——
+    const emReward = endlessMode ? (1 + level * 0.1) : 1;
+    const g = addGold(Math.round((20 + level * 5) * (1 + 0.2 * (bonus.supply || 0)) * diffMul().reward * emReward));
     showToast('🪙 过关奖励 +' + g);
     lvIntroNext = true;
     showLevelIntro('第 ' + level + ' 关' + (difficulty !== 'normal' ? ' · ' + ({ easy: '轻松', hard: '硬核' })[difficulty] : ''));
@@ -3320,6 +3489,40 @@
   function hideUpgradeBox() {
     upgradeBox.classList.remove('show');
     upgradeOpen = false;
+  }
+
+  // ===== v0.2.6 过关结算界面（星级 + 额外金币） =====
+  function showLvResult() {
+    lvStarsNow = starsForLevel(level, !tookHitThisLevel, lives, levelSecs);
+    const baseGold = Math.round((20 + (level + 1) * 5) * (1 + 0.2 * (bonus.supply || 0)) * diffMul().reward);
+    const starGold = lvStarsNow * 25;
+    lvNum.textContent = level;
+    lvTime.textContent = Math.floor(levelSecs) + 's';
+    lvKills.textContent = levelKills;
+    lvLives.textContent = Math.max(0, lives);
+    lvBase.textContent = '+' + baseGold + ' 🪙';
+    lvStarGoldEl.textContent = '+' + starGold + ' 🪙';
+    lvStarTxt.textContent = '评级 ' + '★'.repeat(lvStarsNow) + '☆'.repeat(3 - lvStarsNow);
+    // 星级弹出动画（逐个点亮）
+    const stars = lvResult.querySelectorAll('.lvStars span');
+    stars.forEach((s, i) => { s.classList.remove('on'); void s.offsetWidth; if (i < lvStarsNow) s.classList.add('on'); });
+    // 记录最佳星级 + 解锁下一关
+    if (lvStarsNow > (levelStars[level] || 0)) { levelStars[level] = lvStarsNow; saveStars(); }
+    if (maxUnlocked < level + 1) { maxUnlocked = level + 1; saveMaxLv(); }
+    lvResultPending = true;
+    lvResult.classList.add('show');
+  }
+  function claimLvResult() {
+    if (!lvResultPending) return;
+    lvResultPending = false;
+    lvResult.classList.remove('show');
+    const g = addGold(lvStarsNow * 25);
+    showToast('⭐ ' + lvStarsNow + ' 星 · 星级奖励 🪙+' + g);
+    sfxPickup();
+    updateHud();
+    // 第一关通过 → 内测广告弹窗（一次性），领完/跳过再进强化面板
+    if (maybeShowAdPopup()) return;
+    offerUpgrades();
   }
 
   // ===== 内测广告弹窗（第一关通过 · 一次性 1000 金币） =====
@@ -3355,8 +3558,11 @@
   function startLevel() {
     bossLevel = (level % 5 === 0);
     tookHitThisLevel = false;
+    levelSecs = 0; levelKills = 0;      // —— v0.2.6 本关计时与击杀重置 ——
     enemiesSpawned = 0;
-    enemiesTotal = bossLevel ? 1 : Math.round((6 + level * 2) * (dailyMods.surge ? 1.3 : 1));
+    // —— v0.2.6 无尽模式：敌人数量随波次递增（封顶 2.5x） ——
+    const emCount = endlessMode ? Math.min(2.5, 1 + level * 0.05) : 1;
+    enemiesTotal = bossLevel ? 1 : Math.round((6 + level * 2) * (dailyMods.surge ? 1.3 : 1) * emCount);
     // 单波洪流：所有敌人一波刷完，不再分拨分批
     wavesTotal = 1;
     wave = 1; waveSpawned = 0; waveGapT = 0;
@@ -3441,6 +3647,7 @@
 
     // —— v0.2.5 局内计时（战绩档案累计时长） ——
     playSecRun += dt;
+    levelSecs += dt;                    // —— v0.2.6 本关用时 ——
 
     // v0.2.3 里程碑庆典：冻结世界，仅保留画面
     if (milestoneOpen) { draw(); return; }
@@ -3539,11 +3746,9 @@
       if (!tookHitThisLevel) unlockAch('nohit');
       if (score >= 5000) unlockAch('score5k');
       sfxLevel();
-      // 过关成长：先弹三选一面板，选完（或跳过）再开下一关
+      // —— v0.2.6 过关结算界面：星级 + 额外金币，继续后再进三选一 ——
       lvIntroNext = false;
-      // 第一关通过 → 内测广告弹窗（一次性），领完/跳过再进强化面板
-      if (maybeShowAdPopup()) { updateHud(); return; }
-      offerUpgrades();
+      showLvResult();
       updateHud();
       return;
     }
@@ -4571,6 +4776,8 @@
     btnDaily.style.display = (kind === 'title' && !dailyInvited) ? 'block' : 'none';
     // v0.2.3 限时冲分入口：仅标题页且非 ?time= 直达时显示
     if (btnTimed) btnTimed.style.display = (kind === 'title' && !timedInvited) ? 'block' : 'none';
+    // —— v0.2.6 无尽模式入口：仅标题页显示 ——
+    if (btnEndless) btnEndless.style.display = (kind === 'title') ? 'block' : 'none';
     // v0.2.1 PWA 安装按钮：仅标题页且浏览器支持安装时显示
     if (btnInstall) btnInstall.style.display = (kind === 'title' && deferredInstall) ? 'block' : 'none';
     if (kind === 'title') {
@@ -4634,15 +4841,19 @@
         btnRevive.style.display = 'block';
         btnRevive.textContent = '🪙 花 ' + rc + ' 金币复活基地';
       }
-      ovTip.textContent = '达到第 ' + level + ' 关';
+      ovTip.textContent = endlessMode ? '无尽模式 · 到达第 ' + level + ' 波' : '达到第 ' + level + ' 关';
     }
   }
   function hideOverlay() { overlay.classList.add('hide'); }
 
   // ===== 控制 =====
-  function start(mode) {
+  function start(mode, startLv) {
     dailyMode = mode === 'daily';
     timedMode = mode === 'timed';
+    endlessMode = mode === 'endless';   // —— v0.2.6 无尽/生存模式 ——
+    // —— v0.2.6 关卡选择：支持从指定关卡开局 ——
+    level = 1;
+    if (startLv && startLv > 1) level = Math.min(startLv | 0, 999);
     // —— v0.2.5 战绩档案：本局计时清零 ——
     playSecRun = 0;
     dailyRng = dailyMode ? mulberry32(dailySeed()) : null;
@@ -4651,7 +4862,7 @@
     if (timedMode && !timedInvited) timeLimit = 120;
     timeLeft = timedMode ? timeLimit : 0;
     lastCountdownSec = -1;   // —— v0.2.4 重置倒计时滴答边界 ——
-    score = 0; lives = 3 + (bonus.lifeup || 0); level = 1;   // 装甲储备：开局额外生命
+    score = 0; lives = 3 + (bonus.lifeup || 0);   // 装甲储备：开局额外生命（level 已在上方按 startLv 设定）
     reviveCount = 0;                                         // 本局复活次数清零
     // 重置过关成长与每日词条
     upgrades = {}; upgTotal = 0;
@@ -4684,7 +4895,12 @@
     pauseBtn.textContent = '⏸';
     setBgm('battle');
     lvIntroNext = false;
-    showLevelIntro(dailyMode ? '每日挑战' : (timedMode ? '⏱ 限时冲分' : '第 1 关'));
+    // —— v0.2.6 关卡选择 / 无尽模式标题文案 ——
+    let introTxt = '第 ' + level + ' 关';
+    if (dailyMode) introTxt = '每日挑战';
+    else if (timedMode) introTxt = '⏱ 限时冲分';
+    else if (endlessMode) introTxt = '🌊 无尽模式';
+    showLevelIntro(introTxt);
     updateTimerHud();
     if (dailyMode) {
       const d = new Date();
@@ -4724,6 +4940,24 @@
     if (coins >= 3000) unlockAch('rich');
     // —— v0.2.5 战绩档案：一局结束累计生涯 + 更新排行榜 ——
     recordGame(win);
+    // —— v0.2.6 战绩图：捕获本局快照（供战绩档案「生成战绩图」复用） ——
+    lastRun = {
+      score: score, level: level,
+      kills: stat.kills, maxCombo: stat.maxCombo,
+      acc: stat.shots > 0 ? Math.round(stat.hits / stat.shots * 100) : 0,
+      bossKills: stat.bossKills, deaths: stat.deaths,
+      ach: achNew.length ? achNew.slice() : [...achUnlocked].slice(0, 4),
+      stars: Math.max(levelStars[level] || 0, lvStarsNow || 0),
+      bestAtStart: bestAtStart,
+      daily: dailyMode, timed: timedMode, endless: endlessMode, won: win,
+      date: Date.now()
+    };
+    // —— v0.2.6 无尽模式：记录最高波次 + 波次成就 ——
+    if (endlessMode) {
+      if (level > bestWave) { bestWave = level; saveBestWave(); }
+      if (level >= 10) unlockAch('endless10');
+      if (level >= 30) unlockAch('endless30');
+    }
     // —— v0.2.4 存档主动提醒：首次通关或金币达 2000 ——
     if (win || coins >= 2000) maybeBackupTip();
     // 每日挑战通关：额外金币奖励
@@ -5247,6 +5481,36 @@
   }
   function closeCareer() { if (carBox) carBox.classList.remove('show'); }
 
+  // ===== v0.2.6 关卡选择 + 星级界面 =====
+  function openLevelSelect() {
+    if (!lvSelect || !lvGrid) return;
+    lvSelect.classList.add('show');
+    if (lvSelSub) lvSelSub.textContent = '已解锁 ' + maxUnlocked + ' 关';
+    // 展示到「已解锁 + 4 关预览」，至少 5 张卡，最多 99
+    const shown = Math.min(99, Math.max(maxUnlocked + 4, 5));
+    const cards = [];
+    for (let n = 1; n <= shown; n++) {
+      const stars = levelStars[n] || 0;
+      const unlocked = n <= maxUnlocked;
+      const boss = n % 5 === 0;
+      cards.push(
+        '<button class="lvCard' + (unlocked ? '' : ' locked') + '" data-lv="' + n + '"' + (unlocked ? '' : ' disabled') + ' aria-label="第 ' + n + ' 关' + (unlocked ? '' : ' 未解锁') + '">' +
+          '<span class="lvNum">' + n + '</span>' +
+          '<span class="lvStar">' + (boss ? '👑' : (unlocked ? '🛡' : '🔒')) + '</span>' +
+          '<span class="lvStarRow">' + '★'.repeat(stars) + '☆'.repeat(3 - stars) + '</span>' +
+        '</button>'
+      );
+    }
+    lvGrid.innerHTML = cards.join('');
+  }
+  function closeLevelSelect() { if (lvSelect) lvSelect.classList.remove('show'); }
+  function startAtLevel(n) {
+    const lv = Math.max(1, Math.min(n | 0, 999));
+    closeLevelSelect();
+    start('level', lv);
+    return { level: lv };
+  }
+
   // ===== 回到主菜单（暂停时退出） =====
   function quitToMenu() {
     player = null; bullets = []; enemies = []; particles = []; texts = []; powerups = [];
@@ -5308,7 +5572,18 @@
   }
 
   // ===== 战绩图（霓虹战报卡，长按保存 / 分享） =====
-  function buildReportCanvas() {
+  function buildReportCanvas(src) {
+    // —— v0.2.6 战绩图：支持快照源（战绩档案复用上一局数据） ——
+    const S = src || {
+      score: score, level: level,
+      kills: stat.kills, maxCombo: stat.maxCombo,
+      acc: stat.shots > 0 ? Math.round(stat.hits / stat.shots * 100) : 0,
+      bossKills: stat.bossKills, deaths: stat.deaths,
+      ach: achNew.length ? achNew : [...achUnlocked].slice(0, 4),
+      stars: Math.max(levelStars[level] || 0, lvStarsNow || 0),
+      bestAtStart: bestAtStart,
+      daily: dailyMode, timed: timedMode, endless: endlessMode
+    };
     const W2 = 728, H2 = 1028;
     const c = document.createElement('canvas');
     c.width = W2; c.height = H2;
@@ -5334,17 +5609,17 @@
     g.fillText('— 战 绩 报 告 —', W2 / 2, 122);
 
     // 大分数
-    const acc = stat.shots > 0 ? Math.round(stat.hits / stat.shots * 100) : 0;
+    const acc = S.acc;
     g.fillStyle = '#ffffff';
     g.font = '800 128px "Segoe UI", sans-serif';
     g.shadowColor = 'rgba(0, 240, 255, 0.85)'; g.shadowBlur = glowBlur(34);
-    g.fillText(String(score), W2 / 2, 288);
+    g.fillText(String(S.score), W2 / 2, 288);
     g.shadowBlur = 0;
     g.fillStyle = '#00f0ff';
     g.font = '700 22px "Segoe UI", sans-serif';
     g.fillText('TOTAL SCORE', W2 / 2, 328);
 
-    if (score > bestAtStart && score > 0) {
+    if (S.score > S.bestAtStart && S.score > 0) {
       g.fillStyle = '#ffe600';
       g.font = '800 24px "Segoe UI", sans-serif';
       g.shadowColor = 'rgba(255, 230, 0, 0.8)'; g.shadowBlur = glowBlur(16);
@@ -5352,17 +5627,30 @@
       g.shadowBlur = 0;
     }
 
+    // —— v0.2.6 关卡星级展示（本局到达关卡的最佳星级） ——
+    const stars = Math.max(0, Math.min(3, S.stars | 0));
+    if (stars > 0 || (S.level >= 1)) {
+      g.font = '800 34px "Segoe UI", sans-serif';
+      g.shadowColor = 'rgba(255, 210, 80, 0.9)'; g.shadowBlur = glowBlur(14);
+      g.fillStyle = '#ffd250';
+      g.fillText('★'.repeat(stars) + '☆'.repeat(3 - stars), W2 / 2, 404);
+      g.shadowBlur = 0;
+      g.fillStyle = 'rgba(157, 196, 232, 0.7)';
+      g.font = '600 15px "Segoe UI", sans-serif';
+      g.fillText('第 ' + S.level + ' 关 ' + (S.endless ? '· 无尽' : (S.daily ? '· 每日' : (S.timed ? '· 限时' : ''))), W2 / 2, 430);
+    }
+
     // 统计卡
     const stats = [
-      ['到达关卡', '第 ' + level + ' 关', '#00f0ff'],
-      ['击毁敌军', stat.kills + ' 辆', '#ff00ff'],
-      ['最长连击', '×' + Math.max(1, stat.maxCombo), '#ffe600'],
+      ['到达关卡', '第 ' + S.level + ' 关', '#00f0ff'],
+      ['击毁敌军', S.kills + ' 辆', '#ff00ff'],
+      ['最长连击', '×' + Math.max(1, S.maxCombo), '#ffe600'],
       ['命中率', acc + '%', '#39ff14'],
-      ['Boss 击破', stat.bossKills + ' 只', '#ff2d55'],
-      ['阵亡', stat.deaths + ' 次', '#9dc4e8']
+      ['Boss 击破', S.bossKills + ' 只', '#ff2d55'],
+      ['阵亡', S.deaths + ' 次', '#9dc4e8']
     ];
     const cardW = 288, cardH = 92, gapX = 28, gapY = 22;
-    const x0 = (W2 - cardW * 2 - gapX) / 2, y0 = 420;
+    const x0 = (W2 - cardW * 2 - gapX) / 2, y0 = 458;
     stats.forEach((s, i) => {
       const cx = x0 + (i % 2) * (cardW + gapX);
       const cy = y0 + ((i / 2) | 0) * (cardH + gapY);
@@ -5380,7 +5668,7 @@
     });
 
     // 成就徽章（本次解锁优先）
-    const showAch = achNew.length ? achNew : [...achUnlocked].slice(0, 4);
+    const showAch = (S.ach && S.ach.length) ? S.ach : [...achUnlocked].slice(0, 4);
     if (showAch.length) {
       let ax = W2 / 2 - (showAch.length * 132 - 12) / 2;
       const ay = y0 + 3 * (cardH + gapY) + 18;
@@ -5401,12 +5689,12 @@
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V2.5', W2 / 2, H2 - 78);
-    const d = new Date();
+    g.fillText('DESIGNED BY QIAN · V2.6', W2 / 2, H2 - 78);
+    const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
     g.font = '500 15px "Segoe UI", sans-serif';
-    g.fillText(ds + (dailyMode ? ' · 每日挑战' : ''), W2 / 2, H2 - 48);
+    g.fillText(ds + (S.daily ? ' · 每日挑战' : (S.endless ? ' · 无尽模式' : (S.timed ? ' · 限时冲分' : ''))), W2 / 2, H2 - 48);
 
     return c;
   }
@@ -5420,13 +5708,24 @@
     g.closePath();
   }
 
-  function openReport() {
+  function openReport(fromSnapshot) {
+    // —— v0.2.6 战绩图：战绩档案入口复用上一局快照 ——
+    if (fromSnapshot && !lastRun) { showToast('先打一局，再来生成战绩图'); return; }
     try {
-      const c = buildReportCanvas();
+      const c = buildReportCanvas(fromSnapshot ? lastRun : null);
       reportImg.src = c.toDataURL('image/png');
       reportBox.classList.add('show');
     } catch (e) {
       showToast('战绩图生成失败');
+    }
+  }
+  async function copyReport() {
+    try {
+      const blob = await (await fetch(reportImg.src)).blob();
+      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+      showToast('✅ 战绩图已复制到剪贴板');
+    } catch (e) {
+      showToast('复制失败 · 请长按图片保存');
     }
   }
   async function shareReport() {
@@ -5452,6 +5751,8 @@
   btnRevive.addEventListener('click', () => { ensureAudio(); revive(); });
   btnDaily.addEventListener('click', () => { ensureAudio(); start('daily'); });
   btnTimed.addEventListener('click', () => { ensureAudio(); start('timed'); });
+  // —— v0.2.6 无尽模式入口 ——
+  btnEndless.addEventListener('click', () => { ensureAudio(); start('endless'); });
   // v0.2.3 里程碑庆典：继续战斗
   document.getElementById('btnMiloOk').addEventListener('click', () => { ensureAudio(); closeMilestone(); });
   milestone.addEventListener('click', (e) => { if (e.target === milestone) closeMilestone(); });
@@ -5461,8 +5762,13 @@
   tabSkins.addEventListener('click', () => { shopTab = 'skins'; tabSkins.classList.add('active'); tabBonus.classList.remove('active'); renderShop(); });
   btnShare.addEventListener('click', () => { ensureAudio(); shareScore(); });
   btnReport.addEventListener('click', () => { ensureAudio(); openReport(); });
+  // —— v0.2.6 过关结算：继续按钮 ——
+  btnLvNext.addEventListener('click', () => { ensureAudio(); claimLvResult(); });
   $('btnReportClose').addEventListener('click', () => reportBox.classList.remove('show'));
   $('btnReportShare').addEventListener('click', () => { ensureAudio(); shareReport(); });
+  // —— v0.2.6 战绩图：复制图片 / 战绩档案生成入口 ——
+  $('btnReportCopy').addEventListener('click', () => { ensureAudio(); copyReport(); });
+  $('btnCarReport').addEventListener('click', () => { ensureAudio(); openReport(true); });
   pauseBtn.addEventListener('click', (e) => { togglePause(); e.currentTarget.blur(); });
   muteBtn.addEventListener('click', (e) => { toggleMute(); e.currentTarget.blur(); });
   fullBtn.addEventListener('click', (e) => { toggleFullscreen(); e.currentTarget.blur(); });
@@ -5474,6 +5780,16 @@
   btnCareer.addEventListener('click', () => { ensureAudio(); openCareer(); });
   $('btnCarClose').addEventListener('click', closeCareer);
   carBox.addEventListener('click', (e) => { if (e.target === carBox) closeCareer(); });
+  // —— v0.2.6 关卡选择 ——
+  btnLevels.addEventListener('click', () => { ensureAudio(); openLevelSelect(); });
+  $('btnLvSelClose').addEventListener('click', closeLevelSelect);
+  lvGrid.addEventListener('click', (e) => {
+    const b = e.target.closest('.lvCard');
+    if (!b || b.disabled) return;
+    ensureAudio();
+    startAtLevel(parseInt(b.dataset.lv, 10));
+  });
+  lvSelect.addEventListener('click', (e) => { if (e.target === lvSelect) closeLevelSelect(); });
   volSlider.addEventListener('input', (e) => setMasterVol(parseFloat(e.target.value) / 100));
   // v0.2.0 设置面板
   bgmSlider.addEventListener('input', (e) => setBgmVol(parseFloat(e.target.value) / 100));
@@ -5504,6 +5820,8 @@
     if (e.key === 'Escape' && achBox.classList.contains('show')) closeAch();
     if (e.key === 'Escape' && saveBox.classList.contains('show')) closeSaveBox();
     if (e.key === 'Escape' && milestone.classList.contains('show')) closeMilestone();
+    if (e.key === 'Escape' && carBox.classList.contains('show')) closeCareer();
+    if (e.key === 'Escape' && lvSelect.classList.contains('show')) closeLevelSelect();
   });
 
   window.addEventListener('keydown', (e) => {
@@ -6010,6 +6328,53 @@
           motionOff: document.documentElement.classList.contains('motion-off'),
         };
       },
+      // —— v0.2.6 无尽/生存模式 ——
+      startEndless: () => { start('endless'); return { endless: endlessMode }; },
+      endlessInfo: () => ({
+        endless: endlessMode, level: level, bestWave: bestWave,
+        enemyMul: endlessMode ? {
+          hp: 1 + level * 0.35,
+          spd: Math.min(1.8, 1 + level * 0.04),
+          count: Math.min(2.5, 1 + level * 0.05)
+        } : null
+      }),
+      // —— v0.2.6 关卡选择 + 星级 ——
+      startAtLevel: (n) => startAtLevel(n),
+      openLevelSelect: () => openLevelSelect(),
+      setMaxLv: (n) => { maxUnlocked = Math.max(1, Math.min(n | 0, 999)); saveMaxLv(); return maxUnlocked; },
+      setStars: (o) => { levelStars = {}; for (const k in (o || {})) { const v = parseInt(o[k], 10); if (v >= 1 && v <= 3) levelStars[k] = v; } saveStars(); return { ...levelStars }; },
+      levelSelectNow: () => {
+        if (!lvSelect) return { exists: false };
+        const open = lvSelect.classList.contains('show');
+        const cards = lvGrid ? lvGrid.querySelectorAll('.lvCard').length : 0;
+        const locked = lvGrid ? lvGrid.querySelectorAll('.lvCard.locked').length : 0;
+        return {
+          exists: true, open, cards, locked,
+          maxUnlocked: maxUnlocked,
+          stars: { ...levelStars },
+          firstCardLv: lvGrid && lvGrid.firstElementChild ? parseInt(lvGrid.firstElementChild.dataset.lv, 10) : 0,
+        };
+      },
+      starsFor: (n) => starsForLevel(n, false, 3, 30),
+      // —— v0.2.6 无尽/结算 测试钩子 ——
+      endlessNow: () => ({ endless: endlessMode, level: level, bestWave: bestWave }),
+      bestWaveNow: () => bestWave,
+      setBestWave: (n) => { bestWave = Math.max(0, n | 0); saveBestWave(); return bestWave; },
+      lvResultNow: () => ({ pending: lvResultPending, show: lvResult.classList.contains('show'), stars: lvStarsNow, num: lvNum.textContent, time: lvTime.textContent }),
+      showLvResultNow: () => { showLvResult(); return { stars: lvStarsNow, pending: lvResultPending, show: lvResult.classList.contains('show') }; },
+      claimLvNow: () => { const g = lvStarsNow * 25; claimLvResult(); return { gold: g }; },
+      // —— v0.2.6 战绩图增强：分享/复制/快照 ——
+      reportShareNow: () => ({
+        boxOpen: reportBox.classList.contains('show'),
+        hasSrc: !!reportImg.src && reportImg.src.indexOf('data:image') === 0,
+        srcBytes: reportImg.src ? Math.round(reportImg.src.length * 0.75) : 0,
+        lastRun: lastRun ? { score: lastRun.score, level: lastRun.level, stars: lastRun.stars, kills: lastRun.kills } : null,
+        copySupported: !!(navigator.clipboard && typeof window.ClipboardItem !== 'undefined'),
+        careerReportBtn: !!document.getElementById('btnCarReport'),
+        copyBtn: !!document.getElementById('btnReportCopy'),
+      }),
+      openReportFromCareer: () => openReport(true),
+      openReportNow: () => openReport(false),
     };
   }
 
