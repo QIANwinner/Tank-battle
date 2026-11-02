@@ -145,6 +145,39 @@
     color: var(--green); margin-left: 2px;
   }
   #lives .off { opacity: .2; }
+  #lives2 {
+    display: none; gap: 1px; font-size: 12px; line-height: 1;
+    color: #ff5a76; margin-left: 6px;
+  }
+  #lives2 .off { opacity: .2; }
+  /* —— v0.2.7 双人同屏模式选择 —— */
+  #multiBox {
+    position: fixed; inset: 0; z-index: 90;
+    display: none; align-items: center; justify-content: center;
+    background: rgba(3, 6, 14, .72); backdrop-filter: blur(4px);
+  }
+  #multiBox.show { display: flex; }
+  .muCard {
+    width: min(440px, 92vw);
+    background: #0d1626; border: 1px solid rgba(0, 229, 255, .25);
+    border-radius: 16px; padding: 16px;
+    box-shadow: 0 12px 48px rgba(0, 0, 0, .6);
+  }
+  .muHead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .muTitle { font-size: 18px; font-weight: 700; letter-spacing: .5px; }
+  .muClose { background: none; border: 0; color: #8fa3c0; font-size: 18px; cursor: pointer; padding: 4px 8px; }
+  .muClose:hover { color: #fff; }
+  .muBody { display: flex; flex-direction: column; gap: 12px; }
+  .muOpt {
+    display: flex; gap: 12px; align-items: center;
+    background: #101c30; border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 12px; padding: 14px; cursor: pointer; text-align: left;
+    color: #e8f1ff; transition: border-color .15s, transform .15s;
+  }
+  .muOpt:hover { border-color: rgba(0, 229, 255, .55); transform: translateY(-1px); }
+  .muIco { font-size: 26px; line-height: 1; }
+  .muTxt b { display: block; font-size: 15px; margin-bottom: 3px; }
+  .muTxt small { color: #93a7c4; font-size: 12px; line-height: 1.5; display: block; }
   .hbtns { margin-left: auto; display: flex; gap: 6px; pointer-events: auto; }
   .hbtn {
     width: 34px; height: 34px; padding: 0;
@@ -249,6 +282,33 @@
     -webkit-appearance: none; appearance: none;
   }
   #tFire.on { transform: scale(0.94); box-shadow: 0 0 32px rgba(255, 0, 255, 0.8); }
+
+  /* v0.2.7 近战大招按钮（触屏 + 桌面均可点） */
+  #rightCtl { display: flex; align-items: flex-end; gap: 14px; }
+  #tUlt {
+    pointer-events: auto;
+    width: 70px; height: 70px; border-radius: 50%;
+    border: 2px solid rgba(0, 240, 255, 0.6);
+    background: radial-gradient(circle at 50% 32%, #1ee6ff, #0060b8);
+    color: #fff; font-size: 13px; font-weight: 800; letter-spacing: 1px;
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.45);
+    position: relative; overflow: hidden;
+    touch-action: none;
+    -webkit-appearance: none; appearance: none;
+  }
+  #tUlt .cd {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; font-weight: 900; color: #fff;
+    text-shadow: 0 0 6px #000;
+  }
+  #tUlt.cooling { filter: grayscale(0.85) brightness(0.6); box-shadow: none; }
+  #tUlt.ready { animation: ultPulse 1.4s ease-in-out infinite; }
+  @keyframes ultPulse {
+    0%, 100% { box-shadow: 0 0 18px rgba(0, 229, 255, 0.5); }
+    50% { box-shadow: 0 0 34px rgba(0, 229, 255, 0.95); }
+  }
+  #tUlt:active { transform: scale(0.94); }
 
   /* 竖屏：控制区底部渐变分离画布，开火按钮加大拇指易点 */
   html.touch #pad {
@@ -965,6 +1025,13 @@
   #achBox .achItem.locked .aState {
     color: #8ea0b8; border-color: rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.04);
   }
+  /* ---------- v0.2.7 成就分组进度条 ---------- */
+  #achBox .achGroup { margin: 14px 0 6px; }
+  #achBox .achGroup .agLbl { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  #achBox .achGroup .agName { color: #ffe066; font-size: 12px; font-weight: 800; letter-spacing: 1px; }
+  #achBox .achGroup .agPct { color: #ffe9a6; font-size: 11px; font-weight: 700; letter-spacing: 1px; font-variant-numeric: tabular-nums; }
+  #achBox .achGroup .agTrack { height: 7px; border-radius: 999px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+  #achBox .achGroup .agFill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #ffd250, #ff9f43); }
   /* ---------- v0.2.5 战绩档案（生涯统计 + 排行榜） ---------- */
   #careerBox {
     position: fixed; inset: 0; z-index: 45;
@@ -1022,6 +1089,30 @@
   #careerBox .carRow .mi { color: #8ea0b8; font-size: 10px; letter-spacing: 0.5px; }
   #careerBox .carRow .md { flex: none; font-size: 10px; font-weight: 700; letter-spacing: 1px; padding: 2px 8px; border-radius: 999px; color: #9fdce8; border: 1px solid rgba(0, 240, 255, 0.4); }
   #careerBox .carEmpty { color: #5b6b82; font-size: 11px; text-align: center; padding: 10px 0; letter-spacing: 0.5px; }
+  /* ---------- v0.2.7 周挑战词条 + 排行榜分榜 Tab ---------- */
+  #careerBox .wkCard {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+    border-radius: 12px; border: 1px solid rgba(255, 210, 80, 0.35); background: rgba(255, 210, 80, 0.07);
+  }
+  #careerBox .wkCard.done { border-color: rgba(57, 255, 20, 0.5); background: rgba(57, 255, 20, 0.08); }
+  #careerBox .wkCard .wkIcon { flex: none; font-size: 22px; }
+  #careerBox .wkCard .wkInfo { flex: 1; min-width: 0; }
+  #careerBox .wkCard .wkName { color: #ffe066; font-size: 12px; font-weight: 800; letter-spacing: 0.5px; }
+  #careerBox .wkCard .wkMeta { color: #8ea0b8; font-size: 10px; margin-top: 2px; letter-spacing: 0.5px; }
+  #careerBox .wkCard .wkMeta b { color: #eafcff; }
+  #careerBox .wkCard .wkBtn {
+    flex: none; padding: 6px 10px; border-radius: 999px; cursor: pointer; font-family: inherit;
+    border: 1px solid rgba(57, 255, 20, 0.5); background: rgba(57, 255, 20, 0.12);
+    color: #c9ffd2; font-size: 10px; font-weight: 800; letter-spacing: 0.5px; -webkit-appearance: none; appearance: none;
+  }
+  #careerBox .wkCard .wkBtn:disabled { opacity: 0.45; cursor: default; }
+  #careerBox .boardTabs { display: flex; gap: 6px; margin: 4px 0 8px; flex-wrap: wrap; }
+  #careerBox .boardTabs .btab {
+    flex: 1; padding: 6px 4px; border-radius: 9px; cursor: pointer; font-family: inherit;
+    border: 1px solid rgba(255, 255, 255, 0.12); background: rgba(255, 255, 255, 0.04);
+    color: #8ea0b8; font-size: 11px; font-weight: 700; letter-spacing: 1px; -webkit-appearance: none; appearance: none;
+  }
+  #careerBox .boardTabs .btab.on { color: #0a1220; background: #00f0ff; border-color: #00f0ff; }
   #careerBox .carReport {
     width: min(92vw, 380px);
     margin-top: 10px;
@@ -1031,6 +1122,64 @@
     -webkit-appearance: none; appearance: none;
   }
   #careerBox .carReport:active { background: rgba(57, 255, 20, 0.2); transform: translateY(1px); }
+  #careerBox .carBtns { display: flex; gap: 8px; width: min(92vw, 380px); margin-top: 10px; }
+  #careerBox .carBtns .carReport { flex: 1; margin-top: 0; width: auto; }
+  /* ---------- v0.2.7 生涯报告页 ---------- */
+  #careerRepBox {
+    position: fixed; inset: 0; z-index: 46;
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(4, 10, 20, 0.88); backdrop-filter: blur(6px);
+  }
+  #careerRepBox.show { display: flex; }
+  #careerRepBox .repCard {
+    width: min(94vw, 470px); max-height: 84vh; overflow-y: auto;
+    background: linear-gradient(160deg, #101b2e, #0a1220);
+    border: 1px solid rgba(0, 240, 255, 0.35); border-radius: 18px;
+    padding: 16px 18px 18px; box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+  }
+  #careerRepBox .repHead { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  #careerRepBox .repTitle { flex: 1; color: #00f0ff; font-size: 16px; font-weight: 800; letter-spacing: 2px; }
+  #careerRepBox .repClose {
+    flex: none; width: 34px; height: 34px; border-radius: 10px; cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.18); background: rgba(255, 255, 255, 0.06);
+    color: #cfe6f0; font-size: 15px; font-family: inherit; -webkit-appearance: none; appearance: none;
+  }
+  #careerRepBox .repHero {
+    display: flex; align-items: center; gap: 12px; margin: 6px 0 12px; padding: 12px;
+    border-radius: 14px; background: rgba(0, 240, 255, 0.06); border: 1px solid rgba(0, 240, 255, 0.2);
+  }
+  #careerRepBox .repBadge {
+    flex: none; width: 56px; height: 56px; border-radius: 16px; display: flex;
+    align-items: center; justify-content: center; font-size: 28px;
+    background: linear-gradient(135deg, #00f0ff, #2b7fff); box-shadow: 0 4px 18px rgba(0, 240, 255, 0.35);
+  }
+  #careerRepBox .repHeroName { color: #eafcff; font-size: 17px; font-weight: 800; letter-spacing: 1px; }
+  #careerRepBox .repHeroMeta { color: #8ea0b8; font-size: 11px; margin-top: 3px; letter-spacing: 0.5px; }
+  #careerRepBox .repSec { color: #00f0ff; font-size: 12px; font-weight: 800; letter-spacing: 1.5px; margin: 12px 0 6px; }
+  #careerRepBox .repGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  #careerRepBox .repStat {
+    background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px; padding: 10px 8px; text-align: center;
+  }
+  #careerRepBox .repStat b { display: block; color: #eafcff; font-size: 16px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  #careerRepBox .repStat span { color: #8ea0b8; font-size: 10px; letter-spacing: 1px; margin-top: 3px; display: block; }
+  #careerRepBox .repBar { margin: 8px 0; }
+  #careerRepBox .repBar .rbLbl {
+    display: flex; justify-content: space-between; color: #9fdce8; font-size: 11px;
+    font-weight: 700; letter-spacing: 0.5px; margin-bottom: 4px;
+  }
+  #careerRepBox .repBar .rbTrack { height: 8px; border-radius: 999px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+  #careerRepBox .repBar .rbFill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #00f0ff, #2b7fff); }
+  #careerRepBox .repAchRow {
+    display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px;
+    background: rgba(255, 224, 102, 0.05); border: 1px solid rgba(255, 224, 102, 0.18);
+  }
+  #careerRepBox .repAchRow .raIcon { font-size: 20px; }
+  #careerRepBox .repAchRow .raInfo { flex: 1; min-width: 0; }
+  #careerRepBox .repAchRow .raName { color: #ffe066; font-size: 13px; font-weight: 700; letter-spacing: 0.5px; }
+  #careerRepBox .repAchRow .raDesc { color: #8ea0b8; font-size: 10px; margin-top: 1px; letter-spacing: 0.3px; }
+  #careerRepBox .repAchRow .raState { flex: none; font-size: 10px; font-weight: 800; letter-spacing: 1px; padding: 3px 8px; border-radius: 999px; color: #ffe9a6; border: 1px solid rgba(255, 224, 102, 0.4); }
+  #careerRepBox .repAchRow.done .raState { color: #0a1220; background: #ffe066; border-color: #ffe066; }
   /* ---------- v0.2.6 关卡选择 ---------- */
   #lvSelect {
     position: fixed; inset: 0; z-index: 45;
@@ -1239,6 +1388,120 @@
   @media (max-width: 430px) {
     html.touch .pill.best { display: none; }
   }
+
+  /* ===== v0.2.7 地图编辑器 ===== */
+  #editorBox {
+    position: fixed; inset: 0; z-index: 46;
+    display: none; align-items: center; justify-content: center;
+    background: rgba(2, 4, 12, 0.94);
+    padding: 14px;
+  }
+  #editorBox.show { display: flex; }
+  #editorBox .edCard {
+    display: flex; flex-direction: column;
+    width: min(96vw, 900px); max-height: 94vh;
+    background: rgba(6, 10, 22, 0.96);
+    border: 1px solid rgba(0, 240, 255, 0.35);
+    border-radius: 16px;
+    box-shadow: 0 0 40px rgba(0, 47, 167, 0.45);
+    overflow: hidden;
+  }
+  #editorBox .edHead {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px;
+    background: linear-gradient(180deg, rgba(0, 47, 167, 0.35), rgba(6, 10, 22, 0.6));
+    border-bottom: 1px solid rgba(0, 240, 255, 0.25);
+  }
+  #editorBox .edTitle { flex: 1; color: #00f0ff; font-size: 15px; font-weight: 800; letter-spacing: 2px; }
+  #editorBox .edName {
+    width: 150px; padding: 6px 10px;
+    background: rgba(0, 0, 0, 0.35); color: #dff6ff;
+    border: 1px solid rgba(0, 240, 255, 0.4); border-radius: 8px;
+    font-size: 12px; outline: none;
+  }
+  #editorBox .edName:focus { border-color: #00f0ff; box-shadow: 0 0 8px rgba(0, 240, 255, 0.4); }
+  #editorBox .edClose {
+    width: 26px; height: 26px; border-radius: 8px; cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(0, 0, 0, 0.3);
+    color: #bfe4ff; font-size: 13px; line-height: 1;
+  }
+  #editorBox .edBody {
+    display: flex; gap: 14px; padding: 14px;
+    overflow: auto;
+  }
+  #editorBox .edGridWrap {
+    flex: 0 0 auto;
+    width: min(58vw, 624px); height: auto;
+    aspect-ratio: 1 / 1;
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    border-radius: 10px; overflow: hidden;
+    background: #0a0f1e;
+  }
+  #editorBox #edCanvas { width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; }
+  #editorBox .edSide {
+    flex: 1; min-width: 190px;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  #editorBox .edPalette {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;
+  }
+  #editorBox .edTile {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 8px; cursor: pointer;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-left: 3px solid var(--tile, #333);
+    border-radius: 8px; color: #cfe6f5; font-size: 11px; font-weight: 700;
+  }
+  #editorBox .edTile.on {
+    border-color: #00f0ff; color: #fff;
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.45);
+    background: rgba(0, 47, 167, 0.35);
+  }
+  #editorBox .edTile .edTileIco { font-size: 14px; }
+  #editorBox .edBtns { display: flex; flex-direction: column; gap: 7px; }
+  #editorBox .edBtn {
+    padding: 9px 12px; cursor: pointer; text-align: left;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(0, 240, 255, 0.28);
+    border-radius: 8px; color: #bfe4ff; font-size: 12px; font-weight: 700; letter-spacing: 1px;
+  }
+  #editorBox .edBtn:hover { border-color: #00f0ff; color: #fff; }
+  #editorBox .edBtn.primary {
+    background: linear-gradient(135deg, #002FA7, #0a1040);
+    border-color: #00f0ff; color: #fff;
+    box-shadow: 0 0 12px rgba(0, 47, 167, 0.6);
+  }
+  #editorBox .edListHead { color: #7f93ac; font-size: 11px; font-weight: 700; letter-spacing: 2px; margin-top: 2px; }
+  #editorBox .edList {
+    display: flex; flex-direction: column; gap: 6px;
+    max-height: 200px; overflow-y: auto;
+  }
+  #editorBox .edItem {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 9px; cursor: pointer;
+    background: rgba(0, 0, 0, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 8px;
+  }
+  #editorBox .edItem.on { border-color: #00f0ff; background: rgba(0, 47, 167, 0.3); }
+  #editorBox .edItemName { flex: 1; color: #dff6ff; font-size: 12px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #editorBox .edItemDel {
+    width: 20px; height: 20px; border-radius: 6px; cursor: pointer;
+    border: 1px solid rgba(255, 45, 85, 0.4); background: rgba(255, 45, 85, 0.15);
+    color: #ff5c7a; font-size: 10px; line-height: 1;
+  }
+  #editorBox .edEmpty { color: #5b6b82; font-size: 11px; padding: 8px 2px; }
+  #editorBox .edTip {
+    padding: 9px 16px;
+    border-top: 1px solid rgba(0, 240, 255, 0.15);
+    color: #6f8299; font-size: 11px; letter-spacing: 0.5px;
+  }
+  @media (max-width: 640px) {
+    #editorBox .edBody { flex-direction: column; }
+    #editorBox .edGridWrap { width: 100%; }
+    #editorBox .edPalette { grid-template-columns: repeat(4, 1fr); }
+    #editorBox .edTile { flex-direction: column; gap: 2px; text-align: center; }
+  }
 </style>
 </head>
 <body>
@@ -1256,6 +1519,7 @@
     <div class="pill coin"><span class="k">🪙</span><span class="v" id="coins">0</span></div>
     <div class="pill combo" id="comboWrap" style="display:none"><span class="k">连击</span><span class="v" id="combo">×1</span></div>
     <div id="lives"></div>
+    <div id="lives2"></div>
     <div class="hbtns">
       <button class="hbtn" id="pauseBtn" aria-label="暂停">⏸</button>
       <button class="hbtn" id="muteBtn" aria-label="静音">🔊</button>
@@ -1269,7 +1533,10 @@
         <div id="knob"></div>
       </div>
     </div>
-    <button id="tFire" aria-label="开火">开火</button>
+    <div id="rightCtl">
+      <button id="tUlt" aria-label="近战大招（E 键）">大招<span class="cd" id="ultCd"></span></button>
+      <button id="tFire" aria-label="开火">开火</button>
+    </div>
   </div>
 
   <div id="overlay">
@@ -1307,6 +1574,8 @@
     <button id="btnAch">🏆 成就</button>
     <button id="btnCareer">📊 战绩档案</button>
     <button id="btnLevels">🗺 关卡选择</button>
+    <button id="btnEditor">🛠 地图编辑器</button>
+    <button id="btnMulti">👥 双人同屏</button>
     <button id="btnShop">🛒 商店</button>
     <button id="btnShare">📤 分享成绩 · 发起挑战</button>
     <button id="btnReport">🖼 生成战绩图</button>
@@ -1410,7 +1679,21 @@
       <button class="carClose" id="btnCarClose" aria-label="关闭">✕</button>
     </div>
     <div class="carBody" id="carBody"></div>
-    <button class="carReport" id="btnCarReport">🖼 生成战绩图</button>
+    <div class="carBtns">
+      <button class="carReport" id="btnCarReport">🖼 生成战绩图</button>
+      <button class="carReport" id="btnCarRep">📋 生涯报告</button>
+    </div>
+  </div>
+
+  <!-- v0.2.7 生涯报告页 -->
+  <div id="careerRepBox">
+    <div class="repCard">
+      <div class="repHead">
+        <div class="repTitle">📋 生涯报告</div>
+        <button class="repClose" id="btnCarRepClose" aria-label="关闭">✕</button>
+      </div>
+      <div id="repBody"></div>
+    </div>
   </div>
 
   <!-- v0.2.6 关卡选择 + 星级 -->
@@ -1421,6 +1704,59 @@
       <button class="lvClose" id="btnLvSelClose" aria-label="关闭">✕</button>
     </div>
     <div class="lvGrid" id="lvGrid"></div>
+  </div>
+
+  <!-- v0.2.7 双人同屏：模式选择（合作 / 对抗） -->
+  <div id="multiBox">
+    <div class="muCard">
+      <div class="muHead">
+        <div class="muTitle">👥 双人同屏</div>
+        <button class="muClose" id="btnMuClose" aria-label="关闭">✕</button>
+      </div>
+      <div class="muBody">
+        <button class="muOpt" id="muCoop">
+          <span class="muIco">🤝</span>
+          <span class="muTxt">
+            <b>双人合作</b>
+            <small>P1 蓝 · WASD + 空格/J ｜ P2 红 · 方向键 + Enter<br>同屏并肩作战，任一玩家命尽则败</small>
+          </span>
+        </button>
+        <button class="muOpt" id="muVersus">
+          <span class="muIco">⚔️</span>
+          <span class="muTxt">
+            <b>双人对抗</b>
+            <small>P1 蓝 · WASD + 空格/J ｜ P2 红 · 方向键 + Enter<br>互相射击，先命中耗尽对方生命者胜</small>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- v0.2.7 地图编辑器 + 自制关卡 -->
+  <div id="editorBox">
+    <div class="edCard">
+      <div class="edHead">
+        <div class="edTitle">🛠 地图编辑器</div>
+        <input id="edName" class="edName" maxlength="12" placeholder="关卡名（≤12字）" value="我的关卡">
+        <button class="edClose" id="btnEdClose" aria-label="关闭">✕</button>
+      </div>
+      <div class="edBody">
+        <div class="edGridWrap"><canvas id="edCanvas" width="624" height="624"></canvas></div>
+        <div class="edSide">
+          <div class="edPalette" id="edPalette"></div>
+          <div class="edBtns" id="edBtns">
+            <button class="edBtn" data-ed="clear">🗑 清空</button>
+            <button class="edBtn" data-ed="save">💾 保存</button>
+            <button class="edBtn" data-ed="export">📤 导出分享码</button>
+            <button class="edBtn" data-ed="import">📥 导入分享码</button>
+            <button class="edBtn primary" data-ed="play">▶ 游玩此关卡</button>
+          </div>
+          <div class="edListHead">已存关卡</div>
+          <div class="edList" id="edList"></div>
+        </div>
+      </div>
+      <div class="edTip">点击/拖动绘制 · 右键擦除 · 传送门需成对（0 或 ≥2）· 游玩时自动补外墙·基地护墙·出生点</div>
+    </div>
   </div>
 
   <!-- v0.2.3 存档备份/恢复 -->
@@ -1454,7 +1790,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V2.6</div>
+  <div id="mark">DESIGNED BY QIAN · V2.7</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -1779,7 +2115,7 @@
   let ctx = canvas.getContext('2d');   // drawSkinPrev 会临时切换预览画布上下文
   const stage = $('stage');
   const elScore = $('score'), elBest = $('best'), elLevel = $('level'),
-        elRemaining = $('remaining'), elLives = $('lives'), elCombo = $('combo'),
+        elRemaining = $('remaining'), elLives = $('lives'), elLives2 = $('lives2'), elCombo = $('combo'),
         elComboWrap = $('comboWrap'),
         elWaveWrap = $('waveWrap'), elWaveNum = $('waveNum'),
         elUpgWrap = $('upgWrap'), elUpgNum = $('upgNum'), elCoins = $('coins'),
@@ -1805,8 +2141,16 @@
         btnRestart = $('btnRestart'), btnQuit = $('btnQuit'),
         btnAch = $('btnAch'), achBox = $('achBox'), achBody = $('achBody'), achCount = $('achCount'),
         btnCareer = $('btnCareer'), carBox = $('careerBox'), carBody = $('carBody'), carSub = $('carSub'),
+        // —— v0.2.7 生涯报告页 ——
+        carRepBox = $('careerRepBox'), repBody = $('repBody'),
         // —— v0.2.6 关卡选择 ——
         lvSelect = $('lvSelect'), lvGrid = $('lvGrid'), lvSelSub = $('lvSelSub'),
+        // —— v0.2.7 地图编辑器 ——
+        btnEditor = $('btnEditor'), editorBox = $('editorBox'),
+        btnMulti = $('btnMulti'), multiBox = $('multiBox'),
+        btnMuClose = $('btnMuClose'), muCoop = $('muCoop'), muVersus = $('muVersus'),
+        edNameEl = $('edName'), edPaletteEl = $('edPalette'),
+        edBtnsEl = $('edBtns'), edListEl = $('edList'),
         saveBox = $('saveBox'), saveBody = $('saveBody'),
         volRow = $('volRow'), volSlider = $('volSlider'), volPct = $('volPct'), volIcon = $('volIcon'),
         settings = $('settings'), bgmSlider = $('bgmSlider'), sfxSlider = $('sfxSlider'),
@@ -2037,6 +2381,9 @@
   let mapStaticCtx = null;
   let mapDirty = true;
   let player = null;
+  let player2 = null;          // v0.2.7 双人同屏 P2
+  let multiMode = 0;           // v0.2.7 0 单人 / 1 合作 / 2 对抗
+  let lives2 = 3;              // v0.2.7 P2 生命
   let bullets = [];
   let enemies = [];
   let particles = [];
@@ -2060,7 +2407,7 @@
   let shake = 0;
   let keys = {};
   let rafId = null;
-  let lastLives = -1, lastCombo = -1, lastUpg = -1;
+  let lastLives = -1, lastCombo = -1, lastUpg = -1, lastLives2 = -1;
 
   // 过关成长（三选一 Roguelite 强化）
   let upgrades = {};             // 各强化已叠加次数，如 { rapid: 2 }
@@ -2092,6 +2439,13 @@
     { id: 'vampire',   icon: '🧛', name: '吸血装甲', desc: '击杀有几率回复 1 生命', tag: '生存' },
     { id: 'fortune',   icon: '🍀', name: '金运',     desc: '金币获取 +30%（可叠加）', tag: '经济' },
   ];
+
+  // —— v0.2.7 近战大招（E 键）：冷却 + 近战 AOE ——
+  const ULT_CD = 8;          // 大招冷却（秒）
+  const ULT_RADIUS = 2.6;    // 近战冲击半径（格）
+  const ULT_DMG = 4;         // 近战基础伤害
+  let ultFlash = 0;          // 释放白闪/定格计时（秒）
+  let ultWaves = [];         // 冲击波扩散环 { x, y, r, maxR, alpha }
 
   // 每日挑战词条：由日期种子抽取 2~3 条，全服同一天一致
   const DAILY_MODS = [
@@ -2142,9 +2496,38 @@
 
   // ===== v0.2.5 战绩档案：生涯累计 + 本地排行榜 =====
   const LS_CAREER = 'tank-battle-career', LS_BOARD = 'tank-battle-board';
-  let career = { games: 0, kills: 0, playSec: 0, bestDaily: 0, bestTimed: 0, bestHard: 0, bestScore: 0 };
+  // —— v0.2.7 生涯统计扩展：累计金币/星/Boss 击杀/死亡/命中/胜场/模式场次/无尽波 ——
+  let career = { games: 0, kills: 0, playSec: 0, bestDaily: 0, bestTimed: 0, bestHard: 0, bestScore: 0,
+    totalCoins: 0, totalStars: 0, bestEndless: 0, bossKills: 0, deaths: 0, hits: 0, shots: 0, wins: 0,
+    modeGames: { normal: 0, daily: 0, timed: 0, endless: 0, hard: 0 } };
   let board = [];                    // 本地前十：{ score, level, mode, date }
+  // —— v0.2.7 排行榜分榜 Tab ——
+  let boardTab = 'all';
+  const BOARD_TABS = [
+    { id: 'all', name: '全部' }, { id: 'normal', name: '标准' }, { id: 'daily', name: '每日' },
+    { id: 'timed', name: '限时' }, { id: 'endless', name: '无尽' }
+  ];
   let playSecRun = 0;                // 本局已玩秒数（战绩档案用）
+
+  // ===== v0.2.7 地图编辑器 + 自制关卡 =====
+  const LS_CUSTOM = 'tank-battle-custom-maps';
+  let customMaps = [];        // 已存自制关卡 [{ id, name, rows:[26行字符串], createdAt }]
+  let customMode = false;     // 当前局是否为自制关卡
+  let customMap = null;       // 当前局自制关卡 rows（26 行字符串）
+  let edGrid = [];            // 编辑器 26x26 工作副本
+  let edTool = TILE_BRICK;    // 当前笔刷（0-6）
+  let edSelId = null;         // 当前选中的已存关卡 id
+  let edCanvas = null, edCtx = null;
+  let edPainting = false;
+  const ED_TILES = [
+    { t: 0,               name: '空地',   icon: '▫', color: '#2a3548' },
+    { t: TILE_BRICK,      name: '砖墙',   icon: '🧱', color: '#3a2030' },
+    { t: TILE_STEEL,      name: '钢墙',   icon: '⬛', color: '#3a4860' },
+    { t: TILE_WATER,      name: '水面',   icon: '🌊', color: '#0a4a6a' },
+    { t: TILE_TREE,       name: '草丛',   icon: '🌿', color: '#1a4020' },
+    { t: TILE_BARREL,     name: '油桶',   icon: '🛢', color: '#8a5f1e' },
+    { t: TILE_PORTAL,     name: '传送门', icon: '🌀', color: '#a06bff' },
+  ];
   let levelSecs = 0;                 // —— v0.2.6 本关用时（结算界面） ——
   let lvResultPending = false;       // —— v0.2.6 结算面板是否弹出 ——
   let lvStarsNow = 0;                // —— v0.2.6 本关评级星数 ——
@@ -2159,6 +2542,19 @@
       career.bestTimed = Math.max(0, parseInt(c.bestTimed, 10) || 0);
       career.bestHard = Math.max(0, parseInt(c.bestHard, 10) || 0);
       career.bestScore = Math.max(0, parseInt(c.bestScore, 10) || 0);
+      // —— v0.2.7 生涯统计扩展：迁移加载 ——
+      career.totalCoins = Math.max(0, parseInt(c.totalCoins, 10) || 0);
+      career.totalStars = Math.max(0, parseInt(c.totalStars, 10) || 0);
+      career.bestEndless = Math.max(0, parseInt(c.bestEndless, 10) || 0);
+      career.bossKills = Math.max(0, parseInt(c.bossKills, 10) || 0);
+      career.deaths = Math.max(0, parseInt(c.deaths, 10) || 0);
+      career.hits = Math.max(0, parseInt(c.hits, 10) || 0);
+      career.shots = Math.max(0, parseInt(c.shots, 10) || 0);
+      career.wins = Math.max(0, parseInt(c.wins, 10) || 0);
+      career.modeGames = { normal: 0, daily: 0, timed: 0, endless: 0, hard: 0 };
+      if (c.modeGames && typeof c.modeGames === 'object') {
+        for (const k in career.modeGames) career.modeGames[k] = Math.max(0, parseInt(c.modeGames[k], 10) || 0);
+      }
     }
     const bd = JSON.parse(localStorage.getItem(LS_BOARD) || '[]');
     if (Array.isArray(bd)) board = bd.slice(0, 10);
@@ -2171,13 +2567,27 @@
     career.games++;
     career.kills += stat.kills;
     career.playSec += Math.round(playSecRun);
+    // —— v0.2.7 生涯统计扩展：累计金币/星/Boss 击杀/死亡/命中/胜场/模式场次 ——
+    career.bossKills += stat.bossKills;
+    career.deaths += stat.deaths;
+    career.hits += stat.hits;
+    career.shots += stat.shots;
+    if (win) career.wins++;
     career.bestScore = Math.max(career.bestScore, score);
     if (dailyMode) career.bestDaily = Math.max(career.bestDaily, score);
     if (timedMode) career.bestTimed = Math.max(career.bestTimed, score);
+    if (endlessMode) career.bestEndless = Math.max(career.bestEndless, level);
     if (difficulty === 'hard') career.bestHard = Math.max(career.bestHard, score);
+    career.modeGames.normal += (dailyMode || timedMode || endlessMode || difficulty === 'hard') ? 0 : 1;
+    if (dailyMode) career.modeGames.daily++;
+    if (timedMode) career.modeGames.timed++;
+    if (endlessMode) career.modeGames.endless++;
+    if (difficulty === 'hard') career.modeGames.hard++;
     saveCareer();
     if (score > 0) {
-      const rec = { score: score, level: level, mode: dailyMode ? 'daily' : (timedMode ? 'timed' : 'normal'), date: Date.now(), uid: Date.now() + '' + Math.floor(Math.random() * 1e6) };
+      // —— v0.2.7 分榜：无尽局记入 endless ——
+      const modeTag = endlessMode ? 'endless' : (dailyMode ? 'daily' : (timedMode ? 'timed' : 'normal'));
+      const rec = { score: score, level: level, mode: modeTag, date: Date.now(), uid: Date.now() + '' + Math.floor(Math.random() * 1e6) };
       board.push(rec);
       board.sort((a, b) => b.score - a.score);
       if (board.length > 10) board = board.slice(0, 10);
@@ -2206,7 +2616,26 @@
     { id: 'rich',    icon: '🏦', name: '金库富翁', desc: '金币余额达到 3000', reward: 300 },
     // —— v0.2.6 无尽模式波次成就 ——
     { id: 'endless10', icon: '🌊', name: '深潜者', desc: '无尽模式到达第 10 波', reward: 150 },
-    { id: 'endless30', icon: '🌀', name: '深渊猎手', desc: '无尽模式到达第 30 波', reward: 300 }
+    { id: 'endless30', icon: '🌀', name: '深渊猎手', desc: '无尽模式到达第 30 波', reward: 300 },
+    // —— v0.2.7 生涯累计成就 ——
+    { id: 'kills200', icon: '💥', name: '杀戮机器', desc: '生涯累计击杀 200', reward: 300 },
+    { id: 'coins10k', icon: '🏦', name: '财富自由', desc: '生涯累计获得金币 10000', reward: 300 },
+    { id: 'boss20',   icon: '👑', name: '屠龙勇士', desc: '生涯累计 Boss 击杀 20', reward: 300 },
+    { id: 'win50',    icon: '🏆', name: '常胜将军', desc: '生涯累计胜利 50', reward: 300 },
+    { id: 'star20',   icon: '⭐', name: '摘星大师', desc: '累计获得星数 20', reward: 250 }
+  ];
+  // —— v0.2.7 成就分组（分组进度条用） ——
+  const ACH_GROUP = {
+    first: 'combat', combo8: 'combat', boss: 'combat', nohit: 'combat', surge: 'combat',
+    kills200: 'combat', boss20: 'combat', win50: 'combat',
+    daily: 'challenge', timed: 'challenge', hard: 'challenge', daily3: 'challenge', save: 'challenge',
+    score5k: 'depth', lv5: 'depth', milo20: 'depth', rich: 'depth', endless10: 'depth',
+    endless30: 'depth', star20: 'depth', coins10k: 'depth'
+  };
+  const ACH_GROUPS = [
+    { id: 'combat', name: '⚔️ 战斗', icon: '⚔️' },
+    { id: 'challenge', name: '🎯 挑战', icon: '🎯' },
+    { id: 'depth', name: '🏔 深度', icon: '🏔' }
   ];
   let achUnlocked = new Set();
   let achNew = [];             // 本局新解锁（结算页展示）
@@ -2230,6 +2659,14 @@
     }
     vibe(30);
     sfxPickup();
+  }
+  // —— v0.2.7 生涯累计成就检查（一局结束后调用） ——
+  function checkCareerAch() {
+    if (career.kills >= 200) unlockAch('kills200');
+    if (career.totalCoins >= 10000) unlockAch('coins10k');
+    if (career.bossKills >= 20) unlockAch('boss20');
+    if (career.wins >= 50) unlockAch('win50');
+    if (career.totalStars >= 20) unlockAch('star20');
   }
 
   // 触觉反馈（iOS Safari 不支持，自动忽略）
@@ -2341,6 +2778,12 @@
   const sfxHit    = () => { noiseBurst(0.12, 0.15, 900, 180); sweep(160, 70, 0.12, 'sine', 0.07); };
   const sfxBoom   = () => { noiseBurst(0.38, 0.2, 2400, 160); sweep(140, 38, 0.32, 'triangle', 0.11); };
   const sfxPickup = () => { sweep(523, 784, 0.07, 'triangle', 0.05); setTimeout(() => sweep(784, 1046, 0.09, 'triangle', 0.05), 70); };
+  // v0.2.7 近战大招：低频轰击 + 锯齿冲击 + 亮音
+  const sfxUltimate = () => {
+    noiseBurst(0.5, 0.24, 2800, 110);
+    sweep(240, 40, 0.42, 'sawtooth', 0.09);
+    setTimeout(() => beep(880, 0.09, 'square', 0.035), 60);
+  };
   const sfxBoss   = () => {
     sweep(180, 420, 0.28, 'sawtooth', 0.08);
     setTimeout(() => sweep(420, 160, 0.34, 'sawtooth', 0.08), 260);
@@ -2465,6 +2908,30 @@
     markMapDirty();
   }
 
+  // —— v0.2.7 自制关卡：按用户手绘的 rows 载入（自动补外墙/基地/出生点） ——
+  function loadCustomMap(rows) {
+    map = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+    for (let y = 0; y < ROWS; y++) {
+      const row = rows[y] || '';
+      for (let x = 0; x < COLS; x++) {
+        const ch = row[x] || '.';
+        map[y][x] = ch === 'B' ? TILE_BRICK
+                  : ch === 'S' ? TILE_STEEL
+                  : ch === 'W' ? TILE_WATER
+                  : ch === 'T' ? TILE_TREE
+                  : ch === 'R' ? TILE_BARREL
+                  : ch === 'P' ? TILE_PORTAL : 0;
+      }
+    }
+    decorateMap();
+    // 手动摆放的传送门成对注册（供 checkPortal 使用）
+    portals = [];
+    for (let y = 0; y < ROWS; y++)
+      for (let x = 0; x < COLS; x++)
+        if (map[y][x] === TILE_PORTAL) portals.push([x, y]);
+    markMapDirty();
+  }
+
   function decorateMap() {
     // 四周钢墙
     for (let x = 0; x < COLS; x++) {
@@ -2485,6 +2952,7 @@
   }
 
   function generateMap() {
+    if (customMode && customMap) { loadCustomMap(customMap); return; }   // v0.2.7 自制关卡（不再随机补油桶/传送门）
     if (bossLevel) { loadPresetMap(PRESET_MAPS.length - 1, 0); }   // Boss 场
     else if (dailyMode && dailyRng) {
       // 每日挑战：日期种子决定地图与镜像，同一天所有人同图
@@ -2661,13 +3129,14 @@
   }
 
   // ===== 坦克 =====
-  function makePlayer() {
+  function makePlayer(px, py, color) {
     return {
-      x: SPAWN.x * TILE + (TILE - TANK_SIZE) / 2,
-      y: SPAWN.y * TILE + (TILE - TANK_SIZE) / 2,
+      x: (px ?? SPAWN.x) * TILE + (TILE - TANK_SIZE) / 2,
+      y: (py ?? SPAWN.y) * TILE + (TILE - TANK_SIZE) / 2,
       dir: DIR.UP, speed: PLAYER_SPEED,
-      cooldown: 0, isPlayer: true, color: '#002FA7',
-      size: TANK_SIZE, spawnInv: 0, hitFlash: 0, portalCd: 0
+      cooldown: 0, isPlayer: true, color: color || '#002FA7',
+      size: TANK_SIZE, spawnInv: 0, hitFlash: 0, portalCd: 0,
+      ultCd: 0                                  // v0.2.7 近战大招冷却（秒）
     };
   }
 
@@ -2957,6 +3426,13 @@
 
   function updateEnemy(e, k) {
     if (fx.freeze > 0) return;              // 冻结：不动不射
+    // v0.2.7 近战大招击退：短促爆发位移，期间不移动不射击
+    if (e.kbt > 0) {
+      e.kbt -= k;
+      e.x = clamp(e.x + e.kbx * 5 * TILE * k, TILE, W - TILE - e.size);
+      e.y = clamp(e.y + e.kby * 5 * TILE * k, TILE, H - TILE - e.size);
+      return;
+    }
     if (e.freezeT > 0) { e.freezeT -= k; if (e.freezeT <= 0) e.freezeT = 0; return; }  // 冰冻子弹：单兵冻结中不动不射
     if (e.isBoss) { updateBoss(e, k); return; }
     if (e.type === 'sniper')  { updateSniper(e, k); return; }    // 狙击：远处压制
@@ -2974,8 +3450,9 @@
       fire(e);
     }
     // 分层目标锁定：精英追玩家，装甲/工兵直冲基地，快速游走
+    // —— v0.2.7 双人：目标锁定最近存活玩家 ——
     const tgt = enemyTarget(e);
-    if (tgt === 'player' && player && !player.dead) e.dir = dirFromVec(player.x - e.x, player.y - e.y);
+    if (tgt === 'player') { const tp = nearestPlayerTo(e.x, e.y); if (tp) e.dir = dirFromVec(tp.x - e.x, tp.y - e.y); }
     else if (tgt === 'base' && baseAlive) e.dir = dirFromVec(BASE.x * TILE - e.x, BASE.y * TILE - e.y);
 
     if (!moveTank(e, k)) {
@@ -2986,8 +3463,9 @@
 
   // —— 狙击兵：保持中距离压制，慢速精准弹，可走位躲避 ——
   function updateSniper(e, k) {
-    if (player && !player.dead) {
-      const dx = player.x - e.x, dy = player.y - e.y;
+    const tp = nearestPlayerTo(e.x, e.y);
+    if (tp) {
+      const dx = tp.x - e.x, dy = tp.y - e.y;
       const dist = Math.hypot(dx, dy);
       let moveDir = null;
       if (dist > 11 * TILE) moveDir = dirFromVec(dx, dy);          // 太远：靠近
@@ -3009,7 +3487,8 @@
   // —— 自爆兵：全速冲向玩家（无则基地），近身引爆 ——
   function updateSuicide(e, k) {
     let tx = BASE.x * TILE, ty = BASE.y * TILE;
-    if (player && !player.dead) { tx = player.x; ty = player.y; }
+    const tp = nearestPlayerTo(e.x, e.y);
+    if (tp) { tx = tp.x; ty = tp.y; }
     e.dir = dirFromVec(tx - e.x, ty - e.y);
     if (!moveTank(e, k)) e.dir = pickFreeDir(e, 0.9);
     const dist = Math.hypot(tx - e.x, ty - e.y);
@@ -3019,10 +3498,12 @@
     const cx = e.x + TANK_SIZE / 2, cy = e.y + TANK_SIZE / 2;
     spawnParticles(cx, cy, '#ff6b35', 26);
     sfxBoom(); shake = Math.max(shake, 8); vibe(30);
-    // 近身伤害玩家（护盾/无敌期间免疫）
-    if (player && !player.dead && !(player.spawnInv > 0)) {
-      const d = Math.hypot(player.x + TANK_SIZE / 2 - cx, player.y + TANK_SIZE / 2 - cy);
-      if (d < 2.2 * TILE) killPlayer();
+    // 近身伤害玩家（护盾/无敌期间免疫）—— v0.2.7 双人：检测 P1/P2
+    for (const p of [player, player2]) {
+      if (p && !p.dead && !(p.spawnInv > 0)) {
+        const d = Math.hypot(p.x + TANK_SIZE / 2 - cx, p.y + TANK_SIZE / 2 - cy);
+        if (d < 2.2 * TILE) killPlayer(p);
+      }
     }
   }
 
@@ -3072,11 +3553,12 @@
       if (e.chargeT <= 0) { e.state = 'charge'; e.chargeT = 26; }
       return;
     }
-    // 追踪玩家
-    if (player && !player.dead) {
+    // 追踪玩家（v0.2.7 双人：锁定最近玩家）
+    const tp = nearestPlayerTo(e.x, e.y);
+    if (tp) {
       e.dir = dirFromVec(
-        (player.x + TANK_SIZE / 2) - (e.x + e.size / 2),
-        (player.y + TANK_SIZE / 2) - (e.y + e.size / 2));
+        (tp.x + TANK_SIZE / 2) - (e.x + e.size / 2),
+        (tp.y + TANK_SIZE / 2) - (e.y + e.size / 2));
     }
     e.speed = e.phase >= 1 ? bossType.speed * 1.4 : bossType.speed;   // 类型基准速度 × 狂暴加速
     if (!moveTank(e, k)) e.dir = pickFreeDir(e);
@@ -3099,9 +3581,9 @@
     if (!free.length) return randInt(0, 7);
     // 被挡住转向时：按 chase 概率优先朝目标（玩家 / 基地）走，其余随机游走
     if (chase && rng() < chase) {
-      const goPlayer = player && !player.dead && e.type !== 'fast';
-      const tx = goPlayer ? player.x : BASE.x * TILE;
-      const ty = goPlayer ? player.y : BASE.y * TILE;
+      const tp = (e.type !== 'fast') ? nearestPlayerTo(e.x, e.y) : null;
+      const tx = tp ? tp.x : BASE.x * TILE;
+      const ty = tp ? tp.y : BASE.y * TILE;
       const want = dirFromVec(tx - e.x, ty - e.y);
       // 期望方向不可走时，退而求其次：先两侧 45°，再对称方向
       const prefs = [want, (want + 1) % 8, (want + 7) % 8, (want + 2) % 8, (want + 6) % 8];
@@ -3111,8 +3593,22 @@
     return free[randInt(0, free.length - 1)];
   }
 
+  // —— v0.2.7 双人同屏：返回距 (x,y) 最近的存活玩家（合作模式敌人目标锁定用） ——
+  function nearestPlayerTo(x, y) {
+    let best = null, bd = 1e18;
+    for (const p of [player, player2]) {
+      if (!p || p.dead) continue;
+      const d = (p.x - x) * (p.x - x) + (p.y - y) * (p.y - y);
+      if (d < bd) { bd = d; best = p; }
+    }
+    return best;
+  }
+
   function tankHitsTank(nx, ny, size, self) {
-    const tanks = self.isPlayer ? enemies : enemies.concat(player && !player.dead ? [player] : []);
+    const others = [];
+    if (player && player !== self && !player.dead) others.push(player);
+    if (player2 && player2 !== self && !player2.dead) others.push(player2);   // v0.2.7 双人：坦克互撞
+    const tanks = self.isPlayer ? enemies.concat(others) : enemies.concat(others);
     for (const t of tanks) {
       if (t === self || t.dead) continue;
       if (nx < t.x + t.size && nx + size > t.x && ny < t.y + t.size && ny + size > t.y) return true;
@@ -3178,9 +3674,22 @@
             return;
           }
         }
-      } else if (player && !player.dead && !(player.spawnInv > 0)) {
-        if (cx >= player.x && cx <= player.x + TANK_SIZE && cy >= player.y && cy <= player.y + TANK_SIZE) {
-          b.dead = true; killPlayer(); return;
+        // —— v0.2.7 对抗模式：玩家弹命中对方玩家 ——
+        if (multiMode === 2) {
+          const foe = b.owner === player ? player2 : player;
+          if (foe && !foe.dead && !(foe.spawnInv > 0)) {
+            if (cx >= foe.x && cx <= foe.x + TANK_SIZE && cy >= foe.y && cy <= foe.y + TANK_SIZE) {
+              b.dead = true; killPlayer(foe); return;
+            }
+          }
+        }
+      } else {
+        // 敌方弹命中任一存活玩家（v0.2.7 双人：P1/P2 皆可被击中）
+        for (const p of [player, player2]) {
+          if (!p || p.dead || p.spawnInv > 0) continue;
+          if (cx >= p.x && cx <= p.x + TANK_SIZE && cy >= p.y && cy <= p.y + TANK_SIZE) {
+            b.dead = true; killPlayer(p); return;
+          }
         }
       }
       // 子弹互撞（玩家弹拦截 Boss 弹有反馈）
@@ -3199,12 +3708,20 @@
   function updatePlayer(k) {
     if (!player || player.dead) return;
     if (player.cooldown > 0) player.cooldown -= k;
+    if (player.ultCd > 0) { player.ultCd -= k; if (player.ultCd <= 0) updateUltHud(); }
     // 双轴独立读取：斜向键组合（如 W+D / 摇杆斜推）即走对角线
+    // —— v0.2.7 双人同屏：P1 用 WASD（双人模式方向键让给 P2）；单人保留方向键兼容 ——
     let mx = 0, my = 0;
-    if (keys['ArrowUp'] || keys['w'] || keys['W']) my -= 1;
-    if (keys['ArrowDown'] || keys['s'] || keys['S']) my += 1;
-    if (keys['ArrowLeft'] || keys['a'] || keys['A']) mx -= 1;
-    if (keys['ArrowRight'] || keys['d'] || keys['D']) mx += 1;
+    if (keys['w'] || keys['W']) my -= 1;
+    if (keys['s'] || keys['S']) my += 1;
+    if (keys['a'] || keys['A']) mx -= 1;
+    if (keys['d'] || keys['D']) mx += 1;
+    if (!multiMode) {
+      if (keys['ArrowUp']) my -= 1;
+      if (keys['ArrowDown']) my += 1;
+      if (keys['ArrowLeft']) mx -= 1;
+      if (keys['ArrowRight']) mx += 1;
+    }
 
     if (mx !== 0 || my !== 0) {
       player.dir = dirFromVec(mx, my);
@@ -3224,33 +3741,132 @@
     checkPortal(player);
   }
 
+  // ===== v0.2.7 近战大招（E 键）：冷却 + 近战 AOE =====
+  function tryUltimate() {
+    if (!running || paused || gameOver || !player || player.dead) return;
+    if (player.ultCd > 0) return;
+    player.ultCd = ULT_CD;
+    const cx = player.x + TANK_SIZE / 2, cy = player.y + TANK_SIZE / 2;
+    const R = ULT_RADIUS * TILE;
+    ultFlash = 0.4;
+    ultWaves.push({ x: cx, y: cy, r: 0, maxR: R, alpha: 0.9 });
+    hitStop = Math.max(hitStop, 0.07);
+    shake = Math.max(shake, 12);
+    whiteFlash = Math.max(whiteFlash, 0.22);
+    sfxUltimate();
+    vibe([80, 40, 80]);
+    // 近战伤害：半径内敌人高伤 + 击退（Boss 减半伤害、免疫击退）
+    for (const e of enemies) {
+      if (e.dead || (e.isBoss && e.enterT > 0)) continue;
+      const ecx = e.x + e.size / 2, ecy = e.y + e.size / 2;
+      const d = Math.hypot(ecx - cx, ecy - cy);
+      if (d <= R + e.size / 2) {
+        const dmg = e.isBoss ? Math.ceil(ULT_DMG / 2) : ULT_DMG;
+        e.hp -= dmg; e.hitFlash = 6;
+        if (!e.isBoss && d > 0.001) { e.kbx = (ecx - cx) / d; e.kby = (ecy - cy) / d; e.kbt = 10; }
+        spawnParticles(ecx, ecy, '#00e5ff', 6);
+        if (e.hp <= 0) { e.dead = true; onEnemyKilled(e); }
+        else sfxHit();
+      }
+    }
+    // 近战摧毁：半径内砖墙与油桶（damageTile 会引爆油桶并连锁）
+    for (let gx = 0; gx < COLS; gx++) {
+      for (let gy = 0; gy < ROWS; gy++) {
+        const tcx = gx * TILE + TILE / 2, tcy = gy * TILE + TILE / 2;
+        if (Math.hypot(tcx - cx, tcy - cy) <= R) damageTile(tcx, tcy);
+      }
+    }
+    spawnParticles(cx, cy, '#fff', 14);
+    spawnParticles(cx, cy, '#00e5ff', 20);
+    updateUltHud();
+  }
+
+  // 大招冷却 HUD：冷却时置灰显示倒计时秒，可用时高亮呼吸
+  function updateUltHud() {
+    const btn = document.getElementById('tUlt'), cd = document.getElementById('ultCd');
+    if (!btn || !cd) return;
+    if (player && player.ultCd > 0) {
+      btn.classList.add('cooling'); btn.classList.remove('ready');
+      cd.textContent = Math.ceil(player.ultCd);
+    } else {
+      btn.classList.remove('cooling'); btn.classList.add('ready');
+      cd.textContent = '';
+    }
+  }
+
   function clampPlayer() {
     player.x = clamp(player.x, TILE, W - TILE - TANK_SIZE);
     player.y = clamp(player.y, TILE, H - TILE - TANK_SIZE);
   }
 
-  function killPlayer() {
-    if (!player || player.dead) return;
-    player.dead = true;
+  // —— v0.2.7 双人同屏 P2：方向键走位 + Enter/./Numpad0 开火 ——
+  function updatePlayer2(k) {
+    if (!multiMode || !player2 || player2.dead) return;
+    if (player2.cooldown > 0) player2.cooldown -= k;
+    if (player2.ultCd > 0) player2.ultCd -= k;
+    let mx = 0, my = 0;
+    if (keys['ArrowUp']) my -= 1;
+    if (keys['ArrowDown']) my += 1;
+    if (keys['ArrowLeft']) mx -= 1;
+    if (keys['ArrowRight']) mx += 1;
+    if (mx !== 0 || my !== 0) {
+      player2.dir = dirFromVec(mx, my);
+      const spd = player2.speed * (1 + 0.15 * (upgrades.speed || 0)) * (1 + 0.05 * (bonus.spd || 0));
+      const step = spd * k * ((mx !== 0 && my !== 0) ? Math.SQRT1_2 : 1);
+      const nx = player2.x + mx * step;
+      const ny = player2.y + my * step;
+      if (mx !== 0 && !isBlocked(nx, player2.y, TANK_SIZE) && !tankHitsTank(nx, player2.y, TANK_SIZE, player2))
+        player2.x = nx;
+      if (my !== 0 && !isBlocked(player2.x, ny, TANK_SIZE) && !tankHitsTank(player2.x, ny, TANK_SIZE, player2))
+        player2.y = ny;
+      clampPlayer2();
+    }
+    if (keys['Enter'] || keys['n'] || keys['N'] || keys['.'] || keys['Numpad0'] || keys['NumPad0']) fire(player2);
+    if (player2.portalCd > 0) player2.portalCd -= k;
+    checkPortal(player2);
+  }
+  function clampPlayer2() {
+    player2.x = clamp(player2.x, TILE, W - TILE - TANK_SIZE);
+    player2.y = clamp(player2.y, TILE, H - TILE - TANK_SIZE);
+  }
+
+  // —— v0.2.7 双人同屏：参数化击杀（p 缺省为 P1） ——
+  function killPlayer(p) {
+    p = p || player;
+    if (!p || p.dead) return;
+    const isP2 = p === player2;
+    p.dead = true;
     stat.deaths++;
     tookHitThisLevel = true;
     sfxBoom();
     hurtFlash = 1;
     vibe([70, 40, 70]);
-    spawnParticles(player.x + TANK_SIZE / 2, player.y + TANK_SIZE / 2, player.color, 18);
+    spawnParticles(p.x + TANK_SIZE / 2, p.y + TANK_SIZE / 2, p.color, 18);
     shake = 10;
-    lives--;
+    if (isP2) lives2--; else lives--;
     updateHud();
     setTimeout(() => {
       if (!running || gameOver) return;
-      if (player && !player.dead) return;  // 已重生
-      if (lives > 0) {
-        player = makePlayer();
-        player.spawnInv = 120;
-        updateHud();
-      } else {
-        endGame(false);
+      if (p && !p.dead) return;  // 已重生
+      const left = isP2 ? lives2 : lives;
+      if (multiMode === 2) {
+        // 对抗：任一玩家命尽即分出胜负
+        if (left <= 0) { endGame(isP2 ? false : true); return; }
+      } else if (left <= 0) {
+        if (multiMode === 1) {
+          // 合作：任一玩家命尽 → 整体失败
+          endGame(false); return;
+        }
+        endGame(false); return;
       }
+      if (isP2) {
+        player2 = makePlayer(COLS - 2, 1, '#E63946');
+        player2.spawnInv = 120;
+      } else {
+        player = makePlayer(SPAWN.x, SPAWN.y, '#002FA7');
+        player.spawnInv = 120;
+      }
+      updateHud();
     }, 700);
   }
 
@@ -3263,6 +3879,8 @@
     // 金运永久加成 +15%/级；金运强化 +30%/层
     const gain = Math.max(1, Math.round(n * (1 + 0.15 * (bonus.coinup || 0)) * (1 + 0.3 * (upgrades.fortune || 0))));
     coins += gain; saveCoins(); updateCoinHud();
+    // —— v0.2.7 生涯统计：累计获得金币（recordGame 统一持久化） ——
+    career.totalCoins += gain;
     // —— v0.2.4 成就：金库余额达 3000 ——
     if (coins >= 3000) unlockAch('rich');
     if (x !== undefined && y !== undefined) addText(x, y, '+' + gain + '🪙', '#ffd700');
@@ -3507,7 +4125,13 @@
     const stars = lvResult.querySelectorAll('.lvStars span');
     stars.forEach((s, i) => { s.classList.remove('on'); void s.offsetWidth; if (i < lvStarsNow) s.classList.add('on'); });
     // 记录最佳星级 + 解锁下一关
-    if (lvStarsNow > (levelStars[level] || 0)) { levelStars[level] = lvStarsNow; saveStars(); }
+    if (lvStarsNow > (levelStars[level] || 0)) {
+      // —— v0.2.7 生涯统计：仅累计本次新增星数 ——
+      career.totalStars += (lvStarsNow - (levelStars[level] || 0));
+      levelStars[level] = lvStarsNow; saveStars();
+      // —— v0.2.7 摘星大师：累计 20 星 ——
+      if (career.totalStars >= 20) unlockAch('star20');
+    }
     if (maxUnlocked < level + 1) { maxUnlocked = level + 1; saveMaxLv(); }
     lvResultPending = true;
     lvResult.classList.add('show');
@@ -3563,6 +4187,7 @@
     // —— v0.2.6 无尽模式：敌人数量随波次递增（封顶 2.5x） ——
     const emCount = endlessMode ? Math.min(2.5, 1 + level * 0.05) : 1;
     enemiesTotal = bossLevel ? 1 : Math.round((6 + level * 2) * (dailyMods.surge ? 1.3 : 1) * emCount);
+    if (multiMode === 2) enemiesTotal = 0;   // —— v0.2.7 对抗模式：无敌人，纯 PvP ——
     // 单波洪流：所有敌人一波刷完，不再分拨分批
     wavesTotal = 1;
     wave = 1; waveSpawned = 0; waveGapT = 0;
@@ -3584,6 +4209,13 @@
       player.dir = DIR.UP;
       // 开局护盾强化：每关开场 3 秒护盾
       if (upgrades.shield > 0) player.spawnInv = Math.max(player.spawnInv || 0, 180);
+    }
+    // —— v0.2.7 双人同屏：P2 换关归位右上出生点 ——
+    if (player2) {
+      player2.x = (COLS - 2) * TILE + (TILE - TANK_SIZE) / 2;
+      player2.y = 1 * TILE + (TILE - TANK_SIZE) / 2;
+      player2.dir = DIR.UP;
+      if (upgrades.shield > 0) player2.spawnInv = Math.max(player2.spawnInv || 0, 180);
     }
     lastLives = -1; lastCombo = -1;
     updateHud();
@@ -3707,7 +4339,15 @@
     if (whiteFlash > 0) whiteFlash = Math.max(0, whiteFlash - dt * 1.7);
     if (bossHitFlash > 0) bossHitFlash = Math.max(0, bossHitFlash - dt);
 
+    // v0.2.7 近战大招特效衰减（白闪 + 冲击波扩散）
+    if (ultFlash > 0) ultFlash -= dt;
+    if (ultWaves.length) {
+      for (const w of ultWaves) { w.r += w.maxR * 4 * dt; w.alpha -= 3 * dt; }
+      ultWaves = ultWaves.filter(w => w.alpha > 0);
+    }
+
     updatePlayer(k);
+    if (multiMode) updatePlayer2(k);   // —— v0.2.7 双人同屏 P2 ——
     enemies.forEach(e => { if (e.portalCd > 0) e.portalCd -= k; updateEnemy(e, k); checkPortal(e); });
     bullets.forEach(b => updateBullet(b, k));
     updateLasers(k);        // —— v0.2.5 猎手激光扫射 ——
@@ -3718,18 +4358,19 @@
 
     updateSpawning(k);
 
-    // 玩家与敌人碰撞
-    if (player && !player.dead) {
+    // 玩家与敌人碰撞（v0.2.7 双人：P1/P2 各自推开）
+    for (const p of [player, player2]) {
+      if (!p || p.dead) continue;
       for (const e of enemies) {
         if (e.dead) continue;
         const r = TANK_SIZE - 1;
-        if (player.x < e.x + e.size - 1 && player.x + r > e.x && player.y < e.y + e.size - 1 && player.y + r > e.y) {
-          const dx = player.x - e.x, dy = player.y - e.y;
+        if (p.x < e.x + e.size - 1 && p.x + r > e.x && p.y < e.y + e.size - 1 && p.y + r > e.y) {
+          const dx = p.x - e.x, dy = p.y - e.y;
           const len = Math.hypot(dx, dy) || 1;
           const push = 0.5 * k;
-          player.x += dx / len * push; player.y += dy / len * push;
+          p.x += dx / len * push; p.y += dy / len * push;
           e.x -= dx / len * push; e.y -= dy / len * push;
-          clampPlayer();
+          if (p === player) clampPlayer(); else clampPlayer2();
           e.changeTimer = Math.min(e.changeTimer, 10);
         }
       }
@@ -3738,7 +4379,8 @@
     if (!baseAlive) { endGame(false); return; }
 
     // 敌人全灭 → 过关奖励 + 关卡过渡（成就判定；Boss 需等死亡演出结束；强化面板弹出时不再重复触发）
-    if (running && !upgradeOpen && enemies.length === 0 && enemiesSpawned >= enemiesTotal && bossDeathT <= 0) {
+    // —— v0.2.7 对抗模式：无敌人，跳过过关判定 ——
+    if (multiMode !== 2 && running && !upgradeOpen && enemies.length === 0 && enemiesSpawned >= enemiesTotal && bossDeathT <= 0) {
       const bonus = 1000 + level * 200;
       score += bonus;
       addText(W / 2, H / 2 - 30, '+' + bonus, '#39ff14');
@@ -3800,6 +4442,21 @@
       const slots = Math.max(3, lives);
       for (let i = 0; i < slots; i++) html += `<span class="${i < lives ? '' : 'off'}">▲</span>`;
       elLives.innerHTML = html;
+    }
+    // —— v0.2.7 双人同屏：P2 生命 HUD ——
+    if (elLives2) {
+      if (multiMode > 0) {
+        elLives2.style.display = 'flex';
+        if (lives2 !== lastLives2) {
+          lastLives2 = lives2;
+          let h = '';
+          const s2 = Math.max(3, lives2);
+          for (let i = 0; i < s2; i++) h += `<span class="${i < lives2 ? '' : 'off'}">▲</span>`;
+          elLives2.innerHTML = h;
+        }
+      } else {
+        elLives2.style.display = 'none';
+      }
     }
     if (combo !== lastCombo) {
       lastCombo = combo;
@@ -3980,15 +4637,31 @@
     // 敌人
     for (const e of enemies) drawTank(e);
 
-    // 玩家（无敌闪烁）
-    if (player && !player.dead) {
-      if (player.spawnInv > 0 && Math.floor(player.spawnInv / 4) % 2 === 0) {
+    // 玩家（无敌闪烁）—— v0.2.7 双人：P1/P2 同屏渲染
+    for (const p of [player, player2]) {
+      if (!p || p.dead) continue;
+      if (p.spawnInv > 0 && Math.floor(p.spawnInv / 4) % 2 === 0) {
         // 闪烁隐藏
-      } else drawTank(player);
+      } else drawTank(p);
     }
 
     // —— v0.2.5 猎手激光扫射（覆盖在坦克之上） ——
     drawLasers();
+
+    // v0.2.7 近战大招冲击波扩散环（青色主环 + 白色内环）
+    for (const w of ultWaves) {
+      const a = Math.max(0, w.alpha);
+      ctx.beginPath();
+      ctx.arc(w.x, w.y, w.r, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(0, 229, 255,' + a.toFixed(2) + ')';
+      ctx.lineWidth = 5;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(w.x, w.y, w.r * 0.72, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255,255,255,' + (a * 0.6).toFixed(2) + ')';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
 
     // 草丛（覆盖上层）
     for (let y = 0; y < ROWS; y++)
@@ -4851,6 +5524,8 @@
     dailyMode = mode === 'daily';
     timedMode = mode === 'timed';
     endlessMode = mode === 'endless';   // —— v0.2.6 无尽/生存模式 ——
+    customMode = mode === 'custom';     // —— v0.2.7 自制关卡 ——
+    multiMode = mode === 'coop' ? 1 : (mode === 'versus' ? 2 : 0);   // —— v0.2.7 双人同屏 ——
     // —— v0.2.6 关卡选择：支持从指定关卡开局 ——
     level = 1;
     if (startLv && startLv > 1) level = Math.min(startLv | 0, 999);
@@ -4882,13 +5557,24 @@
     }
     gameOver = false; paused = false; won = false;
     bestAtStart = best;
-    lastLives = -1; lastCombo = -1;
+    lastLives = -1; lastCombo = -1; lastLives2 = -1;
     hurtFlash = 0; hitStop = 0; bossWarn = 0;
     resetStat();
     achNew = [];
-    player = makePlayer();
+    ultWaves = []; ultFlash = 0;      // v0.2.7 近战大招特效清理
+    player = makePlayer(SPAWN.x, SPAWN.y, '#002FA7');
     // 常备护盾：每关开场 2 秒护盾（120 帧 ≈ 2 秒）
     player.spawnInv = bonus.shield > 0 ? 120 : 0;
+    // —— v0.2.7 双人同屏：P2 出生右上角（对抗/合作） ——
+    if (multiMode > 0) {
+      player2 = makePlayer(COLS - 2, 1, '#E63946');
+      player2.spawnInv = bonus.shield > 0 ? 120 : 0;
+      lives2 = 3 + (bonus.lifeup || 0);
+    } else {
+      player2 = null;
+      lives2 = 3;
+    }
+    updateUltHud();                    // v0.2.7 初始化大招按钮状态
     startLevel();
     running = true;
     hideOverlay();
@@ -4900,6 +5586,9 @@
     if (dailyMode) introTxt = '每日挑战';
     else if (timedMode) introTxt = '⏱ 限时冲分';
     else if (endlessMode) introTxt = '🌊 无尽模式';
+    else if (customMode) introTxt = '🛠 自制关卡';
+    else if (multiMode === 1) introTxt = '👥 双人合作';
+    else if (multiMode === 2) introTxt = '⚔ 双人对抗';
     showLevelIntro(introTxt);
     updateTimerHud();
     if (dailyMode) {
@@ -4940,6 +5629,10 @@
     if (coins >= 3000) unlockAch('rich');
     // —— v0.2.5 战绩档案：一局结束累计生涯 + 更新排行榜 ——
     recordGame(win);
+    // —— v0.2.7 每周挑战：刷新本周最佳 ——
+    updateWeek(score);
+    // —— v0.2.7 生涯累计成就（依赖 recordGame 已更新 career） ——
+    checkCareerAch();
     // —— v0.2.6 战绩图：捕获本局快照（供战绩档案「生成战绩图」复用） ——
     lastRun = {
       score: score, level: level,
@@ -5424,14 +6117,27 @@
     const got = achUnlocked.size;
     if (achCount) achCount.textContent = got + '/' + ACHIEVE.length;
     achBody.innerHTML = '';
-    for (const a of ACHIEVE) {
-      const on = achUnlocked.has(a.id);
-      const row = document.createElement('div');
-      row.className = 'achItem' + (on ? '' : ' locked');
-      row.innerHTML = '<span class="aIcon">' + a.icon + '</span>' +
-        '<span class="aInfo"><span class="aName">' + a.name + '</span><span class="aDesc">' + a.desc + '</span></span>' +
-        '<span class="aState">' + (on ? '已解锁' : ('+' + a.reward + '🪙')) + '</span>';
-      achBody.appendChild(row);
+    // —— v0.2.7 分组进度条：按组渲染，组头显示进度 ——
+    for (const g of ACH_GROUPS) {
+      const list = ACHIEVE.filter(a => (ACH_GROUP[a.id] || 'depth') === g.id);
+      if (!list.length) continue;
+      const done = list.filter(a => achUnlocked.has(a.id)).length;
+      const pct = Math.round(done / list.length * 100);
+      const head = document.createElement('div');
+      head.className = 'achGroup';
+      head.innerHTML = '<div class="agLbl"><span class="agName">' + g.name + '</span>' +
+        '<span class="agPct">' + done + '/' + list.length + '</span></div>' +
+        '<div class="agTrack"><div class="agFill" style="width:' + pct + '%"></div></div>';
+      achBody.appendChild(head);
+      for (const a of list) {
+        const on = achUnlocked.has(a.id);
+        const row = document.createElement('div');
+        row.className = 'achItem' + (on ? '' : ' locked');
+        row.innerHTML = '<span class="aIcon">' + a.icon + '</span>' +
+          '<span class="aInfo"><span class="aName">' + a.name + '</span><span class="aDesc">' + a.desc + '</span></span>' +
+          '<span class="aState">' + (on ? '已解锁' : ('+' + a.reward + '🪙')) + '</span>';
+        achBody.appendChild(row);
+      }
     }
   }
   function closeAch() { if (achBox) achBox.classList.remove('show'); }
@@ -5444,7 +6150,45 @@
     const h = Math.floor(m / 60), mm = m % 60;
     return h + ' 小时' + (mm ? ' ' + mm + ' 分' : '');
   };
-  const MODE_NAME = { normal: '标准', daily: '每日', timed: '限时' };
+  const MODE_NAME = { normal: '标准', daily: '每日', timed: '限时', endless: '无尽' };
+  // —— v0.2.7 每周挑战：ISO 周序号 + 目标 + 状态 ——
+  const weekISO = () => {
+    const d = new Date();
+    const day = (d.getDay() + 6) % 7;               // 周一=0
+    d.setDate(d.getDate() - day + 3);               // 移到本周四
+    const y = d.getFullYear(), m = d.getMonth() + 1, dd = d.getDate();
+    const t = new Date(y, m - 1, dd);
+    const n = new Date(t.getTime() - 864e5 * 4);    // 上一年的周四基准
+    const w = Math.round((t - n) / 864e5 / 7) + 1;
+    return y + '-W' + (w < 10 ? '0' + w : w);
+  };
+  const WEEK_GOAL = () => 500 + (parseInt(weekISO().slice(-2), 10) % 10) * 60;   // 目标随周数波动 500~1040
+  const LS_WEEK = 'tank-battle-week';
+  let weekState = { wk: '', best: 0, claimed: false };
+  try {
+    const w = JSON.parse(localStorage.getItem(LS_WEEK) || '{}');
+    if (w && typeof w === 'object' && w.wk === weekISO()) {
+      weekState.best = Math.max(0, parseInt(w.best, 10) || 0);
+      weekState.claimed = !!w.claimed;
+    }
+    weekState.wk = weekISO();
+  } catch (e) { /* 忽略 */ }
+  function saveWeek() { try { localStorage.setItem(LS_WEEK, JSON.stringify(weekState)); } catch (e) {} }
+  // 一局结束：刷新本周最佳
+  function updateWeek(score) {
+    const wk = weekISO();
+    if (weekState.wk !== wk) { weekState = { wk: wk, best: 0, claimed: false }; }
+    if (score > weekState.best) weekState.best = score;
+    saveWeek();
+  }
+  const weekDone = () => weekState.best >= WEEK_GOAL();
+  // 领取周挑战奖励（达标且未领）
+  function claimWeek() {
+    if (!weekDone() || weekState.claimed) return 0;
+    weekState.claimed = true; saveWeek();
+    showToast('📅 周挑战达成 +150🪙');
+    return addGold(150);
+  }
   function openCareer() {
     if (!carBox || !carBody) return;
     carBox.classList.add('show');
@@ -5456,18 +6200,52 @@
       '<div class="carStat"><b>' + career.kills + '</b><span>总击杀</span></div>' +
       '<div class="carStat"><b>' + fmtPlay(career.playSec) + '</b><span>总时长</span></div>' +
       '</div>');
+    // —— v0.2.7 生涯深度：金币/星/Boss 击杀/死亡/命中/胜率 ——
+    const acc = (career.shots > 0) ? Math.round(career.hits / career.shots * 100) : 0;
+    const wr = (career.games > 0) ? Math.round(career.wins / career.games * 100) : 0;
+    rows.push('<div class="carSec">生涯深度</div><div class="carGrid">' +
+      '<div class="carStat"><b>' + career.totalCoins + '</b><span>累计金币</span></div>' +
+      '<div class="carStat"><b>' + career.totalStars + '</b><span>累计星数</span></div>' +
+      '<div class="carStat"><b>' + career.bossKills + '</b><span>Boss 击杀</span></div>' +
+      '<div class="carStat"><b>' + career.deaths + '</b><span>阵亡次数</span></div>' +
+      '<div class="carStat"><b>' + acc + '%</b><span>总命中率</span></div>' +
+      '<div class="carStat"><b>' + wr + '%</b><span>胜率</span></div>' +
+      '</div>');
     // 各模式最佳
     rows.push('<div class="carSec">各模式最佳</div><div class="carGrid">' +
       '<div class="carStat"><b>' + career.bestScore + '</b><span>最高分</span></div>' +
       '<div class="carStat"><b>' + career.bestDaily + '</b><span>每日挑战</span></div>' +
       '<div class="carStat"><b>' + career.bestHard + '</b><span>硬核难度</span></div>' +
+      '<div class="carStat"><b>' + career.bestEndless + '</b><span>无尽波次</span></div>' +
       '</div>');
-    // 本地排行榜
+    // —— v0.2.7 模式场次分布 ——
+    const mg = career.modeGames;
+    rows.push('<div class="carSec">模式场次</div><div class="carGrid">' +
+      '<div class="carStat"><b>' + mg.normal + '</b><span>标准</span></div>' +
+      '<div class="carStat"><b>' + mg.daily + '</b><span>每日</span></div>' +
+      '<div class="carStat"><b>' + mg.timed + '</b><span>限时</span></div>' +
+      '<div class="carStat"><b>' + mg.endless + '</b><span>无尽</span></div>' +
+      '<div class="carStat"><b>' + mg.hard + '</b><span>硬核</span></div>' +
+      '</div>');
+    // —— v0.2.7 每周挑战词条 ——
+    const goal = WEEK_GOAL();
+    const done = weekDone();
+    const canClaim = done && !weekState.claimed;
+    rows.push('<div class="wkCard' + (done ? ' done' : '') + '">' +
+      '<div class="wkIcon">📅</div>' +
+      '<div class="wkInfo"><div class="wkName">本周挑战 · 单局 ' + goal + ' 分</div>' +
+      '<div class="wkMeta">本周最佳 <b>' + weekState.best + '</b> / ' + goal + ' · ' + weekISO() + '</div></div>' +
+      '<button class="wkBtn" data-wk="claim"' + (canClaim ? '' : ' disabled') + '>' +
+      (canClaim ? '领取 +150🪙' : (done ? '已达成' : '进行中')) + '</button></div>');
+    // 本地排行榜 · 分榜 Tab
     rows.push('<div class="carSec">本地排行榜 · 前十</div>');
-    if (!board.length) {
+    rows.push('<div class="boardTabs">' + BOARD_TABS.map(t =>
+      '<button class="btab' + (boardTab === t.id ? ' on' : '') + '" data-tab="' + t.id + '">' + t.name + '</button>').join('') + '</div>');
+    const list = boardTab === 'all' ? board : board.filter(b => b.mode === boardTab);
+    if (!list.length) {
       rows.push('<div class="carEmpty">暂无记录 · 打一局上榜吧</div>');
     } else {
-      board.forEach((b, i) => {
+      list.forEach((b, i) => {
         const top = i < 3 ? ' top' + (i + 1) : '';
         const d = new Date(b.date);
         const ds = (d.getMonth() + 1) + '/' + d.getDate();
@@ -5480,6 +6258,71 @@
     carBody.innerHTML = rows.join('');
   }
   function closeCareer() { if (carBox) carBox.classList.remove('show'); }
+
+  // ===== v0.2.7 生涯报告页 =====
+  const rankTitle = () => {
+    const p = career.kills + career.totalCoins / 10 + career.games * 20;
+    if (p >= 4000) return '战车元帅';
+    if (p >= 2000) return '王牌指挥官';
+    if (p >= 1000) return '精英战将';
+    if (p >= 400) return '钢铁老兵';
+    if (p >= 100) return '冲锋新锐';
+    return '新兵入伍';
+  };
+  function openCareerRep() {
+    if (!carRepBox || !repBody) return;
+    carRepBox.classList.add('show');
+    const acc = (career.shots > 0) ? Math.round(career.hits / career.shots * 100) : 0;
+    const wr = (career.games > 0) ? Math.round(career.wins / career.games * 100) : 0;
+    const mg = career.modeGames;
+    const modeTotal = mg.normal + mg.daily + mg.timed + mg.endless + mg.hard || 1;
+    const mkBar = (label, val, max) => {
+      const pct = max > 0 ? Math.min(100, Math.round(val / max * 100)) : 0;
+      return '<div class="repBar"><div class="rbLbl"><span>' + label + '</span><span>' + val + '</span></div>' +
+        '<div class="rbTrack"><div class="rbFill" style="width:' + pct + '%"></div></div></div>';
+    };
+    const mkStat = (v, l) => '<div class="repStat"><b>' + v + '</b><span>' + l + '</span></div>';
+    // Hero
+    const hero = '<div class="repHero">' +
+      '<div class="repBadge">🛡️</div>' +
+      '<div><div class="repHeroName">' + rankTitle() + '</div>' +
+      '<div class="repHeroMeta">累计 ' + fmtPlay(career.playSec) + ' · 共 ' + career.games + ' 局 · ' + achUnlocked.size + '/' + ACHIEVE.length + ' 成就</div></div>' +
+      '</div>';
+    // 总览
+    let html = hero;
+    html += '<div class="repSec">生涯总览</div><div class="repGrid">' +
+      mkStat(career.games, '总场次') + mkStat(career.kills, '总击杀') +
+      mkStat(career.bossKills, 'Boss 击杀') + mkStat(career.deaths, '阵亡') +
+      mkStat(acc + '%', '命中率') + mkStat(wr + '%', '胜率') +
+      '</div>';
+    html += '<div class="repSec">财富与进度</div><div class="repGrid">' +
+      mkStat(career.totalCoins, '累计金币') + mkStat(career.totalStars, '累计星数') +
+      mkStat(career.bestEndless, '无尽波次') +
+      '</div>';
+    // 模式场次进度条
+    html += '<div class="repSec">模式场次分布</div>';
+    html += mkBar('标准', mg.normal, modeTotal) + mkBar('每日', mg.daily, modeTotal) +
+      mkBar('限时', mg.timed, modeTotal) + mkBar('无尽', mg.endless, modeTotal) +
+      mkBar('硬核', mg.hard, modeTotal);
+    // 各模式最佳
+    html += '<div class="repSec">各模式最佳</div><div class="repGrid">' +
+      mkStat(career.bestScore, '最高分') + mkStat(career.bestDaily, '每日') +
+      mkStat(career.bestTimed, '限时') + mkStat(career.bestHard, '硬核') +
+      '</div>';
+    // 最近解锁成就
+    const recent = [...achUnlocked].slice(-3).reverse();
+    if (recent.length) {
+      html += '<div class="repSec">最近解锁成就</div>';
+      recent.forEach(id => {
+        const a = ACHIEVE.find(x => x.id === id);
+        if (a) html += '<div class="repAchRow done"><span class="raIcon">' + a.icon + '</span>' +
+          '<div class="raInfo"><div class="raName">' + a.name + '</div><div class="raDesc">' + a.desc + '</div></div>' +
+          '<span class="raState">已解锁</span></div>';
+      });
+    }
+    repBody.innerHTML = html;
+  }
+  function closeCareerRep() { if (carRepBox) carRepBox.classList.remove('show'); }
 
   // ===== v0.2.6 关卡选择 + 星级界面 =====
   function openLevelSelect() {
@@ -5511,9 +6354,236 @@
     return { level: lv };
   }
 
+  // ===== v0.2.7 地图编辑器 + 自制关卡 =====
+  function loadCustomMaps() {
+    customMaps = [];
+    try {
+      const raw = localStorage.getItem(LS_CUSTOM);
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (Array.isArray(d))
+          customMaps = d.filter(m => m && Array.isArray(m.rows) && m.rows.length === ROWS);
+      }
+    } catch (e) { /* 忽略损坏数据 */ }
+  }
+  function saveCustomMaps() {
+    try { localStorage.setItem(LS_CUSTOM, JSON.stringify(customMaps)); } catch (e) { /* 忽略 */ }
+  }
+
+  // 编辑器网格 ⇄ rows（26 行 × 26 字符：.空 B砖 S钢 W水 T树 R油桶 P传送门）
+  function edRows() {
+    const rows = [];
+    for (let y = 0; y < ROWS; y++) {
+      let s = '';
+      for (let x = 0; x < COLS; x++) {
+        const t = edGrid[y][x];
+        s += t === TILE_BRICK ? 'B' : t === TILE_STEEL ? 'S' : t === TILE_WATER ? 'W'
+           : t === TILE_TREE ? 'T' : t === TILE_BARREL ? 'R' : t === TILE_PORTAL ? 'P' : '.';
+      }
+      rows.push(s);
+    }
+    return rows;
+  }
+  function edFromRows(rows) {
+    edGrid = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+    for (let y = 0; y < ROWS; y++) {
+      const row = rows[y] || '';
+      for (let x = 0; x < COLS; x++) {
+        const ch = row[x] || '.';
+        edGrid[y][x] = ch === 'B' ? TILE_BRICK : ch === 'S' ? TILE_STEEL
+                     : ch === 'W' ? TILE_WATER : ch === 'T' ? TILE_TREE
+                     : ch === 'R' ? TILE_BARREL : ch === 'P' ? TILE_PORTAL : 0;
+      }
+    }
+  }
+
+  // 编辑器画布渲染（自绘图块，样式与游戏一致）
+  function edDrawTile(gx, gy, t) {
+    const c = edCtx; if (!c) return;
+    const px = gx * TILE, py = gy * TILE;
+    if (t === TILE_BRICK) {
+      c.fillStyle = '#2a1520'; c.fillRect(px, py, TILE, TILE);
+      c.strokeStyle = '#1a0a12'; c.lineWidth = 1; c.strokeRect(px + 0.5, py + 0.5, TILE - 1, TILE - 1);
+      c.fillStyle = '#3a2030';
+      c.fillRect(px, py + 7, TILE, 2); c.fillRect(px, py + 15, TILE, 2);
+      c.fillRect(px + 5, py, 2, 7); c.fillRect(px + 17, py, 2, 7);
+      c.fillRect(px + 11, py + 9, 2, 6); c.fillRect(px + 23, py + 9, 2, 6);
+      c.fillRect(px + 5, py + 17, 2, 7); c.fillRect(px + 17, py + 17, 2, 7);
+    } else if (t === TILE_STEEL) {
+      c.fillStyle = '#1a2030'; c.fillRect(px, py, TILE, TILE);
+      c.fillStyle = '#2a3548'; c.fillRect(px + 3, py + 3, TILE - 6, TILE - 6);
+      c.fillStyle = '#3a4860'; c.fillRect(px + 8, py + 8, TILE - 16, TILE - 16);
+      c.fillStyle = 'rgba(0, 240, 255, 0.12)'; c.fillRect(px + 8, py + 8, TILE - 16, 2);
+    } else if (t === TILE_WATER) {
+      c.fillStyle = '#0a1530'; c.fillRect(px, py, TILE, TILE);
+      c.strokeStyle = 'rgba(0, 240, 255, 0.35)'; c.lineWidth = 2;
+      c.beginPath(); c.moveTo(px + 2, py + 8); c.lineTo(px + 12, py + 8);
+      c.moveTo(px + 14, py + 16); c.lineTo(px + 22, py + 16); c.stroke();
+    } else if (t === TILE_TREE) {
+      c.fillStyle = 'rgba(10, 30, 20, 0.85)'; c.fillRect(px, py, TILE, TILE);
+      c.fillStyle = '#1a4020';
+      for (let i = 0; i < 3; i++) {
+        c.beginPath(); c.arc(px + 6 + i * 7, py + 8, 6, 0, Math.PI * 2);
+        c.arc(px + 10 + i * 7, py + 15, 6, 0, Math.PI * 2); c.fill();
+      }
+      c.fillStyle = 'rgba(57, 255, 20, 0.4)'; c.fillRect(px + 4, py + 4, 2, 2); c.fillRect(px + 18, py + 14, 2, 2);
+    } else if (t === TILE_BARREL) {
+      const cx = px + TILE / 2, cy = py + TILE / 2;
+      c.fillStyle = '#6b4a16'; c.fillRect(px + 5, py + 3, TILE - 10, TILE - 6);
+      c.fillStyle = '#8a5f1e'; c.fillRect(px + 5, py + 3, TILE - 10, TILE - 14);
+      c.fillStyle = '#ffb300'; c.fillRect(px + 5, py + 13, TILE - 10, 5);
+      c.fillStyle = '#1a1206'; for (let i = 0; i < 4; i++) c.fillRect(px + 6 + i * 6, py + 13, 3, 5);
+      c.fillStyle = '#4a320e'; c.fillRect(px + 4, py + 3, TILE - 8, 2); c.fillRect(px + 4, py + TILE - 7, TILE - 8, 2);
+      c.fillStyle = '#ff2d55'; c.beginPath(); c.arc(cx, cy - 5, 3, 0, Math.PI * 2); c.fill();
+      c.strokeStyle = '#ffb300'; c.lineWidth = 1; c.strokeRect(px + 6.5, py + 4.5, TILE - 13, TILE - 9);
+    } else if (t === TILE_PORTAL) {
+      const cx = px + TILE / 2, cy = py + TILE / 2;
+      c.fillStyle = 'rgba(160, 107, 255, 0.5)'; c.beginPath(); c.arc(cx, cy, TILE / 2 - 3, 0, Math.PI * 2); c.fill();
+      c.fillStyle = 'rgba(10, 6, 20, 0.88)'; c.beginPath(); c.arc(cx, cy, TILE / 2 - 9, 0, Math.PI * 2); c.fill();
+      c.strokeStyle = '#c9a6ff'; c.lineWidth = 2; c.beginPath(); c.arc(cx, cy, TILE / 2 - 6, 0, Math.PI * 1.3); c.stroke();
+      c.fillStyle = '#e9d8ff'; c.beginPath(); c.arc(cx, cy, 3, 0, Math.PI * 2); c.fill();
+    }
+  }
+  function edRender() {
+    if (!edCtx) return;
+    const c = edCtx;
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    c.clearRect(0, 0, W, H);
+    c.fillStyle = '#0a0f1e'; c.fillRect(0, 0, W, H);
+    c.strokeStyle = 'rgba(0, 240, 255, 0.09)'; c.lineWidth = 1;
+    for (let i = 0; i <= COLS; i++) { c.beginPath(); c.moveTo(i * TILE, 0); c.lineTo(i * TILE, H); c.stroke(); }
+    for (let i = 0; i <= ROWS; i++) { c.beginPath(); c.moveTo(0, i * TILE); c.lineTo(W, i * TILE); c.stroke(); }
+    for (let y = 0; y < ROWS; y++)
+      for (let x = 0; x < COLS; x++)
+        if (edGrid[y][x]) edDrawTile(x, y, edGrid[y][x]);
+    // 基地与出生点标记
+    const bx = BASE.x * TILE, by = BASE.y * TILE;
+    c.fillStyle = 'rgba(0, 47, 167, 0.35)'; c.fillRect(bx, by, TILE, TILE);
+    c.strokeStyle = '#00f0ff'; c.lineWidth = 2; c.strokeRect(bx + 2, by + 2, TILE - 4, TILE - 4);
+    c.fillStyle = '#00f0ff'; c.font = '700 12px Consolas, monospace'; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillText('Q', bx + TILE / 2, by + TILE / 2);
+    const sx = SPAWN.x * TILE + TILE / 2, sy = SPAWN.y * TILE + TILE / 2;
+    c.fillStyle = 'rgba(0, 240, 255, 0.18)'; c.beginPath(); c.arc(sx, sy, 7, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = 'rgba(0, 240, 255, 0.5)'; c.lineWidth = 1.5; c.beginPath(); c.arc(sx, sy, 10, 0, Math.PI * 2); c.stroke();
+  }
+  function edBuildPalette() {
+    if (!edPaletteEl) return;
+    edPaletteEl.innerHTML = ED_TILES.map(t =>
+      '<button class="edTile' + (t.t === edTool ? ' on' : '') + '" data-t="' + t.t + '" aria-label="' + t.name + '" style="--tile:' + t.color + '">' +
+        '<span class="edTileIco">' + t.icon + '</span><span class="edTileNm">' + t.name + '</span>' +
+      '</button>').join('');
+  }
+  function edRenderList() {
+    if (!edListEl) return;
+    if (!customMaps.length) { edListEl.innerHTML = '<div class="edEmpty">暂无自制关卡 · 画完点「保存」</div>'; return; }
+    edListEl.innerHTML = customMaps.map(m =>
+      '<div class="edItem' + (m.id === edSelId ? ' on' : '') + '" data-id="' + m.id + '">' +
+        '<span class="edItemName">' + m.name + '</span>' +
+        '<button class="edItemDel" data-del="' + m.id + '" aria-label="删除">✕</button>' +
+      '</div>').join('');
+  }
+  function edCanvasPos(e) {
+    const r = edCanvas.getBoundingClientRect();
+    const sx = edCanvas.width / r.width, sy = edCanvas.height / r.height;
+    const gx = Math.floor((e.clientX - r.left) * sx / TILE), gy = Math.floor((e.clientY - r.top) * sy / TILE);
+    return { gx, gy };
+  }
+  function edPaintAt(e, erase) {
+    const p = edCanvasPos(e);
+    if (!inside(p.gx, p.gy)) return;
+    edGrid[p.gy][p.gx] = erase ? 0 : edTool;
+    edDrawTile(p.gx, p.gy, edGrid[p.gy][p.gx]);
+  }
+  let edCanvasBound = false;
+  function edBindCanvas() {
+    if (edCanvasBound || !edCanvas) return;
+    edCanvasBound = true;
+    edCanvas.addEventListener('mousedown', (e) => { edPainting = true; edPaintAt(e, e.button === 2); e.preventDefault(); });
+    edCanvas.addEventListener('mousemove', (e) => { if (edPainting) edPaintAt(e, e.button === 2); });
+    window.addEventListener('mouseup', () => { edPainting = false; });
+    edCanvas.addEventListener('contextmenu', (e) => e.preventDefault());
+    edCanvas.addEventListener('touchstart', (e) => { edPainting = true; edPaintAt(e.touches[0], false); e.preventDefault(); }, { passive: false });
+    edCanvas.addEventListener('touchmove', (e) => { if (edPainting) edPaintAt(e.touches[0], false); e.preventDefault(); }, { passive: false });
+    edCanvas.addEventListener('touchend', () => { edPainting = false; });
+  }
+  function openEditor() {
+    if (!editorBox) return;
+    ensureAudio();
+    loadCustomMaps();
+    if (!edCanvas) { edCanvas = document.getElementById('edCanvas'); if (edCanvas) edCtx = edCanvas.getContext('2d'); }
+    edBindCanvas();
+    if (!edGrid.length) edFromRows(PRESET_MAPS[0]);
+    const first = customMaps[0];
+    if (first) { edFromRows(first.rows); edSelId = first.id; if (edNameEl) edNameEl.value = first.name; }
+    else { edSelId = null; if (edNameEl) edNameEl.value = '我的关卡'; }
+    editorBox.classList.add('show');
+    edRender(); edRenderList(); edBuildPalette();
+  }
+  function closeEditor() { if (editorBox) editorBox.classList.remove('show'); }
+  function edSaveMap() {
+    const name = (edNameEl && edNameEl.value || '我的关卡').trim().slice(0, 12) || '我的关卡';
+    const rows = edRows();
+    if (edSelId) {
+      const m = customMaps.find(m => m.id === edSelId);
+      if (m) { m.name = name; m.rows = rows; m.createdAt = Date.now(); }
+    } else {
+      edSelId = 'cm' + Date.now();
+      customMaps.push({ id: edSelId, name: name, rows: rows, createdAt: Date.now() });
+    }
+    saveCustomMaps();
+    edRenderList();
+    showToast('💾 已保存自制关卡「' + name + '」');
+    return { id: edSelId, name: name };
+  }
+  function edDeleteMap(id) {
+    customMaps = customMaps.filter(m => m.id !== id);
+    if (edSelId === id) edSelId = null;
+    saveCustomMaps();
+    edRenderList();
+  }
+  function edSelectMap(id) {
+    const m = customMaps.find(m => m.id === id);
+    if (!m) return false;
+    edFromRows(m.rows); edSelId = m.id;
+    if (edNameEl) edNameEl.value = m.name;
+    edRender(); edRenderList();
+    return true;
+  }
+  // 分享码：TB1:base64(JSON{n,r:676字符})
+  function edExportCode() {
+    const name = (edNameEl && edNameEl.value || '我的关卡').trim().slice(0, 12) || '我的关卡';
+    const json = JSON.stringify({ n: name, r: edRows().join('') });
+    return 'TB1:' + btoa(unescape(encodeURIComponent(json)));
+  }
+  function edImportCode(code) {
+    try {
+      const m = /^TB1:([A-Za-z0-9+/=]+)$/.exec(String(code || '').trim());
+      if (!m) return { ok: false, err: '分享码格式错误' };
+      const d = JSON.parse(decodeURIComponent(escape(atob(m[1]))));
+      if (!d || typeof d.r !== 'string' || d.r.length !== ROWS * COLS) return { ok: false, err: '关卡数据损坏' };
+      const rows = [];
+      for (let i = 0; i < ROWS; i++) rows.push(d.r.slice(i * COLS, (i + 1) * COLS));
+      edFromRows(rows); edSelId = null;
+      if (d.n && edNameEl) edNameEl.value = String(d.n).slice(0, 12);
+      edRender(); edRenderList();
+      return { ok: true, rows: rows };
+    } catch (e) { return { ok: false, err: '导入失败：' + (e && e.message || '') }; }
+  }
+  function edPlayCurrent() {
+    const rows = edRows();
+    const portalCount = rows.join('').split('P').length - 1;
+    if (portalCount % 2 !== 0) { showToast('⚠ 传送门需成对放置（0 或 2 的倍数）'); return false; }
+    customMap = rows;
+    closeEditor();
+    start('custom');
+    return true;
+  }
+  function copyTextToClip(t) { try { navigator.clipboard && navigator.clipboard.writeText(t); } catch (e) { /* 忽略 */ } }
+
   // ===== 回到主菜单（暂停时退出） =====
   function quitToMenu() {
     player = null; bullets = []; enemies = []; particles = []; texts = []; powerups = [];
+    ultWaves = []; ultFlash = 0;      // v0.2.7 近战大招特效清理
     score = 0; lives = 3; level = 1; combo = 0; comboTimer = 0;
     running = false; paused = false; gameOver = false; won = false;
     bossLevel = false; bossHp = 0; bossMaxHp = 0;
@@ -5523,6 +6593,8 @@
     fx = { rapid: 0, double: 0, freeze: 0 };
     upgrades = {}; upgTotal = 0; upgradeOpen = false;
     dailyMode = false; dailyMods = { _names: [] };
+    customMode = false; customMap = null;   // v0.2.7 自制关卡：退出回菜单重置
+    multiMode = 0; player2 = null; lives2 = 3;   // v0.2.7 双人同屏：退出回菜单重置
     reviveCount = 0; adPending = false;
     enemySpawnTimer = 0; lvIntroT = 0; lvIntroNext = false;
     lastLives = -1; lastCombo = -1; hitStop = 0;
@@ -5689,7 +6761,7 @@
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V2.6', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V2.7', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -5753,6 +6825,12 @@
   btnTimed.addEventListener('click', () => { ensureAudio(); start('timed'); });
   // —— v0.2.6 无尽模式入口 ——
   btnEndless.addEventListener('click', () => { ensureAudio(); start('endless'); });
+  // —— v0.2.7 双人同屏：打开模式选择 ——
+  btnMulti.addEventListener('click', () => { ensureAudio(); multiBox.classList.add('show'); });
+  btnMuClose.addEventListener('click', () => multiBox.classList.remove('show'));
+  multiBox.addEventListener('click', (e) => { if (e.target === multiBox) multiBox.classList.remove('show'); });
+  muCoop.addEventListener('click', () => { ensureAudio(); multiBox.classList.remove('show'); start('coop'); });
+  muVersus.addEventListener('click', () => { ensureAudio(); multiBox.classList.remove('show'); start('versus'); });
   // v0.2.3 里程碑庆典：继续战斗
   document.getElementById('btnMiloOk').addEventListener('click', () => { ensureAudio(); closeMilestone(); });
   milestone.addEventListener('click', (e) => { if (e.target === milestone) closeMilestone(); });
@@ -5779,7 +6857,19 @@
   achBox.addEventListener('click', (e) => { if (e.target === achBox) closeAch(); });
   btnCareer.addEventListener('click', () => { ensureAudio(); openCareer(); });
   $('btnCarClose').addEventListener('click', closeCareer);
-  carBox.addEventListener('click', (e) => { if (e.target === carBox) closeCareer(); });
+  carBox.addEventListener('click', (e) => {
+    // —— v0.2.7 排行榜分榜 Tab 切换 ——
+    const tab = e.target.closest('[data-tab]');
+    if (tab) { boardTab = tab.getAttribute('data-tab'); openCareer(); return; }
+    // —— v0.2.7 周挑战奖励领取 ——
+    const wk = e.target.closest('[data-wk]');
+    if (wk && wk.getAttribute('data-wk') === 'claim') { claimWeek(); openCareer(); return; }
+    if (e.target === carBox) closeCareer();
+  });
+  // —— v0.2.7 生涯报告页 ——
+  $('btnCarRep').addEventListener('click', () => { ensureAudio(); openCareerRep(); });
+  $('btnCarRepClose').addEventListener('click', closeCareerRep);
+  carRepBox.addEventListener('click', (e) => { if (e.target === carRepBox) closeCareerRep(); });
   // —— v0.2.6 关卡选择 ——
   btnLevels.addEventListener('click', () => { ensureAudio(); openLevelSelect(); });
   $('btnLvSelClose').addEventListener('click', closeLevelSelect);
@@ -5790,6 +6880,38 @@
     startAtLevel(parseInt(b.dataset.lv, 10));
   });
   lvSelect.addEventListener('click', (e) => { if (e.target === lvSelect) closeLevelSelect(); });
+  // —— v0.2.7 地图编辑器 ——
+  btnEditor.addEventListener('click', () => { openEditor(); });
+  document.getElementById('btnEdClose').addEventListener('click', closeEditor);
+  editorBox.addEventListener('click', (e) => { if (e.target === editorBox) closeEditor(); });
+  edPaletteEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.edTile');
+    if (!btn) return;
+    edTool = parseInt(btn.dataset.t, 10);
+    edBuildPalette();
+  });
+  edBtnsEl.addEventListener('click', (e) => {
+    const btn = e.target.closest('.edBtn');
+    if (!btn) return;
+    const act = btn.dataset.ed;
+    if (act === 'clear') {
+      edFromRows(Array.from({ length: ROWS }, () => '.'.repeat(COLS)));
+      edSelId = null; edRender();
+      showToast('🗑 已清空画布');
+    } else if (act === 'save') { edSaveMap(); }
+    else if (act === 'export') { const code = edExportCode(); copyTextToClip(code); showToast('📤 已复制分享码（' + code.length + ' 字符）'); }
+    else if (act === 'import') {
+      const code = window.prompt('📥 粘贴分享码：');
+      if (code) { const r = edImportCode(code); showToast(r.ok ? '✅ 已导入「' + (edNameEl ? edNameEl.value : '') + '」' : '⚠ ' + r.err); }
+    }
+    else if (act === 'play') { edPlayCurrent(); }
+  });
+  edListEl.addEventListener('click', (e) => {
+    const del = e.target.closest('.edItemDel');
+    if (del) { e.stopPropagation(); edDeleteMap(del.dataset.del); return; }
+    const item = e.target.closest('.edItem');
+    if (item) edSelectMap(item.dataset.id);
+  });
   volSlider.addEventListener('input', (e) => setMasterVol(parseFloat(e.target.value) / 100));
   // v0.2.0 设置面板
   bgmSlider.addEventListener('input', (e) => setBgmVol(parseFloat(e.target.value) / 100));
@@ -5821,7 +6943,9 @@
     if (e.key === 'Escape' && saveBox.classList.contains('show')) closeSaveBox();
     if (e.key === 'Escape' && milestone.classList.contains('show')) closeMilestone();
     if (e.key === 'Escape' && carBox.classList.contains('show')) closeCareer();
+    if (e.key === 'Escape' && carRepBox.classList.contains('show')) closeCareerRep();
     if (e.key === 'Escape' && lvSelect.classList.contains('show')) closeLevelSelect();
+    if (e.key === 'Escape' && editorBox.classList.contains('show')) closeEditor();
   });
 
   window.addEventListener('keydown', (e) => {
@@ -5829,6 +6953,7 @@
     if (e.key === 'p' || e.key === 'P') togglePause();
     if (e.key === 'm' || e.key === 'M') toggleMute();
     if (e.key === 'f' || e.key === 'F') toggleFullscreen();
+    if (e.key === 'e' || e.key === 'E') tryUltimate();
     if (e.key === 'Enter' && !overlay.classList.contains('hide')) {
       if (overlayKind === 'paused') togglePause(); else start(dailyInvited ? 'daily' : 'normal');
     }
@@ -5935,6 +7060,16 @@
   };
   fireBtn.addEventListener('pointerup', fireUp);
   fireBtn.addEventListener('pointercancel', fireUp);
+
+  // v0.2.7 近战大招按钮（触屏 + 桌面均可点击）
+  const ultBtn = document.getElementById('tUlt');
+  if (ultBtn) {
+    ultBtn.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      ensureAudio();
+      tryUltimate();
+    });
+  }
   fireBtn.addEventListener('lostpointercapture', fireUp);
   fireBtn.addEventListener('contextmenu', (e) => e.preventDefault());
 
@@ -6135,6 +7270,9 @@
       invul: (ms = 9999) => { if (player) player.spawnInv = ms; },
       skipIntro: () => { lvIntroT = 0; lvIntroNext = false; },
       clearMap: () => { for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) map[y][x] = 0; markMapDirty(); },
+      // —— v0.2.7 近战大招砖墙验证：直接读写地形格 ——
+      setTile: (gx, gy, v) => { if (inside(gx, gy)) { map[gy][gx] = v; markMapDirty(); } return inside(gx, gy); },
+      tileAt: (gx, gy) => inside(gx, gy) ? map[gy][gx] : -1,
       setUpgrades: (o) => { upgrades = Object.assign({}, o); },
       stopSpawn: () => { enemySpawnTimer = 999999; },
       // —— 单波洪流验证 ——
@@ -6143,6 +7281,10 @@
       enemyNear: (px, py, r) => enemies.find(e => !e.dead && Math.hypot(e.x + e.size / 2 - px, e.y + e.size / 2 - py) <= r) || null,
       playerPos: () => player ? { x: player.x, y: player.y, portalCd: player.portalCd } : null,
       setPlayer: (x, y) => { if (player) { player.x = x; player.y = y; } },
+      // —— v0.2.7 近战大招验证钩子 ——
+      ultNow: () => player ? { cd: player.ultCd, flash: ultFlash, waves: ultWaves.length, ready: player.ultCd <= 0 } : null,
+      setUltCd: (n) => { if (player) { player.ultCd = n; updateUltHud(); } return player ? player.ultCd : -1; },
+      fireUlt: () => { tryUltimate(); return { cd: player ? player.ultCd : -1, waves: ultWaves.length }; },
       // 诊断探针：玩家中心所在格是否为门格 + 手动触发一次传送
       probePortal: () => {
         const cx = player.x + player.size / 2, cy = player.y + player.size / 2;
@@ -6205,6 +7347,12 @@
       setMasterVol, applyVolUI,
       masterVolNow: () => masterVol,
       achCountNow: () => ({ total: ACHIEVE.length, unlocked: achUnlocked.size }),
+      // —— v0.2.7 成就分组 + 生涯累计成就检查 ——
+      achGroupsNow: () => ACH_GROUPS.map(g => {
+        const list = ACHIEVE.filter(a => (ACH_GROUP[a.id] || 'depth') === g.id);
+        return { id: g.id, done: list.filter(a => achUnlocked.has(a.id)).length, total: list.length };
+      }),
+      achCheckCareer: () => { checkCareerAch(); return [...achUnlocked]; },
       // —— v0.2.0 验证：性能档位 / 减弱动效 / 分音量 / 静态地图缓存 / 全屏 ——
       perfNow: () => perfQuality,
       motionNow: () => reduceMotion,
@@ -6296,9 +7444,67 @@
       unlockAch: (id) => unlockAch(id),
       setScore: (n) => { score = Math.max(0, n | 0); },
       careerNow: () => ({ ...career, board: board.slice() }),
-      resetCareer: () => { career = { games: 0, kills: 0, playSec: 0, bestDaily: 0, bestTimed: 0, bestHard: 0, bestScore: 0 }; board = []; playSecRun = 0; try { localStorage.removeItem(LS_CAREER); localStorage.removeItem(LS_BOARD); } catch (e) {} },
+      resetCareer: () => {
+        career = { games: 0, kills: 0, playSec: 0, bestDaily: 0, bestTimed: 0, bestHard: 0, bestScore: 0,
+          totalCoins: 0, totalStars: 0, bestEndless: 0, bossKills: 0, deaths: 0, hits: 0, shots: 0, wins: 0,
+          modeGames: { normal: 0, daily: 0, timed: 0, endless: 0, hard: 0 } };
+        board = []; playSecRun = 0;
+        try { localStorage.removeItem(LS_CAREER); localStorage.removeItem(LS_BOARD); } catch (e) {}
+      },
       recordGameNow: (win) => recordGame(win),
       careerOpenNow: () => !!(carBox && carBox.classList.contains('show')),
+      // —— v0.2.7 生涯统计扩展：报告页检查 ——
+      careerRepBtn: () => !!document.getElementById('btnCarRep'),
+      careerRepOpenNow: () => !!(carRepBox && carRepBox.classList.contains('show')),
+      careerRepTitle: () => rankTitle(),
+      careerRepHtml: () => (repBody ? repBody.innerHTML.length : 0),
+      careerAddGold: (n) => addGold(n || 0),
+      careerAddStars: (n) => { career.totalStars += Math.max(0, n | 0); saveCareer(); return career.totalStars; },
+      // 精确测一局累计：设置临时全局后调 recordGame，再恢复
+      careerRecord: (win, opts) => {
+        const o = opts || {};
+        const old = { dailyMode, timedMode, endlessMode, difficulty, score, level };
+        stat = { kills: o.kills || 0, shots: o.shots || 0, hits: o.hits || 0, maxCombo: 0, bossKills: o.bossKills || 0, deaths: o.deaths || 0 };
+        dailyMode = !!o.daily; timedMode = !!o.timed; endlessMode = !!o.endless;
+        difficulty = o.hard ? 'hard' : 'normal';
+        score = o.score || 0; level = o.level || 1;
+        recordGame(win);
+        dailyMode = old.dailyMode; timedMode = old.timedMode; endlessMode = old.endlessMode;
+        difficulty = old.difficulty; score = old.score; level = old.level;
+        return { ...career };
+      },
+      // —— v0.2.7 排行榜分榜 + 周挑战 ——
+      boardNow: () => board.slice(),
+      boardTabNow: () => boardTab,
+      setBoardTab: (id) => { boardTab = BOARD_TABS.some(t => t.id === id) ? id : 'all'; },
+      boardPush: (rec) => { board.push(rec); board.sort((a, b) => b.score - a.score); if (board.length > 10) board = board.slice(0, 10); saveBoard(); },
+      boardReset: () => { board = []; try { localStorage.removeItem(LS_BOARD); } catch (e) {} },
+      weekNow: () => ({ wk: weekState.wk, best: weekState.best, claimed: weekState.claimed, goal: WEEK_GOAL(), done: weekDone() }),
+      weekSetBest: (n) => { updateWeek(n); return { best: weekState.best, done: weekDone(), goal: WEEK_GOAL() }; },
+      weekClaim: () => claimWeek(),
+      weekReset: () => { weekState = { wk: weekISO(), best: 0, claimed: false }; saveWeek(); },
+      // —— v0.2.7 地图编辑器 + 自制关卡 ——
+      editorBtn: () => !!document.getElementById('btnEditor'),
+      editorOpenNow: () => !!(editorBox && editorBox.classList.contains('show')),
+      editorOpen: () => { openEditor(); return !!(editorBox && editorBox.classList.contains('show')); },
+      editorClose: () => { closeEditor(); return !(editorBox && editorBox.classList.contains('show')); },
+      editorNow: () => ({ grid: edGrid.map(r => r.slice()), tool: edTool, sel: edSelId, count: customMaps.length }),
+      editorSetTile: (gx, gy, v) => { if (inside(gx, gy)) { edGrid[gy][gx] = v; edDrawTile(gx, gy, v); } return inside(gx, gy); },
+      editorSetTool: (v) => { edTool = Math.max(0, Math.min(6, v | 0)); edBuildPalette(); return edTool; },
+      editorGrid: () => edGrid.map(r => r.slice()),
+      editorRows: () => edRows(),
+      editorFromRows: (rows) => { edFromRows(rows); edRender(); return edRows(); },
+      editorClear: () => { edFromRows(Array.from({ length: ROWS }, () => '.'.repeat(COLS))); edSelId = null; edRender(); return edRows(); },
+      editorNew: () => { edSelId = null; edFromRows(Array.from({ length: ROWS }, () => '.'.repeat(COLS))); if (edNameEl) edNameEl.value = '我的关卡'; edRender(); edRenderList(); return edSelId; },
+      editorSave: (name) => { if (name) edNameEl.value = name; return edSaveMap(); },
+      editorList: () => customMaps.map(m => ({ id: m.id, name: m.name, len: m.rows.length })),
+      editorLoad: (id) => edSelectMap(id),
+      editorDelete: (id) => { edDeleteMap(id); return customMaps.length; },
+      editorExportCode: () => edExportCode(),
+      editorImportCode: (code) => edImportCode(code),
+      editorPlay: () => edPlayCurrent(),
+      editorPlayNow: () => ({ customMode, customMap: customMap ? customMap.length : 0 }),
+      customMapInfo: () => ({ customMode, customMap: customMap ? customMap.slice() : null, level, bossLevel }),
       // —— v0.2.5 辅助模式 ——
       assistNow: () => ({ contrast: highContrast, colorBlind }),
       setContrast: (v) => setContrast(v === '1' ? '1' : '0'),
@@ -6375,6 +7581,22 @@
       }),
       openReportFromCareer: () => openReport(true),
       openReportNow: () => openReport(false),
+      // —— v0.2.7 双人同屏验证钩子 ——
+      multiBtn: () => !!document.getElementById('btnMulti'),
+      multiOpen: () => { if (multiBox) multiBox.classList.add('show'); return !!(multiBox && multiBox.classList.contains('show')); },
+      multiClose: () => { if (multiBox) multiBox.classList.remove('show'); return !(multiBox && multiBox.classList.contains('show')); },
+      multiOpenNow: () => !!(multiBox && multiBox.classList.contains('show')),
+      startCoop: () => { start('coop'); return { multiMode, p2: !!player2 }; },
+      startVersus: () => { start('versus'); return { multiMode, p2: !!player2 }; },
+      multiNow: () => ({ multiMode, lives2, running, gameOver,
+        p2: player2 ? { x: player2.x, y: player2.y, dir: player2.dir, dead: player2.dead, spawnInv: player2.spawnInv } : null }),
+      setPlayer2: (x, y) => { if (player2) { player2.x = x; player2.y = y; player2.dead = false; } return !!player2; },
+      setP2Invul: (n) => { if (player2) player2.spawnInv = n; return player2 ? player2.spawnInv : -1; },
+      setLives2: (n) => { lives2 = Math.max(0, n | 0); lastLives2 = -1; updateHud(); return lives2; },
+      killP2: () => { killPlayer(player2); return { lives2, dead: player2 ? player2.dead : null }; },
+      keySet: (k, v) => { keys[k] = !!v; return keys[k]; },
+      quit: () => { quitToMenu(); return { multiMode, p2: !!player2 }; },
+      p2LivesHud: () => (elLives2 ? elLives2.textContent : null),
     };
   }
 
