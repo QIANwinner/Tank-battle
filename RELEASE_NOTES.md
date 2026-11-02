@@ -1,3 +1,37 @@
+# v0.3.0 · 主菜单美化（初始界面焕新）
+
+> v0.3.0 将进入游戏的主界面从「一长列平铺按钮」重构为**分组卡片 + 大按钮 + 折叠设置**的整齐布局。回归：主套件 169/169 全过 + 菜单结构 DOM 验证 26 项全过。
+
+## 🅰 分组卡片布局（#103 HTML 重构 + #104 CSS 重写）
+
+- 菜单按钮按功能分组包入 `.menuScroll`（可滚动容器）：
+  - 🎯 **主操作** `.menuHero`：`#btnPlay` 全宽大按钮 + 流光扫过动画（`playSheen`）
+  - 🎮 **游戏模式** `.menuGroup#groupModes`：每日 / 限时 / 无尽 / 双人 —— 2×2 等宽网格（`.modeGrid` `grid-template-columns: 1fr 1fr`）
+  - 🧰 **内容与工具** `.menuGroup#groupTools`：关卡 / 编辑器 / 成就 / 战绩 / 商店 —— 网格布局，`#btnShop` 金色跨整行（`grid-column: 1 / -1`）
+  - 📲 **辅助行** `.auxRow#groupAux`：安装到桌面（胶囊小按钮）
+  - 🅿 **暂停行** `.pauseRow#pauseRow`：重开 / 主菜单 / 复活 / 分享 / 报告（居中换行）
+- 全部按钮 id 保留，JS 经 `$('id')` 引用不依赖 DOM 相邻——重构安全
+- 每张分组卡片渐变描边 + 居中分隔线标题（`.groupLabel`）；统一胶囊按钮（hover 发光 / active 下压）
+
+## 🅱 设置面板可折叠（#105）
+
+- `#settings` 新增 `#setToggle` 折叠头（▾/▸），**默认收起**，标题页不再被长串设置项占据
+- 折叠状态持久化 `tank-battle-settings-collapsed`
+
+## 🅲 暂停 / 结算页干净化（#105）
+
+- 新增 `#overlay.hideMain` 类：暂停/结算时隐藏 brand / diffRow / menuGroup / auxRow，**保留 `.menuHero`** 供三态复用 `#btnPlay`
+- `showOverlay()` 三分支（title / paused / gameover）toggle `hideMain`，避免暂停/结算页残留主菜单按钮
+
+## 🅳 验证（#106）
+
+- 内联脚本语法校验：1 块 / 362,844 字符 / ALL SCRIPTS SYNTAX OK
+- 新增 `tb_v030_menu_check.js` DOM 验证 **26 项全过**（结构 8 + title 态 7 + 主按钮 2 + paused 4 + gameover 1 + 设置 4）
+- 主回归套件 `tb_cdp_test.js` **169/169 全过**（无回归）
+- 视觉模型本会话不可用，改用 DOM 计算样式断言验证布局（CSS grid 1fr 1fr 保证等宽按钮、menuScroll 居中、分组可见性）
+
+---
+
 # v0.2.9 · 随机地图 + BGM 曲库扩充 + 金币经济补全
 
 > v0.2.9 是 v0.2.8 之后三个方向的增强：**随机地图生成**（种子随机 Roguelike 地图 + 连通性校验）、**BGM 曲库扩充**（2→4 首，Boss 战 / 无尽高波动态切换）、**金币经济补全**（抽奖箱 / 强化重置 / 成就徽章展示框）。回归：主套件 169/169 全过 + 新增 v0.2.9 专项冒烟 20/20 全过。

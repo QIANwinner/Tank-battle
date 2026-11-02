@@ -383,14 +383,96 @@
     position: fixed; inset: 0; z-index: 30;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    gap: 10px; padding: 26px;
+    gap: 0; padding: 0;
     text-align: center;
-    overflow-y: auto;
     background: radial-gradient(circle at 50% 42%, rgba(0, 47, 167, 0.28), rgba(4, 4, 10, 0.9) 62%);
     -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
     transition: opacity .22s ease, visibility .22s;
   }
   #overlay.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+  /* ===== v0.3.0 主菜单布局重构：分组卡片 + 等宽网格 + 统一按钮 ===== */
+  .menuScroll {
+    display: flex; flex-direction: column; align-items: center;
+    width: min(430px, 94%); max-height: 100%;
+    margin: auto; padding: 30px 22px 26px;
+    overflow-y: auto; gap: 12px;
+  }
+  .menuScroll::-webkit-scrollbar { width: 6px; }
+  .menuScroll::-webkit-scrollbar-thumb { background: rgba(0, 240, 255, 0.25); border-radius: 3px; }
+  /* 主操作按钮 */
+  .menuHero { width: 100%; }
+  #btnPlay {
+    width: 100%; min-width: 0; margin: 0; padding: 16px 24px;
+    font-size: 18px; letter-spacing: 4px; border-radius: 14px;
+    background: linear-gradient(135deg, #0a3fd0, var(--klein) 55%, #0030a0);
+    box-shadow: 0 0 26px rgba(0, 47, 167, 0.75), 0 0 0 1px rgba(0, 240, 255, 0.22) inset, 0 8px 22px rgba(0, 20, 60, 0.5);
+    position: relative; overflow: hidden;
+    transition: transform .12s ease, box-shadow .2s ease;
+  }
+  #btnPlay::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.16) 50%, transparent 70%);
+    transform: translateX(-120%); animation: playSheen 3.4s ease-in-out infinite;
+  }
+  @keyframes playSheen { 0%, 60% { transform: translateX(-120%); } 90%, 100% { transform: translateX(120%); } }
+  /* 分组卡片 */
+  .menuGroup {
+    width: 100%; padding: 12px 14px 14px; border-radius: 16px;
+    border: 1px solid rgba(0, 240, 255, 0.16);
+    background: linear-gradient(180deg, rgba(0, 26, 54, 0.5), rgba(0, 14, 30, 0.42));
+    box-shadow: 0 6px 20px rgba(0, 10, 30, 0.35);
+  }
+  .groupLabel {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 10px; font-weight: 800; letter-spacing: 4px; color: #6f8fb5;
+    text-transform: uppercase; margin-bottom: 10px;
+  }
+  .groupLabel::before, .groupLabel::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.4));
+  }
+  .groupLabel::after { transform: scaleX(-1); }
+  .modeGrid, .toolGrid { display: grid; gap: 8px; }
+  .modeGrid { grid-template-columns: 1fr 1fr; }
+  .toolGrid { grid-template-columns: 1fr 1fr; }
+  #btnShop { grid-column: 1 / -1; }
+  /* 统一次级按钮 */
+  .modeGrid button, .toolGrid button, .auxRow button, .pauseRow button {
+    margin: 0; padding: 11px 12px; border-radius: 11px;
+    font-size: 13px; letter-spacing: 1px;
+    border: 1px solid rgba(0, 240, 255, 0.32);
+    background: linear-gradient(180deg, rgba(0, 47, 167, 0.30), rgba(0, 24, 52, 0.30));
+    color: #cfe8ff; font-weight: 700; cursor: pointer;
+    transition: transform .1s ease, background .15s ease, box-shadow .15s ease;
+    box-shadow: 0 2px 8px rgba(0, 15, 40, 0.3);
+  }
+  .modeGrid button:hover, .toolGrid button:hover, .auxRow button:hover, .pauseRow button:hover {
+    background: linear-gradient(180deg, rgba(0, 60, 180, 0.45), rgba(0, 30, 70, 0.4));
+    box-shadow: 0 0 14px rgba(0, 240, 255, 0.25);
+  }
+  .modeGrid button:active, .toolGrid button:active, .auxRow button:active, .pauseRow button:active { transform: translateY(1px); }
+  /* 金色商店（跨整行） */
+  #btnShop {
+    border-color: rgba(255, 215, 0, 0.6); color: #ffe9a6;
+    background: linear-gradient(180deg, rgba(255, 200, 0, 0.20), rgba(150, 100, 0, 0.12));
+    box-shadow: 0 0 16px rgba(255, 200, 0, 0.22);
+  }
+  #btnShop:hover { box-shadow: 0 0 18px rgba(255, 200, 0, 0.35); }
+  /* 辅助行（安装到桌面） */
+  .auxRow { width: 100%; display: flex; justify-content: center; gap: 8px; }
+  .auxRow button {
+    font-size: 11px; padding: 7px 16px; letter-spacing: 1px; border-radius: 999px;
+    background: rgba(0, 20, 40, 0.4); color: #9dc4e8; border: 1px solid rgba(0, 240, 255, 0.22);
+  }
+  /* 暂停 / 结算行 */
+  .pauseRow { width: 100%; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+  /* 暂停/结算时隐藏主菜单专属元素（由 JS toggle .hideMain）；menuHero 保留（btnPlay 三态复用） */
+  #overlay.hideMain .brand,
+  #overlay.hideMain .diffRow,
+  #overlay.hideMain .menuGroup,
+  #overlay.hideMain .auxRow { display: none; }
+  /* 触屏宽幅：菜单略加宽 */
+  html.touch.wide .menuScroll { width: min(560px, 92%); }
   #overlay .brand {
     position: relative; align-self: center;
     display: flex; align-items: baseline; gap: 6px;
@@ -475,74 +557,13 @@
     font-variant-numeric: tabular-nums; min-height: 16px;
   }
   #ovStats b { color: var(--cyan); font-size: 15px; }
-  #btnPlay {
-    margin-top: 4px;
-    min-width: 176px; padding: 14px 30px;
-    border: 1px solid rgba(0, 240, 255, 0.55); border-radius: 999px;
-    background: linear-gradient(180deg, #0a3fd0, var(--klein));
-    color: #fff; font-size: 16px; font-weight: 800; letter-spacing: 3px;
-    box-shadow: 0 0 22px rgba(0, 47, 167, 0.7), 0 0 0 1px rgba(0, 240, 255, 0.18) inset;
-    cursor: pointer;
-    -webkit-appearance: none; appearance: none;
-  }
-  #btnPlay:active { transform: translateY(1px); filter: brightness(1.1); }
-  #btnDaily, #btnShare, #btnReport, #btnShop, #btnTimed {
-    margin-top: -2px;
-    padding: 9px 22px;
-    border: 1px solid rgba(0, 240, 255, 0.4); border-radius: 999px;
-    background: rgba(0, 47, 167, 0.22);
-    color: #bfe4ff; font-size: 13px; font-weight: 700; letter-spacing: 2px;
-    cursor: pointer;
-    -webkit-appearance: none; appearance: none;
-  }
-  #btnDaily:active, #btnShare:active, #btnReport:active, #btnShop:active, #btnTimed:active { background: var(--klein); transform: translateY(1px); }
-  #btnDaily { display: none; }
-  #btnTimed { display: none; border-color: rgba(255, 170, 0, 0.6); color: #ffe0a3; box-shadow: 0 0 14px rgba(255, 170, 0, 0.22); }
-  #btnShare { display: none; border-color: rgba(255, 0, 255, 0.5); color: #ffc4ff; box-shadow: 0 0 14px rgba(255, 0, 255, 0.18); }
-  #btnReport { display: none; border-color: rgba(57, 255, 20, 0.5); color: #c9ffd2; box-shadow: 0 0 14px rgba(57, 255, 20, 0.18); }
-  #btnShop { border-color: rgba(255, 215, 0, 0.55); color: #ffe9a6; box-shadow: 0 0 14px rgba(255, 215, 0, 0.2); }
-  #btnRevive {
-    display: none;
-    margin-top: 4px;
-    padding: 11px 26px;
-    border: 1px solid rgba(255, 215, 0, 0.75); border-radius: 999px;
-    background: linear-gradient(180deg, rgba(255, 200, 0, 0.24), rgba(255, 160, 0, 0.10));
-    color: #ffe9a6; font-size: 14px; font-weight: 800; letter-spacing: 2px;
-    box-shadow: 0 0 18px rgba(255, 200, 0, 0.35);
-    cursor: pointer;
-    animation: revivePulse 1.4s ease infinite;
-    -webkit-appearance: none; appearance: none;
-  }
-  #btnRevive:active { transform: translateY(1px); filter: brightness(1.15); }
+  /* 默认隐藏的菜单按钮：JS 用内联 style.display 控制显隐（布局统一见 v0.3.0 上方规则） */
+  #btnDaily, #btnTimed, #btnShare, #btnReport, #btnRevive,
+  #btnRestart, #btnQuit, #btnAch { display: none; }
   @keyframes revivePulse {
     0%, 100% { box-shadow: 0 0 14px rgba(255, 200, 0, 0.25); }
     50% { box-shadow: 0 0 24px rgba(255, 200, 0, 0.55); }
   }
-  /* 暂停菜单：重开 / 回主菜单 */
-  #btnRestart, #btnQuit {
-    display: none;
-    margin-top: -2px;
-    padding: 9px 22px;
-    border: 1px solid rgba(0, 240, 255, 0.4); border-radius: 999px;
-    background: rgba(0, 47, 167, 0.22);
-    color: #bfe4ff; font-size: 13px; font-weight: 700; letter-spacing: 2px;
-    cursor: pointer;
-    -webkit-appearance: none; appearance: none;
-  }
-  #btnRestart:active, #btnQuit:active { background: var(--klein); transform: translateY(1px); }
-  #btnQuit { border-color: rgba(255, 255, 255, 0.28); color: #b8c6dd; }
-  #btnAch {
-    display: none;
-    margin-top: -2px;
-    padding: 9px 22px;
-    border: 1px solid rgba(255, 230, 0, 0.5); border-radius: 999px;
-    background: rgba(255, 190, 0, 0.10);
-    color: #ffe9a6; font-size: 13px; font-weight: 700; letter-spacing: 2px;
-    cursor: pointer;
-    box-shadow: 0 0 14px rgba(255, 230, 0, 0.18);
-    -webkit-appearance: none; appearance: none;
-  }
-  #btnAch:active { background: var(--klein); transform: translateY(1px); }
   /* 主音量滑块 */
   .volRow {
     display: none; align-items: center; gap: 10px;
@@ -580,6 +601,18 @@
     background: rgba(0, 16, 34, 0.55);
     backdrop-filter: blur(8px);
   }
+  /* —— v0.3.0 设置面板可折叠 —— */
+  .setToggle {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; cursor: pointer; user-select: none;
+    font-size: 12px; font-weight: 800; letter-spacing: 2px; color: #9dc4e8;
+    margin: -4px 0 2px; padding: 4px 2px; transition: color .15s ease;
+  }
+  .setToggle:hover { color: var(--cyan); }
+  .setToggle .setArrow { font-size: 11px; color: #6f8fb5; transition: transform .18s ease; }
+  .settings.collapsed { gap: 0; }
+  .settings.collapsed > .setRow { display: none; }
+  .settings.collapsed .setArrow { transform: rotate(-90deg); }
   .setRow { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .setLabel { font-size: 12px; letter-spacing: 1px; color: #9dc4e8; font-weight: 700; white-space: nowrap; }
   .setLabel .hint { display: block; font-size: 10px; color: #5f7ba0; letter-spacing: 0.5px; margin-top: 2px; }
@@ -1632,6 +1665,7 @@
       <div class="d-scan"></div>
       <div class="d-beam"></div>
     </div>
+    <div class="menuScroll" id="menuScroll">
     <div class="brand"><span class="b1">QIAN</span><span class="b2">出品</span></div>
     <h1 id="ovTitle">坦克大战</h1>
     <p id="ovSub">守住基地 · 消灭敌军 · 点开即玩</p>
@@ -1644,22 +1678,43 @@
         <button data-diff="hard">🔥 硬核</button>
       </div>
     </div>
-    <button id="btnPlay">开始游戏</button>
-    <button id="btnRestart">🔄 重新开始本局</button>
-    <button id="btnQuit">🏠 回到主菜单</button>
-    <button id="btnRevive">🪙 花金币复活基地</button>
-    <button id="btnDaily">📅 每日挑战</button>
-    <button id="btnTimed">⏱ 限时冲分</button>
-    <button id="btnEndless">🌊 无尽模式</button>
-    <button id="btnInstall">📲 安装到桌面</button>
-    <button id="btnAch">🏆 成就</button>
-    <button id="btnCareer">📊 战绩档案</button>
-    <button id="btnLevels">🗺 关卡选择</button>
-    <button id="btnEditor">🛠 地图编辑器</button>
-    <button id="btnMulti">👥 双人同屏</button>
-    <button id="btnShop">🛒 商店</button>
-    <button id="btnShare">📤 分享成绩 · 发起挑战</button>
-    <button id="btnReport">🖼 生成战绩图</button>
+    <!-- 主操作：开始游戏 -->
+    <div class="menuHero" id="menuHero">
+      <button id="btnPlay">开始游戏</button>
+    </div>
+    <!-- 游戏模式 -->
+    <div class="menuGroup" id="groupModes">
+      <div class="groupLabel">游戏模式</div>
+      <div class="modeGrid">
+        <button id="btnDaily">📅 每日挑战</button>
+        <button id="btnTimed">⏱ 限时冲分</button>
+        <button id="btnEndless">🌊 无尽模式</button>
+        <button id="btnMulti">👥 双人同屏</button>
+      </div>
+    </div>
+    <!-- 内容与工具 -->
+    <div class="menuGroup" id="groupTools">
+      <div class="groupLabel">内容与工具</div>
+      <div class="toolGrid">
+        <button id="btnLevels">🗺 关卡选择</button>
+        <button id="btnEditor">🛠 地图编辑器</button>
+        <button id="btnAch">🏆 成就</button>
+        <button id="btnCareer">📊 战绩档案</button>
+        <button id="btnShop">🛒 商店</button>
+      </div>
+    </div>
+    <!-- 辅助行 -->
+    <div class="auxRow" id="groupAux">
+      <button id="btnInstall">📲 安装到桌面</button>
+    </div>
+    <!-- 暂停 / 结算操作 -->
+    <div class="pauseRow" id="pauseRow">
+      <button id="btnRestart">🔄 重新开始本局</button>
+      <button id="btnQuit">🏠 回到主菜单</button>
+      <button id="btnRevive">🪙 花金币复活基地</button>
+      <button id="btnShare">📤 分享成绩 · 发起挑战</button>
+      <button id="btnReport">🖼 生成战绩图</button>
+    </div>
     <div id="ovTip"></div>
     <div class="volRow" id="volRow">
       <span class="volIcon" id="volIcon">🔊</span>
@@ -1667,6 +1722,9 @@
       <span class="volPct" id="volPct">100%</span>
     </div>
     <div class="settings" id="settings">
+      <div class="setToggle" id="setToggle" role="button" aria-expanded="true">
+        <span>⚙️ 设置</span><span class="setArrow">▾</span>
+      </div>
       <div class="setRow">
         <span class="setLabel">🎵 音乐<span class="hint">BGM 分音量</span></span>
         <input id="bgmSlider" type="range" min="0" max="100" value="100" aria-label="音乐音量">
@@ -1724,6 +1782,7 @@
           <button id="btnSaveImport">导入恢复</button>
         </div>
       </div>
+    </div>
     </div>
   </div>
 
@@ -1878,7 +1937,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V2.9</div>
+  <div id="mark">DESIGNED BY QIAN · V3.0</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2243,7 +2302,7 @@
         edBtnsEl = $('edBtns'), edListEl = $('edList'),
         saveBox = $('saveBox'), saveBody = $('saveBody'),
         volRow = $('volRow'), volSlider = $('volSlider'), volPct = $('volPct'), volIcon = $('volIcon'),
-        settings = $('settings'), bgmSlider = $('bgmSlider'), sfxSlider = $('sfxSlider'),
+        settings = $('settings'), setToggle = $('setToggle'), bgmSlider = $('bgmSlider'), sfxSlider = $('sfxSlider'),
         perfSeg = $('perfSeg'), motionSeg = $('motionSeg'), settingsFullBtn = $('settingsFullBtn'),
         contrastSeg = $('contrastSeg'), cbSeg = $('cbSeg'),
         randMapSeg = $('randMapSeg'),     // —— v0.2.9 随机地图开关 ——
@@ -5692,6 +5751,7 @@
     // v0.2.1 PWA 安装按钮：仅标题页且浏览器支持安装时显示
     if (btnInstall) btnInstall.style.display = (kind === 'title' && deferredInstall) ? 'block' : 'none';
     if (kind === 'title') {
+      overlay.classList.remove('hideMain');
       btnAch.style.display = 'block';
       if (btnCareer) btnCareer.style.display = 'block';
       volRow.style.display = 'flex';
@@ -5717,6 +5777,7 @@
         ? '左下摇杆八方向走位 · 右下按钮开火'
         : 'WASD / 方向键移动（可斜向） · 空格开火 · P 暂停 · M 静音';
     } else if (kind === 'paused') {
+      overlay.classList.add('hideMain');
       btnRestart.style.display = 'block';
       btnQuit.style.display = 'block';
       volRow.style.display = 'flex';
@@ -5729,6 +5790,7 @@
       btnPlay.textContent = '继续游戏';
       ovTip.textContent = '';
     } else {
+      overlay.classList.add('hideMain');
       ovTitle.textContent = won ? '胜 利' : '游戏结束';
       ovTitle.style.color = won ? '#00f0ff' : '#ff2d55';
       ovSub.textContent = won ? '基地守住了！' : '基地被摧毁了…';
@@ -7162,7 +7224,7 @@
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V2.9', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V3.0', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -7337,6 +7399,22 @@
     const b = e.target.closest('button'); if (b) setDifficulty(b.dataset.diff);
   });
   settingsFullBtn.addEventListener('click', () => { ensureAudio(); toggleFullscreen(); });
+  // —— v0.3.0 设置面板可折叠（默认收起，保持标题页整洁） ——
+  const LS_SETCOLLAPSE = 'tank-battle-settings-collapsed';
+  let setCollapsed = true;
+  try { if (localStorage.getItem(LS_SETCOLLAPSE) === '0') setCollapsed = false; } catch (e) {}
+  function applySetCollapse() {
+    settings.classList.toggle('collapsed', setCollapsed);
+    if (setToggle) setToggle.setAttribute('aria-expanded', String(!setCollapsed));
+  }
+  if (setToggle) {
+    setToggle.addEventListener('click', () => {
+      setCollapsed = !setCollapsed;
+      try { localStorage.setItem(LS_SETCOLLAPSE, setCollapsed ? '1' : '0'); } catch (e) {}
+      applySetCollapse();
+    });
+  }
+  applySetCollapse();
   // v0.2.3 存档备份 / 恢复
   document.getElementById('btnSaveExport').addEventListener('click', () => { ensureAudio(); openSaveBox('export'); });
   document.getElementById('btnSaveImport').addEventListener('click', () => { ensureAudio(); openSaveBox('import'); });
