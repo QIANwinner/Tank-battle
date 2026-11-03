@@ -87,6 +87,9 @@ async function main() {
     const t = (name, pass, detail) => R.push({ name, pass: !!pass, detail: String(detail ?? '') });
     const sleep = (ms) => new Promise(r => setTimeout(r, ms));
     const wm = () => T.wingman();
+    // —— v0.3.3 僚机皮肤期望值（镜像 index.html WINGMAN_SKINS）——
+    const WING_PRICE = { gold: 120, violet: 140, onyx: 180 };
+    const WING_COLOR = { violet: '#8a2be2' };
 
     // 清场开图，避免地图干扰
     const openField = () => { T.clearMap(); };
@@ -152,6 +155,42 @@ async function main() {
       const w = wm();
       t('W7 僚机存在不影响玩家命数', T.livesNow() === livesBefore && !!w, 'lives=' + T.livesNow());
     } catch (e) { t('W7 僚机存在不影响玩家命数', false, e.message); }
+
+    // ===== W8: 默认僚机皮肤 = wing-teal 免费拥有 =====
+    try {
+      T.setCoins(0); T.setWSkins({ owned: ['wing-teal'], equipped: 'wing-teal' });
+      const s = T.wskin();
+      t('W8 默认僚机皮肤 wing-teal 免费拥有', s.owned.includes('wing-teal') && s.equipped === 'wing-teal', JSON.stringify(s));
+    } catch (e) { t('W8 默认僚机皮肤 wing-teal 免费拥有', false, e.message); }
+
+    // ===== W9: 购买僚机皮肤扣金币 + 自动装备 =====
+    try {
+      T.setCoins(500);
+      const r = T.buyWSkin('wing-gold');
+      t('W9 购买 wing-gold 扣金币并装备', r.coins === 500 - WING_PRICE.gold && r.owned.includes('wing-gold') && r.equipped === 'wing-gold', JSON.stringify(r));
+    } catch (e) { t('W9 购买 wing-gold 扣金币并装备', false, e.message); }
+
+    // ===== W10: 再购 wing-violet 并验证颜色生效 =====
+    try {
+      T.setCoins(500);
+      const r = T.buyWSkin('wing-violet');
+      const color = T.wingmanColor();
+      t('W10 购买 wing-violet 颜色生效', r.coins === 500 - WING_PRICE.violet && r.equipped === 'wing-violet' && color === WING_COLOR.violet, 'coins=' + r.coins + ' equipped=' + r.equipped + ' color=' + color);
+    } catch (e) { t('W10 购买 wing-violet 颜色生效', false, e.message); }
+
+    // ===== W11: 金币不足购买被拒（保持已装备不变） =====
+    try {
+      T.setCoins(50);
+      const before = T.wskin().owned.length;
+      const r = T.buyWSkin('wing-onyx');
+      t('W11 金币不足购买被拒', r.owned.length === before && r.equipped === 'wing-violet', 'owned=' + r.owned.length + ' equipped=' + r.equipped);
+    } catch (e) { t('W11 金币不足购买被拒', false, e.message); }
+
+    // ===== W12: 手动装备已购皮肤 =====
+    try {
+      const r = T.equipWSkin('wing-gold');
+      t('W12 装备已购 wing-gold', r.equipped === 'wing-gold', 'equipped=' + r.equipped);
+    } catch (e) { t('W12 装备已购 wing-gold', false, e.message); }
 
     return R;
   })()
