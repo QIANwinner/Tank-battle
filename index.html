@@ -2003,7 +2003,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V3.1</div>
+  <div id="mark">DESIGNED BY QIAN · V3.2</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2053,6 +2053,7 @@
       <button class="shopTab active" id="tabBonus">永久加成</button>
       <button class="shopTab" id="tabSkins">角色皮肤</button>
       <button class="shopTab" id="tabGacha">🎰 抽奖</button>
+      <button class="shopTab" id="tabPets">🐾 宠物</button>
     </div>
     <div class="shopBody" id="shopBody"></div>
   </div>
@@ -2350,6 +2351,7 @@
         btnShop = $('btnShop'), btnShopClose = $('btnShopClose'),
         tabBonus = $('tabBonus'), tabSkins = $('tabSkins'),
         tabGacha = $('tabGacha'),   // v0.2.9 抽奖箱 tab
+        tabPets = $('tabPets'),     // v0.3.2 宠物 tab
         // v0.2.3 里程碑庆典
         milestone = $('milestone'), miloFire = $('miloFire'),
         miloTitle = $('miloTitle'), miloSub = $('miloSub'),
@@ -2498,7 +2500,10 @@
         LS_BESTWAVE = 'tank-battle-bestwave',// —— v0.2.6 无尽模式最高波次 ——
         LS_GACHA = 'tank-battle-gacha',      // —— v0.2.9 抽奖箱累计次数 ——
         LS_BONUSSPENT = 'tank-battle-bonus-spent', // —— v0.2.9 强化累计投入（重置返还用） ——
-        LS_SIGNIN = 'tank-battle-signin';         // —— v0.3.1 每日签到 {last, streak} ——
+        LS_SIGNIN = 'tank-battle-signin',         // —— v0.3.1 每日签到 {last, streak} ——
+        LS_PET = 'tank-battle-pet',               // —— v0.3.2 宠物：当前装备 id ——
+        LS_PETOWN = 'tank-battle-petown',         // —— v0.3.2 宠物：已购 id 数组 ——
+        LS_PETLV = 'tank-battle-petlv';           // —— v0.3.2 宠物：等级 {id: lv} ——
   let coins = 0;                                                       // 金币余额
   let bonus = { lifeup: 0, cd: 0, spd: 0, coinup: 0, shield: 0, revive: 0, combo: 0, bulletspd: 0, pierce: 0, supply: 0, focus: 0 };      // 永久加成等级
   let baseLevel = 0;                                                   // 基地升级等级（护墙阵法）
@@ -2527,6 +2532,13 @@
     // —— v0.2.9 抽奖箱 / 强化重置状态 ——
     gachaCount = Math.max(0, parseInt(localStorage.getItem(LS_GACHA) || '0', 10) || 0);
     bonusSpent = Math.max(0, parseInt(localStorage.getItem(LS_BONUSSPENT) || '0', 10) || 0);
+    // —— v0.3.2 宠物持久化：已购 / 等级 / 当前装备 ——
+    const op = JSON.parse(localStorage.getItem(LS_PETOWN) || '[]');
+    if (Array.isArray(op)) ownedPets = op.filter(id => PET_MAP[id]);
+    const pl = JSON.parse(localStorage.getItem(LS_PETLV) || '{}');
+    if (pl && typeof pl === 'object') for (const k in pl) if (PET_MAP[k]) petLevels[k] = Math.min(Math.max(0, parseInt(pl[k], 10) || 0), PET_MAP[k].maxLv);
+    const eqp = localStorage.getItem(LS_PET);
+    if (eqp && PET_MAP[eqp] && ownedPets.includes(eqp)) pet = { id: eqp, level: Math.max(1, petLevels[eqp] || 1) };
   } catch (e) { /* 隐私模式下 localStorage 不可用 */ }
   function saveCoins() { try { localStorage.setItem(LS_COINS, String(coins)); } catch (e) {} }
   function saveBonus() { try { localStorage.setItem(LS_BONUS, JSON.stringify(bonus)); } catch (e) {} }
@@ -2538,6 +2550,10 @@
   function saveBestWave() { try { localStorage.setItem(LS_BESTWAVE, String(bestWave)); } catch (e) {} }
   function saveGacha() { try { localStorage.setItem(LS_GACHA, String(gachaCount)); } catch (e) {} }
   function saveBonusSpent() { try { localStorage.setItem(LS_BONUSSPENT, String(bonusSpent)); } catch (e) {} }
+  // —— v0.3.2 宠物持久化 ——
+  function savePet() { try { localStorage.setItem(LS_PET, pet ? pet.id : ''); } catch (e) {} }
+  function savePetOwn() { try { localStorage.setItem(LS_PETOWN, JSON.stringify(ownedPets)); } catch (e) {} }
+  function savePetLv() { try { localStorage.setItem(LS_PETLV, JSON.stringify(petLevels)); } catch (e) {} }
   // —— v0.2.6 关卡星级算法：无伤 / 剩余生命 / 用时 各 +1，至少 1 星 ——
   function starsForLevel(lv, nohit, livesLeft, secs) {
     let s = 1;
@@ -2614,6 +2630,22 @@
     { id: 'focus',   icon: '🔍', name: '连击专注', desc: '连击窗口 +25%',   max: 3, unit: '级', price: [60, 140, 300] },
   ];
 
+  // —— v0.3.2 宠物系统：跟随玩家的萌宠，提供被动加成（商店购买 + 金币喂养升级） ——
+  // passive: coin 金币获取+10%/级 | shield 每关开局护盾+1秒/级 | combo 连击窗口+15%/级
+  const PET_DEF = [
+    { id: 'cat',    name: '招财猫', icon: '🐱', price: 200, passive: 'coin',   desc: '金币获取 +10%',   color: '#ffb347', maxLv: 3 },
+    { id: 'turtle', name: '守护龟', icon: '🐢', price: 350, passive: 'shield', desc: '每关开局护盾 +1 秒', color: '#39ff14', maxLv: 3 },
+    { id: 'bunny',  name: '幸运兔', icon: '🐰', price: 500, passive: 'combo',  desc: '连击窗口 +15%',    color: '#ff8ab0', maxLv: 3 },
+  ];
+  const PET_MAP = {};
+  PET_DEF.forEach(p => { PET_MAP[p.id] = p; });
+  const PET_LV_PRICE = [0, 150, 400];   // 升到 2 级 / 3 级的金币消耗（1→2→3）
+  let pet = null;            // 当前装备宠物 { id, level }
+  let ownedPets = [];        // 已购宠物 id 数组
+  let petLevels = {};        // 宠物等级 { id: 1..maxLv }
+  let petFollow = null;      // 局内跟随实体（弹簧插值）
+  let petAnim = 0;           // 宠物动画计时
+
   // ===== 状态 =====
   let map = [];
   // v0.2.0 静态地图离屏缓存：背景+网格+砖/钢/水 烘焙一次，每帧只 drawImage，油桶/传送门/草丛/实体仍动态
@@ -2624,6 +2656,8 @@
   let player2 = null;          // v0.2.7 双人同屏 P2
   let multiMode = 0;           // v0.2.7 0 单人 / 1 合作 / 2 对抗
   let lives2 = 3;              // v0.2.7 P2 生命
+  let wingman = null;          // v0.3.2 AI 僚机（仅单人模式）
+  let wingmanEnabled = true;   // v0.3.2 真实游玩默认开启；测试 startGame 钩子关闭以保确定性
   let bullets = [];
   let enemies = [];
   let particles = [];
@@ -2862,7 +2896,14 @@
     { id: 'coins10k', icon: '🏦', name: '财富自由', desc: '生涯累计获得金币 10000', reward: 300 },
     { id: 'boss20',   icon: '👑', name: '屠龙勇士', desc: '生涯累计 Boss 击杀 20', reward: 300 },
     { id: 'win50',    icon: '🏆', name: '常胜将军', desc: '生涯累计胜利 50', reward: 300 },
-    { id: 'star20',   icon: '⭐', name: '摘星大师', desc: '累计获得星数 20', reward: 250 }
+    { id: 'star20',   icon: '⭐', name: '摘星大师', desc: '累计获得星数 20', reward: 250 },
+    // —— v0.3.2 成就系统加深：高难隐藏成就 ——
+    { id: 'combo15',  icon: '⚡', name: '连击狂神', desc: '单次连击达到 15', reward: 200 },
+    { id: 'speedster', icon: '⏱', name: '闪电侠', desc: '单关 30 秒内通关', reward: 180 },
+    { id: 'collector', icon: '🎨', name: '收藏家', desc: '拥有 15 款皮肤', reward: 300 },
+    { id: 'endless50', icon: '🌌', name: '深渊王者', desc: '无尽模式到达第 50 波', reward: 500 },
+    { id: 'rich2',    icon: '🏛', name: '金币大亨', desc: '金币余额达到 10000', reward: 400 },
+    { id: 'milo40',   icon: '🏔', name: '传奇之路', desc: '到达第 40 关', reward: 400 }
   ];
   // —— v0.2.7 成就分组（分组进度条用） ——
   const ACH_GROUP = {
@@ -2870,7 +2911,10 @@
     kills200: 'combat', boss20: 'combat', win50: 'combat',
     daily: 'challenge', timed: 'challenge', hard: 'challenge', daily3: 'challenge', save: 'challenge',
     score5k: 'depth', lv5: 'depth', milo20: 'depth', rich: 'depth', endless10: 'depth',
-    endless30: 'depth', star20: 'depth', coins10k: 'depth'
+    endless30: 'depth', star20: 'depth', coins10k: 'depth',
+    // —— v0.3.2 成就分组映射 ——
+    combo15: 'combat', speedster: 'challenge', collector: 'depth',
+    endless50: 'depth', rich2: 'depth', milo40: 'depth'
   };
   const ACH_GROUPS = [
     { id: 'combat', name: '⚔️ 战斗', icon: '⚔️' },
@@ -3065,10 +3109,23 @@
     const urgent = sec <= 3;
     beep(urgent ? 1320 : 880, urgent ? 0.07 : 0.05, 'square', urgent ? 0.06 : 0.04);
   };
+  // —— v0.3.2 音效场景扩充：胜利礼花 / 失败下行 / 金币 / 购买 / 大招充能 ——
+  const sfxWin = () => {
+    [523, 659, 784, 1046, 1318, 1568].forEach((f, i) => setTimeout(() => sweep(f, f * 1.03, 0.18, 'triangle', 0.05), i * 80));
+    [0, 160, 340].forEach((d, i) => setTimeout(() => noiseBurst(0.1, 0.04 + i * 0.012, 2600, 320), d));
+  };
+  const sfxLose = () => {
+    sweep(392, 196, 0.5, 'sawtooth', 0.08);
+    setTimeout(() => sweep(196, 98, 0.6, 'sawtooth', 0.07), 260);
+    setTimeout(() => sweep(98, 55, 0.8, 'triangle', 0.06), 520);
+  };
+  const sfxCoin = () => { beep(1568, 0.05, 'sine', 0.045); setTimeout(() => beep(2093, 0.08, 'sine', 0.04), 55); };
+  const sfxBuy = () => { sweep(660, 990, 0.09, 'triangle', 0.05); setTimeout(() => sweep(990, 1320, 0.12, 'triangle', 0.05), 80); };
+  const sfxUltReady = () => { sweep(520, 1040, 0.16, 'square', 0.05); setTimeout(() => sweep(1040, 1560, 0.12, 'square', 0.04), 120); };
 
   // ===== BGM：程序化 8-bit 循环（平静 / 战斗 / Boss / 无尽紧迫 四首，可关） =====
   const BGM_NOTES = {
-    G2: 98, C3: 130.81, D3: 146.83, E3: 164.81, F3: 174.61, G3: 196, A3: 220, B3: 246.94,
+    F2: 87.31, G2: 98, A2: 110, C3: 130.81, D3: 146.83, E3: 164.81, F3: 174.61, G3: 196, A3: 220, B3: 246.94,
     C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392, A4: 440, B4: 493.88,
     C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99, A5: 880, R: 0
   };
@@ -3093,8 +3150,24 @@
     bass: ['E3','E3','E3','E3','A3','A3','A3','A3','G3','G3','G3','G3','B3','B3','B3','B3'],
     lead: ['E5','G5','A5','G5','E5','R','D5','E5','G5','A5','G5','E5','R','R','E5','G5']
   };
-  const BGM_TRACKS = { calm: BGM_CALM, battle: BGM_BATTLE, boss: BGM_BOSS, rush: BGM_RUSH };
-  let bgmMode = 'off';        // 'off' | 'calm' | 'battle' | 'boss' | 'rush'
+  // —— v0.3.2 新增场景曲：主菜单舒缓 / 胜利庆祝 / 失败低沉 ——
+  const BGM_MENU = {
+    bpm: 72,
+    bass: ['C3','R','R','R','A2','R','R','R','F2','R','R','R','G2','R','R','R'],
+    lead: ['E4','R','C4','R','D4','R','B3','R','C4','R','A3','R','G3','R','B3','R']
+  };
+  const BGM_VICTORY = {
+    bpm: 120,
+    bass: ['C3','C3','G3','G3','A3','A3','E3','E3','F3','F3','C4','C4','G3','G3','C3','R'],
+    lead: ['C5','E5','G5','E5','C5','R','A4','C5','E5','C5','A4','R','G4','B4','C5','R']
+  };
+  const BGM_DEFEAT = {
+    bpm: 64,
+    bass: ['C3','R','G2','R','C3','R','A2','R','F2','R','C3','R','G2','R','C3','R'],
+    lead: ['A3','R','G3','R','E3','R','F3','R','E3','R','C3','R','D3','R','C3','R']
+  };
+  const BGM_TRACKS = { calm: BGM_CALM, battle: BGM_BATTLE, boss: BGM_BOSS, rush: BGM_RUSH, menu: BGM_MENU, victory: BGM_VICTORY, defeat: BGM_DEFEAT };
+  let bgmMode = 'off';        // 'off' | 'calm' | 'battle' | 'boss' | 'rush' | 'menu' | 'victory' | 'defeat'
   let bgmStep = 0, bgmNextTime = 0, bgmTimer = null;
 
   function bgmNote(freq, time, dur, type, vol) {
@@ -3121,7 +3194,9 @@
     const bl  = st.bossLevel !== undefined ? st.bossLevel : bossLevel;
     const bw  = st.bossWarn !== undefined ? st.bossWarn : bossWarn;
     const bossAlive = st.bossAlive !== undefined ? st.bossAlive : enemies.some(e => e.isBoss && !e.dead);
-    if (pau || !run || go) return 'calm';
+    const wvWin = st.won !== undefined ? st.won : won;   // v0.3.2 结算曲可注入测试
+    if (go) return wvWin ? 'victory' : 'defeat';   // v0.3.2 结算场景曲：胜/败
+    if (pau || !run) return 'calm';
     if (bossAlive || (bl && bw > 0)) return 'boss';
     if (em && wv >= BGM_RUSH_WAVE) return 'rush';
     return 'battle';
@@ -3509,6 +3584,192 @@
     };
   }
 
+  // ===== v0.3.2 AI 僚机 =====
+  // 单人模式并肩作战的友军坦克：跟随走位、协同开火、独立血条与重生
+  const WINGMAN_HP = 5;           // 僚机血量
+  const WINGMAN_RESPAWN = 9;      // 坠毁后重生时间（秒）
+  function makeWingman(px, py) {
+    return {
+      x: (px ?? SPAWN.x + 1) * TILE + (TILE - (TANK_SIZE - 4)) / 2,
+      y: (py ?? SPAWN.y) * TILE + (TILE - (TANK_SIZE - 4)) / 2,
+      dir: DIR.UP, speed: PLAYER_SPEED * 0.92,
+      cooldown: 0, isPlayer: true, isWingman: true, color: '#2ec4b6',
+      size: TANK_SIZE - 4, spawnInv: 0, hitFlash: 0, portalCd: 0,
+      hp: WINGMAN_HP, maxHp: WINGMAN_HP,
+      respawnT: 0, strafe: 1, strafeT: 2
+    };
+  }
+  // 距 (x,y) 最近存活敌人（Boss 出场下降中不可锁定）
+  function nearestEnemyTo(x, y) {
+    let best = null, bd = 1e18;
+    for (const e of enemies) {
+      if (e.dead) continue;
+      if (e.isBoss && e.enterT > 0) continue;
+      const d = (e.x - x) * (e.x - x) + (e.y - y) * (e.y - y);
+      if (d < bd) { bd = d; best = e; }
+    }
+    return best;
+  }
+  // 僚机 AI：跟随玩家 / 绕敌侧翼游走 / 朝最近敌人协同开火
+  function updateWingman(k) {
+    if (!wingman) return;
+    if (wingman.dead) {
+      wingman.respawnT -= k;
+      if (wingman.respawnT <= 0) respawnWingman();
+      return;
+    }
+    if (wingman.spawnInv > 0) wingman.spawnInv -= k;
+    if (wingman.cooldown > 0) wingman.cooldown -= k;
+    if (wingman.hitFlash > 0) wingman.hitFlash -= k;
+
+    const tgt = nearestEnemyTo(wingman.x, wingman.y);
+    const px = player && !player.dead ? player.x : wingman.x;
+    const py = player && !player.dead ? player.y : wingman.y;
+
+    let moveDir = null, aimDir = null;
+    if (tgt) {
+      const dx = tgt.x - wingman.x, dy = tgt.y - wingman.y;
+      const dist = Math.hypot(dx, dy);
+      aimDir = dirFromVec(dx, dy);
+      // 保持中距离压制：太远靠近，太近拉开，中距绕敌侧翼游走
+      if (dist > 9 * TILE) moveDir = dirFromVec(dx, dy);
+      else if (dist < 4.5 * TILE) moveDir = dirFromVec(-dx, -dy);
+      else {
+        wingman.strafeT -= k;
+        if (wingman.strafeT <= 0) { wingman.strafe = -wingman.strafe; wingman.strafeT = 2 + Math.random() * 2; }
+        moveDir = dirFromVec(-dy * wingman.strafe, dx * wingman.strafe);
+      }
+      // 离玩家太远则先归队
+      const pd = Math.hypot(px - wingman.x, py - wingman.y);
+      if (pd > 10 * TILE) moveDir = dirFromVec(px - wingman.x, py - wingman.y);
+    } else {
+      // 无敌人：跟随玩家侧翼位（保持 2~5 格距离）
+      const pdx = px - wingman.x, pdy = py - wingman.y;
+      const pd = Math.hypot(pdx, pdy);
+      if (pd > 4 * TILE) moveDir = dirFromVec(pdx, pdy);
+      else if (pd < 1.6 * TILE) moveDir = dirFromVec(-pdx, -pdy);
+    }
+    if (moveDir !== null) {
+      wingman.dir = moveDir;
+      if (!moveTank(wingman, k)) wingman.dir = pickFreeDir(wingman, 0.5);
+    }
+    // 协同开火：面向目标、射程内、冷却完毕
+    if (tgt && aimDir !== null) {
+      wingman.dir = aimDir;
+      const dist = Math.hypot(tgt.x - wingman.x, tgt.y - wingman.y);
+      if (dist < 13 * TILE && wingman.cooldown <= 0) {
+        wingman.cooldown = 0;
+        fire(wingman);                       // 复用玩家射击（isPlayer=true 生成友方弹）
+        wingman.cooldown = Math.max(wingman.cooldown, 24);  // 射速略慢于玩家
+      }
+    }
+  }
+  function hurtWingman(n) {
+    if (!wingman || wingman.dead) return;
+    wingman.hp -= n; wingman.hitFlash = 6;
+    if (wingman.hp <= 0) destroyWingman();
+    else { sfxHit(); spawnParticles(wingman.x + wingman.size / 2, wingman.y + wingman.size / 2, '#2ec4b6', 8); }
+  }
+  function destroyWingman() {
+    if (!wingman) return;
+    const cx = wingman.x + wingman.size / 2, cy = wingman.y + wingman.size / 2;
+    spawnParticles(cx, cy, '#2ec4b6', 22);
+    sfxBoom(); shake = Math.max(shake, 6); vibe(40);
+    addText(cx, cy - 12, '僚机坠毁!', '#7fd7ff');
+    wingman.dead = true; wingman.hp = 0;
+    wingman.respawnT = WINGMAN_RESPAWN;
+  }
+  function respawnWingman() {
+    if (!wingman) return;
+    // 在玩家周围找一处空位重生，找不到则回出生点
+    const spots = [[SPAWN.x + 1, SPAWN.y], [SPAWN.x - 1, SPAWN.y], [SPAWN.x + 2, SPAWN.y], [SPAWN.x, SPAWN.y + 1]];
+    const px = player && !player.dead ? player.x : SPAWN.x * TILE;
+    const py = player && !player.dead ? player.y : SPAWN.y * TILE;
+    let sx = SPAWN.x + 1, sy = SPAWN.y;
+    for (const [gx, gy] of spots) {
+      const gpx = gx * TILE + (TILE - wingman.size) / 2, gpy = gy * TILE + (TILE - wingman.size) / 2;
+      if (!isBlocked(gpx, gpy, wingman.size) && !tankHitsTank(gpx, gpy, wingman.size, wingman)) { sx = gx; sy = gy; break; }
+    }
+    wingman.x = sx * TILE + (TILE - wingman.size) / 2;
+    wingman.y = sy * TILE + (TILE - wingman.size) / 2;
+    wingman.dead = false; wingman.hp = wingman.maxHp;
+    wingman.spawnInv = 90; wingman.dir = DIR.UP;
+    addText(wingman.x + wingman.size / 2, wingman.y - 12, '僚机归队!', '#7fd7ff');
+    sfxCoin();
+  }
+  // 僚机头顶血条（渲染叠加）
+  function drawWingmanHp() {
+    if (!wingman || wingman.dead) return;
+    const w = wingman.size + 6, hx = wingman.x - 3, hy = wingman.y - 8;
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fillRect(hx, hy, w, 4);
+    ctx.fillStyle = '#2ec4b6';
+    ctx.fillRect(hx + 0.5, hy + 0.5, (w - 1) * Math.max(0, wingman.hp / wingman.maxHp), 3);
+    ctx.strokeStyle = 'rgba(126,215,255,0.6)'; ctx.lineWidth = 0.6;
+    ctx.strokeRect(hx + 0.5, hy + 0.5, w - 1, 3);
+  }
+
+  // ===== v0.3.2 宠物跟随实体 =====
+  // 纯装饰 + 被动加成（加成在 addGold/start/addKillScore 接入）；弹簧跟随玩家斜后方
+  function updatePet(k) {
+    if (!pet) { petFollow = null; return; }
+    const host = (player && !player.dead) ? player : null;
+    if (!host) { petFollow = null; return; }
+    if (!petFollow) petFollow = { x: host.x - 12, y: host.y + 12, bob: rand(0, 6) };
+    // 目标：玩家斜后方（基于朝向反方向偏移 + 右侧偏移）
+    const bx = -DX[host.dir] * 15 - DY[host.dir] * 11;
+    const by = -DY[host.dir] * 15 + DX[host.dir] * 11;
+    const tx = host.x + bx, ty = host.y + by;
+    const lerp = Math.min(1, 0.16 * k);
+    petFollow.x += (tx - petFollow.x) * lerp;
+    petFollow.y += (ty - petFollow.y) * lerp;
+    petFollow.x = clamp(petFollow.x, TILE, W - TILE - 16);
+    petFollow.y = clamp(petFollow.y, TILE, H - TILE - 16);
+    petAnim += k;
+  }
+  function drawPet() {
+    if (!pet || !petFollow || !player || player.dead) return;
+    const def = PET_MAP[pet.id];
+    const px = petFollow.x + 8, py = petFollow.y + 8;
+    const bobY = Math.sin(petAnim * 0.09) * 2.2;
+    ctx.save();
+    setGlow(def.color, 7);
+    // 身体
+    ctx.fillStyle = def.color;
+    ctx.beginPath(); ctx.ellipse(px, py + bobY, 7.5, 6.2, 0, 0, Math.PI * 2); ctx.fill();
+    // 头部（朝向前方偏左，随动画轻摆）
+    const hx = px - 2.5, hy = py - 6 + bobY * 0.6;
+    ctx.fillStyle = shade(def.color, -12);
+    ctx.beginPath(); ctx.arc(hx, hy, 4.4, 0, Math.PI * 2); ctx.fill();
+    // 耳朵（猫/兔尖耳；龟无）
+    if (def.id !== 'turtle') {
+      ctx.fillStyle = shade(def.color, 18);
+      ctx.beginPath(); ctx.moveTo(hx - 3.6, hy - 1.5); ctx.lineTo(hx - 2.2, hy - 7.5); ctx.lineTo(hx - 0.6, hy - 3.4); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(hx + 0.6, hy - 3.4); ctx.lineTo(hx + 2.2, hy - 7.5); ctx.lineTo(hx + 3.6, hy - 1.5); ctx.closePath(); ctx.fill();
+    } else {
+      // 龟壳纹
+      ctx.strokeStyle = shade(def.color, -35); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(px, py + bobY, 4, 0, Math.PI * 2); ctx.stroke();
+    }
+    // 眼睛
+    ctx.fillStyle = '#1a0a10';
+    ctx.beginPath(); ctx.arc(hx - 1.4, hy - 0.6, 0.9, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(hx + 1.4, hy - 0.6, 0.9, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+    // 等级星标（小金星）
+    if (pet.level > 1) {
+      ctx.fillStyle = '#ffd700';
+      for (let i = 0; i < pet.level - 1; i++) {
+        const sx = px - 6 + i * 5, sy = py + 8.5;
+        ctx.beginPath(); ctx.moveTo(sx, sy - 2.2); ctx.lineTo(sx + 0.8, sy - 0.6); ctx.lineTo(sx + 2.4, sy - 0.5);
+        ctx.lineTo(sx + 1.2, sy + 0.8); ctx.lineTo(sx + 1.5, sy + 2.4); ctx.lineTo(sx, sy + 1.4);
+        ctx.lineTo(sx - 1.5, sy + 2.4); ctx.lineTo(sx - 1.2, sy + 0.8); ctx.lineTo(sx - 2.4, sy - 0.5);
+        ctx.lineTo(sx - 0.8, sy - 0.6); ctx.closePath(); ctx.fill();
+      }
+    }
+    ctx.restore();
+  }
+
   function levelSpeedMul() { return Math.min(1 + (level - 1) * 0.06, 1.6); }
 
   function pickEnemyType() {
@@ -3874,6 +4135,11 @@
         if (d < 2.2 * TILE) killPlayer(p);
       }
     }
+    // —— v0.3.2 自爆冲击波波及僚机（扣 2 血） ——
+    if (wingman && !wingman.dead && !(wingman.spawnInv > 0)) {
+      const d = Math.hypot(wingman.x + wingman.size / 2 - cx, wingman.y + wingman.size / 2 - cy);
+      if (d < 2.2 * TILE) hurtWingman(2);
+    }
   }
 
   // —— 工兵：直冲基地，高射速专拆护墙 ——
@@ -3977,6 +4243,7 @@
     const others = [];
     if (player && player !== self && !player.dead) others.push(player);
     if (player2 && player2 !== self && !player2.dead) others.push(player2);   // v0.2.7 双人：坦克互撞
+    if (wingman && wingman !== self && !wingman.dead) others.push(wingman);   // v0.3.2 僚机为实体障碍
     const tanks = self.isPlayer ? enemies.concat(others) : enemies.concat(others);
     for (const t of tanks) {
       if (t === self || t.dead) continue;
@@ -4060,6 +4327,12 @@
             b.dead = true; killPlayer(p); return;
           }
         }
+        // —— v0.3.2 敌方弹命中僚机：扣其独立血条（不占玩家命数） ——
+        if (wingman && !wingman.dead && !(wingman.spawnInv > 0)) {
+          if (cx >= wingman.x && cx <= wingman.x + wingman.size && cy >= wingman.y && cy <= wingman.y + wingman.size) {
+            b.dead = true; hurtWingman(1); return;
+          }
+        }
       }
       // 子弹互撞（玩家弹拦截 Boss 弹有反馈）
       for (const o of bullets) {
@@ -4077,7 +4350,7 @@
   function updatePlayer(k) {
     if (!player || player.dead) return;
     if (player.cooldown > 0) player.cooldown -= k;
-    if (player.ultCd > 0) { player.ultCd -= k; if (player.ultCd <= 0) updateUltHud(); }
+    if (player.ultCd > 0) { player.ultCd -= k; if (player.ultCd <= 0) { updateUltHud(); sfxUltReady(); } }   // v0.3.2 大招充能完毕提示
     // 双轴独立读取：斜向键组合（如 W+D / 摇杆斜推）即走对角线
     // —— v0.2.7 双人同屏：P1 用 WASD（双人模式方向键让给 P2）；单人保留方向键兼容 ——
     let mx = 0, my = 0;
@@ -4239,19 +4512,30 @@
     }, 700);
   }
 
+  // ===== v0.3.2 宠物 =====
+  // 宠物被动加成等级（0 表示未装备该被动宠物；返回当前宠物在指定被动下的等级 1..3）
+  function petBonus(type) {
+    if (!pet) return 0;
+    const def = PET_MAP[pet.id];
+    if (!def || def.passive !== type) return 0;
+    return pet.level;
+  }
+
   // ===== 金币 =====
   function enemyGold(e) {
     const base = e.isBoss ? 60 + level * 10 : Math.round(ENEMY_TYPES[e.type].score / 10);
     return Math.max(1, Math.round(base * diffMul().reward));
   }
   function addGold(n, x, y) {
-    // 金运永久加成 +15%/级；金运强化 +30%/层
-    const gain = Math.max(1, Math.round(n * (1 + 0.15 * (bonus.coinup || 0)) * (1 + 0.3 * (upgrades.fortune || 0))));
+    // 金运永久加成 +15%/级；金运强化 +30%/层；宠物招财猫 +10%/级（v0.3.2）
+    const gain = Math.max(1, Math.round(n * (1 + 0.15 * (bonus.coinup || 0)) * (1 + 0.3 * (upgrades.fortune || 0)) * (1 + 0.10 * petBonus('coin'))));
     coins += gain; saveCoins(); updateCoinHud();
     // —— v0.2.7 生涯统计：累计获得金币（recordGame 统一持久化） ——
     career.totalCoins += gain;
     // —— v0.2.4 成就：金库余额达 3000 ——
     if (coins >= 3000) unlockAch('rich');
+    // —— v0.3.2 金币大亨：余额达 10000 ——
+    if (coins >= 10000) unlockAch('rich2');
     if (x !== undefined && y !== undefined) addText(x, y, '+' + gain + '🪙', '#ffd700');
     return gain;
   }
@@ -4317,10 +4601,11 @@
 
   function addKillScore(e) {
     combo++;
-    // 连击窗口：连击专注永久加成 +25%/级
-    comboTimer = 5 * (1 + 0.25 * (bonus.focus || 0));
+    // 连击窗口：连击专注永久加成 +25%/级；宠物幸运兔 +15%/级（v0.3.2）
+    comboTimer = 5 * (1 + 0.25 * (bonus.focus || 0)) * (1 + 0.15 * petBonus('combo'));
     if (combo > stat.maxCombo) stat.maxCombo = combo;
     if (combo >= 8) unlockAch('combo8');
+    if (combo >= 15) unlockAch('combo15');   // v0.3.2 连击狂神
     const baseScore = e.isBoss ? 1000 * level : ENEMY_TYPES[e.type].score;
     // 连击暴击：连击系数加成 +50%；战利品猎手：基础分 +25%/层；连击大师：连击得分 +10%/级
     const mult = (1 + (combo - 1) * 0.1 * (1 + 0.5 * (upgrades.double || 0))) * (1 + 0.1 * (bonus.combo || 0));
@@ -4461,6 +4746,8 @@
     if (level >= 5) unlockAch('lv5');
     // —— v0.2.4 成就：里程碑之路 第 20 关 ——
     if (level >= 20) unlockAch('milo20');
+    // —— v0.3.2 传奇之路：第 40 关 ——
+    if (level >= 40) unlockAch('milo40');
     // v0.2.3 里程碑：刚打完 10/20/30... 关，全屏庆典
     if (level > 1 && (level - 1) % 10 === 0) triggerMilestone();
     // 过关奖励金币（随关卡提升，受金运加成；战地补给 +20%/级 加成基数；难度系数）
@@ -4501,6 +4788,8 @@
       // —— v0.2.7 摘星大师：累计 20 星 ——
       if (career.totalStars >= 20) unlockAch('star20');
     }
+    // —— v0.3.2 闪电侠：单关 30 秒内通关 ——
+    if (levelSecs <= 30) unlockAch('speedster');
     if (maxUnlocked < level + 1) { maxUnlocked = level + 1; saveMaxLv(); }
     lvResultPending = true;
     lvResult.classList.add('show');
@@ -4511,7 +4800,7 @@
     lvResult.classList.remove('show');
     const g = addGold(lvStarsNow * 25);
     showToast('⭐ ' + lvStarsNow + ' 星 · 星级奖励 🪙+' + g);
-    sfxPickup();
+    sfxCoin();   // v0.3.2 金币入账音
     updateHud();
     // 第一关通过 → 内测广告弹窗（一次性），领完/跳过再进强化面板
     if (maybeShowAdPopup()) return;
@@ -4537,7 +4826,7 @@
     try { localStorage.setItem(LS_AD1, '1'); } catch (e) { /* 忽略 */ }
     coins += 1000; saveCoins(); updateCoinHud();   // 固定 1000，不受金运影响
     showToast('🎁 内测奖励 +1000 🪙');
-    sfxPickup();
+    sfxCoin();   // v0.3.2 金币入账音
     hideAdPopup();
     offerUpgrades();               // 领完继续强化三选一
   }
@@ -4585,6 +4874,14 @@
       player2.y = 1 * TILE + (TILE - TANK_SIZE) / 2;
       player2.dir = DIR.UP;
       if (upgrades.shield > 0) player2.spawnInv = Math.max(player2.spawnInv || 0, 180);
+    }
+    // —— v0.3.2 僚机换关：归位玩家侧翼、满血 ——
+    if (wingman) {
+      wingman.dead = false;
+      wingman.hp = wingman.maxHp;
+      wingman.respawnT = 0;
+      respawnWingman();
+      if (upgrades.shield > 0) wingman.spawnInv = Math.max(wingman.spawnInv || 0, 180);
     }
     lastLives = -1; lastCombo = -1;
     updateHud();
@@ -4717,6 +5014,8 @@
 
     updatePlayer(k);
     if (multiMode) updatePlayer2(k);   // —— v0.2.7 双人同屏 P2 ——
+    updateWingman(k);                  // —— v0.3.2 AI 僚机 ——
+    updatePet(k);                      // —— v0.3.2 宠物跟随 ——
     enemies.forEach(e => { if (e.portalCd > 0) e.portalCd -= k; updateEnemy(e, k); checkPortal(e); });
     bullets.forEach(b => updateBullet(b, k));
     updateLasers(k);        // —— v0.2.5 猎手激光扫射 ——
@@ -4740,6 +5039,23 @@
           p.x += dx / len * push; p.y += dy / len * push;
           e.x -= dx / len * push; e.y -= dy / len * push;
           if (p === player) clampPlayer(); else clampPlayer2();
+          e.changeTimer = Math.min(e.changeTimer, 10);
+        }
+      }
+    }
+    // —— v0.3.2 僚机与敌人碰撞推开（防止叠模） ——
+    if (wingman && !wingman.dead) {
+      for (const e of enemies) {
+        if (e.dead) continue;
+        const r = wingman.size - 1;
+        if (wingman.x < e.x + e.size - 1 && wingman.x + r > e.x && wingman.y < e.y + e.size - 1 && wingman.y + r > e.y) {
+          const dx = wingman.x - e.x, dy = wingman.y - e.y;
+          const len = Math.hypot(dx, dy) || 1;
+          const push = 0.5 * k;
+          wingman.x += dx / len * push; wingman.y += dy / len * push;
+          e.x -= dx / len * push; e.y -= dy / len * push;
+          wingman.x = clamp(wingman.x, TILE, W - TILE - wingman.size);
+          wingman.y = clamp(wingman.y, TILE, H - TILE - wingman.size);
           e.changeTimer = Math.min(e.changeTimer, 10);
         }
       }
@@ -5013,6 +5329,17 @@
         // 闪烁隐藏
       } else drawTank(p);
     }
+
+    // —— v0.3.2 AI 僚机（无敌闪烁 + 血条） ——
+    if (wingman && !wingman.dead) {
+      if (wingman.spawnInv > 0 && Math.floor(wingman.spawnInv / 4) % 2 === 0) {
+        // 闪烁隐藏
+      } else drawTank(wingman);
+      drawWingmanHp();
+    }
+
+    // —— v0.3.2 宠物跟随（绘制在玩家之上，不参与碰撞） ——
+    drawPet();
 
     // —— v0.2.5 猎手激光扫射（覆盖在坦克之上） ——
     drawLasers();
@@ -5427,6 +5754,35 @@
     const flashing = t.hitFlash > 0;
     // 装备皮肤（仅玩家）：按当前装备的皮肤配色绘制
     const skin = isPlayer ? (SKINS[equippedSkin] || SKINS.classic) : null;
+
+    // —— v0.3.2 僚机专属造型：青绿色友军坦克 + 白色菱形徽标 ——
+    if (t.isWingman) {
+      setGlow('#2ec4b6', 9);
+      const wb = flashing ? '#ffffff' : '#2ec4b6';
+      const wtrack = '#0d2a2a';
+      ctx.fillStyle = wtrack;
+      ctx.fillRect(-11, -10, 5, 20);
+      ctx.fillRect(6, -10, 5, 20);
+      ctx.fillStyle = '#15504d';
+      ctx.fillRect(-11, -8, 5, 3); ctx.fillRect(-11, -3, 5, 3);
+      ctx.fillRect(-11, 2, 5, 3); ctx.fillRect(-11, 7, 5, 3);
+      ctx.fillRect(6, -8, 5, 3); ctx.fillRect(6, -3, 5, 3);
+      ctx.fillRect(6, 2, 5, 3); ctx.fillRect(6, 7, 5, 3);
+      ctx.fillStyle = wb;
+      ctx.fillRect(-6, -8, 12, 16);
+      ctx.fillStyle = flashing ? '#dddddd' : '#1a6e6a';
+      ctx.fillRect(-4, -4, 8, 8);
+      ctx.fillStyle = '#e8fbf9';
+      ctx.fillRect(-2, -16, 4, 10);
+      // 友军菱形徽标
+      ctx.fillStyle = '#eafffd';
+      ctx.beginPath();
+      ctx.moveTo(0, -2.4); ctx.lineTo(1.8, 0); ctx.lineTo(0, 2.4); ctx.lineTo(-1.8, 0);
+      ctx.closePath(); ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.restore();
+      return;
+    }
 
     if (isPlayer) setGlow(skin.glow, 10);
     else if (t.isBoss) setGlow(cbColor(t.color), 18);
@@ -5941,8 +6297,10 @@
     achNew = [];
     ultWaves = []; ultFlash = 0;      // v0.2.7 近战大招特效清理
     player = makePlayer(SPAWN.x, SPAWN.y, '#002FA7');
-    // 常备护盾：每关开场 2 秒护盾（120 帧 ≈ 2 秒）
-    player.spawnInv = bonus.shield > 0 ? 120 : 0;
+    // 常备护盾：每关开场 2 秒护盾（120 帧 ≈ 2 秒）；宠物守护龟每级 +1 秒（60 帧，v0.3.2）
+    player.spawnInv = (bonus.shield > 0 ? 120 : 0) + 60 * petBonus('shield');
+    // —— v0.3.2 宠物跟随实体重置 ——
+    petFollow = null;
     // —— v0.2.7 双人同屏：P2 出生右上角（对抗/合作） ——
     if (multiMode > 0) {
       player2 = makePlayer(COLS - 2, 1, '#E63946');
@@ -5952,6 +6310,9 @@
       player2 = null;
       lives2 = 3;
     }
+    // —— v0.3.2 AI 僚机：仅单人模式（经典/无尽/限时/每日/自制）并肩作战 ——
+    wingman = (wingmanEnabled && multiMode === 0) ? makeWingman(SPAWN.x + 1, SPAWN.y) : null;
+    if (wingman) wingman.spawnInv = bonus.shield > 0 ? 120 : 0;
     // —— v0.2.8 双人开局专属音效 ——
     if (multiMode === 1) sfxCoopStart();
     else if (multiMode === 2) sfxVersusStart();
@@ -5995,7 +6356,8 @@
     running = false;
     won = win;
     pauseBtn.textContent = '⏸';
-    setBgm('calm');
+    setBgm(won ? 'victory' : 'defeat');   // v0.3.2 结算场景曲
+    if (win) sfxWin(); else sfxLose();    // v0.3.2 胜利礼花 / 失败下行
     // 结算成就判定
     if (dailyMode) unlockAch('daily');
     if (score >= 5000) unlockAch('score5k');
@@ -6032,6 +6394,8 @@
       if (level > bestWave) { bestWave = level; saveBestWave(); }
       if (level >= 10) unlockAch('endless10');
       if (level >= 30) unlockAch('endless30');
+      // —— v0.3.2 深渊王者：无尽 50 波 ——
+      if (level >= 50) unlockAch('endless50');
     }
     // —— v0.2.4 存档主动提醒：首次通关或金币达 2000 ——
     if (win || coins >= 2000) maybeBackupTip();
@@ -6129,6 +6493,9 @@
     } else if (shopTab === 'gacha') {
       // —— v0.2.9 金币消费中心：抽奖箱 + 强化重置 + 成就徽章展示框 ——
       renderGacha();
+    } else if (shopTab === 'pets') {
+      // —— v0.3.2 宠物：购买 / 装备 / 喂养升级 ——
+      renderPets();
     } else {
       for (const id of SKIN_LIST) {
         const sk = SKINS[id];
@@ -6215,7 +6582,7 @@
     if (baseAlive && running && !gameOver) rebuildBaseWalls();
     renderShop(); updateCoinHud();
     showToast('🏰 基地升级 · ' + BASE_LEVELS[baseLevel].name + '（护墙 ' + BASE_LEVELS[baseLevel].walls.length + ' 格）');
-    sfxPickup();
+    sfxBuy();   // v0.3.2 购买音效
   }
   function buyBonus(id) {
     const def = BONUS_DEF.find(x => x.id === id);
@@ -6227,7 +6594,7 @@
     coins -= price; bonus[id] = lv + 1; bonusSpent += price;   // v0.2.9 追踪强化累计投入
     saveCoins(); saveBonus(); saveBonusSpent(); renderShop(); updateCoinHud();
     showToast(def.icon + ' 购买成功 · ' + def.name);
-    sfxPickup();
+    sfxBuy();   // v0.3.2 购买音效
   }
   function buySkin(id) {
     const sk = SKINS[id];
@@ -6235,8 +6602,10 @@
     if (coins < sk.price) { showToast('🪙 金币不足'); beep(180, 0.12, 'square', 0.05); return; }
     coins -= sk.price; ownedSkins.push(id); equippedSkin = id;
     saveCoins(); saveSkins(); saveSkin(); renderShop(); updateCoinHud();
+    // —— v0.3.2 收藏家：拥有 15 款皮肤 ——
+    if (ownedSkins.length >= 15) unlockAch('collector');
     showToast(sk.icon + ' 皮肤已购买并装备 · ' + sk.name);
-    sfxPickup();
+    sfxBuy();   // v0.3.2 购买音效
   }
   function equipSkin(id) {
     if (!ownedSkins.includes(id)) return;
@@ -6244,6 +6613,69 @@
     sfxEquip();   // —— v0.2.8 皮肤装备专属音效 ——
     showToast(SKINS[id].icon + ' 已装备 · ' + SKINS[id].name);
     sfxPickup();
+  }
+
+  // ===== v0.3.2 宠物商店：购买 / 装备 / 喂养升级 =====
+  function petPassiveName(def) {
+    return { coin: '🪙 金运', shield: '🛡 护盾', combo: '🎯 连击' }[def.passive] || '';
+  }
+  function renderPets() {
+    for (const def of PET_DEF) {
+      const owned = ownedPets.includes(def.id);
+      const equipped = pet && pet.id === def.id;
+      const lv = petLevels[def.id] || (owned ? 1 : 0);
+      const maxed = lv >= def.maxLv;
+      const item = document.createElement('div');
+      item.className = 'shopItem rar-' + (owned ? 'legendary' : 'epic') + (equipped ? ' equipped' : '');
+      const lvTxt = 'Lv' + lv + (maxed ? '·MAX' : '');
+      const effDesc = def.desc + ' ×' + lv;
+      let btnTxt, btnCls = '', action = null;
+      if (!owned) { btnTxt = '🪙 购买 ' + def.price; action = () => buyPet(def.id); }
+      else if (equipped) {
+        if (!maxed) { btnTxt = '🪙 升级 ' + PET_LV_PRICE[lv]; action = () => upgradePet(def.id); btnCls = 'owned'; }
+        else { btnTxt = '已装备'; btnCls = 'equipped'; }
+      } else { btnTxt = '装备'; btnCls = 'owned'; action = () => equipPet(def.id); }
+      item.innerHTML = '<span class="siIcon">' + def.icon + '</span>' +
+        '<span class="siName">' + def.name + '<b class="rar ' + (owned ? 'legendary' : 'epic') + '">' + petPassiveName(def) + '</b></span>' +
+        '<span class="siDesc">' + effDesc + (equipped && !maxed ? ' · 升到 Lv' + (lv + 1) + ' 后 ' + def.desc + ' ×' + (lv + 1) : '') + '</span>' +
+        '<span class="siMeta">' + lvTxt + (owned ? (equipped ? ' · 跟随中' : ' · 已拥有') : '') + '</span>' +
+        '<button class="siBtn ' + btnCls + '">' + btnTxt + '</button>';
+      const btn = item.querySelector('.siBtn');
+      if (action) btn.onclick = action;
+      shopBody.appendChild(item);
+    }
+  }
+  function buyPet(id) {
+    const def = PET_MAP[id];
+    if (!def || ownedPets.includes(id)) return;
+    if (coins < def.price) { showToast('🪙 金币不足'); beep(180, 0.12, 'square', 0.05); return; }
+    coins -= def.price;
+    ownedPets.push(id); petLevels[id] = Math.max(1, petLevels[id] || 1);
+    pet = { id, level: petLevels[id] };
+    saveCoins(); savePetOwn(); savePetLv(); savePet(); renderShop(); updateCoinHud();
+    showToast(def.icon + ' ' + def.name + ' 已购买并跟随！' + def.desc + ' ×' + pet.level);
+    sfxBuy();
+  }
+  function equipPet(id) {
+    if (!ownedPets.includes(id)) return;
+    pet = { id, level: Math.max(1, petLevels[id] || 1) };
+    savePet(); renderShop();
+    sfxEquip();
+    showToast(PET_MAP[id].icon + ' ' + PET_MAP[id].name + ' 已跟随（Lv' + pet.level + '）');
+    sfxPickup();
+  }
+  function upgradePet(id) {
+    if (!ownedPets.includes(id)) return;
+    const def = PET_MAP[id];
+    const lv = Math.max(1, petLevels[id] || 1);
+    if (lv >= def.maxLv) return;
+    const price = PET_LV_PRICE[lv];
+    if (coins < price) { showToast('🪙 金币不足'); beep(180, 0.12, 'square', 0.05); return; }
+    coins -= price; petLevels[id] = lv + 1;
+    if (pet && pet.id === id) pet.level = lv + 1;
+    saveCoins(); savePetLv(); savePet(); renderShop(); updateCoinHud();
+    showToast(def.icon + ' ' + def.name + ' 升到 Lv' + (lv + 1) + ' · ' + def.desc + ' ×' + (lv + 1));
+    sfxBuy();
   }
 
   // ===== v0.2.9 金币经济补全：抽奖箱 / 强化重置 / 成就徽章展示框 =====
@@ -6729,7 +7161,7 @@
     saveSignin();
     coins += st.reward; saveCoins(); updateCoinHud();
     showToast('📅 签到成功 · 连续 ' + st.streak + ' 天 +' + st.reward + '🪙');
-    beep(880, 0.12, 'square', 0.05);
+    sfxCoin();   // v0.3.2 金币入账音
     renderSignin();
   }
 
@@ -6778,6 +7210,7 @@
     if (!weekDone() || weekState.claimed) return 0;
     weekState.claimed = true; saveWeek();
     showToast('📅 周挑战达成 +150🪙');
+    sfxCoin();   // v0.3.2 金币入账音
     return addGold(150);
   }
   function openCareer() {
@@ -7186,6 +7619,7 @@
     dailyMode = false; dailyMods = { _names: [] };
     customMode = false; customMap = null;   // v0.2.7 自制关卡：退出回菜单重置
     multiMode = 0; player2 = null; lives2 = 3;   // v0.2.7 双人同屏：退出回菜单重置
+    wingman = null;                              // v0.3.2 僚机退出清理
     updateTouchLayout();               // v0.2.8 退出双人恢复单人触控布局
     reviveCount = 0; adPending = false;
     enemySpawnTimer = 0; lvIntroT = 0; lvIntroNext = false;
@@ -7193,7 +7627,7 @@
     hideUpgradeBox();
     resetStat();
     pauseBtn.textContent = '⏸';
-    setBgm('calm');
+    setBgm('menu');   // v0.3.2 主菜单舒缓曲
     generateMap();
     showOverlay('title');
     updateHud();
@@ -7353,7 +7787,7 @@
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V3.1', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V3.2', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -7430,9 +7864,10 @@
   btnShopClose.addEventListener('click', closeShop);
   $('btnSignin').addEventListener('click', () => { ensureAudio(); openSignin(); });
   $('btnSigninClose').addEventListener('click', closeSignin);
-  tabBonus.addEventListener('click', () => { shopTab = 'bonus'; tabBonus.classList.add('active'); tabSkins.classList.remove('active'); tabGacha.classList.remove('active'); renderShop(); });
-  tabSkins.addEventListener('click', () => { shopTab = 'skins'; tabSkins.classList.add('active'); tabBonus.classList.remove('active'); tabGacha.classList.remove('active'); renderShop(); });
-  tabGacha.addEventListener('click', () => { shopTab = 'gacha'; tabGacha.classList.add('active'); tabBonus.classList.remove('active'); tabSkins.classList.remove('active'); renderShop(); });
+  tabBonus.addEventListener('click', () => { shopTab = 'bonus'; tabBonus.classList.add('active'); tabSkins.classList.remove('active'); tabGacha.classList.remove('active'); tabPets.classList.remove('active'); renderShop(); });
+  tabSkins.addEventListener('click', () => { shopTab = 'skins'; tabSkins.classList.add('active'); tabBonus.classList.remove('active'); tabGacha.classList.remove('active'); tabPets.classList.remove('active'); renderShop(); });
+  tabGacha.addEventListener('click', () => { shopTab = 'gacha'; tabGacha.classList.add('active'); tabBonus.classList.remove('active'); tabSkins.classList.remove('active'); tabPets.classList.remove('active'); renderShop(); });
+  tabPets.addEventListener('click', () => { shopTab = 'pets'; tabPets.classList.add('active'); tabBonus.classList.remove('active'); tabSkins.classList.remove('active'); tabGacha.classList.remove('active'); renderShop(); });
   btnShare.addEventListener('click', () => { ensureAudio(); shareScore(); });
   btnReport.addEventListener('click', () => { ensureAudio(); openReport(); });
   // —— v0.2.6 过关结算：继续按钮 ——
@@ -7835,7 +8270,7 @@
   generateMap();
   layout();
   showOverlay('title');
-  setBgm('calm');
+  setBgm('menu');   // v0.3.2 主菜单舒缓曲
   showTutorial();
   lastTime = performance.now();
   rafId = requestAnimationFrame(tick);
@@ -7916,6 +8351,23 @@
       setLevel: (lv) => { level = lv; startLevel(); },
       respawn: () => { if (player) { player.dead = false; player.spawnInv = 120; } },
       tp: (x, y) => { if (player) { player.x = x; player.y = y; player.dead = false; player.spawnInv = 120; } },
+      // —— v0.3.2 AI 僚机验证钩子 ——
+      wingman: () => wingman ? { x: wingman.x, y: wingman.y, hp: wingman.hp, maxHp: wingman.maxHp, dead: wingman.dead, respawnT: wingman.respawnT, dir: wingman.dir } : null,
+      setWingman: (on) => { wingman = on ? makeWingman(SPAWN.x + 1, SPAWN.y) : null; return !!wingman; },
+      hurtWingman: (n) => { hurtWingman(n); return wingman ? { hp: wingman.hp, dead: wingman.dead } : null; },
+      wingmanShoot: () => { if (wingman && !wingman.dead) { wingman.cooldown = 0; const t = nearestEnemyTo(wingman.x, wingman.y); if (t) wingman.dir = dirFromVec(t.x - wingman.x, t.y - wingman.y); fire(wingman); } return bullets.filter(b => b.owner === wingman).length; },
+      spawnWingmanBulletAt: (x, y) => { if (!wingman) return false; bullets.push({ x: x - 2, y: y - 2, size: 4, dir: 2, speed: BULLET_SPEED * 0.95, owner: wingman, pen: 0, bomb: false }); return true; },
+      setWingmanRespawn: (n) => { if (wingman) wingman.respawnT = n; return wingman ? wingman.respawnT : null; },
+      // 同步命中探针：在首个测试敌人中心放一颗僚机弹并推进一步 updateBullet，验证友方弹能伤敌
+      probeWingmanHit: () => {
+        const en = enemies.find(e => e.__test && !e.dead);
+        if (!en || !wingman) return { ok: false, reason: 'no enemy or wingman' };
+        const before = en.hp;
+        bullets.push({ x: en.x + en.size / 2 - 2, y: en.y + en.size / 2 - 2, size: 4, dir: 2, speed: BULLET_SPEED * 0.95, owner: wingman, pen: 0, bomb: false });
+        updateBullet(bullets[bullets.length - 1], 1 / 60);
+        bullets = bullets.filter(b => !b.dead);
+        return { ok: true, before, after: en.hp, dead: en.dead };
+      },
       // —— 过关成长 / 每日词条验证 ——
       upgrades: () => ({ ...upgrades, upgTotal }),
       daily: () => ({ dailyMode, ...dailyMods }),
@@ -7981,6 +8433,32 @@
       setCoins: (n) => { coins = Math.max(0, n | 0); saveCoins(); updateCoinHud(); },
       addGold,
       enemyGold,
+      // —— v0.3.2 宠物验证 ——
+      pet: () => pet ? { id: pet.id, level: pet.level, bonus: { coin: petBonus('coin'), shield: petBonus('shield'), combo: petBonus('combo') } } : null,
+      petDefs: () => PET_DEF.map(d => ({ id: d.id, name: d.name, price: d.price, passive: d.passive, maxLv: d.maxLv, color: d.color })),
+      setPet: (id, lv) => {
+        if (!PET_MAP[id]) return false;
+        if (!ownedPets.includes(id)) ownedPets.push(id);
+        petLevels[id] = Math.min(Math.max(1, lv | 0 || 1), PET_MAP[id].maxLv);
+        pet = { id, level: petLevels[id] };
+        savePetOwn(); savePetLv(); savePet();
+        return true;
+      },
+      clearPet: () => { pet = null; savePet(); return true; },
+      petBonus: (t) => petBonus(t),
+      petState: () => ({ owned: ownedPets.slice(), levels: Object.assign({}, petLevels), equipped: pet ? pet.id : null }),
+      buyPet, equipPet, upgradePet,
+      petFollowNow: () => petFollow ? { x: petFollow.x, y: petFollow.y } : null,
+      // 干净重置宠物归属/等级/装备（用于购买经济闭环的确定性测试）
+      setPetOwn: (arr) => {
+        ownedPets = Array.isArray(arr) ? arr.filter(id => PET_MAP[id]) : [];
+        petLevels = {}; pet = null;
+        savePetOwn(); savePetLv(); savePet();
+        return true;
+      },
+      // 确定性同步探针：计算一次连击窗口 / 读取玩家开局护盾（帧）
+      comboWindowNow: () => { combo = 0; comboTimer = 0; addKillScore({ isBoss: false, type: 'normal', x: 0, y: 0, size: 0, color: '#fff' }); return comboTimer; },
+      playerInvNow: () => (player ? player.spawnInv : -1),
       bonus: () => ({ ...bonus }),
       skins: () => ({ owned: ownedSkins.slice(), equipped: equippedSkin }),
       setBonus: (o) => { bonus = Object.assign({ lifeup: 0, cd: 0, spd: 0, coinup: 0, shield: 0, revive: 0, combo: 0, bulletspd: 0, pierce: 0, supply: 0, focus: 0 }, o); saveBonus(); },
@@ -7995,7 +8473,7 @@
       setShopTab: (t) => { shopTab = t; },
       bullets: () => bullets.map(b => ({ dir: b.dir, x: b.x, y: b.y, size: b.size, speed: b.speed, pen: b.pen, bomb: b.bomb, owner: b.owner.isPlayer ? 'p' : 'e' })),
       // —— 局外养成验证 ——
-      startGame: () => start('normal'),
+      startGame: () => { wingmanEnabled = false; return start('normal'); },   // v0.3.2 测试关僚机保确定性
       livesNow: () => lives,
       setLives: (n) => { lives = Math.max(0, n | 0); lastLives = -1; },
       hudCoins: () => elCoins ? elCoins.textContent : null,
