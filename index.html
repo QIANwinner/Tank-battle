@@ -2003,7 +2003,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V3.3</div>
+  <div id="mark">DESIGNED BY QIAN · V3.4</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2046,7 +2046,7 @@
   <div id="shopBox">
     <div class="shopHead">
       <div class="shopTitle">🛒 军械商店</div>
-      <div class="shopWallet">🪙 <b id="shopCoins">0</b></div>
+      <div class="shopWallet">🪙 <b id="shopCoins">0</b> · 🐾 <b id="shopPetCoins">0</b></div>
       <button class="shopClose" id="btnShopClose" aria-label="关闭">✕</button>
     </div>
     <div class="shopTabs">
@@ -2415,13 +2415,14 @@
   //      空存档 / 隐私模式下自动 no-op，不影响回归（干净 profile 为空档）。
   // =====================================================================
   const LS_VER = 'tank-battle-ver';
-  const LS_SAVE_VER = 1;   // 当前存档 schema 版本（v0.3.2 的键结构即 v1 形态）
+  const LS_SAVE_VER = 2;   // 当前存档 schema 版本（v2：v0.3.4 新增宠物币 LS_PETCOIN）
   function migrateSave() {
     let ver = 0;
     try { ver = parseInt(localStorage.getItem(LS_VER) || '0', 10) || 0; } catch (e) { return; }
     if (ver >= LS_SAVE_VER) return;                    // 已是最新，跳过
     // —— v0 → v1：旧版（无版本号）键结构已与 v1 一致，做登记即可 ——
-    //     未来 v1→v2：在此逐键升级（如 bonus 拆分 / petlv 补默认），再向下写 ver=1 后继续
+    // —— v1 → v2：新增宠物币经济（v0.3.4）。LS_PETCOIN 键的创建与「按已解锁成就补发宠物币」
+    //     在 loadLateState() 惰性执行（需 ACHIEVE 表，提前引用会 TDZ），迁移链本身无需改数据 ——
     try { localStorage.setItem(LS_VER, String(LS_SAVE_VER)); } catch (e) { /* 隐私模式 */ }
   }
   migrateSave();
@@ -2526,8 +2527,10 @@
         LS_PETOWN = 'tank-battle-petown',         // —— v0.3.2 宠物：已购 id 数组 ——
         LS_PETLV = 'tank-battle-petlv',           // —— v0.3.2 宠物：等级 {id: lv} ——
         LS_WSKINS = 'tank-battle-wskins',         // —— v0.3.3 僚机：已购皮肤 id 数组 ——
-        LS_WSKIN = 'tank-battle-wskin';           // —— v0.3.3 僚机：当前装备皮肤 id ——
+        LS_WSKIN = 'tank-battle-wskin',           // —— v0.3.3 僚机：当前装备皮肤 id ——
+        LS_PETCOIN = 'tank-battle-petcoin';       // —— v0.3.4 宠物币：宠物购买/升级专属货币 ——
   let coins = 0;                                                       // 金币余额
+  let petCoins = 0;                                                    // —— v0.3.4 宠物币余额（🐾）
   let bonus = { lifeup: 0, cd: 0, spd: 0, coinup: 0, shield: 0, revive: 0, combo: 0, bulletspd: 0, pierce: 0, supply: 0, focus: 0 };      // 永久加成等级
   let baseLevel = 0;                                                   // 基地升级等级（护墙阵法）
   let ownedSkins = ['classic'];                                        // 已购皮肤
@@ -2539,6 +2542,7 @@
   let bonusSpent = 0;                                                  // —— v0.2.9 强化累计投入（重置返还 50%） ——
   try {
     coins = parseInt(localStorage.getItem(LS_COINS) || '0', 10) || 0;
+    petCoins = Math.max(0, parseInt(localStorage.getItem(LS_PETCOIN) || '0', 10) || 0);
     const b = JSON.parse(localStorage.getItem(LS_BONUS) || '{}');
     if (b && typeof b === 'object') for (const k in bonus) bonus[k] = Math.max(0, parseInt(b[k], 10) || 0);
     baseLevel = Math.min(Math.max(0, parseInt(localStorage.getItem(LS_BASE) || '0', 10) || 0), BASE_LEVELS.length - 1);
@@ -2567,6 +2571,14 @@
       if (pl && typeof pl === 'object') for (const k in pl) if (PET_MAP[k]) petLevels[k] = Math.min(Math.max(0, parseInt(pl[k], 10) || 0), PET_MAP[k].maxLv);
       const eqp = localStorage.getItem(LS_PET);
       if (eqp && PET_MAP[eqp] && ownedPets.includes(eqp)) pet = { id: eqp, level: Math.max(1, petLevels[eqp] || 1) };
+      // —— v0.3.4 宠物币惰性初始化 + 老档成就补发：键不存在 = 首次升级到 v2，
+      //     按已解锁成就一次性补发宠物币（petRewardOf/ACH_MAP 此时已声明，无 TDZ；键写入后不再进，幂等） ——
+      if (localStorage.getItem(LS_PETCOIN) === null) {
+        let retro = 0;
+        for (const id of achUnlocked) retro += petRewardOf(ACH_MAP[id]);
+        petCoins = retro;
+        savePetCoin();
+      }
       // —— v0.3.3 僚机皮肤：已购 / 当前装备 ——
       const ws = JSON.parse(localStorage.getItem(LS_WSKINS) || '[]');
       if (Array.isArray(ws)) ownedWSkins = ws.includes('wing-teal') ? ws.slice() : ['wing-teal', ...ws];
@@ -2575,6 +2587,7 @@
     } catch (e) { /* 隐私模式 / 损坏数据：保持默认 */ }
   }
   function saveCoins() { try { localStorage.setItem(LS_COINS, String(coins)); } catch (e) {} }
+  function savePetCoin() { try { localStorage.setItem(LS_PETCOIN, String(petCoins)); } catch (e) {} }
   function saveBonus() { try { localStorage.setItem(LS_BONUS, JSON.stringify(bonus)); } catch (e) {} }
   function saveBase() { try { localStorage.setItem(LS_BASE, String(baseLevel)); } catch (e) {} }
   function saveSkins() { try { localStorage.setItem(LS_SKINS, JSON.stringify(ownedSkins)); } catch (e) {} }
@@ -2667,16 +2680,16 @@
     { id: 'focus',   icon: '🔍', name: '连击专注', desc: '连击窗口 +25%',   max: 3, unit: '级', price: [60, 140, 300] },
   ];
 
-  // —— v0.3.2 宠物系统：跟随玩家的萌宠，提供被动加成（商店购买 + 金币喂养升级） ——
+  // —— v0.3.2 宠物系统：跟随玩家的萌宠，提供被动加成（v0.3.4 起购买/升级消耗宠物币🐾，来源=成就奖励） ——
   // passive: coin 金币获取+10%/级 | shield 每关开局护盾+1秒/级 | combo 连击窗口+15%/级
   const PET_DEF = [
-    { id: 'cat',    name: '招财猫', icon: '🐱', price: 200, passive: 'coin',   desc: '金币获取 +10%',   color: '#ffb347', maxLv: 3 },
-    { id: 'turtle', name: '守护龟', icon: '🐢', price: 350, passive: 'shield', desc: '每关开局护盾 +1 秒', color: '#39ff14', maxLv: 3 },
-    { id: 'bunny',  name: '幸运兔', icon: '🐰', price: 500, passive: 'combo',  desc: '连击窗口 +15%',    color: '#ff8ab0', maxLv: 3 },
+    { id: 'cat',    name: '招财猫', icon: '🐱', price: 4,  passive: 'coin',   desc: '金币获取 +10%',   color: '#ffb347', maxLv: 3 },
+    { id: 'turtle', name: '守护龟', icon: '🐢', price: 6,  passive: 'shield', desc: '每关开局护盾 +1 秒', color: '#39ff14', maxLv: 3 },
+    { id: 'bunny',  name: '幸运兔', icon: '🐰', price: 10, passive: 'combo',  desc: '连击窗口 +15%',    color: '#ff8ab0', maxLv: 3 },
   ];
   const PET_MAP = {};
   PET_DEF.forEach(p => { PET_MAP[p.id] = p; });
-  const PET_LV_PRICE = [0, 150, 400];   // 升到 2 级 / 3 级的金币消耗（1→2→3）
+  const PET_LV_PET = [0, 3, 6];   // —— v0.3.4 升到 2 级 / 3 级的宠物币消耗（1→2→3）
   let pet = null;            // 当前装备宠物 { id, level }
   let ownedPets = [];        // 已购宠物 id 数组
   let petLevels = {};        // 宠物等级 { id: 1..maxLv }
@@ -2954,7 +2967,11 @@
     { id: 'collector', icon: '🎨', name: '收藏家', desc: '拥有 15 款皮肤', reward: 300 },
     { id: 'endless50', icon: '🌌', name: '深渊王者', desc: '无尽模式到达第 50 波', reward: 500 },
     { id: 'rich2',    icon: '🏛', name: '金币大亨', desc: '金币余额达到 10000', reward: 400 },
-    { id: 'milo40',   icon: '🏔', name: '传奇之路', desc: '到达第 40 关', reward: 400 }
+    { id: 'milo40',   icon: '🏔', name: '传奇之路', desc: '到达第 40 关', reward: 400 },
+    // —— v0.3.4 宠物经济成就：宠物币专属来源（reward 0 金币 + petReward 宠物币） ——
+    { id: 'pet1',   icon: '🐾', name: '初次饲主', desc: '购买第一只宠物', reward: 0, petReward: 2 },
+    { id: 'petmax', icon: '🐣', name: '满级萌宠', desc: '任意宠物升到满级', reward: 0, petReward: 3 },
+    { id: 'petall', icon: '💞', name: '宠物全家福', desc: '集齐全部 3 只宠物', reward: 0, petReward: 5 }
   ];
   // —— v0.2.7 成就分组（分组进度条用） ——
   const ACH_GROUP = {
@@ -2965,13 +2982,19 @@
     endless30: 'depth', star20: 'depth', coins10k: 'depth',
     // —— v0.3.2 成就分组映射 ——
     combo15: 'combat', speedster: 'challenge', collector: 'depth',
-    endless50: 'depth', rich2: 'depth', milo40: 'depth'
+    endless50: 'depth', rich2: 'depth', milo40: 'depth',
+    // —— v0.3.4 宠物经济成就 ——
+    pet1: 'challenge', petmax: 'challenge', petall: 'challenge'
   };
   const ACH_GROUPS = [
     { id: 'combat', name: '⚔️ 战斗', icon: '⚔️' },
     { id: 'challenge', name: '🎯 挑战', icon: '🎯' },
     { id: 'depth', name: '🏔 深度', icon: '🏔' }
   ];
+  const ACH_MAP = {};
+  ACHIEVE.forEach(a => { ACH_MAP[a.id] = a; });
+  // —— v0.3.4 成就宠物币奖励：金币档位映射（≥300→3🐾 · ≥150→2🐾 · 其余→1🐾），条目可用 petReward 覆盖 ——
+  const petRewardOf = a => !a ? 0 : (a.petReward !== undefined ? a.petReward : (a.reward >= 300 ? 3 : a.reward >= 150 ? 2 : 1));
   let achUnlocked = new Set();
   let achNew = [];             // 本局新解锁（结算页展示）
   // —— v0.2.4 每日挑战累计通关次数（成就「坚持打卡」用，持久化） ——
@@ -2986,11 +3009,15 @@
     achUnlocked.add(id);
     achNew.push(id);
     try { localStorage.setItem(LS_ACH, JSON.stringify([...achUnlocked])); } catch (e) { /* 忽略 */ }
-    const a = ACHIEVE.find(x => x.id === id);
+    const a = ACH_MAP[id];
     // —— v0.2.5 成就奖励金币：解锁即发奖，形成「成就→金币→商店」闭环 ——
+    // —— v0.3.4 成就奖励宠物币：金币档位映射（≥300→3🐾 · ≥150→2🐾 · 其余→1🐾），
+    //     形成「成就→宠物币→宠物养成」闭环，宠物币不与金币互相兑换 ——
     if (a) {
-      showToast('🏆 成就解锁 · ' + a.name + '  +' + a.reward + '🪙');
+      const pr = petRewardOf(a);
+      showToast('🏆 成就解锁 · ' + a.name + (a.reward > 0 ? '  +' + a.reward + '🪙' : '') + (pr > 0 ? ' +' + pr + '🐾' : ''));
       if (a.reward > 0) addGold(a.reward);
+      if (pr > 0) addPetCoin(pr);
     }
     vibe(30);
     sfxAch();   // —— v0.2.8 成就解锁专属音效 ——
@@ -4647,9 +4674,16 @@
     if (x !== undefined && y !== undefined) addText(x, y, '+' + gain + '🪙', '#ffd700');
     return gain;
   }
+  // —— v0.3.4 宠物币：宠物购买/升级专属货币，来源=成就奖励（老档首载按已解锁成就一次性补发） ——
+  function addPetCoin(n) {
+    petCoins = Math.max(0, petCoins + n);
+    savePetCoin(); updateCoinHud();
+    return petCoins;
+  }
   function updateCoinHud() {
     if (elCoins) elCoins.textContent = coins;
     const sc = $('shopCoins'); if (sc) sc.textContent = coins;
+    const pc = $('shopPetCoins'); if (pc) pc.textContent = petCoins;   // —— v0.3.4 宠物币 ——
   }
 
   // 金币复活：基地被毁后可花金币重建基地继续战斗（成本随关卡与复活次数递增；工程回收 -15%/级）
@@ -6787,9 +6821,9 @@
       const lvTxt = 'Lv' + lv + (maxed ? '·MAX' : '');
       const effDesc = def.desc + ' ×' + lv;
       let btnTxt, btnCls = '', action = null;
-      if (!owned) { btnTxt = '🪙 购买 ' + def.price; action = () => buyPet(def.id); }
+      if (!owned) { btnTxt = '🐾 购买 ' + def.price; action = () => buyPet(def.id); }
       else if (equipped) {
-        if (!maxed) { btnTxt = '🪙 升级 ' + PET_LV_PRICE[lv]; action = () => upgradePet(def.id); btnCls = 'owned'; }
+        if (!maxed) { btnTxt = '🐾 升级 ' + PET_LV_PET[lv]; action = () => upgradePet(def.id); btnCls = 'owned'; }
         else { btnTxt = '已装备'; btnCls = 'equipped'; }
       } else { btnTxt = '装备'; btnCls = 'owned'; action = () => equipPet(def.id); }
       item.innerHTML = '<span class="siIcon">' + def.icon + '</span>' +
@@ -6805,11 +6839,14 @@
   function buyPet(id) {
     const def = PET_MAP[id];
     if (!def || ownedPets.includes(id)) return;
-    if (coins < def.price) { showToast('🪙 金币不足'); beep(180, 0.12, 'square', 0.05); return; }
-    coins -= def.price;
+    if (petCoins < def.price) { showToast('🐾 宠物币不足'); beep(180, 0.12, 'square', 0.05); return; }
+    petCoins -= def.price;
     ownedPets.push(id); petLevels[id] = Math.max(1, petLevels[id] || 1);
     pet = { id, level: petLevels[id] };
-    saveCoins(); savePetOwn(); savePetLv(); savePet(); renderShop(); updateCoinHud();
+    // —— v0.3.4 宠物经济成就：首购 / 集齐全家福 ——
+    if (ownedPets.length === 1) unlockAch('pet1');
+    if (ownedPets.length === PET_DEF.length) unlockAch('petall');
+    savePetCoin(); savePetOwn(); savePetLv(); savePet(); renderShop(); updateCoinHud();
     showToast(def.icon + ' ' + def.name + ' 已购买并跟随！' + def.desc + ' ×' + pet.level);
     sfxBuy();
   }
@@ -6826,11 +6863,13 @@
     const def = PET_MAP[id];
     const lv = Math.max(1, petLevels[id] || 1);
     if (lv >= def.maxLv) return;
-    const price = PET_LV_PRICE[lv];
-    if (coins < price) { showToast('🪙 金币不足'); beep(180, 0.12, 'square', 0.05); return; }
-    coins -= price; petLevels[id] = lv + 1;
+    const price = PET_LV_PET[lv];
+    if (petCoins < price) { showToast('🐾 宠物币不足'); beep(180, 0.12, 'square', 0.05); return; }
+    petCoins -= price; petLevels[id] = lv + 1;
     if (pet && pet.id === id) pet.level = lv + 1;
-    saveCoins(); savePetLv(); savePet(); renderShop(); updateCoinHud();
+    // —— v0.3.4 宠物经济成就：任意宠物满级 ——
+    if (lv + 1 >= def.maxLv) unlockAch('petmax');
+    savePetCoin(); savePetLv(); savePet(); renderShop(); updateCoinHud();
     showToast(def.icon + ' ' + def.name + ' 升到 Lv' + (lv + 1) + ' · ' + def.desc + ' ×' + (lv + 1));
     sfxBuy();
   }
@@ -7269,9 +7308,12 @@
         const on = achUnlocked.has(a.id);
         const row = document.createElement('div');
         row.className = 'achItem' + (on ? '' : ' locked');
+        // —— v0.3.4 奖励展示：金币 + 宠物币（宠物成就只显示🐾） ——
+        const pr = petRewardOf(a);
+        const rwTxt = (a.reward > 0 ? '+' + a.reward + '🪙' : '') + (pr > 0 ? (a.reward > 0 ? ' ' : '') + '+' + pr + '🐾' : '');
         row.innerHTML = '<span class="aIcon">' + a.icon + '</span>' +
           '<span class="aInfo"><span class="aName">' + a.name + '</span><span class="aDesc">' + a.desc + '</span></span>' +
-          '<span class="aState">' + (on ? '已解锁' : ('+' + a.reward + '🪙')) + '</span>';
+          '<span class="aState">' + (on ? '已解锁' : rwTxt) + '</span>';
         achBody.appendChild(row);
       }
     }
@@ -7951,7 +7993,7 @@
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V3.3', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V3.4', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -8620,6 +8662,13 @@
       setCoins: (n) => { coins = Math.max(0, n | 0); saveCoins(); updateCoinHud(); },
       addGold,
       enemyGold,
+      // —— v0.3.4 宠物币 / 成就发放验证 ——
+      petCoins: () => petCoins,
+      setPetCoins: (n) => { petCoins = Math.max(0, n | 0); savePetCoin(); updateCoinHud(); },
+      addPetCoin,
+      grantAch: (id) => { unlockAch(id); return [...achUnlocked]; },
+      setAch: (arr) => { achUnlocked = new Set(Array.isArray(arr) ? arr.filter(x => ACH_MAP[x]) : []); try { localStorage.setItem(LS_ACH, JSON.stringify([...achUnlocked])); } catch (e) { /* 忽略 */ } return [...achUnlocked]; },
+      achPetReward: (id) => petRewardOf(ACH_MAP[id]),
       // —— v0.3.2 宠物验证 ——
       pet: () => pet ? { id: pet.id, level: pet.level, bonus: { coin: petBonus('coin'), shield: petBonus('shield'), combo: petBonus('combo') } } : null,
       petDefs: () => PET_DEF.map(d => ({ id: d.id, name: d.name, price: d.price, passive: d.passive, maxLv: d.maxLv, color: d.color })),

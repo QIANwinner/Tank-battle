@@ -149,44 +149,42 @@ async function main() {
       t('P6 宠物跟随实体存在', p && f && isFinite(f.x) && isFinite(f.y), 'pet=' + (p && p.id) + ' follow=' + JSON.stringify(f));
     } catch (e) { t('P6 宠物跟随实体存在', false, e.message); }
 
-    // ===== P7: 商店购买/装备/升级经济闭环 =====
+    // ===== P7: 宠物购买/装备/升级经济闭环（v0.3.4 宠物币🐾：买4-升3-升6-满级3） =====
     try {
       T.setPetOwn([]);   // 干净重置，不受 P2-P5 setPet 污染
-      // 购买招财猫（200 金币）
-      T.setCoins(500);
-      T.buyPet('cat');
+      T.setAch(['pet1', 'petmax', 'petall']);   // 预发宠物成就，隔离解锁奖励对余额的干扰
+      T.setPetCoins(30);
+      T.buyPet('cat');   // 4🐾
       const st1 = T.petState();
-      const bought = st1.owned.includes('cat') && st1.equipped === 'cat' && T.coins() === 300;
-      // 升级到 2 级（150 金币）
-      T.upgradePet('cat');
+      const bought = st1.owned.includes('cat') && st1.equipped === 'cat' && T.petCoins() === 26;
+      T.upgradePet('cat');   // 3🐾 → lv2
       const st2 = T.petState();
-      const upg = st2.levels['cat'] === 2 && T.coins() === 150 && T.petBonus('coin') === 2;
-      // 补足金币，升级到 3 级（400 金币），验证等级上限
-      T.setCoins(2000);
-      T.upgradePet('cat');
+      const upg = st2.levels['cat'] === 2 && T.petCoins() === 23 && T.petBonus('coin') === 2;
+      T.upgradePet('cat');   // 6🐾 → lv3
       const st3 = T.petState();
-      const cap = st3.levels['cat'] === 3 && T.petBonus('coin') === 3;
+      const cap = st3.levels['cat'] === 3 && T.petCoins() === 17 && T.petBonus('coin') === 3;
       // 已满级再升级不扣费
-      const cBefore = T.coins();
+      const cBefore = T.petCoins();
       T.upgradePet('cat');
-      const noOver = T.coins() === cBefore;
-      t('P7 购买/升级经济闭环（买200-升150-升400-满级3）', bought && upg && cap && noOver, 'coins=' + T.coins() + ' lv=' + st3.levels['cat']);
-    } catch (e) { t('P7 购买/升级经济闭环（买200-升150-升400-满级3）', false, e.message); }
+      const noOver = T.petCoins() === cBefore;
+      t('P7 购买/升级经济闭环（买4🐾-升3🐾-升6🐾-满级3）', bought && upg && cap && noOver, 'petCoins=' + T.petCoins() + ' lv=' + st3.levels['cat']);
+    } catch (e) { t('P7 购买/升级经济闭环（买4🐾-升3🐾-升6🐾-满级3）', false, e.message); }
 
-    // ===== P8: 重复购买不扣费 · 金币不足升级被拒 · 不影响命数 =====
+    // ===== P8: 重复购买不扣费 · 宠物币不足升级被拒 · 不影响命数 =====
     try {
-      // 干净拥有 turtle（lv=2），验证重复购买不扣费 + 金币不足升级被拒
+      // 干净拥有 turtle（lv=2），验证重复购买不扣费 + 宠物币不足升级被拒
       T.setPetOwn(['turtle']);
       T.setPet('turtle', 2);
-      T.setCoins(0);
-      const c0 = T.coins();
+      T.setPetCoins(0);
+      const c0 = T.petCoins();
       T.buyPet('turtle');          // 已拥有 → 早退，不扣费
-      const dupNoCharge = T.coins() === c0;
-      T.upgradePet('turtle');      // lv=2 → 需 400 金币，余额 0 → 拒绝
-      const upgNoCharge = T.coins() === c0;
+      const dupNoCharge = T.petCoins() === c0;
+      T.upgradePet('turtle');      // lv=2 → 需 6🐾，余额 0 → 拒绝
+      const upgNoCharge = T.petCoins() === c0;
+      const lvAfter = T.petState().levels['turtle'];
       const lives = T.livesNow();
-      t('P8 重复购买不扣费 · 金币不足升级被拒', dupNoCharge && upgNoCharge && lives >= 0, 'coins=' + T.coins() + ' lives=' + lives);
-    } catch (e) { t('P8 重复购买不扣费 · 金币不足升级被拒', false, e.message); }
+      t('P8 重复购买不扣费 · 宠物币不足升级被拒', dupNoCharge && upgNoCharge && lvAfter === 2 && lives >= 0, 'petCoins=' + T.petCoins() + ' lv=' + lvAfter + ' lives=' + lives);
+    } catch (e) { t('P8 重复购买不扣费 · 宠物币不足升级被拒', false, e.message); }
 
     // ===== P9: 宠物局内参战反应（fire/hit/kill 触发 + 衰减回 idle） =====
     try {

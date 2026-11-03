@@ -98,8 +98,8 @@ async function main() {
     await loadGame();                       // 重新加载，migrateSave 对空档执行
     const lv = await ev('window.__tbTest.lsVer()');
     const sv = await ev('window.__tbTest.saveVer()');
-    t('M0 空存档首次加载自动登记 LS_VER=1', lv === 1 && sv === 1, 'lsVer=' + lv + ' saveVer=' + sv);
-  } catch (e) { t('M0 空存档首次加载自动登记 LS_VER=1', false, e.message); }
+    t('M0 空存档首次加载自动登记 LS_VER=2', lv === 2 && sv === 2, 'lsVer=' + lv + ' saveVer=' + sv);
+  } catch (e) { t('M0 空存档首次加载自动登记 LS_VER=2', false, e.message); }
 
   // ===== M1: v0 存档（无版本号但有数据）→ 迁移后数据保留 =====
   try {
@@ -111,7 +111,7 @@ async function main() {
     const lv = await ev('window.__tbTest.lsVer()');
     const coins = await ev('window.__tbTest.coinsNow()');
     const best = await ev('window.__tbTest.bestNow()');
-    t('M1 v0 存档迁移后版本登记且数据保留', lv === 1 && coins === 500 && best === 1200, 'lsVer=' + lv + ' coins=' + coins + ' best=' + best);
+    t('M1 v0 存档迁移后版本登记且数据保留', lv === 2 && coins === 500 && best === 1200, 'lsVer=' + lv + ' coins=' + coins + ' best=' + best);
   } catch (e) { t('M1 v0 存档迁移后版本登记且数据保留', false, e.message); }
 
   // ===== M2: 未来版本（LS_VER=99）→ 不被降级覆盖 =====
@@ -125,7 +125,7 @@ async function main() {
     t('M2 未来版本 99 不被覆盖且数据保留', lv === 99 && coins === 777, 'lsVer=' + lv + ' coins=' + coins);
   } catch (e) { t('M2 未来版本 99 不被覆盖且数据保留', false, e.message); }
 
-  // ===== M3: 已是最新（LS_VER=1）→ no-op =====
+  // ===== M3: 旧最新（LS_VER=1）→ 升级到 v2，no-op 数据保留 =====
   try {
     await ev('localStorage.clear()');
     await ev("localStorage.setItem('tank-battle-ver','1')");
@@ -133,19 +133,19 @@ async function main() {
     await loadGame();
     const lv = await ev('window.__tbTest.lsVer()');
     const coins = await ev('window.__tbTest.coinsNow()');
-    t('M3 已最新 LS_VER=1 no-op 数据保留', lv === 1 && coins === 333, 'lsVer=' + lv + ' coins=' + coins);
-  } catch (e) { t('M3 已最新 LS_VER=1 no-op 数据保留', false, e.message); }
+    t('M3 旧最新 LS_VER=1 升级到 2 数据保留', lv === 2 && coins === 333, 'lsVer=' + lv + ' coins=' + coins);
+  } catch (e) { t('M3 旧最新 LS_VER=1 升级到 2 数据保留', false, e.message); }
 
   // ===== M4: 迁移幂等（手动再跑一次不重复/不破坏） =====
   try {
     await ev('localStorage.clear()');
     await ev("localStorage.setItem('tank-battle-coins','100')");
-    await loadGame();                        // 自动迁移 → lsVer=1
+    await loadGame();                        // 自动迁移 → lsVer=2
     const before = await ev('window.__tbTest.lsVer()');
     await ev('window.__tbTest.migrateNow()'); // 手动再触发
     const after = await ev('window.__tbTest.lsVer()');
     const coins = await ev('window.__tbTest.coinsNow()');
-    t('M4 迁移幂等（重复执行不破坏）', before === 1 && after === 1 && coins === 100, 'before=' + before + ' after=' + after + ' coins=' + coins);
+    t('M4 迁移幂等（重复执行不破坏）', before === 2 && after === 2 && coins === 100, 'before=' + before + ' after=' + after + ' coins=' + coins);
   } catch (e) { t('M4 迁移幂等（重复执行不破坏）', false, e.message); }
 
   chrome.kill();

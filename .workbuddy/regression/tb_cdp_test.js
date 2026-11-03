@@ -797,7 +797,7 @@ async function main() {
     try {
       reset(); T.resetAch();
       const n = T.achCountNow();
-      t('T1 成就总数 21→27(v0.3.2 扩至 27 枚)', n.total === 27, 'total=' + n.total);
+      t('T1 成就总数(v0.3.4 扩至 30 枚)', n.total === 30, 'total=' + n.total);
     } catch (e) { t('T1 成就总数', false, e.message); }
 
     try {
