@@ -1,2 +1,9 @@
 # WorkBuddy 项目数据目录
-.workbuddy/
+.workbuddy/*
+!.workbuddy/regression/
+.workbuddy/regression/*
+!.workbuddy/regression/serve.js
+!.workbuddy/regression/tb_cdp_test.js
+!.workbuddy/regression/tb_pet_smoke.js
+!.workbuddy/regression/tb_wingman_smoke.js
+!.workbuddy/regression/tb_save_migrate.js

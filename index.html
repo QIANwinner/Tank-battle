@@ -2404,6 +2404,25 @@
   let highContrast = false, colorBlind = false;
   // —— v0.2.9 随机地图：默认开启（经典/无尽每局程序化新图，每日/自制/Boss 不受影响） ——
   let randMaps = true;
+  // =====================================================================
+  // —— v0.3.3 存档 schema 版本迁移：为分散 localStorage 键建立版本登记与迁移链 ——
+  // 背景：此前 32+ 个 LS_* 键各自 getItem/setItem，无 schema 版本号。
+  //      一旦某键结构升级（如成就/宠物数据拆分、补默认字段），老玩家存档会解析失败或错位。
+  // 机制：LS_SAVE_VER 为当前 schema 版本；migrateSave() 在一切读取前执行，逐级升级旧档。
+  //      未来任何版本升级 → LS_SAVE_VER++ 并在下方迁移链加一级（数据规整/合并/补默认）。
+  //      空存档 / 隐私模式下自动 no-op，不影响回归（干净 profile 为空档）。
+  // =====================================================================
+  const LS_VER = 'tank-battle-ver';
+  const LS_SAVE_VER = 1;   // 当前存档 schema 版本（v0.3.2 的键结构即 v1 形态）
+  function migrateSave() {
+    let ver = 0;
+    try { ver = parseInt(localStorage.getItem(LS_VER) || '0', 10) || 0; } catch (e) { return; }
+    if (ver >= LS_SAVE_VER) return;                    // 已是最新，跳过
+    // —— v0 → v1：旧版（无版本号）键结构已与 v1 一致，做登记即可 ——
+    //     未来 v1→v2：在此逐键升级（如 bonus 拆分 / petlv 补默认），再向下写 ver=1 后继续
+    try { localStorage.setItem(LS_VER, String(LS_SAVE_VER)); } catch (e) { /* 隐私模式 */ }
+  }
+  migrateSave();
   try {
     highContrast = localStorage.getItem(LS_CONTRAST) === '1';
     colorBlind = localStorage.getItem(LS_CB) === '1';
@@ -8270,7 +8289,15 @@
   generateMap();
   layout();
   showOverlay('title');
-  setBgm('menu');   // v0.3.2 主菜单舒缓曲
+  // —— v0.3.3 首屏优化：AudioContext 不占用启动同步路径 ——
+  //   自动播放策略下启动即创建音频上下文属反模式（无声却推后首帧/阻塞解析）。
+  //   改为首次用户手势后再起主菜单 BGM；若手势前已切曲（如 ?time=N 自动开局 / 直接进战斗）则不覆盖。
+  const bootMenuBgm = () => {
+    if (bgmMode === 'off' && overlayKind === 'title') setBgm('menu');
+  };
+  document.addEventListener('pointerdown', bootMenuBgm, { once: true, passive: true });
+  document.addEventListener('keydown', bootMenuBgm, { once: true, passive: true });
+  document.addEventListener('touchstart', bootMenuBgm, { once: true, passive: true });
   showTutorial();
   lastTime = performance.now();
   rafId = requestAnimationFrame(tick);
@@ -8456,6 +8483,14 @@
         savePetOwn(); savePetLv(); savePet();
         return true;
       },
+      // —— v0.3.3 存档迁移验证：版本探针 + 原始 localStorage 读写 ——
+      saveVer: () => LS_SAVE_VER,
+      lsVer: () => { try { return parseInt(localStorage.getItem('tank-battle-ver') || '0', 10) || 0; } catch (e) { return -1; } },
+      migrateNow: () => migrateSave(),
+      setRawSave: (k, v) => { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } },
+      getRawSave: (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } },
+      coinsNow: () => coins,
+      bestNow: () => best,
       // 确定性同步探针：计算一次连击窗口 / 读取玩家开局护盾（帧）
       comboWindowNow: () => { combo = 0; comboTimer = 0; addKillScore({ isBoss: false, type: 'normal', x: 0, y: 0, size: 0, color: '#fff' }); return comboTimer; },
       playerInvNow: () => (player ? player.spawnInv : -1),

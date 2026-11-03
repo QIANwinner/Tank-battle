@@ -1,0 +1,61 @@
+# CI — Tank-battle 回归自动化
+# 触发：push 到 main / PR 到 main。跑主回归套件(169) + 专项冒烟(宠物/僚机/存档迁移)。
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  regression:
+    name: Regression (main + smokes)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup Chrome
+        id: setup-chrome
+        uses: browser-actions/setup-chrome@v1
+        with:
+          chrome-version: stable
+
+      # 单 step 内起服务器 + 全量测试，避免后台进程被跨 step 清理
+      - name: Run regression suite
+        env:
+          TB_CHROME: ${{ steps.setup-chrome.outputs.chrome-path }}
+        run: |
+          set -e
+          echo "Chrome: ${TB_CHROME}"
+          node .workbuddy/regression/serve.js &
+          SERVER_PID=$!
+          # 等待静态服务器就绪
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:8124/index.html >/dev/null && break
+            sleep 1
+          done
+          curl -sf http://127.0.0.1:8124/index.html >/dev/null || { echo "server failed to start"; kill $SERVER_PID 2>/dev/null; exit 1; }
+          # 串行跑套件，汇总退出码
+          set +e
+          echo "===== MAIN (169) ====="
+          TB_PROFILE=/tmp/tb-main node .workbuddy/regression/tb_cdp_test.js http://127.0.0.1:8124/index.html?test=1 /tmp/tb-shot.png
+          R1=$?
+          echo "===== PET SMOKE ====="
+          TB_PROFILE=/tmp/tb-pet node .workbuddy/regression/tb_pet_smoke.js
+          R2=$?
+          echo "===== WINGMAN SMOKE ====="
+          TB_PROFILE=/tmp/tb-wm node .workbuddy/regression/tb_wingman_smoke.js
+          R3=$?
+          echo "===== SAVE MIGRATE SMOKE ====="
+          TB_PROFILE=/tmp/tb-save node .workbuddy/regression/tb_save_migrate.js
+          R4=$?
+          kill $SERVER_PID 2>/dev/null
+          echo "RESULT: main=$R1 pet=$R2 wingman=$R3 save=$R4"
+          [ $R1 -eq 0 ] && [ $R2 -eq 0 ] && [ $R3 -eq 0 ] && [ $R4 -eq 0 ]
