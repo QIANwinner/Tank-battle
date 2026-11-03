@@ -19,3 +19,4 @@
 !.workbuddy/regression/tb_mobile_smoke.js
 !.workbuddy/regression/tb_bonddex_smoke.js
 !.workbuddy/regression/tb_earnhint_smoke.js
+!.workbuddy/regression/tb_signinbonus_smoke.js
