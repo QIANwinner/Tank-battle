@@ -188,6 +188,30 @@ async function main() {
       t('P8 重复购买不扣费 · 金币不足升级被拒', dupNoCharge && upgNoCharge && lives >= 0, 'coins=' + T.coins() + ' lives=' + lives);
     } catch (e) { t('P8 重复购买不扣费 · 金币不足升级被拒', false, e.message); }
 
+    // ===== P9: 宠物局内参战反应（fire/hit/kill 触发 + 衰减回 idle） =====
+    try {
+      // 确保战斗中且有跟随实体
+      T.setPetOwn(['cat']); T.setPet('cat', 3); T.setBonus({ lifeup:0,cd:0,spd:0,coinup:0,shield:0,revive:0,combo:0,bulletspd:0,pierce:0,supply:0,focus:0 });
+      T.startGame(); T.skipIntro();
+      await sleep(60);
+      const follow = T.petFollowNow();
+      if (!follow) { t('P9 宠物局内参战反应', false, 'no petFollow'); }
+      else {
+        const f1 = T.petReactNow('fire'), s1 = T.petFxNow();
+        const f2 = T.petReactNow('hit'),  s2 = T.petFxNow();
+        const f3 = T.petReactNow('kill'), s3 = T.petFxNow();
+        // 动画中段仍保持（kill 时长 0.55s，150ms 时应仍为 kill）—— 校验时长单位换算
+        await sleep(150);
+        const mid = T.petFxNow();
+        // 衰减回 idle：等待 kill 时长(0.55s) + 余量
+        await sleep(600);
+        const s4 = T.petFxNow();
+        t('P9 宠物局内参战反应（fire/hit/kill 触发 + 中段保持 + 衰减回 idle）',
+          f1 === 'fire' && s1 === 'fire' && f2 === 'hit' && s2 === 'hit' && f3 === 'kill' && s3 === 'kill' && mid === 'kill' && s4 === 'idle',
+          'fire=' + f1 + ' hit=' + f2 + ' kill=' + f3 + ' mid=' + mid + ' idle=' + s4);
+      }
+    } catch (e) { t('P9 宠物局内参战反应（fire/hit/kill 触发 + 中段保持 + 衰减回 idle）', false, e.message); }
+
     return R;
   })()
   `;

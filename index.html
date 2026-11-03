@@ -2664,6 +2664,7 @@
   let petLevels = {};        // 宠物等级 { id: 1..maxLv }
   let petFollow = null;      // 局内跟随实体（弹簧插值）
   let petAnim = 0;           // 宠物动画计时
+  let petFx = { type: 'idle', t: 0, dur: 1 };   // —— v0.3.3 宠物局内参战反应：fire / hit / kill ——
 
   // ===== 状态 =====
   let map = [];
@@ -3745,19 +3746,45 @@
     petFollow.x = clamp(petFollow.x, TILE, W - TILE - 16);
     petFollow.y = clamp(petFollow.y, TILE, H - TILE - 16);
     petAnim += k;
+    // —— v0.3.3 参战反应计时：完成后回到 idle ——
+    if (petFx.type !== 'idle') {
+      petFx.t += k;
+      if (petFx.t >= petFx.dur) petFx = { type: 'idle', t: 0, dur: 1 };
+    }
   }
   function drawPet() {
     if (!pet || !petFollow || !player || player.dead) return;
     const def = PET_MAP[pet.id];
     const px = petFollow.x + 8, py = petFollow.y + 8;
     const bobY = Math.sin(petAnim * 0.09) * 2.2;
+    // —— v0.3.3 参战反应：位移 / 旋转 / 压扁 / 红闪 ——
+    let offX = 0, offY = 0, rot = 0, squash = 1, redFlash = 0;
+    const fxp = petFx.dur > 0 ? Math.min(1, petFx.t / petFx.dur) : 1;
+    if (petFx.type === 'fire') {
+      // 前扑：沿玩家朝向短促位移 + 轻微压扁回弹
+      const p = Math.sin(Math.min(1, fxp * 1.4) * Math.PI);
+      offX = DX[player.dir] * 5 * p; offY = DY[player.dir] * 5 * p;
+      squash = 1 - 0.15 * Math.sin(fxp * Math.PI);
+    } else if (petFx.type === 'hit') {
+      // 受击：左右抖动 + 红闪衰减
+      const p = 1 - fxp;
+      offX = Math.sin(fxp * 28) * 3 * p; offY = Math.cos(fxp * 22) * 1.5 * p;
+      redFlash = p; squash = 1 - 0.1 * p;
+    } else if (petFx.type === 'kill') {
+      // 欢跳：上下蹦 + 小幅旋转 + 放大回弹
+      const p = Math.sin(Math.min(1, fxp) * Math.PI);
+      offY = -8 * p; rot = Math.sin(fxp * Math.PI * 2) * 0.18 * p; squash = 1 + 0.12 * p;
+    }
+    const cx = px + offX, cy = py + bobY + offY;
     ctx.save();
     setGlow(def.color, 7);
+    // 以宠物中心为基准做旋转 / 压扁
+    ctx.translate(cx, cy); ctx.rotate(rot); ctx.scale(squash, squash); ctx.translate(-cx, -cy);
     // 身体
     ctx.fillStyle = def.color;
-    ctx.beginPath(); ctx.ellipse(px, py + bobY, 7.5, 6.2, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx, cy, 7.5, 6.2, 0, 0, Math.PI * 2); ctx.fill();
     // 头部（朝向前方偏左，随动画轻摆）
-    const hx = px - 2.5, hy = py - 6 + bobY * 0.6;
+    const hx = cx - 2.5, hy = cy - 6 + bobY * 0.6;
     ctx.fillStyle = shade(def.color, -12);
     ctx.beginPath(); ctx.arc(hx, hy, 4.4, 0, Math.PI * 2); ctx.fill();
     // 耳朵（猫/兔尖耳；龟无）
@@ -3768,25 +3795,55 @@
     } else {
       // 龟壳纹
       ctx.strokeStyle = shade(def.color, -35); ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.arc(px, py + bobY, 4, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(cx, cy, 4, 0, Math.PI * 2); ctx.stroke();
     }
     // 眼睛
     ctx.fillStyle = '#1a0a10';
     ctx.beginPath(); ctx.arc(hx - 1.4, hy - 0.6, 0.9, 0, Math.PI * 2); ctx.fill();
     ctx.beginPath(); ctx.arc(hx + 1.4, hy - 0.6, 0.9, 0, Math.PI * 2); ctx.fill();
+    // 受击红闪覆盖
+    if (redFlash > 0) {
+      ctx.globalAlpha = redFlash * 0.5; ctx.fillStyle = '#ff3b3b';
+      ctx.beginPath(); ctx.ellipse(cx, cy, 8.5, 7, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
     ctx.shadowBlur = 0;
     // 等级星标（小金星）
     if (pet.level > 1) {
       ctx.fillStyle = '#ffd700';
       for (let i = 0; i < pet.level - 1; i++) {
-        const sx = px - 6 + i * 5, sy = py + 8.5;
+        const sx = cx - 6 + i * 5, sy = cy + 8.5;
         ctx.beginPath(); ctx.moveTo(sx, sy - 2.2); ctx.lineTo(sx + 0.8, sy - 0.6); ctx.lineTo(sx + 2.4, sy - 0.5);
         ctx.lineTo(sx + 1.2, sy + 0.8); ctx.lineTo(sx + 1.5, sy + 2.4); ctx.lineTo(sx, sy + 1.4);
         ctx.lineTo(sx - 1.5, sy + 2.4); ctx.lineTo(sx - 1.2, sy + 0.8); ctx.lineTo(sx - 2.4, sy - 0.5);
         ctx.lineTo(sx - 0.8, sy - 0.6); ctx.closePath(); ctx.fill();
       }
     }
+    // —— v0.3.3 等级表现：Lv2 呼吸光环 / Lv3 金冠 ——
+    if (pet.level >= 2) {
+      const pulse = 0.5 + 0.5 * Math.sin(petAnim * 0.12);
+      ctx.strokeStyle = def.color; ctx.globalAlpha = 0.25 + 0.2 * pulse; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.ellipse(cx, cy + 3, 11 + pulse * 1.5, 8.5 + pulse, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+    if (pet.level >= 3) {
+      // 小金冠
+      ctx.fillStyle = '#ffd700';
+      ctx.beginPath();
+      ctx.moveTo(cx - 5, cy - 8.5); ctx.lineTo(cx - 5, cy - 12.5); ctx.lineTo(cx - 2.8, cy - 10);
+      ctx.lineTo(cx - 1, cy - 13); ctx.lineTo(cx + 1, cy - 10); ctx.lineTo(cx + 3.2, cy - 13);
+      ctx.lineTo(cx + 5, cy - 10); ctx.lineTo(cx + 5, cy - 8.5); ctx.closePath(); ctx.fill();
+    }
     ctx.restore();
+  }
+
+  // —— v0.3.3 宠物局内参战反应：开火前扑 / 受击震动+红闪 / 击杀欢跳+星光 ——
+  // 时长单位为「秒」，petFx.t 以 k（60fps 帧系数，≈1/帧）推进，故 ×60 换算为帧
+  const PET_FX_DUR = { fire: 0.28, hit: 0.4, kill: 0.55 };
+  function petReact(type) {
+    if (!pet || !petFollow) return;
+    petFx = { type, t: 0, dur: (PET_FX_DUR[type] || 0.4) * 60 };
+    if (type === 'kill') spawnParticles(petFollow.x + 8, petFollow.y + 6, '#ffd700', 6);
   }
 
   function levelSpeedMul() { return Math.min(1 + (level - 1) * 0.06, 1.6); }
@@ -3928,7 +3985,7 @@
         }
       }
     }
-    if (isP) sfxShoot();
+    if (isP) { sfxShoot(); petReact('fire'); }
     else beep(500, 0.05, 'square', 0.02);
   }
 
@@ -4501,6 +4558,7 @@
     tookHitThisLevel = true;
     sfxBoom();
     hurtFlash = 1;
+    if (!isP2) petReact('hit');   // —— v0.3.3 宠物受击反应（宠物随 P1）——
     vibe([70, 40, 70]);
     spawnParticles(p.x + TANK_SIZE / 2, p.y + TANK_SIZE / 2, p.color, 18);
     shake = 10;
@@ -4587,6 +4645,7 @@
 
   function onEnemyKilled(e) {
     sfxBoom();
+    petReact('kill');   // —— v0.3.3 宠物击杀欢跳 ——
     hitStop = reduced() ? 0 : (e.isBoss ? 0.06 : 0.03);   // 击杀定格（减弱动效时关闭；Boss 用慢动作替代长定格）
     vibe(e.isBoss ? [60, 50, 130] : 15);
     spawnParticles(e.x + e.size / 2, e.y + e.size / 2, e.color, e.isBoss ? 48 : 16);
@@ -8476,6 +8535,9 @@
       petState: () => ({ owned: ownedPets.slice(), levels: Object.assign({}, petLevels), equipped: pet ? pet.id : null }),
       buyPet, equipPet, upgradePet,
       petFollowNow: () => petFollow ? { x: petFollow.x, y: petFollow.y } : null,
+      // —— v0.3.3 宠物参战反应：当前类型 + 触发探针（fire/hit/kill）——
+      petFxNow: () => petFx.type,
+      petReactNow: (t) => { if (pet && petFollow) { petReact(t); return petFx.type; } return null; },
       // 干净重置宠物归属/等级/装备（用于购买经济闭环的确定性测试）
       setPetOwn: (arr) => {
         ownedPets = Array.isArray(arr) ? arr.filter(id => PET_MAP[id]) : [];
