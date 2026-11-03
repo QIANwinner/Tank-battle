@@ -93,7 +93,7 @@ async function main() {
   try {
     const o = JSON.parse(await ev(`(async () => {
       const T = window.__tbTest;
-      T.setHero("fortress"); T.clearPet();
+      T.setPetCoins(99); T.buyHeroNow("sniper"); T.buyHeroNow("vanguard"); T.setHero("fortress"); T.clearPet();
       T.startGame(); T.skipIntro();
       return JSON.stringify({ inv: T.playerInvNow(), bond: T.bondNow() });
     })()`));

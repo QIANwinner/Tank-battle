@@ -696,6 +696,7 @@
   /* ---------- v0.3.6 英雄选择 ---------- */
   #heroSeg button { padding: 5px 11px; font-size: 11px; border-radius: 8px; }
   #heroSeg button.active { background: #002FA7; border-color: #00f0ff; color: #fff; box-shadow: 0 0 12px rgba(0, 240, 255, .55); }
+  #heroSeg button.locked { filter: grayscale(0.6) brightness(0.75); border-style: dashed; }
 
   /* ---------- 关卡过渡 ---------- */
   #lvIntro {
@@ -2039,7 +2040,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V3.8</div>
+  <div id="mark">DESIGNED BY QIAN · V3.9</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2750,15 +2751,29 @@
   // —— v0.3.6 英雄系统(任务122①):局外选择一名英雄,单人局提供全局被动(局内技能/宠物羁绊见任务122后续) ——
   const LS_HERO = 'tank-battle-hero';
   const HEROES = {
-    none:     { id: 'none',     name: '无英雄', icon: '🚫', desc: '不携带英雄',              color: '#8ea0b8' },
-    blade:    { id: 'blade',    name: '剑刃',   icon: '⚔️', desc: '开火冷却 -15%',           color: '#ff2d55' },
-    fortress: { id: 'fortress', name: '堡垒',   icon: '🛡', desc: '生命 +1 · 开局护盾 +3 秒', color: '#00f0ff' },
-    sniper:   { id: 'sniper',   name: '狙击',   icon: '🎯', desc: '弹速 +25% · 弹体 +1',     color: '#ffd700' },
-    vanguard: { id: 'vanguard', name: '先锋',   icon: '💥', desc: '移速 +15% · 连击窗口 +20%', color: '#39ff14' },
+    none:     { id: 'none',     name: '无英雄', icon: '🚫', desc: '不携带英雄',              color: '#8ea0b8', price: 0 },
+    blade:    { id: 'blade',    name: '剑刃',   icon: '⚔️', desc: '开火冷却 -15%',           color: '#ff2d55', price: 0 },
+    fortress: { id: 'fortress', name: '堡垒',   icon: '🛡', desc: '生命 +1 · 开局护盾 +3 秒', color: '#00f0ff', price: 0 },
+    sniper:   { id: 'sniper',   name: '狙击',   icon: '🎯', desc: '弹速 +25% · 弹体 +1',     color: '#ffd700', price: 8 },
+    vanguard: { id: 'vanguard', name: '先锋',   icon: '💥', desc: '移速 +15% · 连击窗口 +20%', color: '#39ff14', price: 12 },
   };
+  // —— v0.3.9 英雄解锁经济:高价英雄用🐾宠物币解锁(免费期已装备的老档自动 grandfather) ——
+  const FREE_HEROES = ['none', 'blade', 'fortress'];
+  const LS_HEROS = 'tank-battle-heros';   // 已购英雄 id 数组(免费英雄始终视为已拥有)
+  let ownedHeroes = FREE_HEROES.slice();
+  try {
+    const oh = JSON.parse(localStorage.getItem(LS_HEROS) || '[]');
+    if (Array.isArray(oh)) for (const id of oh) if (HEROES[id] && !ownedHeroes.includes(id)) ownedHeroes.push(id);
+  } catch (e) { /* 忽略 */ }
+  // grandfather:v0.3.6-0.3.8 英雄免费期已装备高价英雄的老档,自动视为已拥有
+  try { const h0 = localStorage.getItem(LS_HERO); if (h0 && HEROES[h0] && !ownedHeroes.includes(h0)) ownedHeroes.push(h0); } catch (e) { /* 忽略 */ }
+  const heroOwned = (id) => ownedHeroes.includes(id) || HEROES[id].price === 0;
+  function saveHeroOwn() { try { localStorage.setItem(LS_HEROS, JSON.stringify(ownedHeroes)); } catch (e) { /* 忽略 */ } }
   let hero = 'none';
   try { const h = localStorage.getItem(LS_HERO); if (h && HEROES[h]) hero = h; } catch (e) { /* 忽略 */ }
   function saveHero() { try { localStorage.setItem(LS_HERO, hero); } catch (e) { /* 忽略 */ } }
+  // 装备门控:未购高价英雄回退无英雄(正常路径走 buyHero,此处仅兜底)
+  if (!heroOwned(hero)) { hero = 'none'; try { localStorage.setItem(LS_HERO, hero); } catch (e) { /* 忽略 */ } }
   const heroOn = () => multiMode === 0 && hero !== 'none';   // 英雄被动仅单人局生效(双人竞技不引入不对称)
   const heroPassive = (k) => (heroOn() && hero === k) ? 1 : 0;
   const heroDef = () => HEROES[hero] || HEROES.none;
@@ -7200,14 +7215,21 @@
     applySettingsUI();
     sfxPickup();
   }
-  // —— v0.3.6 英雄选择：标题页单选,持久化,即时预览描述 ——
+  // —— v0.3.6 英雄选择:标题页单选,持久化,即时预览描述;v0.3.9 未购高价英雄先解锁 ——
   function renderHeroSeg() {
     if (!heroSeg) return;
-    for (const b of heroSeg.querySelectorAll('button'))
+    for (const b of heroSeg.querySelectorAll('button')) {
+      const def = HEROES[b.dataset.hero];
+      if (!def) continue;
+      const owned = heroOwned(b.dataset.hero);
       b.classList.toggle('active', b.dataset.hero === hero);
+      b.classList.toggle('locked', !owned);
+      b.textContent = def.icon + ' ' + def.name + (owned ? '' : ' ' + def.price + '🐾');
+    }
   }
   function setHero(id) {
     if (!HEROES[id]) return false;
+    if (!heroOwned(id)) { showToast('🔒 「' + HEROES[id].name + '」未解锁 · 需 ' + HEROES[id].price + '🐾'); return false; }
     hero = id;
     saveHero();
     renderHeroSeg();
@@ -7215,6 +7237,20 @@
     const bond = activeBond();
     showToast(heroDef().icon + ' 英雄 · ' + heroDef().name + '（' + heroDef().desc + '）' + (bond ? ' · ' + bond.icon + ' 羁绊「' + bond.name + '」激活！' : ''));
     return true;
+  }
+  // —— v0.3.9 高价英雄用🐾宠物币解锁;已拥有则直接装备 ——
+  function buyHero(id) {
+    const def = HEROES[id];
+    if (!def) return false;
+    if (heroOwned(id)) return setHero(id);
+    if (petCoins < def.price) { showToast('🐾 宠物币不足 · 解锁「' + def.name + '」需 ' + def.price + '🐾'); beep(180, 0.12, 'square', 0.05); return false; }
+    petCoins -= def.price;
+    ownedHeroes.push(id);
+    savePetCoin(); saveHeroOwn();
+    const ok = setHero(id);
+    showToast(def.icon + ' 已解锁 · ' + def.name + '（-' + def.price + '🐾）');
+    sfxBuy();
+    return ok;
   }
   function setPerf(q) {
     if (q !== 'auto' && q !== 'high' && q !== 'medium' && q !== 'low') return;
@@ -8145,7 +8181,7 @@
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V3.8', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V3.9', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -8330,9 +8366,12 @@
   diffSeg.addEventListener('click', (e) => {
     const b = e.target.closest('button'); if (b) setDifficulty(b.dataset.diff);
   });
-  // —— v0.3.6 英雄选择接线 ——
+  // —— v0.3.6 英雄选择接线;v0.3.9 未购点击即走解锁流程 ——
   heroSeg.addEventListener('click', (e) => {
-    const b = e.target.closest('button'); if (b) setHero(b.dataset.hero);
+    const b = e.target.closest('button');
+    if (!b) return;
+    const id = b.dataset.hero;
+    if (heroOwned(id)) setHero(id); else buyHero(id);
   });
   renderHeroSeg();
   settingsFullBtn.addEventListener('click', () => { ensureAudio(); toggleFullscreen(); });
@@ -8810,6 +8849,10 @@
       bondNow: () => { const b = activeBond(); return b ? b.id : null; },
       bondActiveNow: (id) => bondActive(id),
       bondsDef: () => PET_BONDS.map(b => b.id),
+      // —— v0.3.9 英雄解锁经济验证 ——
+      heroOwnedAll: () => ownedHeroes.slice(),
+      heroOwnedNow: (id) => heroOwned(id),
+      buyHeroNow: (id) => buyHero(id),
       triggerHeroUltNow: () => { tryHeroUlt(); return heroUltCd; },
       setHeroUltCd: (n) => { heroUltCd = Math.max(0, n); updateHeroUltHud(); return heroUltCd; },
       setPcd: (n) => { if (player) player.cooldown = Math.max(0, n); return player ? player.cooldown : -1; },

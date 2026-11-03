@@ -100,7 +100,7 @@ async function main() {
   // ===== H1: 默认无英雄 · 全部被动为 0 · 基准值不变 =====
   try {
     const h = await ev('window.__tbTest.heroNow()');
-    await ev('window.__tbTest.setHero("none")');
+    await ev('window.__tbTest.setPetCoins(99); window.__tbTest.buyHeroNow("sniper"); window.__tbTest.buyHeroNow("vanguard"); window.__tbTest.setHero("none")');
     await ev('window.__tbTest.startGame()');
     const lives = await ev('window.__tbTest.livesNow()');
     const spd = await ev('window.__tbTest.playerSpd()');
