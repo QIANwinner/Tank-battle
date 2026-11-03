@@ -199,6 +199,36 @@ async function main() {
     t('C7 宠物币跨刷新持久化（23🐾）', ok && pc === 23, 'ok=' + ok + ' petCoins=' + pc);
   } catch (e) { t('C7 宠物币跨刷新持久化（23🐾）', false, e.message); }
 
+  // ===== C8: 每日签到 +1🐾（当日幂等，重复领取不再发） =====
+  try {
+    await ev('window.__tbTest.signinReset()');
+    await ev('window.__tbTest.setPetCoins(0)');
+    const r1 = await ev('window.__tbTest.signinClaim()');
+    const r2 = await ev('window.__tbTest.signinClaim()');   // 当日已签 → 早退
+    t('C8 签到 +1🐾（streak=' + (r1 && r1.streak) + '）· 当日重复领取不重发', r1 && r1.petCoins === 1 && r2 && r2.petCoins === 1 && r2.streak === r1.streak,
+      'r1=' + JSON.stringify(r1) + ' r2=' + JSON.stringify(r2));
+  } catch (e) { t('C8 签到 +1🐾 · 当日重复领取不重发', false, e.message); }
+
+  // ===== C9: 无尽模式每通过 10 波 +1🐾（11 波首次、21 波第二次；普通关不发） =====
+  try {
+    // 预发途中会解锁的里程碑/金库成就,隔离 unlockAch 奖励对计数的干扰(rich: 过关金币累计破 3000 时合法触发)
+    await ev('window.__tbTest.setAch(["lv5", "milo20", "milo40", "endless10", "endless30", "endless50", "rich", "rich2"])');
+    await ev('window.__tbTest.setEndless(true)');
+    await ev('window.__tbTest.setPetCoins(0)');
+    for (let i = 0; i < 10; i++) await ev('window.__tbTest.advance()');   // level 1→11
+    const p1 = await ev('window.__tbTest.petCoins()');
+    for (let i = 0; i < 9; i++) await ev('window.__tbTest.advance()');    // level 11→20(无里程碑)
+    const p2 = await ev('window.__tbTest.petCoins()');
+    await ev('window.__tbTest.advance()');                                // level 20→21 里程碑
+    const p3 = await ev('window.__tbTest.petCoins()');
+    await ev('window.__tbTest.setEndless(false)');
+    await ev('window.__tbTest.advance()');                                // 普通关推进不发
+    const p4 = await ev('window.__tbTest.petCoins()');
+    const lv = await ev('window.__tbTest.endlessNow().level');
+    t('C9 无尽 10 波里程碑 +1🐾（1→2→普通关不发）', p1 === 1 && p2 === 1 && p3 === 2 && p4 === 2 && lv === 22,
+      'p=' + p1 + ',' + p2 + ',' + p3 + ',' + p4 + ' level=' + lv);
+  } catch (e) { t('C9 无尽 10 波里程碑 +1🐾', false, e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
