@@ -1198,6 +1198,14 @@ async function main() {
     t('U246 非法值回退', o.b === 1, JSON.stringify(o));
   } catch(e){ t('U245 合法值保持',false,e.message); t('U246 非法值回退',false,e.message); }
 
+
+  // ===== U247~U248: SFX 音量加载统一为 clampVol(v4.65) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.guardSfxVolNow(5),b:T.guardSfxVolNow(0)});})()"));
+    t('U247 超界钳制', o.a === 1, JSON.stringify(o));
+    t('U248 零音量保持', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U247 超界钳制',false,e.message); t('U248 零音量保持',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
