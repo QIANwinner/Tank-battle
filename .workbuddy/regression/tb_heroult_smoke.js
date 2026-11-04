@@ -1270,6 +1270,14 @@ async function main() {
     t('U264 负值归零', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U263 合法场次',false,e.message); t('U264 负值归零',false,e.message); }
 
+
+  // ===== U265~U266: 关卡星级算法抽为 starPointsOf 纯函数(v4.74) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.starPointsOfNow(1,false,1,999),b:T.starPointsOfNow(1,true,3,10)});})()"));
+    t('U265 保底一星', o.a === 1, JSON.stringify(o));
+    t('U266 满条件三星', o.b === 3, JSON.stringify(o));
+  } catch(e){ t('U265 保底一星',false,e.message); t('U266 满条件三星',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

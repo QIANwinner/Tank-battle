@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V4.73</div>
+  <div id="mark">DESIGNED BY QIAN · V4.74</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2705,14 +2705,7 @@
   function saveWSkins() { try { localStorage.setItem(LS_WSKINS, JSON.stringify(ownedWSkins)); } catch (e) {} }
   function saveWSkin() { try { localStorage.setItem(LS_WSKIN, equippedWSkin); } catch (e) {} }
   // —— v0.2.6 关卡星级算法：无伤 / 剩余生命 / 用时 各 +1，至少 1 星 ——
-  function starsForLevel(lv, nohit, livesLeft, secs) {
-    let s = 1;
-    if (nohit) s++;
-    const need = livesLeft >= 2;      // 剩余生命 ≥2 视为稳守
-    if (need) s++;
-    if (secs >= 0 && secs <= 75 + lv * 12) s++;
-    return Math.min(3, s);
-  }
+  function starsForLevel(lv, nohit, livesLeft, secs) { return starPointsOf(lv, nohit, livesLeft, secs); }
 
   // 角色皮肤定义（玩家坦克配色，经典免费）
   // rarity: rare稀有(蓝) / epic史诗(紫) / legendary传奇(橙) / limited限定(红)
@@ -6779,6 +6772,7 @@ function safeGacha(v) { return Math.max(0, safeInt(v, 0)); }
 function safeBonusSpent(v) { return Math.max(0, safeInt(v, 0)); }
 function safeDailyCount(v) { return Math.max(0, safeInt(v, 0)); }
 function safeModeGames(v) { return Math.max(0, safeInt(v, 0)); }
+function starPointsOf(lv, nohit, livesLeft, secs) { let s = 1; if (nohit) s++; if (livesLeft >= 2) s++; if (secs >= 0 && secs <= 75 + lv * 12) s++; return Math.min(3, s); }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -8587,7 +8581,7 @@ function safeModeGames(v) { return Math.max(0, safeInt(v, 0)); }
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V4.73', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V4.74', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9422,6 +9416,7 @@ function safeModeGames(v) { return Math.max(0, safeInt(v, 0)); }
       safeBonusSpentNow: (...a) => safeBonusSpent(...a),
       safeDailyCountNow: (...a) => safeDailyCount(...a),
       safeModeGamesNow: (...a) => safeModeGames(...a),
+      starPointsOfNow: (...a) => starPointsOf(...a),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
