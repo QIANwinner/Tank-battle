@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V5.3</div>
+  <div id="mark">DESIGNED BY QIAN · V5.4</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -5024,7 +5024,7 @@
     const mult = (1 + (combo - 1) * 0.1 * (1 + 0.5 * (upgrades.double || 0))) * (1 + 0.1 * (bonus.combo || 0));
     const gain = Math.round(baseScore * mult * (1 + 0.25 * (upgrades.greed || 0)) / 10) * 10;
     score += gain;
-    addText(e.x + e.size / 2, e.y - 4, '+' + gain, combo >= 3 ? '#ff00ff' : '#00f0ff');
+    addText(e.x + e.size / 2, e.y - 4, v5ComboGainText(gain), combo >= 3 ? '#ff00ff' : '#00f0ff');
     if (combo >= 3) addText(e.x + e.size / 2, e.y - 24, combo + ' 连击', '#ffe600');
   }
 
@@ -6797,6 +6797,7 @@ function v5RgbaStr(r,g,b,a){return 'rgba('+r+','+g+','+b+','+a+')';}
 function v5GridKey(x,y){return x+','+y;}
 function v5WhiteStrokeA(a){return 'rgba(255,255,255,'+(0.85*a).toFixed(3)+')';}
 function v5CoinGainText(g){return '+'+fmtNum(g)+'🪙';}
+function v5ComboGainText(g){return '+'+fmtNum(g);}
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -8605,7 +8606,7 @@ function v5CoinGainText(g){return '+'+fmtNum(g)+'🪙';}
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V5.3', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V5.4', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9468,6 +9469,7 @@ function v5CoinGainText(g){return '+'+fmtNum(g)+'🪙';}
       v5GridKeyNow: (...a) => v5GridKey(...a),
       v5WhiteStrokeANow: (...a) => v5WhiteStrokeA(...a),
       v5CoinGainTextNow: (...a) => v5CoinGainText(...a),
+      v5ComboGainTextNow: (...a) => v5ComboGainText(...a),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

@@ -1494,6 +1494,14 @@ async function main() {
     t('U320 金币飘字抽为纯函数边界', o.b === '+12,345🪙', JSON.stringify(o));
   } catch(e){ t('U319 金币飘字抽为纯函数',false,e.message); t('U320 金币飘字抽为纯函数边界',false,e.message); }
 
+
+  // ===== U321~U322: 连击得分飘字抽为纯函数(v5.4) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5ComboGainTextNow(50),b:T.v5ComboGainTextNow(12345)});})()"));
+    t('U321 连击得分飘字抽为纯函数', o.a === '+50', JSON.stringify(o));
+    t('U322 连击得分飘字抽为纯函数边界', o.b === '+12,345', JSON.stringify(o));
+  } catch(e){ t('U321 连击得分飘字抽为纯函数',false,e.message); t('U322 连击得分飘字抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
