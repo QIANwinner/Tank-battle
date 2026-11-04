@@ -1830,6 +1830,14 @@ async function main() {
     t('U404 皮肤名称 HTML 抽为纯函数边界', o.b === '<span class="siName">X</span>', JSON.stringify(o));
   } catch(e){ t('U403 皮肤名称 HTML 抽为纯函数',false,e.message); t('U404 皮肤名称 HTML 抽为纯函数边界',false,e.message); }
 
+
+  // ===== U405~U406: 皮肤状态文案抽为纯函数(v5.46) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5SkinMetaNow(true,true,0),b:T.v5SkinMetaNow(false,false,12345)});})()"));
+    t('U405 皮肤状态文案抽为纯函数', o.a === '已装备', JSON.stringify(o));
+    t('U406 皮肤状态文案抽为纯函数边界', o.b === '🪙 12,345', JSON.stringify(o));
+  } catch(e){ t('U405 皮肤状态文案抽为纯函数',false,e.message); t('U406 皮肤状态文案抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
