@@ -1694,6 +1694,14 @@ async function main() {
     t('U370 粉色填充串抽为纯函数边界', o.b === 'rgba(255,107,213,0)', JSON.stringify(o));
   } catch(e){ t('U369 粉色填充串抽为纯函数',false,e.message); t('U370 粉色填充串抽为纯函数边界',false,e.message); }
 
+
+  // ===== U371~U372: 橙色填充串抽为纯函数(v5.29) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5OrangeFillNow(0.8),b:T.v5OrangeFillNow(0)});})()"));
+    t('U371 橙色填充串抽为纯函数', o.a === 'rgba(255,106,0,0.8)', JSON.stringify(o));
+    t('U372 橙色填充串抽为纯函数边界', o.b === 'rgba(255,106,0,0)', JSON.stringify(o));
+  } catch(e){ t('U371 橙色填充串抽为纯函数',false,e.message); t('U372 橙色填充串抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
