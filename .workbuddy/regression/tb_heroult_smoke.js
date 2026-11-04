@@ -2334,6 +2334,18 @@ async function main() {
     t('U548 HUD 文本为字符串', typeof o.b === 'string', String(o.b));
   } catch(e){ for(let k=543;k<=548;k++) t('U'+k+' 模式标签',false,e.message); }
 
+
+  // ===== U549~U554: 成就进度条(v0.6.6) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.achBarWidthNow(7,20),b:T.achBarWidthNow(0,20),c:T.achBarWidthNow(20,20),d:T.achBarWidthNow(30,20),e:T.achBarWidthNow(5,0),f:T.achBarDomNow()});})()"));
+    t('U549 常规完成度百分比', o.a === '35%', o.a);
+    t('U550 零完成度', o.b === '0%', o.b);
+    t('U551 全完成度', o.c === '100%', o.c);
+    t('U552 超额钳制为 100%', o.d === '100%', o.d);
+    t('U553 零总数安全兜底', o.e === '0%', o.e);
+    t('U554 宽度值为合法百分比', o.f === null || /^\d+%$/.test(o.f), String(o.f));
+  } catch(e){ for(let k=549;k<=554;k++) t('U'+k+' 成就进度条',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
