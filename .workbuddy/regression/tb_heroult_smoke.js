@@ -1638,6 +1638,14 @@ async function main() {
     t('U356 BOSS 来袭警告文字抽为纯函数边界', o.b.indexOf('猎手')>=0, JSON.stringify(o));
   } catch(e){ t('U355 BOSS 来袭警告文字抽为纯函数',false,e.message); t('U356 BOSS 来袭警告文字抽为纯函数边界',false,e.message); }
 
+
+  // ===== U357~U358: 白闪遮罩串抽为纯函数(v5.22) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5WhiteFlashStrNow(1,1),b:T.v5WhiteFlashStrNow(1,0.4)});})()"));
+    t('U357 白闪遮罩串抽为纯函数', o.a === 'rgba(255,255,255,0.850)', JSON.stringify(o));
+    t('U358 白闪遮罩串抽为纯函数边界', o.b === 'rgba(255,255,255,0.340)', JSON.stringify(o));
+  } catch(e){ t('U357 白闪遮罩串抽为纯函数',false,e.message); t('U358 白闪遮罩串抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
