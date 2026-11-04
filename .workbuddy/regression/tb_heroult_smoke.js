@@ -2503,6 +2503,22 @@ async function main() {
     t('U614 非无尽恢复灰显', o6.txt === '—', JSON.stringify(o6));
   } catch(e){ for(let k=609;k<=614;k++) t('U'+k+' 纪录对比',false,e.message); }
 
+
+  // ===== U615~U620: 存档状态面板(v0.6.17) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;const box=document.getElementById('saveStatBox');return JSON.stringify({dom:!!box,sum:box?(box.querySelector('summary')||{}).textContent:null,body:(document.getElementById('saveStatBody')||{}).textContent});})()"));
+    t('U615 存档面板已加入设置页', o.dom === true && (o.sum || '').indexOf('存档状态') >= 0, JSON.stringify(o));
+    t('U616 未展开初值 —', o.body === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.saveStatToggleNow());})()"));
+    t('U617 展开后显示 KB 与覆盖项数', o2.open === true && (o2.txt || '').indexOf('KB') >= 0 && (o2.txt || '').indexOf('覆盖') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.fmtKBTextNow(0),b:T.fmtKBTextNow(2048),c:T.storageBytesNow()});})()"));
+    t('U618 边界 0 与 2KB 换算', o3.a === '0.0 KB' && o3.b === '2.0 KB' && o3.c >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.fmtKBTextNow(NaN),b:T.fmtKBTextNow(-999),c:T.fmtKBTextNow('abc')});})()"));
+    t('U619 非法输入兜底 0.0 KB', o4.a === '0.0 KB' && o4.b === '0.0 KB' && o4.c === '0.0 KB', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({html:T.saveStatHtmlNow(),bytes:T.storageBytesNow()});})()"));
+    t('U620 DOM 与函数一致(KB 值相同)', o5.html.indexOf((o5.bytes / 1024).toFixed(1) + ' KB') >= 0, JSON.stringify(o5));
+  } catch(e){ for(let k=615;k<=620;k++) t('U'+k+' 存档面板',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
