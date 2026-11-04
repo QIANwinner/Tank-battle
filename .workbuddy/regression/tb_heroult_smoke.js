@@ -2376,6 +2376,22 @@ async function main() {
     t('U566 DOM 与函数一致', o5.dom === o5.f, JSON.stringify(o5));
   } catch(e){ for(let k=561;k<=566;k++) t('U'+k+' 羁绊小标',false,e.message); }
 
+
+  // ===== U567~U572: 宠物跟随状态 pill(v0.6.9) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;T.clearPet();T.extraHudRefreshNow();return JSON.stringify({dom:!!document.getElementById('petPillWrap'),txt:(document.getElementById('petPillVal')||{}).textContent,f:T.petHudTextNow()});})()"));
+    t('U567 宠物 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U568 无宠物初值 —', o.txt === '—' && o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setPet('turtle',2);T.extraHudRefreshNow();return JSON.stringify({f:T.petHudTextNow(),dom:T.petPillDomNow()});})()"));
+    t('U569 装备宠物显示名称与等级', o2.f === '🐢 守护龟 Lv2' && o2.dom === o2.f, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.clearPet();T.extraHudRefreshNow();return JSON.stringify({f:T.petHudTextNow()});})()"));
+    t('U570 清除宠物边界为 —', o3.f === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;const ok=T.setPet('nonexistent',5);T.extraHudRefreshNow();return JSON.stringify({ok,f:T.petHudTextNow()});})()"));
+    t('U571 非法宠物 id 不影响显示', o4.ok === false && o4.f === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setPet('turtle',2);T.extraHudRefreshNow();return JSON.stringify({dom:T.petPillDomNow(),f:T.petHudTextNow()});})()"));
+    t('U572 DOM 与函数一致', o5.dom === o5.f, JSON.stringify(o5));
+  } catch(e){ for(let k=567;k<=572;k++) t('U'+k+' 宠物pill',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
