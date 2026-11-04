@@ -205,6 +205,32 @@ async function main() {
     t('U10 就绪触发不误弹冷却提示', o.txt.indexOf('冷却中') < 0 && o.cd > 40, JSON.stringify(o));
   } catch (e) { t('U10 就绪不误弹', false, e.message); }
 
+  // ===== U11: E 键近战大招冷却中 toast(v0.3.41) =====
+  try {
+    const o = JSON.parse(await ev(`(function(){
+      const T = window.__tbTest;
+      T.setHero('none'); T.startGame(); T.skipIntro();
+      T.setUltCd(5);
+      document.getElementById('toast').textContent = '';
+      T.fireUlt();
+      return JSON.stringify({ txt: document.getElementById('toast').textContent || '', cd: T.ultNow().cd });
+    })()`));
+    t('U11 近战大招冷却 toast 含剩余秒数', o.txt.indexOf('冷却中') >= 0 && o.txt.indexOf('5') >= 0 && o.cd > 3, JSON.stringify(o));
+  } catch (e) { t('U11 近战大招冷却 toast', false, e.message); }
+
+  // ===== U12: 近战大招就绪触发不误弹(v0.3.41) =====
+  try {
+    const o = JSON.parse(await ev(`(function(){
+      const T = window.__tbTest;
+      T.setHero('none'); T.startGame(); T.skipIntro();
+      T.setUltCd(0);
+      document.getElementById('toast').textContent = '';
+      T.fireUlt();
+      return JSON.stringify({ txt: document.getElementById('toast').textContent || '', cd: T.ultNow().cd });
+    })()`));
+    t('U12 近战大招就绪不误弹冷却提示', o.txt.indexOf('冷却中') < 0 && o.cd > 6, JSON.stringify(o));
+  } catch (e) { t('U12 近战大招就绪不误弹', false, e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
