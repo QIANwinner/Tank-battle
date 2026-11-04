@@ -2118,6 +2118,14 @@ async function main() {
     t('U476 成就徽章 HTML 抽为纯函数边界', o.b.indexOf(' none')>=0 && o.b.indexOf('未解锁')>=0, JSON.stringify(o));
   } catch(e){ t('U475 成就徽章 HTML 抽为纯函数',false,e.message); t('U476 成就徽章 HTML 抽为纯函数边界',false,e.message); }
 
+
+  // ===== U477~U478: 抽奖箱描述文案抽为纯函数(v5.82) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5GachaDescTextNow(200),b:T.v5GachaDescTextNow(12345)});})()"));
+    t('U477 抽奖箱描述文案抽为纯函数', o.a.indexOf('消耗 🪙200')>=0, JSON.stringify(o));
+    t('U478 抽奖箱描述文案抽为纯函数边界', o.b.indexOf('12,345')>=0, JSON.stringify(o));
+  } catch(e){ t('U477 抽奖箱描述文案抽为纯函数',false,e.message); t('U478 抽奖箱描述文案抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
