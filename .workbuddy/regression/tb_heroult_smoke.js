@@ -614,6 +614,14 @@ async function main() {
     t('U100 提示保留成对规则', o.a.indexOf('0 或 2 的倍数')>=0 && o.b.indexOf('⚠ 传送门需成对放置')>=0, o.a);
   } catch(e){ t('U99 传送门数量',false,e.message); t('U100 成对规则',false,e.message); }
 
+
+  // ===== U101~U102: 画质提示(v0.3.82) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.qualityMsgNow(0),b:T.qualityMsgNow(2),c:T.qualityMsgNow(9),d:T.qualityMsgNow(-1)});})()"));
+    t('U101 三档名称与设置入口', o.a.indexOf('「高」')>=0 && o.b.indexOf('「低」')>=0 && o.a.indexOf('可在设置中手动切换')>=0, o.a+' | '+o.b);
+    t('U102 越界档位兜底为自动', o.c.indexOf('「自动」')>=0 && o.d.indexOf('「自动」')>=0, o.c+' | '+o.d);
+  } catch(e){ t('U101 画质档位',false,e.message); t('U102 档位兜底',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
