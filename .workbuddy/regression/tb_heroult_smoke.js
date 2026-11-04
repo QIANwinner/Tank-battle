@@ -366,6 +366,14 @@ async function main() {
     t('U38 过关奖励含宠物币且大额千分位', o.b.indexOf('+1🐾')>=0 && o.b.indexOf('余额 12,345🪙')>=0, o.b);
   } catch(e){ t('U37 过关文案',false,e.message); t('U38 过关千分位',false,e.message); }
 
+
+  // ===== U39~U40: BOSS 击破得分(v0.3.51) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossKillMsgNow(3200),b:T.bossKillMsgNow(12345)});})()"));
+    t('U39 击破文案含当前得分', o.a.indexOf('当前 3200 分')>=0 && o.a.indexOf('BOSS 击破')>=0, o.a);
+    t('U40 得分大额千分位', o.b.indexOf('当前 12,345 分')>=0, o.b);
+  } catch(e){ t('U39 击破得分',false,e.message); t('U40 得分千分位',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
