@@ -566,6 +566,14 @@ async function main() {
     t('U88 三种技能文案口径一致', o.c.indexOf('BOSS 技能 · 分裂召唤')>=0 && o.a.indexOf('🎯')===0 && o.a.slice(-1)==='！', JSON.stringify(o));
   } catch(e){ t('U87 BOSS 技能来源',false,e.message); t('U88 BOSS 技能口径',false,e.message); }
 
+
+  // ===== U89~U90: 道具与强化提示(v0.3.76) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.powerupMsgNow('无敌护盾'),b:T.boostMsgNow('🛡','开局护盾')});})()"));
+    t('U89 道具提示带主语与名称', o.a.indexOf('🎁 获得道具 · 无敌护盾！')>=0, o.a);
+    t('U90 强化提示标明已生效', o.b.indexOf('🛡 强化生效 · 开局护盾')>=0, o.b);
+  } catch(e){ t('U89 道具提示',false,e.message); t('U90 强化提示',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
