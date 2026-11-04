@@ -80,6 +80,8 @@ async function main() {
   }
   if (!ready) { console.log('FAIL: game test hook never appeared'); chrome.kill(); process.exit(2); }
   console.log('game test hook ready');
+  // —— 状态卫生:清上一轮残留的宠物/英雄/加成(僵尸 Chrome 占 profile 时 rmSync 会静默失败) ——
+  await ev('window.__tbTest.setBonus({}); window.__tbTest.clearPet(); window.__tbTest.setHero("none");');
 
   async function ev(expr) {
     const r = await client.send('Runtime.evaluate', { expression: expr, returnByValue: true, awaitPromise: true });
@@ -2357,6 +2359,22 @@ async function main() {
     t('U559 安全态提示', o.d === '基地状态良好', o.d);
     t('U560 DOM 状态可读', o.e && typeof o.e.txt === 'string' && typeof o.e.cls === 'string', JSON.stringify(o.e));
   } catch(e){ for(let k=555;k<=560;k++) t('U'+k+' 濒死警示',false,e.message); }
+
+
+  // ===== U561~U566: 羁绊 HUD 小标(v0.6.8) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setHero('none');T.clearPet();T.extraHudRefreshNow();return JSON.stringify({dom:!!document.getElementById('bondBadgeWrap'),txt:(document.getElementById('bondBadge')||{}).textContent,f:T.bondBadgeTextNow(),id:T.activeBondIdNow()});})()"));
+    t('U561 羁绊 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U562 无羁绊初值 —', o.txt === '—' && o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setHero('fortress');T.setPet('turtle',2);T.extraHudRefreshNow();return JSON.stringify({f:T.bondBadgeTextNow(),id:T.activeBondIdNow()});})()"));
+    t('U563 匹配羁绊显示名称', o2.f === '🧱 铜墙铁壁' && o2.id === 'bondwall', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setHero('none');T.extraHudRefreshNow();return JSON.stringify({f:T.bondBadgeTextNow()});})()"));
+    t('U564 无英雄边界为 —', o3.f === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setHero('fortress');T.setPet('cat',1);T.extraHudRefreshNow();return JSON.stringify({f:T.bondBadgeTextNow(),id:T.activeBondIdNow()});})()"));
+    t('U565 错配组合不激活', o4.f === '—' && o4.id === null, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setHero('fortress');T.setPet('turtle',2);T.extraHudRefreshNow();return JSON.stringify({dom:T.bondBadgeDomNow(),f:T.bondBadgeTextNow()});})()"));
+    t('U566 DOM 与函数一致', o5.dom === o5.f, JSON.stringify(o5));
+  } catch(e){ for(let k=561;k<=566;k++) t('U'+k+' 羁绊小标',false,e.message); }
 
   chrome.kill();
 
