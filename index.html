@@ -2098,7 +2098,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V3.29</div>
+  <div id="mark">DESIGNED BY QIAN · V3.30</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -5055,13 +5055,21 @@
     });
   }
 
+  // —— v0.3.30 磁力半径计算(update 与 draw 共用;含羁绊/英雄/风暴倍率) ——
+  function magnetRadius() {
+    const lv = petBonus('magnet');
+    if (!lv) return 0;
+    const sm = magnetStorm > 0 ? (bondActive('bondmagnetstorm') ? 4 : 3) : 1;
+    return (24 + 24 * lv) * (bondActive('bondmagnet') ? 1.5 : 1) * (heroPassive('magnet') ? 1.3 : 1) * sm;
+  }
+
   function updatePowerups(dt) {
     // —— v0.3.16 磁力猪:磁力半径内道具被吸向玩家(基础拾取 24;Lv1=48 / Lv2=72 / Lv3=96),拉速随级提升 ——
     // —— v0.3.17 羁绊「磁力弹幕」:狙击×磁力猪,吸附范围 ×1.5 ——
     // —— v0.3.21 磁暴:被动磁力+30%,大招磁力风暴 ×3(三者叠乘) ——
     const magLv = petBonus('magnet');
     const stormMul = magnetStorm > 0 ? (bondActive('bondmagnetstorm') ? 4 : 3) : 1;
-    const magR = magLv ? (24 + 24 * magLv) * (bondActive('bondmagnet') ? 1.5 : 1) * (heroPassive('magnet') ? 1.3 : 1) * stormMul : 0;
+    const magR = magnetRadius();
     // —— v0.3.29 拉速加速曲线:Lv1=80/Lv2=140/Lv3=240(吸程0.6/0.51/0.4s),高等级「吸更快」补偿面积收益递减 ——
     // —— v0.3.29 风暴吸速同步:风暴×3/×4 拉速同乘(半径与吸速等比,吸程不因风暴拉长,「磁力风暴」名副其实) ——
     const pullSpd = magLv ? (80 + 40 * (magLv - 1) + 20 * (magLv - 1) * (magLv - 1)) * stormMul : 0;
@@ -5798,6 +5806,20 @@
 
     // 道具
     for (const p of powerups) drawPowerup(p);
+
+    // —— v0.3.30 磁力范围可视化:磁力生效时画淡色虚线圆环(风暴期间紫色),玩家感知被动范围 ——
+    const magFxR = magnetRadius();
+    if (magFxR > 24 && player && !player.dead) {
+      ctx.save();
+      const stormOn = magnetStorm > 0;
+      ctx.strokeStyle = stormOn ? 'rgba(200,107,255,0.42)' : 'rgba(0,240,255,0.22)';
+      ctx.lineWidth = stormOn ? 2 : 1.5;
+      ctx.setLineDash(stormOn ? [4, 5] : [6, 9]);
+      ctx.beginPath();
+      ctx.arc(player.x + TANK_SIZE / 2, player.y + TANK_SIZE / 2, magFxR, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.restore();
+    }
 
     // 粒子
     // —— v0.3.25 粒子 draw 合批:按(颜色+alpha分桶)path 合并,减 draw 调用(alpha 量化 1/16,视觉差异≤6%) ——
@@ -8385,7 +8407,7 @@
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V3.29', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V3.30', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9082,7 +9104,9 @@
       dailyHeroNow: () => dailyHero(),
       dailyHeroApply: () => { applyDailyHero(); return hero; },
       // —— v0.3.21 磁暴(第5英雄)验证钩子 ——
-      magnetRadiusNow: () => { const lv = petBonus('magnet'); const sm = magnetStorm > 0 ? (bondActive('bondmagnetstorm') ? 4 : 3) : 1; return lv ? (24 + 24 * lv) * (bondActive('bondmagnet') ? 1.5 : 1) * (heroPassive('magnet') ? 1.3 : 1) * sm : 0; },
+      magnetRadiusNow: () => magnetRadius(),
+      // —— v0.3.30 磁力圈可视化状态探针(on/off + 半径 + 风暴标志) ——
+      magnetFxNow: () => ({ r: magnetRadius(), storm: magnetStorm > 0, on: magnetRadius() > 24 && !!player && !player.dead }),
       // —— v0.3.29 磁力拉速探针(验证拉速加速曲线 + 风暴同步) ——
       magnetPullNow: () => { const lv = petBonus('magnet'); const sm = magnetStorm > 0 ? (bondActive('bondmagnetstorm') ? 4 : 3) : 1; return lv ? (80 + 40 * (lv - 1) + 20 * (lv - 1) * (lv - 1)) * sm : 0; },
       setMagnetStorm: (n) => { magnetStorm = Math.max(0, n | 0); return magnetStorm; },
