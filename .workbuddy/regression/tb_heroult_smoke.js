@@ -1350,6 +1350,14 @@ async function main() {
     t('U284 衰减不为负', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U283 按系数衰减',false,e.message); t('U284 衰减不为负',false,e.message); }
 
+
+  // ===== U285~U286: 磁暴剩余时间抽为 stormDecay(v4.84) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.stormDecayNow(3,0.5),b:T.stormDecayNow(0.2,1)});})()"));
+    t('U285 正常衰减', o.a === 2.5, JSON.stringify(o));
+    t('U286 不为负', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U285 正常衰减',false,e.message); t('U286 不为负',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
