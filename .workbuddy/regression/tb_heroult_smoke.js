@@ -998,6 +998,14 @@ async function main() {
     t('U196 前缀数字可解析', o.b === 88, JSON.stringify(o));
   } catch(e){ t('U195 空值归零',false,e.message); t('U196 前缀数字可解析',false,e.message); }
 
+
+  // ===== U197~U198: 生涯统计解析统一（累计星数/无尽最佳）(v0.4.40) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerNumNow('-1'),b:T.careerNumNow(' 7 ')});})()"));
+    t('U197 负数归零', o.a === 0, JSON.stringify(o));
+    t('U198 前后空格容错', o.b === 7, JSON.stringify(o));
+  } catch(e){ t('U197 负数归零',false,e.message); t('U198 前后空格容错',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
