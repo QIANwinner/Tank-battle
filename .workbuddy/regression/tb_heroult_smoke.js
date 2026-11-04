@@ -510,6 +510,14 @@ async function main() {
     t('U74 长提示截断为 90 字并带省略号', o.b.length === 90 && o.b.slice(-1) === '…' && o.len === 90, 'b=' + o.b.length + ' dom=' + o.len);
   } catch(e){ t('U73 短提示',false,e.message); t('U74 长提示截断',false,e.message); }
 
+
+  // ===== U75~U76: 时长格式化(v0.3.69) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.fmtDurationNow(120),b:T.fmtDurationNow(65),c:T.fmtDurationNow(45),d:T.fmtDurationNow(-3),e:T.fmtDurationNow(0)});})()"));
+    t('U75 整分与分秒混合显示', o.a === '2分' && o.b === '1分5秒', JSON.stringify(o));
+    t('U76 秒级与非法值兜底', o.c === '45秒' && o.d === '0秒' && o.e === '0秒', JSON.stringify(o));
+  } catch(e){ t('U75 分秒格式',false,e.message); t('U76 时长兜底',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
