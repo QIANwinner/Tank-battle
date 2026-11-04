@@ -942,6 +942,14 @@ async function main() {
     t('U182 零值下限保护', o.b === 1, JSON.stringify(o));
   } catch(e){ t('U181 合法值',false,e.message); t('U182 零值下限保护',false,e.message); }
 
+
+  // ===== U183~U184: 皮肤存档数组解析统一为 safeJsonArr(v0.4.33) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.safeJsonArrNow(JSON.stringify([1,2])).length,b:T.safeJsonArrNow(JSON.stringify({a:1})).length});})()"));
+    t('U183 合法数组', o.a === 2, JSON.stringify(o));
+    t('U184 非数组回退空数组', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U183 合法数组',false,e.message); t('U184 非数组回退空数组',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
