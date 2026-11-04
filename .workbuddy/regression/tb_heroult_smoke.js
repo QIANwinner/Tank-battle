@@ -1158,6 +1158,14 @@ async function main() {
     t('U236 负数归零', o.b === '0', JSON.stringify(o));
   } catch(e){ t('U235 正常余量',false,e.message); t('U236 负数归零',false,e.message); }
 
+
+  // ===== U237~U238: 测试模式提示抽为纯函数(v4.60) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.testModeTextNow(),b:T.testModeTextNow()});})()"));
+    t('U237 提示含关键说明', o.a.indexOf('不自动刷新')>=0, JSON.stringify(o));
+    t('U238 前缀正确', o.b.indexOf('测试模式')===0, JSON.stringify(o));
+  } catch(e){ t('U237 提示含关键说明',false,e.message); t('U238 前缀正确',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
