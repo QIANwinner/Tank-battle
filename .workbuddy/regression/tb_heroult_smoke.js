@@ -1630,6 +1630,14 @@ async function main() {
     t('U354 受伤渐变红色抽为纯函数边界', o.b === 'rgba(255,45,85,0.000)', JSON.stringify(o));
   } catch(e){ t('U353 受伤渐变红色抽为纯函数',false,e.message); t('U354 受伤渐变红色抽为纯函数边界',false,e.message); }
 
+
+  // ===== U355~U356: BOSS 来袭警告文字抽为纯函数(v5.21) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BossWarnTextNow('重甲'),b:T.v5BossWarnTextNow('猎手')});})()"));
+    t('U355 BOSS 来袭警告文字抽为纯函数', o.a === '⚠ WARNING · 重甲 BOSS 来袭 ⚠', JSON.stringify(o));
+    t('U356 BOSS 来袭警告文字抽为纯函数边界', o.b.indexOf('猎手')>=0, JSON.stringify(o));
+  } catch(e){ t('U355 BOSS 来袭警告文字抽为纯函数',false,e.message); t('U356 BOSS 来袭警告文字抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
