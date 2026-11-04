@@ -2591,6 +2591,23 @@ async function main() {
     t('U644 实测帧率写入 pill(v>0 · 与函数一致)', o5.v > 0 && o5.dom === (function(n){ return Math.max(0, Math.min(999, Math.round(Number(n) || 0))) + ' FPS'; })(o5.v), JSON.stringify(o5));
   } catch(e){ for(let k=639;k<=644;k++) t('U'+k+' FPS开关',false,e.message); }
 
+
+  // ===== U645~U650: 最近一局战绩卡片(v0.6.22) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('lastRunCard')});})()"));
+    t('U645 卡片容器已加入主菜单', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({txt:T.lastRunCardRefreshNow(),f:T.lastRunCardHtmlNow(null)});})()"));
+    t('U646 无战绩初值提示', o2.txt.indexOf('暂无战绩') >= 0 && o2.f.indexOf('暂无战绩') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.lastRunCardHtmlNow({score:12345,level:5,kills:10,maxCombo:8,endless:false,daily:false,timed:false,win:true}));})()"));
+    t('U647 正常卡片(千分位/关卡/胜利)', o3.indexOf('12,345') >= 0 && o3.indexOf('第 5 关') >= 0 && o3.indexOf('胜利') >= 0, o3);
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lastRunCardHtmlNow(null),b:T.lastRunCardHtmlNow({score:0,level:3,kills:0,maxCombo:0}),c:T.lastRunCardHtmlNow({score:-5,level:3,kills:0,maxCombo:0})});})()"));
+    t('U648 非法与零分兜底为空态', o4.a.indexOf('暂无战绩') >= 0 && o4.b.indexOf('暂无战绩') >= 0 && o4.c.indexOf('暂无战绩') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.lastRunCardHtmlNow({score:123456,level:9,kills:99,maxCombo:12,endless:true,daily:false,timed:false,win:false}));})()"));
+    t('U649 大额千分位与模式标注', o5.indexOf('123,456') >= 0 && o5.indexOf('🌊 无尽') >= 0 && o5.indexOf('败北') >= 0, o5);
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.endGame(true);const dom=T.lastRunCardRefreshNow();const fn=T.lastRunCardHtmlNow(T.lastRunNow2());T.startGame();return JSON.stringify({dom,fn});})()"));
+    t('U650 DOM 与函数一致(真实一局)', o6.fn.indexOf(o6.dom) >= 0 && o6.dom.indexOf('暂无战绩') >= 0, JSON.stringify(o6).slice(0, 260));
+  } catch(e){ for(let k=645;k<=650;k++) t('U'+k+' 最近一局卡片',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
