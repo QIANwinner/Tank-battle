@@ -870,6 +870,14 @@ async function main() {
     t('U164 结算重开', o.b === '再来一局', JSON.stringify(o));
   } catch(e){ t('U163 暂停续玩',false,e.message); t('U164 结算重开',false,e.message); }
 
+
+  // ===== U165~U166: 修复自制关卡名未转义导致的 HTML 注入(v0.4.24) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.escapeHtmlNow('<img src=x onerror=1>'),b:T.escapeHtmlNow('我的关卡')});})()"));
+    t('U165 尖括号被转义', o.a.indexOf('<img')<0 && o.a.indexOf('&lt;img')>=0, JSON.stringify(o));
+    t('U166 普通名称不变', o.b === '我的关卡', JSON.stringify(o));
+  } catch(e){ t('U165 尖括号被转义',false,e.message); t('U166 普通名称不变',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

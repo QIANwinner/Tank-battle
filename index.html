@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V4.23</div>
+  <div id="mark">DESIGNED BY QIAN · V4.24</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -6732,6 +6732,7 @@ function ovSubText(kind) { return ({ invite: '⚔️ 好友向你发起挑战', 
 function resultSubText(won) { return won ? '基地守住了！' : '基地被摧毁了…'; }
 function overlayTitleText(kind) { return kind === 'pause' ? '已暂停' : '坦克大战'; }
 function playBtnText(kind) { return kind === 'replay' ? '再来一局' : '继续游戏'; }
+function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -8255,7 +8256,7 @@ function playBtnText(kind) { return kind === 'replay' ? '再来一局' : '继续
     if (!customMaps.length) { edListEl.innerHTML = '<div class="edEmpty">暂无自制关卡 · 画完点「保存」</div>'; return; }
     edListEl.innerHTML = customMaps.map(m =>
       '<div class="edItem' + (m.id === edSelId ? ' on' : '') + '" data-id="' + m.id + '">' +
-        '<span class="edItemName">' + m.name + '</span>' +
+        '<span class="edItemName">' + escapeHtml(m.name) + '</span>' +
         '<button class="edItemDel" data-del="' + m.id + '" aria-label="删除">✕</button>' +
       '</div>').join('');
   }
@@ -8540,7 +8541,7 @@ function playBtnText(kind) { return kind === 'replay' ? '再来一局' : '继续
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V4.23', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V4.24', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9330,6 +9331,7 @@ function playBtnText(kind) { return kind === 'replay' ? '再来一局' : '继续
       resultSubTextNow: (...a) => resultSubText(...a),
       overlayTitleTextNow: (...a) => overlayTitleText(...a),
       playBtnTextNow: (...a) => playBtnText(...a),
+      escapeHtmlNow: (...a) => escapeHtml(...a),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
