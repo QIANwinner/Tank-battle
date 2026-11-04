@@ -950,6 +950,14 @@ async function main() {
     t('U184 非数组回退空数组', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U183 合法数组',false,e.message); t('U184 非数组回退空数组',false,e.message); }
 
+
+  // ===== U185~U186: 星级存档对象解析统一为 safeJsonObj(v0.4.34) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.safeJsonObjNow(JSON.stringify({a:1})).a,b:T.safeJsonObjNow('[1,2]')});})()"));
+    t('U185 合法对象', o.a === 1, JSON.stringify(o));
+    t('U186 数组回退空对象', Array.isArray(o.b) === false && Object.keys(o.b).length === 0, JSON.stringify(o));
+  } catch(e){ t('U185 合法对象',false,e.message); t('U186 数组回退空对象',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
