@@ -1614,6 +1614,14 @@ async function main() {
     t('U350 BOSS 血条文字抽为纯函数边界', o.b.indexOf('⚡狂暴')>=0, JSON.stringify(o));
   } catch(e){ t('U349 BOSS 血条文字抽为纯函数',false,e.message); t('U350 BOSS 血条文字抽为纯函数边界',false,e.message); }
 
+
+  // ===== U351~U352: 状态倒计时标签抽为纯函数(v5.19) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5StatusLabelNow('护盾',2),b:T.v5StatusLabelNow('冰冻',0)});})()"));
+    t('U351 状态倒计时标签抽为纯函数', o.a === '护盾 2.0s', JSON.stringify(o));
+    t('U352 状态倒计时标签抽为纯函数边界', o.b === '冰冻 0.0s', JSON.stringify(o));
+  } catch(e){ t('U351 状态倒计时标签抽为纯函数',false,e.message); t('U352 状态倒计时标签抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
