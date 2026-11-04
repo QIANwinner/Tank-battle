@@ -494,6 +494,14 @@ async function main() {
     t('U70 余额已足时差额不为负', o.b.indexOf('还差 0🐾')>=0, o.b);
   } catch(e){ t('U69 英雄差额',false,e.message); t('U70 差额下限',false,e.message); }
 
+
+  // ===== U71~U72: toast 可访问性(v0.3.67) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.toastAriaNow());})()"));
+    t('U71 toast 具备 status 语义', o.role === 'status' && o.live === 'polite', JSON.stringify(o));
+    t('U72 toast 整条播报不拆分', o.atomic === 'true', JSON.stringify(o));
+  } catch(e){ t('U71 toast 语义',false,e.message); t('U72 toast 播报',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
