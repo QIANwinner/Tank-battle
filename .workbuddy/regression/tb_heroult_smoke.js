@@ -726,6 +726,14 @@ async function main() {
     t('U128 普通显示关', o.b === '达到第 5 关', JSON.stringify(o));
   } catch(e){ t('U127 无尽显示波',false,e.message); t('U128 普通显示关',false,e.message); }
 
+
+  // ===== U129~U130: 结算标题 HTML 抽为纯函数(v0.4.6) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lvTitleHtmlNow(true,8),b:T.lvTitleHtmlNow(false,5)});})()"));
+    t('U129 无尽标题', o.a === '第 <b>8</b> 波 · 坚持', JSON.stringify(o));
+    t('U130 普通标题', o.b === '第 <b>5</b> 关 · 通关', JSON.stringify(o));
+  } catch(e){ t('U129 无尽标题',false,e.message); t('U130 普通标题',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
