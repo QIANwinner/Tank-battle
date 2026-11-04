@@ -2407,6 +2407,22 @@ async function main() {
     t('U578 DOM 宽度与函数一致', o4.w === o4.pct + '%', JSON.stringify(o4));
   } catch(e){ for(let k=573;k<=578;k++) t('U'+k+' 连击进度条',false,e.message); }
 
+
+  // ===== U579~U584: 无尽里程碑倒计时(v0.6.11) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('milestoneWrap'),txt:(document.getElementById('milestoneVal')||{}).textContent,f:T.milestoneTextNow(1,false)});})()"));
+    t('U579 里程碑 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U580 非无尽初值 —', o.txt === '—' && o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.wavesToMilestoneNow(1),b:T.wavesToMilestoneNow(13),c:T.wavesToMilestoneNow(20)});})()"));
+    t('U581 正常倒计时 10/8/1', o2.a === 10 && o2.b === 8 && o2.c === 1, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.wavesToMilestoneNow(11),b:T.wavesToMilestoneNow(21)});})()"));
+    t('U582 里程碑当日边界重置 10', o3.a === 10 && o3.b === 10, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.wavesToMilestoneNow('abc'),b:T.wavesToMilestoneNow(-5),c:T.wavesToMilestoneNow(0),d:T.wavesToMilestoneNow(NaN)});})()"));
+    t('U583 非法输入钳制为 1 层(=10)', o4.a === 10 && o4.b === 10 && o4.c === 10 && o4.d === 10, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setEndless(true);T.extraHudRefreshNow();const dom=document.getElementById('milestoneVal')?document.getElementById('milestoneVal').textContent:null;const f=T.milestoneTextNow(1,true);T.setEndless(false);T.extraHudRefreshNow();return JSON.stringify({dom,f});})()"));
+    t('U584 DOM 与函数一致(无尽态)', o5.dom === o5.f && o5.f === '🌊 10 波', JSON.stringify(o5));
+  } catch(e){ for(let k=579;k<=584;k++) t('U'+k+' 里程碑倒计时',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
