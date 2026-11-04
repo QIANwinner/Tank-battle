@@ -342,6 +342,22 @@ async function main() {
     t('U33 大额余额千分位', o.big.indexOf('余额 12,345🐾') >= 0, o.big);
   } catch (e) { t('U31 升级文案', false, e.message); t('U32 满级文案', false, e.message); t('U33 升级余额', false, e.message); }
 
+
+  // ===== U34~U36: 签到文案(v0.3.49) =====
+  try {
+    const o = JSON.parse(await ev(`(function(){
+      const T = window.__tbTest;
+      return JSON.stringify({
+        normal: T.signinToastMsgNow(2, 30, 1, 0, 880),
+        cycle:  T.signinToastMsgNow(7, 100, 3, 2, 1010),
+        big:    T.signinToastMsgNow(14, 100, 3, 2, 12345)
+      });
+    })()`));
+    t('U34 普通签到含天数奖励与余额', o.normal.indexOf('连续 2 天') >= 0 && o.normal.indexOf('+30🪙') >= 0 && o.normal.indexOf('余额 880🪙') >= 0, o.normal);
+    t('U35 整轮签到保留庆祝标识与 +3🐾', o.cycle.indexOf('🎉整轮奖励！') >= 0 && o.cycle.indexOf('+3🐾') >= 0, o.cycle);
+    t('U36 签到大额余额千分位', o.big.indexOf('余额 12,345🪙') >= 0, o.big);
+  } catch (e) { t('U34 签到文案', false, e.message); t('U35 整轮标识', false, e.message); t('U36 签到余额', false, e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V3.48</div>
+  <div id="mark">DESIGNED BY QIAN · V3.49</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -6655,6 +6655,11 @@
       + ' · 余额 ' + fmtNum(balance) + '🐾';
   }
 
+  // v0.3.49: 签到文案抽为纯函数,附带签到后余额
+  function signinToastMsg(streak, reward, pet, cycleBonus, balance) {
+    return '📅 签到成功 · 连续 ' + streak + ' 天 +' + reward + '🪙 +' + pet + '🐾'
+      + (cycleBonus ? ' 🎉整轮奖励！' : '') + ' · 余额 ' + fmtNum(balance) + '🪙';
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -7838,7 +7843,7 @@
     // —— v0.3.14 签到发宠物币:每日 +1🐾;连续满 7 天整轮额外 +2🐾 ——
     const cycleBonus = (st.streak % 7 === 0) ? 2 : 0;
     addPetCoin(1 + cycleBonus);
-    showToast('📅 签到成功 · 连续 ' + st.streak + ' 天 +' + st.reward + '🪙 +' + (1 + cycleBonus) + '🐾' + (cycleBonus ? ' 🎉整轮奖励！' : ''));
+    showToast(signinToastMsg(st.streak, st.reward, 1 + cycleBonus, cycleBonus, coins));
     sfxCoin();   // v0.3.2 金币入账音
     renderSignin();
   }
@@ -8465,7 +8470,7 @@
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V3.48', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V3.49', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9190,6 +9195,7 @@
       toastStatsNow: () => ({ count: toastCount, suppressed: toastSuppressed, last: lastToastMsg, text: $('toast').textContent }),
       toastEmitNow: (m) => { showToast(m); return { count: toastCount, suppressed: toastSuppressed }; },
       petUpgradeMsgNow: (i, n, d, lv, np, bal) => petUpgradeMsg(i, n, d, lv, np, bal),
+      signinToastMsgNow: (s, r, p, c, b) => signinToastMsg(s, r, p, c, b),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
