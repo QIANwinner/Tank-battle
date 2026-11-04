@@ -390,6 +390,14 @@ async function main() {
     t('U44 重置大额余额千分位', o.b.indexOf('余额 12,345🪙')>=0, o.b);
   } catch(e){ t('U43 重置文案',false,e.message); t('U44 重置余额',false,e.message); }
 
+
+  // ===== U45~U46: 周挑战余额(v0.3.54) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.weeklyMsgNow(150,900),b:T.weeklyMsgNow(150,12345)});})()"));
+    t('U45 周挑战文案含奖励与余额', o.a.indexOf('+150🪙')>=0 && o.a.indexOf('余额 900🪙')>=0, o.a);
+    t('U46 周挑战大额千分位', o.b.indexOf('余额 12,345🪙')>=0, o.b);
+  } catch(e){ t('U45 周挑战文案',false,e.message); t('U46 周挑战余额',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

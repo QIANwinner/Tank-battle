@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V3.53</div>
+  <div id="mark">DESIGNED BY QIAN · V3.54</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -6664,6 +6664,7 @@
   function bossKillMsg(s) { return '💥 BOSS 击破！ · 当前 ' + fmtNum(s) + ' 分'; }
   function gachaMsg(label, detail, bal) { return '🎰 抽中：' + label + (detail ? ' · ' + detail : '') + ' · 余额 ' + fmtNum(bal) + '🪙'; }
   function resetBonusMsg(refund, bal) { return '🔄 强化已重置 · 返还 🪙' + refund + ' · 余额 ' + fmtNum(bal) + '🪙'; }
+  function weeklyMsg(g, bal) { return '📅 周挑战达成 +' + g + '🪙 · 余额 ' + fmtNum(bal) + '🪙'; }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -7896,7 +7897,7 @@
   function claimWeek() {
     if (!weekDone() || weekState.claimed) return 0;
     weekState.claimed = true; saveWeek();
-    showToast('📅 周挑战达成 +150🪙');
+    showToast(weeklyMsg(150, coins));
     sfxCoin();   // v0.3.2 金币入账音
     return addGold(150);
   }
@@ -8474,7 +8475,7 @@
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V3.53', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V3.54', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9204,6 +9205,7 @@
       bossKillMsgNow: (s) => bossKillMsg(s),
       gachaMsgNow: (l, d, b) => gachaMsg(l, d, b),
       resetBonusMsgNow: (r, b) => resetBonusMsg(r, b),
+      weeklyMsgNow: (g, b) => weeklyMsg(g, b),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
