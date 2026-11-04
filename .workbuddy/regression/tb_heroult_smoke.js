@@ -1022,6 +1022,14 @@ async function main() {
     t('U202 长度稳定', o.b === 6, JSON.stringify(o));
   } catch(e){ t('U201 标题文案',false,e.message); t('U202 长度稳定',false,e.message); }
 
+
+  // ===== U203~U204: 结算与分享命中率统一为 fmtPct 纯函数(v0.4.43) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.fmtPctNow(3,4),b:T.fmtPctNow(5,0)});})()"));
+    t('U203 正常命中率', o.a === 75, JSON.stringify(o));
+    t('U204 零分母兜底', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U203 正常命中率',false,e.message); t('U204 零分母兜底',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
