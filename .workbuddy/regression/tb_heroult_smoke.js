@@ -1374,6 +1374,14 @@ async function main() {
     t('U290 零分母兜底', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U289 正常命中率',false,e.message); t('U290 零分母兜底',false,e.message); }
 
+
+  // ===== U291~U292: 生涯页与战绩图胜率统一为 carWinRateText(v4.87) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.carWinRateTextNow(1,4),b:T.carWinRateTextNow(0,0)});})()"));
+    t('U291 正常胜率', o.a === 25, JSON.stringify(o));
+    t('U292 零场次兜底', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U291 正常胜率',false,e.message); t('U292 零场次兜底',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
