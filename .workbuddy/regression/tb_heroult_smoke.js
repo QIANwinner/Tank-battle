@@ -486,6 +486,14 @@ async function main() {
     t('U68 宠物跟随含名称与等级', o.c.indexOf('守护龟 已跟随 · Lv3')>=0, o.c);
   } catch(e){ t('U67 装备文案',false,e.message); t('U68 宠物跟随',false,e.message); }
 
+
+  // ===== U69~U70: 英雄未解锁提示(v0.3.66) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.heroLockedMsgNow('磁暴',80,35),b:T.heroLockedMsgNow('堡垒',60,60)});})()"));
+    t('U69 未解锁提示含差额与总价', o.a.indexOf('还差 45🐾')>=0 && o.a.indexOf('需 80🐾')>=0, o.a);
+    t('U70 余额已足时差额不为负', o.b.indexOf('还差 0🐾')>=0, o.b);
+  } catch(e){ t('U69 英雄差额',false,e.message); t('U70 差额下限',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
