@@ -231,6 +231,21 @@ async function main() {
     t('U12 近战大招就绪不误弹冷却提示', o.txt.indexOf('冷却中') < 0 && o.cd > 6, JSON.stringify(o));
   } catch (e) { t('U12 近战大招就绪不误弹', false, e.message); }
 
+  // ===== U13~U15: 余额不足文案统一为「还差 X（需 Y）」(v0.3.42) =====
+  try {
+    const o = JSON.parse(await ev(`(function(){
+      const T = window.__tbTest;
+      return JSON.stringify({
+        coin: T.shortMsg('🪙 金币', 10, 80),
+        pet: T.shortMsg('🐾 宠物币', 2, 10, '解锁「狙击」'),
+        edge: T.shortMsg('🪙 金币', 100, 100)
+      });
+    })()`));
+    t('U13 金币不足含差额与所需', o.coin.indexOf('还差 70') >= 0 && o.coin.indexOf('需 80') >= 0, o.coin);
+    t('U14 宠物币不足含差额与物品名', o.pet.indexOf('还差 8') >= 0 && o.pet.indexOf('解锁「狙击」') >= 0, o.pet);
+    t('U15 边界余额相等时差额为 0 不为负', o.edge.indexOf('还差 0') >= 0 && o.edge.indexOf('-') < 0, o.edge);
+  } catch (e) { t('U13 经济文案', false, e.message); t('U14 宠物币文案', false, e.message); t('U15 文案边界', false, e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
