@@ -1238,6 +1238,14 @@ async function main() {
     t('U256 损坏存档归零', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U255 合法波次',false,e.message); t('U256 损坏存档归零',false,e.message); }
 
+
+  // ===== U257~U258: 抽奖次数解析抽为 safeGacha(v4.70) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.safeGachaNow('7'),b:T.safeGachaNow('-9')});})()"));
+    t('U257 合法次数', o.a === 7, JSON.stringify(o));
+    t('U258 负值归零', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U257 合法次数',false,e.message); t('U258 负值归零',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
