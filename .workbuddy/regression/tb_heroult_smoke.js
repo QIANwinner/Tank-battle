@@ -1246,6 +1246,14 @@ async function main() {
     t('U258 负值归零', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U257 合法次数',false,e.message); t('U258 负值归零',false,e.message); }
 
+
+  // ===== U259~U260: 强化累计投入解析抽为 safeBonusSpent(v4.71) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.safeBonusSpentNow('600'),b:T.safeBonusSpentNow(null)});})()"));
+    t('U259 合法投入', o.a === 600, JSON.stringify(o));
+    t('U260 空值归零', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U259 合法投入',false,e.message); t('U260 空值归零',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

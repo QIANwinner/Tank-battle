@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V4.70</div>
+  <div id="mark">DESIGNED BY QIAN · V4.71</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2658,7 +2658,7 @@
     bestWave = safeWave(localStorage.getItem(LS_BESTWAVE));
     // —— v0.2.9 抽奖箱 / 强化重置状态 ——
     gachaCount = safeGacha(localStorage.getItem(LS_GACHA));
-    bonusSpent = Math.max(0, parseInt(localStorage.getItem(LS_BONUSSPENT) || '0', 10) || 0);
+    bonusSpent = safeBonusSpent(localStorage.getItem(LS_BONUSSPENT));
     // NOTE: 宠物 / 僚机皮肤持久化在 loadLateState()（所有 const/let 声明完成后调用）加载，
     //       因早期 try 块引用 PET_MAP/WINGMAN_SKINS 等声明于其后的常量会触发 TDZ ReferenceError 被吞掉。
   } catch (e) { /* 隐私模式下 localStorage 不可用 */ }
@@ -6776,6 +6776,7 @@ function safeBonusLv(v) { return Math.max(0, safeInt(v, 0)); }
 function safeStarLv(v) { const n = safeInt(v, 0); return n >= 1 && n <= 3 ? n : 0; }
 function safeWave(v) { return Math.max(0, safeInt(v, 0)); }
 function safeGacha(v) { return Math.max(0, safeInt(v, 0)); }
+function safeBonusSpent(v) { return Math.max(0, safeInt(v, 0)); }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -8584,7 +8585,7 @@ function safeGacha(v) { return Math.max(0, safeInt(v, 0)); }
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V4.70', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V4.71', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9416,6 +9417,7 @@ function safeGacha(v) { return Math.max(0, safeInt(v, 0)); }
       safeStarLvNow: (...a) => safeStarLv(...a),
       safeWaveNow: (...a) => safeWave(...a),
       safeGachaNow: (...a) => safeGacha(...a),
+      safeBonusSpentNow: (...a) => safeBonusSpent(...a),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
