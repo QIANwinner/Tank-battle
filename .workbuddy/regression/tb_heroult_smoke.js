@@ -1862,6 +1862,14 @@ async function main() {
     t('U412 基地与宠物等级标签统一抽为纯函数边界', o.b === 'Lv6·MAX', JSON.stringify(o));
   } catch(e){ t('U411 基地与宠物等级标签统一抽为纯函数',false,e.message); t('U412 基地与宠物等级标签统一抽为纯函数边界',false,e.message); }
 
+
+  // ===== U413~U414: 基地满级描述抽为纯函数(v5.50) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BaseMaxDescNow(12),b:T.v5BaseMaxDescNow(0)});})()"));
+    t('U413 基地满级描述抽为纯函数', o.a === '基地护墙 12 格 · 已满级，最坚固的堡垒', JSON.stringify(o));
+    t('U414 基地满级描述抽为纯函数边界', o.b.indexOf('0 格')>=0, JSON.stringify(o));
+  } catch(e){ t('U413 基地满级描述抽为纯函数',false,e.message); t('U414 基地满级描述抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
