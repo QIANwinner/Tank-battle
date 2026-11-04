@@ -1310,6 +1310,14 @@ async function main() {
     t('U274 即将刷兵时半径扩大', o.b > 21, JSON.stringify(o));
   } catch(e){ t('U273 计时满时为最小半径',false,e.message); t('U274 即将刷兵时半径扩大',false,e.message); }
 
+
+  // ===== U275~U276: 冲击波透明度抽为 waveAlpha 非负兜底(v4.79) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveAlphaNow(0.5),b:T.waveAlphaNow(-2)});})()"));
+    t('U275 正常透明度', o.a === 0.5, JSON.stringify(o));
+    t('U276 负值归零', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U275 正常透明度',false,e.message); t('U276 负值归零',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

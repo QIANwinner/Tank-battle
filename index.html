@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V4.78</div>
+  <div id="mark">DESIGNED BY QIAN · V4.79</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -5803,7 +5803,7 @@
 
     // v0.2.7 近战大招冲击波扩散环（青色主环 + 白色内环）
     for (const w of ultWaves) {
-      const a = Math.max(0, w.alpha);
+      const a = waveAlpha(w.alpha);
       ctx.beginPath();
       ctx.arc(w.x, w.y, w.r, 0, Math.PI * 2);
       ctx.strokeStyle = 'rgba(0, 229, 255,' + a.toFixed(2) + ')';
@@ -6774,6 +6774,7 @@ function reviveCostOf(lv, cnt, revBonus) { const base = 100 + lv * 25 + cnt * 60
 function timeSeconds(s) { return Math.max(0, Math.ceil(Number(s) || 0)); }
 function themeIdxOf(lv) { return Math.max(0, (Number(lv) || 1) - 1); }
 function warnRingRadius(timer) { return 9 + (35 - Math.max(0, Number(timer) || 0)) * 0.35; }
+function waveAlpha(a) { return Math.max(0, Number(a) || 0); }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -8582,7 +8583,7 @@ function warnRingRadius(timer) { return 9 + (35 - Math.max(0, Number(timer) || 0
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V4.78', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V4.79', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9422,6 +9423,7 @@ function warnRingRadius(timer) { return 9 + (35 - Math.max(0, Number(timer) || 0
       timeSecondsNow: (...a) => timeSeconds(...a),
       themeIdxOfNow: (...a) => themeIdxOf(...a),
       warnRingRadiusNow: (...a) => warnRingRadius(...a),
+      waveAlphaNow: (...a) => waveAlpha(...a),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
