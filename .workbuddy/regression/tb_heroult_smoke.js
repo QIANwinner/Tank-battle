@@ -958,6 +958,14 @@ async function main() {
     t('U186 数组回退空对象', Array.isArray(o.b) === false && Object.keys(o.b).length === 0, JSON.stringify(o));
   } catch(e){ t('U185 合法对象',false,e.message); t('U186 数组回退空对象',false,e.message); }
 
+
+  // ===== U187~U188: 宠物等级钳制抽为 petLvClamp(v0.4.35) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petLvClampNow('2',3),b:T.petLvClampNow('99',3)});})()"));
+    t('U187 合法等级', o.a === 2, JSON.stringify(o));
+    t('U188 超过上限钳制', o.b === 3, JSON.stringify(o));
+  } catch(e){ t('U187 合法等级',false,e.message); t('U188 超过上限钳制',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
