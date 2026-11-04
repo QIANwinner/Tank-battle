@@ -526,6 +526,14 @@ async function main() {
     t('U78 两处失败提示口径一致', o.b.indexOf('⚠ 战绩图复制失败')>=0 && o.b.indexOf(' · ')>=0, o.b);
   } catch(e){ t('U77 复制失败对象',false,e.message); t('U78 复制失败口径',false,e.message); }
 
+
+  // ===== U79~U80: 分享码提示(v0.3.71) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shareCodeMsgNow(320),b:T.shareCodeMsgNow(12345),c:T.shareImportMsgNow(true,'迷宫',''),d:T.shareImportMsgNow(false,'','校验失败')});})()"));
+    t('U79 分享码字符数正常/大额千分位', o.a.indexOf('320 字符')>=0 && o.b.indexOf('12,345 字符')>=0, o.a+' | '+o.b);
+    t('U80 导入成功与失败明确区分', o.c.indexOf('已导入「迷宫」')>=0 && o.d.indexOf('⚠ 导入失败 · 校验失败')>=0, o.c+' | '+o.d);
+  } catch(e){ t('U79 分享码字符数',false,e.message); t('U80 导入反馈',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
