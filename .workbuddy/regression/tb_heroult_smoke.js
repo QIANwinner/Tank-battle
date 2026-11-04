@@ -1006,6 +1006,14 @@ async function main() {
     t('U198 前后空格容错', o.b === 7, JSON.stringify(o));
   } catch(e){ t('U197 负数归零',false,e.message); t('U198 前后空格容错',false,e.message); }
 
+
+  // ===== U199~U200: 生涯统计解析统一（BOSS 击破/阵亡）(v0.4.41) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerNumNow('999'),b:T.careerNumNow(undefined)});})()"));
+    t('U199 常规值', o.a === 999, JSON.stringify(o));
+    t('U200 未定义归零', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U199 常规值',false,e.message); t('U200 未定义归零',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
