@@ -2470,6 +2470,22 @@ async function main() {
     t('U602 DOM 与函数一致', o5.dom === String(o5.f), JSON.stringify(o5));
   } catch(e){ for(let k=597;k<=602;k++) t('U'+k+' 濒死红晕',false,e.message); }
 
+
+  // ===== U603~U608: 抽奖概率公示(v0.6.15) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setShopTab('gacha');T.renderShop();const el=document.querySelector('.gachaProb');const rows=el?el.querySelectorAll('.gachaProbRow').length:0;return JSON.stringify({dom:!!el,rows,txt:el?el.textContent:''});})()"));
+    t('U603 概率面板渲染于抽奖页(5 行)', o.dom === true && o.rows === 5, JSON.stringify(o));
+    t('U604 面板含标题与百分比', (o.txt || '').indexOf('概率公示') >= 0 && (o.txt || '').indexOf('%') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.gachaProbRowsNow([{w:1,label:'a'},{w:3,label:'b'}]));})()"));
+    t('U605 自定义权重 25%/75%', o2.indexOf('25%') >= 0 && o2.indexOf('75%') >= 0, o2);
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.gachaProbRowsNow(null),b:T.gachaProbRowsNow([]),c:T.gachaProbRowsNow([{w:0}])});})()"));
+    t('U606 非法输入返回空串', o3.a === '' && o3.b === '' && o3.c === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.gachaProbRowsNow([{w:5,label:'solo'}]));})()"));
+    t('U607 单项边界 100%', o4.indexOf('100%') >= 0, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const el=document.querySelector('.gachaProb');const first=el?el.querySelector('.gachaProbRow b'):null;return JSON.stringify({txt:el?el.textContent:'',first:first?first.textContent:''});})()"));
+    t('U608 DOM 与函数一致(首行 +600 30%)', (o5.txt || '').indexOf('30%') >= 0 && o5.first === '30%', JSON.stringify(o5));
+  } catch(e){ for(let k=603;k<=608;k++) t('U'+k+' 概率公示',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
