@@ -1414,6 +1414,14 @@ async function main() {
     t('U300 大额千分位', o.b === '🪙 购买 12,345', JSON.stringify(o));
   } catch(e){ t('U299 常规价格',false,e.message); t('U300 大额千分位',false,e.message); }
 
+
+  // ===== U301~U302: 选关卡片图标抽为 lvCardIcon(v4.92) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lvCardIconNow(true,true),b:T.lvCardIconNow(false,false)});})()"));
+    t('U301 BOSS 关优先', o.a === '👑', JSON.stringify(o));
+    t('U302 未解锁加锁', o.b === '🔒', JSON.stringify(o));
+  } catch(e){ t('U301 BOSS 关优先',false,e.message); t('U302 未解锁加锁',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
