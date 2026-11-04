@@ -654,6 +654,14 @@ async function main() {
     t('U110 有羁绊时标注激活', o.b.indexOf('💰 羁绊「刀口舔金」激活！')>=0, o.b);
   } catch(e){ t('U109 无羁绊',false,e.message); t('U110 羁绊激活',false,e.message); }
 
+
+  // ===== U111~U112: 备份与分享提示(v0.3.87) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.backupTipMsgNow(),b:T.reportShareMsgNow()});})()"));
+    t('U111 备份提醒含原因与入口', o.a.indexOf('进度已累积')>=0 && o.a.indexOf('设置 → 💾 存档')>=0, o.a);
+    t('U112 分享提示带主语与操作', o.b.indexOf('📷 战绩图已生成')>=0 && o.b.indexOf('长按图片保存发给朋友')>=0, o.b);
+  } catch(e){ t('U111 备份提醒',false,e.message); t('U112 战绩图分享',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
