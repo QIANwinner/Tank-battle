@@ -1798,6 +1798,14 @@ async function main() {
     t('U396 关卡开场标题抽为纯函数边界', o.b === '第 1 关', JSON.stringify(o));
   } catch(e){ t('U395 关卡开场标题抽为纯函数',false,e.message); t('U396 关卡开场标题抽为纯函数边界',false,e.message); }
 
+
+  // ===== U397~U398: 商店强化图标 HTML 抽为纯函数(v5.42) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5ShopIconHtmlNow('🛡'),b:T.v5ShopIconHtmlNow('⚡')});})()"));
+    t('U397 商店强化图标 HTML 抽为纯函数', o.a === '<span class="siIcon">🛡</span>', JSON.stringify(o));
+    t('U398 商店强化图标 HTML 抽为纯函数边界', o.b.indexOf('⚡')>=0, JSON.stringify(o));
+  } catch(e){ t('U397 商店强化图标 HTML 抽为纯函数',false,e.message); t('U398 商店强化图标 HTML 抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
