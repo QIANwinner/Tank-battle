@@ -918,6 +918,14 @@ async function main() {
     t('U176 超 1 钳制', o.b === 1, JSON.stringify(o));
   } catch(e){ t('U175 正常比例',false,e.message); t('U176 超 1 钳制',false,e.message); }
 
+
+  // ===== U177~U178: BOSS 狂暴阶段判定抽为纯函数(v0.4.30) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossPhaseOfNow(0.4),b:T.bossPhaseOfNow(0.1)});})()"));
+    t('U177 半血进一段', o.a === 1, JSON.stringify(o));
+    t('U178 四分之一血进二段', o.b === 2, JSON.stringify(o));
+  } catch(e){ t('U177 半血进一段',false,e.message); t('U178 四分之一血进二段',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
