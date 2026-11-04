@@ -1774,6 +1774,14 @@ async function main() {
     t('U390 翠绿填充串抽为纯函数边界', o.b === 'rgba(52,211,153,0)', JSON.stringify(o));
   } catch(e){ t('U389 翠绿填充串抽为纯函数',false,e.message); t('U390 翠绿填充串抽为纯函数边界',false,e.message); }
 
+
+  // ===== U391~U392: 宠物下级费用文案抽为纯函数(v5.39) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5NextPriceTextNow(60),b:T.v5NextPriceTextNow(0)});})()"));
+    t('U391 宠物下级费用文案抽为纯函数', o.a === ' · 下级 60🐾', JSON.stringify(o));
+    t('U392 宠物下级费用文案抽为纯函数边界', o.b === ' · 已满级', JSON.stringify(o));
+  } catch(e){ t('U391 宠物下级费用文案抽为纯函数',false,e.message); t('U392 宠物下级费用文案抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
