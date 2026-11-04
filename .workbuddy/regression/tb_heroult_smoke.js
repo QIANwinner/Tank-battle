@@ -1118,6 +1118,14 @@ async function main() {
     t('U226 零音量图标', o.b === '🔈', JSON.stringify(o));
   } catch(e){ t('U225 静音优先',false,e.message); t('U226 零音量图标',false,e.message); }
 
+
+  // ===== U227~U228: 设置页全屏按钮文案抽为纯函数(v4.55) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.fullscreenBtnTextNow(true),b:T.fullscreenBtnTextNow(false)});})()"));
+    t('U227 已全屏', o.a === '退出全屏', JSON.stringify(o));
+    t('U228 未全屏', o.b === '进入全屏', JSON.stringify(o));
+  } catch(e){ t('U227 已全屏',false,e.message); t('U228 未全屏',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
