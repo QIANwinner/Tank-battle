@@ -246,6 +246,21 @@ async function main() {
     t('U15 边界余额相等时差额为 0 不为负', o.edge.indexOf('还差 0') >= 0 && o.edge.indexOf('-') < 0, o.edge);
   } catch (e) { t('U13 经济文案', false, e.message); t('U14 宠物币文案', false, e.message); t('U15 文案边界', false, e.message); }
 
+
+  // ===== U16~U18: 大额货币千分位(v0.3.43) =====
+  try {
+    const o = JSON.parse(await ev(`(function(){
+      const T = window.__tbTest;
+      T.setCoins(12345); const big = T.hudCoins();
+      T.setCoins(123);   const small = T.hudCoins();
+      T.setCoins(0);
+      return JSON.stringify({ big, small, e9999: T.fmtNumNow(9999), e10000: T.fmtNumNow(10000) });
+    })()`));
+    t('U16 大额金币 HUD 显示 12,345', o.big === '12,345', JSON.stringify(o));
+    t('U17 小额金币保持 123 不变', o.small === '123', JSON.stringify(o));
+    t('U18 千分位边界 9999/10000', o.e9999 === '9999' && o.e10000 === '10,000', JSON.stringify(o));
+  } catch (e) { t('U16 千分位', false, e.message); t('U17 小额兼容', false, e.message); t('U18 边界', false, e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
