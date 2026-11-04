@@ -2423,6 +2423,21 @@ async function main() {
     t('U584 DOM 与函数一致(无尽态)', o5.dom === o5.f && o5.f === '🌊 10 波', JSON.stringify(o5));
   } catch(e){ for(let k=579;k<=584;k++) t('U'+k+' 里程碑倒计时',false,e.message); }
 
+
+  // ===== U585~U590: 成就等级称号(v0.6.12) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setAch([]);T.openAchNow();const row=document.querySelector('.achPetStat');return JSON.stringify({a:T.achRankNameNow(0,30),b:T.achRankNameNow(8,30),c:T.achRankNameNow(15,30),d:T.achRankNameNow(23,30),e:T.achRankNameNow(30,30),dom:row?row.textContent:''});})()"));
+    t('U585 五级称号齐全(新兵/老兵/精锐/将军/元帅)', o.a === '新兵' && o.b === '老兵' && o.c === '精锐' && o.d === '将军' && o.e === '元帅', JSON.stringify(o));
+    t('U586 零成就初值为新兵且面板含称号', o.dom.indexOf('🎖') >= 0 && o.dom.indexOf('新兵') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.achRankNameNow(0,0),b:T.achRankNameNow(-5,30),c:T.achRankNameNow(99,30),d:T.achRankNameNow('x','y')});})()"));
+    t('U587 边界:零总量/负数/超额/非法', o2.a === '新兵' && o2.b === '新兵' && o2.c === '元帅' && o2.d === '新兵', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.achRankNameNow(NaN,30),b:T.achRankNameNow(30,NaN),c:T.achRankNameNow(15,'30')});})()"));
+    t('U588 非法输入兜底(NaN 数量/总数均落新兵)', o3.a === '新兵' && o3.b === '新兵' && o3.c === '精锐', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setAch(T.achAllDefs());T.openAchNow();const row=document.querySelector('.achPetStat');const r=row?row.textContent:'';T.setAch([]);T.openAchNow();return JSON.stringify({full:r,none:(document.querySelector('.achPetStat')||{}).textContent});})()"));
+    t('U589 DOM 与函数一致(全解锁=元帅)', o4.full.indexOf('元帅') >= 0 && (o4.none || '').indexOf('新兵') >= 0, JSON.stringify(o4));
+    t('U590 口径与统计条共存不冲突', (o4.full || '').indexOf('🐾 宠物币进度') >= 0 || (o4.none || '').indexOf('🐾 宠物币进度') >= 0, JSON.stringify(o4));
+  } catch(e){ for(let k=585;k<=590;k++) t('U'+k+' 成就称号',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
