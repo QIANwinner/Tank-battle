@@ -2174,6 +2174,14 @@ async function main() {
     t('U490 英雄解锁标签抽为纯函数边界', o.b === '解锁「」', JSON.stringify(o));
   } catch(e){ t('U489 英雄解锁标签抽为纯函数',false,e.message); t('U490 英雄解锁标签抽为纯函数边界',false,e.message); }
 
+
+  // ===== U491~U492: 英雄解锁成功文案抽为纯函数(v5.89) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5HeroBoughtMsgNow('⚡','磁暴',80),b:T.v5HeroBoughtMsgNow('X','Y',12345)});})()"));
+    t('U491 英雄解锁成功文案抽为纯函数', o.a === '⚡ 已解锁 · 磁暴（-80🐾）', JSON.stringify(o));
+    t('U492 英雄解锁成功文案抽为纯函数边界', o.b.indexOf('12,345')>=0, JSON.stringify(o));
+  } catch(e){ t('U491 英雄解锁成功文案抽为纯函数',false,e.message); t('U492 英雄解锁成功文案抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
