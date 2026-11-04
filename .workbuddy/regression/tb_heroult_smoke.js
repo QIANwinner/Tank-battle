@@ -1038,6 +1038,14 @@ async function main() {
     t('U206 恢复默认', o.b === '📋 复制存档码', JSON.stringify(o));
   } catch(e){ t('U205 复制成功',false,e.message); t('U206 恢复默认',false,e.message); }
 
+
+  // ===== U207~U208: 自动恢复倒计时文案抽为纯函数(v0.4.45) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.autoRecoverTextNow(5),b:T.autoRecoverTextNow(0)});})()"));
+    t('U207 正数倒计时', o.a === '自动恢复中（5 秒后刷新）…', JSON.stringify(o));
+    t('U208 归零切换文案', o.b === '正在刷新…', JSON.stringify(o));
+  } catch(e){ t('U207 正数倒计时',false,e.message); t('U208 归零切换文案',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
