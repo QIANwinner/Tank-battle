@@ -1790,6 +1790,14 @@ async function main() {
     t('U394 每日词条描述拼接抽为纯函数边界', o.b === 'A · B(C)', JSON.stringify(o));
   } catch(e){ t('U393 每日词条描述拼接抽为纯函数',false,e.message); t('U394 每日词条描述拼接抽为纯函数边界',false,e.message); }
 
+
+  // ===== U395~U396: 关卡开场标题抽为纯函数(v5.41) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5IntroTxtNow(7),b:T.v5IntroTxtNow(1)});})()"));
+    t('U395 关卡开场标题抽为纯函数', o.a === '第 7 关', JSON.stringify(o));
+    t('U396 关卡开场标题抽为纯函数边界', o.b === '第 1 关', JSON.stringify(o));
+  } catch(e){ t('U395 关卡开场标题抽为纯函数',false,e.message); t('U396 关卡开场标题抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
