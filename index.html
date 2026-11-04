@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V3.74</div>
+  <div id="mark">DESIGNED BY QIAN · V3.75</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -4286,7 +4286,7 @@
       }
     }
     beep(200, 0.18, 'sawtooth', 0.06);
-    showToast('🎯 散射弹幕！');
+    showToast(bossSkillMsg('🎯', '散射弹幕'));
   }
   // 猎手·激光扫射：一道能量束绕 Boss 旋转扫过（触碰玩家即受伤）
   function laserShot(e) {
@@ -4295,13 +4295,13 @@
     if (player && !player.dead) aim = Math.atan2((player.y + TANK_SIZE / 2) - cy, (player.x + TANK_SIZE / 2) - cx);
     lasers.push({ x: cx, y: cy, angle: aim, spin: (Math.random() < 0.5 ? -1 : 1) * 0.9, t: 0, dur: 1.6, len: 760, thick: 7, owner: e, hitDone: false });
     beep(160, 0.3, 'sawtooth', 0.07);
-    showToast('⚡ 激光扫射！');
+    showToast(bossSkillMsg('⚡', '激光扫射'));
   }
   // 分裂者·分裂召唤：环形弹幕 + 召唤增援（增殖压迫）
   function splitSummon(e) {
     ringShot(e);
     summonMinions(e);
-    showToast('🧬 分裂召唤！');
+    showToast(bossSkillMsg('🧬', '分裂召唤'));
   }
   function ringShot(e) {
     const cx = e.x + e.size / 2, cy = e.y + e.size / 2;
@@ -6686,6 +6686,7 @@
   function achBadgeTitleMsg(c, t) { return '🏅 已解锁成就徽章 · ' + c + '/' + t + ' · 完成度 ' + achPct(c, t) + '%'; }
   function hudNum(n) { return fmtNum(Math.max(0, Math.floor(Number(n) || 0))); }
   function cooldownMsg(kind, sec) { return '⏳ ' + kind + '冷却中 · 还需 ' + fmtDuration(sec); }
+  function bossSkillMsg(icon, name) { return icon + ' BOSS 技能 · ' + name + '！'; }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -8496,7 +8497,7 @@
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V3.74', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V3.75', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9247,6 +9248,7 @@
       achPctNow: (c, t) => achPct(c, t), achBadgeTitleMsgNow: (c, t) => achBadgeTitleMsg(c, t),
       hudNumNow: (n) => hudNum(n),
       cooldownMsgNow: (k, s) => cooldownMsg(k, s),
+      bossSkillMsgNow: (i, n) => bossSkillMsg(i, n),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
