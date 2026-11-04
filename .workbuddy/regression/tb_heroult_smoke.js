@@ -2054,6 +2054,14 @@ async function main() {
     t('U460 宠物描述 HTML 抽为纯函数边界', o.b.indexOf('A · NB')>=0, JSON.stringify(o));
   } catch(e){ t('U459 宠物描述 HTML 抽为纯函数',false,e.message); t('U460 宠物描述 HTML 抽为纯函数边界',false,e.message); }
 
+
+  // ===== U461~U462: 宠物状态 HTML 抽为纯函数(v5.74) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5PetMetaHtmlNow('Lv2',true,true),b:T.v5PetMetaHtmlNow('Lv1',false,false)});})()"));
+    t('U461 宠物状态 HTML 抽为纯函数', o.a === '<span class="siMeta">Lv2 · 跟随中</span>', JSON.stringify(o));
+    t('U462 宠物状态 HTML 抽为纯函数边界', o.b === '<span class="siMeta">Lv1</span>', JSON.stringify(o));
+  } catch(e){ t('U461 宠物状态 HTML 抽为纯函数',false,e.message); t('U462 宠物状态 HTML 抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
