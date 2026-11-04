@@ -1902,6 +1902,14 @@ async function main() {
     t('U422 带书名号的名称标签抽为纯函数边界', o.b === '「」', JSON.stringify(o));
   } catch(e){ t('U421 带书名号的名称标签抽为纯函数',false,e.message); t('U422 带书名号的名称标签抽为纯函数边界',false,e.message); }
 
+
+  // ===== U423~U424: 皮肤购买成功文案抽为纯函数(v5.55) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5SkinBoughtMsgNow('🔵','经典 QIAN'),b:T.v5SkinBoughtMsgNow('X','Y')});})()"));
+    t('U423 皮肤购买成功文案抽为纯函数', o.a === '🔵 皮肤已购买并装备 · 经典 QIAN', JSON.stringify(o));
+    t('U424 皮肤购买成功文案抽为纯函数边界', o.b.indexOf('X 皮肤')>=0, JSON.stringify(o));
+  } catch(e){ t('U423 皮肤购买成功文案抽为纯函数',false,e.message); t('U424 皮肤购买成功文案抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
