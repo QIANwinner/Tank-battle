@@ -1166,6 +1166,14 @@ async function main() {
     t('U238 前缀正确', o.b.indexOf('测试模式')===0, JSON.stringify(o));
   } catch(e){ t('U237 提示含关键说明',false,e.message); t('U238 前缀正确',false,e.message); }
 
+
+  // ===== U239~U240: HUD 关卡数抽为纯函数(v4.61) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hudLevelTextNow(7),b:T.hudLevelTextNow(0)});})()"));
+    t('U239 常规关卡', o.a === '7', JSON.stringify(o));
+    t('U240 零值下限保护', o.b === '1', JSON.stringify(o));
+  } catch(e){ t('U239 常规关卡',false,e.message); t('U240 零值下限保护',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
