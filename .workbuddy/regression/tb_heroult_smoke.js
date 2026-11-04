@@ -1254,6 +1254,14 @@ async function main() {
     t('U260 空值归零', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U259 合法投入',false,e.message); t('U260 空值归零',false,e.message); }
 
+
+  // ===== U261~U262: 每日挑战计数解析抽为 safeDailyCount(v4.72) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.safeDailyCountNow('4'),b:T.safeDailyCountNow('bad')});})()"));
+    t('U261 合法计数', o.a === 4, JSON.stringify(o));
+    t('U262 非法值归零', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U261 合法计数',false,e.message); t('U262 非法值归零',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

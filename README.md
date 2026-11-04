@@ -162,6 +162,12 @@ Tank-battle/
 
 ## 🆕 更新日志
 
+### v0.4.72 · 2026-11-04
+**每日挑战计数解析抽为 safeDailyCount**
+- 每日挑战计数解析抽为 safeDailyCount
+- ✅ 回归验证：主套件 169/169 + 反馈专项 262/262（无回归）
+- 📴 Service Worker 缓存版本更新至 **v04720**，游戏内版本 **V4.72**
+
 ### v0.4.71 · 2026-11-04
 **强化累计投入解析抽为 safeBonusSpent**
 - 强化累计投入解析抽为 safeBonusSpent
