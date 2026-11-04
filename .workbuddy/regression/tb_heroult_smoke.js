@@ -854,6 +854,14 @@ async function main() {
     t('U160 失败文案', o.b === '基地被摧毁了…', JSON.stringify(o));
   } catch(e){ t('U159 胜利文案',false,e.message); t('U160 失败文案',false,e.message); }
 
+
+  // ===== U161~U162: 遮罩标题文案抽为纯函数(v0.4.22) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.overlayTitleTextNow('title'),b:T.overlayTitleTextNow('pause')});})()"));
+    t('U161 标题页', o.a === '坦克大战', JSON.stringify(o));
+    t('U162 暂停页', o.b === '已暂停', JSON.stringify(o));
+  } catch(e){ t('U161 标题页',false,e.message); t('U162 暂停页',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
