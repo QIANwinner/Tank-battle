@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V4.50</div>
+  <div id="mark">DESIGNED BY QIAN · V4.51</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -6756,6 +6756,7 @@ function timedIntroMsg(sec) { return '⏱ 限时冲分 · ' + fmtDuration(sec) +
 function heroDisabledMsg() { return '🚫 英雄技仅在单人局且已选英雄时可用'; }
 function reportCopyMsg() { return '✅ 战绩图已复制到剪贴板'; }
 function pauseIconText(paused) { return paused ? '▶' : '⏸'; }
+function muteIconText(muted) { return muted ? '🔇' : '🔊'; }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -7497,7 +7498,7 @@ function pauseIconText(paused) { return paused ? '▶' : '⏸'; }
   }
 
   function applyMuteLabel() {
-    muteBtn.textContent = muted ? '🔇' : '🔊';
+    muteBtn.textContent = muteIconText(muted);
   }
 
   function toggleMute() {
@@ -8564,7 +8565,7 @@ function pauseIconText(paused) { return paused ? '▶' : '⏸'; }
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V4.50', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V4.51', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9376,6 +9377,7 @@ function pauseIconText(paused) { return paused ? '▶' : '⏸'; }
       heroDisabledMsgNow: (...a) => heroDisabledMsg(...a),
       reportCopyMsgNow: (...a) => reportCopyMsg(...a),
       pauseIconTextNow: (...a) => pauseIconText(...a),
+      muteIconTextNow: (...a) => muteIconText(...a),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

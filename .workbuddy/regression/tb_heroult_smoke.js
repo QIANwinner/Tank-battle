@@ -1086,6 +1086,14 @@ async function main() {
     t('U218 运行态', o.b === '⏸', JSON.stringify(o));
   } catch(e){ t('U217 暂停态',false,e.message); t('U218 运行态',false,e.message); }
 
+
+  // ===== U219~U220: 静音按钮图标抽为纯函数(v4.51) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.muteIconTextNow(true),b:T.muteIconTextNow(false)});})()"));
+    t('U219 静音态', o.a === '🔇', JSON.stringify(o));
+    t('U220 有声态', o.b === '🔊', JSON.stringify(o));
+  } catch(e){ t('U219 静音态',false,e.message); t('U220 有声态',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
