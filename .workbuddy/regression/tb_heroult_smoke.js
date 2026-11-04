@@ -1094,6 +1094,14 @@ async function main() {
     t('U220 有声态', o.b === '🔊', JSON.stringify(o));
   } catch(e){ t('U219 静音态',false,e.message); t('U220 有声态',false,e.message); }
 
+
+  // ===== U221~U222: 全屏按钮图标抽为纯函数(v4.52) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.fullscreenIconTextNow(true),b:T.fullscreenIconTextNow(false)});})()"));
+    t('U221 全屏态', o.a === '🗗', JSON.stringify(o));
+    t('U222 窗口态', o.b === '⛶', JSON.stringify(o));
+  } catch(e){ t('U221 全屏态',false,e.message); t('U222 窗口态',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
