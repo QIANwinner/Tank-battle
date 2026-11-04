@@ -2006,6 +2006,14 @@ async function main() {
     t('U448 宠物稀有度类名抽为纯函数边界', o.b === 'shopItem rar-epic equipped', JSON.stringify(o));
   } catch(e){ t('U447 宠物稀有度类名抽为纯函数',false,e.message); t('U448 宠物稀有度类名抽为纯函数边界',false,e.message); }
 
+
+  // ===== U449~U450: 磁力猪当前效果描述抽为纯函数(v5.68) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5MagnetEffDescNow(1),b:T.v5MagnetEffDescNow(3)});})()"));
+    t('U449 磁力猪当前效果描述抽为纯函数', o.a.indexOf('磁力半径')>=0 && o.a.indexOf('px/s')>=0, JSON.stringify(o));
+    t('U450 磁力猪当前效果描述抽为纯函数边界', o.b.indexOf('拉速')>=0, JSON.stringify(o));
+  } catch(e){ t('U449 磁力猪当前效果描述抽为纯函数',false,e.message); t('U450 磁力猪当前效果描述抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
