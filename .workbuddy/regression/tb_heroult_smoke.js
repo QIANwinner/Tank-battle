@@ -1102,6 +1102,14 @@ async function main() {
     t('U222 窗口态', o.b === '⛶', JSON.stringify(o));
   } catch(e){ t('U221 全屏态',false,e.message); t('U222 窗口态',false,e.message); }
 
+
+  // ===== U223~U224: 音量百分比文本抽为纯函数并钳制(v4.53) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.volPctTextNow(45),b:T.volPctTextNow(150)});})()"));
+    t('U223 常规音量', o.a === '45%', JSON.stringify(o));
+    t('U224 越界钳制', o.b === '100%', JSON.stringify(o));
+  } catch(e){ t('U223 常规音量',false,e.message); t('U224 越界钳制',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
