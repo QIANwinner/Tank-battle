@@ -990,6 +990,14 @@ async function main() {
     t('U194 大数值保持', o.b === 12345, JSON.stringify(o));
   } catch(e){ t('U193 零值保持',false,e.message); t('U194 大数值保持',false,e.message); }
 
+
+  // ===== U195~U196: 生涯统计解析统一（最高分/累计金币）(v0.4.39) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerNumNow(null),b:T.careerNumNow('88abc')});})()"));
+    t('U195 空值归零', o.a === 0, JSON.stringify(o));
+    t('U196 前缀数字可解析', o.b === 88, JSON.stringify(o));
+  } catch(e){ t('U195 空值归零',false,e.message); t('U196 前缀数字可解析',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
