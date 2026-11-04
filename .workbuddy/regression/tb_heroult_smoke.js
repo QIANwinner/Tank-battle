@@ -798,6 +798,14 @@ async function main() {
     t('U146 未签到奖励千分位', o.b === '今日可领 🪙12,345', JSON.stringify(o));
   } catch(e){ t('U145 已签到显示连续',false,e.message); t('U146 未签到奖励千分位',false,e.message); }
 
+
+  // ===== U147~U148: 生涯页局数副标题抽为纯函数(v0.4.15) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerSubTextNow(5),b:T.careerSubTextNow(12345)});})()"));
+    t('U147 普通局数', o.a === '共 5 局', JSON.stringify(o));
+    t('U148 大额千分位', o.b === '共 12,345 局', JSON.stringify(o));
+  } catch(e){ t('U147 普通局数',false,e.message); t('U148 大额千分位',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
