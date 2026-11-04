@@ -502,6 +502,14 @@ async function main() {
     t('U72 toast 整条播报不拆分', o.atomic === 'true', JSON.stringify(o));
   } catch(e){ t('U71 toast 语义',false,e.message); t('U72 toast 播报',false,e.message); }
 
+
+  // ===== U73~U74: 长提示截断(v0.3.68) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;const L='A'.repeat(140);return JSON.stringify({a:T.toastClipNow('短提示',90),b:T.toastClipNow(L,90),len:T.toastClipDomNow(L)});})()"));
+    t('U73 短提示原样保留', o.a === '短提示', o.a);
+    t('U74 长提示截断为 90 字并带省略号', o.b.length === 90 && o.b.slice(-1) === '…' && o.len === 90, 'b=' + o.b.length + ' dom=' + o.len);
+  } catch(e){ t('U73 短提示',false,e.message); t('U74 长提示截断',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
