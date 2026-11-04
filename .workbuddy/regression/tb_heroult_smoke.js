@@ -2230,6 +2230,14 @@ async function main() {
     t('U504 成就解锁文案抽为纯函数边界', o.b.indexOf('+0')<0, JSON.stringify(o));
   } catch(e){ t('U503 成就解锁文案抽为纯函数',false,e.message); t('U504 成就解锁文案抽为纯函数边界',false,e.message); }
 
+
+  // ===== U505~U506: 颜色转 rgba 兜底串抽为纯函数(v5.96) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5FallbackRgbaNow(0.5),b:T.v5FallbackRgbaNow(0)});})()"));
+    t('U505 颜色转 rgba 兜底串抽为纯函数', o.a === 'rgba(255,45,85,0.5)', JSON.stringify(o));
+    t('U506 颜色转 rgba 兜底串抽为纯函数边界', o.b === 'rgba(255,45,85,0)', JSON.stringify(o));
+  } catch(e){ t('U505 颜色转 rgba 兜底串抽为纯函数',false,e.message); t('U506 颜色转 rgba 兜底串抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
