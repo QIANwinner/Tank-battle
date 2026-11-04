@@ -926,6 +926,14 @@ async function main() {
     t('U178 四分之一血进二段', o.b === 2, JSON.stringify(o));
   } catch(e){ t('U177 半血进一段',false,e.message); t('U178 四分之一血进二段',false,e.message); }
 
+
+  // ===== U179~U180: 宠物币存档解析统一为 safeMax0(v0.4.31) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.safeMax0Now('88'),b:T.safeMax0Now('-5')});})()"));
+    t('U179 合法值', o.a === 88, JSON.stringify(o));
+    t('U180 负值归零', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U179 合法值',false,e.message); t('U180 负值归零',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
