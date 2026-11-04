@@ -966,6 +966,14 @@ async function main() {
     t('U188 超过上限钳制', o.b === 3, JSON.stringify(o));
   } catch(e){ t('U187 合法等级',false,e.message); t('U188 超过上限钳制',false,e.message); }
 
+
+  // ===== U189~U190: 生涯统计解析统一为 careerNum（局数/击杀）(v0.4.36) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerNumNow('42'),b:T.careerNumNow('-8')});})()"));
+    t('U189 合法统计值', o.a === 42, JSON.stringify(o));
+    t('U190 负值归零', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U189 合法统计值',false,e.message); t('U190 负值归零',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
