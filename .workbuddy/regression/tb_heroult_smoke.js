@@ -2254,6 +2254,14 @@ async function main() {
     t('U510 皮肤描述 HTML 抽为纯函数边界', o.b.indexOf('>X</span>')>=0, JSON.stringify(o));
   } catch(e){ t('U509 皮肤描述 HTML 抽为纯函数',false,e.message); t('U510 皮肤描述 HTML 抽为纯函数边界',false,e.message); }
 
+
+  // ===== U511~U512: 基地图标 HTML 抽为纯函数（100 轮收口）(v5.99) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BaseIconHtmlNow(),b:T.v5BaseIconHtmlNow()});})()"));
+    t('U511 基地图标 HTML 抽为纯函数（100 轮收口）', o.a === '<span class="baseIcon">🏰</span>', JSON.stringify(o));
+    t('U512 基地图标 HTML 抽为纯函数（100 轮收口）边界', o.b.indexOf('baseIcon')>=0, JSON.stringify(o));
+  } catch(e){ t('U511 基地图标 HTML 抽为纯函数（100 轮收口）',false,e.message); t('U512 基地图标 HTML 抽为纯函数（100 轮收口）边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

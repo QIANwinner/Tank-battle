@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V5.98</div>
+  <div id="mark">DESIGNED BY QIAN · V5.99</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -6892,6 +6892,7 @@ function v5AchUnlockText(a,pr,count){return '🏆 成就解锁 · '+a.name+(a.re
 function v5FallbackRgba(a){return 'rgba(255,45,85,'+a+')';}
 function v5SkinPrevHtml(){return '<span class="siIcon skinPrev"><canvas width="48" height="48"></canvas></span>';}
 function v5SkinDescHtml(d){return '<span class="siDesc">'+d+'</span>';}
+function v5BaseIconHtml(){return '<span class="baseIcon">🏰</span>';}
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -7331,7 +7332,7 @@ function v5SkinDescHtml(d){return '<span class="siDesc">'+d+'</span>';}
     const desc = maxed
       ? v5BaseMaxDesc(def.walls.length)
       : v5BaseNextDesc(def.walls.length, next.name, next.walls.length);
-    item.innerHTML = '<span class="baseIcon">🏰</span>' +
+    item.innerHTML = v5BaseIconHtml() +
       '<div class="baseInfo">' +
         v5BaseNameRow(def.name, lvTxt) +
         '<span class="siDesc">' + desc + '</span>' +
@@ -8699,7 +8700,7 @@ function v5SkinDescHtml(d){return '<span class="siDesc">'+d+'</span>';}
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V5.98', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V5.99', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9657,6 +9658,7 @@ function v5SkinDescHtml(d){return '<span class="siDesc">'+d+'</span>';}
       v5FallbackRgbaNow: (...a) => v5FallbackRgba(...a),
       v5SkinPrevHtmlNow: (...a) => v5SkinPrevHtml(...a),
       v5SkinDescHtmlNow: (...a) => v5SkinDescHtml(...a),
+      v5BaseIconHtmlNow: (...a) => v5BaseIconHtml(...a),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
