@@ -2142,6 +2142,14 @@ async function main() {
     t('U482 抽奖按钮 HTML 抽为纯函数边界', o.b.indexOf('disabled')>=0, JSON.stringify(o));
   } catch(e){ t('U481 抽奖按钮 HTML 抽为纯函数',false,e.message); t('U482 抽奖按钮 HTML 抽为纯函数边界',false,e.message); }
 
+
+  // ===== U483~U484: 重置说明文案抽为纯函数(v5.85) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5ResetDescTextNow(400),b:T.v5ResetDescTextNow(0)});})()"));
+    t('U483 重置说明文案抽为纯函数', o.a.indexOf('🪙200')>=0 && o.a.indexOf('🪙200）')>=0, JSON.stringify(o));
+    t('U484 重置说明文案抽为纯函数边界', o.b.indexOf('🪙0）')>=0, JSON.stringify(o));
+  } catch(e){ t('U483 重置说明文案抽为纯函数',false,e.message); t('U484 重置说明文案抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
