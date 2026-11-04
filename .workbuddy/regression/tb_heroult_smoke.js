@@ -2392,6 +2392,21 @@ async function main() {
     t('U572 DOM 与函数一致', o5.dom === o5.f, JSON.stringify(o5));
   } catch(e){ for(let k=567;k<=572;k++) t('U'+k+' 宠物pill',false,e.message); }
 
+
+  // ===== U573~U578: 连击计时进度条(v0.6.10) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('comboBarWrap'),fill:!!document.getElementById('comboBarFill'),bar:T.comboBarNow(),w:(document.getElementById('comboBarFill')||{}).style?document.getElementById('comboBarFill').style.width:null});})()"));
+    t('U573 进度条 DOM 已加入', o.dom === true && o.fill === true, JSON.stringify(o));
+    t('U574 无连击初值 0%', o.bar.max === 0 && o.bar.pct === 0 && o.w === '0%', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({p:T.comboPctNow(5,10),a:T.comboPctNow(10,10),b:T.comboPctNow(0,10),c:T.comboPctNow(-3,10)});})()"));
+    t('U575 正常比例换算 50%', o2.p === 50, JSON.stringify(o2));
+    t('U576 边界满格与零值', o2.a === 100 && o2.b === 0 && o2.c === 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboPctNow('x','y'),b:T.comboPctNow(5,0),c:T.comboPctNow(5,NaN)});})()"));
+    t('U577 非法输入兜底为 0', o3.a === 0 && o3.b === 0 && o3.c === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.extraHudRefreshNow();return JSON.stringify({w:(document.getElementById('comboBarFill')||{}).style?document.getElementById('comboBarFill').style.width:null,pct:T.comboBarNow().pct});})()"));
+    t('U578 DOM 宽度与函数一致', o4.w === o4.pct + '%', JSON.stringify(o4));
+  } catch(e){ for(let k=573;k<=578;k++) t('U'+k+' 连击进度条',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
