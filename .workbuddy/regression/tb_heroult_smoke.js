@@ -1430,6 +1430,14 @@ async function main() {
     t('U304 越界钳制满星', o.b === '★★★', JSON.stringify(o));
   } catch(e){ t('U303 二星补空心',false,e.message); t('U304 越界钳制满星',false,e.message); }
 
+
+  // ===== U305~U306: 生涯统计格抽为 carStatHtml(v4.94) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.carStatHtmlNow(12345,'总场次'),b:T.carStatHtmlNow(0,'总击杀')});})()"));
+    t('U305 千分位与标签', o.a.indexOf('<b>12,345</b>')>=0 && o.a.indexOf('总场次')>=0, JSON.stringify(o));
+    t('U306 零值显示', o.b.indexOf('<b>0</b>')>=0, JSON.stringify(o));
+  } catch(e){ t('U305 千分位与标签',false,e.message); t('U306 零值显示',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
