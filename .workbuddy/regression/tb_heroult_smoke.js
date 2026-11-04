@@ -574,6 +574,14 @@ async function main() {
     t('U90 强化提示标明已生效', o.b.indexOf('🛡 强化生效 · 开局护盾')>=0, o.b);
   } catch(e){ t('U89 道具提示',false,e.message); t('U90 强化提示',false,e.message); }
 
+
+  // ===== U91~U92: 存档恢复提示(v0.3.77) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.restoreMsgNow(true,''),b:T.restoreMsgNow(false,'校验失败')});})()"));
+    t('U91 恢复成功文案不变', o.a === '✅ 存档已恢复', o.a);
+    t('U92 恢复失败带前缀与原因', o.b.indexOf('⚠ 存档恢复失败 · 校验失败')>=0, o.b);
+  } catch(e){ t('U91 恢复成功',false,e.message); t('U92 恢复失败',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
