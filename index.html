@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V4.95</div>
+  <div id="mark">DESIGNED BY QIAN · V4.96</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -6791,6 +6791,7 @@ function lvCardIcon(unlocked, boss) { return boss ? '👑' : (unlocked ? '🛡' 
 function lvCardStars(stars) { const k = Math.max(0, Math.min(3, Math.floor(Number(stars) || 0))); return '★'.repeat(k) + '☆'.repeat(3 - k); }
 function carStatHtml(v, label) { return '<div class="carStat"><b>' + fmtNum(v) + '</b><span>' + label + '</span></div>'; }
 function achStateText(on, rw) { return on ? '已解锁' : rw; }
+function boardRankText(i) { return String(Math.max(1, Math.floor(Number(i) || 0) + 1)); }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -8085,7 +8086,7 @@ function achStateText(on, rw) { return on ? '已解锁' : rw; }
         const top = i < 3 ? ' top' + (i + 1) : '';
         const d = new Date(b.date);
         const ds = boardDateText(d);
-        rows.push('<div class="carRow' + top + '"><span class="rk">' + (i + 1) + '</span>' +
+        rows.push('<div class="carRow' + top + '"><span class="rk">' + boardRankText(i) + '</span>' +
           '<span class="sc">' + b.score + '</span>' +
           '<span class="mi">第' + b.level + '关 · ' + ds + '</span>' +
           '<span class="md">' + (MODE_NAME[b.mode] || '标准') + '</span></div>');
@@ -8599,7 +8600,7 @@ function achStateText(on, rw) { return on ? '已解锁' : rw; }
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V4.95', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V4.96', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9456,6 +9457,7 @@ function achStateText(on, rw) { return on ? '已解锁' : rw; }
       lvCardStarsNow: (...a) => lvCardStars(...a),
       carStatHtmlNow: (...a) => carStatHtml(...a),
       achStateTextNow: (...a) => achStateText(...a),
+      boardRankTextNow: (...a) => boardRankText(...a),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

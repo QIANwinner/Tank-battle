@@ -1446,6 +1446,14 @@ async function main() {
     t('U308 未解锁显示奖励', o.b === '+3🐾', JSON.stringify(o));
   } catch(e){ t('U307 已解锁优先',false,e.message); t('U308 未解锁显示奖励',false,e.message); }
 
+
+  // ===== U309~U310: 排行榜名次抽为 boardRankText(v4.96) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.boardRankTextNow(0),b:T.boardRankTextNow(9)});})()"));
+    t('U309 首名', o.a === '1', JSON.stringify(o));
+    t('U310 第十名', o.b === '10', JSON.stringify(o));
+  } catch(e){ t('U309 首名',false,e.message); t('U310 第十名',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

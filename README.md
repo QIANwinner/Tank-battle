@@ -162,6 +162,12 @@ Tank-battle/
 
 ## 🆕 更新日志
 
+### v0.4.96 · 2026-11-04
+**排行榜名次抽为 boardRankText**
+- 排行榜名次抽为 boardRankText
+- ✅ 回归验证：主套件 169/169 + 反馈专项 310/310（无回归）
+- 📴 Service Worker 缓存版本更新至 **v04960**，游戏内版本 **V4.96**
+
 ### v0.4.95 · 2026-11-04
 **成就状态文案抽为 achStateText**
 - 成就状态文案抽为 achStateText
