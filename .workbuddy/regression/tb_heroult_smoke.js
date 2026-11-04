@@ -1566,6 +1566,14 @@ async function main() {
     t('U338 里程碑光晕阴影串抽为纯函数边界', o.b === '0 0 12px 2px red', JSON.stringify(o));
   } catch(e){ t('U337 里程碑光晕阴影串抽为纯函数',false,e.message); t('U338 里程碑光晕阴影串抽为纯函数边界',false,e.message); }
 
+
+  // ===== U339~U340: 局内副标题抽为纯函数(v5.13) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5RunSubTextNow(false,5,80),b:T.v5RunSubTextNow(true,8,12345)});})()"));
+    t('U339 局内副标题抽为纯函数', o.a === '第 5 关 · 目前 80 分', JSON.stringify(o));
+    t('U340 局内副标题抽为纯函数边界', o.b === '第 8 波 · 目前 12,345 分', JSON.stringify(o));
+  } catch(e){ t('U339 局内副标题抽为纯函数',false,e.message); t('U340 局内副标题抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
