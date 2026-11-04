@@ -1390,6 +1390,14 @@ async function main() {
     t('U294 两位数月日', o.b === '11/24', JSON.stringify(o));
   } catch(e){ t('U293 月日补零',false,e.message); t('U294 两位数月日',false,e.message); }
 
+
+  // ===== U295~U296: 成就奖励文案抽为 achRewardText(v4.89) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.achRewardTextNow(100,2),b:T.achRewardTextNow(0,3)});})()"));
+    t('U295 双币奖励', o.a === '+100🪙 +2🐾', JSON.stringify(o));
+    t('U296 仅宠物币', o.b === '+3🐾', JSON.stringify(o));
+  } catch(e){ t('U295 双币奖励',false,e.message); t('U296 仅宠物币',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
