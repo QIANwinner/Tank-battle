@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V4.90</div>
+  <div id="mark">DESIGNED BY QIAN · V4.91</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -6786,6 +6786,7 @@ function carWinRateText(wins, games) { return fmtPct(wins, games); }
 function boardDateText(d) { return String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0'); }
 function achRewardText(reward, pet) { return (reward > 0 ? '+' + reward + '🪙' : '') + (pet > 0 ? (reward > 0 ? ' ' : '') + '+' + pet + '🐾' : ''); }
 function shopMetaText(maxed, lv, max, price) { return maxed ? '已满级' : '等级 ' + lv + '/' + max + ' · 下一级 🪙' + fmtNum(price); }
+function shopBtnLabel(maxed, price) { return maxed ? '已满级' : '🪙 购买 ' + fmtNum(price); }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -7146,7 +7147,7 @@ function shopMetaText(maxed, lv, max, price) { return maxed ? '已满级' : '等
           '<span class="siName">' + def.name + '</span>' +
           '<span class="siDesc">' + def.desc + '</span>' +
           '<span class="siMeta">' + shopMetaText(maxed, lv, def.max, price) + '</span>' +
-          '<button class="siBtn' + (maxed ? ' owned disabled' : '') + '">' + (maxed ? '已满级' : '🪙 购买 ' + price) + '</button>';
+          '<button class="siBtn' + (maxed ? ' owned disabled' : '') + '">' + shopBtnLabel(maxed, price) + '</button>';
         const btn = item.querySelector('.siBtn');
         if (!maxed) btn.onclick = () => buyBonus(def.id);
         shopBody.appendChild(item);
@@ -8594,7 +8595,7 @@ function shopMetaText(maxed, lv, max, price) { return maxed ? '已满级' : '等
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V4.90', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V4.91', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9446,6 +9447,7 @@ function shopMetaText(maxed, lv, max, price) { return maxed ? '已满级' : '等
       boardDateTextNow: (...a) => boardDateText(...a),
       achRewardTextNow: (...a) => achRewardText(...a),
       shopMetaTextNow: (...a) => shopMetaText(...a),
+      shopBtnLabelNow: (...a) => shopBtnLabel(...a),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

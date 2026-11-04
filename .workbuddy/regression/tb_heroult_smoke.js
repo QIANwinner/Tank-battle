@@ -1406,6 +1406,14 @@ async function main() {
     t('U298 满级文案', o.b === '已满级', JSON.stringify(o));
   } catch(e){ t('U297 未满级显示价格',false,e.message); t('U298 满级文案',false,e.message); }
 
+
+  // ===== U299~U300: 商店购买按钮文案抽为 shopBtnLabel(v4.91) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shopBtnLabelNow(false,120),b:T.shopBtnLabelNow(false,12345)});})()"));
+    t('U299 常规价格', o.a === '🪙 购买 120', JSON.stringify(o));
+    t('U300 大额千分位', o.b === '🪙 购买 12,345', JSON.stringify(o));
+  } catch(e){ t('U299 常规价格',false,e.message); t('U300 大额千分位',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
