@@ -1,3 +1,16 @@
+# v0.4.80 · BOSS 光柱高度抽为 bossBeamHeight
+
+> BOSS 光柱高度抽为 bossBeamHeight 回归：主套件 169/169 + 反馈专项 278/278。
+
+## 🅰 改进
+
+- BOSS 光柱高度抽为 bossBeamHeight
+
+## 🅱 验证
+
+- 主套件 169/169 + 反馈专项 278/278；内联脚本语法 SYNTAX OK
+- SW 缓存 v04800，游戏内版本 V4.80；远程树与本地树一致（sync_push）
+
 # v0.4.79 · 冲击波透明度抽为 waveAlpha 非负兜底
 
 > 冲击波透明度抽为 waveAlpha 非负兜底 回归：主套件 169/169 + 反馈专项 276/276。

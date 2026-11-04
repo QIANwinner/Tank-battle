@@ -1318,6 +1318,14 @@ async function main() {
     t('U276 负值归零', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U275 正常透明度',false,e.message); t('U276 负值归零',false,e.message); }
 
+
+  // ===== U277~U278: BOSS 光柱高度抽为 bossBeamHeight(v4.80) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossBeamHeightNow(40,10),b:T.bossBeamHeightNow(-100,10)});})()"));
+    t('U277 正常高度', o.a === 50, JSON.stringify(o));
+    t('U278 负值归零', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U277 正常高度',false,e.message); t('U278 负值归零',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

@@ -162,6 +162,12 @@ Tank-battle/
 
 ## 🆕 更新日志
 
+### v0.4.80 · 2026-11-04
+**BOSS 光柱高度抽为 bossBeamHeight**
+- BOSS 光柱高度抽为 bossBeamHeight
+- ✅ 回归验证：主套件 169/169 + 反馈专项 278/278（无回归）
+- 📴 Service Worker 缓存版本更新至 **v04800**，游戏内版本 **V4.80**
+
 ### v0.4.79 · 2026-11-04
 **冲击波透明度抽为 waveAlpha 非负兜底**
 - 冲击波透明度抽为 waveAlpha 非负兜底
