@@ -2298,6 +2298,18 @@ async function main() {
     t('U530 非法关卡不崩且 HUD 有值', o.e.indexOf('BOSS')>=0 && typeof o.h === 'string', o.e+' | '+o.h);
   } catch(e){ for(let k=525;k<=530;k++) t('U'+k+' BOSS提示',false,e.message); }
 
+
+  // ===== U531~U536: 金币流水(v0.6.3) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('coinLogText'),a:T.coinLogTextNow([]),b:T.coinLogTextNow([{n:50,label:'击杀'},{n:200,label:'过关'}]),c:T.coinLogTextNow([{n:-80,label:'复活'}]),d:T.coinLogPushNow(12345,'测试'),e:T.coinLogLenNow(),f:T.coinLogDomNow()});})()"));
+    t('U531 流水面板已加入设置页', o.dom === true, JSON.stringify(o));
+    t('U532 空流水显示占位', o.a === '暂无记录', o.a);
+    t('U533 多笔按序拼接', o.b === '+50 击杀 · +200 过关', o.b);
+    t('U534 支出显示负号', o.c === '-80 复活', o.c);
+    t('U535 入账返回长度', o.d === 1 && o.e === 1, String(o.d)+'/'+String(o.e));
+    t('U536 大额千分位进入 DOM', typeof o.f === 'string', String(o.f));
+  } catch(e){ for(let k=531;k<=536;k++) t('U'+k+' 金币流水',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
