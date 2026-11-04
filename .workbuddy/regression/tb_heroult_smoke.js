@@ -630,6 +630,14 @@ async function main() {
     t('U104 清空提示含引导且分支可辨', o.b.indexOf('已清空画布 · 可重新绘制')>=0 && o.c === '🛠 画布已更新', o.b+' | '+o.c);
   } catch(e){ t('U103 保存提示',false,e.message); t('U104 清空提示',false,e.message); }
 
+
+  // ===== U105~U106: 英雄技提示(v0.3.84) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.heroUltMsgNow('⚔️','狂暴速射','5 秒双倍射速'),b:T.heroUltMsgNow('🧲','磁暴领域','3 秒超强磁力'),c:T.heroUltMsgNow('🎯','穿透一击','下一发贯穿全场')});})()"));
+    t('U105 英雄技提示带主语与技能名', o.a.indexOf('英雄技 · 狂暴速射')>=0 && o.b.indexOf('英雄技 · 磁暴领域')>=0, o.a+' | '+o.b);
+    t('U106 英雄技提示保留效果与结尾', o.c.indexOf('下一发贯穿全场！')>=0 && o.a.slice(-1) === '！', o.c);
+  } catch(e){ t('U105 英雄技主语',false,e.message); t('U106 英雄技效果',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
