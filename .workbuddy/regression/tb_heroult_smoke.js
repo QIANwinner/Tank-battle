@@ -382,6 +382,14 @@ async function main() {
     t('U42 无详情不出现分隔符且大额千分位', o.b.indexOf(' · · ') < 0 && o.b.indexOf('余额 12,345🪙')>=0, o.b);
   } catch(e){ t('U41 抽奖文案',false,e.message); t('U42 抽奖余额',false,e.message); }
 
+
+  // ===== U43~U44: 重置返还余额(v0.3.53) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.resetBonusMsgNow(175,4915),b:T.resetBonusMsgNow(350,12345)});})()"));
+    t('U43 重置文案含返还与余额', o.a.indexOf('返还 🪙175')>=0 && o.a.indexOf('余额 4915🪙')>=0, o.a);
+    t('U44 重置大额余额千分位', o.b.indexOf('余额 12,345🪙')>=0, o.b);
+  } catch(e){ t('U43 重置文案',false,e.message); t('U44 重置余额',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
