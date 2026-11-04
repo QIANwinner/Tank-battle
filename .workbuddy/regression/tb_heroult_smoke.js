@@ -678,6 +678,14 @@ async function main() {
     t('U116 长文案延长且封顶 3200ms', o.b === 2500 && o.c === 3200, JSON.stringify(o));
   } catch(e){ t('U115 短文案时长',false,e.message); t('U116 长文案时长',false,e.message); }
 
+
+  // ===== U117~U118: 结算基础金币提示抽为可测纯函数(v0.4.0) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lvBaseTextNow(0),b:T.lvBaseTextNow(12345)});})()"));
+    t('U117 小额原样', o.a === '+0 🪙', JSON.stringify(o));
+    t('U118 大额千分位', o.b === '+12,345 🪙', JSON.stringify(o));
+  } catch(e){ t('U117 小额原样',false,e.message); t('U118 大额千分位',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
