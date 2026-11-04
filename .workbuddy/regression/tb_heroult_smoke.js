@@ -1054,6 +1054,14 @@ async function main() {
     t('U210 超长异常文案截断到 185 字', o.b === 185, JSON.stringify(o));
   } catch(e){ t('U209 暂停按钮文案',false,e.message); t('U210 超长异常文案截断到 185 字',false,e.message); }
 
+
+  // ===== U211~U212: 限时冲分开场提示抽为纯函数(v0.4.47) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.timedIntroMsgNow(120),b:T.timedIntroMsgNow(65)});})()"));
+    t('U211 整分显示', o.a.indexOf('限时冲分 · 2分')>=0, JSON.stringify(o));
+    t('U212 分秒与说明齐全', o.b.indexOf('1分5秒')>=0 && o.b.indexOf('分数越高奖励越多')>=0, JSON.stringify(o));
+  } catch(e){ t('U211 整分显示',false,e.message); t('U212 分秒与说明齐全',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
