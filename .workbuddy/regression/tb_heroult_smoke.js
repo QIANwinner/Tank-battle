@@ -1846,6 +1846,14 @@ async function main() {
     t('U408 皮肤按钮 HTML 抽为纯函数边界', o.b.indexOf('🪙 购买 120')>=0, JSON.stringify(o));
   } catch(e){ t('U407 皮肤按钮 HTML 抽为纯函数',false,e.message); t('U408 皮肤按钮 HTML 抽为纯函数边界',false,e.message); }
 
+
+  // ===== U409~U410: 基地护墙预览格抽为纯函数(v5.48) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BaseBrickNow(true,false),b:T.v5BaseBrickNow(false,false)});})()"));
+    t('U409 基地护墙预览格抽为纯函数', o.a === '<div class="bw core"></div>', JSON.stringify(o));
+    t('U410 基地护墙预览格抽为纯函数边界', o.b === '<div class="bw off"></div>', JSON.stringify(o));
+  } catch(e){ t('U409 基地护墙预览格抽为纯函数',false,e.message); t('U410 基地护墙预览格抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
