@@ -326,6 +326,22 @@ async function main() {
     t('U30 冷却类提示不抑制', o.d.count === o.c.count + 1 && o.st.text.indexOf('还需 5 秒') >= 0, JSON.stringify(o.d));
   } catch (e) { t('U28 防刷屏', false, e.message); t('U29 不同提示', false, e.message); t('U30 冷却不抑制', false, e.message); }
 
+
+  // ===== U31~U33: 宠物升级文案(v0.3.48) =====
+  try {
+    const o = JSON.parse(await ev(`(function(){
+      const T = window.__tbTest;
+      return JSON.stringify({
+        mid:  T.petUpgradeMsgNow('🐱','招财猫','金币+10%',1,6,12),
+        max:  T.petUpgradeMsgNow('🐱','招财猫','金币+10%',2,0,6),
+        big:  T.petUpgradeMsgNow('🐷','磁力猪','吸附',1,6,12345)
+      });
+    })()`));
+    t('U31 升级文案含等级与下级费用', o.mid.indexOf('Lv2') >= 0 && o.mid.indexOf('下级 6🐾') >= 0 && o.mid.indexOf('余额 12🐾') >= 0, o.mid);
+    t('U32 满级显示已满级且无下级', o.max.indexOf('已满级') >= 0 && o.max.indexOf('下级') < 0, o.max);
+    t('U33 大额余额千分位', o.big.indexOf('余额 12,345🐾') >= 0, o.big);
+  } catch (e) { t('U31 升级文案', false, e.message); t('U32 满级文案', false, e.message); t('U33 升级余额', false, e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
