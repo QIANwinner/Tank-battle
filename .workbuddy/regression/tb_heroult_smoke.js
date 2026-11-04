@@ -2166,6 +2166,14 @@ async function main() {
     t('U488 重置按钮 HTML 抽为纯函数边界', o.b.indexOf('disabled')>=0, JSON.stringify(o));
   } catch(e){ t('U487 重置按钮 HTML 抽为纯函数',false,e.message); t('U488 重置按钮 HTML 抽为纯函数边界',false,e.message); }
 
+
+  // ===== U489~U490: 英雄解锁标签抽为纯函数(v5.88) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5HeroUnlockLabelNow('磁暴'),b:T.v5HeroUnlockLabelNow('')});})()"));
+    t('U489 英雄解锁标签抽为纯函数', o.a === '解锁「磁暴」', JSON.stringify(o));
+    t('U490 英雄解锁标签抽为纯函数边界', o.b === '解锁「」', JSON.stringify(o));
+  } catch(e){ t('U489 英雄解锁标签抽为纯函数',false,e.message); t('U490 英雄解锁标签抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
