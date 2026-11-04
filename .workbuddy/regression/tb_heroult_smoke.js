@@ -1214,6 +1214,14 @@ async function main() {
     t('U250 负值归零', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U249 合法最高分',false,e.message); t('U250 负值归零',false,e.message); }
 
+
+  // ===== U251~U252: 强化等级存档解析抽为 safeBonusLv(v4.67) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.safeBonusLvNow('3'),b:T.safeBonusLvNow('x')});})()"));
+    t('U251 合法等级', o.a === 3, JSON.stringify(o));
+    t('U252 非法值归零', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U251 合法等级',false,e.message); t('U252 非法值归零',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
