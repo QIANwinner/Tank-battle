@@ -1454,6 +1454,14 @@ async function main() {
     t('U310 第十名', o.b === '10', JSON.stringify(o));
   } catch(e){ t('U309 首名',false,e.message); t('U310 第十名',false,e.message); }
 
+
+  // ===== U311~U312: 本地排行榜存档解析抽为 safeBoard（48 轮收口）(v4.97) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.safeBoardNow(JSON.stringify([{score:1},null])).length,b:T.safeBoardNow('{bad').length});})()"));
+    t('U311 过滤无效记录', o.a === 1, JSON.stringify(o));
+    t('U312 损坏存档回退空榜', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U311 过滤无效记录',false,e.message); t('U312 损坏存档回退空榜',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
