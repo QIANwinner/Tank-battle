@@ -710,6 +710,14 @@ async function main() {
     t('U124 大额千分位', o.b === '×12,345', JSON.stringify(o));
   } catch(e){ t('U123 普通连击',false,e.message); t('U124 大额千分位',false,e.message); }
 
+
+  // ===== U125~U126: 基地复活按钮文案显示千分位(v0.4.4) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reviveBtnTextNow(160),b:T.reviveBtnTextNow(12345)});})()"));
+    t('U125 小额原样', o.a === '🪙 花 160 金币复活基地', JSON.stringify(o));
+    t('U126 大额千分位', o.b === '🪙 花 12,345 金币复活基地', JSON.stringify(o));
+  } catch(e){ t('U125 小额原样',false,e.message); t('U126 大额千分位',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
