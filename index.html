@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V4.94</div>
+  <div id="mark">DESIGNED BY QIAN · V4.95</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -6790,6 +6790,7 @@ function shopBtnLabel(maxed, price) { return maxed ? '已满级' : '🪙 购买 
 function lvCardIcon(unlocked, boss) { return boss ? '👑' : (unlocked ? '🛡' : '🔒'); }
 function lvCardStars(stars) { const k = Math.max(0, Math.min(3, Math.floor(Number(stars) || 0))); return '★'.repeat(k) + '☆'.repeat(3 - k); }
 function carStatHtml(v, label) { return '<div class="carStat"><b>' + fmtNum(v) + '</b><span>' + label + '</span></div>'; }
+function achStateText(on, rw) { return on ? '已解锁' : rw; }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -7915,7 +7916,7 @@ function carStatHtml(v, label) { return '<div class="carStat"><b>' + fmtNum(v) +
         const rwTxt = achRewardText(a.reward, pr);
         row.innerHTML = '<span class="aIcon">' + a.icon + '</span>' +
           '<span class="aInfo"><span class="aName">' + a.name + '</span><span class="aDesc">' + a.desc + '</span></span>' +
-          '<span class="aState">' + (on ? '已解锁' : rwTxt) + '</span>';
+          '<span class="aState">' + achStateText(on, rwTxt) + '</span>';
         achBody.appendChild(row);
       }
     }
@@ -8598,7 +8599,7 @@ function carStatHtml(v, label) { return '<div class="carStat"><b>' + fmtNum(v) +
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V4.94', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V4.95', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9454,6 +9455,7 @@ function carStatHtml(v, label) { return '<div class="carStat"><b>' + fmtNum(v) +
       lvCardIconNow: (...a) => lvCardIcon(...a),
       lvCardStarsNow: (...a) => lvCardStars(...a),
       carStatHtmlNow: (...a) => carStatHtml(...a),
+      achStateTextNow: (...a) => achStateText(...a),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

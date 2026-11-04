@@ -1438,6 +1438,14 @@ async function main() {
     t('U306 零值显示', o.b.indexOf('<b>0</b>')>=0, JSON.stringify(o));
   } catch(e){ t('U305 千分位与标签',false,e.message); t('U306 零值显示',false,e.message); }
 
+
+  // ===== U307~U308: 成就状态文案抽为 achStateText(v4.95) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.achStateTextNow(true,'+100🪙'),b:T.achStateTextNow(false,'+3🐾')});})()"));
+    t('U307 已解锁优先', o.a === '已解锁', JSON.stringify(o));
+    t('U308 未解锁显示奖励', o.b === '+3🐾', JSON.stringify(o));
+  } catch(e){ t('U307 已解锁优先',false,e.message); t('U308 未解锁显示奖励',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
