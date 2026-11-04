@@ -1502,6 +1502,14 @@ async function main() {
     t('U322 连击得分飘字抽为纯函数边界', o.b === '+12,345', JSON.stringify(o));
   } catch(e){ t('U321 连击得分飘字抽为纯函数',false,e.message); t('U322 连击得分飘字抽为纯函数边界',false,e.message); }
 
+
+  // ===== U323~U324: 无尽里程碑提示抽为纯函数(v5.5) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5MilestoneTipNow(3),b:T.v5MilestoneTipNow(12345)});})()"));
+    t('U323 无尽里程碑提示抽为纯函数', o.a === ' · 🌊里程碑 +3🐾', JSON.stringify(o));
+    t('U324 无尽里程碑提示抽为纯函数边界', o.b.indexOf('12,345')>=0, JSON.stringify(o));
+  } catch(e){ t('U323 无尽里程碑提示抽为纯函数',false,e.message); t('U324 无尽里程碑提示抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
