@@ -862,6 +862,14 @@ async function main() {
     t('U162 暂停页', o.b === '已暂停', JSON.stringify(o));
   } catch(e){ t('U161 标题页',false,e.message); t('U162 暂停页',false,e.message); }
 
+
+  // ===== U163~U164: 主按钮文案抽为纯函数(v0.4.23) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.playBtnTextNow('resume'),b:T.playBtnTextNow('replay')});})()"));
+    t('U163 暂停续玩', o.a === '继续游戏', JSON.stringify(o));
+    t('U164 结算重开', o.b === '再来一局', JSON.stringify(o));
+  } catch(e){ t('U163 暂停续玩',false,e.message); t('U164 结算重开',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
