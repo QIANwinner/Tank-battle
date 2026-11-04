@@ -1998,6 +1998,14 @@ async function main() {
     t('U446 羁绊状态文案抽为纯函数边界', o.b === '未激活', JSON.stringify(o));
   } catch(e){ t('U445 羁绊状态文案抽为纯函数',false,e.message); t('U446 羁绊状态文案抽为纯函数边界',false,e.message); }
 
+
+  // ===== U447~U448: 宠物稀有度类名抽为纯函数(v5.67) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5PetRarClassNow(true,false),b:T.v5PetRarClassNow(false,true)});})()"));
+    t('U447 宠物稀有度类名抽为纯函数', o.a === 'shopItem rar-legendary', JSON.stringify(o));
+    t('U448 宠物稀有度类名抽为纯函数边界', o.b === 'shopItem rar-epic equipped', JSON.stringify(o));
+  } catch(e){ t('U447 宠物稀有度类名抽为纯函数',false,e.message); t('U448 宠物稀有度类名抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
