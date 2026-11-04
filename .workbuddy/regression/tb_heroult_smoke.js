@@ -598,6 +598,14 @@ async function main() {
     t('U96 词条提示标明今日', o.c.indexOf('⚡ 今日词条 · 钢铁防线')>=0, o.c);
   } catch(e){ t('U95 每日日期',false,e.message); t('U96 今日词条',false,e.message); }
 
+
+  // ===== U97~U98: 签到与内测奖励(v0.3.80) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.signinRemindMsgNow(120),b:T.signinRemindMsgNow(12345),c:T.betaRewardMsgNow(1000,2050),d:T.betaRewardMsgNow(1000,12345)});})()"));
+    t('U97 签到提醒小额原样大额千分位', o.a.indexOf('领 120🪙')>=0 && o.b.indexOf('领 12,345🪙')>=0, o.a+' | '+o.b);
+    t('U98 内测奖励附余额且千分位', o.c.indexOf('+1000🪙')>=0 && o.c.indexOf('余额 2050🪙')>=0 && o.d.indexOf('余额 12,345🪙')>=0, o.c+' | '+o.d);
+  } catch(e){ t('U97 签到提醒',false,e.message); t('U98 内测奖励',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
