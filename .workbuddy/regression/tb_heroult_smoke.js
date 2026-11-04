@@ -293,6 +293,22 @@ async function main() {
     t('U24 零奖励不出现 +0', o.zero.indexOf('+0') < 0 && o.zero.indexOf('第 1 个成就') >= 0, o.zero);
   } catch (e) { t('U22 成就奖励文案', false, e.message); t('U23 成就进度', false, e.message); t('U24 零奖励', false, e.message); }
 
+
+  // ===== U25~U27: 购买成功余额提示(v0.3.46) =====
+  try {
+    const o = JSON.parse(await ev(`(function(){
+      const T = window.__tbTest;
+      return JSON.stringify({
+        coin: T.withBalanceNow('皮肤已购买', 850, '🪙'),
+        pet:  T.withBalanceNow('宠物已购买', 12, '🐾'),
+        big:  T.withBalanceNow('大额', 12345, '🪙')
+      });
+    })()`));
+    t('U25 金币余额与货币符号', o.coin.indexOf('余额 850🪙') >= 0, o.coin);
+    t('U26 宠物币余额', o.pet.indexOf('余额 12🐾') >= 0, o.pet);
+    t('U27 大额余额千分位', o.big.indexOf('余额 12,345🪙') >= 0, o.big);
+  } catch (e) { t('U25 金币余额', false, e.message); t('U26 宠物币余额', false, e.message); t('U27 余额千分位', false, e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
