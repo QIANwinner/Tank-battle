@@ -169,7 +169,7 @@ async function main() {
   // ===== H8: 英雄定义 5 名(id 齐全) =====
   try {
     const ids = await ev('window.__tbTest.heroDefsNow()');
-    const ok = ids.length === 5 && ['none', 'blade', 'fortress', 'sniper', 'vanguard'].every(x => ids.includes(x));
+    const ok = ids.length === 6 && ['none', 'blade', 'fortress', 'sniper', 'vanguard', 'magnet'].every(x => ids.includes(x));
     t('H8 英雄定义 5 名齐全', ok, JSON.stringify(ids));
   } catch (e) { t('H8 英雄定义 5 名齐全', false, e.message); }
 
