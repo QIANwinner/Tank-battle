@@ -1014,6 +1014,14 @@ async function main() {
     t('U200 未定义归零', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U199 常规值',false,e.message); t('U200 未定义归零',false,e.message); }
 
+
+  // ===== U201~U202: 里程碑标题抽为纯函数(v0.4.42) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.milestoneTitleTextNow(),b:T.milestoneTitleTextNow().length});})()"));
+    t('U201 标题文案', o.a === '里程碑达成！', JSON.stringify(o));
+    t('U202 长度稳定', o.b === 6, JSON.stringify(o));
+  } catch(e){ t('U201 标题文案',false,e.message); t('U202 长度稳定',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
