@@ -774,6 +774,14 @@ async function main() {
     t('U140 大额千分位', o.b === '12,345/20,000', JSON.stringify(o));
   } catch(e){ t('U139 普通进度',false,e.message); t('U140 大额千分位',false,e.message); }
 
+
+  // ===== U141~U142: 成就页双币统计条抽为纯函数(v0.4.12) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.achPetStatHtmlNow(3,9,7,20),b:T.achPetStatHtmlNow(0,9,0,20)});})()"));
+    t('U141 两组统计齐全', o.a.indexOf('宠物币进度 3 / 9')>=0 && o.a.indexOf('已解锁 7 / 20')>=0, JSON.stringify(o));
+    t('U142 标签结构完整', o.b.indexOf('</span><span>')>=0 && o.b.slice(-7) === '</span>', JSON.stringify(o));
+  } catch(e){ t('U141 两组统计齐全',false,e.message); t('U142 标签结构完整',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
