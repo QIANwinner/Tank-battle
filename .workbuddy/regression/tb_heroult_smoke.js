@@ -982,6 +982,14 @@ async function main() {
     t('U192 小数按整数解析', o.b === 3, JSON.stringify(o));
   } catch(e){ t('U191 非法值归零',false,e.message); t('U192 小数按整数解析',false,e.message); }
 
+
+  // ===== U193~U194: 生涯统计解析统一（限时/困难最佳）(v0.4.38) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerNumNow('0'),b:T.careerNumNow('12345')});})()"));
+    t('U193 零值保持', o.a === 0, JSON.stringify(o));
+    t('U194 大数值保持', o.b === 12345, JSON.stringify(o));
+  } catch(e){ t('U193 零值保持',false,e.message); t('U194 大数值保持',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
