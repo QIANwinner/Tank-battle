@@ -1222,6 +1222,14 @@ async function main() {
     t('U252 非法值归零', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U251 合法等级',false,e.message); t('U252 非法值归零',false,e.message); }
 
+
+  // ===== U253~U254: 关卡星级存档解析抽为 safeStarLv 范围校验(v4.68) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.safeStarLvNow('2'),b:T.safeStarLvNow('9')});})()"));
+    t('U253 合法星级', o.a === 2, JSON.stringify(o));
+    t('U254 越界归零', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U253 合法星级',false,e.message); t('U254 越界归零',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
