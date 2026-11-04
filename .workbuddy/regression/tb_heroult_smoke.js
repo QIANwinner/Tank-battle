@@ -830,6 +830,14 @@ async function main() {
     t('U154 未持有显示标签', o.b === '生存', JSON.stringify(o));
   } catch(e){ t('U153 已持有显示数量',false,e.message); t('U154 未持有显示标签',false,e.message); }
 
+
+  // ===== U155~U156: 每日英雄提示 HTML 抽为纯函数(v0.4.19) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dailyHeroTipHtmlNow('🛡','堡垒','生命+1'),b:T.dailyHeroTipHtmlNow('⚡','先锋','冲锋')});})()"));
+    t('U155 三项信息齐全', o.a.indexOf('今日英雄: 🛡 堡垒（生命+1）')>=0, JSON.stringify(o));
+    t('U156 前缀与描述正确', o.b.indexOf('📅 每日挑战')===0 && o.b.indexOf('冲锋')>=0, JSON.stringify(o));
+  } catch(e){ t('U155 三项信息齐全',false,e.message); t('U156 前缀与描述正确',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
