@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V5.9</div>
+  <div id="mark">DESIGNED BY QIAN · V5.10</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -5640,7 +5640,7 @@
     return {
       bg: bg, grid: grid, accent: accent,
       bgStr: v5RgbStr(bg),
-      gridStr: 'rgba(' + grid.join(',') + ',0.12)',
+      gridStr: v5GridStr(grid),
       accentStr: 'rgb(' + accent.join(',') + ')'
     };
   }
@@ -6803,6 +6803,7 @@ function v5LevelIntroText(endless,lv,diff){return (endless?'第 '+lv+' 波':'第
 function v5LevelBonusText(g){return '+'+fmtNum(g);}
 function v5ClockStr(s){return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
 function v5RgbStr(c){return 'rgb('+c.join(',')+')';}
+function v5GridStr(c){return 'rgba('+c.join(',')+',0.12)';}
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -8611,7 +8612,7 @@ function v5RgbStr(c){return 'rgb('+c.join(',')+')';}
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V5.9', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V5.10', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9480,6 +9481,7 @@ function v5RgbStr(c){return 'rgb('+c.join(',')+')';}
       v5LevelBonusTextNow: (...a) => v5LevelBonusText(...a),
       v5ClockStrNow: (...a) => v5ClockStr(...a),
       v5RgbStrNow: (...a) => v5RgbStr(...a),
+      v5GridStrNow: (...a) => v5GridStr(...a),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
