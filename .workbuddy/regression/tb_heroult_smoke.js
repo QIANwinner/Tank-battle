@@ -2110,6 +2110,14 @@ async function main() {
     t('U474 成就徽章栏标题 HTML 抽为纯函数边界', o.b.indexOf('0/20')>=0, JSON.stringify(o));
   } catch(e){ t('U473 成就徽章栏标题 HTML 抽为纯函数',false,e.message); t('U474 成就徽章栏标题 HTML 抽为纯函数边界',false,e.message); }
 
+
+  // ===== U475~U476: 成就徽章 HTML 抽为纯函数(v5.81) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5AchBadgeHtmlNow('首胜',true,'🏆'),b:T.v5AchBadgeHtmlNow('X',false,'Y')});})()"));
+    t('U475 成就徽章 HTML 抽为纯函数', o.a === '<div class="achBadge" title="首胜">🏆</div>', JSON.stringify(o));
+    t('U476 成就徽章 HTML 抽为纯函数边界', o.b.indexOf(' none')>=0 && o.b.indexOf('未解锁')>=0, JSON.stringify(o));
+  } catch(e){ t('U475 成就徽章 HTML 抽为纯函数',false,e.message); t('U476 成就徽章 HTML 抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
