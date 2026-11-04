@@ -1814,6 +1814,14 @@ async function main() {
     t('U400 皮肤稀有度类名抽为纯函数边界', o.b === 'shopItem rar-gold equipped', JSON.stringify(o));
   } catch(e){ t('U399 皮肤稀有度类名抽为纯函数',false,e.message); t('U400 皮肤稀有度类名抽为纯函数边界',false,e.message); }
 
+
+  // ===== U401~U402: 稀有度徽章 HTML 抽为纯函数(v5.44) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5RarBadgeNow('rare'),b:T.v5RarBadgeNow('epic')});})()"));
+    t('U401 稀有度徽章 HTML 抽为纯函数', o.a.indexOf('class="rar rare"')>=0, JSON.stringify(o));
+    t('U402 稀有度徽章 HTML 抽为纯函数边界', o.b.indexOf('epic')>=0, JSON.stringify(o));
+  } catch(e){ t('U401 稀有度徽章 HTML 抽为纯函数',false,e.message); t('U402 稀有度徽章 HTML 抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
