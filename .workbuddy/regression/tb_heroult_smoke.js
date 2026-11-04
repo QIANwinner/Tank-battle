@@ -822,6 +822,14 @@ async function main() {
     t('U152 未解锁显示价格', o.b === '🛡 堡垒 80🐾', JSON.stringify(o));
   } catch(e){ t('U151 已拥有不显示价格',false,e.message); t('U152 未解锁显示价格',false,e.message); }
 
+
+  // ===== U153~U154: 强化卡持有数文案抽为纯函数(v0.4.18) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.upgradeOwnTextNow(3,'生存'),b:T.upgradeOwnTextNow(0,'生存')});})()"));
+    t('U153 已持有显示数量', o.a === '已持有 ×3', JSON.stringify(o));
+    t('U154 未持有显示标签', o.b === '生存', JSON.stringify(o));
+  } catch(e){ t('U153 已持有显示数量',false,e.message); t('U154 未持有显示标签',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
