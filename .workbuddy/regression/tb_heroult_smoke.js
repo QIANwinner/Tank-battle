@@ -1358,6 +1358,14 @@ async function main() {
     t('U286 不为负', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U285 正常衰减',false,e.message); t('U286 不为负',false,e.message); }
 
+
+  // ===== U287~U288: BOSS 血量比例抽为 hpRatioOf 双向钳制(v4.85) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hpRatioOfNow(5,10),b:T.hpRatioOfNow(20,10)});})()"));
+    t('U287 正常比例', o.a === 0.5, JSON.stringify(o));
+    t('U288 超满钳制', o.b === 1, JSON.stringify(o));
+  } catch(e){ t('U287 正常比例',false,e.message); t('U288 超满钳制',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
