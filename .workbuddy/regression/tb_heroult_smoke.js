@@ -1878,6 +1878,14 @@ async function main() {
     t('U416 基地下级描述抽为纯函数边界', o.b.indexOf('下一级 X')>=0, JSON.stringify(o));
   } catch(e){ t('U415 基地下级描述抽为纯函数',false,e.message); t('U416 基地下级描述抽为纯函数边界',false,e.message); }
 
+
+  // ===== U417~U418: 基地名称行 HTML 抽为纯函数(v5.52) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BaseNameRowNow('堡垒','Lv2'),b:T.v5BaseNameRowNow('X','')});})()"));
+    t('U417 基地名称行 HTML 抽为纯函数', o.a.indexOf('基地 · 堡垒')>=0 && o.a.indexOf('Lv2')>=0, JSON.stringify(o));
+    t('U418 基地名称行 HTML 抽为纯函数边界', o.b.indexOf('baseLv')>=0, JSON.stringify(o));
+  } catch(e){ t('U417 基地名称行 HTML 抽为纯函数',false,e.message); t('U418 基地名称行 HTML 抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
