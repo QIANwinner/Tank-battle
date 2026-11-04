@@ -153,6 +153,21 @@ async function main() {
     t('D5 未拥有回退 / 已拥有装备', o.ok === true, JSON.stringify(o));
   } catch (e) { t('D5 回退/装备', false, e.message); }
 
+  // ===== D6: 每日词条完整描述(7条定义含desc + 抽取后_descfull含格式) =====
+  try {
+    const o = JSON.parse(await ev(`(async () => {
+      const T = window.__tbTest;
+      const defs = T.dailyModDefsNow();
+      const allDesc = defs.every(d => d.desc && d.desc.length > 0 && d.desc !== d.name);
+      T.setDailySeed(20261104); T.setHero('none');
+      T.startMode('daily');
+      const d = T.daily();
+      const full = d._descFull || '';
+      return JSON.stringify({ n: defs.length, allDesc, full, hasParen: full.indexOf('(') >= 0 && full.indexOf(')') >= 0 });
+    })()`));
+    t('D6 词条7条含描述 + 抽取_descfull含(名(描述))', o.n === 7 && o.allDesc && o.hasParen && o.full.length > 0, JSON.stringify(o));
+  } catch (e) { t('D6 词条描述', false, e.message); }
+
   // ===== U1: 标题页展示「今日英雄」提示 =====
   try {
     const o = JSON.parse(await ev(`(async () => {
@@ -174,6 +189,17 @@ async function main() {
     })()`));
     t('U2 非标题页隐藏', o.display === 'none', JSON.stringify(o));
   } catch (e) { t('U2 非标题页隐藏', false, e.message); }
+
+  // ===== U3: 今日英雄提示含英雄特性(desc 括号格式) =====
+  try {
+    const o = JSON.parse(await ev(`(async () => {
+      const T = window.__tbTest;
+      T.dailyHeroTipShow('title');
+      const tip = T.dailyHeroTipNow();
+      return JSON.stringify({ text: tip ? tip.text : '' });
+    })()`));
+    t('U3 今日英雄提示含特性', o.text.indexOf('\uff08') >= 0 && o.text.indexOf('\uff09') >= 0, JSON.stringify(o));
+  } catch (e) { t('U3 英雄特性', false, e.message); }
 
   chrome.kill();
 

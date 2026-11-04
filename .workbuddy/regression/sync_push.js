@@ -14,14 +14,26 @@ const CUSTOM_MSG = process.argv[4];
 const REPO_DIR = 'C:/Users/21889/Desktop/开源项目/Tank-battle';
 const STATE_FILE = path.join(REPO_DIR, '.workbuddy', 'remote_sync.json');
 
+// gh.exe 常不在 PATH(本机安装于 Program Files/GitHub CLI);且代理 3428 常返 502,
+// 直连 api.github.com 反而可用 —— 显式解析 gh 路径并剥离代理变量,保证循环发布稳定。
+const GH_BIN = (() => {
+  if (process.env.GH_BIN && fs.existsSync(process.env.GH_BIN)) return process.env.GH_BIN;
+  const abs = 'C:/Program Files/GitHub CLI/gh.exe';
+  return fs.existsSync(abs) ? abs : 'gh';
+})();
+function ghEnv() {
+  const env = { ...process.env };
+  for (const k of ['http_proxy', 'https_proxy', 'HTTP_PROXY', 'HTTPS_PROXY', 'ALL_PROXY', 'all_proxy']) delete env[k];
+  return env;
+}
 function gh(args, input) {
-  const opts = { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024 };
+  const opts = { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024, env: ghEnv() };
   if (input !== undefined) {
     const tmp = path.join(os.tmpdir(), 'gh_in_' + Date.now() + '_' + Math.floor(Math.random() * 1e6) + '.json');
     fs.writeFileSync(tmp, input);
     args += ' --input "' + tmp + '"';
   }
-  try { return execSync('gh api ' + args, opts).trim(); }
+  try { return execSync('"' + GH_BIN + '" api ' + args, opts).trim(); }
   catch (e) { throw new Error('gh api ' + args.split(' ')[0] + ' failed: ' + (e.stderr || e.message).slice(0, 300)); }
 }
 function git(args) {

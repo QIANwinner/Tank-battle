@@ -194,6 +194,45 @@ async function main() {
     t('M7 petall 成就描述动态化(含4只)', o.has && /4\s*只/.test(o.desc || ''), JSON.stringify(o));
   } catch (e) { t('M7 成就动态', false, e.message); }
 
+  // ===== M8: 拉速加速曲线(Lv1=80/Lv2=140/Lv3=240,吸程递减) =====
+  try {
+    const o = JSON.parse(await ev(`(async () => {
+      const T = window.__tbTest;
+      const get = (lv) => { T.startGame(); T.skipIntro(); T.setPetOwn([]); T.setPet('pig', lv); return T.magnetPullNow(); };
+      return JSON.stringify({ p1: get(1), p2: get(2), p3: get(3) });
+    })()`));
+    t('M8 拉速曲线 80/140/240(高等级吸更快)', o.p1 === 80 && o.p2 === 140 && o.p3 === 240, JSON.stringify(o));
+  } catch (e) { t('M8 拉速曲线', false, e.message); }
+
+  // ===== M9: 磁力范围可视化状态(无磁力 off / Lv3 on r96 / 风暴 on storm) =====
+  try {
+    const o = JSON.parse(await ev(`(async () => {
+      const T = window.__tbTest;
+      T.startGame(); T.skipIntro(); T.setPetOwn([]); T.clearPet();
+      const off = T.magnetFxNow();
+      T.setPet('pig', 3);
+      const on = T.magnetFxNow();
+      T.setMagnetStorm(3);
+      const storm = T.magnetFxNow();
+      return JSON.stringify({ off, on, storm });
+    })()`));
+    t('M9 磁力圈状态 off / Lv3 on r96 / 风暴 on', o.off.on === false && o.on.on === true && o.on.r === 96 && o.storm.on === true && o.storm.storm === true, JSON.stringify(o));
+  } catch (e) { t('M9 磁力圈状态', false, e.message); }
+
+  // ===== M10: 磁力数值单一来源(48/72/96 + 80/140/240) + 商店文本含具体 px =====
+  try {
+    const o = JSON.parse(await ev(`(async () => {
+      const T = window.__tbTest;
+      const r = [T.magnetRangeNow(1), T.magnetRangeNow(2), T.magnetRangeNow(3)];
+      const p = [T.magnetPullBaseNow(1), T.magnetPullBaseNow(2), T.magnetPullBaseNow(3)];
+      T.setPetCoins(99); T.setPetOwn(['cat']); T.buyPet('pig'); T.setPet('pig', 1);
+      T.openPetShopNow();
+      const desc = T.petDescTextNow('pig');
+      return JSON.stringify({ r, p, desc });
+    })()`));
+    t('M10 磁力数值 48/72/96+80/140/240 + 商店文本含px', o.r[0] === 48 && o.r[1] === 72 && o.r[2] === 96 && o.p[0] === 80 && o.p[1] === 140 && o.p[2] === 240 && o.desc && o.desc.indexOf('半径 48px') >= 0 && o.desc.indexOf('拉速 80px/s') >= 0, JSON.stringify(o));
+  } catch (e) { t('M10 磁力数值/商店文本', false, e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

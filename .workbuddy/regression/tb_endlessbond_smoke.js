@@ -143,6 +143,92 @@ async function main() {
     t('E5 宠物币来源提示含羁绊×2', o.ok === true, JSON.stringify(o));
   } catch (e) { t('E5 宠物币来源提示', false, e.message); }
 
+  // ===== E6: 里程碑庆典显示宠物币奖励(无尽11波 +1🐾 / 羁绊×2 文本) =====
+  try {
+    const o = JSON.parse(await ev(`(async () => {
+      const T = window.__tbTest;
+      T.startEndless(); T.setLevel(11); T.clearPet();   // 清掉 E2 遗留的猫(无宠物无羁绊)
+      T.triggerMilestoneNow();
+      const plain = T.milestoneSubNow() || '';
+      T.startEndless(); T.setLevel(11); T.setHero('blade'); T.setPet('cat', 1);
+      T.triggerMilestoneNow();
+      const bond = T.milestoneSubNow() || '';
+      return JSON.stringify({ plain, bond });
+    })()`));
+    t('E6 庆典显示里程碑+1🐾(羁绊×2 文本)', o.plain.indexOf('+1') >= 0 && o.plain.indexOf('\u00d7') < 0 && o.bond.indexOf('+2') >= 0 && o.bond.indexOf('\u00d7') >= 0, JSON.stringify(o));
+  } catch (e) { t('E6 庆典奖励文本', false, e.message); }
+
+  // ===== E7: 无尽模式结算页显示「第 N 波」(普通模式「第 N 关」) =====
+  try {
+    const o = JSON.parse(await ev(`(async () => {
+      const T = window.__tbTest;
+      T.startEndless(); T.setLevel(11);
+      T.showLvResultNow();
+      const title = T.lvTitleNow() || '';
+      T.startGame(); T.setLevel(3);
+      T.showLvResultNow();
+      const normal = T.lvTitleNow() || '';
+      return JSON.stringify({ title, normal });
+    })()`));
+    t('E7 无尽结算「第11波」/ 普通「第3关」', o.title.indexOf('11') >= 0 && o.title.indexOf('\u6ce2') >= 0 && o.normal.indexOf('3') >= 0 && o.normal.indexOf('\u5173') >= 0 && o.normal.indexOf('\u6ce2') < 0, JSON.stringify(o));
+  } catch (e) { t('E7 无尽结算波', false, e.message); }
+
+  // ===== E8: 无尽模式关卡过渡显示「第 N 波」(普通「第 N 关」) =====
+  try {
+    const o = JSON.parse(await ev(`(async () => {
+      const T = window.__tbTest;
+      T.startEndless(); T.setLevel(10);
+      T.skipUpgrade();   // advanceLevel → level 11
+      const endlessIntro = T.lvIntroNow() || '';
+      T.startGame(); T.setLevel(2);
+      T.skipUpgrade();   // → level 3
+      const normalIntro = T.lvIntroNow() || '';
+      return JSON.stringify({ endlessIntro, normalIntro });
+    })()`));
+    t('E8 无尽过渡「第11波」/ 普通「第3关」', o.endlessIntro.indexOf('11') >= 0 && o.endlessIntro.indexOf('\u6ce2') >= 0 && o.normalIntro.indexOf('3') >= 0 && o.normalIntro.indexOf('\u5173') >= 0, JSON.stringify(o));
+  } catch (e) { t('E8 无尽过渡波', false, e.message); }
+
+  // ===== E9: 无尽模式 HUD 关卡标签显示「波」(普通「关」) =====
+  try {
+    const o = JSON.parse(await ev(`(async () => {
+      const T = window.__tbTest;
+      T.startEndless(); T.updateHudNow();
+      const endlessTag = T.hudLevelTagNow() || '';
+      T.startGame(); T.updateHudNow();
+      const normalTag = T.hudLevelTagNow() || '';
+      return JSON.stringify({ endlessTag, normalTag });
+    })()`));
+    t('E9 无尽HUD标签「波」/ 普通「关」', o.endlessTag === '\u6ce2' && o.normalTag === '\u5173', JSON.stringify(o));
+  } catch (e) { t('E9 无尽HUD标签', false, e.message); }
+
+  // ===== E10: 里程碑庆典无尽模式显示「第 N 波」(普通「第 N 关」) =====
+  try {
+    const o = JSON.parse(await ev(`(async () => {
+      const T = window.__tbTest;
+      T.startEndless(); T.setLevel(11); T.clearPet();
+      T.triggerMilestoneNow();
+      const sub = T.milestoneSubNow() || '';
+      T.startGame(); T.setLevel(5); T.clearPet();
+      T.triggerMilestoneNow();
+      const normal = T.milestoneSubNow() || '';
+      return JSON.stringify({ sub, normal });
+    })()`));
+    t('E10 里程碑无尽「第11波」/ 普通「第5关」', o.sub.indexOf('11') >= 0 && o.sub.indexOf('\u6ce2') >= 0 && o.normal.indexOf('5') >= 0 && o.normal.indexOf('\u5173') >= 0, JSON.stringify(o));
+  } catch (e) { t('E10 里程碑波', false, e.message); }
+
+  // ===== E11: 标题页无尽按钮显示历史最高波(与 bestWave 一致) =====
+  try {
+    const o = JSON.parse(await ev(`(async () => {
+      const T = window.__tbTest;
+      T.showOverlay('title');
+      const btn = T.endlessBtnNow() || '';
+      const best = T.bestWaveNow();
+      const ok = best > 0 ? (btn.indexOf('\u6700\u9ad8') >= 0 && btn.indexOf(String(best)) >= 0) : btn.indexOf('\u6700\u9ad8') < 0;
+      return JSON.stringify({ btn, best, ok });
+    })()`));
+    t('E11 无尽按钮含模式(有最高则显示波)', o.btn.indexOf('\u65e0\u5c3d') >= 0 && o.ok === true, JSON.stringify(o));
+  } catch (e) { t('E11 无尽按钮', false, e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

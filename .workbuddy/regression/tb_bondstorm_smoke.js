@@ -126,6 +126,20 @@ async function main() {
     t('S3 磁暴矩阵风暴 48*1.3*4=249.6', Math.abs(o.r - 249.6) < 0.01, JSON.stringify(o));
   } catch (e) { t('S3 磁暴矩阵风暴', false, e.message); }
 
+  // ===== S4: 磁暴矩阵风暴拉速同步(Lv3 拉速 240×4=960) =====
+  try {
+    const o = JSON.parse(await ev(`(async () => {
+      const T = window.__tbTest;
+      T.setPetCoins(99); T.buyHeroNow('magnet'); T.setPet('pig', 3);
+      T.setMagnetStorm(0);                          // 清除 S3 遗留风暴再测无风暴
+      const noStorm = T.magnetPullNow();
+      T.setMagnetStorm(3);
+      const storm = T.magnetPullNow();
+      return JSON.stringify({ noStorm, storm, expect: 240 * 4 });
+    })()`));
+    t('S4 风暴拉速同步 240→960(×4)', o.noStorm === 240 && o.storm === 960, JSON.stringify(o));
+  } catch (e) { t('S4 风暴拉速', false, e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
