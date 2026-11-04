@@ -606,6 +606,14 @@ async function main() {
     t('U98 内测奖励附余额且千分位', o.c.indexOf('+1000🪙')>=0 && o.c.indexOf('余额 2050🪙')>=0 && o.d.indexOf('余额 12,345🪙')>=0, o.c+' | '+o.d);
   } catch(e){ t('U97 签到提醒',false,e.message); t('U98 内测奖励',false,e.message); }
 
+
+  // ===== U99~U100: 传送门校验提示(v0.3.81) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.portalMsgNow(1),b:T.portalMsgNow(5)});})()"));
+    t('U99 提示含当前传送门数量', o.a.indexOf('当前 1 个')>=0 && o.b.indexOf('当前 5 个')>=0, o.a+' | '+o.b);
+    t('U100 提示保留成对规则', o.a.indexOf('0 或 2 的倍数')>=0 && o.b.indexOf('⚠ 传送门需成对放置')>=0, o.a);
+  } catch(e){ t('U99 传送门数量',false,e.message); t('U100 成对规则',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
