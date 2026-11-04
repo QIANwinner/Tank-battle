@@ -422,6 +422,14 @@ async function main() {
     t('U52 星级奖励大额千分位', o.b.indexOf('余额 12,345🪙')>=0, o.b);
   } catch(e){ t('U51 星级文案',false,e.message); t('U52 星级余额',false,e.message); }
 
+
+  // ===== U53~U54: 基地重建文案(v0.3.58) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.rebuildMsgNow(160,340),b:T.rebuildMsgNow(200,12345)});})()"));
+    t('U53 重建含花费与余额', o.a.indexOf('花 160 金币')>=0 && o.a.indexOf('余额 340🪙')>=0, o.a);
+    t('U54 重建大额千分位', o.b.indexOf('余额 12,345🪙')>=0, o.b);
+  } catch(e){ t('U53 重建文案',false,e.message); t('U54 重建余额',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
