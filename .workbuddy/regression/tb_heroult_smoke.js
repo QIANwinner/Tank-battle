@@ -670,6 +670,14 @@ async function main() {
     t('U114 空重置提示给出下一步', o.c.indexOf('暂无强化可重置')>=0 && o.c.indexOf('先在商店购买加成')>=0, o.c);
   } catch(e){ t('U113 链接提示',false,e.message); t('U114 空重置',false,e.message); }
 
+
+  // ===== U115~U116: toast 时长自适应(v0.3.89) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.toastDurationNow('短'),b:T.toastDurationNow('A'.repeat(60)),c:T.toastDurationNow('A'.repeat(200)),d:T.toastDurationNow('')});})()"));
+    t('U115 短文案保持 1600ms', o.a === 1600 && o.d === 1600, JSON.stringify(o));
+    t('U116 长文案延长且封顶 3200ms', o.b === 2500 && o.c === 3200, JSON.stringify(o));
+  } catch(e){ t('U115 短文案时长',false,e.message); t('U116 长文案时长',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
