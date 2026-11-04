@@ -2346,6 +2346,18 @@ async function main() {
     t('U554 宽度值为合法百分比', o.f === null || /^\d+%$/.test(o.f), String(o.f));
   } catch(e){ for(let k=549;k<=554;k++) t('U'+k+' 成就进度条',false,e.message); }
 
+
+  // ===== U555~U560: 濒死警示(v0.6.7) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('dangerTip'),a:T.dangerClassNow(1),b:T.dangerClassNow(3),c:T.dangerTipNow(1),d:T.dangerTipNow(3),e:T.dangerDomNow()});})()"));
+    t('U555 警示元素已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U556 最后一命触发 danger 类', o.a === 'danger', o.a);
+    t('U557 生命充足无 danger 类', o.b === '', o.b);
+    t('U558 濒死提示含守基地建议', o.c.indexOf('最后一命')>=0 && o.c.indexOf('守住基地')>=0, o.c);
+    t('U559 安全态提示', o.d === '基地状态良好', o.d);
+    t('U560 DOM 状态可读', o.e && typeof o.e.txt === 'string' && typeof o.e.cls === 'string', JSON.stringify(o.e));
+  } catch(e){ for(let k=555;k<=560;k++) t('U'+k+' 濒死警示',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
