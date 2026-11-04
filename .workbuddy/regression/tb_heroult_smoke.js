@@ -1934,6 +1934,14 @@ async function main() {
     t('U430 僚机皮肤名称 HTML 抽为纯函数边界', o.b.indexOf('B</span>')>=0, JSON.stringify(o));
   } catch(e){ t('U429 僚机皮肤名称 HTML 抽为纯函数',false,e.message); t('U430 僚机皮肤名称 HTML 抽为纯函数边界',false,e.message); }
 
+
+  // ===== U431~U432: 僚机皮肤状态文案抽为纯函数(v5.59) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5WskinMetaNow(true,false,0),b:T.v5WskinMetaNow(false,false,12345)});})()"));
+    t('U431 僚机皮肤状态文案抽为纯函数', o.a === '已拥有', JSON.stringify(o));
+    t('U432 僚机皮肤状态文案抽为纯函数边界', o.b === '🪙 12,345', JSON.stringify(o));
+  } catch(e){ t('U431 僚机皮肤状态文案抽为纯函数',false,e.message); t('U432 僚机皮肤状态文案抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
