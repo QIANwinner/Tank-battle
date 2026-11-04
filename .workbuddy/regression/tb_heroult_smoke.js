@@ -358,6 +358,14 @@ async function main() {
     t('U36 签到大额余额千分位', o.big.indexOf('余额 12,345🪙') >= 0, o.big);
   } catch (e) { t('U34 签到文案', false, e.message); t('U35 整轮标识', false, e.message); t('U36 签到余额', false, e.message); }
 
+
+  // ===== U37~U38: 过关奖励余额(v0.3.50) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.levelClearMsgNow(120,'',880),b:T.levelClearMsgNow(120,' +1🐾',12345)});})()"));
+    t('U37 过关奖励含奖励值与余额', o.a.indexOf('+120')>=0 && o.a.indexOf('余额 880🪙')>=0, o.a);
+    t('U38 过关奖励含宠物币且大额千分位', o.b.indexOf('+1🐾')>=0 && o.b.indexOf('余额 12,345🪙')>=0, o.b);
+  } catch(e){ t('U37 过关文案',false,e.message); t('U38 过关千分位',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
