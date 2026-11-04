@@ -26,6 +26,9 @@ function ghEnv() {
   for (const k of ['http_proxy', 'https_proxy', 'HTTP_PROXY', 'HTTPS_PROXY', 'ALL_PROXY', 'all_proxy']) delete env[k];
   return env;
 }
+function pause(ms) { Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms); }
+// GitHub API 偶发 502 / 200 但空响应体(2026-11-04 实测):传输层重试,
+// blob/tree 内容寻址天然幂等,commit/ref 重复写入最多留下一个悬挂提交,树仍一致。
 function gh(args, input) {
   const opts = { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024, env: ghEnv() };
   if (input !== undefined) {
@@ -33,8 +36,19 @@ function gh(args, input) {
     fs.writeFileSync(tmp, input);
     args += ' --input "' + tmp + '"';
   }
-  try { return execSync('"' + GH_BIN + '" api ' + args, opts).trim(); }
-  catch (e) { throw new Error('gh api ' + args.split(' ')[0] + ' failed: ' + (e.stderr || e.message).slice(0, 300)); }
+  let last = '';
+  for (let attempt = 1; attempt <= 5; attempt++) {
+    try {
+      const out = execSync('"' + GH_BIN + '" api ' + args, opts).trim();
+      if (out) return out;
+      last = 'empty response body';
+    } catch (e) {
+      last = (e.stderr || e.message || '').toString().slice(0, 200);
+      if (/404|Not Found|Validation Failed/i.test(last)) break;   // 确定性错误不重试
+    }
+    if (attempt < 5) pause(600 * attempt);
+  }
+  throw new Error('gh api ' + args.split(' ')[0] + ' failed after retries: ' + last);
 }
 function git(args) {
   return execSync('git -C "' + REPO_DIR + '" ' + args, { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 }).trim();

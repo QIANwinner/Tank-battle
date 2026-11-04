@@ -750,6 +750,14 @@ async function main() {
     t('U134 负数兜底', o.b === '0', JSON.stringify(o));
   } catch(e){ t('U133 正常生命',false,e.message); t('U134 负数兜底',false,e.message); }
 
+
+  // ===== U135~U136: 结算击杀数与关卡数抽为纯函数(v0.4.9) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lvCountTextNow(27),b:T.lvCountTextNow(null)});})()"));
+    t('U135 普通计数', o.a === '27', JSON.stringify(o));
+    t('U136 空值兜底', o.b === '0', JSON.stringify(o));
+  } catch(e){ t('U135 普通计数',false,e.message); t('U136 空值兜底',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
