@@ -1870,6 +1870,14 @@ async function main() {
     t('U414 基地满级描述抽为纯函数边界', o.b.indexOf('0 格')>=0, JSON.stringify(o));
   } catch(e){ t('U413 基地满级描述抽为纯函数',false,e.message); t('U414 基地满级描述抽为纯函数边界',false,e.message); }
 
+
+  // ===== U415~U416: 基地下级描述抽为纯函数(v5.51) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BaseNextDescNow(6,'要塞',12),b:T.v5BaseNextDescNow(0,'X',0)});})()"));
+    t('U415 基地下级描述抽为纯函数', o.a === '基地护墙 6 格 → 下一级 要塞（12 格）', JSON.stringify(o));
+    t('U416 基地下级描述抽为纯函数边界', o.b.indexOf('下一级 X')>=0, JSON.stringify(o));
+  } catch(e){ t('U415 基地下级描述抽为纯函数',false,e.message); t('U416 基地下级描述抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
