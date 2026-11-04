@@ -1550,6 +1550,14 @@ async function main() {
     t('U334 主题网格 rgba 串抽为纯函数边界', o.b === 'rgba(0,0,0,0.12)', JSON.stringify(o));
   } catch(e){ t('U333 主题网格 rgba 串抽为纯函数',false,e.message); t('U334 主题网格 rgba 串抽为纯函数边界',false,e.message); }
 
+
+  // ===== U335~U336: 主题强调色 rgb 串抽为纯函数(v5.11) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5AccentRgbStrNow([9,8,7]),b:T.v5AccentRgbStrNow([0,255,0])});})()"));
+    t('U335 主题强调色 rgb 串抽为纯函数', o.a === 'rgb(9,8,7)', JSON.stringify(o));
+    t('U336 主题强调色 rgb 串抽为纯函数边界', o.b === 'rgb(0,255,0)', JSON.stringify(o));
+  } catch(e){ t('U335 主题强调色 rgb 串抽为纯函数',false,e.message); t('U336 主题强调色 rgb 串抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
