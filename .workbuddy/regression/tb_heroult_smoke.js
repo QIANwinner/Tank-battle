@@ -1126,6 +1126,14 @@ async function main() {
     t('U228 未全屏', o.b === '进入全屏', JSON.stringify(o));
   } catch(e){ t('U227 已全屏',false,e.message); t('U228 未全屏',false,e.message); }
 
+
+  // ===== U229~U230: 开始按钮文案按每日挑战抽为纯函数(v4.56) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.playStartTextNow(true),b:T.playStartTextNow(false)});})()"));
+    t('U229 挑战入口', o.a === '开始每日挑战', JSON.stringify(o));
+    t('U230 普通入口', o.b === '开始游戏', JSON.stringify(o));
+  } catch(e){ t('U229 挑战入口',false,e.message); t('U230 普通入口',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
