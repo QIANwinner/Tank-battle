@@ -1678,6 +1678,14 @@ async function main() {
     t('U366 粒子 hsla 串抽为纯函数边界', o.b === 'hsla(40,100%,60%,0.5)', JSON.stringify(o));
   } catch(e){ t('U365 粒子 hsla 串抽为纯函数',false,e.message); t('U366 粒子 hsla 串抽为纯函数边界',false,e.message); }
 
+
+  // ===== U367~U368: 粉色描边串抽为纯函数(v5.27) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5PinkStrokeNow(0.4),b:T.v5PinkStrokeNow(0)});})()"));
+    t('U367 粉色描边串抽为纯函数', o.a === 'rgba(255,45,149,0.4)', JSON.stringify(o));
+    t('U368 粉色描边串抽为纯函数边界', o.b === 'rgba(255,45,149,0)', JSON.stringify(o));
+  } catch(e){ t('U367 粉色描边串抽为纯函数',false,e.message); t('U368 粉色描边串抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
