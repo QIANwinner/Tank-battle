@@ -1382,6 +1382,14 @@ async function main() {
     t('U292 零场次兜底', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U291 正常胜率',false,e.message); t('U292 零场次兜底',false,e.message); }
 
+
+  // ===== U293~U294: 排行榜日期抽为 boardDateText 补零(v4.88) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.boardDateTextNow(new Date(2026,2,7)),b:T.boardDateTextNow(new Date(2026,10,24))});})()"));
+    t('U293 月日补零', o.a === '03/07', JSON.stringify(o));
+    t('U294 两位数月日', o.b === '11/24', JSON.stringify(o));
+  } catch(e){ t('U293 月日补零',false,e.message); t('U294 两位数月日',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
