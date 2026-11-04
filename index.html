@@ -1776,6 +1776,9 @@
   .saveStatBox { border: 1px solid rgba(0, 240, 255, 0.35); border-radius: 9px; background: rgba(0, 47, 167, 0.18); padding: 6px 10px; margin-top: 8px; }
   .saveStatBox summary { font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #00f0ff; cursor: pointer; }
   #backupAgeBody { font-size: 11px; color: #cfe3ff; padding-top: 5px; font-variant-numeric: tabular-nums; }
+  #fpsWrap .v { color: #39ff14; font-variant-numeric: tabular-nums; }
+  .fpsToggle { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #cfe3ff; cursor: pointer; margin-top: 6px; }
+  .fpsToggle input { accent-color: #00f0ff; }
 </style>
 </head>
 <body>
@@ -1806,6 +1809,7 @@
     <div class="pill m-hide" id="waveDeltaWrap"><span class="k">纪录</span><span class="v" id="waveDeltaVal">—</span></div>
     <div id="swBanner" class="swBanner"></div>
     <div id="netBanner" class="netBanner"></div>
+    <div class="pill m-hide" id="fpsWrap" style="display:none"><span class="k">FPS</span><span class="v" id="fpsVal">0 FPS</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1922,7 +1926,7 @@
       <span class="volPct" id="volPct">100%</span>
     </div>
     <div class="settings" id="settings">
-      <details id="backupAgeBox" class="saveStatBox"><summary>📦 备份状态（点开刷新）</summary><div id="backupAgeBody">—</div></details>
+      <label class="fpsToggle"><input type="checkbox" id="fpsToggle"> 显示 FPS 帧率</label>      <details id="backupAgeBox" class="saveStatBox"><summary>📦 备份状态（点开刷新）</summary><div id="backupAgeBody">—</div></details>
       <details id="saveStatBox" class="saveStatBox"><summary>💾 存档状态（点开刷新）</summary><div id="saveStatBody">—</div></details>
       <details id="keyHintBox"><summary>⌨️ 键位速查</summary><div id="keyHintText"></div></details>
       <div class="setRow coinLogRow"><span class="setLabel">🪙 收支<span class="hint">最近 3 笔</span></span><span id="coinLogText">暂无记录</span></div>
@@ -2151,7 +2155,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V6.20</div>
+  <div id="mark">DESIGNED BY QIAN · V6.21</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -5423,6 +5427,7 @@
     rafId = requestAnimationFrame(tick);
     animTime = now;
     let dt = (now - lastTime) / 1000;
+  fpsMeterFrames++; fpsMeterAcc += dt; if (fpsMeterAcc >= 0.5) { fpsMeterValue = Math.round(fpsMeterFrames / fpsMeterAcc); fpsMeterFrames = 0; fpsMeterAcc = 0; const fp = $('fpsVal'); if (fp) fp.textContent = fpsText(fpsMeterValue); }   // —— v0.6.21 FPS 计数 ——
     lastTime = now;
     if (!isFinite(dt) || dt <= 0) dt = 1 / 60;
     if (dt > 0.05) dt = 0.05;      // 切窗恢复后限制单帧步长
@@ -7097,6 +7102,27 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const days = Math.floor((Date.now() - t) / 86400000);
     return days <= 0 ? '今天已备份' : days + ' 天前备份';
   }
+  // —— v0.6.21 FPS 显示开关 ——
+  function fpsText(n) {
+    const v = Math.max(0, Math.min(999, Math.round(Number(n) || 0)));
+    return v + ' FPS';
+  }
+  let fpsMeterFrames = 0, fpsMeterAcc = 0, fpsMeterValue = 0;
+  let fpsShow = false;
+  try { fpsShow = localStorage.getItem('tank-battle-fps') === '1'; } catch (e) { /* 忽略 */ }
+  (function bindFpsToggle() {
+    const t = document.getElementById('fpsToggle');
+    const wrap = document.getElementById('fpsWrap');
+    if (wrap) wrap.style.display = fpsShow ? '' : 'none';
+    if (!t) return;
+    t.checked = fpsShow;
+    t.addEventListener('change', () => {
+      fpsShow = t.checked;
+      try { localStorage.setItem('tank-battle-fps', fpsShow ? '1' : '0'); } catch (e) { /* 忽略 */ }
+      const w = document.getElementById('fpsWrap');
+      if (w) w.style.display = fpsShow ? '' : 'none';
+    });
+  })();
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -8908,7 +8934,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V6.20', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V6.21', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9893,6 +9919,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       swUpdateTextNow: (v) => swUpdateText(v), swBannerDomNow: () => { const e = $('swBanner'); return e ? { txt: e.textContent, cls: e.className } : null; }, swUpdateSimNow: () => { swUpdateFound(true); const e = $('swBanner'); return e ? { txt: e.textContent, cls: e.className } : null; },
       netBannerTextNow: (on) => netBannerText(on), netBannerDomNow: () => { const e = $('netBanner'); return e ? { txt: e.textContent, cls: e.className } : null; }, netUpdSimNow: (v) => { const b = $('netBanner'); if (b) { b.textContent = netBannerText(v); b.className = netBannerClass(v); } return { txt: b ? b.textContent : null, cls: b ? b.className : null }; },
       backupAgeTextNow: (t) => backupAgeText(t), backupAgeRefreshNow: () => { const el = $('backupAgeBody'); let last = 0; try { last = Number(localStorage.getItem('tank-battle-lastbackup')) || 0; } catch (e) { /* 忽略 */ } if (el) el.textContent = backupAgeText(last); return el ? el.textContent : null; },
+      fpsTextNow: (n) => fpsText(n), fpsPillDomNow: () => { const e = $('fpsVal'); return e ? e.textContent : null; }, fpsValueNow: () => fpsMeterValue, fpsToggleNow: (on) => { const t = document.getElementById('fpsToggle'); if (t) { t.checked = !!on; t.dispatchEvent(new Event('change')); } let ls = null; try { ls = localStorage.getItem('tank-battle-fps'); } catch (e) { /* 忽略 */ } return { show: fpsShow, ls }; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

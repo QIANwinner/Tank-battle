@@ -2575,6 +2575,22 @@ async function main() {
     t('U638 DOM 与函数一致(导出后=今天已备份)', o5.r1 === '从未备份' && o5.r2 === '今天已备份', JSON.stringify(o5));
   } catch(e){ for(let k=633;k<=638;k++) t('U'+k+' 备份日期',false,e.message); }
 
+
+  // ===== U639~U644: FPS 显示开关(v0.6.21) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;const w=document.getElementById('fpsWrap');return JSON.stringify({pill:!!w,tog:!!document.getElementById('fpsToggle'),hidden:w?w.style.display==='none':null,val:T.fpsPillDomNow(),v:T.fpsValueNow(),f:T.fpsTextNow(T.fpsValueNow())});})()"));
+    t('U639 FPS pill 与设置开关已加入', o.pill === true && o.tog === true, JSON.stringify(o));
+    t('U640 默认关闭且 pill 实测值与函数一致', o.hidden === true && o.val === o.f && o.v >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.fpsTextNow(60),b:T.fpsTextNow(0),c:T.fpsTextNow(59.6)});})()"));
+    t('U641 纯函数取整格式', o2.a === '60 FPS' && o2.b === '0 FPS' && o2.c === '60 FPS', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.fpsTextNow(NaN),b:T.fpsTextNow(-5),c:T.fpsTextNow(9999)});})()"));
+    t('U642 非法与上界钳制', o3.a === '0 FPS' && o3.b === '0 FPS' && o3.c === '999 FPS', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;const on=T.fpsToggleNow(true);const off=T.fpsToggleNow(false);return JSON.stringify({on,off});})()"));
+    t('U643 开关持久化 localStorage(1/0)', o4.on.ls === '1' && o4.on.show === true && o4.off.ls === '0' && o4.off.show === false, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(async () => { const T = window.__tbTest; T.fpsToggleNow(true); await new Promise(r => setTimeout(r, 700)); const v = T.fpsValueNow(); const dom = T.fpsPillDomNow(); T.fpsToggleNow(false); return JSON.stringify({ v, dom }); })()"));
+    t('U644 实测帧率写入 pill(v>0 · 与函数一致)', o5.v > 0 && o5.dom === (function(n){ return Math.max(0, Math.min(999, Math.round(Number(n) || 0))) + ' FPS'; })(o5.v), JSON.stringify(o5));
+  } catch(e){ for(let k=639;k<=644;k++) t('U'+k+' FPS开关',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
