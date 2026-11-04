@@ -2150,6 +2150,14 @@ async function main() {
     t('U484 重置说明文案抽为纯函数边界', o.b.indexOf('🪙0）')>=0, JSON.stringify(o));
   } catch(e){ t('U483 重置说明文案抽为纯函数',false,e.message); t('U484 重置说明文案抽为纯函数边界',false,e.message); }
 
+
+  // ===== U485~U486: 重置统计文案抽为纯函数(v5.86) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5ResetMetaTextNow(600,8),b:T.v5ResetMetaTextNow(12345,0)});})()"));
+    t('U485 重置统计文案抽为纯函数', o.a === '累计投入 🪙600 · 当前总等级 8', JSON.stringify(o));
+    t('U486 重置统计文案抽为纯函数边界', o.b.indexOf('12,345')>=0, JSON.stringify(o));
+  } catch(e){ t('U485 重置统计文案抽为纯函数',false,e.message); t('U486 重置统计文案抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
