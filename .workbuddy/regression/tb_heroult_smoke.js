@@ -1974,6 +1974,14 @@ async function main() {
     t('U440 羁绊名称 HTML 抽为纯函数边界', o.b.indexOf('<b>X</b>')>=0, JSON.stringify(o));
   } catch(e){ t('U439 羁绊名称 HTML 抽为纯函数',false,e.message); t('U440 羁绊名称 HTML 抽为纯函数边界',false,e.message); }
 
+
+  // ===== U441~U442: 羁绊组合说明抽为纯函数(v5.64) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BondPairTextNow({icon:'🛡',name:'堡垒'},{icon:'🐢',name:'守护龟'}),b:T.v5BondPairTextNow({icon:'A',name:'A'},{icon:'B',name:'B'})});})()"));
+    t('U441 羁绊组合说明抽为纯函数', o.a === '🛡 堡垒 × 🐢 守护龟', JSON.stringify(o));
+    t('U442 羁绊组合说明抽为纯函数边界', o.b === 'A A × B B', JSON.stringify(o));
+  } catch(e){ t('U441 羁绊组合说明抽为纯函数',false,e.message); t('U442 羁绊组合说明抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
