@@ -582,6 +582,14 @@ async function main() {
     t('U92 恢复失败带前缀与原因', o.b.indexOf('⚠ 存档恢复失败 · 校验失败')>=0, o.b);
   } catch(e){ t('U91 恢复成功',false,e.message); t('U92 恢复失败',false,e.message); }
 
+
+  // ===== U93~U94: 环境与战绩图提示(v0.3.78) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.unsupportedMsgNow('全屏','请在设置中手动切换'),b:T.unsupportedMsgNow('直接安装','可用浏览器菜单'),c:T.reportMsgNow(false,'先打一局再来生成'),d:T.reportMsgNow(true,'')});})()"));
+    t('U93 不支持提示带对象与替代操作', o.a.indexOf('不支持全屏 · 请在设置中手动切换')>=0 && o.b.indexOf('可用浏览器菜单')>=0, o.a+' | '+o.b);
+    t('U94 战绩图失败/成功口径分明', o.c.indexOf('⚠ 战绩图生成失败 · 先打一局再来生成')>=0 && o.d === '✅ 战绩图已生成', o.c+' | '+o.d);
+  } catch(e){ t('U93 环境提示',false,e.message); t('U94 战绩图提示',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
