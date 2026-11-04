@@ -542,6 +542,14 @@ async function main() {
     t('U82 徽章标题含进度与百分比', o.d.indexOf('7/20')>=0 && o.d.indexOf('完成度 35%')>=0, o.d);
   } catch(e){ t('U81 完成度计算',false,e.message); t('U82 徽章标题',false,e.message); }
 
+
+  // ===== U83~U84: HUD 数值口径(v0.3.73) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hudNumNow(999),b:T.hudNumNow(123456),c:T.hudNumNow(-5),d:T.hudNumNow(NaN)});})()"));
+    t('U83 小额原样大额千分位', o.a === '999' && o.b === '123,456', JSON.stringify(o));
+    t('U84 负数与非法值兜底为零', o.c === '0' && o.d === '0', JSON.stringify(o));
+  } catch(e){ t('U83 HUD 千分位',false,e.message); t('U84 HUD 兜底',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
