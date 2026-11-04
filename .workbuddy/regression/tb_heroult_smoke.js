@@ -430,6 +430,14 @@ async function main() {
     t('U54 重建大额千分位', o.b.indexOf('余额 12,345🪙')>=0, o.b);
   } catch(e){ t('U53 重建文案',false,e.message); t('U54 重建余额',false,e.message); }
 
+
+  // ===== U55~U56: 加成购买文案(v0.3.59) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bonusBuyMsgNow('🛡','护盾强化',740),b:T.bonusBuyMsgNow('⚡','射速',12345)});})()"));
+    t('U55 加成购买含名称与余额', o.a.indexOf('护盾强化')>=0 && o.a.indexOf('余额 740🪙')>=0, o.a);
+    t('U56 加成购买大额千分位', o.b.indexOf('余额 12,345🪙')>=0, o.b);
+  } catch(e){ t('U55 加成文案',false,e.message); t('U56 加成余额',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
