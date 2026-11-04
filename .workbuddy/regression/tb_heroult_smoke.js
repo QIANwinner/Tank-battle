@@ -398,6 +398,14 @@ async function main() {
     t('U46 周挑战大额千分位', o.b.indexOf('余额 12,345🪙')>=0, o.b);
   } catch(e){ t('U45 周挑战文案',false,e.message); t('U46 周挑战余额',false,e.message); }
 
+
+  // ===== U47~U48: 关卡完成文案(v0.3.55) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.levelDoneMsgNow(5,80,920),b:T.levelDoneMsgNow(12,120,12345)});})()"));
+    t('U47 关完成含关卡奖励与余额', o.a.indexOf('第 5 关完成')>=0 && o.a.indexOf('+80')>=0 && o.a.indexOf('余额 920🪙')>=0, o.a);
+    t('U48 关完成大额千分位', o.b.indexOf('余额 12,345🪙')>=0, o.b);
+  } catch(e){ t('U47 关完成文案',false,e.message); t('U48 关完成千分位',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
