@@ -742,6 +742,14 @@ async function main() {
     t('U132 负数兜底', o.b === '0s', JSON.stringify(o));
   } catch(e){ t('U131 小数取整',false,e.message); t('U132 负数兜底',false,e.message); }
 
+
+  // ===== U133~U134: 结算剩余生命抽为纯函数(v0.4.8) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lvLivesTextNow(3),b:T.lvLivesTextNow(-2)});})()"));
+    t('U133 正常生命', o.a === '3', JSON.stringify(o));
+    t('U134 负数兜底', o.b === '0', JSON.stringify(o));
+  } catch(e){ t('U133 正常生命',false,e.message); t('U134 负数兜底',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
