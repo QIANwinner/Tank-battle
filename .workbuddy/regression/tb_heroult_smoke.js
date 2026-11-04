@@ -686,6 +686,14 @@ async function main() {
     t('U118 大额千分位', o.b === '+12,345 🪙', JSON.stringify(o));
   } catch(e){ t('U117 小额原样',false,e.message); t('U118 大额千分位',false,e.message); }
 
+
+  // ===== U119~U120: 结算星级金币提示抽为可测纯函数(v0.4.1) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lvStarGoldTextNow(80),b:T.lvStarGoldTextNow(12345)});})()"));
+    t('U119 小额原样', o.a === '+80 🪙', JSON.stringify(o));
+    t('U120 大额千分位', o.b === '+12,345 🪙', JSON.stringify(o));
+  } catch(e){ t('U119 小额原样',false,e.message); t('U120 大额千分位',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
