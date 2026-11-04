@@ -1574,6 +1574,14 @@ async function main() {
     t('U340 局内副标题抽为纯函数边界', o.b === '第 8 波 · 目前 12,345 分', JSON.stringify(o));
   } catch(e){ t('U339 局内副标题抽为纯函数',false,e.message); t('U340 局内副标题抽为纯函数边界',false,e.message); }
 
+
+  // ===== U341~U342: 里程碑副标题追加抽为纯函数(v5.14) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5MilestoneSubNow(3,false),b:T.v5MilestoneSubNow(3,true)});})()"));
+    t('U341 里程碑副标题追加抽为纯函数', o.a === ' · 🌊里程碑 +3🐾', JSON.stringify(o));
+    t('U342 里程碑副标题追加抽为纯函数边界', o.b.indexOf('羁绊×2')>=0, JSON.stringify(o));
+  } catch(e){ t('U341 里程碑副标题追加抽为纯函数',false,e.message); t('U342 里程碑副标题追加抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
