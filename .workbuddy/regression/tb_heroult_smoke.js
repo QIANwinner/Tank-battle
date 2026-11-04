@@ -1078,6 +1078,14 @@ async function main() {
     t('U216 统一成功前缀', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U215 复制成功文案',false,e.message); t('U216 统一成功前缀',false,e.message); }
 
+
+  // ===== U217~U218: 暂停按钮图标抽为纯函数(v4.50) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pauseIconTextNow(true),b:T.pauseIconTextNow(false)});})()"));
+    t('U217 暂停态', o.a === '▶', JSON.stringify(o));
+    t('U218 运行态', o.b === '⏸', JSON.stringify(o));
+  } catch(e){ t('U217 暂停态',false,e.message); t('U218 运行态',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
