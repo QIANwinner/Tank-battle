@@ -1286,6 +1286,14 @@ async function main() {
     t('U268 折扣后不低于下限', o.b === 40, JSON.stringify(o));
   } catch(e){ t('U267 基础费用',false,e.message); t('U268 折扣后不低于下限',false,e.message); }
 
+
+  // ===== U269~U270: 倒计时秒数取整抽为 timeSeconds(v4.76) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.timeSecondsNow(12.1),b:T.timeSecondsNow(-5)});})()"));
+    t('U269 小数向上取整', o.a === 13, JSON.stringify(o));
+    t('U270 负数归零', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U269 小数向上取整',false,e.message); t('U270 负数归零',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
