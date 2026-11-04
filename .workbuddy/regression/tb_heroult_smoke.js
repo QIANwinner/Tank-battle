@@ -1342,6 +1342,14 @@ async function main() {
     t('U282 扣减不为负', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U281 增加宠物币',false,e.message); t('U282 扣减不为负',false,e.message); }
 
+
+  // ===== U283~U284: 闪光衰减抽为 decay 纯函数(v4.83) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.decayNow(1,0.2,2),b:T.decayNow(0.1,1,2)});})()"));
+    t('U283 按系数衰减', Math.abs(o.a - 0.6) < 1e-9, JSON.stringify(o));
+    t('U284 衰减不为负', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U283 按系数衰减',false,e.message); t('U284 衰减不为负',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
