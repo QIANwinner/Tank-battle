@@ -662,6 +662,14 @@ async function main() {
     t('U112 分享提示带主语与操作', o.b.indexOf('📷 战绩图已生成')>=0 && o.b.indexOf('长按图片保存发给朋友')>=0, o.b);
   } catch(e){ t('U111 备份提醒',false,e.message); t('U112 战绩图分享',false,e.message); }
 
+
+  // ===== U113~U114: 链接与空重置(v0.3.88) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.challengeLinkMsgNow(true),b:T.challengeLinkMsgNow(false),c:T.resetEmptyMsgNow()});})()"));
+    t('U113 复制成功与失败共用口径', o.a.indexOf('📋 挑战链接已复制')>=0 && o.b.indexOf('⚠ 挑战链接复制失败')>=0, o.a+' | '+o.b);
+    t('U114 空重置提示给出下一步', o.c.indexOf('暂无强化可重置')>=0 && o.c.indexOf('先在商店购买加成')>=0, o.c);
+  } catch(e){ t('U113 链接提示',false,e.message); t('U114 空重置',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
