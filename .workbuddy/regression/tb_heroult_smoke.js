@@ -2629,6 +2629,37 @@ async function main() {
 
 
 
+
+  // ===== U675~U680: 强化总等级 pill(v0.6.27) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('upgPillWrap'),f:T.upgTotalTextNow(0)});})()"));
+    t('U675 强化 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U676 零强化初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.upgTotalTextNow(3),b:T.upgTotalTextNow(1)});})()"));
+    t('U677 正常值 ×3/×1', o2.a === '⚡ ×3' && o2.b === '⚡ ×1', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.upgTotalTextNow(-5),b:T.upgTotalTextNow(NaN)});})()"));
+    t('U678 非法输入兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.upgPillDomNow(),total:T.upgTotalNow()});})()"));
+    t('U679 DOM 与函数一致(新局 total=0)', o4.dom === '—' && o4.total === 0, JSON.stringify(o4));
+    t('U680 类型一致(number)', typeof o4.total === 'number', String(o4.total));
+  } catch(e){ for(let k=675;k<=680;k++) t('U'+k+' 强化pill',false,e.message); }
+
+
+  // ===== U681~U686: 游玩时长 pill(v0.6.28) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('timePillWrap'),f:T.playTimeTextNow(0)});})()"));
+    t('U681 时长 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U682 零秒初值', o.f === '0 秒', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.playTimeTextNow(45),b:T.playTimeTextNow(90),c:T.playTimeTextNow(3725)});})()"));
+    t('U683 正常格式 45秒/1分30秒/62分5秒', o2.a === '45 秒' && o2.b === '1 分 30 秒' && o2.c === '62 分 5 秒', JSON.stringify(o2));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.playTimeTextNow(-5),b:T.playTimeTextNow(NaN),c:T.playTimeTextNow('x')});})()"));
+    t('U684 非法输入兜底 0 秒', o4.a === '0 秒' && o4.b === '0 秒' && o4.c === '0 秒', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(async () => { const T = window.__tbTest; T.startGame(); T.skipIntro(); await new Promise(r => setTimeout(r, 1200)); const dom = T.timePillDomNow(); return JSON.stringify({ dom }); })()"));
+    t('U685 实时计时(1 秒后 ≥1 秒)', parseInt(o5.dom) >= 1, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const dom=T.timePillDomNow();const fn=T.playTimeTextNow(T.playSecRunNow());return JSON.stringify({dom,fn});})()"));
+    t('U686 DOM 与函数一致', o6.dom === o6.fn, JSON.stringify(o6));
+  } catch(e){ for(let k=681;k<=686;k++) t('U'+k+' 时长pill',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
