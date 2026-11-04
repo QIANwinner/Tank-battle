@@ -470,6 +470,14 @@ async function main() {
     t('U64 限时冲分含结束态与千分位', o.b.indexOf('限时冲分结束')>=0 && o.b.indexOf('余额 12,345🪙')>=0 && o.c.indexOf('限时冲分完成')>=0, o.b+' | '+o.c);
   } catch(e){ t('U63 每日结算',false,e.message); t('U64 限时结算',false,e.message); }
 
+
+  // ===== U65~U66: 基地升级文案(v0.3.64) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseUpgradeMsgNow('堡垒',12,340),b:T.baseUpgradeMsgNow('要塞',24,12345)});})()"));
+    t('U65 基地升级含名称护墙与余额', o.a.indexOf('堡垒')>=0 && o.a.indexOf('护墙 12 格')>=0 && o.a.indexOf('余额 340🪙')>=0, o.a);
+    t('U66 基地升级大额千分位', o.b.indexOf('余额 12,345🪙')>=0, o.b);
+  } catch(e){ t('U65 基地文案',false,e.message); t('U66 基地千分位',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
