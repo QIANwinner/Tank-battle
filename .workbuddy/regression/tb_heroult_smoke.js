@@ -1230,6 +1230,14 @@ async function main() {
     t('U254 越界归零', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U253 合法星级',false,e.message); t('U254 越界归零',false,e.message); }
 
+
+  // ===== U255~U256: 无尽最高波次解析抽为 safeWave(v4.69) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.safeWaveNow('12'),b:T.safeWaveNow('bad')});})()"));
+    t('U255 合法波次', o.a === 12, JSON.stringify(o));
+    t('U256 损坏存档归零', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U255 合法波次',false,e.message); t('U256 损坏存档归零',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
