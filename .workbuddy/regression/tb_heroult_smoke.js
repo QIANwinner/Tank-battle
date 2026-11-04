@@ -646,6 +646,14 @@ async function main() {
     t('U108 两阶段均说明威胁变化', o.a.indexOf('弹幕与速度提升')>=0 && o.b.indexOf('弹幕与速度提升')>=0, o.a+' | '+o.b);
   } catch(e){ t('U107 狂暴阶段',false,e.message); t('U108 狂暴威胁',false,e.message); }
 
+
+  // ===== U109~U110: 英雄选择提示(v0.3.86) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.heroSelectMsgNow('🛡','堡垒','生命 +1',null),b:T.heroSelectMsgNow('⚔️','剑刃','双倍射速',{icon:'💰',name:'刀口舔金'})});})()"));
+    t('U109 无羁绊时不出现羁绊字样', o.a.indexOf('英雄 · 堡垒（生命 +1）')>=0 && o.a.indexOf('羁绊')<0, o.a);
+    t('U110 有羁绊时标注激活', o.b.indexOf('💰 羁绊「刀口舔金」激活！')>=0, o.b);
+  } catch(e){ t('U109 无羁绊',false,e.message); t('U110 羁绊激活',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
