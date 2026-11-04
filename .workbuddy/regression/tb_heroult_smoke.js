@@ -261,6 +261,22 @@ async function main() {
     t('U18 千分位边界 9999/10000', o.e9999 === '9999' && o.e10000 === '10,000', JSON.stringify(o));
   } catch (e) { t('U16 千分位', false, e.message); t('U17 小额兼容', false, e.message); t('U18 边界', false, e.message); }
 
+
+  // ===== U19~U21: 局内 HUD 宠物币(v0.3.44) =====
+  try {
+    const o = JSON.parse(await ev(`(function(){
+      const T = window.__tbTest;
+      T.setPetCoins(7);      const small = T.hudPetCoinsNow();
+      T.setPetCoins(12345);  const big = T.hudPetCoinsNow();
+      T.setPetCoins(0);      const zero = T.hudPetCoinsNow();
+      const exists = !!document.getElementById('hudPetCoins');
+      return JSON.stringify({ small, big, zero, exists });
+    })()`));
+    t('U19 HUD 宠物币随余额同步 7', o.small === '7' && o.exists, JSON.stringify(o));
+    t('U20 HUD 宠物币大额千分位', o.big === '12,345', JSON.stringify(o));
+    t('U21 宠物币清零显示 0', o.zero === '0', JSON.stringify(o));
+  } catch (e) { t('U19 HUD宠物币', false, e.message); t('U20 HUD千分位', false, e.message); t('U21 HUD清零', false, e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
