@@ -132,6 +132,17 @@ async function main() {
     t('E4 非无尽 0', o.m === 0, JSON.stringify(o));
   } catch (e) { t('E4 非无尽', false, e.message); }
 
+  // ===== E5: 宠物币来源提示含羁绊×2 说明(v0.3.28 文案更新) =====
+  try {
+    const o = JSON.parse(await ev(`(async () => {
+      const T = window.__tbTest;
+      const hint = T.petEarnHintNow();
+      // 用 ASCII/Unicode 转义匹配(避免中文编码不一致):+1( 与 ×(\u00d7)
+      return JSON.stringify({ hint, ok: !!(hint && hint.indexOf('+1(') >= 0 && hint.indexOf('\u00d7') >= 0) });
+    })()`));
+    t('E5 宠物币来源提示含羁绊×2', o.ok === true, JSON.stringify(o));
+  } catch (e) { t('E5 宠物币来源提示', false, e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
