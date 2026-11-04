@@ -814,6 +814,14 @@ async function main() {
     t('U150 大额千分位', o.b === '已解锁 12,345 关', JSON.stringify(o));
   } catch(e){ t('U149 普通关卡数',false,e.message); t('U150 大额千分位',false,e.message); }
 
+
+  // ===== U151~U152: 英雄分段按钮文案抽为纯函数(v0.4.17) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.heroSegTextNow('🛡','堡垒',true,80),b:T.heroSegTextNow('🛡','堡垒',false,80)});})()"));
+    t('U151 已拥有不显示价格', o.a === '🛡 堡垒', JSON.stringify(o));
+    t('U152 未解锁显示价格', o.b === '🛡 堡垒 80🐾', JSON.stringify(o));
+  } catch(e){ t('U151 已拥有不显示价格',false,e.message); t('U152 未解锁显示价格',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
