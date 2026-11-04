@@ -1886,6 +1886,14 @@ async function main() {
     t('U418 基地名称行 HTML 抽为纯函数边界', o.b.indexOf('baseLv')>=0, JSON.stringify(o));
   } catch(e){ t('U417 基地名称行 HTML 抽为纯函数',false,e.message); t('U418 基地名称行 HTML 抽为纯函数边界',false,e.message); }
 
+
+  // ===== U419~U420: 基地升级按钮 HTML 抽为纯函数(v5.53) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BaseBtnHtmlNow(true,0),b:T.v5BaseBtnHtmlNow(false,12345)});})()"));
+    t('U419 基地升级按钮 HTML 抽为纯函数', o.a.indexOf('已满级')>=0, JSON.stringify(o));
+    t('U420 基地升级按钮 HTML 抽为纯函数边界', o.b.indexOf('🪙 升级 12,345')>=0, JSON.stringify(o));
+  } catch(e){ t('U419 基地升级按钮 HTML 抽为纯函数',false,e.message); t('U420 基地升级按钮 HTML 抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
