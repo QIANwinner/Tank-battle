@@ -894,6 +894,14 @@ async function main() {
     t('U170 非法值回退默认值', o.b === 7, JSON.stringify(o));
   } catch(e){ t('U169 合法字符串',false,e.message); t('U170 非法值回退默认值',false,e.message); }
 
+
+  // ===== U171~U172: 基地等级钳制抽为 clampNum(v0.4.27) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.clampNumNow(5,0,3),b:T.clampNumNow('x',0,3)});})()"));
+    t('U171 上界钳制', o.a === 3, JSON.stringify(o));
+    t('U172 非法值回退下界', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U171 上界钳制',false,e.message); t('U172 非法值回退下界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
