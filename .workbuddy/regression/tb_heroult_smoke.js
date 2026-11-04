@@ -438,6 +438,14 @@ async function main() {
     t('U56 加成购买大额千分位', o.b.indexOf('余额 12,345🪙')>=0, o.b);
   } catch(e){ t('U55 加成文案',false,e.message); t('U56 加成余额',false,e.message); }
 
+
+  // ===== U57~U58: 僚机皮肤购买文案(v0.3.60) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.wskinBuyMsgNow('🟡','黄金僚机',880),b:T.wskinBuyMsgNow('🟣','紫电僚机',12345)});})()"));
+    t('U57 僚机皮肤购买含名称与余额', o.a.indexOf('黄金僚机')>=0 && o.a.indexOf('余额 880🪙')>=0, o.a);
+    t('U58 僚机皮肤大额千分位', o.b.indexOf('余额 12,345🪙')>=0, o.b);
+  } catch(e){ t('U57 僚机文案',false,e.message); t('U58 僚机余额',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
