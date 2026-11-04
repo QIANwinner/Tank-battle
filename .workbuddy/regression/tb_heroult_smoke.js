@@ -454,6 +454,14 @@ async function main() {
     t('U60 重置提示含返还与余额', o.m.indexOf('返还 🪙300')>=0 && o.m.indexOf('余额 12,345🪙')>=0, o.m);
   } catch(e){ t('U59 重置单一提示',false,e.message); t('U60 重置余额',false,e.message); }
 
+
+  // ===== U61~U62: 新纪录文案(v0.3.62) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.recordMsgNow(860),b:T.recordMsgNow(1234567)});})()"));
+    t('U61 新纪录保留原始分数', o.a.indexOf('860 分')>=0, o.a);
+    t('U62 新纪录大额千分位', o.b.indexOf('1,234,567 分')>=0, o.b);
+  } catch(e){ t('U61 新纪录小分数',false,e.message); t('U62 新纪录千分位',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
