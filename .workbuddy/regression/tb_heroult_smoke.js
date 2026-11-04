@@ -758,6 +758,14 @@ async function main() {
     t('U136 空值兜底', o.b === '0', JSON.stringify(o));
   } catch(e){ t('U135 普通计数',false,e.message); t('U136 空值兜底',false,e.message); }
 
+
+  // ===== U137~U138: 标题页无尽按钮抽为纯函数并补千分位(v0.4.10) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.endlessBtnHtmlNow(0),b:T.endlessBtnHtmlNow(12345)});})()"));
+    t('U137 无纪录不附加', o.a === '🌊 无尽模式', JSON.stringify(o));
+    t('U138 大额千分位', o.b === '🌊 无尽模式 · 最高 12,345 波', JSON.stringify(o));
+  } catch(e){ t('U137 无纪录不附加',false,e.message); t('U138 大额千分位',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
