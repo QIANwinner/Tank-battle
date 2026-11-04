@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V5.91</div>
+  <div id="mark">DESIGNED BY QIAN · V5.92</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -6885,6 +6885,8 @@ function v5HeroUnlockLabel(n){return '解锁「'+n+'」';}
 function v5HeroBoughtMsg(icon,name,price){return icon+' 已解锁 · '+name+'（-'+fmtNum(price)+'🐾）';}
 function v5SaveCode(json){return 'QTB1.'+btoa(unescape(encodeURIComponent(JSON.stringify(json))));}
 function v5ParseErrText(e){return '解析失败：'+(e&&e.message||e);}
+function v5SaveTipHtml(){return '<div class="saveTip">把下面的存档码复制保存好。换设备 / 清缓存后，用它「导入恢复」即可拿回全部进度。</div>'+
+          '<textarea class="saveArea" id="saveCode" readonly></textarea>';}
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -7930,8 +7932,7 @@ function v5ParseErrText(e){return '解析失败：'+(e&&e.message||e);}
     const isExp = mode === 'export';
     saveBody.innerHTML =
       (isExp
-        ? '<div class="saveTip">把下面的存档码复制保存好。换设备 / 清缓存后，用它「导入恢复」即可拿回全部进度。</div>' +
-          '<textarea class="saveArea" id="saveCode" readonly></textarea>' +
+        ? v5SaveTipHtml() +
           '<div class="saveRow"><button class="ok" id="btnCopyCode">📋 复制存档码</button><button id="btnCloseSave">关闭</button></div>'
         : '<div class="saveTip">粘贴之前导出的存档码，点击「确认恢复」将<b>覆盖</b>当前进度（金币/皮肤/加成/基地/最高分/成就/设置/关卡星级/解锁/生涯/排行榜/周挑战/自制关卡）。此操作不可撤销。</div>' +
           '<textarea class="saveArea import" id="saveCode" placeholder="QTB1.xxxx…"></textarea>' +
@@ -8693,7 +8694,7 @@ function v5ParseErrText(e){return '解析失败：'+(e&&e.message||e);}
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V5.91', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V5.92', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9644,6 +9645,7 @@ function v5ParseErrText(e){return '解析失败：'+(e&&e.message||e);}
       v5HeroBoughtMsgNow: (...a) => v5HeroBoughtMsg(...a),
       v5SaveCodeNow: (...a) => v5SaveCode(...a),
       v5ParseErrTextNow: (...a) => v5ParseErrText(...a),
+      v5SaveTipHtmlNow: (...a) => v5SaveTipHtml(...a),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

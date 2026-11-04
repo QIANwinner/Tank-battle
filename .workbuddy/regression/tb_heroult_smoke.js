@@ -2198,6 +2198,14 @@ async function main() {
     t('U496 存档解析失败文案抽为纯函数边界', o.b === '解析失败：x', JSON.stringify(o));
   } catch(e){ t('U495 存档解析失败文案抽为纯函数',false,e.message); t('U496 存档解析失败文案抽为纯函数边界',false,e.message); }
 
+
+  // ===== U497~U498: 存档备份提示 HTML 抽为纯函数(v5.92) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5SaveTipHtmlNow(),b:T.v5SaveTipHtmlNow()});})()"));
+    t('U497 存档备份提示 HTML 抽为纯函数', o.a.indexOf('saveTip')>=0, JSON.stringify(o));
+    t('U498 存档备份提示 HTML 抽为纯函数边界', o.b.indexOf('saveArea')>=0, JSON.stringify(o));
+  } catch(e){ t('U497 存档备份提示 HTML 抽为纯函数',false,e.message); t('U498 存档备份提示 HTML 抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
