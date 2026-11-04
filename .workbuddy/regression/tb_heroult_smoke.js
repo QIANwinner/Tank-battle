@@ -1734,6 +1734,14 @@ async function main() {
     t('U380 冰蓝描边串抽为纯函数边界', o.b === 'rgba(174,230,255,0)', JSON.stringify(o));
   } catch(e){ t('U379 冰蓝描边串抽为纯函数',false,e.message); t('U380 冰蓝描边串抽为纯函数边界',false,e.message); }
 
+
+  // ===== U381~U382: 白色粒子填充抽为纯函数(v5.34) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5WhiteFillNow(0),b:T.v5WhiteFillNow(20)});})()"));
+    t('U381 白色粒子填充抽为纯函数', o.a === 'rgba(255,255,255,0.75)', JSON.stringify(o));
+    t('U382 白色粒子填充抽为纯函数边界', o.b === 'rgba(255,255,255,0)', JSON.stringify(o));
+  } catch(e){ t('U381 白色粒子填充抽为纯函数',false,e.message); t('U382 白色粒子填充抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
