@@ -1110,6 +1110,14 @@ async function main() {
     t('U224 越界钳制', o.b === '100%', JSON.stringify(o));
   } catch(e){ t('U223 常规音量',false,e.message); t('U224 越界钳制',false,e.message); }
 
+
+  // ===== U225~U226: 音量图标按档位分级抽为纯函数(v4.54) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.volIconTextNow(true,80),b:T.volIconTextNow(false,0)});})()"));
+    t('U225 静音优先', o.a === '🔇', JSON.stringify(o));
+    t('U226 零音量图标', o.b === '🔈', JSON.stringify(o));
+  } catch(e){ t('U225 静音优先',false,e.message); t('U226 零音量图标',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
