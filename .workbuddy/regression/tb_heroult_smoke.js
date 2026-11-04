@@ -550,6 +550,14 @@ async function main() {
     t('U84 负数与非法值兜底为零', o.c === '0' && o.d === '0', JSON.stringify(o));
   } catch(e){ t('U83 HUD 千分位',false,e.message); t('U84 HUD 兜底',false,e.message); }
 
+
+  // ===== U85~U86: 冷却提示(v0.3.74) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cooldownMsgNow('大招',45),b:T.cooldownMsgNow('英雄技',65),c:T.cooldownMsgNow('大招',120)});})()"));
+    t('U85 冷却提示保留技能名与秒数', o.a.indexOf('大招冷却中')>=0 && o.a.indexOf('还需 45秒')>=0, o.a);
+    t('U86 长冷却显示分秒且前缀一致', o.b.indexOf('英雄技冷却中')>=0 && o.b.indexOf('还需 1分5秒')>=0 && o.c.indexOf('还需 2分')>=0, o.b+' | '+o.c);
+  } catch(e){ t('U85 冷却秒数',false,e.message); t('U86 冷却分秒',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
