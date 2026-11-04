@@ -1806,6 +1806,14 @@ async function main() {
     t('U398 商店强化图标 HTML 抽为纯函数边界', o.b.indexOf('⚡')>=0, JSON.stringify(o));
   } catch(e){ t('U397 商店强化图标 HTML 抽为纯函数',false,e.message); t('U398 商店强化图标 HTML 抽为纯函数边界',false,e.message); }
 
+
+  // ===== U399~U400: 皮肤稀有度类名抽为纯函数(v5.43) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5RarClassNow('gold',false),b:T.v5RarClassNow('gold',true)});})()"));
+    t('U399 皮肤稀有度类名抽为纯函数', o.a === 'shopItem rar-gold', JSON.stringify(o));
+    t('U400 皮肤稀有度类名抽为纯函数边界', o.b === 'shopItem rar-gold equipped', JSON.stringify(o));
+  } catch(e){ t('U399 皮肤稀有度类名抽为纯函数',false,e.message); t('U400 皮肤稀有度类名抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
