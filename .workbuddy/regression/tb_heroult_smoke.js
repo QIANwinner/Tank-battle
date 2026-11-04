@@ -1958,6 +1958,14 @@ async function main() {
     t('U436 羁绊行 HTML 抽为纯函数边界', o.b === '<div class="bdRow">', JSON.stringify(o));
   } catch(e){ t('U435 羁绊行 HTML 抽为纯函数',false,e.message); t('U436 羁绊行 HTML 抽为纯函数边界',false,e.message); }
 
+
+  // ===== U437~U438: 羁绊图标 HTML 抽为纯函数(v5.62) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BondIconHtmlNow('🧱'),b:T.v5BondIconHtmlNow('X')});})()"));
+    t('U437 羁绊图标 HTML 抽为纯函数', o.a === '<span class="bdIcon">🧱</span>', JSON.stringify(o));
+    t('U438 羁绊图标 HTML 抽为纯函数边界', o.b.indexOf('X')>=0, JSON.stringify(o));
+  } catch(e){ t('U437 羁绊图标 HTML 抽为纯函数',false,e.message); t('U438 羁绊图标 HTML 抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
