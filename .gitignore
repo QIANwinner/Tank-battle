@@ -29,3 +29,5 @@
 !.workbuddy/regression/tb_bondstorm_smoke.js
 !.workbuddy/regression/tb_tutorial_smoke.js
 !.workbuddy/regression/tb_particlebatch_smoke.js
+!.workbuddy/regression/tb_extras_smoke.js
+!.workbuddy/regression/tb_extras_smoke.js
