@@ -1646,6 +1646,14 @@ async function main() {
     t('U358 白闪遮罩串抽为纯函数边界', o.b === 'rgba(255,255,255,0.340)', JSON.stringify(o));
   } catch(e){ t('U357 白闪遮罩串抽为纯函数',false,e.message); t('U358 白闪遮罩串抽为纯函数边界',false,e.message); }
 
+
+  // ===== U359~U360: BOSS 蓄力橙色描边抽为纯函数(v5.23) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5OrangeStrokeNow(0),b:T.v5OrangeStrokeNow(Math.PI)});})()"));
+    t('U359 BOSS 蓄力橙色描边抽为纯函数', o.a === 'rgba(255,90,0,0.500)', JSON.stringify(o));
+    t('U360 BOSS 蓄力橙色描边抽为纯函数边界', o.b === 'rgba(255,90,0,0.900)', JSON.stringify(o));
+  } catch(e){ t('U359 BOSS 蓄力橙色描边抽为纯函数',false,e.message); t('U360 BOSS 蓄力橙色描边抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
