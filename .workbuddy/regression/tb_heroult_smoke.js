@@ -1134,6 +1134,14 @@ async function main() {
     t('U230 普通入口', o.b === '开始游戏', JSON.stringify(o));
   } catch(e){ t('U229 挑战入口',false,e.message); t('U230 普通入口',false,e.message); }
 
+
+  // ===== U231~U232: 结算标题按胜负抽为纯函数(v4.57) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.resultTitleTextNow(true),b:T.resultTitleTextNow(false)});})()"));
+    t('U231 胜利标题', o.a === '胜 利', JSON.stringify(o));
+    t('U232 失败标题', o.b === '游戏结束', JSON.stringify(o));
+  } catch(e){ t('U231 胜利标题',false,e.message); t('U232 失败标题',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
