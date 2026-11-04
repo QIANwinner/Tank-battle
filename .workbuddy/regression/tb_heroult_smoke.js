@@ -1758,6 +1758,14 @@ async function main() {
     t('U386 紫光填充串抽为纯函数边界', o.b === 'rgba(200,107,255,0)', JSON.stringify(o));
   } catch(e){ t('U385 紫光填充串抽为纯函数',false,e.message); t('U386 紫光填充串抽为纯函数边界',false,e.message); }
 
+
+  // ===== U387~U388: 翠绿描边串抽为纯函数(v5.37) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5GreenStrokeNow(0.9),b:T.v5GreenStrokeNow(0)});})()"));
+    t('U387 翠绿描边串抽为纯函数', o.a === 'rgba(52,211,153,0.9)', JSON.stringify(o));
+    t('U388 翠绿描边串抽为纯函数边界', o.b === 'rgba(52,211,153,0)', JSON.stringify(o));
+  } catch(e){ t('U387 翠绿描边串抽为纯函数',false,e.message); t('U388 翠绿描边串抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
