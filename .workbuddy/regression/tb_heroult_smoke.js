@@ -2438,6 +2438,22 @@ async function main() {
     t('U590 口径与统计条共存不冲突', (o4.full || '').indexOf('🐾 宠物币进度') >= 0 || (o4.none || '').indexOf('🐾 宠物币进度') >= 0, JSON.stringify(o4));
   } catch(e){ for(let k=585;k<=590;k++) t('U'+k+' 成就称号',false,e.message); }
 
+
+  // ===== U591~U596: 签到 7 日进度条(v0.6.13) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.signinCyclePctNow(0),b:T.signinCyclePctNow(1),c:T.signinCyclePctNow(6),d:T.signinCyclePctNow(7)});})()"));
+    t('U591 进度 0/14/86/100', o.a === 0 && o.b === 14 && o.c === 86 && o.d === 100, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.signinCycleTextNow(6),b:T.signinCycleTextNow(7),c:T.signinCycleTextNow('x'),d:T.signinCycleTextNow(-3)});})()"));
+    t('U592 文案与非法输入兜底', o2.a === '连续 6 天 · 本轮 6/7' && o2.b === '连续 7 天 · 本轮 7/7' && o2.c === '连续 0 天 · 本轮 0/7' && o2.d === '连续 0 天 · 本轮 0/7', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.signinRenderNow(-1, 5));})()"));
+    t('U593 进度条 DOM 渲染(第6天=86%)', o3.dom === true && o3.w === '86%', JSON.stringify(o3));
+    t('U594 文案含连续天数', (o3.txt || '').indexOf('连续 6 天') >= 0, o3.txt);
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.signinRenderNow(-1, 6));})()"));
+    t('U595 整轮第7天满格 100%', o4.w === '100%' && (o4.txt || '').indexOf('本轮 7/7') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.signinRenderNow(0, 0));})()"));
+    t('U596 零天数 DOM 与函数一致(0%)', o5.w === '0%' && o5.txt === '连续 0 天 · 本轮 0/7', JSON.stringify(o5));
+  } catch(e){ for(let k=591;k<=596;k++) t('U'+k+' 签到进度条',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
