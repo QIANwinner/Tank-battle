@@ -1761,6 +1761,16 @@
   .signinBarFill { height: 100%; width: 0%; background: linear-gradient(90deg, #002FA7, #00f0ff); border-radius: 7px; transition: width .2s ease; }
   .signinBarTxt { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; text-shadow: 0 0 4px #000; letter-spacing: 1px; }
   #vignette { position: fixed; inset: 0; pointer-events: none; z-index: 12; opacity: 0; background: radial-gradient(ellipse at center, transparent 55%, rgba(255, 30, 60, 0.85) 100%); transition: opacity .3s ease; }
+  .gachaProb { background: rgba(0, 47, 167, 0.22); border: 1px solid rgba(0, 240, 255, 0.35); border-radius: 10px; padding: 8px 10px; margin-bottom: 8px; }
+  .gachaProbTitle { font-size: 11px; font-weight: 800; letter-spacing: 2px; color: #00f0ff; margin-bottom: 5px; }
+  .gachaProbRow { display: flex; align-items: center; justify-content: space-between; font-size: 11px; color: #cfe3ff; padding: 2px 0; }
+  .gachaProbRow b { color: #ffe066; font-variant-numeric: tabular-nums; }
+  #waveDeltaWrap .v { color: #7ee7ff; font-weight: 800; font-size: 11px; }
+  .saveStatBox { border: 1px solid rgba(0, 240, 255, 0.35); border-radius: 9px; background: rgba(0, 47, 167, 0.18); padding: 6px 10px; margin-top: 8px; }
+  .saveStatBox summary { font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #00f0ff; cursor: pointer; }
+  #saveStatBody { font-size: 11px; color: #cfe3ff; padding-top: 5px; font-variant-numeric: tabular-nums; }
+  .swBanner { display: none; position: fixed; top: 10px; left: 50%; transform: translateX(-50%); z-index: 60; background: rgba(0, 47, 167, 0.92); border: 1px solid rgba(0, 240, 255, 0.6); color: #fff; font-size: 12px; font-weight: 700; letter-spacing: 1px; padding: 8px 16px; border-radius: 999px; box-shadow: 0 0 18px rgba(0, 240, 255, 0.4); }
+  .swBanner.show { display: block; }
 </style>
 </head>
 <body>
@@ -1788,6 +1798,8 @@
     <div class="comboBarWrap m-hide" id="comboBarWrap"><div id="comboBarFill"></div></div>
     <div class="pill m-hide" id="milestoneWrap"><span class="k">里程碑</span><span class="v" id="milestoneVal">—</span></div>
     <div id="vignette"></div>
+    <div class="pill m-hide" id="waveDeltaWrap"><span class="k">纪录</span><span class="v" id="waveDeltaVal">—</span></div>
+    <div id="swBanner" class="swBanner"></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1904,6 +1916,7 @@
       <span class="volPct" id="volPct">100%</span>
     </div>
     <div class="settings" id="settings">
+      <details id="saveStatBox" class="saveStatBox"><summary>💾 存档状态（点开刷新）</summary><div id="saveStatBody">—</div></details>
       <details id="keyHintBox"><summary>⌨️ 键位速查</summary><div id="keyHintText"></div></details>
       <div class="setRow coinLogRow"><span class="setLabel">🪙 收支<span class="hint">最近 3 笔</span></span><span id="coinLogText">暂无记录</span></div>
       <div class="setToggle" id="setToggle" role="button" aria-expanded="true">
@@ -2131,7 +2144,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V6.14</div>
+  <div id="mark">DESIGNED BY QIAN · V6.18</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -6942,6 +6955,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const cbf = $('comboBarFill'); if (cbf) cbf.style.width = comboBarWidth() + '%';
     const msV = $('milestoneVal'); if (msV) msV.textContent = milestoneHudText(level, endlessMode);
     const vg = $('vignette'); if (vg) vg.style.opacity = vignetteAlpha(lives, 3);
+    const wdV = $('waveDeltaVal'); if (wdV) wdV.textContent = waveDeltaText(level, bestWave, endlessMode);
     // __EXTRA_HUD__
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
   }
@@ -7006,6 +7020,61 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const m = Math.max(1, Math.floor(Number(maxLives) || 1));
     const a = (m - l) / m;
     return Math.min(0.55, Math.max(0, Math.round(a * 100) / 100));
+  }
+  // —— v0.6.15 抽奖概率公示 ——
+  function gachaProbRows(pool) {
+    if (!Array.isArray(pool) || !pool.length) return '';
+    const total = pool.reduce((s2, x) => s2 + (Number(x && x.w) || 0), 0);
+    if (total <= 0) return '';
+    return pool.map(x => '<div class="gachaProbRow"><span>' + ((x && x.label) || '?') + '</span><b>' + Math.round((Number(x && x.w) || 0) * 1000 / total) / 10 + '%</b></div>').join('');
+  }
+  function gachaProbPanel() {
+    const rows = gachaProbRows(GACHA_POOL);
+    const wrap = document.createElement('div');
+    wrap.className = 'gachaProb';
+    wrap.innerHTML = '<div class="gachaProbTitle">🎲 概率公示（单抽）</div>' + (rows || '<div class="gachaProbRow">暂无数据</div>');
+    return wrap;
+  }
+  // —— v0.6.16 无尽波次纪录对比 ——
+  function waveDeltaText(level, bestWave, endless) {
+    if (!endless) return '—';
+    const lv = Math.max(1, Math.floor(Number(level) || 0));
+    const bw = Math.max(0, Math.floor(Number(bestWave) || 0));
+    if (lv > bw) return '🌊 +' + (lv - bw) + ' 超纪录';
+    if (lv === bw) return '🌊 追平纪录';
+    return '🌊 距纪录 ' + (bw - lv) + ' 波';
+  }
+  // —— v0.6.17 存档状态面板:占用容量与覆盖项数 ——
+  function storageBytes() {
+    try {
+      let n = 0;
+      for (const k in localStorage) {
+        if (Object.prototype.hasOwnProperty.call(localStorage, k)) n += ((localStorage.getItem(k) || '').length + k.length);
+      }
+      return n;
+    } catch (e) { return 0; }
+  }
+  function saveKeyCount() {
+    try { let n = 0; for (const k in localStorage) { if (Object.prototype.hasOwnProperty.call(localStorage, k)) n++; } return n; } catch (e) { return 0; }
+  }
+  function fmtKBText(bytes) {
+    const b = Math.max(0, Math.floor(Number(bytes) || 0));
+    return (b / 1024).toFixed(1) + ' KB';
+  }
+  function saveStatHtml() { return '💾 本地存档占用 ' + fmtKBText(storageBytes()) + ' · 覆盖 ' + saveKeyCount() + ' 项'; }
+  (function bindSaveStat() {
+    const box = document.getElementById('saveStatBox');
+    if (box) box.addEventListener('toggle', () => { const el = document.getElementById('saveStatBody'); if (el) el.textContent = saveStatHtml(); });
+  })();
+  // —— v0.6.18 SW 新版本可用提示 ——
+  function swUpdateText(hasUpdate) {
+    return hasUpdate === true ? '🆕 新版本已就绪 · 刷新页面生效' : '';
+  }
+  function swUpdateFound(force) {
+    if (force !== true && (!navigator.serviceWorker || !navigator.serviceWorker.controller)) return;   // 首次安装不算「新版本」
+    const b = document.getElementById('swBanner');
+    if (b) { b.textContent = swUpdateText(true); b.classList.add('show'); }
+    showToast(swUpdateText(true));
   }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
@@ -7708,6 +7777,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   function renderGacha() {
     shopBody.innerHTML = '';
     shopBody.appendChild(achBadgeRow());
+    shopBody.appendChild(gachaProbPanel());   // —— v0.6.15 概率公示 ——
     const gc = document.createElement('div');
     gc.className = 'gachaCard';
     const afford = coins >= GACHA_COST;
@@ -8815,7 +8885,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V6.14', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V6.18', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9789,6 +9859,10 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       achRankNameNow: (d, t) => achRankName(d, t),
       signinCyclePctNow: (s2) => signinCyclePct(s2), signinCycleTextNow: (s2) => signinCycleText(s2), signinRenderNow: (lastOff, streak) => { signinData = { last: String(dayKey(lastOff | 0)), streak: Math.max(0, streak | 0) }; saveSignin(); renderSignin(); const el = document.getElementById('signinBarFill'); return { dom: !!el, w: el ? el.style.width : null, txt: (document.querySelector('.signinBarTxt') || {}).textContent || '' }; },
       vignetteAlphaNow: (l, m) => vignetteAlpha(l, m), vignetteDomNow: () => { const e = $('vignette'); return e ? e.style.opacity : null; },
+      gachaProbRowsNow: (pool) => gachaProbRows(pool), gachaProbDomNow: () => { const el = document.querySelector('.gachaProb'); return el ? el.textContent : null; },
+      waveDeltaTextNow: (lv, bw, e) => waveDeltaText(lv, bw, e), waveDeltaDomNow: () => { const e = $('waveDeltaVal'); return e ? e.textContent : null; },
+      saveStatHtmlNow: () => saveStatHtml(), saveStatToggleNow: () => { const box = document.getElementById('saveStatBox'); if (box) box.open = true; const el = document.getElementById('saveStatBody'); if (el) el.textContent = saveStatHtml(); return { open: !!(box && box.open), txt: el ? el.textContent : null }; }, storageBytesNow: () => storageBytes(), fmtKBTextNow: (b) => fmtKBText(b),
+      swUpdateTextNow: (v) => swUpdateText(v), swBannerDomNow: () => { const e = $('swBanner'); return e ? { txt: e.textContent, cls: e.className } : null; }, swUpdateSimNow: () => { swUpdateFound(true); const e = $('swBanner'); return e ? { txt: e.textContent, cls: e.className } : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
@@ -10248,7 +10322,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   if ('serviceWorker' in navigator &&
       (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').catch(() => { /* 注册失败不影响游戏 */ });
+      navigator.serviceWorker.register('sw.js').then((reg) => { try { reg.addEventListener('updatefound', () => { swUpdateFound(); }); } catch (e) { /* 忽略 */ } }).catch(() => { /* 注册失败不影响游戏 */ });
     });
   }
 })();

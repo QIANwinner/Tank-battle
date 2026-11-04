@@ -2470,6 +2470,71 @@ async function main() {
     t('U602 DOM 与函数一致', o5.dom === String(o5.f), JSON.stringify(o5));
   } catch(e){ for(let k=597;k<=602;k++) t('U'+k+' 濒死红晕',false,e.message); }
 
+
+  // ===== U603~U608: 抽奖概率公示(v0.6.15) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setShopTab('gacha');T.renderShop();const el=document.querySelector('.gachaProb');const rows=el?el.querySelectorAll('.gachaProbRow').length:0;return JSON.stringify({dom:!!el,rows,txt:el?el.textContent:''});})()"));
+    t('U603 概率面板渲染于抽奖页(5 行)', o.dom === true && o.rows === 5, JSON.stringify(o));
+    t('U604 面板含标题与百分比', (o.txt || '').indexOf('概率公示') >= 0 && (o.txt || '').indexOf('%') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.gachaProbRowsNow([{w:1,label:'a'},{w:3,label:'b'}]));})()"));
+    t('U605 自定义权重 25%/75%', o2.indexOf('25%') >= 0 && o2.indexOf('75%') >= 0, o2);
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.gachaProbRowsNow(null),b:T.gachaProbRowsNow([]),c:T.gachaProbRowsNow([{w:0}])});})()"));
+    t('U606 非法输入返回空串', o3.a === '' && o3.b === '' && o3.c === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.gachaProbRowsNow([{w:5,label:'solo'}]));})()"));
+    t('U607 单项边界 100%', o4.indexOf('100%') >= 0, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const el=document.querySelector('.gachaProb');const first=el?el.querySelector('.gachaProbRow b'):null;return JSON.stringify({txt:el?el.textContent:'',first:first?first.textContent:''});})()"));
+    t('U608 DOM 与函数一致(首行 +600 30%)', (o5.txt || '').indexOf('30%') >= 0 && o5.first === '30%', JSON.stringify(o5));
+  } catch(e){ for(let k=603;k<=608;k++) t('U'+k+' 概率公示',false,e.message); }
+
+
+  // ===== U609~U614: 无尽波次纪录对比(v0.6.16) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setEndless(false);T.extraHudRefreshNow();return JSON.stringify({dom:!!document.getElementById('waveDeltaWrap'),txt:(document.getElementById('waveDeltaVal')||{}).textContent,f:T.waveDeltaTextNow(5,10,false)});})()"));
+    t('U609 纪录 pill 已加入 HUD(非无尽 —)', o.dom === true && o.txt === '—' && o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveDeltaTextNow(13,10,true),b:T.waveDeltaTextNow(8,10,true)});})()"));
+    t('U610 超纪录与距纪录', o2.a === '🌊 +3 超纪录' && o2.b === '🌊 距纪录 2 波', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveDeltaTextNow(10,10,true),b:T.waveDeltaTextNow(1,0,true)});})()"));
+    t('U611 边界追平与首局', o3.a === '🌊 追平纪录' && o3.b === '🌊 +1 超纪录', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveDeltaTextNow('x','y',true),b:T.waveDeltaTextNow(NaN,NaN,true)});})()"));
+    t('U612 非法输入钳制为 1/0(+1 超纪录)', o4.a === '🌊 +1 超纪录' && o4.b === '🌊 +1 超纪录', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setEndless(true);T.setBestWave(0);T.extraHudRefreshNow();const dom=document.getElementById('waveDeltaVal')?document.getElementById('waveDeltaVal').textContent:null;T.setEndless(false);T.extraHudRefreshNow();return JSON.stringify({dom});})()"));
+    t('U613 DOM 与函数一致(无尽 Lv1 +1)', o5.dom === '🌊 +1 超纪录', JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.extraHudRefreshNow();return JSON.stringify({txt:(document.getElementById('waveDeltaVal')||{}).textContent});})()"));
+    t('U614 非无尽恢复灰显', o6.txt === '—', JSON.stringify(o6));
+  } catch(e){ for(let k=609;k<=614;k++) t('U'+k+' 纪录对比',false,e.message); }
+
+
+  // ===== U615~U620: 存档状态面板(v0.6.17) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;const box=document.getElementById('saveStatBox');return JSON.stringify({dom:!!box,sum:box?(box.querySelector('summary')||{}).textContent:null,body:(document.getElementById('saveStatBody')||{}).textContent});})()"));
+    t('U615 存档面板已加入设置页', o.dom === true && (o.sum || '').indexOf('存档状态') >= 0, JSON.stringify(o));
+    t('U616 未展开初值 —', o.body === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.saveStatToggleNow());})()"));
+    t('U617 展开后显示 KB 与覆盖项数', o2.open === true && (o2.txt || '').indexOf('KB') >= 0 && (o2.txt || '').indexOf('覆盖') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.fmtKBTextNow(0),b:T.fmtKBTextNow(2048),c:T.storageBytesNow()});})()"));
+    t('U618 边界 0 与 2KB 换算', o3.a === '0.0 KB' && o3.b === '2.0 KB' && o3.c >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.fmtKBTextNow(NaN),b:T.fmtKBTextNow(-999),c:T.fmtKBTextNow('abc')});})()"));
+    t('U619 非法输入兜底 0.0 KB', o4.a === '0.0 KB' && o4.b === '0.0 KB' && o4.c === '0.0 KB', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({html:T.saveStatHtmlNow(),bytes:T.storageBytesNow()});})()"));
+    t('U620 DOM 与函数一致(KB 值相同)', o5.html.indexOf((o5.bytes / 1024).toFixed(1) + ' KB') >= 0, JSON.stringify(o5));
+  } catch(e){ for(let k=615;k<=620;k++) t('U'+k+' 存档面板',false,e.message); }
+
+
+  // ===== U621~U626: SW 新版本提示(v0.6.18) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;const b=document.getElementById('swBanner');return JSON.stringify({dom:!!b,cls:b?b.className:null,txt:b?b.textContent:null});})()"));
+    t('U621 SW 横幅已加入', o.dom === true, JSON.stringify(o));
+    t('U622 初值隐藏且无文案', o.cls === 'swBanner' && o.txt === '', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.swUpdateTextNow(true),b:T.swUpdateTextNow(false)});})()"));
+    t('U623 正常文案', o2.a === '🆕 新版本已就绪 · 刷新页面生效' && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.swUpdateTextNow(false),b:T.swUpdateTextNow('x'),c:T.swUpdateTextNow(undefined),d:T.swUpdateTextNow(1)});})()"));
+    t('U624 严格 true 才显示(非法兜底空串)', o3.a === '' && o3.b === '' && o3.c === '' && o3.d === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.swUpdateSimNow());})()"));
+    t('U625 模拟 updatefound 横幅弹出', o4.cls === 'swBanner show' && (o4.txt || '').indexOf('新版本') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){return JSON.stringify({sw:typeof navigator.serviceWorker === 'object'});})()"));
+    t('U626 注册 API 可用', o5.sw === true, JSON.stringify(o5));
+  } catch(e){ for(let k=621;k<=626;k++) t('U'+k+' SW提示',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
