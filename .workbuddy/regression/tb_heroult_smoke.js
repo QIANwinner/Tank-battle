@@ -2322,6 +2322,18 @@ async function main() {
     t('U542 面板内文本容器存在', typeof o.b === 'string', String(o.b));
   } catch(e){ for(let k=537;k<=542;k++) t('U'+k+' 键位速查',false,e.message); }
 
+
+  // ===== U543~U548: 当前模式标签(v0.6.5) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('modeWrap'),a:T.modeNameTextNow(),b:T.modeNameHudNow()});})()"));
+    t('U543 模式 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U544 默认模式为标准', o.a === '标准' || ['每日','限时','无尽','自制','双人合作','双人对抗'].indexOf(o.a)>=0, o.a);
+    t('U545 模式名非空', o.a.length > 0, o.a);
+    t('U546 模式名不含未定义', o.a.indexOf('undefined')<0, o.a);
+    t('U547 HUD 与函数一致', o.b === o.a, o.b+' | '+o.a);
+    t('U548 HUD 文本为字符串', typeof o.b === 'string', String(o.b));
+  } catch(e){ for(let k=543;k<=548;k++) t('U'+k+' 模式标签',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
