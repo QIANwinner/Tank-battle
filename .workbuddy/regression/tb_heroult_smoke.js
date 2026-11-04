@@ -1718,6 +1718,14 @@ async function main() {
     t('U376 紫色 hsla 串抽为纯函数边界', o.b === 'hsla(325,100%,70%,0.4)', JSON.stringify(o));
   } catch(e){ t('U375 紫色 hsla 串抽为纯函数',false,e.message); t('U376 紫色 hsla 串抽为纯函数边界',false,e.message); }
 
+
+  // ===== U377~U378: 深色填充串抽为纯函数(v5.32) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5DarkFillNow(0.5),b:T.v5DarkFillNow(0)});})()"));
+    t('U377 深色填充串抽为纯函数', o.a === 'rgba(20,4,46,0.5)', JSON.stringify(o));
+    t('U378 深色填充串抽为纯函数边界', o.b === 'rgba(20,4,46,0)', JSON.stringify(o));
+  } catch(e){ t('U377 深色填充串抽为纯函数',false,e.message); t('U378 深色填充串抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
