@@ -462,6 +462,14 @@ async function main() {
     t('U62 新纪录大额千分位', o.b.indexOf('1,234,567 分')>=0, o.b);
   } catch(e){ t('U61 新纪录小分数',false,e.message); t('U62 新纪录千分位',false,e.message); }
 
+
+  // ===== U63~U64: 模式结算文案(v0.3.63) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.modeSettleMsgNow('daily',true,50,12345),b:T.modeSettleMsgNow('timed',false,23,12345),c:T.modeSettleMsgNow('timed',true,23,999)});})()"));
+    t('U63 每日挑战结算含奖励与余额', o.a.indexOf('每日挑战通关')>=0 && o.a.indexOf('🪙50')>=0 && o.a.indexOf('余额 12,345🪙')>=0, o.a);
+    t('U64 限时冲分含结束态与千分位', o.b.indexOf('限时冲分结束')>=0 && o.b.indexOf('余额 12,345🪙')>=0 && o.c.indexOf('限时冲分完成')>=0, o.b+' | '+o.c);
+  } catch(e){ t('U63 每日结算',false,e.message); t('U64 限时结算',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
