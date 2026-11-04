@@ -910,6 +910,14 @@ async function main() {
     t('U174 损坏 JSON 回退', o.b === 7, JSON.stringify(o));
   } catch(e){ t('U173 合法 JSON',false,e.message); t('U174 损坏 JSON 回退',false,e.message); }
 
+
+  // ===== U175~U176: 僚机血条比例抽为 ratio01 并双向钳制(v0.4.29) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.ratio01Now(0.5),b:T.ratio01Now(2)});})()"));
+    t('U175 正常比例', o.a === 0.5, JSON.stringify(o));
+    t('U176 超 1 钳制', o.b === 1, JSON.stringify(o));
+  } catch(e){ t('U175 正常比例',false,e.message); t('U176 超 1 钳制',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V4.28</div>
+  <div id="mark">DESIGNED BY QIAN · V4.29</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -3985,7 +3985,7 @@
     ctx.fillStyle = 'rgba(0,0,0,0.55)';
     ctx.fillRect(hx, hy, w, 4);
     ctx.fillStyle = wingmanSkin().glow;
-    ctx.fillRect(hx + 0.5, hy + 0.5, (w - 1) * Math.max(0, wingman.hp / wingman.maxHp), 3);
+    ctx.fillRect(hx + 0.5, hy + 0.5, (w - 1) * ratio01(wingman.hp / wingman.maxHp), 3);
     ctx.strokeStyle = 'rgba(126,215,255,0.6)'; ctx.lineWidth = 0.6;
     ctx.strokeRect(hx + 0.5, hy + 0.5, w - 1, 3);
   }
@@ -6737,6 +6737,7 @@ function mapName(s) { return String(s == null ? '' : s).replace(/[<>]/g, '').tri
 function safeInt(v, def) { const n = parseInt(v, 10); return Number.isFinite(n) ? n : (def || 0); }
 function clampNum(v, lo, hi) { const n = Number(v); return Number.isFinite(n) ? Math.max(lo, Math.min(hi, n)) : lo; }
 function safeJson(s, def) { try { const v = JSON.parse(String(s || '')); return v == null ? def : v; } catch (e) { return def; } }
+function ratio01(v) { const n = Number(v); return Number.isFinite(n) ? Math.max(0, Math.min(1, n)) : 0; }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -8545,7 +8546,7 @@ function safeJson(s, def) { try { const v = JSON.parse(String(s || '')); return 
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V4.28', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V4.29', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9340,6 +9341,7 @@ function safeJson(s, def) { try { const v = JSON.parse(String(s || '')); return 
       safeIntNow: (...a) => safeInt(...a),
       clampNumNow: (...a) => clampNum(...a),
       safeJsonNow: (...a) => safeJson(...a),
+      ratio01Now: (...a) => ratio01(...a),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
