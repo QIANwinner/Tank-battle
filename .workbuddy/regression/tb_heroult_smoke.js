@@ -806,6 +806,14 @@ async function main() {
     t('U148 大额千分位', o.b === '共 12,345 局', JSON.stringify(o));
   } catch(e){ t('U147 普通局数',false,e.message); t('U148 大额千分位',false,e.message); }
 
+
+  // ===== U149~U150: 选关页解锁进度抽为纯函数(v0.4.16) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.levelSelSubTextNow(3),b:T.levelSelSubTextNow(12345)});})()"));
+    t('U149 普通关卡数', o.a === '已解锁 3 关', JSON.stringify(o));
+    t('U150 大额千分位', o.b === '已解锁 12,345 关', JSON.stringify(o));
+  } catch(e){ t('U149 普通关卡数',false,e.message); t('U150 大额千分位',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
