@@ -2078,6 +2078,14 @@ async function main() {
     t('U466 宠物解锁标签抽为纯函数边界', o.b === '「」', JSON.stringify(o));
   } catch(e){ t('U465 宠物解锁标签抽为纯函数',false,e.message); t('U466 宠物解锁标签抽为纯函数边界',false,e.message); }
 
+
+  // ===== U467~U468: 宠物购买成功文案抽为纯函数(v5.77) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5PetBoughtMsgNow('🐱','招财猫','金币+10%',1),b:T.v5PetBoughtMsgNow('X','Y','Z',3)});})()"));
+    t('U467 宠物购买成功文案抽为纯函数', o.a === '🐱 招财猫 已购买并跟随！金币+10% ×1', JSON.stringify(o));
+    t('U468 宠物购买成功文案抽为纯函数边界', o.b.indexOf('×3')>=0, JSON.stringify(o));
+  } catch(e){ t('U467 宠物购买成功文案抽为纯函数',false,e.message); t('U468 宠物购买成功文案抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
