@@ -1150,6 +1150,14 @@ async function main() {
     t('U234 普通用关', o.b === '关', JSON.stringify(o));
   } catch(e){ t('U233 无尽用波',false,e.message); t('U234 普通用关',false,e.message); }
 
+
+  // ===== U235~U236: 剩余敌人数抽为纯函数并做非负兜底(v4.59) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.remainingTextNow(10,3,2),b:T.remainingTextNow(2,8,1)});})()"));
+    t('U235 正常余量', o.a === '9', JSON.stringify(o));
+    t('U236 负数归零', o.b === '0', JSON.stringify(o));
+  } catch(e){ t('U235 正常余量',false,e.message); t('U236 负数归零',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
