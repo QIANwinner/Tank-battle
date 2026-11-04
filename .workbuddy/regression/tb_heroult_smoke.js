@@ -846,6 +846,14 @@ async function main() {
     t('U158 未知场景返回空串', o.b === '', JSON.stringify(o));
   } catch(e){ t('U157 挑战场景',false,e.message); t('U158 未知场景返回空串',false,e.message); }
 
+
+  // ===== U159~U160: 结算胜负副标题抽为纯函数(v0.4.21) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.resultSubTextNow(true),b:T.resultSubTextNow(false)});})()"));
+    t('U159 胜利文案', o.a === '基地守住了！', JSON.stringify(o));
+    t('U160 失败文案', o.b === '基地被摧毁了…', JSON.stringify(o));
+  } catch(e){ t('U159 胜利文案',false,e.message); t('U160 失败文案',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
