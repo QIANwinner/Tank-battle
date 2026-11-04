@@ -1590,6 +1590,14 @@ async function main() {
     t('U344 青色冲击波描边串抽为纯函数边界', o.b === 'rgba(0, 229, 255,0.00)', JSON.stringify(o));
   } catch(e){ t('U343 青色冲击波描边串抽为纯函数',false,e.message); t('U344 青色冲击波描边串抽为纯函数边界',false,e.message); }
 
+
+  // ===== U345~U346: 白色描边二次衰减串抽为纯函数(v5.16) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5WhiteStrokeBNow(1),b:T.v5WhiteStrokeBNow(0)});})()"));
+    t('U345 白色描边二次衰减串抽为纯函数', o.a === 'rgba(255,255,255,0.60)', JSON.stringify(o));
+    t('U346 白色描边二次衰减串抽为纯函数边界', o.b === 'rgba(255,255,255,0.00)', JSON.stringify(o));
+  } catch(e){ t('U345 白色描边二次衰减串抽为纯函数',false,e.message); t('U346 白色描边二次衰减串抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
