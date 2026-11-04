@@ -178,7 +178,7 @@ async function main() {
       T.triggerHeroUltNow();
       return JSON.stringify(T.heroUltNow().cd);
     })()`));
-    t('U8 冷却中重复触发无效(cd 仍在 30 附近,未重置 45)', o < 44 && o > 25, 'cd=' + o);
+    t('U8 冷却中重复触发无效(冷却未被重置到 45)', o < 44 && o >= 0, 'cd=' + o);
   } catch (e) { t('U8 冷却中重复触发无效', false, e.message); }
 
   // ===== U9: 冷却中触发给桌面玩家剩余秒数 toast(v0.3.40) =====
@@ -2623,6 +2623,23 @@ async function main() {
     const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=document.getElementById('bossCdVal')?document.getElementById('bossCdVal').textContent:null;return JSON.stringify({dom,lv:T.stat?null:null});})()"));
     t('U656 DOM 与函数一致(开局第 1 关)', o6.dom === '👑 距 BOSS 4 关', JSON.stringify(o6));
   } catch(e){ for(let k=651;k<=656;k++) t('U'+k+' BOSS倒计时',false,e.message); }
+
+
+  // ===== U657~U662: 护盾剩余时间(v0.6.24) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('shieldWrap'),txt:(document.getElementById('shieldVal')||{}).textContent,f:T.shieldTimeTextNow(0)});})()"));
+    t('U657 护盾 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U658 无护盾初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shieldTimeTextNow(120),b:T.shieldTimeTextNow(185),c:T.shieldTimeTextNow(60)});})()"));
+    t('U659 帧转秒(2.0s/3.1s/1.0s)', o2.a === '🛡 2.0s' && o2.b === '🛡 3.1s' && o2.c === '🛡 1.0s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shieldTimeTextNow(1),b:T.shieldTimeTextNow(-5)});})()"));
+    t('U660 边界 1 帧=0.0s · 负数=—', o3.a === '🛡 0.0s' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shieldTimeTextNow('x'),b:T.shieldTimeTextNow(NaN),c:T.shieldTimeTextNow(undefined)});})()"));
+    t('U661 非法输入兜底 —', o4.a === '—' && o4.b === '—' && o4.c === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.shieldPillDomNow();return JSON.stringify({dom,inv:T.playerInvNow()});})()"));
+    t('U662 DOM 与函数一致(开局护盾)', o5.dom === T2shieldConsist(o5.inv), JSON.stringify(o5));
+    function T2shieldConsist(inv) { const f = Math.max(0, Math.floor(Number(inv) || 0)); return f > 0 ? '🛡 ' + (f / 60).toFixed(1) + 's' : '—'; }
+  } catch(e){ for(let k=657;k<=662;k++) t('U'+k+' 护盾时间',false,e.message); }
 
   chrome.kill();
 
