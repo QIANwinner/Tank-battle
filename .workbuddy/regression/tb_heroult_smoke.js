@@ -974,6 +974,14 @@ async function main() {
     t('U190 负值归零', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U189 合法统计值',false,e.message); t('U190 负值归零',false,e.message); }
 
+
+  // ===== U191~U192: 生涯统计解析统一（时长/每日最佳）(v0.4.37) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerNumNow('bad'),b:T.careerNumNow('3.9')});})()"));
+    t('U191 非法值归零', o.a === 0, JSON.stringify(o));
+    t('U192 小数按整数解析', o.b === 3, JSON.stringify(o));
+  } catch(e){ t('U191 非法值归零',false,e.message); t('U192 小数按整数解析',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

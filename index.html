@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V4.36</div>
+  <div id="mark">DESIGNED BY QIAN · V4.37</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -3033,8 +3033,8 @@
     if (c && typeof c === 'object') {
       career.games = careerNum(c.games);
       career.kills = careerNum(c.kills);
-      career.playSec = Math.max(0, parseInt(c.playSec, 10) || 0);
-      career.bestDaily = Math.max(0, parseInt(c.bestDaily, 10) || 0);
+      career.playSec = careerNum(c.playSec);
+      career.bestDaily = careerNum(c.bestDaily);
       career.bestTimed = Math.max(0, parseInt(c.bestTimed, 10) || 0);
       career.bestHard = Math.max(0, parseInt(c.bestHard, 10) || 0);
       career.bestScore = Math.max(0, parseInt(c.bestScore, 10) || 0);
@@ -8553,7 +8553,7 @@ function careerNum(v) { return Math.max(0, safeInt(v, 0)); }
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V4.36', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V4.37', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
