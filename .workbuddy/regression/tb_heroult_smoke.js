@@ -2454,6 +2454,22 @@ async function main() {
     t('U596 零天数 DOM 与函数一致(0%)', o5.w === '0%' && o5.txt === '连续 0 天 · 本轮 0/7', JSON.stringify(o5));
   } catch(e){ for(let k=591;k<=596;k++) t('U'+k+' 签到进度条',false,e.message); }
 
+
+  // ===== U597~U602: 濒死红晕渐强(v0.6.14) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setLives(3);T.extraHudRefreshNow();return JSON.stringify({dom:!!document.getElementById('vignette'),op:T.vignetteDomNow(),a:T.vignetteAlphaNow(3,3)});})()"));
+    t('U597 红晕 DOM 已加入', o.dom === true, JSON.stringify(o));
+    t('U598 满命透明(op=0)', o.op === '0' && o.a === 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setLives(2);T.extraHudRefreshNow();return JSON.stringify({op:T.vignetteDomNow(),a:T.vignetteAlphaNow(2,3)});})()"));
+    t('U599 掉一命渐强(op=0.33)', o2.a === 0.33 && o2.op === '0.33', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setLives(1);T.extraHudRefreshNow();return JSON.stringify({op:T.vignetteDomNow(),a:T.vignetteAlphaNow(1,3)});})()"));
+    t('U600 濒死封顶 0.55', o3.a === 0.55 && o3.op === '0.55', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.vignetteAlphaNow(NaN,3),b:T.vignetteAlphaNow(3,0),c:T.vignetteAlphaNow('x','y')});})()"));
+    t('U601 非法输入兜底(零命=濒死上限)', o4.a === 0.55 && o4.b === 0 && o4.c === 0.55, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setLives(2);T.extraHudRefreshNow();return JSON.stringify({dom:T.vignetteDomNow(),f:T.vignetteAlphaNow(2,3)});})()"));
+    t('U602 DOM 与函数一致', o5.dom === String(o5.f), JSON.stringify(o5));
+  } catch(e){ for(let k=597;k<=602;k++) t('U'+k+' 濒死红晕',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
