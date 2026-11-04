@@ -1334,6 +1334,14 @@ async function main() {
     t('U280 负数归零', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U279 倍率生效',false,e.message); t('U280 负数归零',false,e.message); }
 
+
+  // ===== U281~U282: 宠物币增减抽为 petCoinAdd 非负兜底(v4.82) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petCoinAddNow(10,5),b:T.petCoinAddNow(3,-10)});})()"));
+    t('U281 增加宠物币', o.a === 15, JSON.stringify(o));
+    t('U282 扣减不为负', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U281 增加宠物币',false,e.message); t('U282 扣减不为负',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
