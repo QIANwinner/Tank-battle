@@ -1990,6 +1990,14 @@ async function main() {
     t('U444 羁绊效果说明 HTML 抽为纯函数边界', o.b.indexOf('<em>X</em>')>=0, JSON.stringify(o));
   } catch(e){ t('U443 羁绊效果说明 HTML 抽为纯函数',false,e.message); t('U444 羁绊效果说明 HTML 抽为纯函数边界',false,e.message); }
 
+
+  // ===== U445~U446: 羁绊状态文案抽为纯函数(v5.66) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BondStateTextNow(true),b:T.v5BondStateTextNow(false)});})()"));
+    t('U445 羁绊状态文案抽为纯函数', o.a === '激活中', JSON.stringify(o));
+    t('U446 羁绊状态文案抽为纯函数边界', o.b === '未激活', JSON.stringify(o));
+  } catch(e){ t('U445 羁绊状态文案抽为纯函数',false,e.message); t('U446 羁绊状态文案抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
