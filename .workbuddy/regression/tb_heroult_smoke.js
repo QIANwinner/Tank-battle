@@ -1854,6 +1854,14 @@ async function main() {
     t('U410 基地护墙预览格抽为纯函数边界', o.b === '<div class="bw off"></div>', JSON.stringify(o));
   } catch(e){ t('U409 基地护墙预览格抽为纯函数',false,e.message); t('U410 基地护墙预览格抽为纯函数边界',false,e.message); }
 
+
+  // ===== U411~U412: 基地与宠物等级标签统一抽为纯函数(v5.49) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BaseLvTxtNow(2,false),b:T.v5BaseLvTxtNow(6,true)});})()"));
+    t('U411 基地与宠物等级标签统一抽为纯函数', o.a === 'Lv2', JSON.stringify(o));
+    t('U412 基地与宠物等级标签统一抽为纯函数边界', o.b === 'Lv6·MAX', JSON.stringify(o));
+  } catch(e){ t('U411 基地与宠物等级标签统一抽为纯函数',false,e.message); t('U412 基地与宠物等级标签统一抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
