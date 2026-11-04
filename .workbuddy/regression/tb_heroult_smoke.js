@@ -1662,6 +1662,14 @@ async function main() {
     t('U362 大招光环 hsla 串抽为纯函数边界', o.b === 'hsla(150,100%,70%,0.55)', JSON.stringify(o));
   } catch(e){ t('U361 大招光环 hsla 串抽为纯函数',false,e.message); t('U362 大招光环 hsla 串抽为纯函数边界',false,e.message); }
 
+
+  // ===== U363~U364: 激光 hsla 串抽为纯函数(v5.25) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5HslaBNow(0),b:T.v5HslaBNow(2)});})()"));
+    t('U363 激光 hsla 串抽为纯函数', o.a === 'hsla(0,100%,75%,0.9)', JSON.stringify(o));
+    t('U364 激光 hsla 串抽为纯函数边界', o.b === 'hsla(240,100%,75%,0.9)', JSON.stringify(o));
+  } catch(e){ t('U363 激光 hsla 串抽为纯函数',false,e.message); t('U364 激光 hsla 串抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
