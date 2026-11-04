@@ -1598,6 +1598,14 @@ async function main() {
     t('U346 白色描边二次衰减串抽为纯函数边界', o.b === 'rgba(255,255,255,0.00)', JSON.stringify(o));
   } catch(e){ t('U345 白色描边二次衰减串抽为纯函数',false,e.message); t('U346 白色描边二次衰减串抽为纯函数边界',false,e.message); }
 
+
+  // ===== U347~U348: 粒子合批键抽为纯函数(v5.17) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5ParticleKeyNow('#fff',0.5),b:T.v5ParticleKeyNow('red',0)});})()"));
+    t('U347 粒子合批键抽为纯函数', o.a === '#fff|0.5', JSON.stringify(o));
+    t('U348 粒子合批键抽为纯函数边界', o.b === 'red|0', JSON.stringify(o));
+  } catch(e){ t('U347 粒子合批键抽为纯函数',false,e.message); t('U348 粒子合批键抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
