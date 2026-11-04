@@ -1142,6 +1142,14 @@ async function main() {
     t('U232 失败标题', o.b === '游戏结束', JSON.stringify(o));
   } catch(e){ t('U231 胜利标题',false,e.message); t('U232 失败标题',false,e.message); }
 
+
+  // ===== U233~U234: 无尽模式关卡单位标签抽为纯函数(v4.58) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveTagTextNow(true),b:T.waveTagTextNow(false)});})()"));
+    t('U233 无尽用波', o.a === '波', JSON.stringify(o));
+    t('U234 普通用关', o.b === '关', JSON.stringify(o));
+  } catch(e){ t('U233 无尽用波',false,e.message); t('U234 普通用关',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
