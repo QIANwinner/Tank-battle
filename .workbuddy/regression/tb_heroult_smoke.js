@@ -2190,6 +2190,14 @@ async function main() {
     t('U494 存档码前缀抽为纯函数边界', o.b.indexOf('QTB1.')===0, JSON.stringify(o));
   } catch(e){ t('U493 存档码前缀抽为纯函数',false,e.message); t('U494 存档码前缀抽为纯函数边界',false,e.message); }
 
+
+  // ===== U495~U496: 存档解析失败文案抽为纯函数(v5.91) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5ParseErrTextNow({message:'bad'}),b:T.v5ParseErrTextNow('x')});})()"));
+    t('U495 存档解析失败文案抽为纯函数', o.a === '解析失败：bad', JSON.stringify(o));
+    t('U496 存档解析失败文案抽为纯函数边界', o.b === '解析失败：x', JSON.stringify(o));
+  } catch(e){ t('U495 存档解析失败文案抽为纯函数',false,e.message); t('U496 存档解析失败文案抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
