@@ -1942,6 +1942,14 @@ async function main() {
     t('U432 僚机皮肤状态文案抽为纯函数边界', o.b === '🪙 12,345', JSON.stringify(o));
   } catch(e){ t('U431 僚机皮肤状态文案抽为纯函数',false,e.message); t('U432 僚机皮肤状态文案抽为纯函数边界',false,e.message); }
 
+
+  // ===== U433~U434: 僚机皮肤按钮 HTML 抽为纯函数(v5.60) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5WskinBtnHtmlNow(true,true,0),b:T.v5WskinBtnHtmlNow(false,false,880)});})()"));
+    t('U433 僚机皮肤按钮 HTML 抽为纯函数', o.a.indexOf('已装备')>=0, JSON.stringify(o));
+    t('U434 僚机皮肤按钮 HTML 抽为纯函数边界', o.b.indexOf('🪙 购买 880')>=0, JSON.stringify(o));
+  } catch(e){ t('U433 僚机皮肤按钮 HTML 抽为纯函数',false,e.message); t('U434 僚机皮肤按钮 HTML 抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
