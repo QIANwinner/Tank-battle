@@ -1518,6 +1518,14 @@ async function main() {
     t('U326 关卡开场文案抽为纯函数边界', o.b === '第 5 关 · 硬核', JSON.stringify(o));
   } catch(e){ t('U325 关卡开场文案抽为纯函数',false,e.message); t('U326 关卡开场文案抽为纯函数边界',false,e.message); }
 
+
+  // ===== U327~U328: 过关奖励飘字抽为纯函数(v5.7) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5LevelBonusTextNow(80),b:T.v5LevelBonusTextNow(12345)});})()"));
+    t('U327 过关奖励飘字抽为纯函数', o.a === '+80', JSON.stringify(o));
+    t('U328 过关奖励飘字抽为纯函数边界', o.b === '+12,345', JSON.stringify(o));
+  } catch(e){ t('U327 过关奖励飘字抽为纯函数',false,e.message); t('U328 过关奖励飘字抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
