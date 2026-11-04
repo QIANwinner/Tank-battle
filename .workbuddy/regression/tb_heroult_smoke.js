@@ -1486,6 +1486,14 @@ async function main() {
     t('U318 白色描边透明度串抽为纯函数边界', o.b === 'rgba(255,255,255,0.000)', JSON.stringify(o));
   } catch(e){ t('U317 白色描边透明度串抽为纯函数',false,e.message); t('U318 白色描边透明度串抽为纯函数边界',false,e.message); }
 
+
+  // ===== U319~U320: 金币飘字抽为纯函数(v5.3) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5CoinGainTextNow(80),b:T.v5CoinGainTextNow(12345)});})()"));
+    t('U319 金币飘字抽为纯函数', o.a === '+80🪙', JSON.stringify(o));
+    t('U320 金币飘字抽为纯函数边界', o.b === '+12,345🪙', JSON.stringify(o));
+  } catch(e){ t('U319 金币飘字抽为纯函数',false,e.message); t('U320 金币飘字抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
