@@ -100,14 +100,14 @@ async function main() {
     t('T1 引导显示', o.shown === true && o.done === false, JSON.stringify(o));
   } catch (e) { t('T1 引导显示', false, e.message); }
 
-  // ===== T2: tutBody 含宠物/英雄/羁绊系统说明(桌面版) =====
+  // ===== T2: tutBody 含宠物/英雄/羁绊/每日挑战/商店系统说明(桌面版) =====
   try {
     const o = JSON.parse(await ev(`(async () => {
       const T = window.__tbTest;
       const b = T.tutorialBodyNow();
-      return JSON.stringify({ has: !!(b && /宠物/.test(b) && /英雄/.test(b) && /羁绊/.test(b)), len: (b || '').length });
+      return JSON.stringify({ has: !!(b && /宠物/.test(b) && /英雄/.test(b) && /羁绊/.test(b) && /每日挑战/.test(b) && /商店/.test(b)), len: (b || '').length });
     })()`));
-    t('T2 引导含宠物/英雄/羁绊说明', o.has === true && o.len > 0, JSON.stringify(o));
+    t('T2 引导含宠物/英雄/羁绊/每日挑战/商店说明', o.has === true && o.len > 0, JSON.stringify(o));
   } catch (e) { t('T2 引导含系统说明', false, e.message); }
 
   // ===== T3: 触屏版引导同样含系统说明(html.touch 类切换) =====
@@ -118,7 +118,7 @@ async function main() {
       T.resetTutorial(); T.showTutorial();
       const b = T.tutorialBodyNow();
       document.documentElement.classList.remove('touch');
-      return JSON.stringify({ has: !!(b && /宠物/.test(b) && /英雄/.test(b) && /羁绊/.test(b)), len: (b || '').length });
+      return JSON.stringify({ has: !!(b && /宠物/.test(b) && /英雄/.test(b) && /羁绊/.test(b) && /每日挑战/.test(b) && /商店/.test(b)), len: (b || '').length });
     })()`));
     t('T3 触屏引导含系统说明', o.has === true && o.len > 0, JSON.stringify(o));
   } catch (e) { t('T3 触屏引导含系统说明', false, e.message); }
