@@ -1366,6 +1366,14 @@ async function main() {
     t('U288 超满钳制', o.b === 1, JSON.stringify(o));
   } catch(e){ t('U287 正常比例',false,e.message); t('U288 超满钳制',false,e.message); }
 
+
+  // ===== U289~U290: 生涯页与战绩图命中率统一为 carAccText(v4.86) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.carAccTextNow(3,4),b:T.carAccTextNow(9,0)});})()"));
+    t('U289 正常命中率', o.a === 75, JSON.stringify(o));
+    t('U290 零分母兜底', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U289 正常命中率',false,e.message); t('U290 零分母兜底',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
