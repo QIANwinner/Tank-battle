@@ -2310,6 +2310,18 @@ async function main() {
     t('U536 大额千分位进入 DOM', typeof o.f === 'string', String(o.f));
   } catch(e){ for(let k=531;k<=536;k++) t('U'+k+' 金币流水',false,e.message); }
 
+
+  // ===== U537~U542: 键位速查(v0.6.4) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('keyHintBox'),tag:document.getElementById('keyHintBox')?document.getElementById('keyHintBox').tagName:'',a:T.keyHintTextNow(),b:T.keyHintDomNow()});})()"));
+    t('U537 折叠面板已加入设置页', o.dom === true, JSON.stringify(o));
+    t('U538 使用 details 语义标签', o.tag === 'DETAILS', o.tag);
+    t('U539 含移动键位', o.a.indexOf('WASD')>=0 && o.a.indexOf('方向键')>=0, o.a);
+    t('U540 含开火与大招键位', o.a.indexOf('空格')>=0 && o.a.indexOf('E 近战')>=0 && o.a.indexOf('B 英雄技')>=0, o.a);
+    t('U541 含暂停与静音键位', o.a.indexOf('P 暂停')>=0 && o.a.indexOf('M 静音')>=0, o.a);
+    t('U542 面板内文本容器存在', typeof o.b === 'string', String(o.b));
+  } catch(e){ for(let k=537;k<=542;k++) t('U'+k+' 键位速查',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
