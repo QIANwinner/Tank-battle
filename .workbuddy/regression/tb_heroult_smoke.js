@@ -2486,6 +2486,23 @@ async function main() {
     t('U608 DOM 与函数一致(首行 +600 30%)', (o5.txt || '').indexOf('30%') >= 0 && o5.first === '30%', JSON.stringify(o5));
   } catch(e){ for(let k=603;k<=608;k++) t('U'+k+' 概率公示',false,e.message); }
 
+
+  // ===== U609~U614: 无尽波次纪录对比(v0.6.16) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setEndless(false);T.extraHudRefreshNow();return JSON.stringify({dom:!!document.getElementById('waveDeltaWrap'),txt:(document.getElementById('waveDeltaVal')||{}).textContent,f:T.waveDeltaTextNow(5,10,false)});})()"));
+    t('U609 纪录 pill 已加入 HUD(非无尽 —)', o.dom === true && o.txt === '—' && o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveDeltaTextNow(13,10,true),b:T.waveDeltaTextNow(8,10,true)});})()"));
+    t('U610 超纪录与距纪录', o2.a === '🌊 +3 超纪录' && o2.b === '🌊 距纪录 2 波', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveDeltaTextNow(10,10,true),b:T.waveDeltaTextNow(1,0,true)});})()"));
+    t('U611 边界追平与首局', o3.a === '🌊 追平纪录' && o3.b === '🌊 +1 超纪录', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveDeltaTextNow('x','y',true),b:T.waveDeltaTextNow(NaN,NaN,true)});})()"));
+    t('U612 非法输入钳制为 1/0(+1 超纪录)', o4.a === '🌊 +1 超纪录' && o4.b === '🌊 +1 超纪录', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setEndless(true);T.setBestWave(0);T.extraHudRefreshNow();const dom=document.getElementById('waveDeltaVal')?document.getElementById('waveDeltaVal').textContent:null;T.setEndless(false);T.extraHudRefreshNow();return JSON.stringify({dom});})()"));
+    t('U613 DOM 与函数一致(无尽 Lv1 +1)', o5.dom === '🌊 +1 超纪录', JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.extraHudRefreshNow();return JSON.stringify({txt:(document.getElementById('waveDeltaVal')||{}).textContent});})()"));
+    t('U614 非无尽恢复灰显', o6.txt === '—', JSON.stringify(o6));
+  } catch(e){ for(let k=609;k<=614;k++) t('U'+k+' 纪录对比',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
