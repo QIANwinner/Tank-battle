@@ -702,6 +702,14 @@ async function main() {
     t('U122 越界钳制为满星', o.b === '评级 ★★★', JSON.stringify(o));
   } catch(e){ t('U121 二星补空心',false,e.message); t('U122 越界钳制为满星',false,e.message); }
 
+
+  // ===== U123~U124: 连击显示抽为纯函数并做数值兜底(v0.4.3) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboTextNow(2),b:T.comboTextNow(12345)});})()"));
+    t('U123 普通连击', o.a === '×2', JSON.stringify(o));
+    t('U124 大额千分位', o.b === '×12,345', JSON.stringify(o));
+  } catch(e){ t('U123 普通连击',false,e.message); t('U124 大额千分位',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
