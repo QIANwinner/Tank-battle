@@ -718,6 +718,14 @@ async function main() {
     t('U126 大额千分位', o.b === '🪙 花 12,345 金币复活基地', JSON.stringify(o));
   } catch(e){ t('U125 小额原样',false,e.message); t('U126 大额千分位',false,e.message); }
 
+
+  // ===== U127~U128: 结算页波次与关卡提示抽为纯函数(v0.4.5) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveTipTextNow(true,8),b:T.waveTipTextNow(false,5)});})()"));
+    t('U127 无尽显示波', o.a === '无尽模式 · 到达第 8 波', JSON.stringify(o));
+    t('U128 普通显示关', o.b === '达到第 5 关', JSON.stringify(o));
+  } catch(e){ t('U127 无尽显示波',false,e.message); t('U128 普通显示关',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
