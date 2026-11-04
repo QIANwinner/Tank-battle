@@ -902,6 +902,14 @@ async function main() {
     t('U172 非法值回退下界', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U171 上界钳制',false,e.message); t('U172 非法值回退下界',false,e.message); }
 
+
+  // ===== U173~U174: 存档 JSON 解析统一为 safeJson 容错(v0.4.28) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.safeJsonNow(JSON.stringify({a:1}),{}).a,b:T.safeJsonNow('{bad',7)});})()"));
+    t('U173 合法 JSON', o.a === 1, JSON.stringify(o));
+    t('U174 损坏 JSON 回退', o.b === 7, JSON.stringify(o));
+  } catch(e){ t('U173 合法 JSON',false,e.message); t('U174 损坏 JSON 回退',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
