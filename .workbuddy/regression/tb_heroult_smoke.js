@@ -2134,6 +2134,14 @@ async function main() {
     t('U480 抽奖箱统计文案抽为纯函数边界', o.b === '已抽 12,345 次 · 余额 🪙12,345', JSON.stringify(o));
   } catch(e){ t('U479 抽奖箱统计文案抽为纯函数',false,e.message); t('U480 抽奖箱统计文案抽为纯函数边界',false,e.message); }
 
+
+  // ===== U481~U482: 抽奖按钮 HTML 抽为纯函数(v5.84) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5GachaBtnHtmlNow(true,200),b:T.v5GachaBtnHtmlNow(false,200)});})()"));
+    t('U481 抽奖按钮 HTML 抽为纯函数', o.a === '<button class="gachaBtn" >🎲 抽奖 200</button>', JSON.stringify(o));
+    t('U482 抽奖按钮 HTML 抽为纯函数边界', o.b.indexOf('disabled')>=0, JSON.stringify(o));
+  } catch(e){ t('U481 抽奖按钮 HTML 抽为纯函数',false,e.message); t('U482 抽奖按钮 HTML 抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
