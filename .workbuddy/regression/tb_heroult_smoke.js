@@ -1190,6 +1190,14 @@ async function main() {
     t('U244 下界钳制', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U243 上界钳制',false,e.message); t('U244 下界钳制',false,e.message); }
 
+
+  // ===== U245~U246: BGM 音量加载统一为 clampVol(v4.64) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.guardBgmVolNow(0.6),b:T.guardBgmVolNow(NaN)});})()"));
+    t('U245 合法值保持', o.a === 0.6, JSON.stringify(o));
+    t('U246 非法值回退', o.b === 1, JSON.stringify(o));
+  } catch(e){ t('U245 合法值保持',false,e.message); t('U246 非法值回退',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
