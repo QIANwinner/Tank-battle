@@ -1294,6 +1294,14 @@ async function main() {
     t('U270 负数归零', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U269 小数向上取整',false,e.message); t('U270 负数归零',false,e.message); }
 
+
+  // ===== U271~U272: 主题渐变索引抽为 themeIdxOf(v4.77) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.themeIdxOfNow(11),b:T.themeIdxOfNow(0)});})()"));
+    t('U271 常规索引', o.a === 10, JSON.stringify(o));
+    t('U272 零值下限保护', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U271 常规索引',false,e.message); t('U272 零值下限保护',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
