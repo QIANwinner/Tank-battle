@@ -734,6 +734,14 @@ async function main() {
     t('U130 普通标题', o.b === '第 <b>5</b> 关 · 通关', JSON.stringify(o));
   } catch(e){ t('U129 无尽标题',false,e.message); t('U130 普通标题',false,e.message); }
 
+
+  // ===== U131~U132: 结算用时文本抽为纯函数并做非负兜底(v0.4.7) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lvTimeTextNow(12.9),b:T.lvTimeTextNow(-3)});})()"));
+    t('U131 小数取整', o.a === '12s', JSON.stringify(o));
+    t('U132 负数兜底', o.b === '0s', JSON.stringify(o));
+  } catch(e){ t('U131 小数取整',false,e.message); t('U132 负数兜底',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
