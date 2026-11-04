@@ -2286,6 +2286,18 @@ async function main() {
     t('U524 HUD 文本可读', typeof o.e === 'string', String(o.e));
   } catch(e){ for(let k=519;k<=524;k++) t('U'+k+' 道具状态',false,e.message); }
 
+
+  // ===== U525~U530: 下个 BOSS 提示(v0.6.2) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossSoonWrap'),a:T.nextBossInNow(1),b:T.nextBossInNow(4),c:T.nextBossInNow(5),d:T.bossSoonTextNow(4),e:T.bossSoonTextNow(0),h:T.bossSoonHudNow()});})()"));
+    t('U525 BOSS 提示 pill 已加入', o.dom === true, JSON.stringify(o));
+    t('U526 第1关距 BOSS 4 关', o.a === 4, String(o.a));
+    t('U527 第4关距 BOSS 1 关', o.b === 1, String(o.b));
+    t('U528 第5关后距 BOSS 5 关', o.c === 5, String(o.c));
+    t('U529 临界关显示警告', o.d === '⚠ 下关 BOSS', o.d);
+    t('U530 非法关卡不崩且 HUD 有值', o.e.indexOf('BOSS')>=0 && typeof o.h === 'string', o.e+' | '+o.h);
+  } catch(e){ for(let k=525;k<=530;k++) t('U'+k+' BOSS提示',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
