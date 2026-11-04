@@ -590,6 +590,14 @@ async function main() {
     t('U94 战绩图失败/成功口径分明', o.c.indexOf('⚠ 战绩图生成失败 · 先打一局再来生成')>=0 && o.d === '✅ 战绩图已生成', o.c+' | '+o.d);
   } catch(e){ t('U93 环境提示',false,e.message); t('U94 战绩图提示',false,e.message); }
 
+
+  // ===== U95~U96: 每日挑战提示(v0.3.79) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dailyIntroMsgNow(3,7),b:T.dailyIntroMsgNow(11,24),c:T.dailyModMsgNow('钢铁防线')});})()"));
+    t('U95 日期补零且格式统一', o.a.indexOf('03/07')>=0 && o.b.indexOf('11/24')>=0 && o.a.indexOf('全网同图')>=0, o.a+' | '+o.b);
+    t('U96 词条提示标明今日', o.c.indexOf('⚡ 今日词条 · 钢铁防线')>=0, o.c);
+  } catch(e){ t('U95 每日日期',false,e.message); t('U96 今日词条',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
