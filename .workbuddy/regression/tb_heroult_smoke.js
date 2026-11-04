@@ -2629,6 +2629,21 @@ async function main() {
 
 
 
+
+  // ===== U675~U680: 强化总等级 pill(v0.6.27) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('upgPillWrap'),f:T.upgTotalTextNow(0)});})()"));
+    t('U675 强化 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U676 零强化初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.upgTotalTextNow(3),b:T.upgTotalTextNow(1)});})()"));
+    t('U677 正常值 ×3/×1', o2.a === '⚡ ×3' && o2.b === '⚡ ×1', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.upgTotalTextNow(-5),b:T.upgTotalTextNow(NaN)});})()"));
+    t('U678 非法输入兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.upgPillDomNow(),total:T.upgTotalNow()});})()"));
+    t('U679 DOM 与函数一致(新局 total=0)', o4.dom === '—' && o4.total === 0, JSON.stringify(o4));
+    t('U680 类型一致(number)', typeof o4.total === 'number', String(o4.total));
+  } catch(e){ for(let k=675;k<=680;k++) t('U'+k+' 强化pill',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
