@@ -2046,6 +2046,14 @@ async function main() {
     t('U458 宠物名称 HTML 抽为纯函数边界', o.b.indexOf('rar legendary')>=0, JSON.stringify(o));
   } catch(e){ t('U457 宠物名称 HTML 抽为纯函数',false,e.message); t('U458 宠物名称 HTML 抽为纯函数边界',false,e.message); }
 
+
+  // ===== U459~U460: 宠物描述 HTML 抽为纯函数(v5.73) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5PetDescHtmlNow('A',false,false,'','').x,b:T.v5PetDescHtmlNow('A',true,false,'N','B')});})()"));
+    t('U459 宠物描述 HTML 抽为纯函数', o.a === undefined, JSON.stringify(o));
+    t('U460 宠物描述 HTML 抽为纯函数边界', o.b.indexOf('A · NB')>=0, JSON.stringify(o));
+  } catch(e){ t('U459 宠物描述 HTML 抽为纯函数',false,e.message); t('U460 宠物描述 HTML 抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
