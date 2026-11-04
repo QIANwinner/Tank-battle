@@ -766,6 +766,14 @@ async function main() {
     t('U138 大额千分位', o.b === '🌊 无尽模式 · 最高 12,345 波', JSON.stringify(o));
   } catch(e){ t('U137 无纪录不附加',false,e.message); t('U138 大额千分位',false,e.message); }
 
+
+  // ===== U139~U140: 成就数量文本抽为纯函数(v0.4.11) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.achCountTextNow(7,20),b:T.achCountTextNow(12345,20000)});})()"));
+    t('U139 普通进度', o.a === '7/20', JSON.stringify(o));
+    t('U140 大额千分位', o.b === '12,345/20,000', JSON.stringify(o));
+  } catch(e){ t('U139 普通进度',false,e.message); t('U140 大额千分位',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
