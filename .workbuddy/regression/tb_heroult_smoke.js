@@ -1062,6 +1062,14 @@ async function main() {
     t('U212 分秒与说明齐全', o.b.indexOf('1分5秒')>=0 && o.b.indexOf('分数越高奖励越多')>=0, JSON.stringify(o));
   } catch(e){ t('U211 整分显示',false,e.message); t('U212 分秒与说明齐全',false,e.message); }
 
+
+  // ===== U213~U214: 英雄技不可用提示抽为纯函数(v0.4.48) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.heroDisabledMsgNow(),b:T.heroDisabledMsgNow()});})()"));
+    t('U213 适用范围说明齐全', o.a.indexOf('单人局')>=0 && o.a.indexOf('已选英雄')>=0, JSON.stringify(o));
+    t('U214 统一禁止前缀', o.b.indexOf('🚫')===0, JSON.stringify(o));
+  } catch(e){ t('U213 适用范围说明齐全',false,e.message); t('U214 统一禁止前缀',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
