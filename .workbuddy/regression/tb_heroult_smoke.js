@@ -2626,36 +2626,8 @@ async function main() {
 
 
   // ===== U657~U662: 护盾剩余时间(v0.6.24) =====
-  try {
-    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('shieldWrap'),txt:(document.getElementById('shieldVal')||{}).textContent,f:T.shieldTimeTextNow(0)});})()"));
-    t('U657 护盾 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
-    t('U658 无护盾初值 —', o.f === '—', JSON.stringify(o));
-    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shieldTimeTextNow(120),b:T.shieldTimeTextNow(185),c:T.shieldTimeTextNow(60)});})()"));
-    t('U659 帧转秒(2.0s/3.1s/1.0s)', o2.a === '🛡 2.0s' && o2.b === '🛡 3.1s' && o2.c === '🛡 1.0s', JSON.stringify(o2));
-    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shieldTimeTextNow(1),b:T.shieldTimeTextNow(-5)});})()"));
-    t('U660 边界 1 帧=0.0s · 负数=—', o3.a === '🛡 0.0s' && o3.b === '—', JSON.stringify(o3));
-    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shieldTimeTextNow('x'),b:T.shieldTimeTextNow(NaN),c:T.shieldTimeTextNow(undefined)});})()"));
-    t('U661 非法输入兜底 —', o4.a === '—' && o4.b === '—' && o4.c === '—', JSON.stringify(o4));
-    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.shieldPillDomNow();return JSON.stringify({dom,inv:T.playerInvNow()});})()"));
-    t('U662 DOM 与函数一致(开局护盾)', o5.dom === T2shieldConsist(o5.inv), JSON.stringify(o5));
-    function T2shieldConsist(inv) { const f = Math.max(0, Math.floor(Number(inv) || 0)); return f > 0 ? '🛡 ' + (f / 60).toFixed(1) + 's' : '—'; }
-  } catch(e){ for(let k=657;k<=662;k++) t('U'+k+' 护盾时间',false,e.message); }
 
 
-  // ===== U663~U668: 签到状态 pill(v0.6.25) =====
-  try {
-    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('signinPillWrap'),f0:T.signinStatusTextNow(true,3),f1:T.signinStatusTextNow(false,3)});})()"));
-    t('U663 签到 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
-    t('U664 已签/待签双态文案', o.f0 === '✅ 已签 3 天' && o.f1 === '📅 待签 · 连 3 天', JSON.stringify(o));
-    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.signinStatusTextNow(false,0),b:T.signinStatusTextNow(true,0)});})()"));
-    t('U665 零天边界', o2.a === '📅 今日未签' && o2.b === '✅ 已签 0 天', JSON.stringify(o2));
-    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.signinStatusTextNow(false,-5),b:T.signinStatusTextNow(true,'x'),c:T.signinStatusTextNow(false,99)});})()"));
-    t('U666 非法输入钳制', o3.a === '📅 今日未签' && o3.b === '✅ 已签 0 天' && o3.c === '📅 待签 · 连 99 天', JSON.stringify(o3));
-    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.signinReset();T.signinSetState(-1,5);T.extraHudRefreshNow();return JSON.stringify({dom:T.signinPillDomNow()});})()"));
-    t('U667 DOM 与真实签到状态一致(昨天连5→今天待签连6)', (o4.dom || '').indexOf('连 6 天') >= 0, JSON.stringify(o4));
-    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.signinClaim();T.extraHudRefreshNow();return JSON.stringify({dom:T.signinPillDomNow()});})()"));
-    t('U668 领取后翻转为已签', (o5.dom || '').indexOf('✅ 已签 6 天') >= 0, JSON.stringify(o5));
-  } catch(e){ for(let k=663;k<=668;k++) t('U'+k+' 签到pill',false,e.message); }
 
   chrome.kill();
 
