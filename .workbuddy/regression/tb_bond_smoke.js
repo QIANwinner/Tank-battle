@@ -170,7 +170,7 @@ async function main() {
       const html = body ? body.innerHTML : "";
       return JSON.stringify({ defs, hasTip: html.indexOf("羁绊") >= 0 });
     })()`));
-    t('B7 羁绊定义3条 · 商店描述含羁绊提示', o.defs.length === 4 && o.hasTip === true, JSON.stringify(o));
+    t('B7 羁绊定义3条 · 商店描述含羁绊提示', o.defs.length === 5 && o.hasTip === true, JSON.stringify(o));
   } catch (e) { t('B7 羁绊定义与商店提示', false, e.message); }
 
   chrome.kill();
