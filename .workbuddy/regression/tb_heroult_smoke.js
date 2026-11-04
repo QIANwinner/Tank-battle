@@ -1606,6 +1606,14 @@ async function main() {
     t('U348 粒子合批键抽为纯函数边界', o.b === 'red|0', JSON.stringify(o));
   } catch(e){ t('U347 粒子合批键抽为纯函数',false,e.message); t('U348 粒子合批键抽为纯函数边界',false,e.message); }
 
+
+  // ===== U349~U350: BOSS 血条文字抽为纯函数(v5.18) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BossHudTextNow(5,'重甲',10,20,false),b:T.v5BossHudTextNow(5,'重甲',10,20,true)});})()"));
+    t('U349 BOSS 血条文字抽为纯函数', o.a === 'LV.5 重甲  10 / 20', JSON.stringify(o));
+    t('U350 BOSS 血条文字抽为纯函数边界', o.b.indexOf('⚡狂暴')>=0, JSON.stringify(o));
+  } catch(e){ t('U349 BOSS 血条文字抽为纯函数',false,e.message); t('U350 BOSS 血条文字抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
