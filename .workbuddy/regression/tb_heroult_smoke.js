@@ -1654,6 +1654,14 @@ async function main() {
     t('U360 BOSS 蓄力橙色描边抽为纯函数边界', o.b === 'rgba(255,90,0,0.900)', JSON.stringify(o));
   } catch(e){ t('U359 BOSS 蓄力橙色描边抽为纯函数',false,e.message); t('U360 BOSS 蓄力橙色描边抽为纯函数边界',false,e.message); }
 
+
+  // ===== U361~U362: 大招光环 hsla 串抽为纯函数(v5.24) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5HslaANow(0,0),b:T.v5HslaANow(1,1)});})()"));
+    t('U361 大招光环 hsla 串抽为纯函数', o.a === 'hsla(0,100%,70%,0.55)', JSON.stringify(o));
+    t('U362 大招光环 hsla 串抽为纯函数边界', o.b === 'hsla(150,100%,70%,0.55)', JSON.stringify(o));
+  } catch(e){ t('U361 大招光环 hsla 串抽为纯函数',false,e.message); t('U362 大招光环 hsla 串抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
