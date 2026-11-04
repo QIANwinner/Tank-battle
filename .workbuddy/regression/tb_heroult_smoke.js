@@ -1462,6 +1462,806 @@ async function main() {
     t('U312 损坏存档回退空榜', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U311 过滤无效记录',false,e.message); t('U312 损坏存档回退空榜',false,e.message); }
 
+
+  // ===== U313~U314: rgba 颜色串抽为纯函数(v5.0) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5RgbaStrNow(1,2,3,0.5),b:T.v5RgbaStrNow(0,0,0,1)});})()"));
+    t('U313 rgba 颜色串抽为纯函数', o.a === 'rgba(1,2,3,0.5)', JSON.stringify(o));
+    t('U314 rgba 颜色串抽为纯函数边界', o.b === 'rgba(0,0,0,1)', JSON.stringify(o));
+  } catch(e){ t('U313 rgba 颜色串抽为纯函数',false,e.message); t('U314 rgba 颜色串抽为纯函数边界',false,e.message); }
+
+
+  // ===== U315~U316: 网格坐标键抽为纯函数(v5.1) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5GridKeyNow(3,7),b:T.v5GridKeyNow(0,0)});})()"));
+    t('U315 网格坐标键抽为纯函数', o.a === '3,7', JSON.stringify(o));
+    t('U316 网格坐标键抽为纯函数边界', o.b === '0,0', JSON.stringify(o));
+  } catch(e){ t('U315 网格坐标键抽为纯函数',false,e.message); t('U316 网格坐标键抽为纯函数边界',false,e.message); }
+
+
+  // ===== U317~U318: 白色描边透明度串抽为纯函数(v5.2) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5WhiteStrokeANow(0.5),b:T.v5WhiteStrokeANow(0)});})()"));
+    t('U317 白色描边透明度串抽为纯函数', o.a === 'rgba(255,255,255,0.425)', JSON.stringify(o));
+    t('U318 白色描边透明度串抽为纯函数边界', o.b === 'rgba(255,255,255,0.000)', JSON.stringify(o));
+  } catch(e){ t('U317 白色描边透明度串抽为纯函数',false,e.message); t('U318 白色描边透明度串抽为纯函数边界',false,e.message); }
+
+
+  // ===== U319~U320: 金币飘字抽为纯函数(v5.3) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5CoinGainTextNow(80),b:T.v5CoinGainTextNow(12345)});})()"));
+    t('U319 金币飘字抽为纯函数', o.a === '+80🪙', JSON.stringify(o));
+    t('U320 金币飘字抽为纯函数边界', o.b === '+12,345🪙', JSON.stringify(o));
+  } catch(e){ t('U319 金币飘字抽为纯函数',false,e.message); t('U320 金币飘字抽为纯函数边界',false,e.message); }
+
+
+  // ===== U321~U322: 连击得分飘字抽为纯函数(v5.4) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5ComboGainTextNow(50),b:T.v5ComboGainTextNow(12345)});})()"));
+    t('U321 连击得分飘字抽为纯函数', o.a === '+50', JSON.stringify(o));
+    t('U322 连击得分飘字抽为纯函数边界', o.b === '+12,345', JSON.stringify(o));
+  } catch(e){ t('U321 连击得分飘字抽为纯函数',false,e.message); t('U322 连击得分飘字抽为纯函数边界',false,e.message); }
+
+
+  // ===== U323~U324: 无尽里程碑提示抽为纯函数(v5.5) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5MilestoneTipNow(3),b:T.v5MilestoneTipNow(12345)});})()"));
+    t('U323 无尽里程碑提示抽为纯函数', o.a === ' · 🌊里程碑 +3🐾', JSON.stringify(o));
+    t('U324 无尽里程碑提示抽为纯函数边界', o.b.indexOf('12,345')>=0, JSON.stringify(o));
+  } catch(e){ t('U323 无尽里程碑提示抽为纯函数',false,e.message); t('U324 无尽里程碑提示抽为纯函数边界',false,e.message); }
+
+
+  // ===== U325~U326: 关卡开场文案抽为纯函数(v5.6) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5LevelIntroTextNow(true,8,'normal'),b:T.v5LevelIntroTextNow(false,5,'hard')});})()"));
+    t('U325 关卡开场文案抽为纯函数', o.a === '第 8 波', JSON.stringify(o));
+    t('U326 关卡开场文案抽为纯函数边界', o.b === '第 5 关 · 硬核', JSON.stringify(o));
+  } catch(e){ t('U325 关卡开场文案抽为纯函数',false,e.message); t('U326 关卡开场文案抽为纯函数边界',false,e.message); }
+
+
+  // ===== U327~U328: 过关奖励飘字抽为纯函数(v5.7) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5LevelBonusTextNow(80),b:T.v5LevelBonusTextNow(12345)});})()"));
+    t('U327 过关奖励飘字抽为纯函数', o.a === '+80', JSON.stringify(o));
+    t('U328 过关奖励飘字抽为纯函数边界', o.b === '+12,345', JSON.stringify(o));
+  } catch(e){ t('U327 过关奖励飘字抽为纯函数',false,e.message); t('U328 过关奖励飘字抽为纯函数边界',false,e.message); }
+
+
+  // ===== U329~U330: 倒计时字符串抽为纯函数(v5.8) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5ClockStrNow(65),b:T.v5ClockStrNow(0)});})()"));
+    t('U329 倒计时字符串抽为纯函数', o.a === '1:05', JSON.stringify(o));
+    t('U330 倒计时字符串抽为纯函数边界', o.b === '0:00', JSON.stringify(o));
+  } catch(e){ t('U329 倒计时字符串抽为纯函数',false,e.message); t('U330 倒计时字符串抽为纯函数边界',false,e.message); }
+
+
+  // ===== U331~U332: 主题背景 rgb 串抽为纯函数(v5.9) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5RgbStrNow([1,2,3]),b:T.v5RgbStrNow([0,0,0])});})()"));
+    t('U331 主题背景 rgb 串抽为纯函数', o.a === 'rgb(1,2,3)', JSON.stringify(o));
+    t('U332 主题背景 rgb 串抽为纯函数边界', o.b === 'rgb(0,0,0)', JSON.stringify(o));
+  } catch(e){ t('U331 主题背景 rgb 串抽为纯函数',false,e.message); t('U332 主题背景 rgb 串抽为纯函数边界',false,e.message); }
+
+
+  // ===== U333~U334: 主题网格 rgba 串抽为纯函数(v5.10) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5GridStrNow([1,2,3]),b:T.v5GridStrNow([0,0,0])});})()"));
+    t('U333 主题网格 rgba 串抽为纯函数', o.a === 'rgba(1,2,3,0.12)', JSON.stringify(o));
+    t('U334 主题网格 rgba 串抽为纯函数边界', o.b === 'rgba(0,0,0,0.12)', JSON.stringify(o));
+  } catch(e){ t('U333 主题网格 rgba 串抽为纯函数',false,e.message); t('U334 主题网格 rgba 串抽为纯函数边界',false,e.message); }
+
+
+  // ===== U335~U336: 主题强调色 rgb 串抽为纯函数(v5.11) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5AccentRgbStrNow([9,8,7]),b:T.v5AccentRgbStrNow([0,255,0])});})()"));
+    t('U335 主题强调色 rgb 串抽为纯函数', o.a === 'rgb(9,8,7)', JSON.stringify(o));
+    t('U336 主题强调色 rgb 串抽为纯函数边界', o.b === 'rgb(0,255,0)', JSON.stringify(o));
+  } catch(e){ t('U335 主题强调色 rgb 串抽为纯函数',false,e.message); t('U336 主题强调色 rgb 串抽为纯函数边界',false,e.message); }
+
+
+  // ===== U337~U338: 里程碑光晕阴影串抽为纯函数(v5.12) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BoxShadowStrNow('#fff'),b:T.v5BoxShadowStrNow('red')});})()"));
+    t('U337 里程碑光晕阴影串抽为纯函数', o.a === '0 0 12px 2px #fff', JSON.stringify(o));
+    t('U338 里程碑光晕阴影串抽为纯函数边界', o.b === '0 0 12px 2px red', JSON.stringify(o));
+  } catch(e){ t('U337 里程碑光晕阴影串抽为纯函数',false,e.message); t('U338 里程碑光晕阴影串抽为纯函数边界',false,e.message); }
+
+
+  // ===== U339~U340: 局内副标题抽为纯函数(v5.13) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5RunSubTextNow(false,5,80),b:T.v5RunSubTextNow(true,8,12345)});})()"));
+    t('U339 局内副标题抽为纯函数', o.a === '第 5 关 · 目前 80 分', JSON.stringify(o));
+    t('U340 局内副标题抽为纯函数边界', o.b === '第 8 波 · 目前 12,345 分', JSON.stringify(o));
+  } catch(e){ t('U339 局内副标题抽为纯函数',false,e.message); t('U340 局内副标题抽为纯函数边界',false,e.message); }
+
+
+  // ===== U341~U342: 里程碑副标题追加抽为纯函数(v5.14) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5MilestoneSubNow(3,false),b:T.v5MilestoneSubNow(3,true)});})()"));
+    t('U341 里程碑副标题追加抽为纯函数', o.a === ' · 🌊里程碑 +3🐾', JSON.stringify(o));
+    t('U342 里程碑副标题追加抽为纯函数边界', o.b.indexOf('羁绊×2')>=0, JSON.stringify(o));
+  } catch(e){ t('U341 里程碑副标题追加抽为纯函数',false,e.message); t('U342 里程碑副标题追加抽为纯函数边界',false,e.message); }
+
+
+  // ===== U343~U344: 青色冲击波描边串抽为纯函数(v5.15) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5CyanStrokeNow(0.5),b:T.v5CyanStrokeNow(0)});})()"));
+    t('U343 青色冲击波描边串抽为纯函数', o.a === 'rgba(0, 229, 255,0.50)', JSON.stringify(o));
+    t('U344 青色冲击波描边串抽为纯函数边界', o.b === 'rgba(0, 229, 255,0.00)', JSON.stringify(o));
+  } catch(e){ t('U343 青色冲击波描边串抽为纯函数',false,e.message); t('U344 青色冲击波描边串抽为纯函数边界',false,e.message); }
+
+
+  // ===== U345~U346: 白色描边二次衰减串抽为纯函数(v5.16) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5WhiteStrokeBNow(1),b:T.v5WhiteStrokeBNow(0)});})()"));
+    t('U345 白色描边二次衰减串抽为纯函数', o.a === 'rgba(255,255,255,0.60)', JSON.stringify(o));
+    t('U346 白色描边二次衰减串抽为纯函数边界', o.b === 'rgba(255,255,255,0.00)', JSON.stringify(o));
+  } catch(e){ t('U345 白色描边二次衰减串抽为纯函数',false,e.message); t('U346 白色描边二次衰减串抽为纯函数边界',false,e.message); }
+
+
+  // ===== U347~U348: 粒子合批键抽为纯函数(v5.17) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5ParticleKeyNow('#fff',0.5),b:T.v5ParticleKeyNow('red',0)});})()"));
+    t('U347 粒子合批键抽为纯函数', o.a === '#fff|0.5', JSON.stringify(o));
+    t('U348 粒子合批键抽为纯函数边界', o.b === 'red|0', JSON.stringify(o));
+  } catch(e){ t('U347 粒子合批键抽为纯函数',false,e.message); t('U348 粒子合批键抽为纯函数边界',false,e.message); }
+
+
+  // ===== U349~U350: BOSS 血条文字抽为纯函数(v5.18) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BossHudTextNow(5,'重甲',10,20,false),b:T.v5BossHudTextNow(5,'重甲',10,20,true)});})()"));
+    t('U349 BOSS 血条文字抽为纯函数', o.a === 'LV.5 重甲  10 / 20', JSON.stringify(o));
+    t('U350 BOSS 血条文字抽为纯函数边界', o.b.indexOf('⚡狂暴')>=0, JSON.stringify(o));
+  } catch(e){ t('U349 BOSS 血条文字抽为纯函数',false,e.message); t('U350 BOSS 血条文字抽为纯函数边界',false,e.message); }
+
+
+  // ===== U351~U352: 状态倒计时标签抽为纯函数(v5.19) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5StatusLabelNow('护盾',2),b:T.v5StatusLabelNow('冰冻',0)});})()"));
+    t('U351 状态倒计时标签抽为纯函数', o.a === '护盾 2.0s', JSON.stringify(o));
+    t('U352 状态倒计时标签抽为纯函数边界', o.b === '冰冻 0.0s', JSON.stringify(o));
+  } catch(e){ t('U351 状态倒计时标签抽为纯函数',false,e.message); t('U352 状态倒计时标签抽为纯函数边界',false,e.message); }
+
+
+  // ===== U353~U354: 受伤渐变红色抽为纯函数(v5.20) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5RedFillNow(1),b:T.v5RedFillNow(0)});})()"));
+    t('U353 受伤渐变红色抽为纯函数', o.a === 'rgba(255,45,85,0.500)', JSON.stringify(o));
+    t('U354 受伤渐变红色抽为纯函数边界', o.b === 'rgba(255,45,85,0.000)', JSON.stringify(o));
+  } catch(e){ t('U353 受伤渐变红色抽为纯函数',false,e.message); t('U354 受伤渐变红色抽为纯函数边界',false,e.message); }
+
+
+  // ===== U355~U356: BOSS 来袭警告文字抽为纯函数(v5.21) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BossWarnTextNow('重甲'),b:T.v5BossWarnTextNow('猎手')});})()"));
+    t('U355 BOSS 来袭警告文字抽为纯函数', o.a === '⚠ WARNING · 重甲 BOSS 来袭 ⚠', JSON.stringify(o));
+    t('U356 BOSS 来袭警告文字抽为纯函数边界', o.b.indexOf('猎手')>=0, JSON.stringify(o));
+  } catch(e){ t('U355 BOSS 来袭警告文字抽为纯函数',false,e.message); t('U356 BOSS 来袭警告文字抽为纯函数边界',false,e.message); }
+
+
+  // ===== U357~U358: 白闪遮罩串抽为纯函数(v5.22) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5WhiteFlashStrNow(1,1),b:T.v5WhiteFlashStrNow(1,0.4)});})()"));
+    t('U357 白闪遮罩串抽为纯函数', o.a === 'rgba(255,255,255,0.850)', JSON.stringify(o));
+    t('U358 白闪遮罩串抽为纯函数边界', o.b === 'rgba(255,255,255,0.340)', JSON.stringify(o));
+  } catch(e){ t('U357 白闪遮罩串抽为纯函数',false,e.message); t('U358 白闪遮罩串抽为纯函数边界',false,e.message); }
+
+
+  // ===== U359~U360: BOSS 蓄力橙色描边抽为纯函数(v5.23) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5OrangeStrokeNow(0),b:T.v5OrangeStrokeNow(Math.PI)});})()"));
+    t('U359 BOSS 蓄力橙色描边抽为纯函数', o.a === 'rgba(255,90,0,0.500)', JSON.stringify(o));
+    t('U360 BOSS 蓄力橙色描边抽为纯函数边界', o.b === 'rgba(255,90,0,0.900)', JSON.stringify(o));
+  } catch(e){ t('U359 BOSS 蓄力橙色描边抽为纯函数',false,e.message); t('U360 BOSS 蓄力橙色描边抽为纯函数边界',false,e.message); }
+
+
+  // ===== U361~U362: 大招光环 hsla 串抽为纯函数(v5.24) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5HslaANow(0,0),b:T.v5HslaANow(1,1)});})()"));
+    t('U361 大招光环 hsla 串抽为纯函数', o.a === 'hsla(0,100%,70%,0.55)', JSON.stringify(o));
+    t('U362 大招光环 hsla 串抽为纯函数边界', o.b === 'hsla(150,100%,70%,0.55)', JSON.stringify(o));
+  } catch(e){ t('U361 大招光环 hsla 串抽为纯函数',false,e.message); t('U362 大招光环 hsla 串抽为纯函数边界',false,e.message); }
+
+
+  // ===== U363~U364: 激光 hsla 串抽为纯函数(v5.25) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5HslaBNow(0),b:T.v5HslaBNow(2)});})()"));
+    t('U363 激光 hsla 串抽为纯函数', o.a === 'hsla(0,100%,75%,0.9)', JSON.stringify(o));
+    t('U364 激光 hsla 串抽为纯函数边界', o.b === 'hsla(240,100%,75%,0.9)', JSON.stringify(o));
+  } catch(e){ t('U363 激光 hsla 串抽为纯函数',false,e.message); t('U364 激光 hsla 串抽为纯函数边界',false,e.message); }
+
+
+  // ===== U365~U366: 粒子 hsla 串抽为纯函数(v5.26) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5HslaCNow(0),b:T.v5HslaCNow(1)});})()"));
+    t('U365 粒子 hsla 串抽为纯函数', o.a === 'hsla(20,100%,60%,0.5)', JSON.stringify(o));
+    t('U366 粒子 hsla 串抽为纯函数边界', o.b === 'hsla(40,100%,60%,0.5)', JSON.stringify(o));
+  } catch(e){ t('U365 粒子 hsla 串抽为纯函数',false,e.message); t('U366 粒子 hsla 串抽为纯函数边界',false,e.message); }
+
+
+  // ===== U367~U368: 粉色描边串抽为纯函数(v5.27) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5PinkStrokeNow(0.4),b:T.v5PinkStrokeNow(0)});})()"));
+    t('U367 粉色描边串抽为纯函数', o.a === 'rgba(255,45,149,0.4)', JSON.stringify(o));
+    t('U368 粉色描边串抽为纯函数边界', o.b === 'rgba(255,45,149,0)', JSON.stringify(o));
+  } catch(e){ t('U367 粉色描边串抽为纯函数',false,e.message); t('U368 粉色描边串抽为纯函数边界',false,e.message); }
+
+
+  // ===== U369~U370: 粉色填充串抽为纯函数(v5.28) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5PinkFillNow(1),b:T.v5PinkFillNow(0)});})()"));
+    t('U369 粉色填充串抽为纯函数', o.a === 'rgba(255,107,213,0.5)', JSON.stringify(o));
+    t('U370 粉色填充串抽为纯函数边界', o.b === 'rgba(255,107,213,0)', JSON.stringify(o));
+  } catch(e){ t('U369 粉色填充串抽为纯函数',false,e.message); t('U370 粉色填充串抽为纯函数边界',false,e.message); }
+
+
+  // ===== U371~U372: 橙色填充串抽为纯函数(v5.29) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5OrangeFillNow(0.8),b:T.v5OrangeFillNow(0)});})()"));
+    t('U371 橙色填充串抽为纯函数', o.a === 'rgba(255,106,0,0.8)', JSON.stringify(o));
+    t('U372 橙色填充串抽为纯函数边界', o.b === 'rgba(255,106,0,0)', JSON.stringify(o));
+  } catch(e){ t('U371 橙色填充串抽为纯函数',false,e.message); t('U372 橙色填充串抽为纯函数边界',false,e.message); }
+
+
+  // ===== U373~U374: 琥珀粒子填充抽为纯函数(v5.30) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5AmberFillNow(0),b:T.v5AmberFillNow(22)});})()"));
+    t('U373 琥珀粒子填充抽为纯函数', o.a === 'rgba(255,150,40,0.7)', JSON.stringify(o));
+    t('U374 琥珀粒子填充抽为纯函数边界', o.b === 'rgba(255,150,40,0)', JSON.stringify(o));
+  } catch(e){ t('U373 琥珀粒子填充抽为纯函数',false,e.message); t('U374 琥珀粒子填充抽为纯函数边界',false,e.message); }
+
+
+  // ===== U375~U376: 紫色 hsla 串抽为纯函数(v5.31) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5HslaDNow(0),b:T.v5HslaDNow(5)});})()"));
+    t('U375 紫色 hsla 串抽为纯函数', o.a === 'hsla(265,100%,70%,0.4)', JSON.stringify(o));
+    t('U376 紫色 hsla 串抽为纯函数边界', o.b === 'hsla(325,100%,70%,0.4)', JSON.stringify(o));
+  } catch(e){ t('U375 紫色 hsla 串抽为纯函数',false,e.message); t('U376 紫色 hsla 串抽为纯函数边界',false,e.message); }
+
+
+  // ===== U377~U378: 深色填充串抽为纯函数(v5.32) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5DarkFillNow(0.5),b:T.v5DarkFillNow(0)});})()"));
+    t('U377 深色填充串抽为纯函数', o.a === 'rgba(20,4,46,0.5)', JSON.stringify(o));
+    t('U378 深色填充串抽为纯函数边界', o.b === 'rgba(20,4,46,0)', JSON.stringify(o));
+  } catch(e){ t('U377 深色填充串抽为纯函数',false,e.message); t('U378 深色填充串抽为纯函数边界',false,e.message); }
+
+
+  // ===== U379~U380: 冰蓝描边串抽为纯函数(v5.33) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5IceStrokeNow(0.6),b:T.v5IceStrokeNow(0)});})()"));
+    t('U379 冰蓝描边串抽为纯函数', o.a === 'rgba(174,230,255,0.6)', JSON.stringify(o));
+    t('U380 冰蓝描边串抽为纯函数边界', o.b === 'rgba(174,230,255,0)', JSON.stringify(o));
+  } catch(e){ t('U379 冰蓝描边串抽为纯函数',false,e.message); t('U380 冰蓝描边串抽为纯函数边界',false,e.message); }
+
+
+  // ===== U381~U382: 白色粒子填充抽为纯函数(v5.34) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5WhiteFillNow(0),b:T.v5WhiteFillNow(20)});})()"));
+    t('U381 白色粒子填充抽为纯函数', o.a === 'rgba(255,255,255,0.75)', JSON.stringify(o));
+    t('U382 白色粒子填充抽为纯函数边界', o.b === 'rgba(255,255,255,0)', JSON.stringify(o));
+  } catch(e){ t('U381 白色粒子填充抽为纯函数',false,e.message); t('U382 白色粒子填充抽为纯函数边界',false,e.message); }
+
+
+  // ===== U383~U384: 紫色 hsla 描边抽为纯函数(v5.35) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5HslaENow(0),b:T.v5HslaENow(2)});})()"));
+    t('U383 紫色 hsla 描边抽为纯函数', o.a === 'hsla(285,100%,72%,0.45)', JSON.stringify(o));
+    t('U384 紫色 hsla 描边抽为纯函数边界', o.b === 'hsla(315,100%,72%,0.45)', JSON.stringify(o));
+  } catch(e){ t('U383 紫色 hsla 描边抽为纯函数',false,e.message); t('U384 紫色 hsla 描边抽为纯函数边界',false,e.message); }
+
+
+  // ===== U385~U386: 紫光填充串抽为纯函数(v5.36) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5PurpleFillNow(0.3),b:T.v5PurpleFillNow(0)});})()"));
+    t('U385 紫光填充串抽为纯函数', o.a === 'rgba(200,107,255,0.3)', JSON.stringify(o));
+    t('U386 紫光填充串抽为纯函数边界', o.b === 'rgba(200,107,255,0)', JSON.stringify(o));
+  } catch(e){ t('U385 紫光填充串抽为纯函数',false,e.message); t('U386 紫光填充串抽为纯函数边界',false,e.message); }
+
+
+  // ===== U387~U388: 翠绿描边串抽为纯函数(v5.37) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5GreenStrokeNow(0.9),b:T.v5GreenStrokeNow(0)});})()"));
+    t('U387 翠绿描边串抽为纯函数', o.a === 'rgba(52,211,153,0.9)', JSON.stringify(o));
+    t('U388 翠绿描边串抽为纯函数边界', o.b === 'rgba(52,211,153,0)', JSON.stringify(o));
+  } catch(e){ t('U387 翠绿描边串抽为纯函数',false,e.message); t('U388 翠绿描边串抽为纯函数边界',false,e.message); }
+
+
+  // ===== U389~U390: 翠绿填充串抽为纯函数(v5.38) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5GreenFillNow(0.4),b:T.v5GreenFillNow(0)});})()"));
+    t('U389 翠绿填充串抽为纯函数', o.a === 'rgba(52,211,153,0.4)', JSON.stringify(o));
+    t('U390 翠绿填充串抽为纯函数边界', o.b === 'rgba(52,211,153,0)', JSON.stringify(o));
+  } catch(e){ t('U389 翠绿填充串抽为纯函数',false,e.message); t('U390 翠绿填充串抽为纯函数边界',false,e.message); }
+
+
+  // ===== U391~U392: 宠物下级费用文案抽为纯函数(v5.39) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5NextPriceTextNow(60),b:T.v5NextPriceTextNow(0)});})()"));
+    t('U391 宠物下级费用文案抽为纯函数', o.a === ' · 下级 60🐾', JSON.stringify(o));
+    t('U392 宠物下级费用文案抽为纯函数边界', o.b === ' · 已满级', JSON.stringify(o));
+  } catch(e){ t('U391 宠物下级费用文案抽为纯函数',false,e.message); t('U392 宠物下级费用文案抽为纯函数边界',false,e.message); }
+
+
+  // ===== U393~U394: 每日词条描述拼接抽为纯函数(v5.40) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5DailyModTextNow('','钢铁防线','砖墙变钢墙'),b:T.v5DailyModTextNow('A','B','C')});})()"));
+    t('U393 每日词条描述拼接抽为纯函数', o.a === '钢铁防线(砖墙变钢墙)', JSON.stringify(o));
+    t('U394 每日词条描述拼接抽为纯函数边界', o.b === 'A · B(C)', JSON.stringify(o));
+  } catch(e){ t('U393 每日词条描述拼接抽为纯函数',false,e.message); t('U394 每日词条描述拼接抽为纯函数边界',false,e.message); }
+
+
+  // ===== U395~U396: 关卡开场标题抽为纯函数(v5.41) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5IntroTxtNow(7),b:T.v5IntroTxtNow(1)});})()"));
+    t('U395 关卡开场标题抽为纯函数', o.a === '第 7 关', JSON.stringify(o));
+    t('U396 关卡开场标题抽为纯函数边界', o.b === '第 1 关', JSON.stringify(o));
+  } catch(e){ t('U395 关卡开场标题抽为纯函数',false,e.message); t('U396 关卡开场标题抽为纯函数边界',false,e.message); }
+
+
+  // ===== U397~U398: 商店强化图标 HTML 抽为纯函数(v5.42) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5ShopIconHtmlNow('🛡'),b:T.v5ShopIconHtmlNow('⚡')});})()"));
+    t('U397 商店强化图标 HTML 抽为纯函数', o.a === '<span class="siIcon">🛡</span>', JSON.stringify(o));
+    t('U398 商店强化图标 HTML 抽为纯函数边界', o.b.indexOf('⚡')>=0, JSON.stringify(o));
+  } catch(e){ t('U397 商店强化图标 HTML 抽为纯函数',false,e.message); t('U398 商店强化图标 HTML 抽为纯函数边界',false,e.message); }
+
+
+  // ===== U399~U400: 皮肤稀有度类名抽为纯函数(v5.43) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5RarClassNow('gold',false),b:T.v5RarClassNow('gold',true)});})()"));
+    t('U399 皮肤稀有度类名抽为纯函数', o.a === 'shopItem rar-gold', JSON.stringify(o));
+    t('U400 皮肤稀有度类名抽为纯函数边界', o.b === 'shopItem rar-gold equipped', JSON.stringify(o));
+  } catch(e){ t('U399 皮肤稀有度类名抽为纯函数',false,e.message); t('U400 皮肤稀有度类名抽为纯函数边界',false,e.message); }
+
+
+  // ===== U401~U402: 稀有度徽章 HTML 抽为纯函数(v5.44) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5RarBadgeNow('rare'),b:T.v5RarBadgeNow('epic')});})()"));
+    t('U401 稀有度徽章 HTML 抽为纯函数', o.a.indexOf('class="rar rare"')>=0, JSON.stringify(o));
+    t('U402 稀有度徽章 HTML 抽为纯函数边界', o.b.indexOf('epic')>=0, JSON.stringify(o));
+  } catch(e){ t('U401 稀有度徽章 HTML 抽为纯函数',false,e.message); t('U402 稀有度徽章 HTML 抽为纯函数边界',false,e.message); }
+
+
+  // ===== U403~U404: 皮肤名称 HTML 抽为纯函数(v5.45) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5SkinNameHtmlNow('黄金','B'),b:T.v5SkinNameHtmlNow('X','')});})()"));
+    t('U403 皮肤名称 HTML 抽为纯函数', o.a === '<span class="siName">黄金B</span>', JSON.stringify(o));
+    t('U404 皮肤名称 HTML 抽为纯函数边界', o.b === '<span class="siName">X</span>', JSON.stringify(o));
+  } catch(e){ t('U403 皮肤名称 HTML 抽为纯函数',false,e.message); t('U404 皮肤名称 HTML 抽为纯函数边界',false,e.message); }
+
+
+  // ===== U405~U406: 皮肤状态文案抽为纯函数(v5.46) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5SkinMetaNow(true,true,0),b:T.v5SkinMetaNow(false,false,12345)});})()"));
+    t('U405 皮肤状态文案抽为纯函数', o.a === '已装备', JSON.stringify(o));
+    t('U406 皮肤状态文案抽为纯函数边界', o.b === '🪙 12,345', JSON.stringify(o));
+  } catch(e){ t('U405 皮肤状态文案抽为纯函数',false,e.message); t('U406 皮肤状态文案抽为纯函数边界',false,e.message); }
+
+
+  // ===== U407~U408: 皮肤按钮 HTML 抽为纯函数(v5.47) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5SkinBtnHtmlNow(true,true,0),b:T.v5SkinBtnHtmlNow(false,false,120)});})()"));
+    t('U407 皮肤按钮 HTML 抽为纯函数', o.a.indexOf('已装备')>=0, JSON.stringify(o));
+    t('U408 皮肤按钮 HTML 抽为纯函数边界', o.b.indexOf('🪙 购买 120')>=0, JSON.stringify(o));
+  } catch(e){ t('U407 皮肤按钮 HTML 抽为纯函数',false,e.message); t('U408 皮肤按钮 HTML 抽为纯函数边界',false,e.message); }
+
+
+  // ===== U409~U410: 基地护墙预览格抽为纯函数(v5.48) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BaseBrickNow(true,false),b:T.v5BaseBrickNow(false,false)});})()"));
+    t('U409 基地护墙预览格抽为纯函数', o.a === '<div class="bw core"></div>', JSON.stringify(o));
+    t('U410 基地护墙预览格抽为纯函数边界', o.b === '<div class="bw off"></div>', JSON.stringify(o));
+  } catch(e){ t('U409 基地护墙预览格抽为纯函数',false,e.message); t('U410 基地护墙预览格抽为纯函数边界',false,e.message); }
+
+
+  // ===== U411~U412: 基地与宠物等级标签统一抽为纯函数(v5.49) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BaseLvTxtNow(2,false),b:T.v5BaseLvTxtNow(6,true)});})()"));
+    t('U411 基地与宠物等级标签统一抽为纯函数', o.a === 'Lv2', JSON.stringify(o));
+    t('U412 基地与宠物等级标签统一抽为纯函数边界', o.b === 'Lv6·MAX', JSON.stringify(o));
+  } catch(e){ t('U411 基地与宠物等级标签统一抽为纯函数',false,e.message); t('U412 基地与宠物等级标签统一抽为纯函数边界',false,e.message); }
+
+
+  // ===== U413~U414: 基地满级描述抽为纯函数(v5.50) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BaseMaxDescNow(12),b:T.v5BaseMaxDescNow(0)});})()"));
+    t('U413 基地满级描述抽为纯函数', o.a === '基地护墙 12 格 · 已满级，最坚固的堡垒', JSON.stringify(o));
+    t('U414 基地满级描述抽为纯函数边界', o.b.indexOf('0 格')>=0, JSON.stringify(o));
+  } catch(e){ t('U413 基地满级描述抽为纯函数',false,e.message); t('U414 基地满级描述抽为纯函数边界',false,e.message); }
+
+
+  // ===== U415~U416: 基地下级描述抽为纯函数(v5.51) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BaseNextDescNow(6,'要塞',12),b:T.v5BaseNextDescNow(0,'X',0)});})()"));
+    t('U415 基地下级描述抽为纯函数', o.a === '基地护墙 6 格 → 下一级 要塞（12 格）', JSON.stringify(o));
+    t('U416 基地下级描述抽为纯函数边界', o.b.indexOf('下一级 X')>=0, JSON.stringify(o));
+  } catch(e){ t('U415 基地下级描述抽为纯函数',false,e.message); t('U416 基地下级描述抽为纯函数边界',false,e.message); }
+
+
+  // ===== U417~U418: 基地名称行 HTML 抽为纯函数(v5.52) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BaseNameRowNow('堡垒','Lv2'),b:T.v5BaseNameRowNow('X','')});})()"));
+    t('U417 基地名称行 HTML 抽为纯函数', o.a.indexOf('基地 · 堡垒')>=0 && o.a.indexOf('Lv2')>=0, JSON.stringify(o));
+    t('U418 基地名称行 HTML 抽为纯函数边界', o.b.indexOf('baseLv')>=0, JSON.stringify(o));
+  } catch(e){ t('U417 基地名称行 HTML 抽为纯函数',false,e.message); t('U418 基地名称行 HTML 抽为纯函数边界',false,e.message); }
+
+
+  // ===== U419~U420: 基地升级按钮 HTML 抽为纯函数(v5.53) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BaseBtnHtmlNow(true,0),b:T.v5BaseBtnHtmlNow(false,12345)});})()"));
+    t('U419 基地升级按钮 HTML 抽为纯函数', o.a.indexOf('已满级')>=0, JSON.stringify(o));
+    t('U420 基地升级按钮 HTML 抽为纯函数边界', o.b.indexOf('🪙 升级 12,345')>=0, JSON.stringify(o));
+  } catch(e){ t('U419 基地升级按钮 HTML 抽为纯函数',false,e.message); t('U420 基地升级按钮 HTML 抽为纯函数边界',false,e.message); }
+
+
+  // ===== U421~U422: 带书名号的名称标签抽为纯函数(v5.54) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5QuotedNameNow('黄金'),b:T.v5QuotedNameNow('')});})()"));
+    t('U421 带书名号的名称标签抽为纯函数', o.a === '「黄金」', JSON.stringify(o));
+    t('U422 带书名号的名称标签抽为纯函数边界', o.b === '「」', JSON.stringify(o));
+  } catch(e){ t('U421 带书名号的名称标签抽为纯函数',false,e.message); t('U422 带书名号的名称标签抽为纯函数边界',false,e.message); }
+
+
+  // ===== U423~U424: 皮肤购买成功文案抽为纯函数(v5.55) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5SkinBoughtMsgNow('🔵','经典 QIAN'),b:T.v5SkinBoughtMsgNow('X','Y')});})()"));
+    t('U423 皮肤购买成功文案抽为纯函数', o.a === '🔵 皮肤已购买并装备 · 经典 QIAN', JSON.stringify(o));
+    t('U424 皮肤购买成功文案抽为纯函数边界', o.b.indexOf('X 皮肤')>=0, JSON.stringify(o));
+  } catch(e){ t('U423 皮肤购买成功文案抽为纯函数',false,e.message); t('U424 皮肤购买成功文案抽为纯函数边界',false,e.message); }
+
+
+  // ===== U425~U426: 僚机皮肤稀有度类名抽为纯函数(v5.56) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5WskinRarClassNow('epic',false),b:T.v5WskinRarClassNow('epic',true)});})()"));
+    t('U425 僚机皮肤稀有度类名抽为纯函数', o.a === 'shopItem rar-epic', JSON.stringify(o));
+    t('U426 僚机皮肤稀有度类名抽为纯函数边界', o.b === 'shopItem rar-epic equipped', JSON.stringify(o));
+  } catch(e){ t('U425 僚机皮肤稀有度类名抽为纯函数',false,e.message); t('U426 僚机皮肤稀有度类名抽为纯函数边界',false,e.message); }
+
+
+  // ===== U427~U428: 僚机皮肤稀有度徽章抽为纯函数(v5.57) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5WskinRarBadgeNow('rare'),b:T.v5WskinRarBadgeNow('epic')});})()"));
+    t('U427 僚机皮肤稀有度徽章抽为纯函数', o.a.indexOf('class="rar rare"')>=0, JSON.stringify(o));
+    t('U428 僚机皮肤稀有度徽章抽为纯函数边界', o.b.indexOf('epic')>=0, JSON.stringify(o));
+  } catch(e){ t('U427 僚机皮肤稀有度徽章抽为纯函数',false,e.message); t('U428 僚机皮肤稀有度徽章抽为纯函数边界',false,e.message); }
+
+
+  // ===== U429~U430: 僚机皮肤名称 HTML 抽为纯函数(v5.58) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5WskinNameHtmlNow('🟡','黄金僚机',''),b:T.v5WskinNameHtmlNow('X','Y','B')});})()"));
+    t('U429 僚机皮肤名称 HTML 抽为纯函数', o.a === '<span class="siName">🟡 黄金僚机</span>', JSON.stringify(o));
+    t('U430 僚机皮肤名称 HTML 抽为纯函数边界', o.b.indexOf('B</span>')>=0, JSON.stringify(o));
+  } catch(e){ t('U429 僚机皮肤名称 HTML 抽为纯函数',false,e.message); t('U430 僚机皮肤名称 HTML 抽为纯函数边界',false,e.message); }
+
+
+  // ===== U431~U432: 僚机皮肤状态文案抽为纯函数(v5.59) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5WskinMetaNow(true,false,0),b:T.v5WskinMetaNow(false,false,12345)});})()"));
+    t('U431 僚机皮肤状态文案抽为纯函数', o.a === '已拥有', JSON.stringify(o));
+    t('U432 僚机皮肤状态文案抽为纯函数边界', o.b === '🪙 12,345', JSON.stringify(o));
+  } catch(e){ t('U431 僚机皮肤状态文案抽为纯函数',false,e.message); t('U432 僚机皮肤状态文案抽为纯函数边界',false,e.message); }
+
+
+  // ===== U433~U434: 僚机皮肤按钮 HTML 抽为纯函数(v5.60) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5WskinBtnHtmlNow(true,true,0),b:T.v5WskinBtnHtmlNow(false,false,880)});})()"));
+    t('U433 僚机皮肤按钮 HTML 抽为纯函数', o.a.indexOf('已装备')>=0, JSON.stringify(o));
+    t('U434 僚机皮肤按钮 HTML 抽为纯函数边界', o.b.indexOf('🪙 购买 880')>=0, JSON.stringify(o));
+  } catch(e){ t('U433 僚机皮肤按钮 HTML 抽为纯函数',false,e.message); t('U434 僚机皮肤按钮 HTML 抽为纯函数边界',false,e.message); }
+
+
+  // ===== U435~U436: 羁绊行 HTML 抽为纯函数(v5.61) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BondRowHtmlNow(true),b:T.v5BondRowHtmlNow(false)});})()"));
+    t('U435 羁绊行 HTML 抽为纯函数', o.a === '<div class="bdRow on">', JSON.stringify(o));
+    t('U436 羁绊行 HTML 抽为纯函数边界', o.b === '<div class="bdRow">', JSON.stringify(o));
+  } catch(e){ t('U435 羁绊行 HTML 抽为纯函数',false,e.message); t('U436 羁绊行 HTML 抽为纯函数边界',false,e.message); }
+
+
+  // ===== U437~U438: 羁绊图标 HTML 抽为纯函数(v5.62) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BondIconHtmlNow('🧱'),b:T.v5BondIconHtmlNow('X')});})()"));
+    t('U437 羁绊图标 HTML 抽为纯函数', o.a === '<span class="bdIcon">🧱</span>', JSON.stringify(o));
+    t('U438 羁绊图标 HTML 抽为纯函数边界', o.b.indexOf('X')>=0, JSON.stringify(o));
+  } catch(e){ t('U437 羁绊图标 HTML 抽为纯函数',false,e.message); t('U438 羁绊图标 HTML 抽为纯函数边界',false,e.message); }
+
+
+  // ===== U439~U440: 羁绊名称 HTML 抽为纯函数(v5.63) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BondInfoHtmlNow('铜墙铁壁'),b:T.v5BondInfoHtmlNow('X')});})()"));
+    t('U439 羁绊名称 HTML 抽为纯函数', o.a === '<span class="bdInfo"><b>铜墙铁壁</b>', JSON.stringify(o));
+    t('U440 羁绊名称 HTML 抽为纯函数边界', o.b.indexOf('<b>X</b>')>=0, JSON.stringify(o));
+  } catch(e){ t('U439 羁绊名称 HTML 抽为纯函数',false,e.message); t('U440 羁绊名称 HTML 抽为纯函数边界',false,e.message); }
+
+
+  // ===== U441~U442: 羁绊组合说明抽为纯函数(v5.64) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BondPairTextNow({icon:'🛡',name:'堡垒'},{icon:'🐢',name:'守护龟'}),b:T.v5BondPairTextNow({icon:'A',name:'A'},{icon:'B',name:'B'})});})()"));
+    t('U441 羁绊组合说明抽为纯函数', o.a === '🛡 堡垒 × 🐢 守护龟', JSON.stringify(o));
+    t('U442 羁绊组合说明抽为纯函数边界', o.b === 'A A × B B', JSON.stringify(o));
+  } catch(e){ t('U441 羁绊组合说明抽为纯函数',false,e.message); t('U442 羁绊组合说明抽为纯函数边界',false,e.message); }
+
+
+  // ===== U443~U444: 羁绊效果说明 HTML 抽为纯函数(v5.65) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BondEmHtmlNow('护盾 +2 秒'),b:T.v5BondEmHtmlNow('X')});})()"));
+    t('U443 羁绊效果说明 HTML 抽为纯函数', o.a === '<em>护盾 +2 秒</em></span>', JSON.stringify(o));
+    t('U444 羁绊效果说明 HTML 抽为纯函数边界', o.b.indexOf('<em>X</em>')>=0, JSON.stringify(o));
+  } catch(e){ t('U443 羁绊效果说明 HTML 抽为纯函数',false,e.message); t('U444 羁绊效果说明 HTML 抽为纯函数边界',false,e.message); }
+
+
+  // ===== U445~U446: 羁绊状态文案抽为纯函数(v5.66) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BondStateTextNow(true),b:T.v5BondStateTextNow(false)});})()"));
+    t('U445 羁绊状态文案抽为纯函数', o.a === '激活中', JSON.stringify(o));
+    t('U446 羁绊状态文案抽为纯函数边界', o.b === '未激活', JSON.stringify(o));
+  } catch(e){ t('U445 羁绊状态文案抽为纯函数',false,e.message); t('U446 羁绊状态文案抽为纯函数边界',false,e.message); }
+
+
+  // ===== U447~U448: 宠物稀有度类名抽为纯函数(v5.67) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5PetRarClassNow(true,false),b:T.v5PetRarClassNow(false,true)});})()"));
+    t('U447 宠物稀有度类名抽为纯函数', o.a === 'shopItem rar-legendary', JSON.stringify(o));
+    t('U448 宠物稀有度类名抽为纯函数边界', o.b === 'shopItem rar-epic equipped', JSON.stringify(o));
+  } catch(e){ t('U447 宠物稀有度类名抽为纯函数',false,e.message); t('U448 宠物稀有度类名抽为纯函数边界',false,e.message); }
+
+
+  // ===== U449~U450: 磁力猪当前效果描述抽为纯函数(v5.68) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5MagnetEffDescNow(1),b:T.v5MagnetEffDescNow(3)});})()"));
+    t('U449 磁力猪当前效果描述抽为纯函数', o.a.indexOf('磁力半径')>=0 && o.a.indexOf('px/s')>=0, JSON.stringify(o));
+    t('U450 磁力猪当前效果描述抽为纯函数边界', o.b.indexOf('拉速')>=0, JSON.stringify(o));
+  } catch(e){ t('U449 磁力猪当前效果描述抽为纯函数',false,e.message); t('U450 磁力猪当前效果描述抽为纯函数边界',false,e.message); }
+
+
+  // ===== U451~U452: 磁力猪下级效果描述抽为纯函数(v5.69) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5MagnetNextDescNow(1),b:T.v5MagnetNextDescNow(2)});})()"));
+    t('U451 磁力猪下级效果描述抽为纯函数', o.a.indexOf('升到 Lv2')>=0, JSON.stringify(o));
+    t('U452 磁力猪下级效果描述抽为纯函数边界', o.b.indexOf('升到 Lv3')>=0, JSON.stringify(o));
+  } catch(e){ t('U451 磁力猪下级效果描述抽为纯函数',false,e.message); t('U452 磁力猪下级效果描述抽为纯函数边界',false,e.message); }
+
+
+  // ===== U453~U454: 宠物购买按钮文案抽为纯函数(v5.70) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5PetBuyTextNow(6),b:T.v5PetBuyTextNow(12345)});})()"));
+    t('U453 宠物购买按钮文案抽为纯函数', o.a === '🐾 购买 6', JSON.stringify(o));
+    t('U454 宠物购买按钮文案抽为纯函数边界', o.b === '🐾 购买 12,345', JSON.stringify(o));
+  } catch(e){ t('U453 宠物购买按钮文案抽为纯函数',false,e.message); t('U454 宠物购买按钮文案抽为纯函数边界',false,e.message); }
+
+
+  // ===== U455~U456: 宠物升级按钮文案抽为纯函数(v5.71) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5PetUpgradeTextNow(12),b:T.v5PetUpgradeTextNow(12345)});})()"));
+    t('U455 宠物升级按钮文案抽为纯函数', o.a === '🐾 升级 12', JSON.stringify(o));
+    t('U456 宠物升级按钮文案抽为纯函数边界', o.b === '🐾 升级 12,345', JSON.stringify(o));
+  } catch(e){ t('U455 宠物升级按钮文案抽为纯函数',false,e.message); t('U456 宠物升级按钮文案抽为纯函数边界',false,e.message); }
+
+
+  // ===== U457~U458: 宠物名称 HTML 抽为纯函数(v5.72) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5PetNameHtmlNow('招财猫',false,'coin'),b:T.v5PetNameHtmlNow('X',true,'Y')});})()"));
+    t('U457 宠物名称 HTML 抽为纯函数', o.a.indexOf('招财猫')>=0 && o.a.indexOf('rar epic')>=0, JSON.stringify(o));
+    t('U458 宠物名称 HTML 抽为纯函数边界', o.b.indexOf('rar legendary')>=0, JSON.stringify(o));
+  } catch(e){ t('U457 宠物名称 HTML 抽为纯函数',false,e.message); t('U458 宠物名称 HTML 抽为纯函数边界',false,e.message); }
+
+
+  // ===== U459~U460: 宠物描述 HTML 抽为纯函数(v5.73) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5PetDescHtmlNow('A',false,false,'','').x,b:T.v5PetDescHtmlNow('A',true,false,'N','B')});})()"));
+    t('U459 宠物描述 HTML 抽为纯函数', o.a === undefined, JSON.stringify(o));
+    t('U460 宠物描述 HTML 抽为纯函数边界', o.b.indexOf('A · NB')>=0, JSON.stringify(o));
+  } catch(e){ t('U459 宠物描述 HTML 抽为纯函数',false,e.message); t('U460 宠物描述 HTML 抽为纯函数边界',false,e.message); }
+
+
+  // ===== U461~U462: 宠物状态 HTML 抽为纯函数(v5.74) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5PetMetaHtmlNow('Lv2',true,true),b:T.v5PetMetaHtmlNow('Lv1',false,false)});})()"));
+    t('U461 宠物状态 HTML 抽为纯函数', o.a === '<span class="siMeta">Lv2 · 跟随中</span>', JSON.stringify(o));
+    t('U462 宠物状态 HTML 抽为纯函数边界', o.b === '<span class="siMeta">Lv1</span>', JSON.stringify(o));
+  } catch(e){ t('U461 宠物状态 HTML 抽为纯函数',false,e.message); t('U462 宠物状态 HTML 抽为纯函数边界',false,e.message); }
+
+
+  // ===== U463~U464: 宠物按钮 HTML 抽为纯函数(v5.75) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5PetBtnHtmlNow('owned','🐾 升级 12'),b:T.v5PetBtnHtmlNow('','X')});})()"));
+    t('U463 宠物按钮 HTML 抽为纯函数', o.a === '<button class="siBtn owned">🐾 升级 12</button>', JSON.stringify(o));
+    t('U464 宠物按钮 HTML 抽为纯函数边界', o.b.indexOf('>X</button>')>=0, JSON.stringify(o));
+  } catch(e){ t('U463 宠物按钮 HTML 抽为纯函数',false,e.message); t('U464 宠物按钮 HTML 抽为纯函数边界',false,e.message); }
+
+
+  // ===== U465~U466: 宠物解锁标签抽为纯函数(v5.76) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5UnlockLabelNow('招财猫'),b:T.v5UnlockLabelNow('')});})()"));
+    t('U465 宠物解锁标签抽为纯函数', o.a === '「招财猫」', JSON.stringify(o));
+    t('U466 宠物解锁标签抽为纯函数边界', o.b === '「」', JSON.stringify(o));
+  } catch(e){ t('U465 宠物解锁标签抽为纯函数',false,e.message); t('U466 宠物解锁标签抽为纯函数边界',false,e.message); }
+
+
+  // ===== U467~U468: 宠物购买成功文案抽为纯函数(v5.77) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5PetBoughtMsgNow('🐱','招财猫','金币+10%',1),b:T.v5PetBoughtMsgNow('X','Y','Z',3)});})()"));
+    t('U467 宠物购买成功文案抽为纯函数', o.a === '🐱 招财猫 已购买并跟随！金币+10% ×1', JSON.stringify(o));
+    t('U468 宠物购买成功文案抽为纯函数边界', o.b.indexOf('×3')>=0, JSON.stringify(o));
+  } catch(e){ t('U467 宠物购买成功文案抽为纯函数',false,e.message); t('U468 宠物购买成功文案抽为纯函数边界',false,e.message); }
+
+
+  // ===== U469~U470: 抽奖金币详情抽为纯函数(v5.78) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5GachaCoinDetailNow(500),b:T.v5GachaCoinDetailNow(12345)});})()"));
+    t('U469 抽奖金币详情抽为纯函数', o.a === '🪙 +500', JSON.stringify(o));
+    t('U470 抽奖金币详情抽为纯函数边界', o.b === '🪙 +12,345', JSON.stringify(o));
+  } catch(e){ t('U469 抽奖金币详情抽为纯函数',false,e.message); t('U470 抽奖金币详情抽为纯函数边界',false,e.message); }
+
+
+  // ===== U471~U472: 抽奖强化详情抽为纯函数(v5.79) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5GachaBonusDetailNow('⚡','射速',2),b:T.v5GachaBonusDetailNow('X','Y',0)});})()"));
+    t('U471 抽奖强化详情抽为纯函数', o.a === '⚡ 射速 Lv2', JSON.stringify(o));
+    t('U472 抽奖强化详情抽为纯函数边界', o.b === 'X Y Lv0', JSON.stringify(o));
+  } catch(e){ t('U471 抽奖强化详情抽为纯函数',false,e.message); t('U472 抽奖强化详情抽为纯函数边界',false,e.message); }
+
+
+  // ===== U473~U474: 成就徽章栏标题 HTML 抽为纯函数(v5.80) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5AchBadgeWrapNow(7,20),b:T.v5AchBadgeWrapNow(0,20)});})()"));
+    t('U473 成就徽章栏标题 HTML 抽为纯函数', o.a.indexOf('achBadgeTitle')>=0 && o.a.indexOf('完成度 35%')>=0, JSON.stringify(o));
+    t('U474 成就徽章栏标题 HTML 抽为纯函数边界', o.b.indexOf('0/20')>=0, JSON.stringify(o));
+  } catch(e){ t('U473 成就徽章栏标题 HTML 抽为纯函数',false,e.message); t('U474 成就徽章栏标题 HTML 抽为纯函数边界',false,e.message); }
+
+
+  // ===== U475~U476: 成就徽章 HTML 抽为纯函数(v5.81) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5AchBadgeHtmlNow('首胜',true,'🏆'),b:T.v5AchBadgeHtmlNow('X',false,'Y')});})()"));
+    t('U475 成就徽章 HTML 抽为纯函数', o.a === '<div class="achBadge" title="首胜">🏆</div>', JSON.stringify(o));
+    t('U476 成就徽章 HTML 抽为纯函数边界', o.b.indexOf(' none')>=0 && o.b.indexOf('未解锁')>=0, JSON.stringify(o));
+  } catch(e){ t('U475 成就徽章 HTML 抽为纯函数',false,e.message); t('U476 成就徽章 HTML 抽为纯函数边界',false,e.message); }
+
+
+  // ===== U477~U478: 抽奖箱描述文案抽为纯函数(v5.82) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5GachaDescTextNow(200),b:T.v5GachaDescTextNow(12345)});})()"));
+    t('U477 抽奖箱描述文案抽为纯函数', o.a.indexOf('消耗 🪙200')>=0, JSON.stringify(o));
+    t('U478 抽奖箱描述文案抽为纯函数边界', o.b.indexOf('12,345')>=0, JSON.stringify(o));
+  } catch(e){ t('U477 抽奖箱描述文案抽为纯函数',false,e.message); t('U478 抽奖箱描述文案抽为纯函数边界',false,e.message); }
+
+
+  // ===== U479~U480: 抽奖箱统计文案抽为纯函数(v5.83) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5GachaMetaTextNow(3,800),b:T.v5GachaMetaTextNow(12345,12345)});})()"));
+    t('U479 抽奖箱统计文案抽为纯函数', o.a === '已抽 3 次 · 余额 🪙800', JSON.stringify(o));
+    t('U480 抽奖箱统计文案抽为纯函数边界', o.b === '已抽 12,345 次 · 余额 🪙12,345', JSON.stringify(o));
+  } catch(e){ t('U479 抽奖箱统计文案抽为纯函数',false,e.message); t('U480 抽奖箱统计文案抽为纯函数边界',false,e.message); }
+
+
+  // ===== U481~U482: 抽奖按钮 HTML 抽为纯函数(v5.84) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5GachaBtnHtmlNow(true,200),b:T.v5GachaBtnHtmlNow(false,200)});})()"));
+    t('U481 抽奖按钮 HTML 抽为纯函数', o.a === '<button class="gachaBtn" >🎲 抽奖 200</button>', JSON.stringify(o));
+    t('U482 抽奖按钮 HTML 抽为纯函数边界', o.b.indexOf('disabled')>=0, JSON.stringify(o));
+  } catch(e){ t('U481 抽奖按钮 HTML 抽为纯函数',false,e.message); t('U482 抽奖按钮 HTML 抽为纯函数边界',false,e.message); }
+
+
+  // ===== U483~U484: 重置说明文案抽为纯函数(v5.85) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5ResetDescTextNow(400),b:T.v5ResetDescTextNow(0)});})()"));
+    t('U483 重置说明文案抽为纯函数', o.a.indexOf('🪙200')>=0 && o.a.indexOf('🪙200）')>=0, JSON.stringify(o));
+    t('U484 重置说明文案抽为纯函数边界', o.b.indexOf('🪙0）')>=0, JSON.stringify(o));
+  } catch(e){ t('U483 重置说明文案抽为纯函数',false,e.message); t('U484 重置说明文案抽为纯函数边界',false,e.message); }
+
+
+  // ===== U485~U486: 重置统计文案抽为纯函数(v5.86) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5ResetMetaTextNow(600,8),b:T.v5ResetMetaTextNow(12345,0)});})()"));
+    t('U485 重置统计文案抽为纯函数', o.a === '累计投入 🪙600 · 当前总等级 8', JSON.stringify(o));
+    t('U486 重置统计文案抽为纯函数边界', o.b.indexOf('12,345')>=0, JSON.stringify(o));
+  } catch(e){ t('U485 重置统计文案抽为纯函数',false,e.message); t('U486 重置统计文案抽为纯函数边界',false,e.message); }
+
+
+  // ===== U487~U488: 重置按钮 HTML 抽为纯函数(v5.87) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5ResetBtnHtmlNow(true),b:T.v5ResetBtnHtmlNow(false)});})()"));
+    t('U487 重置按钮 HTML 抽为纯函数', o.a === '<button class="gachaBtn" >🔄 重置</button>', JSON.stringify(o));
+    t('U488 重置按钮 HTML 抽为纯函数边界', o.b.indexOf('disabled')>=0, JSON.stringify(o));
+  } catch(e){ t('U487 重置按钮 HTML 抽为纯函数',false,e.message); t('U488 重置按钮 HTML 抽为纯函数边界',false,e.message); }
+
+
+  // ===== U489~U490: 英雄解锁标签抽为纯函数(v5.88) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5HeroUnlockLabelNow('磁暴'),b:T.v5HeroUnlockLabelNow('')});})()"));
+    t('U489 英雄解锁标签抽为纯函数', o.a === '解锁「磁暴」', JSON.stringify(o));
+    t('U490 英雄解锁标签抽为纯函数边界', o.b === '解锁「」', JSON.stringify(o));
+  } catch(e){ t('U489 英雄解锁标签抽为纯函数',false,e.message); t('U490 英雄解锁标签抽为纯函数边界',false,e.message); }
+
+
+  // ===== U491~U492: 英雄解锁成功文案抽为纯函数(v5.89) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5HeroBoughtMsgNow('⚡','磁暴',80),b:T.v5HeroBoughtMsgNow('X','Y',12345)});})()"));
+    t('U491 英雄解锁成功文案抽为纯函数', o.a === '⚡ 已解锁 · 磁暴（-80🐾）', JSON.stringify(o));
+    t('U492 英雄解锁成功文案抽为纯函数边界', o.b.indexOf('12,345')>=0, JSON.stringify(o));
+  } catch(e){ t('U491 英雄解锁成功文案抽为纯函数',false,e.message); t('U492 英雄解锁成功文案抽为纯函数边界',false,e.message); }
+
+
+  // ===== U493~U494: 存档码前缀抽为纯函数(v5.90) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5SaveCodeNow({a:1}),b:T.v5SaveCodeNow({})});})()"));
+    t('U493 存档码前缀抽为纯函数', o.a.indexOf('QTB1.')===0 && o.a.length>10, JSON.stringify(o));
+    t('U494 存档码前缀抽为纯函数边界', o.b.indexOf('QTB1.')===0, JSON.stringify(o));
+  } catch(e){ t('U493 存档码前缀抽为纯函数',false,e.message); t('U494 存档码前缀抽为纯函数边界',false,e.message); }
+
+
+  // ===== U495~U496: 存档解析失败文案抽为纯函数(v5.91) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5ParseErrTextNow({message:'bad'}),b:T.v5ParseErrTextNow('x')});})()"));
+    t('U495 存档解析失败文案抽为纯函数', o.a === '解析失败：bad', JSON.stringify(o));
+    t('U496 存档解析失败文案抽为纯函数边界', o.b === '解析失败：x', JSON.stringify(o));
+  } catch(e){ t('U495 存档解析失败文案抽为纯函数',false,e.message); t('U496 存档解析失败文案抽为纯函数边界',false,e.message); }
+
+
+  // ===== U497~U498: 存档备份提示 HTML 抽为纯函数(v5.92) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5SaveTipHtmlNow(),b:T.v5SaveTipHtmlNow()});})()"));
+    t('U497 存档备份提示 HTML 抽为纯函数', o.a.indexOf('saveTip')>=0, JSON.stringify(o));
+    t('U498 存档备份提示 HTML 抽为纯函数边界', o.b.indexOf('saveArea')>=0, JSON.stringify(o));
+  } catch(e){ t('U497 存档备份提示 HTML 抽为纯函数',false,e.message); t('U498 存档备份提示 HTML 抽为纯函数边界',false,e.message); }
+
+
+  // ===== U499~U500: 战绩记录 UID 抽为纯函数(v5.93) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5RecordUidNow().length,b:T.v5RecordUidNow()});})()"));
+    t('U499 战绩记录 UID 抽为纯函数', o.a >= 13, JSON.stringify(o));
+    t('U500 战绩记录 UID 抽为纯函数边界', o.b.length >= 13 && o.b.length <= 20, JSON.stringify(o));
+  } catch(e){ t('U499 战绩记录 UID 抽为纯函数',false,e.message); t('U500 战绩记录 UID 抽为纯函数边界',false,e.message); }
+
+
+  // ===== U501~U502: 宠物全家福描述抽为纯函数(v5.94) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5PetAllDescNow(4),b:T.v5PetAllDescNow(0)});})()"));
+    t('U501 宠物全家福描述抽为纯函数', o.a === '集齐全部 4 只宠物', JSON.stringify(o));
+    t('U502 宠物全家福描述抽为纯函数边界', o.b === '集齐全部 0 只宠物', JSON.stringify(o));
+  } catch(e){ t('U501 宠物全家福描述抽为纯函数',false,e.message); t('U502 宠物全家福描述抽为纯函数边界',false,e.message); }
+
+
+  // ===== U503~U504: 成就解锁文案抽为纯函数(v5.95) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5AchUnlockTextNow({name:'首胜',reward:100},2,7),b:T.v5AchUnlockTextNow({name:'X',reward:0},0,1)});})()"));
+    t('U503 成就解锁文案抽为纯函数', o.a.indexOf('+100🪙')>=0 && o.a.indexOf('第 7 个成就')>=0, JSON.stringify(o));
+    t('U504 成就解锁文案抽为纯函数边界', o.b.indexOf('+0')<0, JSON.stringify(o));
+  } catch(e){ t('U503 成就解锁文案抽为纯函数',false,e.message); t('U504 成就解锁文案抽为纯函数边界',false,e.message); }
+
+
+  // ===== U505~U506: 颜色转 rgba 兜底串抽为纯函数(v5.96) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5FallbackRgbaNow(0.5),b:T.v5FallbackRgbaNow(0)});})()"));
+    t('U505 颜色转 rgba 兜底串抽为纯函数', o.a === 'rgba(255,45,85,0.5)', JSON.stringify(o));
+    t('U506 颜色转 rgba 兜底串抽为纯函数边界', o.b === 'rgba(255,45,85,0)', JSON.stringify(o));
+  } catch(e){ t('U505 颜色转 rgba 兜底串抽为纯函数',false,e.message); t('U506 颜色转 rgba 兜底串抽为纯函数边界',false,e.message); }
+
+
+  // ===== U507~U508: 皮肤预览画布 HTML 抽为纯函数(v5.97) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5SkinPrevHtmlNow(),b:T.v5SkinPrevHtmlNow()});})()"));
+    t('U507 皮肤预览画布 HTML 抽为纯函数', o.a.indexOf('skinPrev')>=0, JSON.stringify(o));
+    t('U508 皮肤预览画布 HTML 抽为纯函数边界', o.b.indexOf('canvas')>=0, JSON.stringify(o));
+  } catch(e){ t('U507 皮肤预览画布 HTML 抽为纯函数',false,e.message); t('U508 皮肤预览画布 HTML 抽为纯函数边界',false,e.message); }
+
+
+  // ===== U509~U510: 皮肤描述 HTML 抽为纯函数(v5.98) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5SkinDescHtmlNow('经典配色'),b:T.v5SkinDescHtmlNow('X')});})()"));
+    t('U509 皮肤描述 HTML 抽为纯函数', o.a === '<span class="siDesc">经典配色</span>', JSON.stringify(o));
+    t('U510 皮肤描述 HTML 抽为纯函数边界', o.b.indexOf('>X</span>')>=0, JSON.stringify(o));
+  } catch(e){ t('U509 皮肤描述 HTML 抽为纯函数',false,e.message); t('U510 皮肤描述 HTML 抽为纯函数边界',false,e.message); }
+
+
+  // ===== U511~U512: 基地图标 HTML 抽为纯函数（100 轮收口）(v5.99) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BaseIconHtmlNow(),b:T.v5BaseIconHtmlNow()});})()"));
+    t('U511 基地图标 HTML 抽为纯函数（100 轮收口）', o.a === '<span class="baseIcon">🏰</span>', JSON.stringify(o));
+    t('U512 基地图标 HTML 抽为纯函数（100 轮收口）边界', o.b.indexOf('baseIcon')>=0, JSON.stringify(o));
+  } catch(e){ t('U511 基地图标 HTML 抽为纯函数（100 轮收口）',false,e.message); t('U512 基地图标 HTML 抽为纯函数（100 轮收口）边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

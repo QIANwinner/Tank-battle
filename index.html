@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V4.97</div>
+  <div id="mark">DESIGNED BY QIAN · V5.99</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -3076,7 +3076,7 @@
     if (score > 0) {
       // —— v0.2.7 分榜：无尽局记入 endless ——
       const modeTag = endlessMode ? 'endless' : (dailyMode ? 'daily' : (timedMode ? 'timed' : 'normal'));
-      const rec = { score: score, level: level, mode: modeTag, date: Date.now(), uid: Date.now() + '' + Math.floor(Math.random() * 1e6) };
+      const rec = { score: score, level: level, mode: modeTag, date: Date.now(), uid: v5RecordUid() };
       board.push(rec);
       board.sort((a, b) => b.score - a.score);
       if (board.length > 10) board = board.slice(0, 10);
@@ -3122,7 +3122,7 @@
     // —— v0.3.4 宠物经济成就：宠物币专属来源（reward 0 金币 + petReward 宠物币） ——
     { id: 'pet1',   icon: '🐾', name: '初次饲主', desc: '购买第一只宠物', reward: 0, petReward: 2 },
     { id: 'petmax', icon: '🐣', name: '满级萌宠', desc: '任意宠物升到满级', reward: 0, petReward: 3 },
-    { id: 'petall', icon: '💞', name: '宠物全家福', desc: '集齐全部 ' + PET_DEF.length + ' 只宠物', reward: 0, petReward: 5 }
+    { id: 'petall', icon: '💞', name: '宠物全家福', desc: v5PetAllDesc(PET_DEF.length), reward: 0, petReward: 5 }
   ];
   // —— v0.2.7 成就分组（分组进度条用） ——
   const ACH_GROUP = {
@@ -3157,8 +3157,7 @@
   } catch (e) { /* 忽略 */ }
   // v0.3.45: 成就解锁文案抽为纯函数(可测),附带累计进度
   function achUnlockMsg(a, pr, count) {
-    return '🏆 成就解锁 · ' + a.name + (a.reward > 0 ? '  +' + a.reward + '🪙' : '')
-      + (pr > 0 ? ' +' + pr + '🐾' : '') + ' · 第 ' + (count === undefined ? achUnlocked.size : count) + ' 个成就';
+    return v5AchUnlockText(a, pr, count);
   }
   function unlockAch(id) {
     if (achUnlocked.has(id)) return;
@@ -3497,11 +3496,11 @@
   }
   // 十六进制色 → rgba 字符串（供 Boss 血条底/激光半透明用）
   function hexA(hex, a) {
-    if (!hex) return 'rgba(255,45,85,' + a + ')';
+    if (!hex) return v5FallbackRgba(a);
     const h = hex.replace('#', '');
-    if (h.length !== 6) return 'rgba(255,45,85,' + a + ')';
+    if (h.length !== 6) return v5FallbackRgba(a);
     const r = parseInt(h.substring(0, 2), 16), g = parseInt(h.substring(2, 4), 16), b = parseInt(h.substring(4, 6), 16);
-    return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+    return v5RgbaStr(r, g, b, a);
   }
 
   // ===== 地图 =====
@@ -3748,7 +3747,7 @@
   // 油桶爆炸：范围伤害敌人 + 连锁引爆相邻油桶
   function explodeBarrel(x, y, visited) {
     visited = visited || {};
-    const key = x + ',' + y;
+    const key = v5GridKey(x, y);
     if (visited[key]) return;
     visited[key] = true;
     if (!inside(x, y) || map[y][x] !== TILE_BARREL) return;
@@ -4346,7 +4345,7 @@
       ctx.strokeStyle = hexA('#ff2d55', 0.9 * a);
       ctx.lineWidth = L.thick;
       ctx.beginPath(); ctx.moveTo(L.x, L.y); ctx.lineTo(ex, ey); ctx.stroke();
-      ctx.strokeStyle = 'rgba(255,255,255,' + (0.85 * a).toFixed(3) + ')';
+      ctx.strokeStyle = v5WhiteStrokeA(a);
       ctx.lineWidth = 2;
       ctx.beginPath(); ctx.moveTo(L.x, L.y); ctx.lineTo(ex, ey); ctx.stroke();
       ctx.shadowBlur = 0;
@@ -4936,7 +4935,7 @@
     if (coins >= 3000) unlockAch('rich');
     // —— v0.3.2 金币大亨：余额达 10000 ——
     if (coins >= 10000) unlockAch('rich2');
-    if (x !== undefined && y !== undefined) addText(x, y, '+' + gain + '🪙', '#ffd700');
+    if (x !== undefined && y !== undefined) addText(x, y, v5CoinGainText(gain), '#ffd700');
     return gain;
   }
   // —— v0.3.4 宠物币：宠物购买/升级专属货币，来源=成就奖励（老档首载按已解锁成就一次性补发） ——
@@ -5024,7 +5023,7 @@
     const mult = (1 + (combo - 1) * 0.1 * (1 + 0.5 * (upgrades.double || 0))) * (1 + 0.1 * (bonus.combo || 0));
     const gain = Math.round(baseScore * mult * (1 + 0.25 * (upgrades.greed || 0)) / 10) * 10;
     score += gain;
-    addText(e.x + e.size / 2, e.y - 4, '+' + gain, combo >= 3 ? '#ff00ff' : '#00f0ff');
+    addText(e.x + e.size / 2, e.y - 4, v5ComboGainText(gain), combo >= 3 ? '#ff00ff' : '#00f0ff');
     if (combo >= 3) addText(e.x + e.size / 2, e.y - 24, combo + ' 连击', '#ffe600');
   }
 
@@ -5198,10 +5197,10 @@
     // —— v0.3.20 无尽里程碑×羁绊联动：羁绊激活时里程碑宠物币 ×2 ——
     let petTip = '';
     const emb = endlessMilestoneBonus();
-    if (emb > 0) { addPetCoin(emb); petTip = ' · 🌊里程碑 +' + emb + '🐾'; }
+    if (emb > 0) { addPetCoin(emb); petTip = v5MilestoneTip(emb); }
     showToast(levelClearMsg(g, petTip, coins));
     lvIntroNext = true;
-    showLevelIntro((endlessMode ? '第 ' + level + ' 波' : '第 ' + level + ' 关') + (difficulty !== 'normal' ? ' · ' + ({ easy: '轻松', hard: '硬核' })[difficulty] : ''));
+    showLevelIntro(v5LevelIntroText(endlessMode, level, difficulty));
     updateHud();
   }
 
@@ -5518,7 +5517,7 @@
     if (multiMode !== 2 && running && !upgradeOpen && enemies.length === 0 && enemiesSpawned >= enemiesTotal && bossDeathT <= 0) {
       const bonus = 1000 + level * 200;
       score += bonus;
-      addText(W / 2, H / 2 - 30, '+' + bonus, '#39ff14');
+      addText(W / 2, H / 2 - 30, v5LevelBonusText(bonus), '#39ff14');
       showToast(levelDoneMsg(level, bonus, coins));
       if (!tookHitThisLevel) unlockAch('nohit');
       if (score >= 5000) unlockAch('score5k');
@@ -5551,7 +5550,7 @@
   // ===== HUD =====
   function fmtTime(s) {
     s = timeSeconds(s);
-    return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+    return v5ClockStr(s);
   }
   function updateTimerHud() {
     if (!elTimerWrap || !elTimerNum) return;
@@ -5639,9 +5638,9 @@
     const accent = _mix(A.accent, B.accent, t);
     return {
       bg: bg, grid: grid, accent: accent,
-      bgStr: 'rgb(' + bg.join(',') + ')',
-      gridStr: 'rgba(' + grid.join(',') + ',0.12)',
-      accentStr: 'rgb(' + accent.join(',') + ')'
+      bgStr: v5RgbStr(bg),
+      gridStr: v5GridStr(grid),
+      accentStr: v5AccentRgbStr(accent)
     };
   }
 
@@ -5659,7 +5658,7 @@
       s.style.left = (8 + Math.random() * 84) + '%';
       s.style.top = (14 + Math.random() * 58) + '%';
       s.style.background = col;
-      s.style.boxShadow = '0 0 12px 2px ' + col;
+      s.style.boxShadow = v5BoxShadowStr(col);
       s.style.setProperty('--dx', (Math.random() * 180 - 90).toFixed(0) + 'px');
       s.style.setProperty('--dy', (Math.random() * -150 - 20).toFixed(0) + 'px');
       s.style.animationDelay = (Math.random() * 1.3).toFixed(2) + 's';
@@ -5667,10 +5666,10 @@
       miloFire.appendChild(s);
     }
     miloTitle.textContent = milestoneTitleText();
-    let sub = (endlessMode ? '第 ' + level + ' 波' : '第 ' + level + ' 关') + ' · 目前 ' + score + ' 分';
+    let sub = v5RunSubText(endlessMode, level, score);
     // —— v0.3.32 无尽里程碑宠物币奖励显示(庆典内明确可见,与 toast 一致) ——
     const emb2 = endlessMilestoneBonus();
-    if (emb2 > 0) sub += ' · 🌊里程碑 +' + emb2 + '🐾' + (activeBond() ? '(羁绊×2)' : '');
+    if (emb2 > 0) sub += v5MilestoneSub(emb2, activeBond());
     miloSub.textContent = sub;
     milestone.classList.add('show');
     // —— v0.2.4 里程碑专属礼花音效（替换通用通关音） ——
@@ -5806,12 +5805,12 @@
       const a = waveAlpha(w.alpha);
       ctx.beginPath();
       ctx.arc(w.x, w.y, w.r, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(0, 229, 255,' + a.toFixed(2) + ')';
+      ctx.strokeStyle = v5CyanStroke(a);
       ctx.lineWidth = 5;
       ctx.stroke();
       ctx.beginPath();
       ctx.arc(w.x, w.y, w.r * 0.72, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(255,255,255,' + (a * 0.6).toFixed(2) + ')';
+      ctx.strokeStyle = v5WhiteStrokeB(a);
       ctx.lineWidth = 2;
       ctx.stroke();
     }
@@ -5844,7 +5843,7 @@
       const buckets = new Map();
       for (const p of particles) {
         const ab = Math.round(clamp(p.life / p.max, 0, 1) * 16) / 16;
-        const key = p.color + '|' + ab;
+        const key = v5ParticleKey(p.color, ab);
         let b = buckets.get(key);
         if (!b) { b = { color: p.color, alpha: ab, rects: [] }; buckets.set(key, b); }
         b.rects.push(p);
@@ -5921,7 +5920,7 @@
       ctx.fillStyle = '#fff';
       ctx.font = '700 10px "Consolas", monospace';
       ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-      ctx.fillText('LV.' + level + ' ' + bossType.name + '  ' + bossHp + ' / ' + bossMaxHp + (rage ? '  ⚡狂暴' : ''), W / 2, by + bh + 6);
+      ctx.fillText(v5BossHudText(level, bossType.name, bossHp, bossMaxHp, rage), W / 2, by + bh + 6);
     }
 
     // 道具效果状态（左下）
@@ -5936,7 +5935,7 @@
       ctx.fillStyle = '#030308';
       ctx.font = '700 9px "Consolas", monospace';
       ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
-      ctx.fillText(label + ' ' + t.toFixed(1) + 's', ex + 4, ey + 7);
+      ctx.fillText(v5StatusLabel(label, t), ex + 4, ey + 7);
       ex += 64;
     };
     showFx('护盾', (player && player.spawnInv > 0) ? player.spawnInv / 60 : 0, '#00f0ff');
@@ -5949,7 +5948,7 @@
       const hf = hurtFlash * (reduced() ? 0.5 : 1);
       const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.28, W / 2, H / 2, H * 0.78);
       g.addColorStop(0, 'rgba(255,45,85,0)');
-      g.addColorStop(1, 'rgba(255,45,85,' + (0.5 * hf).toFixed(3) + ')');
+      g.addColorStop(1, v5RedFill(hf));
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, W, H);
     }
@@ -5969,13 +5968,13 @@
       ctx.fillStyle = '#ff5c7a';
       ctx.font = '900 26px "Segoe UI", sans-serif';
       ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.fillText('⚠ WARNING · ' + bossType.name + ' BOSS 来袭 ⚠', W / 2, bandY + 33);
+      ctx.fillText(v5BossWarnText(bossType.name), W / 2, bandY + 33);
       ctx.globalAlpha = 1; ctx.shadowBlur = 0;
     }
 
     // Boss 死亡白闪
     if (whiteFlash > 0) {
-      ctx.fillStyle = 'rgba(255,255,255,' + (0.85 * whiteFlash * (reduced() ? 0.4 : 1)).toFixed(3) + ')';
+      ctx.fillStyle = v5WhiteFlashStr(whiteFlash, reduced() ? 0.4 : 1);
       ctx.fillRect(0, 0, W, H);
     }
   }
@@ -6001,7 +6000,7 @@
       if (e.state === 'charge_warn') {
         const cy = e.y + e.size / 2;
         const ex = cx + DX[e.chargeDir] * 800, ey = cy + DY[e.chargeDir] * 800;
-        ctx.strokeStyle = 'rgba(255,90,0,' + (0.5 + 0.4 * Math.sin(e.chargeT * 0.5)).toFixed(3) + ')';
+        ctx.strokeStyle = v5OrangeStroke(e.chargeT);
         ctx.lineWidth = 3;
         ctx.setLineDash([10, 8]);
         ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ex, ey); ctx.stroke();
@@ -6374,18 +6373,18 @@
       if (skin.fx === 'prism') {
         // 极光棱镜：旋转虹彩光环 + 流光描边
         for (let i = 0; i < 6; i++) {
-          ctx.strokeStyle = 'hsla(' + ((ph * 90 + i * 60) % 360) + ',100%,70%,0.55)';
+          ctx.strokeStyle = v5HslaA(ph, i);
           ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.arc(0, 0, 11 + Math.sin(ph * 3 + i) * 1.2, 0, Math.PI * 2);
           ctx.stroke();
         }
-        ctx.strokeStyle = 'hsla(' + ((ph * 120) % 360) + ',100%,75%,0.9)';
+        ctx.strokeStyle = v5HslaB(ph);
         ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(0, 0, 13.5, 0, Math.PI * 2); ctx.stroke();
       } else if (skin.fx === 'dragon') {
         // 圣龙之鳞：龙息余焰（尾迹粒子）+ 金环
-        ctx.fillStyle = 'hsla(' + ((ph * 80) % 60 + 20) + ',100%,60%,0.5)';
+        ctx.fillStyle = v5HslaC(ph);
         ctx.beginPath(); ctx.arc(-4, 9, 3 + Math.sin(ph * 5) * 1, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = 'hsla(20,100%,55%,0.35)';
         ctx.beginPath(); ctx.arc(4, 9, 2.4 + Math.cos(ph * 5) * 0.8, 0, Math.PI * 2); ctx.fill();
@@ -6395,15 +6394,15 @@
       } else if (skin.fx === 'neon') {
         // 霓虹脉冲：呼吸光晕
         const a = 0.4 + 0.4 * Math.sin(ph * 4);
-        ctx.strokeStyle = 'rgba(255,45,149,' + a + ')';
+        ctx.strokeStyle = v5PinkStroke(a);
         ctx.lineWidth = 2.2;
         ctx.beginPath(); ctx.arc(0, 0, 12 + Math.sin(ph * 4) * 1.5, 0, Math.PI * 2); ctx.stroke();
-        ctx.fillStyle = 'rgba(255,107,213,' + (a * 0.5) + ')';
+        ctx.fillStyle = v5PinkFill(a);
         ctx.beginPath(); ctx.arc(0, 0, 6, 0, Math.PI * 2); ctx.fill();
       } else if (skin.fx === 'magma') {
         // 熔岩之心：脉动熔岩外圈 + 灼热裂纹 + 上升火星
         const a = 0.55 + 0.35 * Math.sin(ph * 5);
-        ctx.strokeStyle = 'rgba(255,106,0,' + a + ')';
+        ctx.strokeStyle = v5OrangeFill(a);
         ctx.lineWidth = 2.4;
         ctx.beginPath(); ctx.arc(0, 0, 12.5 + Math.sin(ph * 5) * 1.4, 0, Math.PI * 2); ctx.stroke();
         // 灼热裂纹（放射状折线，随机相位）
@@ -6421,7 +6420,7 @@
         for (let i = 0; i < 3; i++) {
           const fy = ((ph * 22 + i * 13) % 22) - 2;
           const fx2 = Math.sin(ph * 3 + i * 2.1) * 5;
-          ctx.fillStyle = 'rgba(255,150,40,' + (0.7 * (1 - fy / 22)) + ')';
+          ctx.fillStyle = v5AmberFill(fy);
           ctx.beginPath(); ctx.arc(fx2, -6 - fy, 1, 0, Math.PI * 2); ctx.fill();
         }
       } else if (skin.fx === 'void') {
@@ -6432,7 +6431,7 @@
         ctx.lineWidth = 1.4;
         ctx.beginPath(); ctx.arc(0, 0, 13.5, 0, Math.PI * 2); ctx.stroke();
         for (let i = 0; i < 3; i++) {
-          ctx.strokeStyle = 'hsla(' + (265 + i * 12) + ',100%,70%,0.4)';
+          ctx.strokeStyle = v5HslaD(i);
           ctx.lineWidth = 1.1;
           ctx.beginPath();
           ctx.arc(0, 0, 9, i * 2.1, i * 2.1 + 1.4);
@@ -6441,7 +6440,7 @@
         ctx.restore();
         // 中心引力暗点（轻微脉动）
         const va = 0.35 + 0.25 * Math.sin(ph * 4);
-        ctx.fillStyle = 'rgba(20,4,46,' + va + ')';
+        ctx.fillStyle = v5DarkFill(va);
         ctx.beginPath(); ctx.arc(0, 0, 4.5, 0, Math.PI * 2); ctx.fill();
       } else if (skin.fx === 'storm') {
         // 雷霆风暴：随机电弧闪电 + 高压电蓝光环
@@ -6470,7 +6469,7 @@
       } else if (skin.fx === 'frost') {
         // 冰霜王座：冷冽冰环 + 飘落雪花 + 冻结结晶
         const fa = 0.5 + 0.3 * Math.sin(ph * 3);
-        ctx.strokeStyle = 'rgba(174,230,255,' + fa + ')';
+        ctx.strokeStyle = v5IceStroke(fa);
         ctx.lineWidth = 2;
         ctx.beginPath(); ctx.arc(0, 0, 12.5 + Math.sin(ph * 3) * 1.2, 0, Math.PI * 2); ctx.stroke();
         // 六向冰晶（缓慢旋转）
@@ -6490,7 +6489,7 @@
         for (let i = 0; i < 4; i++) {
           const fy = ((ph * 16 + i * 11) % 20) - 1;
           const fx2 = Math.sin(ph * 2.5 + i * 1.9) * 6;
-          ctx.fillStyle = 'rgba(255,255,255,' + (0.75 * (1 - fy / 20)) + ')';
+          ctx.fillStyle = v5WhiteFill(fy);
           ctx.beginPath(); ctx.arc(fx2, -6 - fy, 1.1, 0, Math.PI * 2); ctx.fill();
         }
       } else if (skin.fx === 'plasma') {
@@ -6502,7 +6501,7 @@
         ctx.beginPath(); ctx.arc(0, 0, 13, 0, Math.PI * 2); ctx.stroke();
         for (let i = 0; i < 4; i++) {
           const ang = i * Math.PI / 2;
-          ctx.strokeStyle = 'hsla(' + (285 + i * 15) + ',100%,72%,0.45)';
+          ctx.strokeStyle = v5HslaE(i);
           ctx.lineWidth = 1.2;
           ctx.beginPath();
           ctx.arc(0, 0, 9.5, ang, ang + 1.0);
@@ -6519,12 +6518,12 @@
         ctx.restore();
         // 核心辉光（脉动）
         const pa = 0.25 + 0.2 * Math.sin(ph * 6);
-        ctx.fillStyle = 'rgba(200,107,255,' + pa + ')';
+        ctx.fillStyle = v5PurpleFill(pa);
         ctx.beginPath(); ctx.arc(0, 0, 5, 0, Math.PI * 2); ctx.fill();
       } else if (skin.fx === 'jade') {
         // 翡翠龙鳞：脉动玉环 + 鳞状弧线 + 青绿辉光
         const ja = 0.5 + 0.35 * Math.sin(ph * 4);
-        ctx.strokeStyle = 'rgba(52,211,153,' + ja + ')';
+        ctx.strokeStyle = v5GreenStroke(ja);
         ctx.lineWidth = 2.2;
         ctx.beginPath(); ctx.arc(0, 0, 12.6 + Math.sin(ph * 4) * 1.3, 0, Math.PI * 2); ctx.stroke();
         // 鳞状弧线（同心错位）
@@ -6537,7 +6536,7 @@
         }
         // 顶部玉珠
         const ja2 = 0.4 + 0.3 * Math.sin(ph * 5);
-        ctx.fillStyle = 'rgba(52,211,153,' + ja2 + ')';
+        ctx.fillStyle = v5GreenFill(ja2);
         ctx.beginPath(); ctx.arc(0, -11, 1.6, 0, Math.PI * 2); ctx.fill();
       }
     }
@@ -6640,7 +6639,7 @@
   function withBalance(msg, n, cur) { return msg + ' · 余额 ' + fmtNum(n) + cur; }
   // v0.3.48: 宠物升级文案抽为纯函数,附带下一级费用/满级提示
   function petUpgradeMsg(icon, name, desc, lv, nextPrice, balance) {
-    const next = nextPrice ? ' · 下级 ' + nextPrice + '🐾' : ' · 已满级';
+    const next = v5NextPriceText(nextPrice);
     return icon + ' ' + name + ' 升到 Lv' + (lv + 1) + ' · ' + desc + ' ×' + (lv + 1) + next
       + ' · 余额 ' + fmtNum(balance) + '🐾';
   }
@@ -6793,6 +6792,107 @@ function carStatHtml(v, label) { return '<div class="carStat"><b>' + fmtNum(v) +
 function achStateText(on, rw) { return on ? '已解锁' : rw; }
 function boardRankText(i) { return String(Math.max(1, Math.floor(Number(i) || 0) + 1)); }
 function safeBoard(v) { const a = safeJsonArr(v); return a.filter(x => x && typeof x === 'object'); }
+function v5RgbaStr(r,g,b,a){return 'rgba('+r+','+g+','+b+','+a+')';}
+function v5GridKey(x,y){return x+','+y;}
+function v5WhiteStrokeA(a){return 'rgba(255,255,255,'+(0.85*a).toFixed(3)+')';}
+function v5CoinGainText(g){return '+'+fmtNum(g)+'🪙';}
+function v5ComboGainText(g){return '+'+fmtNum(g);}
+function v5MilestoneTip(e){return ' · 🌊里程碑 +'+fmtNum(e)+'🐾';}
+function v5LevelIntroText(endless,lv,diff){return (endless?'第 '+lv+' 波':'第 '+lv+' 关')+(diff!=='normal'?' · '+({easy:'轻松',hard:'硬核'})[diff]:'');}
+function v5LevelBonusText(g){return '+'+fmtNum(g);}
+function v5ClockStr(s){return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
+function v5RgbStr(c){return 'rgb('+c.join(',')+')';}
+function v5GridStr(c){return 'rgba('+c.join(',')+',0.12)';}
+function v5AccentRgbStr(c){return 'rgb('+c.join(',')+')';}
+function v5BoxShadowStr(c){return '0 0 12px 2px '+c;}
+function v5RunSubText(endless,lv,score){return (endless?'第 '+lv+' 波':'第 '+lv+' 关')+' · 目前 '+fmtNum(score)+' 分';}
+function v5MilestoneSub(e,bond){return ' · 🌊里程碑 +'+fmtNum(e)+'🐾'+(bond?'(羁绊×2)':'');}
+function v5CyanStroke(a){return 'rgba(0, 229, 255,'+a.toFixed(2)+')';}
+function v5WhiteStrokeB(a){return 'rgba(255,255,255,'+(a*0.6).toFixed(2)+')';}
+function v5ParticleKey(c,ab){return c+'|'+ab;}
+function v5BossHudText(lv,name,hp,max,rage){return 'LV.'+lv+' '+name+'  '+hp+' / '+max+(rage?'  ⚡狂暴':'');}
+function v5StatusLabel(l,t){return l+' '+t.toFixed(1)+'s';}
+function v5RedFill(hf){return 'rgba(255,45,85,'+(0.5*hf).toFixed(3)+')';}
+function v5BossWarnText(n){return '⚠ WARNING · '+n+' BOSS 来袭 ⚠';}
+function v5WhiteFlashStr(f,mul){return 'rgba(255,255,255,'+(0.85*f*mul).toFixed(3)+')';}
+function v5OrangeStroke(t){return 'rgba(255,90,0,'+(0.5+0.4*Math.sin(t*0.5)).toFixed(3)+')';}
+function v5HslaA(ph,i){return 'hsla('+((ph*90+i*60)%360)+',100%,70%,0.55)';}
+function v5HslaB(ph){return 'hsla('+((ph*120)%360)+',100%,75%,0.9)';}
+function v5HslaC(ph){return 'hsla('+((ph*80)%60+20)+',100%,60%,0.5)';}
+function v5PinkStroke(a){return 'rgba(255,45,149,'+a+')';}
+function v5PinkFill(a){return 'rgba(255,107,213,'+(a*0.5)+')';}
+function v5OrangeFill(a){return 'rgba(255,106,0,'+a+')';}
+function v5AmberFill(fy){return 'rgba(255,150,40,'+(0.7*(1-fy/22))+')';}
+function v5HslaD(i){return 'hsla('+(265+i*12)+',100%,70%,0.4)';}
+function v5DarkFill(va){return 'rgba(20,4,46,'+va+')';}
+function v5IceStroke(fa){return 'rgba(174,230,255,'+fa+')';}
+function v5WhiteFill(fy){return 'rgba(255,255,255,'+(0.75*(1-fy/20))+')';}
+function v5HslaE(i){return 'hsla('+(285+i*15)+',100%,72%,0.45)';}
+function v5PurpleFill(pa){return 'rgba(200,107,255,'+pa+')';}
+function v5GreenStroke(ja){return 'rgba(52,211,153,'+ja+')';}
+function v5GreenFill(ja){return 'rgba(52,211,153,'+ja+')';}
+function v5NextPriceText(p){return p?' · 下级 '+fmtNum(p)+'🐾':' · 已满级';}
+function v5DailyModText(prev,name,desc){return (prev?prev+' · ':'')+name+'('+desc+')';}
+function v5IntroTxt(lv){return '第 '+lv+' 关';}
+function v5ShopIconHtml(icon){return '<span class="siIcon">'+icon+'</span>';}
+function v5RarClass(rar,equipped){return 'shopItem rar-'+rar+(equipped?' equipped':'');}
+function v5RarBadge(rar){return '<b class="rar '+rar+'">'+RARITY_NAME[rar]+'</b>';}
+function v5SkinNameHtml(name,badge){return '<span class="siName">'+name+badge+'</span>';}
+function v5SkinMeta(owned,equipped,price){return owned?(equipped?'已装备':'已拥有'):'🪙 '+fmtNum(price);}
+function v5SkinBtnHtml(equipped,owned,price){return '<button class="siBtn '+(equipped?'equipped':(owned?'owned':''))+'">'+(equipped?'已装备':(owned?'装备':'🪙 购买 '+fmtNum(price)))+'</button>';}
+function v5BaseBrick(core,on){return '<div class="bw '+(core?'core':(on?'on':'off'))+'"></div>';}
+function v5BaseLvTxt(lv,maxed){return 'Lv'+lv+(maxed?'·MAX':'');}
+function v5BaseMaxDesc(w){return '基地护墙 '+w+' 格 · 已满级，最坚固的堡垒';}
+function v5BaseNextDesc(w,name,nw){return '基地护墙 '+w+' 格 → 下一级 '+name+'（'+nw+' 格）';}
+function v5BaseNameRow(name,lv){return '<div class="baseNameRow"><span class="siName">基地 · '+name+'</span><span class="baseLv">'+lv+'</span></div>';}
+function v5BaseBtnHtml(maxed,price){return '<button class="siBtn'+(maxed?' owned disabled':'')+'">'+(maxed?'已满级':'🪙 升级 '+fmtNum(price))+'</button>';}
+function v5QuotedName(n){return '「'+n+'」';}
+function v5SkinBoughtMsg(icon,name){return icon+' 皮肤已购买并装备 · '+name;}
+function v5WskinRarClass(rar,equipped){return 'shopItem rar-'+rar+(equipped?' equipped':'');}
+function v5WskinRarBadge(rar){return '<b class="rar '+rar+'">'+RARITY_NAME[rar]+'</b>';}
+function v5WskinNameHtml(icon,name,badge){return '<span class="siName">'+icon+' '+name+badge+'</span>';}
+function v5WskinMeta(owned,equipped,price){return owned?(equipped?'已装备':'已拥有'):'🪙 '+fmtNum(price);}
+function v5WskinBtnHtml(equipped,owned,price){return '<button class="siBtn '+(equipped?'equipped':(owned?'owned':''))+'">'+(equipped?'已装备':(owned?'装备':'🪙 购买 '+fmtNum(price)))+'</button>';}
+function v5BondRowHtml(on){return '<div class="bdRow'+(on?' on':'')+'">';}
+function v5BondIconHtml(icon){return '<span class="bdIcon">'+icon+'</span>';}
+function v5BondInfoHtml(name){return '<span class="bdInfo"><b>'+name+'</b>';}
+function v5BondPairText(h,p){return h.icon+' '+h.name+' × '+p.icon+' '+p.name;}
+function v5BondEmHtml(desc){return '<em>'+desc+'</em></span>';}
+function v5BondStateText(on){return on?'激活中':'未激活';}
+function v5PetRarClass(owned,equipped){return 'shopItem rar-'+(owned?'legendary':'epic')+(equipped?' equipped':'');}
+function v5MagnetEffDesc(lv){return '磁力半径 '+magnetRange(lv)+'px · 拉速 '+magnetPull(lv)+'px/s';}
+function v5MagnetNextDesc(lv){return '升到 Lv'+(lv+1)+' 后 半径 '+magnetRange(lv+1)+'px · 拉速 '+magnetPull(lv+1)+'px/s';}
+function v5PetBuyText(price){return '🐾 购买 '+fmtNum(price);}
+function v5PetUpgradeText(p){return '🐾 升级 '+fmtNum(p);}
+function v5PetNameHtml(name,owned,passive){return '<span class="siName">'+name+'<b class="rar '+(owned?'legendary':'epic')+'">'+passive+'</b></span>';}
+function v5PetDescHtml(eff,equipped,maxed,next,bond){return '<span class="siDesc">'+eff+(equipped&&!maxed?' · '+next:'')+bond+'</span>';}
+function v5PetMetaHtml(lv,owned,equipped){return '<span class="siMeta">'+lv+(owned?(equipped?' · 跟随中':' · 已拥有'):'')+'</span>';}
+function v5PetBtnHtml(cls,txt){return '<button class="siBtn '+cls+'">'+txt+'</button>';}
+function v5UnlockLabel(n){return '「'+n+'」';}
+function v5PetBoughtMsg(icon,name,desc,lv){return icon+' '+name+' 已购买并跟随！'+desc+' ×'+lv;}
+function v5GachaCoinDetail(g){return '🪙 +'+fmtNum(g);}
+function v5GachaBonusDetail(icon,name,lv){return icon+' '+name+' Lv'+lv;}
+function v5AchBadgeWrap(got,total){return '<div class="achBadgeTitle">'+achBadgeTitleMsg(got,total)+'</div><div class="achBadgeRow">';}
+function v5AchBadgeHtml(name,got,icon){return '<div class="achBadge'+(got?'':' none')+'" title="'+name+(got?'':'（未解锁）')+'">'+icon+'</div>';}
+function v5GachaDescText(cost){return '消耗 🪙'+fmtNum(cost)+' 抽一次 · 可能获得大额金币 / 随机强化 +1 级 / 超级大奖';}
+function v5GachaMetaText(cnt,bal){return '已抽 '+fmtNum(cnt)+' 次 · 余额 🪙'+fmtNum(bal);}
+function v5GachaBtnHtml(afford,cost){return '<button class="gachaBtn" '+(afford?'':'disabled')+'>🎲 抽奖 '+fmtNum(cost)+'</button>';}
+function v5ResetDescText(spent){return '花费 🪙200 返还已投入 50%（🪙'+fmtNum(Math.floor(spent*0.5))+'）· 清空全部永久加成等级';}
+function v5ResetMetaText(spent,total){return '累计投入 🪙'+fmtNum(spent)+' · 当前总等级 '+total;}
+function v5ResetBtnHtml(can){return '<button class="gachaBtn" '+(can?'':'disabled')+'>🔄 重置</button>';}
+function v5HeroUnlockLabel(n){return '解锁「'+n+'」';}
+function v5HeroBoughtMsg(icon,name,price){return icon+' 已解锁 · '+name+'（-'+fmtNum(price)+'🐾）';}
+function v5SaveCode(json){return 'QTB1.'+btoa(unescape(encodeURIComponent(JSON.stringify(json))));}
+function v5ParseErrText(e){return '解析失败：'+(e&&e.message||e);}
+function v5SaveTipHtml(){return '<div class="saveTip">把下面的存档码复制保存好。换设备 / 清缓存后，用它「导入恢复」即可拿回全部进度。</div>'+
+          '<textarea class="saveArea" id="saveCode" readonly></textarea>';}
+function v5RecordUid(){return Date.now()+''+Math.floor(Math.random()*1e6);}
+function v5PetAllDesc(n){return '集齐全部 '+n+' 只宠物';}
+function v5AchUnlockText(a,pr,count){return '🏆 成就解锁 · '+a.name+(a.reward>0?'  +'+a.reward+'🪙':'')+(pr>0?' +'+pr+'🐾':'')+' · 第 '+(count===undefined?achUnlocked.size:count)+' 个成就';}
+function v5FallbackRgba(a){return 'rgba(255,45,85,'+a+')';}
+function v5SkinPrevHtml(){return '<span class="siIcon skinPrev"><canvas width="48" height="48"></canvas></span>';}
+function v5SkinDescHtml(d){return '<span class="siDesc">'+d+'</span>';}
+function v5BaseIconHtml(){return '<span class="baseIcon">🏰</span>';}
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -6951,7 +7051,7 @@ function safeBoard(v) { const a = safeJsonArr(v); return a.filter(x => x && type
         const m = pool.splice(idx, 1)[0];
         dailyMods._names.push(m.name);
         // —— v0.3.33 词条完整描述(名:描述),玩家知悉具体规则 ——
-        dailyMods._descFull = (dailyMods._descFull ? dailyMods._descFull + ' · ' : '') + m.name + '(' + m.desc + ')';
+        dailyMods._descFull = v5DailyModText(dailyMods._descFull, m.name, m.desc);
         m.apply();
       }
       dailyMods._desc = dailyMods._names.join(' · ');
@@ -6993,7 +7093,7 @@ function safeBoard(v) { const a = safeJsonArr(v); return a.filter(x => x && type
     setBgm(computeTargetBgm());   // v0.2.9 开局即按模式/Boss/波次选曲
     lvIntroNext = false;
     // —— v0.2.6 关卡选择 / 无尽模式标题文案 ——
-    let introTxt = '第 ' + level + ' 关';
+    let introTxt = v5IntroTxt(level);
     if (dailyMode) introTxt = '每日挑战';
     else if (timedMode) introTxt = '⏱ 限时冲分';
     else if (endlessMode) introTxt = '🌊 无尽模式';
@@ -7149,7 +7249,7 @@ function safeBoard(v) { const a = safeJsonArr(v); return a.filter(x => x && type
         const price = maxed ? 0 : def.price[lv];
         const item = document.createElement('div');
         item.className = 'shopItem';
-        item.innerHTML = '<span class="siIcon">' + def.icon + '</span>' +
+        item.innerHTML = v5ShopIconHtml(def.icon) +
           '<span class="siName">' + def.name + '</span>' +
           '<span class="siDesc">' + def.desc + '</span>' +
           '<span class="siMeta">' + shopMetaText(maxed, lv, def.max, price) + '</span>' +
@@ -7174,14 +7274,14 @@ function safeBoard(v) { const a = safeJsonArr(v); return a.filter(x => x && type
         const equipped = equippedSkin === id;
         const item = document.createElement('div');
         const rar = sk.rarity || 'rare';
-        item.className = 'shopItem rar-' + rar + (equipped ? ' equipped' : '');
-        const rarBadge = '<b class="rar ' + rar + '">' + RARITY_NAME[rar] + '</b>';
+        item.className = v5RarClass(rar, equipped);
+        const rarBadge = v5RarBadge(rar);
         const desc = sk.fish ? '🐟 限定版 · 专属肥鱼造型' : (sk.fx ? fxDesc(sk.fx) : '玩家坦克外观配色');
-        item.innerHTML = '<span class="siIcon skinPrev"><canvas width="48" height="48"></canvas></span>' +
-          '<span class="siName">' + sk.name + rarBadge + '</span>' +
-          '<span class="siDesc">' + desc + '</span>' +
-          '<span class="siMeta">' + (owned ? (equipped ? '已装备' : '已拥有') : '🪙 ' + sk.price) + '</span>' +
-          '<button class="siBtn ' + (equipped ? 'equipped' : (owned ? 'owned' : '')) + '">' + (equipped ? '已装备' : (owned ? '装备' : '🪙 购买 ' + sk.price)) + '</button>';
+        item.innerHTML = v5SkinPrevHtml() +
+          v5SkinNameHtml(sk.name, rarBadge) +
+          v5SkinDescHtml(desc) +
+          '<span class="siMeta">' + v5SkinMeta(owned, equipped, sk.price) + '</span>' +
+          v5SkinBtnHtml(equipped, owned, sk.price);
         const prev = item.querySelector('.siIcon canvas');
         if (prev) drawSkinPrev(prev, id);
         const btn = item.querySelector('.siBtn');
@@ -7223,21 +7323,21 @@ function safeBoard(v) { const a = safeJsonArr(v); return a.filter(x => x && type
       for (let dx = -1; dx <= 1; dx++) {
         const on = cells.some(([a, b]) => a === dy && b === dx);
         const core = dy === 0 && dx === 0;
-        prev += '<div class="bw ' + (core ? 'core' : (on ? 'on' : 'off')) + '"></div>';
+        prev += v5BaseBrick(core, on);
       }
       prev += '</div>';
     }
     prev += '</div>';
-    const lvTxt = 'Lv' + lv + (maxed ? '·MAX' : '');
+    const lvTxt = v5BaseLvTxt(lv, maxed);
     const desc = maxed
-      ? ('基地护墙 ' + def.walls.length + ' 格 · 已满级，最坚固的堡垒')
-      : ('基地护墙 ' + def.walls.length + ' 格 → 下一级 ' + next.name + '（' + next.walls.length + ' 格）');
-    item.innerHTML = '<span class="baseIcon">🏰</span>' +
+      ? v5BaseMaxDesc(def.walls.length)
+      : v5BaseNextDesc(def.walls.length, next.name, next.walls.length);
+    item.innerHTML = v5BaseIconHtml() +
       '<div class="baseInfo">' +
-        '<div class="baseNameRow"><span class="siName">基地 · ' + def.name + '</span><span class="baseLv">' + lvTxt + '</span></div>' +
+        v5BaseNameRow(def.name, lvTxt) +
         '<span class="siDesc">' + desc + '</span>' +
       '</div>' + prev +
-      '<button class="siBtn' + (maxed ? ' owned disabled' : '') + '">' + (maxed ? '已满级' : '🪙 升级 ' + next.price) + '</button>';
+      v5BaseBtnHtml(maxed, next.price);
     const btn = item.querySelector('.siBtn');
     if (!maxed) btn.onclick = () => buyBaseLevel();
     return item;
@@ -7270,12 +7370,12 @@ function safeBoard(v) { const a = safeJsonArr(v); return a.filter(x => x && type
   function buySkin(id) {
     const sk = SKINS[id];
     if (!sk || ownedSkins.includes(id)) return;
-    if (coins < sk.price) { showToast(insufficientMsg('🪙 金币', coins, sk.price, '「' + sk.name + '」')); beep(180, 0.12, 'square', 0.05); return; }
+    if (coins < sk.price) { showToast(insufficientMsg('🪙 金币', coins, sk.price, v5QuotedName(sk.name))); beep(180, 0.12, 'square', 0.05); return; }
     coins -= sk.price; ownedSkins.push(id); equippedSkin = id;
     saveCoins(); saveSkins(); saveSkin(); renderShop(); updateCoinHud();
     // —— v0.3.2 收藏家：拥有 15 款皮肤 ——
     if (ownedSkins.length >= 15) unlockAch('collector');
-    showToast(withBalance(sk.icon + ' 皮肤已购买并装备 · ' + sk.name, coins, '🪙'));
+    showToast(withBalance(v5SkinBoughtMsg(sk.icon, sk.name), coins, '🪙'));
     sfxBuy();   // v0.3.2 购买音效
   }
   function equipSkin(id) {
@@ -7294,14 +7394,14 @@ function safeBoard(v) { const a = safeJsonArr(v); return a.filter(x => x && type
       const equipped = equippedWSkin === id;
       const rar = wsk.rarity || 'rare';
       const item = document.createElement('div');
-      item.className = 'shopItem rar-' + rar + (equipped ? ' equipped' : '');
-      const rarBadge = '<b class="rar ' + rar + '">' + RARITY_NAME[rar] + '</b>';
+      item.className = v5WskinRarClass(rar, equipped);
+      const rarBadge = v5WskinRarBadge(rar);
       const desc = id === 'wing-teal' ? '🛡 僚机默认配色 · 免费' : '🛡 僚机专属外观';
       item.innerHTML = '<span class="siIcon skinPrev"><canvas width="48" height="48"></canvas></span>' +
-        '<span class="siName">' + wsk.icon + ' ' + wsk.name + rarBadge + '</span>' +
+        v5WskinNameHtml(wsk.icon, wsk.name, rarBadge) +
         '<span class="siDesc">' + desc + '</span>' +
-        '<span class="siMeta">' + (owned ? (equipped ? '已装备' : '已拥有') : '🪙 ' + wsk.price) + '</span>' +
-        '<button class="siBtn ' + (equipped ? 'equipped' : (owned ? 'owned' : '')) + '">' + (equipped ? '已装备' : (owned ? '装备' : '🪙 购买 ' + wsk.price)) + '</button>';
+        '<span class="siMeta">' + v5WskinMeta(owned, equipped, wsk.price) + '</span>' +
+        v5WskinBtnHtml(equipped, owned, wsk.price);
       const prev = item.querySelector('.siIcon canvas');
       if (prev) drawSkinPrev(prev, id, true);
       const btn = item.querySelector('.siBtn');
@@ -7342,12 +7442,12 @@ function safeBoard(v) { const a = safeJsonArr(v); return a.filter(x => x && type
     for (const b of PET_BONDS) {
       const on = !!(cur && cur.id === b.id);
       const hDef = HEROES[b.hero], pDef = PET_MAP[b.pet];
-      html += '<div class="bdRow' + (on ? ' on' : '') + '">' +
-        '<span class="bdIcon">' + b.icon + '</span>' +
-        '<span class="bdInfo"><b>' + b.name + '</b>' +
-        '<i>' + hDef.icon + ' ' + hDef.name + ' × ' + pDef.icon + ' ' + pDef.name + '</i>' +
-        '<em>' + b.desc + '</em></span>' +
-        '<span class="bdState">' + (on ? '激活中' : '未激活') + '</span></div>';
+      html += v5BondRowHtml(on) +
+        v5BondIconHtml(b.icon) +
+        v5BondInfoHtml(b.name) +
+        '<i>' + v5BondPairText(hDef, pDef) + '</i>' +
+        v5BondEmHtml(b.desc) +
+        '<span class="bdState">' + v5BondStateText(on) + '</span></div>';
     }
     wrap.innerHTML = html;
     shopBody.appendChild(wrap);
@@ -7360,30 +7460,30 @@ function safeBoard(v) { const a = safeJsonArr(v); return a.filter(x => x && type
       const lv = petLevels[def.id] || (owned ? 1 : 0);
       const maxed = lv >= def.maxLv;
       const item = document.createElement('div');
-      item.className = 'shopItem rar-' + (owned ? 'legendary' : 'epic') + (equipped ? ' equipped' : '');
-      const lvTxt = 'Lv' + lv + (maxed ? '·MAX' : '');
+      item.className = v5PetRarClass(owned, equipped);
+      const lvTxt = v5BaseLvTxt(lv, maxed);
       const effDesc = def.passive === 'magnet'
-        ? '磁力半径 ' + magnetRange(lv) + 'px · 拉速 ' + magnetPull(lv) + 'px/s'
+        ? v5MagnetEffDesc(lv)
         : def.desc + ' ×' + lv;
       // —— v0.3.31 磁力猪升级预览显示具体数值(半径/拉速 px),玩家知悉升级收益 ——
       const nextEff = def.passive === 'magnet'
-        ? '升到 Lv' + (lv + 1) + ' 后 半径 ' + magnetRange(lv + 1) + 'px · 拉速 ' + magnetPull(lv + 1) + 'px/s'
+        ? v5MagnetNextDesc(lv)
         : '升到 Lv' + (lv + 1) + ' 后 ' + def.desc + ' ×' + (lv + 1);
       // —— v0.3.8 羁绊提示:该宠物的羁绊英雄与效果 ——
       // —— v0.3.27 修复:filter 显示该宠物全部羁绊(磁力猪有 2 条:狙击/磁暴,原 find 只显 1 条) ——
       const bonds = PET_BONDS.filter(b => b.pet === def.id);
       const bondTip = bonds.length ? ' · ' + bonds.map(b => b.icon + ' 羁绊「' + b.name + '」:与英雄「' + HEROES[b.hero].name + '」同携生效(' + b.desc + ')').join(' · ') : '';
       let btnTxt, btnCls = '', action = null;
-      if (!owned) { btnTxt = '🐾 购买 ' + def.price; action = () => buyPet(def.id); }
+      if (!owned) { btnTxt = v5PetBuyText(def.price); action = () => buyPet(def.id); }
       else if (equipped) {
-        if (!maxed) { btnTxt = '🐾 升级 ' + PET_LV_PET[lv]; action = () => upgradePet(def.id); btnCls = 'owned'; }
+        if (!maxed) { btnTxt = v5PetUpgradeText(PET_LV_PET[lv]); action = () => upgradePet(def.id); btnCls = 'owned'; }
         else { btnTxt = '已装备'; btnCls = 'equipped'; }
       } else { btnTxt = '装备'; btnCls = 'owned'; action = () => equipPet(def.id); }
       item.innerHTML = '<span class="siIcon">' + def.icon + '</span>' +
-        '<span class="siName">' + def.name + '<b class="rar ' + (owned ? 'legendary' : 'epic') + '">' + petPassiveName(def) + '</b></span>' +
-        '<span class="siDesc">' + effDesc + (equipped && !maxed ? ' · ' + nextEff : '') + bondTip + '</span>' +
-        '<span class="siMeta">' + lvTxt + (owned ? (equipped ? ' · 跟随中' : ' · 已拥有') : '') + '</span>' +
-        '<button class="siBtn ' + btnCls + '">' + btnTxt + '</button>';
+        v5PetNameHtml(def.name, owned, petPassiveName(def)) +
+        v5PetDescHtml(effDesc, equipped, maxed, nextEff, bondTip) +
+        v5PetMetaHtml(lvTxt, owned, equipped) +
+        v5PetBtnHtml(btnCls, btnTxt);
       const btn = item.querySelector('.siBtn');
       if (action) btn.onclick = action;
       shopBody.appendChild(item);
@@ -7392,7 +7492,7 @@ function safeBoard(v) { const a = safeJsonArr(v); return a.filter(x => x && type
   function buyPet(id) {
     const def = PET_MAP[id];
     if (!def || ownedPets.includes(id)) return;
-    if (petCoins < def.price) { showToast(insufficientMsg('🐾 宠物币', petCoins, def.price, '「' + def.name + '」')); beep(180, 0.12, 'square', 0.05); return; }
+    if (petCoins < def.price) { showToast(insufficientMsg('🐾 宠物币', petCoins, def.price, v5UnlockLabel(def.name))); beep(180, 0.12, 'square', 0.05); return; }
     petCoins -= def.price;
     ownedPets.push(id); petLevels[id] = Math.max(1, petLevels[id] || 1);
     pet = { id, level: petLevels[id] };
@@ -7400,7 +7500,7 @@ function safeBoard(v) { const a = safeJsonArr(v); return a.filter(x => x && type
     if (ownedPets.length === 1) unlockAch('pet1');
     if (ownedPets.length === PET_DEF.length) unlockAch('petall');
     savePetCoin(); savePetOwn(); savePetLv(); savePet(); renderShop(); updateCoinHud();
-    showToast(withBalance(def.icon + ' ' + def.name + ' 已购买并跟随！' + def.desc + ' ×' + pet.level, petCoins, '🐾'));
+    showToast(withBalance(v5PetBoughtMsg(def.icon, def.name, def.desc, pet.level), petCoins, '🐾'));
     sfxBuy();
   }
   function equipPet(id) {
@@ -7447,13 +7547,13 @@ function safeBoard(v) { const a = safeJsonArr(v); return a.filter(x => x && type
     coins -= GACHA_COST; gachaCount++;
     const win = pickGacha();
     let detail = '';
-    if (win.coins) { coins += win.coins; detail = '🪙 +' + win.coins; }
+    if (win.coins) { coins += win.coins; detail = v5GachaCoinDetail(win.coins); }
     else if (win.bonus) {
       const cands = BONUS_DEF.filter(d => (bonus[d.id] || 0) < d.max);
       if (cands.length) {
         const d = cands[Math.floor(Math.random() * cands.length)];
         bonus[d.id] = (bonus[d.id] || 0) + 1;
-        detail = d.icon + ' ' + d.name + ' Lv' + bonus[d.id];
+        detail = v5GachaBonusDetail(d.icon, d.name, bonus[d.id]);
         saveBonus();
       } else { coins += GACHA_COST; detail = '⚡ 强化已全满级 → 返还成本'; }
     }
@@ -7479,10 +7579,10 @@ function safeBoard(v) { const a = safeJsonArr(v); return a.filter(x => x && type
   function achBadgeRow() {
     const wrap = document.createElement('div');
     wrap.className = 'achBadgeWrap';
-    let html = '<div class="achBadgeTitle">' + achBadgeTitleMsg(achUnlocked.size, ACHIEVE.length) + '</div><div class="achBadgeRow">';
+    let html = v5AchBadgeWrap(achUnlocked.size, ACHIEVE.length);
     for (const a of ACHIEVE) {
       const got = achUnlocked.has(a.id);
-      html += '<div class="achBadge' + (got ? '' : ' none') + '" title="' + a.name + (got ? '' : '（未解锁）') + '">' + a.icon + '</div>';
+      html += v5AchBadgeHtml(a.name, got, a.icon);
     }
     html += '</div>';
     wrap.innerHTML = html;
@@ -7499,10 +7599,10 @@ function safeBoard(v) { const a = safeJsonArr(v); return a.filter(x => x && type
     gc.innerHTML = '<span class="gachaIcon">🎰</span>' +
       '<div class="gachaInfo">' +
         '<div class="gachaName">幸运抽奖箱</div>' +
-        '<div class="gachaDesc">消耗 🪙' + GACHA_COST + ' 抽一次 · 可能获得大额金币 / 随机强化 +1 级 / 超级大奖</div>' +
-        '<div class="gachaMeta">已抽 ' + gachaCount + ' 次 · 余额 🪙' + coins + '</div>' +
+        '<div class="gachaDesc">' + v5GachaDescText(GACHA_COST) + '</div>' +
+        '<div class="gachaMeta">' + v5GachaMetaText(gachaCount, coins) + '</div>' +
       '</div>' +
-      '<button class="gachaBtn" ' + (afford ? '' : 'disabled') + '>🎲 抽奖 ' + GACHA_COST + '</button>';
+      v5GachaBtnHtml(afford, GACHA_COST);
     const btn = gc.querySelector('.gachaBtn');
     if (afford) btn.onclick = () => {
       const r = drawGacha();
@@ -7516,10 +7616,10 @@ function safeBoard(v) { const a = safeJsonArr(v); return a.filter(x => x && type
     rc.innerHTML = '<span class="gachaIcon">🔄</span>' +
       '<div class="gachaInfo">' +
         '<div class="gachaName">强化重置</div>' +
-        '<div class="gachaDesc">花费 🪙200 返还已投入 50%（🪙' + Math.floor(bonusSpent * 0.5) + '）· 清空全部永久加成等级</div>' +
-        '<div class="gachaMeta">累计投入 🪙' + bonusSpent + ' · 当前总等级 ' + totalLv + '</div>' +
+        '<div class="gachaDesc">' + v5ResetDescText(bonusSpent) + '</div>' +
+        '<div class="gachaMeta">' + v5ResetMetaText(bonusSpent, totalLv) + '</div>' +
       '</div>' +
-      '<button class="gachaBtn" ' + (canReset ? '' : 'disabled') + '>🔄 重置</button>';
+      v5ResetBtnHtml(canReset);
     const rbtn = rc.querySelector('.gachaBtn');
     if (canReset) rbtn.onclick = () => { resetBonus(); };
     shopBody.appendChild(rc);
@@ -7646,12 +7746,12 @@ function safeBoard(v) { const a = safeJsonArr(v); return a.filter(x => x && type
     const def = HEROES[id];
     if (!def) return false;
     if (heroOwned(id)) return setHero(id);
-    if (petCoins < def.price) { showToast(insufficientMsg('🐾 宠物币', petCoins, def.price, '解锁「' + def.name + '」')); beep(180, 0.12, 'square', 0.05); return false; }
+    if (petCoins < def.price) { showToast(insufficientMsg('🐾 宠物币', petCoins, def.price, v5HeroUnlockLabel(def.name))); beep(180, 0.12, 'square', 0.05); return false; }
     petCoins -= def.price;
     ownedHeroes.push(id);
     savePetCoin(); saveHeroOwn();
     const ok = setHero(id);
-    showToast(withBalance(def.icon + ' 已解锁 · ' + def.name + '（-' + def.price + '🐾）', petCoins, '🐾'));
+    showToast(withBalance(v5HeroBoughtMsg(def.icon, def.name, def.price), petCoins, '🐾'));
     sfxBuy();
     return ok;
   }
@@ -7764,7 +7864,7 @@ function safeBoard(v) { const a = safeJsonArr(v); return a.filter(x => x && type
     };
   }
   function encodeSave(obj) {
-    try { return 'QTB1.' + btoa(unescape(encodeURIComponent(JSON.stringify(obj)))); }
+    try { return v5SaveCode(obj); }
     catch (e) { return ''; }
   }
   function decodeSave(code) {
@@ -7774,7 +7874,7 @@ function safeBoard(v) { const a = safeJsonArr(v); return a.filter(x => x && type
       const obj = JSON.parse(decodeURIComponent(escape(atob(b64.slice(5)))));
       if (!obj || obj.t !== 'QTB') return { ok: false, err: '存档码已损坏或来源不明' };
       return { ok: true, data: obj };
-    } catch (e) { return { ok: false, err: '解析失败：' + (e && e.message || e) }; }
+    } catch (e) { return { ok: false, err: v5ParseErrText(e) }; }
   }
   function applySave(o) {
     if (typeof o.coins === 'number' && isFinite(o.coins)) { coins = Math.max(0, Math.floor(o.coins)); saveCoins(); }
@@ -7838,8 +7938,7 @@ function safeBoard(v) { const a = safeJsonArr(v); return a.filter(x => x && type
     const isExp = mode === 'export';
     saveBody.innerHTML =
       (isExp
-        ? '<div class="saveTip">把下面的存档码复制保存好。换设备 / 清缓存后，用它「导入恢复」即可拿回全部进度。</div>' +
-          '<textarea class="saveArea" id="saveCode" readonly></textarea>' +
+        ? v5SaveTipHtml() +
           '<div class="saveRow"><button class="ok" id="btnCopyCode">📋 复制存档码</button><button id="btnCloseSave">关闭</button></div>'
         : '<div class="saveTip">粘贴之前导出的存档码，点击「确认恢复」将<b>覆盖</b>当前进度（金币/皮肤/加成/基地/最高分/成就/设置/关卡星级/解锁/生涯/排行榜/周挑战/自制关卡）。此操作不可撤销。</div>' +
           '<textarea class="saveArea import" id="saveCode" placeholder="QTB1.xxxx…"></textarea>' +
@@ -8601,7 +8700,7 @@ function safeBoard(v) { const a = safeJsonArr(v); return a.filter(x => x && type
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V4.97', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V5.99', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9460,6 +9559,106 @@ function safeBoard(v) { const a = safeJsonArr(v); return a.filter(x => x && type
       achStateTextNow: (...a) => achStateText(...a),
       boardRankTextNow: (...a) => boardRankText(...a),
       safeBoardNow: (...a) => safeBoard(...a),
+      v5RgbaStrNow: (...a) => v5RgbaStr(...a),
+      v5GridKeyNow: (...a) => v5GridKey(...a),
+      v5WhiteStrokeANow: (...a) => v5WhiteStrokeA(...a),
+      v5CoinGainTextNow: (...a) => v5CoinGainText(...a),
+      v5ComboGainTextNow: (...a) => v5ComboGainText(...a),
+      v5MilestoneTipNow: (...a) => v5MilestoneTip(...a),
+      v5LevelIntroTextNow: (...a) => v5LevelIntroText(...a),
+      v5LevelBonusTextNow: (...a) => v5LevelBonusText(...a),
+      v5ClockStrNow: (...a) => v5ClockStr(...a),
+      v5RgbStrNow: (...a) => v5RgbStr(...a),
+      v5GridStrNow: (...a) => v5GridStr(...a),
+      v5AccentRgbStrNow: (...a) => v5AccentRgbStr(...a),
+      v5BoxShadowStrNow: (...a) => v5BoxShadowStr(...a),
+      v5RunSubTextNow: (...a) => v5RunSubText(...a),
+      v5MilestoneSubNow: (...a) => v5MilestoneSub(...a),
+      v5CyanStrokeNow: (...a) => v5CyanStroke(...a),
+      v5WhiteStrokeBNow: (...a) => v5WhiteStrokeB(...a),
+      v5ParticleKeyNow: (...a) => v5ParticleKey(...a),
+      v5BossHudTextNow: (...a) => v5BossHudText(...a),
+      v5StatusLabelNow: (...a) => v5StatusLabel(...a),
+      v5RedFillNow: (...a) => v5RedFill(...a),
+      v5BossWarnTextNow: (...a) => v5BossWarnText(...a),
+      v5WhiteFlashStrNow: (...a) => v5WhiteFlashStr(...a),
+      v5OrangeStrokeNow: (...a) => v5OrangeStroke(...a),
+      v5HslaANow: (...a) => v5HslaA(...a),
+      v5HslaBNow: (...a) => v5HslaB(...a),
+      v5HslaCNow: (...a) => v5HslaC(...a),
+      v5PinkStrokeNow: (...a) => v5PinkStroke(...a),
+      v5PinkFillNow: (...a) => v5PinkFill(...a),
+      v5OrangeFillNow: (...a) => v5OrangeFill(...a),
+      v5AmberFillNow: (...a) => v5AmberFill(...a),
+      v5HslaDNow: (...a) => v5HslaD(...a),
+      v5DarkFillNow: (...a) => v5DarkFill(...a),
+      v5IceStrokeNow: (...a) => v5IceStroke(...a),
+      v5WhiteFillNow: (...a) => v5WhiteFill(...a),
+      v5HslaENow: (...a) => v5HslaE(...a),
+      v5PurpleFillNow: (...a) => v5PurpleFill(...a),
+      v5GreenStrokeNow: (...a) => v5GreenStroke(...a),
+      v5GreenFillNow: (...a) => v5GreenFill(...a),
+      v5NextPriceTextNow: (...a) => v5NextPriceText(...a),
+      v5DailyModTextNow: (...a) => v5DailyModText(...a),
+      v5IntroTxtNow: (...a) => v5IntroTxt(...a),
+      v5ShopIconHtmlNow: (...a) => v5ShopIconHtml(...a),
+      v5RarClassNow: (...a) => v5RarClass(...a),
+      v5RarBadgeNow: (...a) => v5RarBadge(...a),
+      v5SkinNameHtmlNow: (...a) => v5SkinNameHtml(...a),
+      v5SkinMetaNow: (...a) => v5SkinMeta(...a),
+      v5SkinBtnHtmlNow: (...a) => v5SkinBtnHtml(...a),
+      v5BaseBrickNow: (...a) => v5BaseBrick(...a),
+      v5BaseLvTxtNow: (...a) => v5BaseLvTxt(...a),
+      v5BaseMaxDescNow: (...a) => v5BaseMaxDesc(...a),
+      v5BaseNextDescNow: (...a) => v5BaseNextDesc(...a),
+      v5BaseNameRowNow: (...a) => v5BaseNameRow(...a),
+      v5BaseBtnHtmlNow: (...a) => v5BaseBtnHtml(...a),
+      v5QuotedNameNow: (...a) => v5QuotedName(...a),
+      v5SkinBoughtMsgNow: (...a) => v5SkinBoughtMsg(...a),
+      v5WskinRarClassNow: (...a) => v5WskinRarClass(...a),
+      v5WskinRarBadgeNow: (...a) => v5WskinRarBadge(...a),
+      v5WskinNameHtmlNow: (...a) => v5WskinNameHtml(...a),
+      v5WskinMetaNow: (...a) => v5WskinMeta(...a),
+      v5WskinBtnHtmlNow: (...a) => v5WskinBtnHtml(...a),
+      v5BondRowHtmlNow: (...a) => v5BondRowHtml(...a),
+      v5BondIconHtmlNow: (...a) => v5BondIconHtml(...a),
+      v5BondInfoHtmlNow: (...a) => v5BondInfoHtml(...a),
+      v5BondPairTextNow: (...a) => v5BondPairText(...a),
+      v5BondEmHtmlNow: (...a) => v5BondEmHtml(...a),
+      v5BondStateTextNow: (...a) => v5BondStateText(...a),
+      v5PetRarClassNow: (...a) => v5PetRarClass(...a),
+      v5MagnetEffDescNow: (...a) => v5MagnetEffDesc(...a),
+      v5MagnetNextDescNow: (...a) => v5MagnetNextDesc(...a),
+      v5PetBuyTextNow: (...a) => v5PetBuyText(...a),
+      v5PetUpgradeTextNow: (...a) => v5PetUpgradeText(...a),
+      v5PetNameHtmlNow: (...a) => v5PetNameHtml(...a),
+      v5PetDescHtmlNow: (...a) => v5PetDescHtml(...a),
+      v5PetMetaHtmlNow: (...a) => v5PetMetaHtml(...a),
+      v5PetBtnHtmlNow: (...a) => v5PetBtnHtml(...a),
+      v5UnlockLabelNow: (...a) => v5UnlockLabel(...a),
+      v5PetBoughtMsgNow: (...a) => v5PetBoughtMsg(...a),
+      v5GachaCoinDetailNow: (...a) => v5GachaCoinDetail(...a),
+      v5GachaBonusDetailNow: (...a) => v5GachaBonusDetail(...a),
+      v5AchBadgeWrapNow: (...a) => v5AchBadgeWrap(...a),
+      v5AchBadgeHtmlNow: (...a) => v5AchBadgeHtml(...a),
+      v5GachaDescTextNow: (...a) => v5GachaDescText(...a),
+      v5GachaMetaTextNow: (...a) => v5GachaMetaText(...a),
+      v5GachaBtnHtmlNow: (...a) => v5GachaBtnHtml(...a),
+      v5ResetDescTextNow: (...a) => v5ResetDescText(...a),
+      v5ResetMetaTextNow: (...a) => v5ResetMetaText(...a),
+      v5ResetBtnHtmlNow: (...a) => v5ResetBtnHtml(...a),
+      v5HeroUnlockLabelNow: (...a) => v5HeroUnlockLabel(...a),
+      v5HeroBoughtMsgNow: (...a) => v5HeroBoughtMsg(...a),
+      v5SaveCodeNow: (...a) => v5SaveCode(...a),
+      v5ParseErrTextNow: (...a) => v5ParseErrText(...a),
+      v5SaveTipHtmlNow: (...a) => v5SaveTipHtml(...a),
+      v5RecordUidNow: (...a) => v5RecordUid(...a),
+      v5PetAllDescNow: (...a) => v5PetAllDesc(...a),
+      v5AchUnlockTextNow: (...a) => v5AchUnlockText(...a),
+      v5FallbackRgbaNow: (...a) => v5FallbackRgba(...a),
+      v5SkinPrevHtmlNow: (...a) => v5SkinPrevHtml(...a),
+      v5SkinDescHtmlNow: (...a) => v5SkinDescHtml(...a),
+      v5BaseIconHtmlNow: (...a) => v5BaseIconHtml(...a),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

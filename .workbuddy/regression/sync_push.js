@@ -30,23 +30,28 @@ function pause(ms) { Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0
 // GitHub API 偶发 502 / 200 但空响应体(2026-11-04 实测):传输层重试,
 // blob/tree 内容寻址天然幂等,commit/ref 重复写入最多留下一个悬挂提交,树仍一致。
 function gh(args, input) {
-  const opts = { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024, env: ghEnv() };
   if (input !== undefined) {
     const tmp = path.join(os.tmpdir(), 'gh_in_' + Date.now() + '_' + Math.floor(Math.random() * 1e6) + '.json');
     fs.writeFileSync(tmp, input);
     args += ' --input "' + tmp + '"';
   }
   let last = '';
-  for (let attempt = 1; attempt <= 5; attempt++) {
-    try {
-      const out = execSync('"' + GH_BIN + '" api ' + args, opts).trim();
-      if (out) return out;
-      last = 'empty response body';
-    } catch (e) {
-      last = (e.stderr || e.message || '').toString().slice(0, 200);
-      if (/404|Not Found|Validation Failed/i.test(last)) break;   // 确定性错误不重试
+  // 代理可用性会反转:先保留系统代理,再剥离代理;每通道各重试 3 次。
+  // blob/tree 内容寻址天然幂等,commit/ref 重复写入最多留下一个悬挂提交,树仍一致。
+  for (const strip of [false, true]) {
+    const env = strip ? ghEnv() : { ...process.env };
+    const opts = { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024, env, timeout: 120000 };
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const out = execSync('"' + GH_BIN + '" api ' + args, opts).trim();
+        if (out) return out;
+        last = 'empty response body';
+      } catch (e) {
+        last = (e.stderr || e.message || '').toString().slice(0, 200);
+        if (/404|Not Found|Validation Failed/i.test(last)) break;   // 确定性错误不重试
+      }
+      if (attempt < 3) pause(600 * attempt);
     }
-    if (attempt < 5) pause(600 * attempt);
   }
   throw new Error('gh api ' + args.split(' ')[0] + ' failed after retries: ' + last);
 }
