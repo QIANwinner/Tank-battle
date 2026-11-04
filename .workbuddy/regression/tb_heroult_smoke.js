@@ -2086,6 +2086,14 @@ async function main() {
     t('U468 宠物购买成功文案抽为纯函数边界', o.b.indexOf('×3')>=0, JSON.stringify(o));
   } catch(e){ t('U467 宠物购买成功文案抽为纯函数',false,e.message); t('U468 宠物购买成功文案抽为纯函数边界',false,e.message); }
 
+
+  // ===== U469~U470: 抽奖金币详情抽为纯函数(v5.78) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5GachaCoinDetailNow(500),b:T.v5GachaCoinDetailNow(12345)});})()"));
+    t('U469 抽奖金币详情抽为纯函数', o.a === '🪙 +500', JSON.stringify(o));
+    t('U470 抽奖金币详情抽为纯函数边界', o.b === '🪙 +12,345', JSON.stringify(o));
+  } catch(e){ t('U469 抽奖金币详情抽为纯函数',false,e.message); t('U470 抽奖金币详情抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
