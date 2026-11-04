@@ -2014,6 +2014,14 @@ async function main() {
     t('U450 磁力猪当前效果描述抽为纯函数边界', o.b.indexOf('拉速')>=0, JSON.stringify(o));
   } catch(e){ t('U449 磁力猪当前效果描述抽为纯函数',false,e.message); t('U450 磁力猪当前效果描述抽为纯函数边界',false,e.message); }
 
+
+  // ===== U451~U452: 磁力猪下级效果描述抽为纯函数(v5.69) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5MagnetNextDescNow(1),b:T.v5MagnetNextDescNow(2)});})()"));
+    t('U451 磁力猪下级效果描述抽为纯函数', o.a.indexOf('升到 Lv2')>=0, JSON.stringify(o));
+    t('U452 磁力猪下级效果描述抽为纯函数边界', o.b.indexOf('升到 Lv3')>=0, JSON.stringify(o));
+  } catch(e){ t('U451 磁力猪下级效果描述抽为纯函数',false,e.message); t('U452 磁力猪下级效果描述抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
