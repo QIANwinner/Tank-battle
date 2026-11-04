@@ -160,6 +160,19 @@ async function main() {
     t('M5 触屏点英雄技触发大招(已入冷却20-45 · 狂暴生效)', o.cd > 20 && o.cd <= 45 && o.rapid > 0 && o.rapid <= 5, JSON.stringify(o));
   } catch (e) { t('M5 触屏点英雄技', false, e.message); }
 
+  // ===== M6: 窄屏(375px)每日英雄提示不溢出可读(v0.3.19 UI 移动端) =====
+  try {
+    const o = JSON.parse(await ev(`(async () => {
+      const T = window.__tbTest;
+      T.dailyHeroTipShow('title');
+      const tip = document.getElementById('dailyHeroTip');
+      if (!tip || tip.style.display !== 'block') return JSON.stringify({ show: false });
+      const r = tip.getBoundingClientRect();
+      return JSON.stringify({ show: true, right: r.right, w: r.width, vw: window.innerWidth });
+    })()`));
+    t('M6 窄屏每日英雄提示不溢出', o.show === true && o.right <= o.vw + 1 && o.w > 0, JSON.stringify(o));
+  } catch (e) { t('M6 窄屏每日英雄提示', false, e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
