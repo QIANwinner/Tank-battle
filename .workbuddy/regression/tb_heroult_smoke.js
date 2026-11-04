@@ -374,6 +374,14 @@ async function main() {
     t('U40 得分大额千分位', o.b.indexOf('当前 12,345 分')>=0, o.b);
   } catch(e){ t('U39 击破得分',false,e.message); t('U40 得分千分位',false,e.message); }
 
+
+  // ===== U41~U42: 抽奖结果余额(v0.3.52) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.gachaMsgNow('🪙 +600','大吉',1100),b:T.gachaMsgNow('🪙 +100','',12345)});})()"));
+    t('U41 抽奖文案含详情与余额', o.a.indexOf('🪙 +600')>=0 && o.a.indexOf('大吉')>=0 && o.a.indexOf('余额 1100🪙')>=0, o.a);
+    t('U42 无详情不出现分隔符且大额千分位', o.b.indexOf(' · · ') < 0 && o.b.indexOf('余额 12,345🪙')>=0, o.b);
+  } catch(e){ t('U41 抽奖文案',false,e.message); t('U42 抽奖余额',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
