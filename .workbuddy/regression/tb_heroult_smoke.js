@@ -782,6 +782,14 @@ async function main() {
     t('U142 标签结构完整', o.b.indexOf('</span><span>')>=0 && o.b.slice(-7) === '</span>', JSON.stringify(o));
   } catch(e){ t('U141 两组统计齐全',false,e.message); t('U142 标签结构完整',false,e.message); }
 
+
+  // ===== U143~U144: 成就分组标题 HTML 抽为纯函数(v0.4.13) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.achGroupHtmlNow('战斗',3,5,60),b:T.achGroupHtmlNow('生存',0,5,0)});})()"));
+    t('U143 名称进度条齐全', o.a.indexOf('agName">战斗')>=0 && o.a.indexOf('3/5')>=0 && o.a.indexOf('width:60%')>=0, JSON.stringify(o));
+    t('U144 零进度正确', o.b.indexOf('0/5')>=0 && o.b.indexOf('width:0%')>=0, JSON.stringify(o));
+  } catch(e){ t('U143 名称进度条齐全',false,e.message); t('U144 零进度正确',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
