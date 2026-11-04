@@ -534,6 +534,14 @@ async function main() {
     t('U80 导入成功与失败明确区分', o.c.indexOf('已导入「迷宫」')>=0 && o.d.indexOf('⚠ 导入失败 · 校验失败')>=0, o.c+' | '+o.d);
   } catch(e){ t('U79 分享码字符数',false,e.message); t('U80 导入反馈',false,e.message); }
 
+
+  // ===== U81~U82: 成就完成度(v0.3.72) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.achPctNow(7,20),b:T.achPctNow(0,0),c:T.achPctNow(25,20),d:T.achBadgeTitleMsgNow(7,20)});})()"));
+    t('U81 完成度四舍五入且不超 100', o.a === 35 && o.b === 0 && o.c === 100, JSON.stringify(o));
+    t('U82 徽章标题含进度与百分比', o.d.indexOf('7/20')>=0 && o.d.indexOf('完成度 35%')>=0, o.d);
+  } catch(e){ t('U81 完成度计算',false,e.message); t('U82 徽章标题',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
