@@ -466,6 +466,13 @@
   .modeGrid, .toolGrid { display: grid; gap: 8px; }
   .modeGrid { grid-template-columns: 1fr 1fr; }
   .toolGrid { grid-template-columns: 1fr 1fr; }
+  /* —— v0.3.19 每日挑战「今日英雄」推荐提示 —— */
+  .dailyTip {
+    display: none; margin-top: 8px; padding: 6px 10px;
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    color: #ffe9a6; background: rgba(0, 47, 167, 0.22);
+    border: 1px solid rgba(0, 240, 255, 0.35); border-radius: 6px;
+  }
   #btnShop { grid-column: 1 / -1; }
   /* 统一次级按钮 */
   .modeGrid button, .toolGrid button, .auxRow button, .pauseRow button {
@@ -1830,6 +1837,8 @@
         <button id="btnEndless">🌊 无尽模式</button>
         <button id="btnMulti">👥 双人同屏</button>
       </div>
+      <!-- v0.3.19 每日挑战「今日英雄」推荐提示(随 btnDaily 显隐) -->
+      <div id="dailyHeroTip" class="dailyTip"></div>
     </div>
     <!-- 内容与工具 -->
     <div class="menuGroup" id="groupTools">
@@ -2087,7 +2096,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V3.18</div>
+  <div id="mark">DESIGNED BY QIAN · V3.19</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -3193,6 +3202,17 @@
     const rec = dailyHero();
     const target = heroOwned(rec) ? rec : (heroOwned('blade') ? 'blade' : (heroOwned('fortress') ? 'fortress' : 'none'));
     if (target !== 'none') { hero = target; saveHero(); renderHeroSeg(); }
+  }
+  // —— v0.3.19 标题页「今日英雄」推荐提示(随每日挑战按钮显隐) ——
+  function updateDailyHeroTip() {
+    const tip = document.getElementById('dailyHeroTip');
+    if (!tip) return;
+    const show = !!btnDaily && btnDaily.style.display === 'block';
+    tip.style.display = show ? 'block' : 'none';
+    if (show) {
+      const def = HEROES[dailyHero()];
+      if (def) tip.innerHTML = '📅 每日挑战 · 今日英雄: ' + def.icon + ' ' + def.name;
+    }
   }
   let dailyMode = false;        // 本局是否每日挑战
   let endlessMode = false;       // —— v0.2.6 无尽/生存模式（波次指数增长） ——
@@ -6565,6 +6585,7 @@
     volRow.style.display = 'none';
     settings.style.display = 'none';
     btnDaily.style.display = (kind === 'title' && !dailyInvited) ? 'block' : 'none';
+    updateDailyHeroTip();   // —— v0.3.19 每日挑战「今日英雄」推荐提示(随 btnDaily 显隐) ——
     // v0.2.3 限时冲分入口：仅标题页且非 ?time= 直达时显示
     if (btnTimed) btnTimed.style.display = (kind === 'title' && !timedInvited) ? 'block' : 'none';
     // —— v0.2.6 无尽模式入口：仅标题页显示 ——
@@ -8318,7 +8339,7 @@
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V3.18', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V3.19', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9013,6 +9034,9 @@
       dailyHeroNow: () => dailyHero(),
       dailyHeroApply: () => { applyDailyHero(); return hero; },
       dailyHeroPool: () => DAILY_HERO_POOL.slice(),
+      // —— v0.3.19 标题页「今日英雄」提示 DOM 验证 ——
+      dailyHeroTipNow: () => { const tip = document.getElementById('dailyHeroTip'); return tip ? { display: tip.style.display, text: tip.textContent } : null; },
+      dailyHeroTipShow: (k) => { showOverlay(k || 'title'); return true; },
       buyHeroNow: (id) => buyHero(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

@@ -153,6 +153,28 @@ async function main() {
     t('D5 未拥有回退 / 已拥有装备', o.ok === true, JSON.stringify(o));
   } catch (e) { t('D5 回退/装备', false, e.message); }
 
+  // ===== U1: 标题页展示「今日英雄」提示 =====
+  try {
+    const o = JSON.parse(await ev(`(async () => {
+      const T = window.__tbTest;
+      T.dailyHeroTipShow('title');
+      const tip = T.dailyHeroTipNow();
+      return JSON.stringify(tip);
+    })()`));
+    t('U1 标题页提示显示+含今日英雄', o.display === 'block' && /今日英雄/.test(o.text || ''), JSON.stringify(o));
+  } catch (e) { t('U1 标题页提示', false, e.message); }
+
+  // ===== U2: 非标题页隐藏 =====
+  try {
+    const o = JSON.parse(await ev(`(async () => {
+      const T = window.__tbTest;
+      T.dailyHeroTipShow('paused');
+      const tip = T.dailyHeroTipNow();
+      return JSON.stringify(tip);
+    })()`));
+    t('U2 非标题页隐藏', o.display === 'none', JSON.stringify(o));
+  } catch (e) { t('U2 非标题页隐藏', false, e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
