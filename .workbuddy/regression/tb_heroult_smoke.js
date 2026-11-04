@@ -2262,6 +2262,18 @@ async function main() {
     t('U512 基地图标 HTML 抽为纯函数（100 轮收口）边界', o.b.indexOf('baseIcon')>=0, JSON.stringify(o));
   } catch(e){ t('U511 基地图标 HTML 抽为纯函数（100 轮收口）',false,e.message); t('U512 基地图标 HTML 抽为纯函数（100 轮收口）边界',false,e.message); }
 
+
+  // ===== U513~U518: 本局最高连击 HUD(v0.6.0) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('maxComboWrap'),txt:document.getElementById('maxComboNum')?document.getElementById('maxComboNum').textContent:null,a:T.maxComboTextNow(12),b:T.maxComboTextNow(12345),c:T.maxComboTextNow(-3),s:T.maxComboStatNow()});})()"));
+    t('U513 峰值 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U514 峰值初值为 ×0', o.txt === '×0', String(o.txt));
+    t('U515 普通峰值格式', o.a === '×12', o.a);
+    t('U516 大额峰值千分位', o.b === '×12,345', o.b);
+    t('U517 负值兜底为零', o.c === '×0', o.c);
+    t('U518 峰值统计可读且非负', typeof o.s === 'number' && o.s >= 0, String(o.s));
+  } catch(e){ for(let k=513;k<=518;k++) t('U'+k+' 峰值HUD',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
