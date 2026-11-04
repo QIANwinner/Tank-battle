@@ -2094,6 +2094,14 @@ async function main() {
     t('U470 抽奖金币详情抽为纯函数边界', o.b === '🪙 +12,345', JSON.stringify(o));
   } catch(e){ t('U469 抽奖金币详情抽为纯函数',false,e.message); t('U470 抽奖金币详情抽为纯函数边界',false,e.message); }
 
+
+  // ===== U471~U472: 抽奖强化详情抽为纯函数(v5.79) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5GachaBonusDetailNow('⚡','射速',2),b:T.v5GachaBonusDetailNow('X','Y',0)});})()"));
+    t('U471 抽奖强化详情抽为纯函数', o.a === '⚡ 射速 Lv2', JSON.stringify(o));
+    t('U472 抽奖强化详情抽为纯函数边界', o.b === 'X Y Lv0', JSON.stringify(o));
+  } catch(e){ t('U471 抽奖强化详情抽为纯函数',false,e.message); t('U472 抽奖强化详情抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
