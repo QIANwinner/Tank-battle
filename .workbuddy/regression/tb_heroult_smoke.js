@@ -2274,6 +2274,18 @@ async function main() {
     t('U518 峰值统计可读且非负', typeof o.s === 'number' && o.s >= 0, String(o.s));
   } catch(e){ for(let k=513;k<=518;k++) t('U'+k+' 峰值HUD',false,e.message); }
 
+
+  // ===== U519~U524: 生效道具状态条(v0.6.1) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('fxWrap'),a:T.activeFxTextNow({rapid:3.2,double:0,freeze:0}),b:T.activeFxTextNow({rapid:2,double:1,freeze:4}),c:T.activeFxTextNow({rapid:0,double:0,freeze:0}),d:T.activeFxTextNow({rapid:-1,double:0,freeze:0}),e:T.fxHudNow()});})()"));
+    t('U519 状态 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U520 单道具显示秒数', o.a === '⚡速射 4s', o.a);
+    t('U521 多道具按序拼接', o.b.indexOf('⚡速射')>=0 && o.b.indexOf('✨双倍')>=0 && o.b.indexOf('❄冰冻')>=0, o.b);
+    t('U522 无道具显示无', o.c === '无', o.c);
+    t('U523 负数不纳入状态', o.d === '无', o.d);
+    t('U524 HUD 文本可读', typeof o.e === 'string', String(o.e));
+  } catch(e){ for(let k=519;k<=524;k++) t('U'+k+' 道具状态',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
