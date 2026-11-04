@@ -2608,6 +2608,22 @@ async function main() {
     t('U650 DOM 与函数一致(真实一局)', o6.fn.indexOf(o6.dom) >= 0 && o6.dom.indexOf('暂无战绩') >= 0, JSON.stringify(o6).slice(0, 260));
   } catch(e){ for(let k=645;k<=650;k++) t('U'+k+' 最近一局卡片',false,e.message); }
 
+
+  // ===== U651~U656: BOSS 关倒计时(v0.6.23) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossCdWrap'),txt:(document.getElementById('bossCdVal')||{}).textContent,f:T.bossCountdownTextNow(3)});})()"));
+    t('U651 倒计时 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U652 正常关卡第 3 关=距 2 关', o.f === '👑 距 BOSS 2 关' && (o.txt || '').indexOf('距 BOSS') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossCountdownTextNow(5),b:T.bossCountdownTextNow(10),c:T.bossCountdownTextNow(9),d:T.bossCountdownTextNow(4)});})()"));
+    t('U653 BOSS 关与临界 1 关', o2.a === '👑 本关 BOSS' && o2.b === '👑 本关 BOSS' && o2.c === '👑 距 BOSS 1 关' && o2.d === '👑 距 BOSS 1 关', JSON.stringify(o2));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossCountdownTextNow(1),b:T.bossCountdownTextNow(50)});})()"));
+    t('U654 边界首关与整十', o4.a === '👑 距 BOSS 4 关' && o4.b === '👑 本关 BOSS', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossCountdownTextNow('x'),b:T.bossCountdownTextNow(-3),c:T.bossCountdownTextNow(NaN),d:T.bossCountdownTextNow(2.7)});})()"));
+    t('U655 非法输入钳制为第 1 关', o5.a === '👑 距 BOSS 4 关' && o5.b === '👑 距 BOSS 4 关' && o5.c === '👑 距 BOSS 4 关' && o5.d === '👑 距 BOSS 3 关', JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=document.getElementById('bossCdVal')?document.getElementById('bossCdVal').textContent:null;return JSON.stringify({dom,lv:T.stat?null:null});})()"));
+    t('U656 DOM 与函数一致(开局第 1 关)', o6.dom === '👑 距 BOSS 4 关', JSON.stringify(o6));
+  } catch(e){ for(let k=651;k<=656;k++) t('U'+k+' BOSS倒计时',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
