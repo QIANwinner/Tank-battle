@@ -1822,6 +1822,14 @@ async function main() {
     t('U402 稀有度徽章 HTML 抽为纯函数边界', o.b.indexOf('epic')>=0, JSON.stringify(o));
   } catch(e){ t('U401 稀有度徽章 HTML 抽为纯函数',false,e.message); t('U402 稀有度徽章 HTML 抽为纯函数边界',false,e.message); }
 
+
+  // ===== U403~U404: 皮肤名称 HTML 抽为纯函数(v5.45) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5SkinNameHtmlNow('黄金','B'),b:T.v5SkinNameHtmlNow('X','')});})()"));
+    t('U403 皮肤名称 HTML 抽为纯函数', o.a === '<span class="siName">黄金B</span>', JSON.stringify(o));
+    t('U404 皮肤名称 HTML 抽为纯函数边界', o.b === '<span class="siName">X</span>', JSON.stringify(o));
+  } catch(e){ t('U403 皮肤名称 HTML 抽为纯函数',false,e.message); t('U404 皮肤名称 HTML 抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
