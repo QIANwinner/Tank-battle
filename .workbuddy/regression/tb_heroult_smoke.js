@@ -2535,6 +2535,46 @@ async function main() {
     t('U626 注册 API 可用', o5.sw === true, JSON.stringify(o5));
   } catch(e){ for(let k=621;k<=626;k++) t('U'+k+' SW提示',false,e.message); }
 
+
+  // ===== U627~U632: 离线状态横幅(v0.6.19) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('netBanner'),cls:(document.getElementById('netBanner')||{}).className,txt:(document.getElementById('netBanner')||{}).textContent});})()"));
+    t('U627 横幅已加入且初始隐藏(在线)', o.dom === true && o.cls === 'netBanner' && o.txt === '', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.netUpdSimNow(false));})()"));
+    t('U628 离线态显示提示', o2.txt === '📴 网络已断开 · 单机进度照常保存' && o2.cls === 'netBanner show', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.netUpdSimNow(true));})()"));
+    t('U629 在线态恢复隐藏', o3.txt === '' && o3.cls === 'netBanner', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.netBannerTextNow(true),b:T.netBannerTextNow('x'),c:T.netBannerTextNow(undefined)});})()"));
+    t('U630 严格 false 才显示(非法兜底空串)', o4.a === '' && o4.b === '' && o4.c === '', JSON.stringify(o4));
+    // 真实离线切换:合成事件不改 navigator.onLine,需 CDP 网络模拟(harness 层)
+    await client.send('Network.enable', {});
+    await client.send('Network.emulateNetworkConditions', { offline: true, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
+    await sleep(80);
+    const off = JSON.parse(await ev("(function(){const b=document.getElementById('netBanner');return JSON.stringify({txt:b?b.textContent:null,cls:b?b.className:null});})()"));
+    await client.send('Network.emulateNetworkConditions', { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
+    await sleep(80);
+    const on = JSON.parse(await ev("(function(){const b=document.getElementById('netBanner');return JSON.stringify({txt:b?b.textContent:null,cls:b?b.className:null});})()"));
+    t('U631 真实离线/在线切换(CDP 模拟)', (off || {}).cls === 'netBanner show' && (on || {}).cls === 'netBanner', JSON.stringify({ off, on }));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:T.netBannerDomNow(),f:T.netBannerTextNow(navigator.onLine)});})()"));
+    t('U632 DOM 与函数一致', (o6.dom || {}).txt === o6.f && (o6.dom || {}).cls === (o6.f === '' ? 'netBanner' : 'netBanner show'), JSON.stringify(o6));
+  } catch(e){ for(let k=627;k<=632;k++) t('U'+k+' 离线横幅',false,e.message); }
+
+
+  // ===== U633~U638: 存档备份日期(v0.6.20) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;const box=document.getElementById('backupAgeBox');return JSON.stringify({dom:!!box,sum:box?(box.querySelector('summary')||{}).textContent:null,body:(document.getElementById('backupAgeBody')||{}).textContent});})()"));
+    t('U633 备份面板已加入设置页', o.dom === true && (o.sum || '').indexOf('备份状态') >= 0, JSON.stringify(o));
+    t('U634 未展开初值 —', o.body === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const now=Date.now();return JSON.stringify({a:T.backupAgeTextNow(now),b:T.backupAgeTextNow(now-2*86400000),c:T.backupAgeTextNow(now-400*86400000)});})()"));
+    t('U635 今天/2天前/400天前', o2.a === '今天已备份' && o2.b === '2 天前备份' && o2.c === '400 天前备份', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.backupAgeTextNow(0),b:T.backupAgeTextNow(-1)});})()"));
+    t('U636 边界 0 与负数=从未备份', o3.a === '从未备份' && o3.b === '从未备份', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.backupAgeTextNow('x'),b:T.backupAgeTextNow(NaN),c:T.backupAgeTextNow(undefined)});})()"));
+    t('U637 非法输入=从未备份', o4.a === '从未备份' && o4.b === '从未备份' && o4.c === '从未备份', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r1=T.backupAgeRefreshNow();T.setRawSave('tank-battle-lastbackup', String(Date.now()));const r2=T.backupAgeRefreshNow();return JSON.stringify({r1,r2});})()"));
+    t('U638 DOM 与函数一致(导出后=今天已备份)', o5.r1 === '从未备份' && o5.r2 === '今天已备份', JSON.stringify(o5));
+  } catch(e){ for(let k=633;k<=638;k++) t('U'+k+' 备份日期',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
