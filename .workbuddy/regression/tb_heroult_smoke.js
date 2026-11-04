@@ -2182,6 +2182,14 @@ async function main() {
     t('U492 英雄解锁成功文案抽为纯函数边界', o.b.indexOf('12,345')>=0, JSON.stringify(o));
   } catch(e){ t('U491 英雄解锁成功文案抽为纯函数',false,e.message); t('U492 英雄解锁成功文案抽为纯函数边界',false,e.message); }
 
+
+  // ===== U493~U494: 存档码前缀抽为纯函数(v5.90) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5SaveCodeNow({a:1}),b:T.v5SaveCodeNow({})});})()"));
+    t('U493 存档码前缀抽为纯函数', o.a.indexOf('QTB1.')===0 && o.a.length>10, JSON.stringify(o));
+    t('U494 存档码前缀抽为纯函数边界', o.b.indexOf('QTB1.')===0, JSON.stringify(o));
+  } catch(e){ t('U493 存档码前缀抽为纯函数',false,e.message); t('U494 存档码前缀抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
