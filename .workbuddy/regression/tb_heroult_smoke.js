@@ -1910,6 +1910,14 @@ async function main() {
     t('U424 皮肤购买成功文案抽为纯函数边界', o.b.indexOf('X 皮肤')>=0, JSON.stringify(o));
   } catch(e){ t('U423 皮肤购买成功文案抽为纯函数',false,e.message); t('U424 皮肤购买成功文案抽为纯函数边界',false,e.message); }
 
+
+  // ===== U425~U426: 僚机皮肤稀有度类名抽为纯函数(v5.56) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5WskinRarClassNow('epic',false),b:T.v5WskinRarClassNow('epic',true)});})()"));
+    t('U425 僚机皮肤稀有度类名抽为纯函数', o.a === 'shopItem rar-epic', JSON.stringify(o));
+    t('U426 僚机皮肤稀有度类名抽为纯函数边界', o.b === 'shopItem rar-epic equipped', JSON.stringify(o));
+  } catch(e){ t('U425 僚机皮肤稀有度类名抽为纯函数',false,e.message); t('U426 僚机皮肤稀有度类名抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
