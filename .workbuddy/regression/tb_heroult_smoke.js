@@ -1470,6 +1470,14 @@ async function main() {
     t('U314 rgba 颜色串抽为纯函数边界', o.b === 'rgba(0,0,0,1)', JSON.stringify(o));
   } catch(e){ t('U313 rgba 颜色串抽为纯函数',false,e.message); t('U314 rgba 颜色串抽为纯函数边界',false,e.message); }
 
+
+  // ===== U315~U316: 网格坐标键抽为纯函数(v5.1) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5GridKeyNow(3,7),b:T.v5GridKeyNow(0,0)});})()"));
+    t('U315 网格坐标键抽为纯函数', o.a === '3,7', JSON.stringify(o));
+    t('U316 网格坐标键抽为纯函数边界', o.b === '0,0', JSON.stringify(o));
+  } catch(e){ t('U315 网格坐标键抽为纯函数',false,e.message); t('U316 网格坐标键抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
