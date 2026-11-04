@@ -1534,6 +1534,14 @@ async function main() {
     t('U330 倒计时字符串抽为纯函数边界', o.b === '0:00', JSON.stringify(o));
   } catch(e){ t('U329 倒计时字符串抽为纯函数',false,e.message); t('U330 倒计时字符串抽为纯函数边界',false,e.message); }
 
+
+  // ===== U331~U332: 主题背景 rgb 串抽为纯函数(v5.9) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5RgbStrNow([1,2,3]),b:T.v5RgbStrNow([0,0,0])});})()"));
+    t('U331 主题背景 rgb 串抽为纯函数', o.a === 'rgb(1,2,3)', JSON.stringify(o));
+    t('U332 主题背景 rgb 串抽为纯函数边界', o.b === 'rgb(0,0,0)', JSON.stringify(o));
+  } catch(e){ t('U331 主题背景 rgb 串抽为纯函数',false,e.message); t('U332 主题背景 rgb 串抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
