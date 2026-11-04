@@ -1278,6 +1278,14 @@ async function main() {
     t('U266 满条件三星', o.b === 3, JSON.stringify(o));
   } catch(e){ t('U265 保底一星',false,e.message); t('U266 满条件三星',false,e.message); }
 
+
+  // ===== U267~U268: 基地复活费用算法抽为 reviveCostOf(v4.75) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reviveCostOfNow(1,0,0),b:T.reviveCostOfNow(0,0,9)});})()"));
+    t('U267 基础费用', o.a === 125, JSON.stringify(o));
+    t('U268 折扣后不低于下限', o.b === 40, JSON.stringify(o));
+  } catch(e){ t('U267 基础费用',false,e.message); t('U268 折扣后不低于下限',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
