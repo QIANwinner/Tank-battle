@@ -638,6 +638,14 @@ async function main() {
     t('U106 英雄技提示保留效果与结尾', o.c.indexOf('下一发贯穿全场！')>=0 && o.a.slice(-1) === '！', o.c);
   } catch(e){ t('U105 英雄技主语',false,e.message); t('U106 英雄技效果',false,e.message); }
 
+
+  // ===== U107~U108: BOSS 狂暴提示(v0.3.85) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossEnrageMsgNow(1),b:T.bossEnrageMsgNow(2)});})()"));
+    t('U107 一段与二段提示可区分', o.a.indexOf('BOSS 狂暴！')>=0 && o.b.indexOf('BOSS 狂暴·二段！')>=0, o.a+' | '+o.b);
+    t('U108 两阶段均说明威胁变化', o.a.indexOf('弹幕与速度提升')>=0 && o.b.indexOf('弹幕与速度提升')>=0, o.a+' | '+o.b);
+  } catch(e){ t('U107 狂暴阶段',false,e.message); t('U108 狂暴威胁',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
