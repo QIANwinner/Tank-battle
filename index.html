@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V4.97</div>
+  <div id="mark">DESIGNED BY QIAN · V5.0</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -3501,7 +3501,7 @@
     const h = hex.replace('#', '');
     if (h.length !== 6) return 'rgba(255,45,85,' + a + ')';
     const r = parseInt(h.substring(0, 2), 16), g = parseInt(h.substring(2, 4), 16), b = parseInt(h.substring(4, 6), 16);
-    return 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+    return v5RgbaStr(r, g, b, a);
   }
 
   // ===== 地图 =====
@@ -6793,6 +6793,7 @@ function carStatHtml(v, label) { return '<div class="carStat"><b>' + fmtNum(v) +
 function achStateText(on, rw) { return on ? '已解锁' : rw; }
 function boardRankText(i) { return String(Math.max(1, Math.floor(Number(i) || 0) + 1)); }
 function safeBoard(v) { const a = safeJsonArr(v); return a.filter(x => x && typeof x === 'object'); }
+function v5RgbaStr(r,g,b,a){return 'rgba('+r+','+g+','+b+','+a+')';}
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -8601,7 +8602,7 @@ function safeBoard(v) { const a = safeJsonArr(v); return a.filter(x => x && type
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V4.97', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V5.0', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9460,6 +9461,7 @@ function safeBoard(v) { const a = safeJsonArr(v); return a.filter(x => x && type
       achStateTextNow: (...a) => achStateText(...a),
       boardRankTextNow: (...a) => boardRankText(...a),
       safeBoardNow: (...a) => safeBoard(...a),
+      v5RgbaStrNow: (...a) => v5RgbaStr(...a),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
