@@ -934,6 +934,14 @@ async function main() {
     t('U180 负值归零', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U179 合法值',false,e.message); t('U180 负值归零',false,e.message); }
 
+
+  // ===== U181~U182: 最高解锁关卡解析统一为 safeMin1(v0.4.32) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.safeMin1Now('9'),b:T.safeMin1Now('0')});})()"));
+    t('U181 合法值', o.a === 9, JSON.stringify(o));
+    t('U182 零值下限保护', o.b === 1, JSON.stringify(o));
+  } catch(e){ t('U181 合法值',false,e.message); t('U182 零值下限保护',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
