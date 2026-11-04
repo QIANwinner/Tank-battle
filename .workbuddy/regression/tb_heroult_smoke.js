@@ -1510,6 +1510,14 @@ async function main() {
     t('U324 无尽里程碑提示抽为纯函数边界', o.b.indexOf('12,345')>=0, JSON.stringify(o));
   } catch(e){ t('U323 无尽里程碑提示抽为纯函数',false,e.message); t('U324 无尽里程碑提示抽为纯函数边界',false,e.message); }
 
+
+  // ===== U325~U326: 关卡开场文案抽为纯函数(v5.6) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5LevelIntroTextNow(true,8,'normal'),b:T.v5LevelIntroTextNow(false,5,'hard')});})()"));
+    t('U325 关卡开场文案抽为纯函数', o.a === '第 8 波', JSON.stringify(o));
+    t('U326 关卡开场文案抽为纯函数边界', o.b === '第 5 关 · 硬核', JSON.stringify(o));
+  } catch(e){ t('U325 关卡开场文案抽为纯函数',false,e.message); t('U326 关卡开场文案抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
