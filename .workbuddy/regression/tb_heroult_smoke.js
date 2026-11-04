@@ -277,6 +277,22 @@ async function main() {
     t('U21 宠物币清零显示 0', o.zero === '0', JSON.stringify(o));
   } catch (e) { t('U19 HUD宠物币', false, e.message); t('U20 HUD千分位', false, e.message); t('U21 HUD清零', false, e.message); }
 
+
+  // ===== U22~U24: 成就解锁进度文案(v0.3.45) =====
+  try {
+    const o = JSON.parse(await ev(`(function(){
+      const T = window.__tbTest;
+      return JSON.stringify({
+        full: T.achUnlockMsgNow('测试成就', 100, 2, 7),
+        zero: T.achUnlockMsgNow('无奖励', 0, 0, 1),
+        pet:  T.achUnlockMsgNow('宠物成就', 0, 3, 12)
+      });
+    })()`));
+    t('U22 文案含金币与宠物币奖励', o.full.indexOf('+100🪙') >= 0 && o.full.indexOf('+2🐾') >= 0, o.full);
+    t('U23 文案含第 N 个成就进度', o.full.indexOf('第 7 个成就') >= 0 && o.pet.indexOf('第 12 个成就') >= 0, o.pet);
+    t('U24 零奖励不出现 +0', o.zero.indexOf('+0') < 0 && o.zero.indexOf('第 1 个成就') >= 0, o.zero);
+  } catch (e) { t('U22 成就奖励文案', false, e.message); t('U23 成就进度', false, e.message); t('U24 零奖励', false, e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
