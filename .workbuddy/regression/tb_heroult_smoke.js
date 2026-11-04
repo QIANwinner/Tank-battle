@@ -2641,6 +2641,22 @@ async function main() {
     function T2shieldConsist(inv) { const f = Math.max(0, Math.floor(Number(inv) || 0)); return f > 0 ? '🛡 ' + (f / 60).toFixed(1) + 's' : '—'; }
   } catch(e){ for(let k=657;k<=662;k++) t('U'+k+' 护盾时间',false,e.message); }
 
+
+  // ===== U663~U668: 签到状态 pill(v0.6.25) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('signinPillWrap'),f0:T.signinStatusTextNow(true,3),f1:T.signinStatusTextNow(false,3)});})()"));
+    t('U663 签到 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U664 已签/待签双态文案', o.f0 === '✅ 已签 3 天' && o.f1 === '📅 待签 · 连 3 天', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.signinStatusTextNow(false,0),b:T.signinStatusTextNow(true,0)});})()"));
+    t('U665 零天边界', o2.a === '📅 今日未签' && o2.b === '✅ 已签 0 天', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.signinStatusTextNow(false,-5),b:T.signinStatusTextNow(true,'x'),c:T.signinStatusTextNow(false,99)});})()"));
+    t('U666 非法输入钳制', o3.a === '📅 今日未签' && o3.b === '✅ 已签 0 天' && o3.c === '📅 待签 · 连 99 天', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.signinReset();T.signinSetState(-1,5);T.extraHudRefreshNow();return JSON.stringify({dom:T.signinPillDomNow()});})()"));
+    t('U667 DOM 与真实签到状态一致(昨天连5→今天待签连6)', (o4.dom || '').indexOf('连 6 天') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.signinClaim();T.extraHudRefreshNow();return JSON.stringify({dom:T.signinPillDomNow()});})()"));
+    t('U668 领取后翻转为已签', (o5.dom || '').indexOf('✅ 已签 6 天') >= 0, JSON.stringify(o5));
+  } catch(e){ for(let k=663;k<=668;k++) t('U'+k+' 签到pill',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

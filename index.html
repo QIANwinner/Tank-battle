@@ -1785,6 +1785,7 @@
   .lastRunCard.empty { color: #8ea0b8; text-align: center; }
   #bossCdWrap .v { color: #ff2d55; font-weight: 800; font-size: 11px; }
   #shieldWrap .v { color: #7ee7ff; font-weight: 800; font-size: 11px; }
+  #signinPillWrap .v { color: #ffe066; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -1818,6 +1819,7 @@
     <div class="pill m-hide" id="fpsWrap" style="display:none"><span class="k">FPS</span><span class="v" id="fpsVal">0 FPS</span></div>
     <div class="pill m-hide" id="bossCdWrap"><span class="k">Boss</span><span class="v" id="bossCdVal">—</span></div>
     <div class="pill m-hide" id="shieldWrap"><span class="k">护盾</span><span class="v" id="shieldVal">—</span></div>
+    <div class="pill m-hide" id="signinPillWrap"><span class="k">签到</span><span class="v" id="signinPillVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -2164,7 +2166,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V6.24</div>
+  <div id="mark">DESIGNED BY QIAN · V6.25</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -6979,6 +6981,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const wdV = $('waveDeltaVal'); if (wdV) wdV.textContent = waveDeltaText(level, bestWave, endlessMode);
     const bcV = $('bossCdVal'); if (bcV) bcV.textContent = bossCountdownText(level);
     const shV = $('shieldVal'); if (shV) shV.textContent = shieldTimeText(player ? player.spawnInv : 0);
+    const spV = $('signinPillVal'); if (spV) { const sn = signinNow(); spV.textContent = signinStatusText(sn.done, sn.streak); }
     // __EXTRA_HUD__
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
   }
@@ -7149,6 +7152,11 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   function shieldTimeText(frames) {
     const f = Math.max(0, Math.floor(Number(frames) || 0));
     return f > 0 ? '🛡 ' + (f / 60).toFixed(1) + 's' : '—';
+  }
+  // —— v0.6.25 今日签到状态 pill ——
+  function signinStatusText(done, streak) {
+    const s2 = Math.max(0, Math.floor(Number(streak) || 0));
+    return done ? '✅ 已签 ' + s2 + ' 天' : (s2 > 0 ? '📅 待签 · 连 ' + s2 + ' 天' : '📅 今日未签');
   }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
@@ -8962,7 +8970,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V6.24', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V6.25', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9951,6 +9959,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       lastRunCardHtmlNow: (r) => lastRunCardHtml(r), lastRunCardRefreshNow: () => { const e = $('lastRunCard'); if (e) e.innerHTML = lastRunCardHtml(lastRun); return e ? e.textContent : null; }, lastRunNow2: () => lastRun || null,
       bossCountdownTextNow: (lv) => bossCountdownText(lv), bossCdDomNow: () => { const e = $('bossCdVal'); return e ? e.textContent : null; },
       shieldTimeTextNow: (f) => shieldTimeText(f), shieldPillDomNow: () => { const e = $('shieldVal'); return e ? e.textContent : null; },
+      signinStatusTextNow: (d, s2) => signinStatusText(d, s2), signinPillDomNow: () => { const e = $('signinPillVal'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
