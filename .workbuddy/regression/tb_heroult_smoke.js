@@ -1302,6 +1302,14 @@ async function main() {
     t('U272 零值下限保护', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U271 常规索引',false,e.message); t('U272 零值下限保护',false,e.message); }
 
+
+  // ===== U273~U274: 敌人出生预警环半径抽为 warnRingRadius(v4.78) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.warnRingRadiusNow(35),b:T.warnRingRadiusNow(0)});})()"));
+    t('U273 计时满时为最小半径', o.a === 9, JSON.stringify(o));
+    t('U274 即将刷兵时半径扩大', o.b > 21, JSON.stringify(o));
+  } catch(e){ t('U273 计时满时为最小半径',false,e.message); t('U274 即将刷兵时半径扩大',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
