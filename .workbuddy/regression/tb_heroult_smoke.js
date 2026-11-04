@@ -446,6 +446,14 @@ async function main() {
     t('U58 僚机皮肤大额千分位', o.b.indexOf('余额 12,345🪙')>=0, o.b);
   } catch(e){ t('U57 僚机文案',false,e.message); t('U58 僚机余额',false,e.message); }
 
+
+  // ===== U59~U60: 重置强化单一提示(v0.3.61) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({gone:T.legacyResetGoneNow(),m:T.resetBonusMsgNow(300,12345)});})()"));
+    t('U59 按钮回调不再二次弹旧文案', o.gone === true, JSON.stringify(o));
+    t('U60 重置提示含返还与余额', o.m.indexOf('返还 🪙300')>=0 && o.m.indexOf('余额 12,345🪙')>=0, o.m);
+  } catch(e){ t('U59 重置单一提示',false,e.message); t('U60 重置余额',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
