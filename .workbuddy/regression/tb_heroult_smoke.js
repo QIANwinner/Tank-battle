@@ -1982,6 +1982,14 @@ async function main() {
     t('U442 羁绊组合说明抽为纯函数边界', o.b === 'A A × B B', JSON.stringify(o));
   } catch(e){ t('U441 羁绊组合说明抽为纯函数',false,e.message); t('U442 羁绊组合说明抽为纯函数边界',false,e.message); }
 
+
+  // ===== U443~U444: 羁绊效果说明 HTML 抽为纯函数(v5.65) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BondEmHtmlNow('护盾 +2 秒'),b:T.v5BondEmHtmlNow('X')});})()"));
+    t('U443 羁绊效果说明 HTML 抽为纯函数', o.a === '<em>护盾 +2 秒</em></span>', JSON.stringify(o));
+    t('U444 羁绊效果说明 HTML 抽为纯函数边界', o.b.indexOf('<em>X</em>')>=0, JSON.stringify(o));
+  } catch(e){ t('U443 羁绊效果说明 HTML 抽为纯函数',false,e.message); t('U444 羁绊效果说明 HTML 抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
