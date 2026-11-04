@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V5.19</div>
+  <div id="mark">DESIGNED BY QIAN · V5.20</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -5949,7 +5949,7 @@
       const hf = hurtFlash * (reduced() ? 0.5 : 1);
       const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.28, W / 2, H / 2, H * 0.78);
       g.addColorStop(0, 'rgba(255,45,85,0)');
-      g.addColorStop(1, 'rgba(255,45,85,' + (0.5 * hf).toFixed(3) + ')');
+      g.addColorStop(1, v5RedFill(hf));
       ctx.fillStyle = g;
       ctx.fillRect(0, 0, W, H);
     }
@@ -6813,6 +6813,7 @@ function v5WhiteStrokeB(a){return 'rgba(255,255,255,'+(a*0.6).toFixed(2)+')';}
 function v5ParticleKey(c,ab){return c+'|'+ab;}
 function v5BossHudText(lv,name,hp,max,rage){return 'LV.'+lv+' '+name+'  '+hp+' / '+max+(rage?'  ⚡狂暴':'');}
 function v5StatusLabel(l,t){return l+' '+t.toFixed(1)+'s';}
+function v5RedFill(hf){return 'rgba(255,45,85,'+(0.5*hf).toFixed(3)+')';}
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -8621,7 +8622,7 @@ function v5StatusLabel(l,t){return l+' '+t.toFixed(1)+'s';}
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V5.19', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V5.20', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9500,6 +9501,7 @@ function v5StatusLabel(l,t){return l+' '+t.toFixed(1)+'s';}
       v5ParticleKeyNow: (...a) => v5ParticleKey(...a),
       v5BossHudTextNow: (...a) => v5BossHudText(...a),
       v5StatusLabelNow: (...a) => v5StatusLabel(...a),
+      v5RedFillNow: (...a) => v5RedFill(...a),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

@@ -1622,6 +1622,14 @@ async function main() {
     t('U352 状态倒计时标签抽为纯函数边界', o.b === '冰冻 0.0s', JSON.stringify(o));
   } catch(e){ t('U351 状态倒计时标签抽为纯函数',false,e.message); t('U352 状态倒计时标签抽为纯函数边界',false,e.message); }
 
+
+  // ===== U353~U354: 受伤渐变红色抽为纯函数(v5.20) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5RedFillNow(1),b:T.v5RedFillNow(0)});})()"));
+    t('U353 受伤渐变红色抽为纯函数', o.a === 'rgba(255,45,85,0.500)', JSON.stringify(o));
+    t('U354 受伤渐变红色抽为纯函数边界', o.b === 'rgba(255,45,85,0.000)', JSON.stringify(o));
+  } catch(e){ t('U353 受伤渐变红色抽为纯函数',false,e.message); t('U354 受伤渐变红色抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
