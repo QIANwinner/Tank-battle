@@ -2214,6 +2214,14 @@ async function main() {
     t('U500 战绩记录 UID 抽为纯函数边界', o.b.length >= 13 && o.b.length <= 20, JSON.stringify(o));
   } catch(e){ t('U499 战绩记录 UID 抽为纯函数',false,e.message); t('U500 战绩记录 UID 抽为纯函数边界',false,e.message); }
 
+
+  // ===== U501~U502: 宠物全家福描述抽为纯函数(v5.94) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5PetAllDescNow(4),b:T.v5PetAllDescNow(0)});})()"));
+    t('U501 宠物全家福描述抽为纯函数', o.a === '集齐全部 4 只宠物', JSON.stringify(o));
+    t('U502 宠物全家福描述抽为纯函数边界', o.b === '集齐全部 0 只宠物', JSON.stringify(o));
+  } catch(e){ t('U501 宠物全家福描述抽为纯函数',false,e.message); t('U502 宠物全家福描述抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
