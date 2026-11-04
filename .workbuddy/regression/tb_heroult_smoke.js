@@ -1950,6 +1950,14 @@ async function main() {
     t('U434 僚机皮肤按钮 HTML 抽为纯函数边界', o.b.indexOf('🪙 购买 880')>=0, JSON.stringify(o));
   } catch(e){ t('U433 僚机皮肤按钮 HTML 抽为纯函数',false,e.message); t('U434 僚机皮肤按钮 HTML 抽为纯函数边界',false,e.message); }
 
+
+  // ===== U435~U436: 羁绊行 HTML 抽为纯函数(v5.61) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BondRowHtmlNow(true),b:T.v5BondRowHtmlNow(false)});})()"));
+    t('U435 羁绊行 HTML 抽为纯函数', o.a === '<div class="bdRow on">', JSON.stringify(o));
+    t('U436 羁绊行 HTML 抽为纯函数边界', o.b === '<div class="bdRow">', JSON.stringify(o));
+  } catch(e){ t('U435 羁绊行 HTML 抽为纯函数',false,e.message); t('U436 羁绊行 HTML 抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
