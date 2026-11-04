@@ -1030,6 +1030,14 @@ async function main() {
     t('U204 零分母兜底', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U203 正常命中率',false,e.message); t('U204 零分母兜底',false,e.message); }
 
+
+  // ===== U205~U206: 存档复制按钮文案抽为纯函数(v0.4.44) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.copyBtnTextNow(true),b:T.copyBtnTextNow(false)});})()"));
+    t('U205 复制成功', o.a === '✅ 已复制', JSON.stringify(o));
+    t('U206 恢复默认', o.b === '📋 复制存档码', JSON.stringify(o));
+  } catch(e){ t('U205 复制成功',false,e.message); t('U206 恢复默认',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

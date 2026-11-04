@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V4.43</div>
+  <div id="mark">DESIGNED BY QIAN · V4.44</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -6747,6 +6747,7 @@ function petLvClamp(v, max) { return clampNum(safeInt(v, 0), 0, max); }
 function careerNum(v) { return Math.max(0, safeInt(v, 0)); }
 function milestoneTitleText() { return '里程碑达成！'; }
 function fmtPct(part, total) { return total > 0 ? Math.round(part / total * 100) : 0; }
+function copyBtnText(ok) { return ok ? '✅ 已复制' : '📋 复制存档码'; }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -7809,8 +7810,8 @@ function fmtPct(part, total) { return total > 0 ? Math.round(part / total * 100)
         const c = document.getElementById('saveCode');
         if (c) { c.select(); try { document.execCommand('copy'); } catch (e) {} }
         try { navigator.clipboard && navigator.clipboard.writeText(code); } catch (e) {}
-        copy.textContent = '✅ 已复制';
-        setTimeout(() => { copy.textContent = '📋 复制存档码'; }, 1600);
+        copy.textContent = copyBtnText(true);
+        setTimeout(() => { copy.textContent = copyBtnText(false); }, 1600);
       });
     } else {
       const apply = document.getElementById('btnApplyImport');
@@ -8555,7 +8556,7 @@ function fmtPct(part, total) { return total > 0 ? Math.round(part / total * 100)
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V4.43', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V4.44', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9360,6 +9361,7 @@ function fmtPct(part, total) { return total > 0 ? Math.round(part / total * 100)
       careerNumNow: (...a) => careerNum(...a),
       milestoneTitleTextNow: (...a) => milestoneTitleText(...a),
       fmtPctNow: (...a) => fmtPct(...a),
+      copyBtnTextNow: (...a) => copyBtnText(...a),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
