@@ -414,6 +414,14 @@ async function main() {
     t('U50 BOSS 出场关卡可变', o.b.indexOf('第 15 关')>=0, o.b);
   } catch(e){ t('U49 BOSS出场',false,e.message); t('U50 BOSS关卡',false,e.message); }
 
+
+  // ===== U51~U52: 星级奖励文案(v0.3.57) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.starRewardMsgNow(3,150,1050),b:T.starRewardMsgNow(2,80,12345)});})()"));
+    t('U51 星级奖励含星数与余额', o.a.indexOf('3 星')>=0 && o.a.indexOf('🪙+150')>=0 && o.a.indexOf('余额 1050🪙')>=0, o.a);
+    t('U52 星级奖励大额千分位', o.b.indexOf('余额 12,345🪙')>=0, o.b);
+  } catch(e){ t('U51 星级文案',false,e.message); t('U52 星级余额',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
