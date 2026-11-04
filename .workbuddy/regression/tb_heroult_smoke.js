@@ -622,6 +622,14 @@ async function main() {
     t('U102 越界档位兜底为自动', o.c.indexOf('「自动」')>=0 && o.d.indexOf('「自动」')>=0, o.c+' | '+o.d);
   } catch(e){ t('U101 画质档位',false,e.message); t('U102 档位兜底',false,e.message); }
 
+
+  // ===== U103~U104: 编辑器提示(v0.3.83) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.mapSaveMsgNow('迷宫'),b:T.editorMsgNow('clear'),c:T.editorMsgNow('draw')});})()"));
+    t('U103 保存提示含关卡名', o.a.indexOf('已保存自制关卡「迷宫」')>=0, o.a);
+    t('U104 清空提示含引导且分支可辨', o.b.indexOf('已清空画布 · 可重新绘制')>=0 && o.c === '🛠 画布已更新', o.b+' | '+o.c);
+  } catch(e){ t('U103 保存提示',false,e.message); t('U104 清空提示',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V3.82</div>
+  <div id="mark">DESIGNED BY QIAN · V3.83</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -6698,6 +6698,8 @@
   function betaRewardMsg(g, bal) { return '🎁 内测奖励 +' + fmtNum(g) + '🪙 · 余额 ' + fmtNum(bal) + '🪙'; }
   function portalMsg(n) { return '⚠ 传送门需成对放置 · 当前 ' + n + ' 个（需 0 或 2 的倍数）'; }
   function qualityMsg(tier) { const names = ['高', '中', '低']; return '⚡ 画质自动调整为「' + (names[tier] || '自动') + '」 · 可在设置中手动切换'; }
+  function mapSaveMsg(name) { return '💾 已保存自制关卡「' + name + '」'; }
+  function editorMsg(act) { return act === 'clear' ? '🗑 已清空画布 · 可重新绘制' : '🛠 画布已更新'; }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -8277,7 +8279,7 @@
     }
     saveCustomMaps();
     edRenderList();
-    showToast('💾 已保存自制关卡「' + name + '」');
+    showToast(mapSaveMsg(name));
     return { id: edSelId, name: name };
   }
   function edDeleteMap(id) {
@@ -8508,7 +8510,7 @@
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V3.82', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V3.83', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -8656,7 +8658,7 @@
     if (act === 'clear') {
       edFromRows(Array.from({ length: ROWS }, () => '.'.repeat(COLS)));
       edSelId = null; edRender();
-      showToast('🗑 已清空画布');
+      showToast(editorMsg('clear'));
     } else if (act === 'save') { edSaveMap(); }
     else if (act === 'export') { const code = edExportCode(); copyTextToClip(code); showToast(shareCodeMsg(code.length)); }
     else if (act === 'import') {
@@ -9267,6 +9269,7 @@
       signinRemindMsgNow: (r) => signinRemindMsg(r), betaRewardMsgNow: (g, b) => betaRewardMsg(g, b),
       portalMsgNow: (n) => portalMsg(n),
       qualityMsgNow: (t) => qualityMsg(t),
+      mapSaveMsgNow: (n) => mapSaveMsg(n), editorMsgNow: (a) => editorMsg(a),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
