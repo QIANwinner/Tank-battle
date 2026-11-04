@@ -838,6 +838,14 @@ async function main() {
     t('U156 前缀与描述正确', o.b.indexOf('📅 每日挑战')===0 && o.b.indexOf('冲锋')>=0, JSON.stringify(o));
   } catch(e){ t('U155 三项信息齐全',false,e.message); t('U156 前缀与描述正确',false,e.message); }
 
+
+  // ===== U157~U158: 主菜单副标题抽为按场景取值的纯函数(v0.4.20) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.ovSubTextNow('invite'),b:T.ovSubTextNow('unknown')});})()"));
+    t('U157 挑战场景', o.a.indexOf('好友向你发起挑战')>=0, JSON.stringify(o));
+    t('U158 未知场景返回空串', o.b === '', JSON.stringify(o));
+  } catch(e){ t('U157 挑战场景',false,e.message); t('U158 未知场景返回空串',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

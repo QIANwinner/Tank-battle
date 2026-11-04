@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V4.19</div>
+  <div id="mark">DESIGNED BY QIAN · V4.20</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -6728,6 +6728,7 @@ function levelSelSubText(max) { return '已解锁 ' + fmtNum(max) + ' 关'; }
 function heroSegText(icon, name, owned, price) { return icon + ' ' + name + (owned ? '' : ' ' + price + '🐾'); }
 function upgradeOwnText(own, tag) { return own > 0 ? '已持有 ×' + fmtNum(own) : tag; }
 function dailyHeroTipHtml(icon, name, desc) { return '📅 每日挑战 · 今日英雄: ' + icon + ' ' + name + '（' + desc + '）'; }
+function ovSubText(kind) { return ({ invite: '⚔️ 好友向你发起挑战', daily: '📅 每日挑战 · 同一天，全世界同一张图', normal: '守住基地 · 消灭敌军 · 点开即玩' })[kind] || ''; }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -6792,15 +6793,15 @@ function dailyHeroTipHtml(icon, name, desc) { return '📅 每日挑战 · 今�
       applySettingsUI();
       ovTitle.textContent = '坦克大战';
       if (challenge) {
-        ovSub.textContent = '⚔️ 好友向你发起挑战';
+        ovSub.textContent = ovSubText('invite');
         ovStats.innerHTML = `对方拿了 <b>${challenge.score}</b> 分 · 打到第 <b>${challenge.level}</b> 关 · 来超越！`
           + (achUnlocked.size ? `<div class="achrow">已解锁成就 <b>${achUnlocked.size}</b>/${ACHIEVE.length}</div>` : '');
       } else if (dailyInvited) {
-        ovSub.textContent = '📅 每日挑战 · 同一天，全世界同一张图';
+        ovSub.textContent = ovSubText('daily');
         ovStats.innerHTML = (best > 0 ? `你的最高分 <b>${best}</b>` : '')
           + (achUnlocked.size ? `<div class="achrow">已解锁成就 <b>${achUnlocked.size}</b>/${ACHIEVE.length}</div>` : '');
       } else {
-        ovSub.textContent = '守住基地 · 消灭敌军 · 点开即玩';
+        ovSub.textContent = ovSubText('normal');
         ovStats.innerHTML = (best > 0 ? `最高分 <b>${best}</b>` : '')
           + (achUnlocked.size ? `<div class="achrow">已解锁成就 <b>${achUnlocked.size}</b>/${ACHIEVE.length}</div>` : '');
       }
@@ -8536,7 +8537,7 @@ function dailyHeroTipHtml(icon, name, desc) { return '📅 每日挑战 · 今�
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V4.19', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V4.20', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9322,6 +9323,7 @@ function dailyHeroTipHtml(icon, name, desc) { return '📅 每日挑战 · 今�
       heroSegTextNow: (...a) => heroSegText(...a),
       upgradeOwnTextNow: (...a) => upgradeOwnText(...a),
       dailyHeroTipHtmlNow: (...a) => dailyHeroTipHtml(...a),
+      ovSubTextNow: (...a) => ovSubText(...a),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
