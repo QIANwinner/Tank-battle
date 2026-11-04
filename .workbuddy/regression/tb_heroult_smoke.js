@@ -878,6 +878,14 @@ async function main() {
     t('U166 普通名称不变', o.b === '我的关卡', JSON.stringify(o));
   } catch(e){ t('U165 尖括号被转义',false,e.message); t('U166 普通名称不变',false,e.message); }
 
+
+  // ===== U167~U168: 自制关卡名清洗统一为纯函数(v0.4.25) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.mapNameNow('  超长的自制关卡名称abcdefgh  '),b:T.mapNameNow('')});})()"));
+    t('U167 去空格并截断', o.a.length <= 12 && o.a.length > 0, JSON.stringify(o));
+    t('U168 空名兜底', o.b === '我的关卡', JSON.stringify(o));
+  } catch(e){ t('U167 去空格并截断',false,e.message); t('U168 空名兜底',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
