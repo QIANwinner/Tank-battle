@@ -96,7 +96,7 @@ async function main() {
       const ids = T.bondsDef();
       return JSON.stringify({ ids, total: ids.length });
     })()`));
-    t('N1 羁绊定义含 bondmagnet(共4条)', o.total === 4 && o.ids.includes('bondmagnet'), JSON.stringify(o));
+    t('N1 羁绊定义含 bondmagnet(共5条)', o.total === 5 && o.ids.includes('bondmagnet') && o.ids.includes('bondmagnetstorm'), JSON.stringify(o));
   } catch (e) { t('N1 羁绊定义', false, e.message); }
 
   // ===== N2: 激活状态(sniper+pig 激活 / 错配 / 无宠物 不激活) =====
@@ -141,12 +141,21 @@ async function main() {
   try {
     const o = JSON.parse(await ev(`(async () => {
       const T = window.__tbTest;
-      // 商店宠物页渲染后,羁绊图鉴 DOM 应含 4 行(含磁力弹幕)
+      // 商店宠物页渲染后,羁绊图鉴 DOM 应含 5 行(含磁力弹幕+磁暴矩阵)
       const defs = T.bondsDef();
       return JSON.stringify({ defs, n: defs.length });
     })()`));
-    t('N4 图鉴/商店收录4条羁绊', o.n === 4 && o.defs.includes('bondmagnet'), JSON.stringify(o));
+    t('N4 图鉴/商店收录5条羁绊', o.n === 5 && o.defs.includes('bondmagnet') && o.defs.includes('bondmagnetstorm'), JSON.stringify(o));
   } catch (e) { t('N4 图鉴收录', false, e.message); }
+
+  // ===== N5: 宠物羁绊提示数(磁力猪 filter 显示全部 2 条:狙击+磁暴) =====
+  try {
+    const o = JSON.parse(await ev(`(async () => {
+      const T = window.__tbTest;
+      return JSON.stringify({ pig: T.petBondTipCount('pig'), cat: T.petBondTipCount('cat'), turtle: T.petBondTipCount('turtle'), bunny: T.petBondTipCount('bunny') });
+    })()`));
+    t('N5 磁力猪羁绊提示2条(cat/turtle/bunny各1)', o.pig === 2 && o.cat === 1 && o.turtle === 1 && o.bunny === 1, JSON.stringify(o));
+  } catch (e) { t('N5 宠物羁绊提示数', false, e.message); }
 
   chrome.kill();
 
