@@ -1478,6 +1478,14 @@ async function main() {
     t('U316 网格坐标键抽为纯函数边界', o.b === '0,0', JSON.stringify(o));
   } catch(e){ t('U315 网格坐标键抽为纯函数',false,e.message); t('U316 网格坐标键抽为纯函数边界',false,e.message); }
 
+
+  // ===== U317~U318: 白色描边透明度串抽为纯函数(v5.2) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5WhiteStrokeANow(0.5),b:T.v5WhiteStrokeANow(0)});})()"));
+    t('U317 白色描边透明度串抽为纯函数', o.a === 'rgba(255,255,255,0.425)', JSON.stringify(o));
+    t('U318 白色描边透明度串抽为纯函数边界', o.b === 'rgba(255,255,255,0.000)', JSON.stringify(o));
+  } catch(e){ t('U317 白色描边透明度串抽为纯函数',false,e.message); t('U318 白色描边透明度串抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
