@@ -2062,6 +2062,14 @@ async function main() {
     t('U462 宠物状态 HTML 抽为纯函数边界', o.b === '<span class="siMeta">Lv1</span>', JSON.stringify(o));
   } catch(e){ t('U461 宠物状态 HTML 抽为纯函数',false,e.message); t('U462 宠物状态 HTML 抽为纯函数边界',false,e.message); }
 
+
+  // ===== U463~U464: 宠物按钮 HTML 抽为纯函数(v5.75) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5PetBtnHtmlNow('owned','🐾 升级 12'),b:T.v5PetBtnHtmlNow('','X')});})()"));
+    t('U463 宠物按钮 HTML 抽为纯函数', o.a === '<button class="siBtn owned">🐾 升级 12</button>', JSON.stringify(o));
+    t('U464 宠物按钮 HTML 抽为纯函数边界', o.b.indexOf('>X</button>')>=0, JSON.stringify(o));
+  } catch(e){ t('U463 宠物按钮 HTML 抽为纯函数',false,e.message); t('U464 宠物按钮 HTML 抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
