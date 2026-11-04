@@ -179,6 +179,32 @@ async function main() {
     t('U8 冷却中重复触发无效(cd 仍在 30 附近,未重置 45)', o < 44 && o > 25, 'cd=' + o);
   } catch (e) { t('U8 冷却中重复触发无效', false, e.message); }
 
+  // ===== U9: 冷却中触发给桌面玩家剩余秒数 toast(v0.3.40) =====
+  try {
+    const o = JSON.parse(await ev(`(function(){
+      const T = window.__tbTest;
+      T.setHero('blade'); T.startGame(); T.skipIntro();
+      T.setHeroUltCd(30);
+      document.getElementById('toast').textContent = '';
+      T.triggerHeroUltNow();
+      return JSON.stringify({ txt: document.getElementById('toast').textContent || '', cd: T.heroUltNow().cd });
+    })()`));
+    t('U9 冷却中 toast 含「冷却中」+剩余秒数', o.txt.indexOf('冷却中') >= 0 && o.txt.indexOf('30') >= 0 && o.cd > 25, JSON.stringify(o));
+  } catch (e) { t('U9 冷却中 toast', false, e.message); }
+
+  // ===== U10: 大招就绪时触发不误弹冷却提示(v0.3.40) =====
+  try {
+    const o = JSON.parse(await ev(`(function(){
+      const T = window.__tbTest;
+      T.setHero('blade'); T.startGame(); T.skipIntro();
+      T.setHeroUltCd(0);
+      document.getElementById('toast').textContent = '';
+      T.triggerHeroUltNow();
+      return JSON.stringify({ txt: document.getElementById('toast').textContent || '', cd: T.heroUltNow().cd });
+    })()`));
+    t('U10 就绪触发不误弹冷却提示', o.txt.indexOf('冷却中') < 0 && o.cd > 40, JSON.stringify(o));
+  } catch (e) { t('U10 就绪不误弹', false, e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
