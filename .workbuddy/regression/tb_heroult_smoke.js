@@ -2222,6 +2222,14 @@ async function main() {
     t('U502 宠物全家福描述抽为纯函数边界', o.b === '集齐全部 0 只宠物', JSON.stringify(o));
   } catch(e){ t('U501 宠物全家福描述抽为纯函数',false,e.message); t('U502 宠物全家福描述抽为纯函数边界',false,e.message); }
 
+
+  // ===== U503~U504: 成就解锁文案抽为纯函数(v5.95) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5AchUnlockTextNow({name:'首胜',reward:100},2,7),b:T.v5AchUnlockTextNow({name:'X',reward:0},0,1)});})()"));
+    t('U503 成就解锁文案抽为纯函数', o.a.indexOf('+100🪙')>=0 && o.a.indexOf('第 7 个成就')>=0, JSON.stringify(o));
+    t('U504 成就解锁文案抽为纯函数边界', o.b.indexOf('+0')<0, JSON.stringify(o));
+  } catch(e){ t('U503 成就解锁文案抽为纯函数',false,e.message); t('U504 成就解锁文案抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
