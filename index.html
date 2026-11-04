@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V5.75</div>
+  <div id="mark">DESIGNED BY QIAN · V5.76</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -6869,6 +6869,7 @@ function v5PetNameHtml(name,owned,passive){return '<span class="siName">'+name+'
 function v5PetDescHtml(eff,equipped,maxed,next,bond){return '<span class="siDesc">'+eff+(equipped&&!maxed?' · '+next:'')+bond+'</span>';}
 function v5PetMetaHtml(lv,owned,equipped){return '<span class="siMeta">'+lv+(owned?(equipped?' · 跟随中':' · 已拥有'):'')+'</span>';}
 function v5PetBtnHtml(cls,txt){return '<button class="siBtn '+cls+'">'+txt+'</button>';}
+function v5UnlockLabel(n){return '「'+n+'」';}
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -7468,7 +7469,7 @@ function v5PetBtnHtml(cls,txt){return '<button class="siBtn '+cls+'">'+txt+'</bu
   function buyPet(id) {
     const def = PET_MAP[id];
     if (!def || ownedPets.includes(id)) return;
-    if (petCoins < def.price) { showToast(insufficientMsg('🐾 宠物币', petCoins, def.price, '「' + def.name + '」')); beep(180, 0.12, 'square', 0.05); return; }
+    if (petCoins < def.price) { showToast(insufficientMsg('🐾 宠物币', petCoins, def.price, v5UnlockLabel(def.name))); beep(180, 0.12, 'square', 0.05); return; }
     petCoins -= def.price;
     ownedPets.push(id); petLevels[id] = Math.max(1, petLevels[id] || 1);
     pet = { id, level: petLevels[id] };
@@ -8677,7 +8678,7 @@ function v5PetBtnHtml(cls,txt){return '<button class="siBtn '+cls+'">'+txt+'</bu
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V5.75', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V5.76', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9612,6 +9613,7 @@ function v5PetBtnHtml(cls,txt){return '<button class="siBtn '+cls+'">'+txt+'</bu
       v5PetDescHtmlNow: (...a) => v5PetDescHtml(...a),
       v5PetMetaHtmlNow: (...a) => v5PetMetaHtml(...a),
       v5PetBtnHtmlNow: (...a) => v5PetBtnHtml(...a),
+      v5UnlockLabelNow: (...a) => v5UnlockLabel(...a),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

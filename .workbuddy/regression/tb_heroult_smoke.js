@@ -2070,6 +2070,14 @@ async function main() {
     t('U464 宠物按钮 HTML 抽为纯函数边界', o.b.indexOf('>X</button>')>=0, JSON.stringify(o));
   } catch(e){ t('U463 宠物按钮 HTML 抽为纯函数',false,e.message); t('U464 宠物按钮 HTML 抽为纯函数边界',false,e.message); }
 
+
+  // ===== U465~U466: 宠物解锁标签抽为纯函数(v5.76) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5UnlockLabelNow('招财猫'),b:T.v5UnlockLabelNow('')});})()"));
+    t('U465 宠物解锁标签抽为纯函数', o.a === '「招财猫」', JSON.stringify(o));
+    t('U466 宠物解锁标签抽为纯函数边界', o.b === '「」', JSON.stringify(o));
+  } catch(e){ t('U465 宠物解锁标签抽为纯函数',false,e.message); t('U466 宠物解锁标签抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
