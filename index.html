@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V5.25</div>
+  <div id="mark">DESIGNED BY QIAN · V5.26</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -6385,7 +6385,7 @@
         ctx.beginPath(); ctx.arc(0, 0, 13.5, 0, Math.PI * 2); ctx.stroke();
       } else if (skin.fx === 'dragon') {
         // 圣龙之鳞：龙息余焰（尾迹粒子）+ 金环
-        ctx.fillStyle = 'hsla(' + ((ph * 80) % 60 + 20) + ',100%,60%,0.5)';
+        ctx.fillStyle = v5HslaC(ph);
         ctx.beginPath(); ctx.arc(-4, 9, 3 + Math.sin(ph * 5) * 1, 0, Math.PI * 2); ctx.fill();
         ctx.fillStyle = 'hsla(20,100%,55%,0.35)';
         ctx.beginPath(); ctx.arc(4, 9, 2.4 + Math.cos(ph * 5) * 0.8, 0, Math.PI * 2); ctx.fill();
@@ -6819,6 +6819,7 @@ function v5WhiteFlashStr(f,mul){return 'rgba(255,255,255,'+(0.85*f*mul).toFixed(
 function v5OrangeStroke(t){return 'rgba(255,90,0,'+(0.5+0.4*Math.sin(t*0.5)).toFixed(3)+')';}
 function v5HslaA(ph,i){return 'hsla('+((ph*90+i*60)%360)+',100%,70%,0.55)';}
 function v5HslaB(ph){return 'hsla('+((ph*120)%360)+',100%,75%,0.9)';}
+function v5HslaC(ph){return 'hsla('+((ph*80)%60+20)+',100%,60%,0.5)';}
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -8627,7 +8628,7 @@ function v5HslaB(ph){return 'hsla('+((ph*120)%360)+',100%,75%,0.9)';}
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V5.25', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V5.26', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9512,6 +9513,7 @@ function v5HslaB(ph){return 'hsla('+((ph*120)%360)+',100%,75%,0.9)';}
       v5OrangeStrokeNow: (...a) => v5OrangeStroke(...a),
       v5HslaANow: (...a) => v5HslaA(...a),
       v5HslaBNow: (...a) => v5HslaB(...a),
+      v5HslaCNow: (...a) => v5HslaC(...a),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

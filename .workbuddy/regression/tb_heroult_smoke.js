@@ -1670,6 +1670,14 @@ async function main() {
     t('U364 激光 hsla 串抽为纯函数边界', o.b === 'hsla(240,100%,75%,0.9)', JSON.stringify(o));
   } catch(e){ t('U363 激光 hsla 串抽为纯函数',false,e.message); t('U364 激光 hsla 串抽为纯函数边界',false,e.message); }
 
+
+  // ===== U365~U366: 粒子 hsla 串抽为纯函数(v5.26) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5HslaCNow(0),b:T.v5HslaCNow(1)});})()"));
+    t('U365 粒子 hsla 串抽为纯函数', o.a === 'hsla(20,100%,60%,0.5)', JSON.stringify(o));
+    t('U366 粒子 hsla 串抽为纯函数边界', o.b === 'hsla(40,100%,60%,0.5)', JSON.stringify(o));
+  } catch(e){ t('U365 粒子 hsla 串抽为纯函数',false,e.message); t('U366 粒子 hsla 串抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
