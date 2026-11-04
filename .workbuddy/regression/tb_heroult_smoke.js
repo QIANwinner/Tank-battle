@@ -1182,6 +1182,14 @@ async function main() {
     t('U242 非法值回退满音量', o.b === 1, JSON.stringify(o));
   } catch(e){ t('U241 合法音量',false,e.message); t('U242 非法值回退满音量',false,e.message); }
 
+
+  // ===== U243~U244: 音量钳制抽为 clampVol(v4.63) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.clampVolNow(2),b:T.clampVolNow(-1)});})()"));
+    t('U243 上界钳制', o.a === 1, JSON.stringify(o));
+    t('U244 下界钳制', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U243 上界钳制',false,e.message); t('U244 下界钳制',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
