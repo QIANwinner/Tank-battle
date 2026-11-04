@@ -886,6 +886,14 @@ async function main() {
     t('U168 空名兜底', o.b === '我的关卡', JSON.stringify(o));
   } catch(e){ t('U167 去空格并截断',false,e.message); t('U168 空名兜底',false,e.message); }
 
+
+  // ===== U169~U170: 存档整数解析统一为 safeInt(v0.4.26) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.safeIntNow('123',0),b:T.safeIntNow('abc',7)});})()"));
+    t('U169 合法字符串', o.a === 123, JSON.stringify(o));
+    t('U170 非法值回退默认值', o.b === 7, JSON.stringify(o));
+  } catch(e){ t('U169 合法字符串',false,e.message); t('U170 非法值回退默认值',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
