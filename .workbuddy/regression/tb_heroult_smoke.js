@@ -1894,6 +1894,14 @@ async function main() {
     t('U420 基地升级按钮 HTML 抽为纯函数边界', o.b.indexOf('🪙 升级 12,345')>=0, JSON.stringify(o));
   } catch(e){ t('U419 基地升级按钮 HTML 抽为纯函数',false,e.message); t('U420 基地升级按钮 HTML 抽为纯函数边界',false,e.message); }
 
+
+  // ===== U421~U422: 带书名号的名称标签抽为纯函数(v5.54) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5QuotedNameNow('黄金'),b:T.v5QuotedNameNow('')});})()"));
+    t('U421 带书名号的名称标签抽为纯函数', o.a === '「黄金」', JSON.stringify(o));
+    t('U422 带书名号的名称标签抽为纯函数边界', o.b === '「」', JSON.stringify(o));
+  } catch(e){ t('U421 带书名号的名称标签抽为纯函数',false,e.message); t('U422 带书名号的名称标签抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
