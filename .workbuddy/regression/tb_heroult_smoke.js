@@ -1206,6 +1206,14 @@ async function main() {
     t('U248 零音量保持', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U247 超界钳制',false,e.message); t('U248 零音量保持',false,e.message); }
 
+
+  // ===== U249~U250: 最高分存档解析抽为 safeBest(v4.66) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.safeBestNow('9800'),b:T.safeBestNow('-3')});})()"));
+    t('U249 合法最高分', o.a === 9800, JSON.stringify(o));
+    t('U250 负值归零', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U249 合法最高分',false,e.message); t('U250 负值归零',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
