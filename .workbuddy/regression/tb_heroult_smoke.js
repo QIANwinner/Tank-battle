@@ -790,6 +790,14 @@ async function main() {
     t('U144 零进度正确', o.b.indexOf('0/5')>=0 && o.b.indexOf('width:0%')>=0, JSON.stringify(o));
   } catch(e){ t('U143 名称进度条齐全',false,e.message); t('U144 零进度正确',false,e.message); }
 
+
+  // ===== U145~U146: 签到副标题抽为纯函数(v0.4.14) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.signinSubTextNow(true,3,0),b:T.signinSubTextNow(false,0,12345)});})()"));
+    t('U145 已签到显示连续', o.a === '已连续 3 天', JSON.stringify(o));
+    t('U146 未签到奖励千分位', o.b === '今日可领 🪙12,345', JSON.stringify(o));
+  } catch(e){ t('U145 已签到显示连续',false,e.message); t('U146 未签到奖励千分位',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
