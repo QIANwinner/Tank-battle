@@ -1326,6 +1326,14 @@ async function main() {
     t('U278 负值归零', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U277 正常高度',false,e.message); t('U278 负值归零',false,e.message); }
 
+
+  // ===== U279~U280: 粒子数量倍率计算抽为 particleCountOf(v4.81) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.particleCountOfNow(10,2),b:T.particleCountOfNow(-5,2)});})()"));
+    t('U279 倍率生效', o.a === 20, JSON.stringify(o));
+    t('U280 负数归零', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U279 倍率生效',false,e.message); t('U280 负数归零',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

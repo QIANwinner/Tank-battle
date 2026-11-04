@@ -162,6 +162,12 @@ Tank-battle/
 
 ## 🆕 更新日志
 
+### v0.4.81 · 2026-11-04
+**粒子数量倍率计算抽为 particleCountOf**
+- 粒子数量倍率计算抽为 particleCountOf
+- ✅ 回归验证：主套件 169/169 + 反馈专项 280/280（无回归）
+- 📴 Service Worker 缓存版本更新至 **v04810**，游戏内版本 **V4.81**
+
 ### v0.4.80 · 2026-11-04
 **BOSS 光柱高度抽为 bossBeamHeight**
 - BOSS 光柱高度抽为 bossBeamHeight

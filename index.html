@@ -2099,7 +2099,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V4.80</div>
+  <div id="mark">DESIGNED BY QIAN · V4.81</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -3823,7 +3823,7 @@
     }
   }
   function spawnParticles(x, y, color, n = 8) {
-    spawnParticlesRaw(x, y, color, Math.max(0, Math.round(n * particleMul())));
+    spawnParticlesRaw(x, y, color, particleCountOf(n, particleMul()));
   }
   // v0.3.15 粒子推进+回收：原地写指针压缩，死亡粒子回池（替代每帧 filter 分配新数组）
   function updateParticles(dt, k) {
@@ -6776,6 +6776,7 @@ function themeIdxOf(lv) { return Math.max(0, (Number(lv) || 1) - 1); }
 function warnRingRadius(timer) { return 9 + (35 - Math.max(0, Number(timer) || 0)) * 0.35; }
 function waveAlpha(a) { return Math.max(0, Number(a) || 0); }
 function bossBeamHeight(y, size) { return Math.max(0, (Number(y) || 0) + (Number(size) || 0)); }
+function particleCountOf(n, mul) { return Math.max(0, Math.round((Number(n) || 0) * (Number(mul) || 1))); }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -8584,7 +8585,7 @@ function bossBeamHeight(y, size) { return Math.max(0, (Number(y) || 0) + (Number
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V4.80', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V4.81', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9426,6 +9427,7 @@ function bossBeamHeight(y, size) { return Math.max(0, (Number(y) || 0) + (Number
       warnRingRadiusNow: (...a) => warnRingRadius(...a),
       waveAlphaNow: (...a) => waveAlpha(...a),
       bossBeamHeightNow: (...a) => bossBeamHeight(...a),
+      particleCountOfNow: (...a) => particleCountOf(...a),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

@@ -1,3 +1,16 @@
+# v0.4.81 · 粒子数量倍率计算抽为 particleCountOf
+
+> 粒子数量倍率计算抽为 particleCountOf 回归：主套件 169/169 + 反馈专项 280/280。
+
+## 🅰 改进
+
+- 粒子数量倍率计算抽为 particleCountOf
+
+## 🅱 验证
+
+- 主套件 169/169 + 反馈专项 280/280；内联脚本语法 SYNTAX OK
+- SW 缓存 v04810，游戏内版本 V4.81；远程树与本地树一致（sync_push）
+
 # v0.4.80 · BOSS 光柱高度抽为 bossBeamHeight
 
 > BOSS 光柱高度抽为 bossBeamHeight 回归：主套件 169/169 + 反馈专项 278/278。
