@@ -518,6 +518,14 @@ async function main() {
     t('U76 秒级与非法值兜底', o.c === '45秒' && o.d === '0秒' && o.e === '0秒', JSON.stringify(o));
   } catch(e){ t('U75 分秒格式',false,e.message); t('U76 时长兜底',false,e.message); }
 
+
+  // ===== U77~U78: 复制失败提示(v0.3.70) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.copyFailMsgNow('挑战链接','请手动复制地址栏链接'),b:T.copyFailMsgNow('战绩图','请长按图片保存')});})()"));
+    t('U77 失败提示带对象与建议', o.a.indexOf('⚠ 挑战链接复制失败')>=0 && o.a.indexOf('请手动复制地址栏链接')>=0, o.a);
+    t('U78 两处失败提示口径一致', o.b.indexOf('⚠ 战绩图复制失败')>=0 && o.b.indexOf(' · ')>=0, o.b);
+  } catch(e){ t('U77 复制失败对象',false,e.message); t('U78 复制失败口径',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
