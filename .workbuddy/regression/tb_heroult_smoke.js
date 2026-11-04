@@ -1558,6 +1558,14 @@ async function main() {
     t('U336 主题强调色 rgb 串抽为纯函数边界', o.b === 'rgb(0,255,0)', JSON.stringify(o));
   } catch(e){ t('U335 主题强调色 rgb 串抽为纯函数',false,e.message); t('U336 主题强调色 rgb 串抽为纯函数边界',false,e.message); }
 
+
+  // ===== U337~U338: 里程碑光晕阴影串抽为纯函数(v5.12) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5BoxShadowStrNow('#fff'),b:T.v5BoxShadowStrNow('red')});})()"));
+    t('U337 里程碑光晕阴影串抽为纯函数', o.a === '0 0 12px 2px #fff', JSON.stringify(o));
+    t('U338 里程碑光晕阴影串抽为纯函数边界', o.b === '0 0 12px 2px red', JSON.stringify(o));
+  } catch(e){ t('U337 里程碑光晕阴影串抽为纯函数',false,e.message); t('U338 里程碑光晕阴影串抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
