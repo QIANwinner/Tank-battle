@@ -478,6 +478,14 @@ async function main() {
     t('U66 基地升级大额千分位', o.b.indexOf('余额 12,345🪙')>=0, o.b);
   } catch(e){ t('U65 基地文案',false,e.message); t('U66 基地千分位',false,e.message); }
 
+
+  // ===== U67~U68: 装备提示(v0.3.65) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.equipMsgNow('🟦','深海迷彩'),b:T.equipMsgNow('🟣','紫电僚机'),c:T.petFollowMsgNow('🐢','守护龟',3)});})()"));
+    t('U67 皮肤与僚机共用装备文案', o.a.indexOf('已装备 · 深海迷彩')>=0 && o.b.indexOf('已装备 · 紫电僚机')>=0, o.a+' | '+o.b);
+    t('U68 宠物跟随含名称与等级', o.c.indexOf('守护龟 已跟随 · Lv3')>=0, o.c);
+  } catch(e){ t('U67 装备文案',false,e.message); t('U68 宠物跟随',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
