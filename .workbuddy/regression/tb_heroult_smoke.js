@@ -406,6 +406,14 @@ async function main() {
     t('U48 关完成大额千分位', o.b.indexOf('余额 12,345🪙')>=0, o.b);
   } catch(e){ t('U47 关完成文案',false,e.message); t('U48 关完成千分位',false,e.message); }
 
+
+  // ===== U49~U50: BOSS 出场关卡(v0.3.56) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossAppearMsgNow('重甲',8),b:T.bossAppearMsgNow('幽灵',15)});})()"));
+    t('U49 BOSS 出场含名称与关卡', o.a.indexOf('重甲 BOSS 出现')>=0 && o.a.indexOf('第 8 关')>=0, o.a);
+    t('U50 BOSS 出场关卡可变', o.b.indexOf('第 15 关')>=0, o.b);
+  } catch(e){ t('U49 BOSS出场',false,e.message); t('U50 BOSS关卡',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
