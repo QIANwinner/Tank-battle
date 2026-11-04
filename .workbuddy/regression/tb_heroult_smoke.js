@@ -2206,6 +2206,14 @@ async function main() {
     t('U498 存档备份提示 HTML 抽为纯函数边界', o.b.indexOf('saveArea')>=0, JSON.stringify(o));
   } catch(e){ t('U497 存档备份提示 HTML 抽为纯函数',false,e.message); t('U498 存档备份提示 HTML 抽为纯函数边界',false,e.message); }
 
+
+  // ===== U499~U500: 战绩记录 UID 抽为纯函数(v5.93) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5RecordUidNow().length,b:T.v5RecordUidNow()});})()"));
+    t('U499 战绩记录 UID 抽为纯函数', o.a >= 13, JSON.stringify(o));
+    t('U500 战绩记录 UID 抽为纯函数边界', o.b.length >= 13 && o.b.length <= 20, JSON.stringify(o));
+  } catch(e){ t('U499 战绩记录 UID 抽为纯函数',false,e.message); t('U500 战绩记录 UID 抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
