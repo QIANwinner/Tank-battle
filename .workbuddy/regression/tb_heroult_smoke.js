@@ -1782,6 +1782,14 @@ async function main() {
     t('U392 宠物下级费用文案抽为纯函数边界', o.b === ' · 已满级', JSON.stringify(o));
   } catch(e){ t('U391 宠物下级费用文案抽为纯函数',false,e.message); t('U392 宠物下级费用文案抽为纯函数边界',false,e.message); }
 
+
+  // ===== U393~U394: 每日词条描述拼接抽为纯函数(v5.40) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5DailyModTextNow('','钢铁防线','砖墙变钢墙'),b:T.v5DailyModTextNow('A','B','C')});})()"));
+    t('U393 每日词条描述拼接抽为纯函数', o.a === '钢铁防线(砖墙变钢墙)', JSON.stringify(o));
+    t('U394 每日词条描述拼接抽为纯函数边界', o.b === 'A · B(C)', JSON.stringify(o));
+  } catch(e){ t('U393 每日词条描述拼接抽为纯函数',false,e.message); t('U394 每日词条描述拼接抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
