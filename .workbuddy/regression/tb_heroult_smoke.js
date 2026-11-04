@@ -2519,6 +2519,22 @@ async function main() {
     t('U620 DOM 与函数一致(KB 值相同)', o5.html.indexOf((o5.bytes / 1024).toFixed(1) + ' KB') >= 0, JSON.stringify(o5));
   } catch(e){ for(let k=615;k<=620;k++) t('U'+k+' 存档面板',false,e.message); }
 
+
+  // ===== U621~U626: SW 新版本提示(v0.6.18) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;const b=document.getElementById('swBanner');return JSON.stringify({dom:!!b,cls:b?b.className:null,txt:b?b.textContent:null});})()"));
+    t('U621 SW 横幅已加入', o.dom === true, JSON.stringify(o));
+    t('U622 初值隐藏且无文案', o.cls === 'swBanner' && o.txt === '', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.swUpdateTextNow(true),b:T.swUpdateTextNow(false)});})()"));
+    t('U623 正常文案', o2.a === '🆕 新版本已就绪 · 刷新页面生效' && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.swUpdateTextNow(false),b:T.swUpdateTextNow('x'),c:T.swUpdateTextNow(undefined),d:T.swUpdateTextNow(1)});})()"));
+    t('U624 严格 true 才显示(非法兜底空串)', o3.a === '' && o3.b === '' && o3.c === '' && o3.d === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.swUpdateSimNow());})()"));
+    t('U625 模拟 updatefound 横幅弹出', o4.cls === 'swBanner show' && (o4.txt || '').indexOf('新版本') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){return JSON.stringify({sw:typeof navigator.serviceWorker === 'object'});})()"));
+    t('U626 注册 API 可用', o5.sw === true, JSON.stringify(o5));
+  } catch(e){ for(let k=621;k<=626;k++) t('U'+k+' SW提示',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
