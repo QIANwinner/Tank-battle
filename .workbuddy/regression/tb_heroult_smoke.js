@@ -1070,6 +1070,14 @@ async function main() {
     t('U214 统一禁止前缀', o.b.indexOf('🚫')===0, JSON.stringify(o));
   } catch(e){ t('U213 适用范围说明齐全',false,e.message); t('U214 统一禁止前缀',false,e.message); }
 
+
+  // ===== U215~U216: 战绩图复制成功提示抽为纯函数（50 轮收口）(v0.4.49) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reportCopyMsgNow(),b:T.reportCopyMsgNow().indexOf('✅')});})()"));
+    t('U215 复制成功文案', o.a === '✅ 战绩图已复制到剪贴板', JSON.stringify(o));
+    t('U216 统一成功前缀', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U215 复制成功文案',false,e.message); t('U216 统一成功前缀',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
