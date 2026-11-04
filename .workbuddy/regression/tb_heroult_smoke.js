@@ -2022,6 +2022,14 @@ async function main() {
     t('U452 磁力猪下级效果描述抽为纯函数边界', o.b.indexOf('升到 Lv3')>=0, JSON.stringify(o));
   } catch(e){ t('U451 磁力猪下级效果描述抽为纯函数',false,e.message); t('U452 磁力猪下级效果描述抽为纯函数边界',false,e.message); }
 
+
+  // ===== U453~U454: 宠物购买按钮文案抽为纯函数(v5.70) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5PetBuyTextNow(6),b:T.v5PetBuyTextNow(12345)});})()"));
+    t('U453 宠物购买按钮文案抽为纯函数', o.a === '🐾 购买 6', JSON.stringify(o));
+    t('U454 宠物购买按钮文案抽为纯函数边界', o.b === '🐾 购买 12,345', JSON.stringify(o));
+  } catch(e){ t('U453 宠物购买按钮文案抽为纯函数',false,e.message); t('U454 宠物购买按钮文案抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
