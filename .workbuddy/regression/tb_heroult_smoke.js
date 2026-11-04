@@ -2246,6 +2246,14 @@ async function main() {
     t('U508 皮肤预览画布 HTML 抽为纯函数边界', o.b.indexOf('canvas')>=0, JSON.stringify(o));
   } catch(e){ t('U507 皮肤预览画布 HTML 抽为纯函数',false,e.message); t('U508 皮肤预览画布 HTML 抽为纯函数边界',false,e.message); }
 
+
+  // ===== U509~U510: 皮肤描述 HTML 抽为纯函数(v5.98) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5SkinDescHtmlNow('经典配色'),b:T.v5SkinDescHtmlNow('X')});})()"));
+    t('U509 皮肤描述 HTML 抽为纯函数', o.a === '<span class="siDesc">经典配色</span>', JSON.stringify(o));
+    t('U510 皮肤描述 HTML 抽为纯函数边界', o.b.indexOf('>X</span>')>=0, JSON.stringify(o));
+  } catch(e){ t('U509 皮肤描述 HTML 抽为纯函数',false,e.message); t('U510 皮肤描述 HTML 抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
