@@ -1046,6 +1046,14 @@ async function main() {
     t('U208 归零切换文案', o.b === '正在刷新…', JSON.stringify(o));
   } catch(e){ t('U207 正数倒计时',false,e.message); t('U208 归零切换文案',false,e.message); }
 
+
+  // ===== U209~U210: 暂停按钮与异常文案抽为纯函数(v0.4.46) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pauseBtnTextNow(),b:T.errMsgLongTextNow(300).length});})()"));
+    t('U209 暂停按钮文案', o.a === '⏸', JSON.stringify(o));
+    t('U210 超长异常文案截断到 185 字', o.b === 185, JSON.stringify(o));
+  } catch(e){ t('U209 暂停按钮文案',false,e.message); t('U210 超长异常文案截断到 185 字',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
