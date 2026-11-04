@@ -1422,6 +1422,14 @@ async function main() {
     t('U302 未解锁加锁', o.b === '🔒', JSON.stringify(o));
   } catch(e){ t('U301 BOSS 关优先',false,e.message); t('U302 未解锁加锁',false,e.message); }
 
+
+  // ===== U303~U304: 选关卡片星级行抽为 lvCardStars(v4.93) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lvCardStarsNow(2),b:T.lvCardStarsNow(9)});})()"));
+    t('U303 二星补空心', o.a === '★★☆', JSON.stringify(o));
+    t('U304 越界钳制满星', o.b === '★★★', JSON.stringify(o));
+  } catch(e){ t('U303 二星补空心',false,e.message); t('U304 越界钳制满星',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
