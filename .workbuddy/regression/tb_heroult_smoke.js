@@ -2158,6 +2158,14 @@ async function main() {
     t('U486 重置统计文案抽为纯函数边界', o.b.indexOf('12,345')>=0, JSON.stringify(o));
   } catch(e){ t('U485 重置统计文案抽为纯函数',false,e.message); t('U486 重置统计文案抽为纯函数边界',false,e.message); }
 
+
+  // ===== U487~U488: 重置按钮 HTML 抽为纯函数(v5.87) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5ResetBtnHtmlNow(true),b:T.v5ResetBtnHtmlNow(false)});})()"));
+    t('U487 重置按钮 HTML 抽为纯函数', o.a === '<button class="gachaBtn" >🔄 重置</button>', JSON.stringify(o));
+    t('U488 重置按钮 HTML 抽为纯函数边界', o.b.indexOf('disabled')>=0, JSON.stringify(o));
+  } catch(e){ t('U487 重置按钮 HTML 抽为纯函数',false,e.message); t('U488 重置按钮 HTML 抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
