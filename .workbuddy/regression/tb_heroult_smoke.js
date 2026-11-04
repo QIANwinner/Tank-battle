@@ -309,6 +309,23 @@ async function main() {
     t('U27 大额余额千分位', o.big.indexOf('余额 12,345🪙') >= 0, o.big);
   } catch (e) { t('U25 金币余额', false, e.message); t('U26 宠物币余额', false, e.message); t('U27 余额千分位', false, e.message); }
 
+
+  // ===== U28~U30: toast 防刷屏(v0.3.47) =====
+  try {
+    const o = JSON.parse(await ev(`(function(){
+      const T = window.__tbTest;
+      const a1 = T.toastEmitNow('🐛 去重测试提示 A');
+      const a2 = T.toastEmitNow('🐛 去重测试提示 A');
+      const b  = T.toastEmitNow('🐛 去重测试提示 B');
+      const c  = T.toastEmitNow('⏳ 大招冷却中 · 还需 5 秒');
+      const d  = T.toastEmitNow('⏳ 大招冷却中 · 还需 5 秒');
+      return JSON.stringify({ a1, a2, b, c, d, st: T.toastStatsNow() });
+    })()`));
+    t('U28 相同提示第二次被抑制', o.a2.suppressed === o.a1.suppressed + 1 && o.a2.count === o.a1.count, JSON.stringify(o.a2));
+    t('U29 不同提示正常弹出', o.b.count === o.a2.count + 1, JSON.stringify(o.b));
+    t('U30 冷却类提示不抑制', o.d.count === o.c.count + 1 && o.st.text.indexOf('还需 5 秒') >= 0, JSON.stringify(o.d));
+  } catch (e) { t('U28 防刷屏', false, e.message); t('U29 不同提示', false, e.message); t('U30 冷却不抑制', false, e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
