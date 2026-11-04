@@ -2038,6 +2038,14 @@ async function main() {
     t('U456 宠物升级按钮文案抽为纯函数边界', o.b === '🐾 升级 12,345', JSON.stringify(o));
   } catch(e){ t('U455 宠物升级按钮文案抽为纯函数',false,e.message); t('U456 宠物升级按钮文案抽为纯函数边界',false,e.message); }
 
+
+  // ===== U457~U458: 宠物名称 HTML 抽为纯函数(v5.72) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5PetNameHtmlNow('招财猫',false,'coin'),b:T.v5PetNameHtmlNow('X',true,'Y')});})()"));
+    t('U457 宠物名称 HTML 抽为纯函数', o.a.indexOf('招财猫')>=0 && o.a.indexOf('rar epic')>=0, JSON.stringify(o));
+    t('U458 宠物名称 HTML 抽为纯函数边界', o.b.indexOf('rar legendary')>=0, JSON.stringify(o));
+  } catch(e){ t('U457 宠物名称 HTML 抽为纯函数',false,e.message); t('U458 宠物名称 HTML 抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
