@@ -1398,6 +1398,14 @@ async function main() {
     t('U296 仅宠物币', o.b === '+3🐾', JSON.stringify(o));
   } catch(e){ t('U295 双币奖励',false,e.message); t('U296 仅宠物币',false,e.message); }
 
+
+  // ===== U297~U298: 商店强化进度文案抽为 shopMetaText(v4.90) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shopMetaTextNow(false,1,3,120),b:T.shopMetaTextNow(true,3,3,0)});})()"));
+    t('U297 未满级显示价格', o.a === '等级 1/3 · 下一级 🪙120', JSON.stringify(o));
+    t('U298 满级文案', o.b === '已满级', JSON.stringify(o));
+  } catch(e){ t('U297 未满级显示价格',false,e.message); t('U298 满级文案',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
