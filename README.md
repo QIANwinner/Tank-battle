@@ -162,6 +162,12 @@ Tank-battle/
 
 ## 🆕 更新日志
 
+### v0.4.73 · 2026-11-04
+**模式场次解析抽为 safeModeGames**
+- 模式场次解析抽为 safeModeGames
+- ✅ 回归验证：主套件 169/169 + 反馈专项 264/264（无回归）
+- 📴 Service Worker 缓存版本更新至 **v04730**，游戏内版本 **V4.73**
+
 ### v0.4.72 · 2026-11-04
 **每日挑战计数解析抽为 safeDailyCount**
 - 每日挑战计数解析抽为 safeDailyCount

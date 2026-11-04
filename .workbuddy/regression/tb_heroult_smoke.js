@@ -1262,6 +1262,14 @@ async function main() {
     t('U262 非法值归零', o.b === 0, JSON.stringify(o));
   } catch(e){ t('U261 合法计数',false,e.message); t('U262 非法值归零',false,e.message); }
 
+
+  // ===== U263~U264: 模式场次解析抽为 safeModeGames(v4.73) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.safeModeGamesNow('11'),b:T.safeModeGamesNow('-2')});})()"));
+    t('U263 合法场次', o.a === 11, JSON.stringify(o));
+    t('U264 负值归零', o.b === 0, JSON.stringify(o));
+  } catch(e){ t('U263 合法场次',false,e.message); t('U264 负值归零',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
