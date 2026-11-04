@@ -2238,6 +2238,14 @@ async function main() {
     t('U506 颜色转 rgba 兜底串抽为纯函数边界', o.b === 'rgba(255,45,85,0)', JSON.stringify(o));
   } catch(e){ t('U505 颜色转 rgba 兜底串抽为纯函数',false,e.message); t('U506 颜色转 rgba 兜底串抽为纯函数边界',false,e.message); }
 
+
+  // ===== U507~U508: 皮肤预览画布 HTML 抽为纯函数(v5.97) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.v5SkinPrevHtmlNow(),b:T.v5SkinPrevHtmlNow()});})()"));
+    t('U507 皮肤预览画布 HTML 抽为纯函数', o.a.indexOf('skinPrev')>=0, JSON.stringify(o));
+    t('U508 皮肤预览画布 HTML 抽为纯函数边界', o.b.indexOf('canvas')>=0, JSON.stringify(o));
+  } catch(e){ t('U507 皮肤预览画布 HTML 抽为纯函数',false,e.message); t('U508 皮肤预览画布 HTML 抽为纯函数边界',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
