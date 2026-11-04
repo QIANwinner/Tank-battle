@@ -129,14 +129,15 @@ async function main() {
     await ev('window.__tbTest.setPetCoins(100)');
     await ev('window.__tbTest.buyPet("cat")');        // -4，触发 pet1 +2
     await ev('window.__tbTest.buyPet("turtle")');     // -6
-    await ev('window.__tbTest.buyPet("bunny")');      // -10，触发 petall +5
+    await ev('window.__tbTest.buyPet("bunny")');      // -10
+    await ev('window.__tbTest.buyPet("pig")');        // -14，触发 petall +5（第4只v0.3.16）
     const pc = await ev('window.__tbTest.petCoins()');
     const ach = await ev('window.__tbTest.ach()');
     const st = await ev('window.__tbTest.petState()');
-    const allOwned = st.owned.length === 3 && ['cat', 'turtle', 'bunny'].every(x => st.owned.includes(x));
-    t('C2 购买扣🐾（100-20+2+5=87）+ pet1/petall 触发', pc === 87 && allOwned && ach.includes('pet1') && ach.includes('petall'),
+    const allOwned = st.owned.length === 4 && ['cat', 'turtle', 'bunny', 'pig'].every(x => st.owned.includes(x));
+    t('C2 购买扣🐾（100-34+2+5=73）+ pet1/petall 触发', pc === 73 && allOwned && ach.includes('pet1') && ach.includes('petall'),
       'petCoins=' + pc + ' owned=' + st.owned.join(','));
-  } catch (e) { t('C2 购买扣🐾（100-20+2+5=87）+ pet1/petall 触发', false, e.message); }
+  } catch (e) { t('C2 购买扣🐾（100-34+2+5=73）+ pet1/petall 触发', false, e.message); }
 
   // ===== C3: 满级触发「满级萌宠」+ 升级扣宠物币 =====
   try {

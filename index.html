@@ -2087,7 +2087,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V3.15</div>
+  <div id="mark">DESIGNED BY QIAN · V3.16</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2774,6 +2774,8 @@
     { id: 'cat',    name: '招财猫', icon: '🐱', price: 4,  passive: 'coin',   desc: '金币获取 +10%',   color: '#ffb347', maxLv: 3 },
     { id: 'turtle', name: '守护龟', icon: '🐢', price: 6,  passive: 'shield', desc: '每关开局护盾 +1 秒', color: '#39ff14', maxLv: 3 },
     { id: 'bunny',  name: '幸运兔', icon: '🐰', price: 10, passive: 'combo',  desc: '连击窗口 +15%',    color: '#ff8ab0', maxLv: 3 },
+    // —— v0.3.16 第 4 只宠物:磁力猪——磁力吸附附近掉落道具(范围随等级扩大,扩充宠物币消耗) ——
+    { id: 'pig',    name: '磁力猪', icon: '🐷', price: 14, passive: 'magnet', desc: '磁力吸附附近道具(范围随级扩大)', color: '#ff6fa0', maxLv: 3 },
   ];
   const PET_MAP = {};
   PET_DEF.forEach(p => { PET_MAP[p.id] = p; });
@@ -3107,7 +3109,7 @@
     // —— v0.3.4 宠物经济成就：宠物币专属来源（reward 0 金币 + petReward 宠物币） ——
     { id: 'pet1',   icon: '🐾', name: '初次饲主', desc: '购买第一只宠物', reward: 0, petReward: 2 },
     { id: 'petmax', icon: '🐣', name: '满级萌宠', desc: '任意宠物升到满级', reward: 0, petReward: 3 },
-    { id: 'petall', icon: '💞', name: '宠物全家福', desc: '集齐全部 3 只宠物', reward: 0, petReward: 5 }
+    { id: 'petall', icon: '💞', name: '宠物全家福', desc: '集齐全部 ' + PET_DEF.length + ' 只宠物', reward: 0, petReward: 5 }
   ];
   // —— v0.2.7 成就分组（分组进度条用） ——
   const ACH_GROUP = {
@@ -5002,14 +5004,25 @@
   }
 
   function updatePowerups(dt) {
+    // —— v0.3.16 磁力猪:磁力半径内道具被吸向玩家(基础拾取 24;Lv1=48 / Lv2=72 / Lv3=96),拉速随级提升 ——
+    const magLv = petBonus('magnet');
+    const magR = magLv ? 24 + 24 * magLv : 0;
+    const pullSpd = magLv ? 80 + 40 * (magLv - 1) : 0;
     for (const p of powerups) {
       if (p.dead) continue;
       p.life -= dt;
       p.bob += dt * 4;
       if (player && !player.dead) {
         const pcx = player.x + TANK_SIZE / 2, pcy = player.y + TANK_SIZE / 2;
-        const dx = pcx - (p.x + 8), dy = pcy - (p.y + 8);
-        if (dx * dx + dy * dy < 24 * 24) { applyPowerup(p.type); p.dead = true; }
+        let dx = pcx - (p.x + 8), dy = pcy - (p.y + 8);
+        let d2 = dx * dx + dy * dy;
+        if (magR > 24 && d2 < magR * magR) {
+          const d = Math.sqrt(d2) || 1;
+          p.x += dx / d * pullSpd * dt;
+          p.y += dy / d * pullSpd * dt;
+          dx = pcx - (p.x + 8); dy = pcy - (p.y + 8); d2 = dx * dx + dy * dy;   // 拉近后重算距离
+        }
+        if (d2 < 24 * 24) { applyPowerup(p.type); p.dead = true; }
       }
       if (p.life <= 0) p.dead = true;
     }
@@ -8291,7 +8304,7 @@
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V3.15', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V3.16', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -8868,6 +8881,10 @@
       // —— v0.2.5 强制刷出 Boss（同步，用于轮换/技能验证） ——
       forceSpawnBoss: () => { spawnBoss(); return { id: bossType.id, name: bossType.name, bar: bossType.bar, skill: bossType.skill, color: bossType.color, hpMul: bossType.hpMul }; },
       powerups: () => powerups.map(p => p.type),
+      // —— v0.3.16 磁力猪磁力吸附验证钩子 ——
+      powerupSpawn: (x, y, type) => { spawnPowerup(x, y, type || 'shield'); },
+      powerupsAll: () => powerups.map(p => ({ x: p.x, y: p.y, type: p.type, dead: p.dead })),
+      powerupStep: (dt) => { updatePowerups(dt); },
       // —— v0.3.15 粒子池化验证钩子 ——
       particleInfo: () => ({ active: particles.length, pool: particlePool.length, poolMax: PARTICLE_POOL_MAX }),
       particlesAll: () => particles.map(p => ({ x: p.x, y: p.y, color: p.color, life: p.life, max: p.max, size: p.size })),
@@ -8981,6 +8998,7 @@
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
       achAllDefs: () => ACHIEVE.map(a => a.id),
+      achDesc: (id) => { const a = ACHIEVE.find(x => x.id === id); return a ? a.desc : null; },   // v0.3.16 成就描述探针
       openAchNow: () => { openAch(); return true; },
       triggerHeroUltNow: () => { tryHeroUlt(); return heroUltCd; },
       setHeroUltCd: (n) => { heroUltCd = Math.max(0, n); updateHeroUltHud(); return heroUltCd; },
@@ -9015,7 +9033,7 @@
       setEndless: (v) => { endlessMode = !!v; return endlessMode; },
       advance: () => { advanceLevel(); return level; },
       // —— v0.3.2 宠物验证 ——
-      pet: () => pet ? { id: pet.id, level: pet.level, bonus: { coin: petBonus('coin'), shield: petBonus('shield'), combo: petBonus('combo') } } : null,
+      pet: () => pet ? { id: pet.id, level: pet.level, bonus: { coin: petBonus('coin'), shield: petBonus('shield'), combo: petBonus('combo'), magnet: petBonus('magnet') } } : null,
       petDefs: () => PET_DEF.map(d => ({ id: d.id, name: d.name, price: d.price, passive: d.passive, maxLv: d.maxLv, color: d.color })),
       setPet: (id, lv) => {
         if (!PET_MAP[id]) return false;

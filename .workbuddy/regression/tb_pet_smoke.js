@@ -99,8 +99,8 @@ async function main() {
     // ===== P1: 宠物定义 3 只，被动类型正确 =====
     try {
       const defs = T.petDefs();
-      const ok = defs.length === 3 && defs.some(d => d.id === 'cat' && d.passive === 'coin') && defs.some(d => d.id === 'turtle' && d.passive === 'shield') && defs.some(d => d.id === 'bunny' && d.passive === 'combo');
-      t('P1 宠物定义 3 只 · 被动类型正确', ok, JSON.stringify(defs.map(d => d.id + ':' + d.passive)));
+      const ok = defs.length === 4 && defs.some(d => d.id === 'cat' && d.passive === 'coin') && defs.some(d => d.id === 'turtle' && d.passive === 'shield') && defs.some(d => d.id === 'bunny' && d.passive === 'combo') && defs.some(d => d.id === 'pig' && d.passive === 'magnet');
+      t('P1 宠物定义 4 只 · 被动类型正确', ok, JSON.stringify(defs.map(d => d.id + ':' + d.passive)));
     } catch (e) { t('P1 宠物定义 3 只 · 被动类型正确', false, e.message); }
 
     // ===== P2: setPet 装备招财猫 Lv1 → coin 加成 = 1 =====
