@@ -2789,6 +2789,22 @@ async function main() {
     t('U734 DOM 文本长度合理', o5.len > 10, JSON.stringify(o5));
   } catch(e){ for(let k=729;k<=734;k++) t('U'+k+' 战绩小结',false,e.message); }
 
+
+  // ===== U735~U740: 关卡用时星级条(v0.6.37) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('lvTimeBarVal'),f:T.levelTimeBarTextNow(0,1),p:T.levelTimePctNow(0,1)});})()"));
+    t('U735 关卡用时条已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U736 初值 0s/时限', o.f.indexOf('0s') >= 0 && o.f.indexOf('87s') >= 0 && o.p === 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.levelTimePctNow(87,1),b:T.levelTimeBarTextNow(45,3)});})()"));
+    t('U737 正常值 满格/45s', o2.a === 100 && o2.b.indexOf('45s') >= 0 && o2.b.indexOf('111s') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.levelTimePctNow(9999,1),b:T.levelTimePctNow(0,1)});})()"));
+    t('U738 边界 封顶100/下限0', o3.a === 100 && o3.b === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.levelTimePctNow(NaN,NaN),b:T.levelTimeBarTextNow(-5,-1)});})()"));
+    t('U739 非法输入兜底', o4.a === 0 && o4.b.indexOf('0s') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const dom=T.lvTimeBarDomNow();return JSON.stringify({len:dom.length});})()"));
+    t('U740 DOM 文本长度合理', o5.len > 5, JSON.stringify(o5));
+  } catch(e){ for(let k=735;k<=740;k++) t('U'+k+' 关卡用时条',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
