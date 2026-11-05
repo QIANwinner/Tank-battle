@@ -3600,6 +3600,22 @@ async function main() {
     t('U1046 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
   } catch(e){ for(let k=1041;k<=1046;k++) t('U'+k+' 得分速率',false,e.message); }
 
+
+  // ===== U1047~U1052: 本局 BOSS 击破(v0.6.89) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossRunPill'),w:T.bossRunTextNow(0)});})()"));
+    t('U1047 BOSS pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1048 初值 BOSS ×0', o.w === 'BOSS ×0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossRunTextNow(3),b:T.bossRunTextNow(12)});})()"));
+    t('U1049 正常值 ×3/×12', o2.a === 'BOSS ×3' && o2.b === 'BOSS ×12', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossRunTextNow(-2),b:T.bossRunTextNow(NaN)});})()"));
+    t('U1050 非法输入兜底 ×0', o3.a === 'BOSS ×0' && o3.b === 'BOSS ×0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({s:T.bossRunStatNow()});})()"));
+    t('U1051 统计值非负整数', typeof o4.s === 'number' && o4.s >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.bossRunDomNow();const fn=T.bossRunTextNow(T.bossRunStatNow());return JSON.stringify({dom,fn});})()"));
+    t('U1052 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1047;k<=1052;k++) t('U'+k+' BOSS击破',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
