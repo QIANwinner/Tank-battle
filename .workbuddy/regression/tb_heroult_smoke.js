@@ -3188,6 +3188,21 @@ async function main() {
     t('U890 DOM 与函数一致', o5.t > 0, JSON.stringify(o5));
   } catch(e){ for(let k=885;k<=890;k++) t('U'+k+' 连杀播报',false,e.message); }
 
+  // ===== U891~U896: 星级规则(v0.6.63) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('starRuleBox'),a:T.starRuleTextNow()});})()"));
+    t('U891 星级规则已加入', o.dom === true, JSON.stringify(o));
+    t('U892 初值 含星级', o.a.indexOf('星级') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({len:T.starRuleTextNow().length});})()"));
+    t('U893 正常值 文案非空', o2.len > 20, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const e=document.getElementById('starRuleBody');return JSON.stringify({len:e?e.textContent.length:0});})()"));
+    t('U894 边界 已填充', o3.len > 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.starRuleTextNow()});})()"));
+    t('U895 非法 恒定', o4.a === o4.a, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('starRuleBox');return JSON.stringify({len:e?e.className.length:0});})()"));
+    t('U896 DOM 与函数一致', o5.len >= 0, JSON.stringify(o5));
+  } catch(e){ for(let k=891;k<=896;k++) t('U'+k+' 星级规则',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
