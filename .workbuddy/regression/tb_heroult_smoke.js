@@ -2977,6 +2977,21 @@ async function main() {
     t('U806 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
   } catch(e){ for(let k=801;k<=806;k++) t('U'+k+' 排行榜高亮',false,e.message); }
 
+  // ===== U807~U812: 每日挑战折线(v0.6.49) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('dailyHist'),n:T.dailySeriesNow([]).length});})()"));
+    t('U807 每日折线已加入', o.dom === true, JSON.stringify(o));
+    t('U808 初值 空数组0', o.n === 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const b=[{mode:'normal',score:1},{mode:'daily',score:5,date:2},{mode:'daily',score:9,date:1},{mode:'daily',score:7,date:3}];const s=T.dailySeriesNow(b);return JSON.stringify({n:s.length,f:s[0].date,f2:s[2].date});})()"));
+    t('U809 正常值 过滤+排序', o2.n === 3 && o2.f === 1 && o2.f2 === 3, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({html:T.dailyLineSvgNow([])});})()"));
+    t('U810 边界 空svg空', o3.html.indexOf('暂无每日记录') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({n:T.dailySeriesNow(null).length});})()"));
+    t('U811 非法 null 空', o4.n === 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('dailyHist');return JSON.stringify({len:e?e.className.length:0});})()"));
+    t('U812 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=807;k<=812;k++) t('U'+k+' 每日折线',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
