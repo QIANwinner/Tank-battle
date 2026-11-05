@@ -3219,6 +3219,22 @@ async function main() {
     t('U902 DOM 与函数一致', o6.a.indexOf('5') >= 0, JSON.stringify(o6));
   } catch(e){ for(let k=897;k<=902;k++) t('U'+k+' 击杀效率',false,e.message); }
 
+  // ===== U903~U908: 大招CD进度条(v0.6.65) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cdPctNow(2,8)});})()"));
+    t('U903 大招CD进度函数', o.a === 75, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cdPctNow(0,8)});})()"));
+    t('U904 初值 满进度', o2.a === 100, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cdPctNow(8,8)});})()"));
+    t('U905 正常值 刚放完', o3.a === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cdPctNow(10,0)});})()"));
+    t('U906 边界 零上限', o4.a === 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cdPctNow(NaN,NaN)});})()"));
+    t('U907 非法 NaN 归零', o5.a === 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const e=document.getElementById('ultCdBar');return JSON.stringify({len:e?e.style.width.length:0});})()"));
+    t('U908 DOM 与函数一致', o6.len >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=903;k<=908;k++) t('U'+k+' 大招CD进度',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
