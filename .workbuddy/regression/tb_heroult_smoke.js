@@ -4180,6 +4180,21 @@ async function main() {
     t('U680 一致性', typeof o4.dom === 'string', o4.dom);
   } catch(e){ for(let k=675;k<=680;k++) t('U'+k+' 投入统计',false,e.message); }
 
+
+  // ===== U681~U686: 抽奖次数统计(v0.7.26) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('gachaCountWrap'),f:T.gachaCountTextNow(0)});})()"));
+    t('U681 抽奖 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U682 零次初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.gachaCountTextNow(10),b:T.gachaCountTextNow(1)});})()"));
+    t('U683 正常 10/1', o2.a === '🎰 10 次' && o2.b === '🎰 1 次', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.gachaCountTextNow(-1),b:T.gachaCountTextNow(NaN)});})()"));
+    t('U684 非法兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.gachaCountPillDomNow(),v:T.gachaCountNow()});})()"));
+    t('U685 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U686 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=681;k<=686;k++) t('U'+k+' 抽奖统计',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
