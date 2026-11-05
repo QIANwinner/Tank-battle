@@ -3985,6 +3985,22 @@ async function main() {
     t('U1190 DOM 与函数一致', o5.dom === '开火 ' + o5.shots, JSON.stringify(o5));
   } catch(e){ for(let k=1185;k<=1190;k++) t('U'+k+' 开炮pill',false,e.message); }
 
+
+  // ===== U1191~U1196: 基地等级(v0.7.13) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('basePillWrap'),f:T.baseLevelTextNow(0)});})()"));
+    t('U1191 基地 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1192 零级初值 Lv0', o.f === '🏰 Lv0', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseLevelTextNow(3),b:T.baseLevelTextNow(1)});})()"));
+    t('U1193 正常 Lv3/Lv1', o2.a === '🏰 Lv3' && o2.b === '🏰 Lv1', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.baseLevelTextNow(-2));})()"));
+    t('U1194 负数钳制 Lv0', o3 === '🏰 Lv0', o3);
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseLevelTextNow('x'),b:T.baseLevelTextNow(2.9)});})()"));
+    t('U1195 非法/小数钳制', o4.a === '🏰 Lv0' && o4.b === '🏰 Lv2', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.basePillDomNow(),level:T.baseLevelNow()});})()"));
+    t('U1196 DOM 与函数一致', o5.dom === '🏰 Lv' + o5.level, JSON.stringify(o5));
+  } catch(e){ for(let k=1191;k<=1196;k++) t('U'+k+' 基地pill',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
