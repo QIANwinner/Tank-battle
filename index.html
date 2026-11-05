@@ -1941,6 +1941,7 @@
   #runPickPill .v { color: #ff9f43; font-size: 11px; }
   #accPillWrap .v { color: #7ee7ff; font-weight: 800; font-size: 11px; }
   #deathsPillWrap .v { color: #ff5c5c; font-weight: 800; font-size: 11px; }
+  #bossPillWrap .v { color: #ffd700; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -2041,6 +2042,7 @@
     <div class="pill m-hide" id="runPickPill"><span class="k">道具</span><span class="v" id="runPickVal">道具拾取 0</span></div>
     <div class="pill m-hide" id="accPillWrap"><span class="k">命中率</span><span class="v" id="accPillVal">—</span></div>
     <div class="pill m-hide" id="deathsPillWrap"><span class="k">阵亡</span><span class="v" id="deathsPillVal">—</span></div>
+    <div class="pill m-hide" id="bossPillWrap"><span class="k">Boss</span><span class="v" id="bossPillVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -7300,6 +7302,12 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const rpv2 = $('runPickVal'); if (rpv2) rpv2.textContent = runPickupText(runPowerups);
     const acV = $('accPillVal'); if (acV) acV.textContent = accPillText(stat.shots, stat.hits);
     const dcV = $('deathsPillVal'); if (dcV) dcV.textContent = runDeathsText(stat.deaths);
+    const bPV = $('bossPillVal'); if (bPV) bPV.textContent = runBossText(stat.bossKills);
+    const pillShots = $('shotsPillVal'); if (pillShots) pillShots.textContent = runShotsText(stat.shots);
+    const pillBase = $('basePillVal'); if (pillBase) pillBase.textContent = baseLevelText(baseLevel);
+    const pillLvK = $('lvKillsPillVal'); if (pillLvK) pillLvK.textContent = levelKillsText(levelKills);
+    const pillRev = $('revivePillVal'); if (pillRev) pillRev.textContent = reviveText(reviveCount);
+    const pillPor = $('portalPillVal'); if (pillPor) pillPor.textContent = portalText(portals.length);
     // __EXTRA_HUD__
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
   }
@@ -8062,6 +8070,11 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   function runDeathsText(n) {
     const v = Math.max(0, Math.floor(Number(n) || 0));
     return v > 0 ? '💀 ×' + v : '—';
+  }
+  // —— v0.7.11 BOSS 击杀 ——
+  function runBossText(n) {
+    const v = Math.max(0, Math.floor(Number(n) || 0));
+    return v > 0 ? '👑 ×' + v : '—';
   }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
@@ -10983,6 +10996,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       runPickupTextNow: (n) => runPickupText(n), runPickDomNow: () => { const e = $('runPickVal'); return e ? e.textContent : null; }, runPickupsNow: () => runPowerups,
       accPillTextNow: (s2, h) => accPillText(s2, h), accPillDomNow: () => { const e = $('accPillVal'); return e ? e.textContent : null; }, statNow: () => ({ shots: stat.shots, hits: stat.hits }),
       runDeathsTextNow: (n) => runDeathsText(n), deathsPillDomNow: () => { const e = $('deathsPillVal'); return e ? e.textContent : null; }, deathsNow: () => stat.deaths,
+      runBossTextNow: (n) => runBossText(n), bossPillDomNow: () => { const e = $('bossPillVal'); return e ? e.textContent : null; }, bossKillsNow: () => stat.bossKills,
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
