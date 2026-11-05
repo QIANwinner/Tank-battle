@@ -3411,6 +3411,22 @@ async function main() {
     t('U974 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('88') >= 0, JSON.stringify(o6));
   } catch(e){ for(let k=969;k<=974;k++) t('U'+k+' 生涯击杀',false,e.message); }
 
+  // ===== U975~U980: K/D 比值(v0.6.77) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('kdVal')});})()"));
+    t('U975 K/D 比值已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.kdNow(0,0)});})()"));
+    t('U976 初值 零杀零亡显占位', o2.a.indexOf('--') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.kdNow(6,4)});})()"));
+    t('U977 正常值 6杀4亡=1.5', o3.a.indexOf('1.5') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.kdNow(0,3)});})()"));
+    t('U978 边界 零杀显0', o4.a.indexOf('K/D 0') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.kdNow(NaN,NaN)});})()"));
+    t('U979 非法 NaN 显占位', o5.a.indexOf('--') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.kdNow(9,3);const e=document.getElementById('kdVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U980 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('K/D 3') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=975;k<=980;k++) t('U'+k+' K/D 比值',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
