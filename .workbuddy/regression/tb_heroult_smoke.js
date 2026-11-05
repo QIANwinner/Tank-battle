@@ -4344,6 +4344,21 @@ async function main() {
     t('U746 一致性', typeof o4.dom === 'string', o4.dom);
   } catch(e){ for(let k=741;k<=746;k++) t('U'+k+' 花费',false,e.message); }
 
+
+  // ===== U747~U752: 排行榜最高分(v0.7.37) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('boardTopWrap'),f:T.boardTopTextNow([])});})()"));
+    t('U747 榜顶 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U748 空榜单初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.boardTopTextNow([{score:5000}]));})()"));
+    t('U749 正常 5,000', o2 === '🏆 5000', o2);
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.boardTopTextNow(null),b:T.boardTopTextNow('x')});})()"));
+    t('U750 非法兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.boardTopPillDomNow()});})()"));
+    t('U751 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U752 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=747;k<=752;k++) t('U'+k+' 榜顶',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
