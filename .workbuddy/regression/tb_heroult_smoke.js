@@ -2869,6 +2869,22 @@ async function main() {
     t('U764 DOM 文本长度合理', o5.len > 0, JSON.stringify(o5));
   } catch(e){ for(let k=759;k<=764;k++) t('U'+k+' P2生命',false,e.message); }
 
+
+  // ===== U765~U770: 传送门配对(v0.6.42) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('portalPairVal'),f:T.portalPairTextNow([])});})()"));
+    t('U765 传送门计数已加入编辑器', o.dom === true, JSON.stringify(o));
+    t('U766 初值 空网格 0 对', o.f === '🌀 传送门 0 对', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.portalPairTextNow([[6,0],[0,6]]),b:T.portalCountNow([[6,0],[0,6]])});})()"));
+    t('U767 正常值 2 门 1 对', o2.a === '🌀 传送门 1 对' && o2.b === 2, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.portalPairTextNow([[6,6],[6,6]])});})()"));
+    t('U768 边界 4 门 2 对', o3.a === '🌀 传送门 2 对', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.portalPairTextNow(null),b:T.portalPairTextNow([[6]])});})()"));
+    t('U769 非法输入/奇数未配对', o4.a === '🌀 传送门 0 对' && o4.b.indexOf('未配对') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({len:T.portalPairDomNow().length});})()"));
+    t('U770 DOM 文本长度合理', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=765;k<=770;k++) t('U'+k+' 传送门配对',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
