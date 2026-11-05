@@ -2962,6 +2962,21 @@ async function main() {
     t('U800 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
   } catch(e){ for(let k=795;k<=800;k++) t('U'+k+' 成就时间线',false,e.message); }
 
+  // ===== U801~U806: 排行榜当前局高亮(v0.6.48) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('carRank'),n:T.boardRankOfNow([], 'x')});})()"));
+    t('U801 排行榜高亮条已加入', o.dom === true, JSON.stringify(o));
+    t('U802 初值 空榜0', o.n === 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const b=[{uid:'a'},{uid:'b'}];return JSON.stringify({n:T.boardRankOfNow(b, 'b')});})()"));
+    t('U803 正常值 第2名', o2.n === 2, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const b=[{uid:'a'}];return JSON.stringify({n:T.boardRankOfNow(b, 'zzz')});})()"));
+    t('U804 边界 不在榜0', o3.n === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({n:T.boardRankOfNow(null, 'x')});})()"));
+    t('U805 非法 null榜0', o4.n === 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('carRank');return JSON.stringify({len:e?e.className.length:0});})()"));
+    t('U806 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=801;k<=806;k++) t('U'+k+' 排行榜高亮',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
