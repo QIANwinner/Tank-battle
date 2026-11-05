@@ -2901,6 +2901,22 @@ async function main() {
     t('U776 DOM 文本长度合理', o5.len > 5, JSON.stringify(o5));
   } catch(e){ for(let k=771;k<=776;k++) t('U'+k+' 生涯快照',false,e.message); }
 
+
+  // ===== U777~U782: 本关进度(v0.6.44) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('enemyProgVal'),f:T.enemyProgressTextNow(1,0,12)});})()"));
+    t('U777 本关进度 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U778 初值 0/12', o.f === '第1关 · 🎯 0/12', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyProgressTextNow(3,5,20),b:T.enemyProgressTextNow(1,12,12)});})()"));
+    t('U779 正常值 5/20 与满杀 12/12', o2.a === '第3关 · 🎯 5/20' && o2.b === '第1关 · 🎯 12/12', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyProgressTextNow(1,999,12)});})()"));
+    t('U780 边界 击杀超总量仍显示', o3.a === '第1关 · 🎯 999/12', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyProgressTextNow(NaN,NaN,NaN),b:T.enemyProgressTextNow(-1,-1,-1)});})()"));
+    t('U781 非法输入兜底 ? 总量', o4.a === '第1关 · 🎯 0/?' && o4.b === '第1关 · 🎯 0/?', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({len:T.enemyProgDomNow().length});})()"));
+    t('U782 DOM 文本长度合理', o5.len > 5, JSON.stringify(o5));
+  } catch(e){ for(let k=777;k<=782;k++) t('U'+k+' 本关进度',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
