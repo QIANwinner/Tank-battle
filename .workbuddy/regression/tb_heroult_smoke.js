@@ -4165,6 +4165,21 @@ async function main() {
     t('U662 收口确认', typeof o2.dom === 'string' && o2.dom.length > 10, o2.dom);
   } catch(e){ for(let k=657;k<=662;k++) t('U'+k+' 收口',false,e.message); }
 
+
+  // ===== U675~U680: 强化投入统计(v0.7.25) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bonusSpentWrap'),f:T.bonusSpentTextNow(0)});})()"));
+    t('U675 投入 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U676 零投入初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bonusSpentTextNow(5000),b:T.bonusSpentTextNow(1)});})()"));
+    t('U677 正常 5,000/1', o2.a === '📈 5000 投入' && o2.b === '📈 1 投入', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bonusSpentTextNow(-5),b:T.bonusSpentTextNow(NaN)});})()"));
+    t('U678 非法兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.bonusSpentPillDomNow(),v:T.bonusSpentNow()});})()"));
+    t('U679 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U680 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=675;k<=680;k++) t('U'+k+' 投入统计',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
