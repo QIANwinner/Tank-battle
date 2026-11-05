@@ -3127,6 +3127,22 @@ async function main() {
     t('U866 一致 非空', o5.len > 100, JSON.stringify(o5));
   } catch(e){ for(let k=861;k<=866;k++) t('U'+k+' 关卡缩略图',false,e.message); }
 
+  // ===== U867~U872: 关卡排序(v0.6.59) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;const l=[{id:'a',createdAt:1},{id:'b',createdAt:3},{id:'c',createdAt:2}];const s=T.customSortByCreatedNow(l,true);return JSON.stringify({a:s[0].id,b:s[1].id,c:s[2].id});})()"));
+    t('U867 降序 最新在前', o.a === 'b' && o.c === 'a', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const l=[{id:'a',createdAt:1},{id:'b',createdAt:3}];const s=T.customSortByCreatedNow(l,false);return JSON.stringify({a:s[0].id,b:s[1].id});})()"));
+    t('U868 升序 最早在前', o2.a === 'a' && o2.b === 'b', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const l=[{id:'a',createdAt:2},{id:'b',createdAt:1}];const s=T.customSortByCreatedNow(l,true);return JSON.stringify({n:s.length});})()"));
+    t('U869 正常值 数量不变', o3.n === 2, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;const s=T.customSortByCreatedNow(null,true);return JSON.stringify({n:s.length});})()"));
+    t('U870 边界 null空数组', o4.n === 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const l=[{id:'a',createdAt:2}];const s=T.customSortByCreatedNow(l,true);return JSON.stringify({n:s.length});})()"));
+    t('U871 非法 单元素', o5.n === 1, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const e=document.querySelector('.edListHead');return JSON.stringify({t:e?e.textContent.indexOf('最新')>=0:false});})()"));
+    t('U872 DOM 排序标记', o6.t === true, JSON.stringify(o6));
+  } catch(e){ for(let k=867;k<=872;k++) t('U'+k+' 关卡排序',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
