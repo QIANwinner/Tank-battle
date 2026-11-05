@@ -2917,6 +2917,21 @@ async function main() {
     t('U782 DOM 文本长度合理', o5.len > 5, JSON.stringify(o5));
   } catch(e){ for(let k=777;k<=782;k++) t('U'+k+' 本关进度',false,e.message); }
 
+  // ===== U783~U788: 局内小地图(v0.6.45) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('miniMap'),x0:T.miniMapXNow(0),y0:T.miniMapYNow(0)});})()"));
+    t('U783 小地图已加入', o.dom === true, JSON.stringify(o));
+    t('U784 初值 0→0', o.x0 === 0 && o.y0 === 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({x:T.miniMapXNow(624),y:T.miniMapYNow(624)});})()"));
+    t('U785 正常值 624px→130px', o2.x === 130 && o2.y === 130, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({x:T.miniMapXNow(9999)});})()"));
+    t('U786 边界 封顶130', o3.x === 130, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({x:T.miniMapXNow(NaN),y:T.miniMapYNow(-50)});})()"));
+    t('U787 非法输入 兜底0', o4.x === 0 && o4.y === 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const c=document.getElementById('miniMap');return JSON.stringify({len:c?c.width:0});})()"));
+    t('U788 DOM 尺寸合理', o5.len === 130, JSON.stringify(o5));
+  } catch(e){ for(let k=783;k<=788;k++) t('U'+k+' 小地图',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
