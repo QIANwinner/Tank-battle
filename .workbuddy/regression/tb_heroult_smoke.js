@@ -4001,6 +4001,22 @@ async function main() {
     t('U1196 DOM 与函数一致', o5.dom === '🏰 Lv' + o5.level, JSON.stringify(o5));
   } catch(e){ for(let k=1191;k<=1196;k++) t('U'+k+' 基地pill',false,e.message); }
 
+
+  // ===== U1197~U1202: 关卡击杀(v0.7.14) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('lvKillsPillWrap'),f:T.levelKillsTextNow(0)});})()"));
+    t('U1197 关卡击杀 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1198 零击杀初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.levelKillsTextNow(8),b:T.levelKillsTextNow(1)});})()"));
+    t('U1199 正常 ×8/×1', o2.a === '💥 ×8' && o2.b === '💥 ×1', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.levelKillsTextNow(-2));})()"));
+    t('U1200 负数兜底 —', o3 === '—', o3);
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.levelKillsTextNow('abc'),b:T.levelKillsTextNow(5.5)});})()"));
+    t('U1201 非法/小数兜底', o4.a === '—' && o4.b === '💥 ×5', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.lvKillsPillDomNow(),kills:T.levelKillsNow()});})()"));
+    t('U1202 DOM 与函数一致', o5.dom === (o5.kills > 0 ? '💥 ×' + o5.kills : '—'), JSON.stringify(o5));
+  } catch(e){ for(let k=1197;k<=1202;k++) t('U'+k+' 关卡击杀',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
