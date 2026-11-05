@@ -233,7 +233,7 @@ async function main() {
 
     // ===== E. 接线到游戏逻辑 =====
     try {
-      reset(); T.setBonus({ lifeup:2 }); T.startGame();
+      reset(); T.setHero('none'); T.setBonus({ lifeup:2 }); T.startGame();
       t('E1 lifeup 永久加成 → 开局 5 生命', T.livesNow() === 5, 'lives=' + T.livesNow());
     } catch (e) { t('E1 lifeup 永久加成 → 开局 5 生命', false, e.message); }
 

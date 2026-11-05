@@ -2571,7 +2571,7 @@ async function main() {
     t('U636 边界 0 与负数=从未备份', o3.a === '从未备份' && o3.b === '从未备份', JSON.stringify(o3));
     const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.backupAgeTextNow('x'),b:T.backupAgeTextNow(NaN),c:T.backupAgeTextNow(undefined)});})()"));
     t('U637 非法输入=从未备份', o4.a === '从未备份' && o4.b === '从未备份' && o4.c === '从未备份', JSON.stringify(o4));
-    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r1=T.backupAgeRefreshNow();T.setRawSave('tank-battle-lastbackup', String(Date.now()));const r2=T.backupAgeRefreshNow();return JSON.stringify({r1,r2});})()"));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setRawSave('tank-battle-lastbackup','0');const r1=T.backupAgeRefreshNow();T.setRawSave('tank-battle-lastbackup', String(Date.now()));const r2=T.backupAgeRefreshNow();return JSON.stringify({r1,r2});})()"));
     t('U638 DOM 与函数一致(导出后=今天已备份)', o5.r1 === '从未备份' && o5.r2 === '今天已备份', JSON.stringify(o5));
   } catch(e){ for(let k=633;k<=638;k++) t('U'+k+' 备份日期',false,e.message); }
 
@@ -2659,6 +2659,23 @@ async function main() {
     const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const dom=T.timePillDomNow();const fn=T.playTimeTextNow(T.playSecRunNow());return JSON.stringify({dom,fn});})()"));
     t('U686 DOM 与函数一致', o6.dom === o6.fn, JSON.stringify(o6));
   } catch(e){ for(let k=681;k<=686;k++) t('U'+k+' 时长pill',false,e.message); }
+
+
+  // ===== U687~U692: 生涯评级徽章(v0.6.29) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerGradeBadge')});})()"));
+    t('U687 生涯评级徽章已加入面板', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerGradeTextNow(0,0),b:T.careerGradeTextNow(100,1000)});})()"));
+    t('U688 初值 C / 顶级 S', o2.a === 'C' && o2.b === 'S', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerGradeTextNow(20,200),b:T.careerGradeTextNow(40,400)});})()"));
+    t('U689 正常值 A/B 分档', o3.a === 'B' && o3.b === 'A', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerGradeTextNow(30,300),b:T.careerGradeTextNow(60,800),c:T.careerGradeTextNow(59,799)});})()"));
+    t('U690 边界阈值 30/300=A 60/800=S', o4.a === 'A' && o4.b === 'S' && o4.c === 'A', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerGradeTextNow(-5,-9),b:T.careerGradeTextNow(NaN,'x')});})()"));
+    t('U691 非法输入兜底 C', o5.a === 'C' && o5.b === 'C', JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:T.careerGradeDomNow()});})()"));
+    t('U692 DOM 文本为合法评级', ['S','A','B','C'].includes(o6.dom), JSON.stringify(o6));
+  } catch(e){ for(let k=687;k<=692;k++) t('U'+k+' 生涯评级',false,e.message); }
 
   chrome.kill();
 
