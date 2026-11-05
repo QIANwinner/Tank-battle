@@ -3712,6 +3712,22 @@ async function main() {
     t('U1088 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
   } catch(e){ for(let k=1083;k<=1088;k++) t('U'+k+' 生涯击杀',false,e.message); }
 
+
+  // ===== U1089~U1094: 英雄大招冷却(v0.6.96) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('heroUltPill'),w:T.heroUltTextNow(0,45)});})()"));
+    t('U1089 大招 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1090 就绪初值', o.w === '大招 就绪!', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.heroUltTextNow(12.3,45),b:T.heroUltTextNow(45,45),c:T.heroUltTextNow(3,45)});})()"));
+    t('U1091 冷却 12.3s→13s/45s/3s', o2.a === '大招 13s' && o2.b === '大招 45s' && o2.c === '大招 3s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.heroUltTextNow(3),b:T.heroUltTextNow(0,0)});})()"));
+    t('U1092 边界 max 缺省 45 与 0 就绪', o3.a === '大招 3s' && o3.b === '大招 就绪!', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.heroUltTextNow(NaN,45),b:T.heroUltTextNow(-1,45)});})()"));
+    t('U1093 非法输入兜底就绪', o4.a === '大招 就绪!' && o4.b === '大招 就绪!', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.heroUltDomNow();const fn=T.heroUltTextNow(T.heroUltCdNow(),T.heroUltMaxNow());return JSON.stringify({dom,fn});})()"));
+    t('U1094 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1089;k<=1094;k++) t('U'+k+' 大招冷却',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
