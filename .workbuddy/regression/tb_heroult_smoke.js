@@ -4225,6 +4225,21 @@ async function main() {
     t('U698 一致性', typeof o4.dom === 'string', o4.dom);
   } catch(e){ for(let k=693;k<=698;k++) t('U'+k+' 皮肤数',false,e.message); }
 
+
+  // ===== U699~U704: 僚机皮肤数(v0.7.29) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('wsCountWrap'),f:T.wsCountTextNow(['wing-teal'])});})()"));
+    t('U699 僚机 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U700 仅默认 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.wsCountTextNow(['wing-teal','wing-crimson','wing-gold']),b:T.wsCountTextNow([])});})()"));
+    t('U701 正常 3 款/空 —', o2.a === '🛡 3 款' && o2.b === '—', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.wsCountTextNow('x'),b:T.wsCountTextNow(null)});})()"));
+    t('U702 非法兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.wsCountPillDomNow(),n:T.wsOwnedNow()});})()"));
+    t('U703 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U704 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=699;k<=704;k++) t('U'+k+' 僚机皮肤数',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
