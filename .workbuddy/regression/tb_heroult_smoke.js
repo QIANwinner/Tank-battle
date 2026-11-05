@@ -2885,6 +2885,22 @@ async function main() {
     t('U770 DOM 文本长度合理', o5.len > 0, JSON.stringify(o5));
   } catch(e){ for(let k=765;k<=770;k++) t('U'+k+' 传送门配对',false,e.message); }
 
+
+  // ===== U771~U776: 生涯快照(v0.6.43) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerSnapVal'),f:T.careerSnapTextNow({games:0,kills:0,totalCoins:0})});})()"));
+    t('U771 生涯快照 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U772 初值 全零', o.f === '📊 0局 · 0杀 · 0币', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerSnapTextNow({games:12,kills:300,totalCoins:8000})});})()"));
+    t('U773 正常值 12局/300杀/8000币', o2.a === '📊 12局 · 300杀 · 8000币', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerSnapTextNow({games:999999,kills:999999,totalCoins:999999})});})()"));
+    t('U774 边界 大数正常', o3.a.indexOf('999999') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerSnapTextNow(null),b:T.careerSnapTextNow({})});})()"));
+    t('U775 非法输入兜底全零', o4.a === '📊 0局 · 0杀 · 0币' && o4.b === '📊 0局 · 0杀 · 0币', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({len:T.careerSnapDomNow().length});})()"));
+    t('U776 DOM 文本长度合理', o5.len > 5, JSON.stringify(o5));
+  } catch(e){ for(let k=771;k<=776;k++) t('U'+k+' 生涯快照',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
