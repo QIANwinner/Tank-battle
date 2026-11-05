@@ -3728,6 +3728,22 @@ async function main() {
     t('U1094 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
   } catch(e){ for(let k=1089;k<=1094;k++) t('U'+k+' 大招冷却',false,e.message); }
 
+
+  // ===== U1095~U1100: 本局复活次数(v0.6.97) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('revivePill'),w:T.revivePillTextNow(0)});})()"));
+    t('U1095 复活 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1096 初值 复活 ×0', o.w === '复活 ×0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.revivePillTextNow(3),b:T.revivePillTextNow(12)});})()"));
+    t('U1097 正常 复活 ×3/×12', o2.a === '复活 ×3' && o2.b === '复活 ×12', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.revivePillTextNow(3.9),b:T.revivePillTextNow(0)});})()"));
+    t('U1098 边界 3.9 取整 ×3 与 0', o3.a === '复活 ×3' && o3.b === '复活 ×0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.revivePillTextNow(NaN),b:T.revivePillTextNow(-1)});})()"));
+    t('U1099 非法输入兜底 ×0', o4.a === '复活 ×0' && o4.b === '复活 ×0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.reviveDomNow();const fn=T.revivePillTextNow(T.reviveNow());return JSON.stringify({dom,fn});})()"));
+    t('U1100 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1095;k<=1100;k++) t('U'+k+' 复活次数',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
