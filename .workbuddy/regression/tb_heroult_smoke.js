@@ -4017,6 +4017,22 @@ async function main() {
     t('U1202 DOM 与函数一致', o5.dom === (o5.kills > 0 ? '💥 ×' + o5.kills : '—'), JSON.stringify(o5));
   } catch(e){ for(let k=1197;k<=1202;k++) t('U'+k+' 关卡击杀',false,e.message); }
 
+
+  // ===== U1203~U1208: 复活次数(v0.7.15) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('revivePillWrap'),f:T.reviveTextNow(0)});})()"));
+    t('U1203 复活 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1204 零复活初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reviveTextNow(2),b:T.reviveTextNow(1)});})()"));
+    t('U1205 正常 ×2/×1', o2.a === '🔄 ×2' && o2.b === '🔄 ×1', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.reviveTextNow(-3));})()"));
+    t('U1206 负数兜底 —', o3 === '—', o3);
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reviveTextNow('x'),b:T.reviveTextNow(1.5)});})()"));
+    t('U1207 非法/小数兜底', o4.a === '—' && o4.b === '🔄 ×1', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.revivePillDomNow(),revive:T.reviveCountNow()});})()"));
+    t('U1208 DOM 与函数一致', o5.dom === (o5.revive > 0 ? '🔄 ×' + o5.revive : '—'), JSON.stringify(o5));
+  } catch(e){ for(let k=1203;k<=1208;k++) t('U'+k+' 复活pill',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
