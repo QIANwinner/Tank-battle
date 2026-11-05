@@ -2693,6 +2693,22 @@ async function main() {
     t('U698 DOM 与函数一致(格式 x/4)', /^\d+\/4$/.test(o5.dom), JSON.stringify(o5));
   } catch(e){ for(let k=693;k<=698;k++) t('U'+k+' 宠物收藏',false,e.message); }
 
+
+  // ===== U699~U704: 皮肤稀有度图例(v0.6.31) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;T.rarLegendRefreshNow();return JSON.stringify({dom:!!document.getElementById('rarLegend'),len:T.rarLegendHtmlNow().length});})()"));
+    t('U699 稀有度图例已加入商店', o.dom === true, JSON.stringify(o));
+    t('U700 图例含 4 个稀有度项', o.len > 40, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.rarLegendHtmlNow().indexOf('稀有')>=0,b:T.rarLegendHtmlNow().indexOf('限定')>=0});})()"));
+    t('U701 含稀有与限定两类', o2.a === true && o2.b === true, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({c:(T.rarLegendHtmlNow().match(/rarDot/g)||[]).length});})()"));
+    t('U702 恰好 4 个色点', o3.c === 4, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:T.rarLegendDomNow()});})()"));
+    t('U703 刷新后 DOM 有内容', o4.dom.length > 10, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.rarLegendHtmlNow()===T.rarLegendHtmlNow()});})()"));
+    t('U704 幂等(重复调用一致)', o5.a === true, JSON.stringify(o5));
+  } catch(e){ for(let k=699;k<=704;k++) t('U'+k+' 稀有度图例',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
