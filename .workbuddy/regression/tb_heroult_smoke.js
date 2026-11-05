@@ -3315,6 +3315,22 @@ async function main() {
     t('U938 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('3/分') >= 0, JSON.stringify(o6));
   } catch(e){ for(let k=933;k<=938;k++) t('U'+k+' 击杀速率',false,e.message); }
 
+  // ===== U939~U944: BOSS击破(v0.6.71) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossKillVal')});})()"));
+    t('U939 BOSS击破已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossKillNow(0)});})()"));
+    t('U940 初值 零破', o2.a.indexOf('0') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossKillNow(3)});})()"));
+    t('U941 正常值 3破', o3.a.indexOf('3') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossKillNow(99)});})()"));
+    t('U942 边界 99破', o4.a.indexOf('99') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossKillNow(NaN)});})()"));
+    t('U943 非法 NaN 归零', o5.a.indexOf('0') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.bossKillNow(2);const e=document.getElementById('bossKillVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U944 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('2') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=939;k<=944;k++) t('U'+k+' BOSS击破',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
