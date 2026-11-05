@@ -2805,6 +2805,22 @@ async function main() {
     t('U740 DOM 文本长度合理', o5.len > 5, JSON.stringify(o5));
   } catch(e){ for(let k=735;k<=740;k++) t('U'+k+' 关卡用时条',false,e.message); }
 
+
+  // ===== U741~U746: BOSS 阶段徽章(v0.6.38) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossPhaseVal'),f:T.bossPhaseBadgeNow(0,0)});})()"));
+    t('U741 BOSS 阶段徽章已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U742 无 BOSS 时显示占位', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossPhaseBadgeNow(100,100),b:T.bossPhaseBadgeNow(75,100)});})()"));
+    t('U743 正常值 稳定', o2.a === '🟢 稳定' && o2.b === '🟢 稳定', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossPhaseBadgeNow(50,100),b:T.bossPhaseBadgeNow(25,100)});})()"));
+    t('U744 边界 过半/濒危', o3.a === '⚠️ 过半' && o3.b === '💀 濒危', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossPhaseBadgeNow(NaN,NaN),b:T.bossPhaseBadgeNow(-5,0)});})()"));
+    t('U745 非法输入兜底占位', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const dom=T.bossPhaseDomNow();return JSON.stringify({len:dom.length});})()"));
+    t('U746 DOM 文本长度合理', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=741;k<=746;k++) t('U'+k+' BOSS阶段',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
