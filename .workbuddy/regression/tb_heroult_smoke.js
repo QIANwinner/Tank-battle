@@ -4078,6 +4078,21 @@ async function main() {
     t('U626 一致性', typeof o4.dom === 'string', o4.dom);
   } catch(e){ for(let k=621;k<=626;k++) t('U'+k+' 最大金',false,e.message); }
 
+
+  // ===== U627~U632: 转机使用数(v0.7.19) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('portalUseWrap'),f:T.portalUseTextNow(0)});})()"));
+    t('U627 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U628 零值初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.portalUseTextNow(5),b:T.portalUseTextNow(1)});})()"));
+    t('U629 正常 5/1', o2.a === '🌀 使用 5 次' && o2.b === '🌀 使用 1 次', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.portalUseTextNow(-1),b:T.portalUseTextNow(NaN)});})()"));
+    t('U630 非法兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.portalUseDomNow()});})()"));
+    t('U631 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U632 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=627;k<=632;k++) t('U'+k+' 转机使用',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
