@@ -3507,6 +3507,22 @@ async function main() {
     t('U1010 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('敌人 5') >= 0, JSON.stringify(o6));
   } catch(e){ for(let k=1005;k<=1010;k++) t('U'+k+' 存活敌人',false,e.message); }
 
+  // ===== U1011~U1016: 飞行子弹(v0.6.83) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bulletFlyVal')});})()"));
+    t('U1011 飞行子弹已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletFlyNow(0)});})()"));
+    t('U1012 初值 零子弹', o2.a.indexOf('子弹 0') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletFlyNow(8)});})()"));
+    t('U1013 正常值 8子弹', o3.a.indexOf('子弹 8') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletFlyNow(200)});})()"));
+    t('U1014 边界 200子弹', o4.a.indexOf('子弹 200') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletFlyNow(NaN)});})()"));
+    t('U1015 非法 NaN 归零', o5.a.indexOf('子弹 0') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.bulletFlyNow(15);const e=document.getElementById('bulletFlyVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U1016 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('子弹 15') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=1011;k<=1016;k++) t('U'+k+' 飞行子弹',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
