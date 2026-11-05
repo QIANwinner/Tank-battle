@@ -3744,6 +3744,22 @@ async function main() {
     t('U1100 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
   } catch(e){ for(let k=1095;k<=1100;k++) t('U'+k+' 复活次数',false,e.message); }
 
+
+  // ===== U1101~U1106: 生涯对局场次(v0.6.98) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerGamePill'),w:T.careerGamesTextNow(0)});})()"));
+    t('U1101 对局 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1102 初值 生涯 0 局', o.w === '生涯 0 局', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerGamesTextNow(7),b:T.careerGamesTextNow(100)});})()"));
+    t('U1103 正常 7/100 局', o2.a === '生涯 7 局' && o2.b === '生涯 100 局', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerGamesTextNow(7.8),b:T.careerGamesTextNow(0)});})()"));
+    t('U1104 边界 7.8 取整 7 局', o3.a === '生涯 7 局' && o3.b === '生涯 0 局', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerGamesTextNow(NaN),b:T.careerGamesTextNow(-3)});})()"));
+    t('U1105 非法输入兜底 0 局', o4.a === '生涯 0 局' && o4.b === '生涯 0 局', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.careerGameDomNow();const fn=T.careerGamesTextNow(T.careerGamesNow());return JSON.stringify({dom,fn});})()"));
+    t('U1106 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1101;k<=1106;k++) t('U'+k+' 对局场次',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
