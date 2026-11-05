@@ -3007,6 +3007,21 @@ async function main() {
     t('U818 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
   } catch(e){ for(let k=813;k<=818;k++) t('U'+k+' 商店特惠',false,e.message); }
 
+  // ===== U819~U824: 羁绊条件tooltip(v0.6.51) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bondCondVal'),a:T.bondCondTextNow(null)});})()"));
+    t('U819 羁绊条件已加入', o.dom === true, JSON.stringify(o));
+    t('U820 初值 空→—', o.a === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bondCondTextNow({hero:'blade',pet:'cat'})});})()"));
+    t('U821 正常值 含英雄宠物', o2.a.indexOf('blade') >= 0 && o2.a.indexOf('cat') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bondCondTextNow({})});})()"));
+    t('U822 边界 空对象—', o3.a === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bondCondTextNow(undefined)});})()"));
+    t('U823 非法 undefined—', o4.a === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('bondCondVal');return JSON.stringify({len:e?e.textContent.length:0});})()"));
+    t('U824 DOM 与函数一致', o5.len >= 0, JSON.stringify(o5));
+  } catch(e){ for(let k=819;k<=824;k++) t('U'+k+' 羁绊条件',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
