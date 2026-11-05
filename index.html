@@ -1947,6 +1947,7 @@
   #lvKillsPillWrap .v { color: #ff9f43; font-weight: 800; font-size: 11px; }
   #revivePillWrap .v { color: #c084fc; font-weight: 800; font-size: 11px; }
   #portalPillWrap .v { color: #b45bff; font-weight: 800; font-size: 11px; }
+  #diffBadgeWrap .v { font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -2053,6 +2054,7 @@
     <div class="pill m-hide" id="lvKillsPillWrap"><span class="k">击杀</span><span class="v" id="lvKillsPillVal">—</span></div>
     <div class="pill m-hide" id="revivePillWrap"><span class="k">复活</span><span class="v" id="revivePillVal">—</span></div>
     <div class="pill m-hide" id="portalPillWrap"><span class="k">传送门</span><span class="v" id="portalPillVal">—</span></div>
+    <div class="pill m-hide" id="diffBadgeWrap"><span class="k">难度</span><span class="v" id="diffBadgeVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -2428,7 +2430,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V7.16</div>
+  <div id="mark">DESIGNED BY QIAN · V7.17</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7323,6 +7325,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r21lkV = $('lvKillsPillVal'); if (r21lkV) r21lkV.textContent = levelKillsText(levelKills);
     const r21rvV = $('revivePillVal'); if (r21rvV) r21rvV.textContent = reviveText(reviveCount);
     const r21ptV = $('portalPillVal'); if (r21ptV) r21ptV.textContent = portalText(portals.length);
+    const r22dbV = $('diffBadgeVal'); if (r22dbV) { r22dbV.textContent = diffBadgeText(difficulty); r22dbV.style.color = diffBadgeColor(difficulty); }
     // __EXTRA_HUD__
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
   }
@@ -8112,6 +8115,10 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   function portalText(n) {
     const v = Math.max(0, Math.floor(Number(n) || 0));
     return v > 0 ? '🌀 ×' + v : '—';
+  }
+  // —— v0.7.17 难度标签色彩增强 ——
+  function diffBadgeColor(d) {
+    return d === 'easy' ? '#39ff14' : d === 'hard' ? '#ff2d55' : '#00f0ff';
   }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
@@ -9954,7 +9961,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V7.16', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V7.17', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -11039,6 +11046,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       levelKillsTextNow: (n) => levelKillsText(n), lvKillsPillDomNow: () => { const e = $('lvKillsPillVal'); return e ? e.textContent : null; }, levelKillsNow: () => levelKills,
       reviveTextNow: (n) => reviveText(n), revivePillDomNow: () => { const e = $('revivePillVal'); return e ? e.textContent : null; }, reviveCountNow: () => reviveCount,
       portalTextNow: (n) => portalText(n), portalPillDomNow: () => { const e = $('portalPillVal'); return e ? e.textContent : null; }, portalCountNow: () => portals.length,
+      diffBadgeColorNow: (d) => diffBadgeColor(d), diffBadgeDomNow: () => { const e = $('diffBadgeVal'); return e ? { txt: e.textContent, color: e.style.color } : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

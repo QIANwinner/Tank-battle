@@ -4049,6 +4049,20 @@ async function main() {
     t('U1214 DOM 与函数一致', o5.dom === (o5.portals > 0 ? '🌀 ×' + o5.portals : '—'), JSON.stringify(o5));
   } catch(e){ for(let k=1209;k<=1214;k++) t('U'+k+' 传送门pill',false,e.message); }
 
+
+  // ===== U1215~U1220: 难度标签色彩(v0.7.17) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('diffBadgeWrap'),a:T.diffBadgeColorNow('easy'),b:T.diffBadgeColorNow('hard'),c:T.diffBadgeColorNow('normal')});})()"));
+    t('U1215 难度标签 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1216 三种难度三色', o.a === '#39ff14' && o.b === '#ff2d55' && o.c === '#00f0ff', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.diffBadgeColorNow('xxx'),b:T.diffBadgeColorNow(undefined)});})()"));
+    t('U1217 非法难度兜底标准色', o2.a === '#00f0ff' && o2.b === '#00f0ff', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.diffBadgeDomNow()});})()"));
+    t('U6218 DOM 可读', !!o3.dom, JSON.stringify(o3));
+    t('U619 一致性', typeof o3.dom === 'object' && o3.dom !== null, JSON.stringify(o3));
+    t('U620 色值有效', (o3.dom || {}).color !== undefined, JSON.stringify(o3));
+  } catch(e){ for(let k=1215;k<=1220;k++) t('U'+k+' 难度标签',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
