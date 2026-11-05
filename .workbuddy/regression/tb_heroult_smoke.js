@@ -3680,6 +3680,22 @@ async function main() {
     t('U1076 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
   } catch(e){ for(let k=1071;k<=1076;k++) t('U'+k+' 开火次数',false,e.message); }
 
+
+  // ===== U1077~U1082: 本局存活时长(v0.6.94) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runTimePill'),w:T.runTimeTextNow(0)});})()"));
+    t('U1077 时长 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1078 初值 0:00', o.w === '0:00', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runTimeTextNow(65),b:T.runTimeTextNow(600)});})()"));
+    t('U1079 正常 65s→1:05 与 600s→10:00', o2.a === '1:05' && o2.b === '10:00', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runTimeTextNow(59),b:T.runTimeTextNow(60),c:T.runTimeTextNow(3599)});})()"));
+    t('U1080 边界 59s/60s/3599s', o3.a === '0:59' && o3.b === '1:00' && o3.c === '59:59', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runTimeTextNow(NaN),b:T.runTimeTextNow(-5)});})()"));
+    t('U1081 非法输入兜底 0:00', o4.a === '0:00' && o4.b === '0:00', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.runTimeDomNow();const fn=T.runTimeTextNow(T.runSecNow());return JSON.stringify({dom,fn});})()"));
+    t('U1082 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1077;k<=1082;k++) t('U'+k+' 时长',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
