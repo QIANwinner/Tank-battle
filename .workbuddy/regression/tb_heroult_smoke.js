@@ -3776,6 +3776,22 @@ async function main() {
     t('U1112 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
   } catch(e){ for(let k=1107;k<=1112;k++) t('U'+k+' 得分',false,e.message); }
 
+
+  // ===== U1113~U1118: 本局击破总数(v0.7.0) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runKillPill'),w:T.runKillsTextNow(0)});})()"));
+    t('U1113 击破 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1114 初值 击破 0', o.w === '击破 0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runKillsTextNow(5),b:T.runKillsTextNow(42)});})()"));
+    t('U1115 正常 5/42', o2.a === '击破 5' && o2.b === '击破 42', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runKillsTextNow(5.9),b:T.runKillsTextNow(0)});})()"));
+    t('U1116 边界 5.9 取整 5', o3.a === '击破 5' && o3.b === '击破 0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runKillsTextNow(NaN),b:T.runKillsTextNow(-2)});})()"));
+    t('U1117 非法输入兜底 0', o4.a === '击破 0' && o4.b === '击破 0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.runKillDomNow();const fn=T.runKillsTextNow(T.runKillsNow());return JSON.stringify({dom,fn});})()"));
+    t('U1118 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1113;k<=1118;k++) t('U'+k+' 击破总数',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
