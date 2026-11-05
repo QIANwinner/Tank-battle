@@ -4195,6 +4195,21 @@ async function main() {
     t('U686 一致性', typeof o4.dom === 'string', o4.dom);
   } catch(e){ for(let k=681;k<=686;k++) t('U'+k+' 抽奖统计',false,e.message); }
 
+
+  // ===== U687~U692: 每日挑战统计(v0.7.27) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('dailyStatWrap'),f:T.dailyStatTextNow(0)});})()"));
+    t('U687 每日 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U688 零次初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dailyStatTextNow(5),b:T.dailyStatTextNow(1)});})()"));
+    t('U689 正常 5/1', o2.a === '📅 5 次挑战' && o2.b === '📅 1 次挑战', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dailyStatTextNow(-1),b:T.dailyStatTextNow('x')});})()"));
+    t('U690 非法兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.dailyStatPillDomNow(),v:T.dailyCountNow()});})()"));
+    t('U691 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U692 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=687;k<=692;k++) t('U'+k+' 每日统计',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
