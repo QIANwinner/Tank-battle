@@ -3235,6 +3235,22 @@ async function main() {
     t('U908 DOM 与函数一致', o6.len >= 0, JSON.stringify(o6));
   } catch(e){ for(let k=903;k<=908;k++) t('U'+k+' 大招CD进度',false,e.message); }
 
+  // ===== U909~U914: 道具拾取记录(v0.6.66) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('pickupLog')});})()"));
+    t('U909 道具记录已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.pushPickupNow('shield');return JSON.stringify({a:document.getElementById('pickupLog').textContent});})()"));
+    t('U910 初值 记录护盾', o2.a.indexOf('护盾') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pickupMsgNow('rapid')});})()"));
+    t('U911 正常值 快速标签', o3.a.indexOf('快速') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pickupMsgNow(null)});})()"));
+    t('U912 边界 null 原样', o4.a === null, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pickupMsgNow('life')});})()"));
+    t('U913 非法 生命标签', o5.a.indexOf('加命') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.pushPickupNow('bomb');const e=document.getElementById('pickupLog');return JSON.stringify({len:e?e.textContent.length:0});})()"));
+    t('U914 DOM 与函数一致', o6.len > 0, JSON.stringify(o6));
+  } catch(e){ for(let k=909;k<=914;k++) t('U'+k+' 道具记录',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

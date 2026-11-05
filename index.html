@@ -1874,6 +1874,8 @@
   #ultCdWrap { width: 64px; height: 4px; border-radius: 2px; background: #1a2740; overflow: hidden; margin-top: 3px; }
   #ultCdWrap #ultCdBar { height: 100%; width: 100%; background: linear-gradient(90deg, #00f0ff, #7c4dff); transition: width 0.1s linear; }
   #ultCdWrap.ready #ultCdBar { background: #39ff14; }
+  /* —— v0.6.66 道具拾取记录 —— */
+  #pickupLog { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -1933,6 +1935,7 @@
     </div>
     <div id="streakBanner" class="m-hide"></div>
     <div class="pill m-hide" id="ultCdWrap"><span class="k">💥</span><div id="ultCdBar"></div></div>
+    <div class="pill m-hide" id="pickupLog"></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -2305,7 +2308,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V6.65</div>
+  <div id="mark">DESIGNED BY QIAN · V6.66</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -5325,6 +5328,7 @@
       case 'freeze': fx.freeze = 5; break;
       case 'bomb':   bombEnemies(); break;
     }
+    pushPickup(type);
     showToast(powerupMsg(def.label));
   }
 
@@ -7672,6 +7676,18 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     bar.style.width = p + '%';
     bar.parentNode.classList.toggle('ready', p >= 100);
   }
+  // —— v0.6.66 道具拾取记录 ——
+  let pickupLog = [];
+  function pickupMsg(type) {
+    const def = POWERUP_DEF[type];
+    return def ? def.label : type;
+  }
+  function pushPickup(type) {
+    pickupLog.push(type);
+    if (pickupLog.length > 6) pickupLog = pickupLog.slice(-6);
+    const p = document.getElementById('pickupLog');
+    if (p) p.textContent = '🧰 ' + pickupLog.map(pickupMsg).join(' · ');
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -9509,7 +9525,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V6.65', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V6.66', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -10543,6 +10559,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       starRuleTextNow: () => starRuleText(),
       calcKpgNow: (k, g) => calcKpg(k, g), kpgTextNow: (k, g) => kpgText(k, g),
       cdPctNow: (c, m) => cdPct(c, m), renderUltBarNow: () => renderUltBar(),
+      pickupMsgNow: (t) => pickupMsg(t), pushPickupNow: (t) => pushPickup(t),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
