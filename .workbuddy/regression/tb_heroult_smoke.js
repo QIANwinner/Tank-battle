@@ -3760,6 +3760,22 @@ async function main() {
     t('U1106 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
   } catch(e){ for(let k=1101;k<=1106;k++) t('U'+k+' 对局场次',false,e.message); }
 
+
+  // ===== U1107~U1112: 本局得分(v0.6.99) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('scoreNowPill'),w:T.scoreNowTextNow(0)});})()"));
+    t('U1107 得分 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1108 初值 得分 0', o.w === '得分 0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scoreNowTextNow(1250),b:T.scoreNowTextNow(999)});})()"));
+    t('U1109 正常 1250/999', o2.a === '得分 1250' && o2.b === '得分 999', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scoreNowTextNow(1250.7),b:T.scoreNowTextNow(0)});})()"));
+    t('U1110 边界 1250.7 取整 1250', o3.a === '得分 1250' && o3.b === '得分 0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scoreNowTextNow(NaN),b:T.scoreNowTextNow(-5)});})()"));
+    t('U1111 非法输入兜底 0', o4.a === '得分 0' && o4.b === '得分 0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.scoreNowDomNow();const fn=T.scoreNowTextNow(T.scoreNowNow());return JSON.stringify({dom,fn});})()"));
+    t('U1112 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1107;k<=1112;k++) t('U'+k+' 得分',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
