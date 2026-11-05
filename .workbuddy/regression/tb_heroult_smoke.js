@@ -4063,6 +4063,21 @@ async function main() {
     t('U620 色值有效', (o3.dom || {}).color !== undefined, JSON.stringify(o3));
   } catch(e){ for(let k=1215;k<=1220;k++) t('U'+k+' 难度标签',false,e.message); }
 
+
+  // ===== U621~U626: 最高单次金币(v0.7.18) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('maxGoldWrap'),f:T.maxGoldTextNow(0)});})()"));
+    t('U621 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U622 零值初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.maxGoldTextNow(500),b:T.maxGoldTextNow(12345)});})()"));
+    t('U623 正常 500/12,345', o2.a === '💰 500' && o2.b === '💰 12,345', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.maxGoldTextNow(-5),b:T.maxGoldTextNow(NaN)});})()"));
+    t('U624 非法兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.maxGoldDomNow()});})()"));
+    t('U625 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U626 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=621;k<=626;k++) t('U'+k+' 最大金',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
