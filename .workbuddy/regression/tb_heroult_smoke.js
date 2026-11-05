@@ -4315,6 +4315,35 @@ async function main() {
     t('U734 一致性', typeof o4.dom === 'string', o4.dom);
   } catch(e){ for(let k=729;k<=734;k++) t('U'+k+' 榜单数',false,e.message); }
 
+
+  // ===== U735~U740: 皮肤拥有率(v0.7.35) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('skinRateWrap'),f:T.skinRateTextNow(['classic'])});})()"));
+    t('U735 拥有率 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U736 仅默认 1/N', o.f.indexOf('1/') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.skinRateTextNow('not array'),b:T.skinRateTextNow(null)});})()"));
+    t('U737 非法兜底 —', o2.a === '—' && o2.b === '—', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.skinRatePillDomNow()});})()"));
+    t('U738 DOM 可读', !!o3.dom, JSON.stringify(o3));
+    t('U739 一致性', typeof o3.dom === 'string', o3.dom);
+    t('U740 无异常', true, 'ok');
+  } catch(e){ for(let k=735;k<=740;k++) t('U'+k+' 拥有率',false,e.message); }
+
+
+  // ===== U741~U746: 宠物币花费(v0.7.36) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('petCoinSpentWrap'),f:T.petCoinSpentTextNow([],[])});})()"));
+    t('U741 花费 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U742 零花费初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.petCoinSpentTextNow(['cat'],['blade']));})()"));
+    t('U743 有花费显示', o2.indexOf('🐾') >= 0, o2);
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petCoinSpentTextNow(null,undefined)});})()"));
+    t('U744 非法兜底 —', o3.a === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.petCoinSpentPillDomNow()});})()"));
+    t('U745 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U746 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=741;k<=746;k++) t('U'+k+' 花费',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
