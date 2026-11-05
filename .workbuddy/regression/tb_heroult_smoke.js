@@ -3331,6 +3331,22 @@ async function main() {
     t('U944 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('2') >= 0, JSON.stringify(o6));
   } catch(e){ for(let k=939;k<=944;k++) t('U'+k+' BOSS击破',false,e.message); }
 
+  // ===== U945~U950: 难度标识(v0.6.72) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('diffBadgeVal')});})()"));
+    t('U945 难度标识已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.diffBadgeNow('normal')});})()"));
+    t('U946 初值 普通', o2.a.indexOf('普通') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.diffBadgeNow('easy')});})()"));
+    t('U947 正常值 简单', o3.a.indexOf('简单') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.diffBadgeNow('hard')});})()"));
+    t('U948 边界 困难', o4.a.indexOf('困难') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.diffBadgeNow(null)});})()"));
+    t('U949 非法 null 回落普通', o5.a.indexOf('普通') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.diffBadgeNow('hard');const e=document.getElementById('diffBadgeVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U950 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('困难') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=945;k<=950;k++) t('U'+k+' 难度标识',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
