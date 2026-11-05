@@ -1932,6 +1932,7 @@
   #scoreNowPill .v { color: #ffd166; font-size: 11px; }
   #runKillPill .v { color: #ff6b6b; font-weight: 700; font-size: 11px; }
   #baseFortPill .v { color: #4ecdc4; font-size: 11px; }
+  #runCoinPill .v { color: #ffd700; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -2023,6 +2024,7 @@
     <div class="pill m-hide" id="scoreNowPill"><span class="k">得分</span><span class="v" id="scoreNowVal">得分 0</span></div>
     <div class="pill m-hide" id="runKillPill"><span class="k">击破</span><span class="v" id="runKillVal">击破 0</span></div>
     <div class="pill m-hide" id="baseFortPill"><span class="k">基地</span><span class="v" id="baseFortVal">基地 护墙 Lv.0</span></div>
+    <div class="pill m-hide" id="runCoinPill"><span class="k">金币</span><span class="v" id="runCoinVal">本局金币 +0</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -2398,7 +2400,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V7.1</div>
+  <div id="mark">DESIGNED BY QIAN · V7.2</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -3279,10 +3281,12 @@
 
   // ===== 局内统计（战绩图 / 分享） =====
   let stat = { kills: 0, shots: 0, hits: 0, maxCombo: 0, bossKills: 0, deaths: 0 };
+  let runCoins = 0;
   // —— v0.2.6 战绩图：保存上一局快照（供战绩档案「生成战绩图」复用） ——
   let lastRun = null;
   function resetStat() {
     stat = { kills: 0, shots: 0, hits: 0, maxCombo: 0, bossKills: 0, deaths: 0 };
+    runCoins = 0;
   }
 
   // ===== v0.2.5 战绩档案：生涯累计 + 本地排行榜 =====
@@ -5236,6 +5240,7 @@
     coinLogPush(gain, '击杀');
     // —— v0.2.7 生涯统计：累计获得金币（recordGame 统一持久化） ——
     career.totalCoins += gain;
+    runCoins += gain;
     // —— v0.2.4 成就：金库余额达 3000 ——
     if (coins >= 3000) unlockAch('rich');
     // —— v0.3.2 金币大亨：余额达 10000 ——
@@ -7267,6 +7272,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const snv = $('scoreNowVal'); if (snv) snv.textContent = scoreNowText(score);
     const rkv = $('runKillVal'); if (rkv) rkv.textContent = runKillsText(stat.kills);
     const bfv = $('baseFortVal'); if (bfv) bfv.textContent = baseFortText(baseLevel);
+    const rcv = $('runCoinVal'); if (rcv) rcv.textContent = runCoinsText(runCoins);
     // __EXTRA_HUD__
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
   }
@@ -7999,6 +8005,8 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   function runKillsText(n) { return '击破 ' + Math.max(0, Math.floor(Number(n) || 0)); }
   // —— v0.7.1 基地护墙等级 pill ——
   function baseFortText(n) { return '基地 护墙 Lv.' + Math.max(0, Math.floor(Number(n) || 0)); }
+  // —— v0.7.2 本局金币收入 pill（击杀获得金币,局内累计） ——
+  function runCoinsText(n) { return '本局金币 +' + fmtNum(Math.max(0, Math.floor(Number(n) || 0))); }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -9840,7 +9848,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V7.1', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V7.2', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -10910,6 +10918,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       scoreNowTextNow: (n) => scoreNowText(n), scoreNowDomNow: () => { const e = $('scoreNowVal'); return e ? e.textContent : null; }, scoreNowNow: () => score,
       runKillsTextNow: (n) => runKillsText(n), runKillDomNow: () => { const e = $('runKillVal'); return e ? e.textContent : null; }, runKillsNow: () => stat.kills,
       baseFortTextNow: (n) => baseFortText(n), baseFortDomNow: () => { const e = $('baseFortVal'); return e ? e.textContent : null; }, baseLevelNow: () => baseLevel,
+      runCoinsTextNow: (n) => runCoinsText(n), runCoinDomNow: () => { const e = $('runCoinVal'); return e ? e.textContent : null; }, runCoinsNow: () => runCoins,
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

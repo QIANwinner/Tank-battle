@@ -3808,6 +3808,22 @@ async function main() {
     t('U1124 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
   } catch(e){ for(let k=1119;k<=1124;k++) t('U'+k+' 基地护墙',false,e.message); }
 
+
+  // ===== U1125~U1130: 本局金币收入(v0.7.2) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runCoinPill'),w:T.runCoinsTextNow(0)});})()"));
+    t('U1125 本局金币 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1126 初值 本局金币 +0', o.w === '本局金币 +0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runCoinsTextNow(150),b:T.runCoinsTextNow(999)});})()"));
+    t('U1127 正常 150/999', o2.a === '本局金币 +150' && o2.b === '本局金币 +999', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runCoinsTextNow(150.7),b:T.runCoinsTextNow(0)});})()"));
+    t('U1128 边界 150.7 取整 150', o3.a === '本局金币 +150' && o3.b === '本局金币 +0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runCoinsTextNow(NaN),b:T.runCoinsTextNow(-5)});})()"));
+    t('U1129 非法输入兜底 +0', o4.a === '本局金币 +0' && o4.b === '本局金币 +0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.runCoinDomNow();const fn=T.runCoinsTextNow(T.runCoinsNow());return JSON.stringify({dom,fn});})()"));
+    t('U1130 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1125;k<=1130;k++) t('U'+k+' 本局金币',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
