@@ -3173,6 +3173,21 @@ async function main() {
     t('U884 DOM 与函数一致', o5.h === true, JSON.stringify(o5));
   } catch(e){ for(let k=879;k<=884;k++) t('U'+k+' 新手引导',false,e.message); }
 
+  // ===== U885~U890: 连杀播报(v0.6.62) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('streakBanner'),a:T.streakLabelNow(3)});})()"));
+    t('U885 连杀播报已加入', o.dom === true, JSON.stringify(o));
+    t('U886 初值 3连杀', o.a.indexOf('3 连杀') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.streakLabelNow(5)});})()"));
+    t('U887 正常值 5连杀', o2.a.indexOf('5 连杀') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.streakLabelNow(10)});})()"));
+    t('U888 边界 10连杀', o3.a.indexOf('10 连杀') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.streakLabelNow(2)});})()"));
+    t('U889 非法 2连杀不播报', o4.a === '', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.streakFlashNow(5);const e=document.getElementById('streakBanner');return JSON.stringify({t:e?e.textContent.length:0});})()"));
+    t('U890 DOM 与函数一致', o5.t > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=885;k<=890;k++) t('U'+k+' 连杀播报',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
