@@ -3491,6 +3491,22 @@ async function main() {
     t('U1004 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('3') >= 0, JSON.stringify(o6));
   } catch(e){ for(let k=999;k<=1004;k++) t('U'+k+' 生涯BOSS',false,e.message); }
 
+  // ===== U1005~U1010: 存活敌人(v0.6.82) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('enemyLeftVal')});})()"));
+    t('U1005 存活敌人已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyLeftNow(0)});})()"));
+    t('U1006 初值 零敌人', o2.a.indexOf('敌人 0') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyLeftNow(12)});})()"));
+    t('U1007 正常值 12敌人', o3.a.indexOf('敌人 12') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyLeftNow(999)});})()"));
+    t('U1008 边界 999敌人', o4.a.indexOf('敌人 999') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyLeftNow(NaN)});})()"));
+    t('U1009 非法 NaN 归零', o5.a.indexOf('敌人 0') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.enemyLeftNow(5);const e=document.getElementById('enemyLeftVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U1010 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('敌人 5') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=1005;k<=1010;k++) t('U'+k+' 存活敌人',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

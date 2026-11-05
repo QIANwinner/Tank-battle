@@ -1906,6 +1906,8 @@
   #careerCoinVal { color: #ffd700; font-weight: 800; }
   /* —— v0.6.81 生涯BOSS —— */
   #careerBossVal { color: #ff5c8a; font-weight: 800; }
+  /* —— v0.6.82 存活敌人 —— */
+  #enemyLeftVal { color: #ff4d4d; font-weight: 800; }
 </style>
 </head>
 <body>
@@ -1979,6 +1981,7 @@
     <div class="pill m-hide"><span class="k">⏱</span><span class="v" id="careerTimeVal"></span></div>
     <div class="pill m-hide"><span class="k">💰</span><span class="v" id="careerCoinVal"></span></div>
     <div class="pill m-hide"><span class="k">🐉</span><span class="v" id="careerBossVal"></span></div>
+    <div class="pill m-hide"><span class="k">👾</span><span class="v" id="enemyLeftVal"></span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -2352,7 +2355,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V6.81</div>
+  <div id="mark">DESIGNED BY QIAN · V6.82</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7201,6 +7204,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const ctV = $('careerTimeVal'); if (ctV) ctV.textContent = careerTimeText(career.playSec);
     const ccV = $('careerCoinVal'); if (ccV) ccV.textContent = careerCoinText(career.totalCoins);
     const cbV = $('careerBossVal'); if (cbV) cbV.textContent = careerBossText(career.bossKills);
+    const elV = $('enemyLeftVal'); if (elV) elV.textContent = enemyLeftText(enemies.length);
     // __EXTRA_HUD__
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
   }
@@ -7832,6 +7836,11 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   function careerBossText(n) {
     const v = Math.max(0, Number(n) || 0);
     return '生涯 BOSS ' + v + ' 破';
+  }
+  // —— v0.6.82 存活敌人计数 ——
+  function enemyLeftText(n) {
+    const v = Math.max(0, Number(n) || 0);
+    return '敌人 ' + v;
   }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
@@ -9674,7 +9683,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V6.81', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V6.82', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -10724,6 +10733,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       careerTimeNow: (s) => { const t = careerTimeText(s); const el = document.getElementById('careerTimeVal'); if (el) el.textContent = t; return t; },
       careerCoinNow: (c) => { const t = careerCoinText(c); const el = document.getElementById('careerCoinVal'); if (el) el.textContent = t; return t; },
       careerBossNow: (n) => { const t = careerBossText(n); const el = document.getElementById('careerBossVal'); if (el) el.textContent = t; return t; },
+      enemyLeftNow: (n) => { const t = enemyLeftText(n); const el = document.getElementById('enemyLeftVal'); if (el) el.textContent = t; return t; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
