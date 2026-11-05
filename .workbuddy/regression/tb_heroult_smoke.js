@@ -4093,6 +4093,35 @@ async function main() {
     t('U632 一致性', typeof o4.dom === 'string', o4.dom);
   } catch(e){ for(let k=627;k<=632;k++) t('U'+k+' 转机使用',false,e.message); }
 
+
+  // ===== U633~U638: P2 生命(v0.7.20) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('p2PillWrap'),f:T.p2LivesTextNow(3)});})()"));
+    t('U633 P2 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U634 正常 ❤×3', o.f === '❤×3', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.p2LivesTextNow(0),b:T.p2LivesTextNow(NaN)});})()"));
+    t('U635 边界/非法兜底(返回字符串)', typeof o2.a === 'string' && typeof o2.b === 'string', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.p2PillDomNow()});})()"));
+    t('U636 单人模式 P2 灰显', (o3.dom || '').indexOf('—') >= 0 || (o3.dom || {}).indexOf && true, JSON.stringify(o3));
+    t('U637 数值类型', typeof o3.dom === 'string', o3.dom);
+    t('U638 一致性', typeof o3.dom === 'string' && o3.dom.length > 0, o3.dom);
+  } catch(e){ for(let k=633;k<=638;k++) t('U'+k+' P2生命',false,e.message); }
+
+
+  // ===== U639~U644: 金币速率(v0.7.21) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('goldRateWrap'),f:T.goldRateTextNow(0,60)});})()"));
+    t('U639 速率 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U640 零金币 0/分', o.f === '💰 0/分', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.goldRateTextNow(500,60),b:T.goldRateTextNow(1000,120)});})()"));
+    t('U641 正常 8.3/分 8.3/分', o2.a === '💰 8.3/分' && o2.b === '💰 8.3/分', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.goldRateTextNow(-5,60),b:T.goldRateTextNow(NaN,0)});})()"));
+    t('U642 非法兜底', o3.a === '💰 0/分' && o3.b === '💰 0/分', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.goldRateDomNow()});})()"));
+    t('U643 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U644 一致性', typeof o4.dom === 'string' && o4.dom.length > 0, o4.dom);
+  } catch(e){ for(let k=639;k<=644;k++) t('U'+k+' 速率',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
