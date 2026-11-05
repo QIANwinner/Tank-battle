@@ -3443,6 +3443,22 @@ async function main() {
     t('U986 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('75%') >= 0, JSON.stringify(o6));
   } catch(e){ for(let k=981;k<=986;k++) t('U'+k+' 生涯命中率',false,e.message); }
 
+  // ===== U987~U992: 生涯游玩时长(v0.6.79) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerTimeVal')});})()"));
+    t('U987 生涯时长已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerTimeNow(0)});})()"));
+    t('U988 初值 零秒显0m', o2.a.indexOf('0m') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerTimeNow(3720)});})()"));
+    t('U989 正常值 3720秒=1h2m', o3.a.indexOf('1h 2m') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerTimeNow(3600)});})()"));
+    t('U990 边界 整1小时显1h0m', o4.a.indexOf('1h 0m') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerTimeNow(NaN)});})()"));
+    t('U991 非法 NaN 归零显0m', o5.a.indexOf('0m') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.careerTimeNow(5400);const e=document.getElementById('careerTimeVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U992 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('1h 30m') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=987;k<=992;k++) t('U'+k+' 生涯时长',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
