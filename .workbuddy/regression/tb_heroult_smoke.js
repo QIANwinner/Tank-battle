@@ -3022,6 +3022,21 @@ async function main() {
     t('U824 DOM 与函数一致', o5.len >= 0, JSON.stringify(o5));
   } catch(e){ for(let k=819;k<=824;k++) t('U'+k+' 羁绊条件',false,e.message); }
 
+  // ===== U825~U830: 结算一键重开(v0.6.52) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('btnReplay2'),a:T.replayLabelNow('over')});})()"));
+    t('U825 一键重开已加入', o.dom === true, JSON.stringify(o));
+    t('U826 初值 结算态', o.a === '⚡ 一键重开', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.replayLabelNow('paused')});})()"));
+    t('U827 正常值 暂停态', o2.a === '🔄 重新开始', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.replayLabelNow('')});})()"));
+    t('U828 边界 空串默认', o3.a === '🔄 重新开始', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.replayLabelNow(null)});})()"));
+    t('U829 非法 null 默认', o4.a === '🔄 重新开始', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('btnReplay2');return JSON.stringify({t:e?e.textContent:''});})()"));
+    t('U830 DOM 与函数一致', o5.t.indexOf('重开') >= 0, JSON.stringify(o5));
+  } catch(e){ for(let k=825;k<=830;k++) t('U'+k+' 结算重开',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
