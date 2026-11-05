@@ -3143,6 +3143,21 @@ async function main() {
     t('U872 DOM 排序标记', o6.t === true, JSON.stringify(o6));
   } catch(e){ for(let k=867;k<=872;k++) t('U'+k+' 关卡排序',false,e.message); }
 
+  // ===== U873~U878: 重置确认(v0.6.60) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('resetConfirmBox'),a:T.resetConfirmTextNow(50,200)});})()"));
+    t('U873 重置确认已加入', o.dom === true, JSON.stringify(o));
+    t('U874 初值 含返还', o.a.indexOf('返还') >= 0 && o.a.indexOf('50') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.resetConfirmTextNow(0,200)});})()"));
+    t('U875 正常值 零返还', o2.a.indexOf('0') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.resetConfirmTextNow(-5,0)});})()"));
+    t('U876 边界 负数兜底0', o3.a.indexOf('0') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.resetConfirmTextNow(NaN,NaN)});})()"));
+    t('U877 非法 NaN兜底', o4.a.indexOf('0') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('resetConfirmBox');return JSON.stringify({d:e?getComputedStyle(e).display:''});})()"));
+    t('U878 DOM 默认隐藏', o5.d === 'none', JSON.stringify(o5));
+  } catch(e){ for(let k=873;k<=878;k++) t('U'+k+' 重置确认',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
