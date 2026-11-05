@@ -3037,6 +3037,21 @@ async function main() {
     t('U830 DOM 与函数一致', o5.t.indexOf('重开') >= 0, JSON.stringify(o5));
   } catch(e){ for(let k=825;k<=830;k++) t('U'+k+' 结算重开',false,e.message); }
 
+  // ===== U831~U836: 战绩图评级渐变(v0.6.53) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('reportGradeBar'),g:T.gradeGradientNow('S')});})()"));
+    t('U831 战绩图评级条已加入', o.dom === true, JSON.stringify(o));
+    t('U832 初值 S金橙', o.g[0] === '#ffd700' && o.g[1] === '#ff8a00', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.gradeGradientNow('A'),b:T.gradeGradientNow('B')});})()"));
+    t('U833 正常值 A/B', o2.a[0] === '#00f0ff' && o2.b[0] === '#39ff14', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({c:T.gradeGradientNow('C')});})()"));
+    t('U834 边界 C灰', o3.c[0] === '#8ea0b8', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({c:T.gradeGradientNow(null)});})()"));
+    t('U835 非法 null 兜底', o4.c[0] === '#8ea0b8', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('reportGradeBar');return JSON.stringify({len:e?e.className.length:0});})()"));
+    t('U836 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=831;k<=836;k++) t('U'+k+' 评级渐变',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
