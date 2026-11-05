@@ -3696,6 +3696,22 @@ async function main() {
     t('U1082 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
   } catch(e){ for(let k=1077;k<=1082;k++) t('U'+k+' 时长',false,e.message); }
 
+
+  // ===== U1083~U1088: 生涯总击杀(v0.6.95) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerKillPill'),w:T.careerKillsTextNow(0)});})()"));
+    t('U1083 生涯 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1084 初值 生涯击杀 0', o.w === '生涯击杀 0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerKillsTextNow(123),b:T.careerKillsTextNow(999)});})()"));
+    t('U1085 正常 123/999', o2.a === '生涯击杀 123' && o2.b === '生涯击杀 999', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerKillsTextNow(10000)});})()"));
+    t('U1086 大数非负', typeof o3.a === 'string' && o3.a.indexOf('生涯击杀')>=0 && /\d+/.test(o3.a), JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerKillsTextNow(NaN),b:T.careerKillsTextNow(-5)});})()"));
+    t('U1087 非法输入兜底 0', o4.a === '生涯击杀 0' && o4.b === '生涯击杀 0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.careerKillDomNow();const fn=T.careerKillsTextNow(T.careerKillsNow());return JSON.stringify({dom,fn});})()"));
+    t('U1088 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1083;k<=1088;k++) t('U'+k+' 生涯击杀',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
