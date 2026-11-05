@@ -2725,6 +2725,22 @@ async function main() {
     t('U710 DOM 文本长度合理', o5.len > 5, JSON.stringify(o5));
   } catch(e){ for(let k=705;k<=710;k++) t('U'+k+' 下一关预告',false,e.message); }
 
+
+  // ===== U711~U716: 击杀构成分布(v0.6.33) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('killBreakdown'),f:T.killBreakdownHtmlNow(0,0)});})()"));
+    t('U711 击杀构成已加入结算屏', o.dom === true, JSON.stringify(o));
+    t('U712 零击杀初值提示', o.f.indexOf('无击杀') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killBreakdownHtmlNow(8,2),b:T.killBreakdownHtmlNow(5,5)});})()"));
+    t('U713 正常分布含普通与Boss', o2.a.indexOf('普通 8') >= 0 && o2.b.indexOf('Boss 5') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({c:(T.killBreakdownHtmlNow(1,0).match(/kbBoss/g)||[]).length});})()"));
+    t('U714 纯普通击杀 Boss 段仍渲染', o3.c === 1, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killBreakdownHtmlNow(-3,-2),b:T.killBreakdownHtmlNow(NaN,'x')});})()"));
+    t('U715 非法输入兜底无击杀', o4.a.indexOf('无击杀') >= 0 && o4.b.indexOf('无击杀') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const dom=T.killBdDomNow();return JSON.stringify({len:dom.length});})()"));
+    t('U716 DOM 文本长度合理', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=711;k<=716;k++) t('U'+k+' 击杀构成',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
