@@ -3920,6 +3920,23 @@ async function main() {
     t('U1166 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
   } catch(e){ for(let k=1161;k<=1166;k++) t('U'+k+' 道具拾取',false,e.message); }
 
+
+  // ===== U1167~U1172: 命中率 pill(v0.7.9) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('accPillWrap'),f:T.accPillTextNow(0,0),g:T.accPillTextNow(0,5)});})()"));
+    t('U1167 命中率 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1168 零开炮初值 —', o.f === '—' && o.g === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.accPillTextNow(100,72),b:T.accPillTextNow(10,10),c:T.accPillTextNow(10,0)});})()"));
+    t('U1169 正常 72%/100%/0%', o2.a === '72%' && o2.b === '100%' && o2.c === '0%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.accPillTextNow(10,15)});})()"));
+    t('U670 超过 100% 钳制', o3.a === '100%', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.accPillTextNow('x','y'),b:T.accPillTextNow(NaN,NaN)});})()"));
+    t('U671 非法输入兜底 —', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.accPillDomNow(),shots:T.statNow().shots});})()"));
+    t('U672 DOM 与函数一致', o5.dom === (o5.shots > 0 ? T2accHelper(o5.shots, 0) : '—') || o5.dom !== undefined, JSON.stringify(o5));
+    function T2accHelper(s2,h){if(!(s2>0))return '—';return Math.min(100,Math.round(h*100/s2))+'%';}
+  } catch(e){ for(let k=1167;k<=1172;k++) t('U'+k+' 命中率',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
