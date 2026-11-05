@@ -2677,6 +2677,22 @@ async function main() {
     t('U692 DOM 文本为合法评级', ['S','A','B','C'].includes(o6.dom), JSON.stringify(o6));
   } catch(e){ for(let k=687;k<=692;k++) t('U'+k+' 生涯评级',false,e.message); }
 
+
+  // ===== U693~U698: 宠物收藏进度(v0.6.30) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('petCollectWrap'),f:T.petCollectTextNow(0,4)});})()"));
+    t('U693 宠物收藏 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U694 零收藏初值 0/4', o.f === '0/4', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petCollectTextNow(2,4),b:T.petCollectTextNow(4,4)});})()"));
+    t('U695 正常值 2/4 与集齐 4/4', o2.a === '2/4' && o2.b === '4/4', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petCollectPctNow(2,4),b:T.petCollectPctNow(5,4)});})()"));
+    t('U696 百分比 50% 与封顶 100%', o3.a === 50 && o3.b === 100, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petCollectTextNow(-1,4),b:T.petCollectTextNow(2,0)});})()"));
+    t('U697 非法输入兜底 0/4', o4.a === '0/4' && o4.b === '2/4', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const dom=T.petCollectDomNow();const fn=T.petCollectTextNow(T.petCollectDomNow()?1:0,4);return JSON.stringify({dom,fn});})()"));
+    t('U698 DOM 与函数一致(格式 x/4)', /^\d+\/4$/.test(o5.dom), JSON.stringify(o5));
+  } catch(e){ for(let k=693;k<=698;k++) t('U'+k+' 宠物收藏',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
