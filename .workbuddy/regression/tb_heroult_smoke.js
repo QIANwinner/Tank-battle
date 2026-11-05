@@ -2853,6 +2853,22 @@ async function main() {
     t('U758 DOM 文本长度合理', o5.len > 0, JSON.stringify(o5));
   } catch(e){ for(let k=753;k<=758;k++) t('U'+k+' 编辑器坐标',false,e.message); }
 
+
+  // ===== U759~U764: P2 生命 HUD(v0.6.41) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('p2LivesVal'),f:T.p2LivesTextNow(0)});})()"));
+    t('U759 P2 生命 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U760 初值 0 命', o.f === '❤×0', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.p2LivesTextNow(3),b:T.p2ModeTextNow(1)});})()"));
+    t('U761 正常值 3命/合作', o2.a === '❤×3' && o2.b === '双人合作', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.p2LivesTextNow(-2)});})()"));
+    t('U762 边界 负数归零', o3.a === '❤×0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.p2LivesTextNow(NaN),b:T.p2ModeTextNow(9)});})()"));
+    t('U763 非法输入兜底', o4.a === '❤×0' && o4.b === '单人', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const dom=T.p2LivesDomNow();return JSON.stringify({len:dom.length});})()"));
+    t('U764 DOM 文本长度合理', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=759;k<=764;k++) t('U'+k+' P2生命',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
