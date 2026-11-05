@@ -4240,6 +4240,21 @@ async function main() {
     t('U704 一致性', typeof o4.dom === 'string', o4.dom);
   } catch(e){ for(let k=699;k<=704;k++) t('U'+k+' 僚机皮肤数',false,e.message); }
 
+
+  // ===== U705~U710: 宠物数(v0.7.30) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('petOwnedWrap'),f:T.petOwnedTextNow([])});})()"));
+    t('U705 宠物数 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U706 零宠物 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petOwnedTextNow(['cat']),b:T.petOwnedTextNow(['cat','turtle','bunny'])});})()"));
+    t('U707 正常 1/3 和 3/3', o2.a === '🐾 1/3' && o2.b === '🐾 3/3', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petOwnedTextNow('x'),b:T.petOwnedTextNow(null)});})()"));
+    t('U708 非法兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.petOwnedPillDomNow(),n:T.petOwnedNow()});})()"));
+    t('U709 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U710 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=705;k<=710;k++) t('U'+k+' 宠物数',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
