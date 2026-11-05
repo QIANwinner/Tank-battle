@@ -4210,6 +4210,21 @@ async function main() {
     t('U692 一致性', typeof o4.dom === 'string', o4.dom);
   } catch(e){ for(let k=687;k<=692;k++) t('U'+k+' 每日统计',false,e.message); }
 
+
+  // ===== U693~U698: 皮肤数统计(v0.7.28) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('skinCountWrap'),f:T.skinCountTextNow(['classic'])});})()"));
+    t('U693 皮肤数 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U694 仅默认 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.skinCountTextNow(['classic','gold','silver','prism','neon']),b:T.skinCountTextNow([])});})()"));
+    t('U695 正常 5 款/空 —', o2.a === '🎨 5 款' && o2.b === '—', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.skinCountTextNow('not array'),b:T.skinCountTextNow(null)});})()"));
+    t('U696 非法兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.skinCountPillDomNow(),n:T.skinOwnedNow()});})()"));
+    t('U697 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U698 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=693;k<=698;k++) t('U'+k+' 皮肤数',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
