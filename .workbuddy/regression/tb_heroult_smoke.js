@@ -3824,6 +3824,22 @@ async function main() {
     t('U1130 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
   } catch(e){ for(let k=1125;k<=1130;k++) t('U'+k+' 本局金币',false,e.message); }
 
+
+  // ===== U1131~U1136: 本局冲击波在场数(v0.7.3) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('ultWavePill'),w:T.ultWaveTextNow(0)});})()"));
+    t('U1131 冲击波 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1132 初值 冲击波 ×0', o.w === '冲击波 ×0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.ultWaveTextNow(2),b:T.ultWaveTextNow(5)});})()"));
+    t('U1133 正常 ×2/×5', o2.a === '冲击波 ×2' && o2.b === '冲击波 ×5', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.ultWaveTextNow(2.6),b:T.ultWaveTextNow(0)});})()"));
+    t('U1134 边界 2.6 取整 ×2', o3.a === '冲击波 ×2' && o3.b === '冲击波 ×0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.ultWaveTextNow(NaN),b:T.ultWaveTextNow(-2)});})()"));
+    t('U1135 非法输入兜底 ×0', o4.a === '冲击波 ×0' && o4.b === '冲击波 ×0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.ultWaveDomNow();const fn=T.ultWaveTextNow(T.ultWavesNow());return JSON.stringify({dom,fn});})()"));
+    t('U1136 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1131;k<=1136;k++) t('U'+k+' 冲击波在场',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
