@@ -3158,6 +3158,21 @@ async function main() {
     t('U878 DOM 默认隐藏', o5.d === 'none', JSON.stringify(o5));
   } catch(e){ for(let k=873;k<=878;k++) t('U'+k+' 重置确认',false,e.message); }
 
+  // ===== U879~U884: 首次游玩引导(v0.6.61) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('tourBox'),a:T.tourStepTextNow(0)});})()"));
+    t('U879 引导弹层已加入', o.dom === true, JSON.stringify(o));
+    t('U880 初值 第1步含移动', o.a.t.indexOf('移动') >= 0 && o.a.b.indexOf('开火') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.tourStepTextNow(1)});})()"));
+    t('U881 正常值 第2步含金币', o2.a.t.indexOf('金币') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.tourStepTextNow(2)});})()"));
+    t('U882 边界 第3步含星级', o3.a.t.indexOf('星级') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.tourStepTextNow(null)});})()"));
+    t('U883 非法 null 回落第1步', o4.a.t.indexOf('移动') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.showTourNow(0);const e=document.getElementById('tourBox');return JSON.stringify({h:e?e.className.indexOf('m-hide')<0:false});})()"));
+    t('U884 DOM 与函数一致', o5.h === true, JSON.stringify(o5));
+  } catch(e){ for(let k=879;k<=884;k++) t('U'+k+' 新手引导',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
