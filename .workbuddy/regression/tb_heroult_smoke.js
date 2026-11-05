@@ -4152,6 +4152,19 @@ async function main() {
     t('U656 一致性', typeof o4.dom === 'string', o4.dom);
   } catch(e){ for(let k=651;k<=656;k++) t('U'+k+' 连击里程碑',false,e.message); }
 
+
+  // ===== U657~U662: 100 轮收口(v0.7.24) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('round100Wrap'),f:T.round100TextNow()});})()"));
+    t('U657 收口 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U658 收口文案', o.f === '🏁 100 轮创造性循环完成 · v0.7.24', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.round100DomNow()});})()"));
+    t('U659 DOM 实时显示', (o2.dom || '').indexOf('100 轮') >= 0, JSON.stringify(o2));
+    t('U660 文案含版本号', (o2.dom || '').indexOf('v0.7.24') >= 0, JSON.stringify(o2));
+    t('U661 一致性', typeof o2.dom === 'string', o2.dom);
+    t('U662 收口确认', typeof o2.dom === 'string' && o2.dom.length > 10, o2.dom);
+  } catch(e){ for(let k=657;k<=662;k++) t('U'+k+' 收口',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
