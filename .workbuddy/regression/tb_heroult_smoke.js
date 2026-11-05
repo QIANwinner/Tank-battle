@@ -3112,6 +3112,21 @@ async function main() {
     t('U860 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
   } catch(e){ for(let k=855;k<=860;k++) t('U'+k+' 分享短码',false,e.message); }
 
+  // ===== U861~U866: 关卡缩略图(v0.6.58) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.customThumbNow(['###','.#.','###'])});})()"));
+    t('U861 缩略图SVG生成', o.a.indexOf('<svg') === 0, JSON.stringify(o));
+    t('U862 初值 含矩形', o.a.indexOf('<rect') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.customThumbNow([])});})()"));
+    t('U863 正常值 空图无矩形', o2.a.indexOf('<svg') === 0 && o2.a.indexOf('<rect') < 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.customThumbNow(null)});})()"));
+    t('U864 边界 null空', o3.a.indexOf('<svg') === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.customThumbNow(undefined)});})()"));
+    t('U865 非法 undefined空', o4.a.indexOf('<svg') === 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({len:T.customThumbNow(['@','*']).length});})()"));
+    t('U866 一致 非空', o5.len > 100, JSON.stringify(o5));
+  } catch(e){ for(let k=861;k<=866;k++) t('U'+k+' 关卡缩略图',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
