@@ -3347,6 +3347,22 @@ async function main() {
     t('U950 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('困难') >= 0, JSON.stringify(o6));
   } catch(e){ for(let k=945;k<=950;k++) t('U'+k+' 难度标识',false,e.message); }
 
+  // ===== U951~U956: 阵亡统计(v0.6.73) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('deathVal')});})()"));
+    t('U951 阵亡统计已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.deathNow(0)});})()"));
+    t('U952 初值 零次', o2.a.indexOf('0') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.deathNow(4)});})()"));
+    t('U953 正常值 4次', o3.a.indexOf('4') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.deathNow(99)});})()"));
+    t('U954 边界 99次', o4.a.indexOf('99') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.deathNow(NaN)});})()"));
+    t('U955 非法 NaN 归零', o5.a.indexOf('0') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.deathNow(1);const e=document.getElementById('deathVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U956 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('1') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=951;k<=956;k++) t('U'+k+' 阵亡统计',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
