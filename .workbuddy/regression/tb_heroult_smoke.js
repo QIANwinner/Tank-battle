@@ -2837,6 +2837,22 @@ async function main() {
     t('U752 DOM 文本长度合理', o5.len > 0, JSON.stringify(o5));
   } catch(e){ for(let k=747;k<=752;k++) t('U'+k+' 宠物升级',false,e.message); }
 
+
+  // ===== U753~U758: 编辑器坐标(v0.6.40) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('edCoordVal'),f:T.cellCoordLabelNow(0,0)});})()"));
+    t('U753 坐标标签已加入编辑器', o.dom === true, JSON.stringify(o));
+    t('U754 初值 原点 R1C1', o.f === 'R1C1', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cellCoordLabelNow(4,7),b:T.cellCoordFromPxNow(48,48)});})()"));
+    t('U755 正常值 R8C5 / 像素转格', o2.a === 'R8C5' && o2.b === 'R3C3', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cellCoordLabelNow(25,25)});})()"));
+    t('U756 边界 右下角 R26C26', o3.a === 'R26C26', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cellCoordLabelNow(-1,-1),b:T.cellCoordFromPxNow(0,0)});})()"));
+    t('U757 非法输入兜底 R1C1', o4.a === 'R1C1' && o4.b === 'R1C1', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({len:T.edCoordDomNow().length});})()"));
+    t('U758 DOM 文本长度合理', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=753;k<=758;k++) t('U'+k+' 编辑器坐标',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
