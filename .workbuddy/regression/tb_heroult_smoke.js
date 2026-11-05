@@ -3616,6 +3616,22 @@ async function main() {
     t('U1052 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
   } catch(e){ for(let k=1047;k<=1052;k++) t('U'+k+' BOSS击破',false,e.message); }
 
+
+  // ===== U1053~U1058: 连击狂人徽章(v0.6.90) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('comboAchWrap'),w:T.comboAchBadgeNow(3)});})()"));
+    t('U1053 徽章已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1054 未达标为空', o.w === '', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboAchBadgeNow(8),b:T.comboAchBadgeNow(15),c:T.comboAchBadgeNow(7)});})()"));
+    t('U1055 达标 8/15 显示徽章,未达 7 为空', o2.a.indexOf('连击狂人')>=0 && o2.b.indexOf('连击狂人')>=0 && o2.c === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboAchBadgeNow(NaN),b:T.comboAchBadgeNow(-1)});})()"));
+    t('U1056 非法输入兜底为空', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({s:T.comboAchMaxNow()});})()"));
+    t('U1057 峰值统计非负', typeof o4.s === 'number' && o4.s >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.comboAchDomNow();const fn=T.comboAchBadgeNow(T.comboAchMaxNow());return JSON.stringify({dom,fn});})()"));
+    t('U1058 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1053;k<=1058;k++) t('U'+k+' 连击徽章',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
