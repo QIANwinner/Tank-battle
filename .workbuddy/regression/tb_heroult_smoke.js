@@ -3872,6 +3872,22 @@ async function main() {
     t('U1148 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
   } catch(e){ for(let k=1143;k<=1148;k++) t('U'+k+' 宠物装备',false,e.message); }
 
+
+  // ===== U1149~U1154: 宠物币余额(v0.7.6) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('petCoinPill'),w:T.petCoinTextNow(0)});})()"));
+    t('U1149 宠物币 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1150 初值 🐾 宠物币 0', o.w === '🐾 宠物币 0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petCoinTextNow(60),b:T.petCoinTextNow(999)});})()"));
+    t('U1151 正常 60/999', o2.a === '🐾 宠物币 60' && o2.b === '🐾 宠物币 999', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petCoinTextNow(60.8),b:T.petCoinTextNow(0)});})()"));
+    t('U1152 边界 60.8 取整 60', o3.a === '🐾 宠物币 60' && o3.b === '🐾 宠物币 0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petCoinTextNow(NaN),b:T.petCoinTextNow(-6)});})()"));
+    t('U1153 非法输入兜底 0', o4.a === '🐾 宠物币 0' && o4.b === '🐾 宠物币 0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.petCoinDomNow();const fn=T.petCoinTextNow(T.petCoinsNow());return JSON.stringify({dom,fn});})()"));
+    t('U1154 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1149;k<=1154;k++) t('U'+k+' 宠物币',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
