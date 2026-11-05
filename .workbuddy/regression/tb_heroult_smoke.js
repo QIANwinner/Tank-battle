@@ -3632,6 +3632,22 @@ async function main() {
     t('U1058 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
   } catch(e){ for(let k=1053;k<=1058;k++) t('U'+k+' 连击徽章',false,e.message); }
 
+
+  // ===== U1059~U1064: 生涯胜利进度(v0.6.91) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('winProgPill'),w:T.winProgressTextNow(0,50)});})()"));
+    t('U1059 胜利 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1060 初值 0/50', o.w === '0/50', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.winProgressTextNow(12,50),b:T.winProgressTextNow(50,50),c:T.winProgressTextNow(75,50)});})()"));
+    t('U1061 正常 12/50 与边界 50/50 超限 75/50', o2.a === '12/50' && o2.b === '50/50' && o2.c === '75/50', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.winProgressTextNow(NaN,50),b:T.winProgressTextNow(3,-5),c:T.winProgressTextNow(3,0)});})()"));
+    t('U1062 非法输入目标回退 50', o3.a === '0/50' && o3.b === '3/50' && o3.c === '3/50', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({s:T.careerWinsNow()});})()"));
+    t('U1063 胜利场次为非负整数', typeof o4.s === 'number' && o4.s >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.winProgDomNow();const fn=T.winProgressTextNow(T.careerWinsNow(),50);return JSON.stringify({dom,fn});})()"));
+    t('U1064 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1059;k<=1064;k++) t('U'+k+' 胜利进度',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
