@@ -3664,6 +3664,22 @@ async function main() {
     t('U1070 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
   } catch(e){ for(let k=1065;k<=1070;k++) t('U'+k+' 关卡进度',false,e.message); }
 
+
+  // ===== U1071~U1076: 本局开火次数(v0.6.93) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runShotsPill'),w:T.runShotsTextNow(0)});})()"));
+    t('U1071 开火 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1072 初值 开火 0', o.w === '开火 0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runShotsTextNow(12),b:T.runShotsTextNow(300)});})()"));
+    t('U1073 正常 12/300 次', o2.a === '开火 12' && o2.b === '开火 300', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runShotsTextNow(12.9),b:T.runShotsTextNow(0)});})()"));
+    t('U1074 边界 12.9 取整 12 与 0', o3.a === '开火 12' && o3.b === '开火 0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runShotsTextNow(NaN),b:T.runShotsTextNow(-4)});})()"));
+    t('U1075 非法输入兜底 0', o4.a === '开火 0' && o4.b === '开火 0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.runShotsDomNow();const fn=T.runShotsTextNow(T.runShotsNow());return JSON.stringify({dom,fn});})()"));
+    t('U1076 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1071;k<=1076;k++) t('U'+k+' 开火次数',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
