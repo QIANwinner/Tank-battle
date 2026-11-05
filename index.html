@@ -1964,6 +1964,7 @@
   #bestWaveWrap .v { color: #7ee7ff; font-weight: 800; font-size: 11px; }
   #totalStarsWrap .v { color: #ffd700; font-weight: 800; font-size: 11px; }
   #bonusTypeWrap .v { color: #7ee7ff; font-weight: 800; font-size: 11px; }
+  #boardCountWrap .v { color: #93a4c4; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -2087,6 +2088,7 @@
     <div class="pill m-hide" id="bestWaveWrap"><span class="k">最佳</span><span class="v" id="bestWaveVal">—</span></div>
     <div class="pill m-hide" id="totalStarsWrap"><span class="k">星级</span><span class="v" id="totalStarsVal">—</span></div>
     <div class="pill m-hide" id="bonusTypeWrap"><span class="k">强化</span><span class="v" id="bonusTypeVal">—</span></div>
+    <div class="pill m-hide" id="boardCountWrap"><span class="k">榜单</span><span class="v" id="boardCountVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -2462,7 +2464,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V7.33</div>
+  <div id="mark">DESIGNED BY QIAN · V7.34</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7374,6 +7376,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r31bwV = $('bestWaveVal'); if (r31bwV) r31bwV.textContent = bestWaveText(bestWave);
     const r31tsV = $('totalStarsVal'); if (r31tsV) r31tsV.textContent = totalStarsText(levelStars);
     const r33btV = $('bonusTypeVal'); if (r33btV) r33btV.textContent = bonusTypeCount(bonus);
+    const r33bcV = $('boardCountVal'); if (r33bcV) r33bcV.textContent = boardCountText(board);
     // __EXTRA_HUD__
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
   }
@@ -8248,6 +8251,11 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     let n = 0;
     for (const k in bonus) { if (bonus[k] > 0) n++; }
     return n > 0 ? '⚡ ' + n + ' 种' : '—';
+  }
+  // —— v0.7.34 排行榜条目数 ——
+  function boardCountText(board) {
+    const n = Array.isArray(board) ? board.length : 0;
+    return n > 0 ? '📋 ' + n + ' 条' : '—';
   }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
@@ -10090,7 +10098,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V7.33', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V7.34', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -11192,6 +11200,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       bestWaveTextNow: (n) => bestWaveText(n), bestWavePillDomNow: () => { const e = $('bestWaveVal'); return e ? e.textContent : null; }, bestWaveNow: () => bestWave,
       totalStarsTextNow: (s2) => totalStarsText(s2), totalStarsPillDomNow: () => { const e = $('totalStarsVal'); return e ? e.textContent : null; }, levelStarsNow: () => levelStars,
       bonusTypeCountNow: (b) => bonusTypeCount(b), bonusTypePillDomNow: () => { const e = $('bonusTypeVal'); return e ? e.textContent : null; },
+      boardCountTextNow: (b) => boardCountText(b), boardCountPillDomNow: () => { const e = $('boardCountVal'); return e ? e.textContent : null; }, boardNow: () => board,
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

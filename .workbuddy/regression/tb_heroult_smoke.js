@@ -4300,6 +4300,21 @@ async function main() {
     t('U728 一致性', typeof o4.dom === 'string', o4.dom);
   } catch(e){ for(let k=723;k<=728;k++) t('U'+k+' 强化种类',false,e.message); }
 
+
+  // ===== U729~U734: 排行榜条目数(v0.7.34) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('boardCountWrap'),f:T.boardCountTextNow([])});})()"));
+    t('U729 榜单 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U730 空榜单初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.boardCountTextNow([{score:100},{score:200},{score:300}]));})()"));
+    t('U731 正常 3 条', o2 === '📋 3 条', o2);
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.boardCountTextNow(null),b:T.boardCountTextNow('x')});})()"));
+    t('U732 非法兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.boardCountPillDomNow()});})()"));
+    t('U733 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U734 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=729;k<=734;k++) t('U'+k+' 榜单数',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
