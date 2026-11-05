@@ -2709,6 +2709,22 @@ async function main() {
     t('U704 幂等(重复调用一致)', o5.a === true, JSON.stringify(o5));
   } catch(e){ for(let k=699;k<=704;k++) t('U'+k+' 稀有度图例',false,e.message); }
 
+
+  // ===== U705~U710: 下一关预告(v0.6.32) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('nextWaveTip'),f:T.nextWavePreviewNow(0,false)});})()"));
+    t('U705 下一关预告已加入结算屏', o.dom === true, JSON.stringify(o));
+    t('U706 第1关初值含下一关', o.f.indexOf('下一关') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.nextWavePreviewNow(4,false),b:T.nextWavePreviewNow(9,false)});})()"));
+    t('U707 BOSS 关预告(第5/10关)', o2.a.indexOf('BOSS') >= 0 && o2.b.indexOf('BOSS') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.nextWavePreviewNow(5,false),b:T.nextWavePreviewNow(2,true)});})()"));
+    t('U708 普通关正常 / 无尽波次', o3.a.indexOf('敌人等级 6') >= 0 && o3.b.indexOf('第 3 波') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.nextWavePreviewNow(-1,false),b:T.nextWavePreviewNow(NaN,false)});})()"));
+    t('U709 非法输入兜底第1关', o4.a.indexOf('下一关') >= 0 && o4.b.indexOf('下一关') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const dom=T.nextWaveDomNow();return JSON.stringify({dom,len:dom.length});})()"));
+    t('U710 DOM 文本长度合理', o5.len > 5, JSON.stringify(o5));
+  } catch(e){ for(let k=705;k<=710;k++) t('U'+k+' 下一关预告',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
