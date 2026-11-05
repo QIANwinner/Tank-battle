@@ -3299,6 +3299,22 @@ async function main() {
     t('U932 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('75%') >= 0, JSON.stringify(o6));
   } catch(e){ for(let k=927;k<=932;k++) t('U'+k+' 命中率面板',false,e.message); }
 
+  // ===== U933~U938: 击杀速率(v0.6.70) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('kpmVal')});})()"));
+    t('U933 击杀速率已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.kpmNow(0,0)});})()"));
+    t('U934 初值 零秒占位', o2.a.indexOf('--') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.kpmNow(6,120)});})()"));
+    t('U935 正常值 6杀2分钟=3/分', o3.a.indexOf('3/分') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.kpmNow(0,60)});})()"));
+    t('U936 边界 零杀0/分', o4.a.indexOf('0/分') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.kpmNow(NaN,NaN)});})()"));
+    t('U937 非法 NaN 占位', o5.a.indexOf('--') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.kpmNow(3,60);const e=document.getElementById('kpmVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U938 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('3/分') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=933;k<=938;k++) t('U'+k+' 击杀速率',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
