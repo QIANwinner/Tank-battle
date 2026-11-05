@@ -3427,6 +3427,22 @@ async function main() {
     t('U980 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('K/D 3') >= 0, JSON.stringify(o6));
   } catch(e){ for(let k=975;k<=980;k++) t('U'+k+' K/D 比值',false,e.message); }
 
+  // ===== U981~U986: 生涯命中率(v0.6.78) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerHitVal')});})()"));
+    t('U981 生涯命中率已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerHitNow(0,0)});})()"));
+    t('U982 初值 无射击显占位', o2.a.indexOf('--') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerHitNow(45,60)});})()"));
+    t('U983 正常值 45/60=75%', o3.a.indexOf('75%') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerHitNow(0,100)});})()"));
+    t('U984 边界 零命中0%', o4.a.indexOf('0%') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerHitNow(NaN,NaN)});})()"));
+    t('U985 非法 NaN 显占位', o5.a.indexOf('--') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.careerHitNow(90,120);const e=document.getElementById('careerHitVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U986 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('75%') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=981;k<=986;k++) t('U'+k+' 生涯命中率',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
