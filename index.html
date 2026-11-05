@@ -1880,6 +1880,8 @@
   #lvStarTotal { font-size: 12px; font-weight: 800; color: #ffe9a6; padding: 4px 2px; }
   /* —— v0.6.68 生涯最佳 —— */
   #bestScoreVal { color: #39ff14; font-weight: 800; }
+  /* —— v0.6.69 命中率面板 —— */
+  #hitRateVal { color: var(--cyan); font-weight: 800; }
 </style>
 </head>
 <body>
@@ -1940,6 +1942,7 @@
     <div id="streakBanner" class="m-hide"></div>
     <div class="pill m-hide" id="ultCdWrap"><span class="k">💥</span><div id="ultCdBar"></div></div>
     <div class="pill m-hide" id="pickupLog"></div>
+    <div class="pill m-hide"><span class="k">🎯</span><span class="v" id="hitRateVal"></span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -2313,7 +2316,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V6.68</div>
+  <div id="mark">DESIGNED BY QIAN · V6.69</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7149,6 +7152,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const bsv = $('bossSkillVal'); if (bsv) bsv.textContent = bossSkillLabel(bossType);
     const bcv = $('bondCondVal'); if (bcv) { const ab = activeBond(); bcv.textContent = bondCondText(ab); }
     const drv = $('dailyRemainVal'); if (drv && dailyMode) drv.textContent = dailyRemainText(Date.now());
+    const hrV = $('hitRateVal'); if (hrV) hrV.textContent = hitRateText(stat.hits, stat.shots);
     // __EXTRA_HUD__
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
   }
@@ -7709,6 +7713,12 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const b = Number(best) || 0;
     if (b <= 0) return '🏅 暂无最佳成绩';
     return '🏅 生涯最佳 ' + b + ' 分';
+  }
+  // —— v0.6.69 命中率面板 ——
+  function hitRateText(hits, shots) {
+    const h = Math.max(0, Number(hits) || 0), s = Math.max(0, Number(shots) || 0);
+    if (s <= 0) return '命中率 --';
+    return '命中率 ' + Math.round((h / s) * 100) + '%';
   }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
@@ -9551,7 +9561,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V6.68', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V6.69', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -10588,6 +10598,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       pickupMsgNow: (t) => pickupMsg(t), pushPickupNow: (t) => pushPickup(t),
       starSumNow: (m) => starSum(m), starProgressTextNow: (s, m) => starProgressText(s, m),
       bestScoreTextNow: (b) => bestScoreText(b),
+      hitRateNow: (h, s) => { const t = hitRateText(h, s); const el = document.getElementById('hitRateVal'); if (el) el.textContent = t; return t; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

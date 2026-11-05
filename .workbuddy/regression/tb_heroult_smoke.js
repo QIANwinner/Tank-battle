@@ -3283,6 +3283,22 @@ async function main() {
     t('U926 DOM 与函数一致', o6.len >= 0, JSON.stringify(o6));
   } catch(e){ for(let k=921;k<=926;k++) t('U'+k+' 生涯最佳',false,e.message); }
 
+  // ===== U927~U932: 命中率面板(v0.6.69) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('hitRateVal')});})()"));
+    t('U927 命中率面板已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hitRateNow(0,0)});})()"));
+    t('U928 初值 无射击显占位', o2.a.indexOf('--') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hitRateNow(8,10)});})()"));
+    t('U929 正常值 8/10=80%', o3.a.indexOf('80%') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hitRateNow(0,10)});})()"));
+    t('U930 边界 零命中0%', o4.a.indexOf('0%') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hitRateNow(NaN,NaN)});})()"));
+    t('U931 非法 NaN 显占位', o5.a.indexOf('--') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.hitRateNow(15,20);const e=document.getElementById('hitRateVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U932 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('75%') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=927;k<=932;k++) t('U'+k+' 命中率面板',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
