@@ -3648,6 +3648,22 @@ async function main() {
     t('U1064 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
   } catch(e){ for(let k=1059;k<=1064;k++) t('U'+k+' 胜利进度',false,e.message); }
 
+
+  // ===== U1065~U1070: 关卡进度(v0.6.92) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('lvProgPill'),w:T.levelProgressTextNow(1,1)});})()"));
+    t('U1065 关卡 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1066 初值 第1关/已解锁1', o.w === '第 1 关 / 已解锁 1', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.levelProgressTextNow(3,7),b:T.levelProgressTextNow(7,7),c:T.levelProgressTextNow(9,7)});})()"));
+    t('U1067 正常 3/7 边界 7/7 越界 9/7', o2.a === '第 3 关 / 已解锁 7' && o2.b === '第 7 关 / 已解锁 7' && o2.c === '第 9 关 / 已解锁 9', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.levelProgressTextNow(NaN,0),b:T.levelProgressTextNow(-3,0)});})()"));
+    t('U1068 非法输入回退 第1关/已解锁1', o3.a === '第 1 关 / 已解锁 1' && o3.b === '第 1 关 / 已解锁 1', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({l:T.lvNow(),m:T.maxUnlockedNow()});})()"));
+    t('U1069 关卡与解锁值为正整数', typeof o4.l === 'number' && typeof o4.m === 'number' && o4.l >= 1 && o4.m >= 1, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.lvProgDomNow();const fn=T.levelProgressTextNow(T.lvNow(),T.maxUnlockedNow());return JSON.stringify({dom,fn});})()"));
+    t('U1070 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1065;k<=1070;k++) t('U'+k+' 关卡进度',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
