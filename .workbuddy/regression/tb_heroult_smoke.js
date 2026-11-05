@@ -2947,6 +2947,21 @@ async function main() {
     t('U794 DOM 与函数一致', o5.len >= 0, JSON.stringify(o5));
   } catch(e){ for(let k=789;k<=794;k++) t('U'+k+' BOSS技能',false,e.message); }
 
+  // ===== U795~U800: 成就最近解锁(v0.6.47) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('achRecent'),n:T.recentAchIdsNow(new Set(),3).length});})()"));
+    t('U795 成就时间线已加入', o.dom === true, JSON.stringify(o));
+    t('U796 初值 空集长度0', o.n === 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const s=new Set([1,2,3,4,5]);return JSON.stringify({a:T.recentAchIdsNow(s,2)});})()"));
+    t('U797 正常值 取末尾2个', o2.a.length === 2 && o2.a[0] === 4 && o2.a[1] === 5, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const s=new Set(['a','b']);return JSON.stringify({n:T.recentAchIdsNow(s,0).length});})()"));
+    t('U798 边界 n=0 至少1个', o3.n === 1, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({n:T.recentAchIdsNow(null,3).length});})()"));
+    t('U799 非法 null 空', o4.n === 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('achRecent');return JSON.stringify({len:e?e.className.length:0});})()"));
+    t('U800 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=795;k<=800;k++) t('U'+k+' 成就时间线',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
