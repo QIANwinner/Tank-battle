@@ -2992,6 +2992,21 @@ async function main() {
     t('U812 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
   } catch(e){ for(let k=807;k<=812;k++) t('U'+k+' 每日折线',false,e.message); }
 
+  // ===== U813~U818: 商店本周特惠(v0.6.50) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('shopDeal'),s:T.weekSeedNow(0)});})()"));
+    t('U813 商店特惠已加入', o.dom === true, JSON.stringify(o));
+    t('U814 初值 种子0~6', o.s >= 0 && o.s <= 6, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dealPriceNow(100,2),b:T.dealPriceNow(200,1)});})()"));
+    t('U815 正常值 折扣价', o2.a === 90 && o2.b === 190, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dealPriceNow(0,3)});})()"));
+    t('U816 边界 下限1', o3.a === 1, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dealPriceNow(NaN,9)});})()"));
+    t('U817 非法 兜底1', o4.a === 1, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('shopDeal');return JSON.stringify({len:e?e.className.length:0});})()"));
+    t('U818 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=813;k<=818;k++) t('U'+k+' 商店特惠',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
