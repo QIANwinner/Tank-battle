@@ -4359,6 +4359,21 @@ async function main() {
     t('U752 一致性', typeof o4.dom === 'string', o4.dom);
   } catch(e){ for(let k=747;k<=752;k++) t('U'+k+' 榜顶',false,e.message); }
 
+
+  // ===== U753~U758: 每日最佳(v0.7.38) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('dailyBestWrap'),f:T.dailyBestTextNow(0)});})()"));
+    t('U753 每日最佳 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U754 零分初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dailyBestTextNow(5000),b:T.dailyBestTextNow(100)});})()"));
+    t('U755 正常 5,000/100', o2.a === '📅 最佳 5000' && o2.b === '📅 最佳 100', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dailyBestTextNow(-1),b:T.dailyBestTextNow(NaN)});})()"));
+    t('U756 非法兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.dailyBestPillDomNow(),v:T.dailyBestNow()});})()"));
+    t('U757 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U758 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=753;k<=758;k++) t('U'+k+' 每日最佳',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
