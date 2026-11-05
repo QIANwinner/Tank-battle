@@ -1942,6 +1942,7 @@
   #accPillWrap .v { color: #7ee7ff; font-weight: 800; font-size: 11px; }
   #deathsPillWrap .v { color: #ff5c5c; font-weight: 800; font-size: 11px; }
   #bossPillWrap .v { color: #ffd700; font-weight: 800; font-size: 11px; }
+  #shotsPillWrap .v { color: #cfe3ff; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -2043,6 +2044,7 @@
     <div class="pill m-hide" id="accPillWrap"><span class="k">命中率</span><span class="v" id="accPillVal">—</span></div>
     <div class="pill m-hide" id="deathsPillWrap"><span class="k">阵亡</span><span class="v" id="deathsPillVal">—</span></div>
     <div class="pill m-hide" id="bossPillWrap"><span class="k">Boss</span><span class="v" id="bossPillVal">—</span></div>
+    <div class="pill m-hide" id="shotsPillWrap"><span class="k">开炮</span><span class="v" id="shotsPillVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -7308,6 +7310,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const pillLvK = $('lvKillsPillVal'); if (pillLvK) pillLvK.textContent = levelKillsText(levelKills);
     const pillRev = $('revivePillVal'); if (pillRev) pillRev.textContent = reviveText(reviveCount);
     const pillPor = $('portalPillVal'); if (pillPor) pillPor.textContent = portalText(portals.length);
+    const r21shV = $('shotsPillVal'); if (shV) shV.textContent = runShotsText(stat.shots);
     // __EXTRA_HUD__
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
   }
@@ -8076,7 +8079,9 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const v = Math.max(0, Math.floor(Number(n) || 0));
     return v > 0 ? '👑 ×' + v : '—';
   }
-  function insufficientMsg(kind, have, need, label) {
+  // —— v0.7.12 开炮次数 ——
+  // —— v0.7.12 开炮次数 ——
+    function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
   // —— v0.6.63 星级规则提示：加载即填充规则文案 ——
@@ -10997,6 +11002,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       accPillTextNow: (s2, h) => accPillText(s2, h), accPillDomNow: () => { const e = $('accPillVal'); return e ? e.textContent : null; }, statNow: () => ({ shots: stat.shots, hits: stat.hits }),
       runDeathsTextNow: (n) => runDeathsText(n), deathsPillDomNow: () => { const e = $('deathsPillVal'); return e ? e.textContent : null; }, deathsNow: () => stat.deaths,
       runBossTextNow: (n) => runBossText(n), bossPillDomNow: () => { const e = $('bossPillVal'); return e ? e.textContent : null; }, bossKillsNow: () => stat.bossKills,
+      runShotsTextNow: (n) => runShotsText(n), shotsPillDomNow: () => { const e = $('shotsPillVal'); return e ? e.textContent : null; }, shotsNow: () => stat.shots,
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

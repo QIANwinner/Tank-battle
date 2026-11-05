@@ -3969,6 +3969,22 @@ async function main() {
     t('U1184 DOM 与函数一致', o5.dom === (o5.kills > 0 ? '👑 ×' + o5.kills : '—'), JSON.stringify(o5));
   } catch(e){ for(let k=1179;k<=1184;k++) t('U'+k+' BOSSpill',false,e.message); }
 
+
+  // ===== U1185~U1190: 开炮次数(v0.7.12) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('shotsPillWrap'),f:T.runShotsTextNow(0)});})()"));
+    t('U1185 开炮 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1186 初值 开火 0', o.f === '开火 0', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runShotsTextNow(45),b:T.runShotsTextNow(1)});})()"));
+    t('U1187 正常 ×45/×1', o2.a === '🔫 ×45' && o2.b === '🔫 ×1', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runShotsTextNow(-3));})()"));
+    t('U1188 负数兜底 开火 0', o3 === '开火 0', o3);
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runShotsTextNow('abc'),b:T.runShotsTextNow(3.9)});})()"));
+    t('U1189 非法/小数兜底', o4.a === '开火 0' && o4.b === '🔫 ×3', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.shotsPillDomNow(),shots:T.shotsNow()});})()"));
+    t('U1190 DOM 与函数一致', o5.dom === '开火 ' + o5.shots, JSON.stringify(o5));
+  } catch(e){ for(let k=1185;k<=1190;k++) t('U'+k+' 开炮pill',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
