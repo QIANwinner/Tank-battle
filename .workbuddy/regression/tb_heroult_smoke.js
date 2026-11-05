@@ -3856,6 +3856,22 @@ async function main() {
     t('U1142 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
   } catch(e){ for(let k=1137;k<=1142;k++) t('U'+k+' 本局命中',false,e.message); }
 
+
+  // ===== U1143~U1148: 当前宠物装备(v0.7.5) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('petEquipPill'),w:T.petEquipTextNow(null)});})()"));
+    t('U1143 宠物 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1144 初值 宠物 无', o.w === '宠物 无', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petEquipTextNow({id:'cat',level:2}),b:T.petEquipTextNow({id:'pig',level:3})});})()"));
+    t('U1145 正常 招财猫 Lv.2/磁力猪 Lv.3', o2.a === '宠物 招财猫 Lv.2' && o2.b === '宠物 磁力猪 Lv.3', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petEquipTextNow({id:'cat'}),b:T.petEquipTextNow({id:'cat',level:0})});})()"));
+    t('U1146 边界 level 缺省/0 → Lv.1', o3.a === '宠物 招财猫 Lv.1' && o3.b === '宠物 招财猫 Lv.1', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petEquipTextNow({id:'zzz',level:1}),b:T.petEquipTextNow({})});})()"));
+    t('U1147 未知 id 兜底与空对象 无', o4.a === '宠物 zzz Lv.1' && o4.b === '宠物 无', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.petEquipDomNow();const fn=T.petEquipTextNow(T.petNow());return JSON.stringify({dom,fn});})()"));
+    t('U1148 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1143;k<=1148;k++) t('U'+k+' 宠物装备',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
