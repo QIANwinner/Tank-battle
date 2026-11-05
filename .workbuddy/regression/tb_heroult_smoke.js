@@ -3937,6 +3937,22 @@ async function main() {
     function T2accHelper(s2,h){if(!(s2>0))return '—';return Math.min(100,Math.round(h*100/s2))+'%';}
   } catch(e){ for(let k=1167;k<=1172;k++) t('U'+k+' 命中率',false,e.message); }
 
+
+  // ===== U1173~U1178: 死亡次数(v0.7.10) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('deathsPillWrap'),f:T.runDeathsTextNow(0)});})()"));
+    t('U1173 死亡 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1174 零死亡初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runDeathsTextNow(3),b:T.runDeathsTextNow(1)});})()"));
+    t('U1175 正常 ×3/×1', o2.a === '💀 ×3' && o2.b === '💀 ×1', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runDeathsTextNow(-5));})()"));
+    t('U1176 负数兜底 —', o3 === '—', o3);
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runDeathsTextNow('x'),b:T.runDeathsTextNow(NaN)});})()"));
+    t('U1177 非法输入兜底 —', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.deathsPillDomNow(),deaths:T.deathsNow()});})()"));
+    t('U1178 DOM 与函数一致', o5.dom === (o5.deaths > 0 ? '💀 ×' + o5.deaths : '—'), JSON.stringify(o5));
+  } catch(e){ for(let k=1173;k<=1178;k++) t('U'+k+' 死亡pill',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
