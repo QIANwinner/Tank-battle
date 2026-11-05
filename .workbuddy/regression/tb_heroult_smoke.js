@@ -4033,6 +4033,22 @@ async function main() {
     t('U1208 DOM 与函数一致', o5.dom === (o5.revive > 0 ? '🔄 ×' + o5.revive : '—'), JSON.stringify(o5));
   } catch(e){ for(let k=1203;k<=1208;k++) t('U'+k+' 复活pill',false,e.message); }
 
+
+  // ===== U1209~U1214: 传送门数量(v0.7.16) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('portalPillWrap'),f:T.portalTextNow(0)});})()"));
+    t('U1209 传送门 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1210 零传送门初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.portalTextNow(3),b:T.portalTextNow(1)});})()"));
+    t('U1211 正常 ×3/×1', o2.a === '🌀 ×3' && o2.b === '🌀 ×1', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.portalTextNow(-1));})()"));
+    t('U1212 负数兜底 —', o3 === '—', o3);
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.portalTextNow('x'),b:T.portalTextNow(2.5)});})()"));
+    t('U1213 非法/小数兜底', o4.a === '—' && o4.b === '🌀 ×2', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.portalPillDomNow(),portals:T.portalCountNow()});})()"));
+    t('U1214 DOM 与函数一致', o5.dom === (o5.portals > 0 ? '🌀 ×' + o5.portals : '—'), JSON.stringify(o5));
+  } catch(e){ for(let k=1209;k<=1214;k++) t('U'+k+' 传送门pill',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
