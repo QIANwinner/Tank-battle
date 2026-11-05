@@ -2757,6 +2757,22 @@ async function main() {
     t('U722 幂等一致', o5.a === true, JSON.stringify(o5));
   } catch(e){ for(let k=717;k<=722;k++) t('U'+k+' 词条图标',false,e.message); }
 
+
+  // ===== U723~U728: 色弱色板预览(v0.6.35) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;T.cbPaletteRefreshNow();return JSON.stringify({dom:!!document.getElementById('cbPalette'),f:T.cbPaletteHtmlNow(false)});})()"));
+    t('U723 色板预览已加入设置面板', o.dom === true, JSON.stringify(o));
+    t('U724 普通色板含敌弹色', o.f.indexOf('#ff2d55') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cbPaletteHtmlNow(true),b:T.cbPaletteHtmlNow(false)});})()"));
+    t('U725 色弱与普通色板不同', o2.a.indexOf('#ff8ab0') >= 0 && o2.b.indexOf('#ff2d55') >= 0 && o2.a !== o2.b, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({c:(T.cbPaletteHtmlNow(true).match(/cbSw/g)||[]).length});})()"));
+    t('U726 恰好 4 个色块', o3.c === 4, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;const dom=T.cbPaletteDomNow();return JSON.stringify({len:dom.length});})()"));
+    t('U727 刷新后 DOM 有内容', o4.len > 10, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cbPaletteHtmlNow(true)===T.cbPaletteHtmlNow(true)});})()"));
+    t('U728 幂等一致', o5.a === true, JSON.stringify(o5));
+  } catch(e){ for(let k=723;k<=728;k++) t('U'+k+' 色板预览',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

@@ -1800,6 +1800,8 @@
   .kbNormal { background: #4da6ff; } .kbBoss { background: #ff2d55; }
   .dmIcon { display: inline-block; margin: 0 3px; font-size: 14px; }
   .dmNone { color: #5f6b85; font-size: 10px; letter-spacing: 1px; }
+  .cbPalette { margin: 6px 0; font-size: 10px; color: #aebbd8; letter-spacing: 1px; }
+  .cbSw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin: 0 4px 0 8px; vertical-align: -1px; }
 </style>
 </head>
 <body>
@@ -2000,6 +2002,7 @@
       </div>
       <div class="setRow">
         <span class="setLabel">🌈 色弱友好<span class="hint">重映射冲突色</span></span>
+    <div class="cbPalette" id="cbPalette"></div>
         <div class="seg" id="cbSeg">
           <button data-cb="0">关</button>
           <button data-cb="1">开</button>
@@ -2188,7 +2191,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V6.34</div>
+  <div id="mark">DESIGNED BY QIAN · V6.35</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7256,6 +7259,13 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (!list.length) return '<span class="dmNone">今日无额外词条</span>';
     return list.map(id => '<span class="dmIcon" title="' + id + '">' + (icons[id] || '📌') + '</span>').join('');
   }
+  // —— v0.6.35 色弱色板预览 ——
+  function cbPaletteHtml(on) {
+    const norm = [['#ff2d55','敌弹','#39ff14','己方'],['#4da6ff','蓝','#ffe066','金']];
+    const cb = [['#ff8ab0','敌弹','#00e5ff','己方'],['#ffd166','蓝','#ffb347','金']];
+    const set = on ? cb : norm;
+    return set.map(x => '<span class="cbSw" style="background:' + x[0] + '"></span>' + x[1] + ' <span class="cbSw" style="background:' + x[2] + '"></span>' + x[3]).join(' · ');
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -9072,7 +9082,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V6.34', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V6.35', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -10071,6 +10081,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       nextWavePreviewNow: (l, e) => nextWavePreview(l, e), nextWaveDomNow: () => { const e = $('nextWaveTip'); return e ? e.textContent : null; },
       killBreakdownHtmlNow: (k, b) => killBreakdownHtml(k, b), killBdDomNow: () => { const e = $('killBreakdown'); return e ? e.textContent : null; },
       dailyModIconsHtmlNow: (m) => dailyModIconsHtml(m), dailyModIconDomNow: () => { const e = $('dailyModIcons'); return e ? e.textContent : null; },
+      cbPaletteHtmlNow: (o) => cbPaletteHtml(o), cbPaletteDomNow: () => { const e = $('cbPalette'); return e ? e.textContent : null; }, cbPaletteRefreshNow: () => { const e = $('cbPalette'); if (e) e.innerHTML = cbPaletteHtml(colorBlind); return true; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
