@@ -3203,6 +3203,22 @@ async function main() {
     t('U896 DOM 与函数一致', o5.len >= 0, JSON.stringify(o5));
   } catch(e){ for(let k=891;k<=896;k++) t('U'+k+' 星级规则',false,e.message); }
 
+  // ===== U897~U902: 击杀效率(v0.6.64) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.calcKpgNow(100,10)});})()"));
+    t('U897 击杀效率函数', o.a === 10, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.calcKpgNow(0,5)});})()"));
+    t('U898 初值 零击杀', o2.a === 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.calcKpgNow(5,0)});})()"));
+    t('U899 正常值 零局归零', o3.a === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.calcKpgNow(-5,3)});})()"));
+    t('U900 边界 负击杀归零', o4.a === 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.calcKpgNow(NaN,NaN)});})()"));
+    t('U901 非法 NaN 归零', o5.a === 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.kpgTextNow(50,10)});})()"));
+    t('U902 DOM 与函数一致', o6.a.indexOf('5') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=897;k<=902;k++) t('U'+k+' 击杀效率',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
