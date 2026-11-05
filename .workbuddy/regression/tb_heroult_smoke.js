@@ -3584,6 +3584,22 @@ async function main() {
     t('U1040 DOM 文本为字符串', typeof o5.dom === 'string', JSON.stringify(o5));
   } catch(e){ for(let k=1035;k<=1040;k++) t('U'+k+' 成就提示',false,e.message); }
 
+
+  // ===== U1041~U1046: 本局得分速率(v0.6.88) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('scoreRatePill'),w:T.scoreRateTextNow(0,0)});})()"));
+    t('U1041 速率 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1042 零秒初值 0 分/分', o.w === '0 分/分', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scoreRateTextNow(600,60),b:T.scoreRateTextNow(120,60)});})()"));
+    t('U1043 正常 600/60s 为 600 分/分', o2.a === '600 分/分' && o2.b === '120 分/分', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scoreRateTextNow(600,0),b:T.scoreRateTextNow(600,120)});})()"));
+    t('U1044 边界 0 秒与半分钟速率', o3.a === '0 分/分' && o3.b === '300 分/分', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scoreRateTextNow(-5,60),b:T.scoreRateTextNow(NaN,60),c:T.scoreRateTextNow(600,-3)});})()"));
+    t('U1045 非法输入兜底 0 分/分', o4.a === '0 分/分' && o4.b === '0 分/分' && o4.c === '0 分/分', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.scoreRateDomNow();const fn=T.scoreRateTextNow(T.scoreNow(),T.runSecNow());return JSON.stringify({dom,fn});})()"));
+    t('U1046 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1041;k<=1046;k++) t('U'+k+' 得分速率',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
