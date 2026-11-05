@@ -3363,6 +3363,22 @@ async function main() {
     t('U956 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('1') >= 0, JSON.stringify(o6));
   } catch(e){ for(let k=951;k<=956;k++) t('U'+k+' 阵亡统计',false,e.message); }
 
+  // ===== U957~U962: 本关击杀进度(v0.6.74) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('lvKillVal')});})()"));
+    t('U957 本关击杀已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lvKillNow(0,0)});})()"));
+    t('U958 初值 0/0', o2.a.indexOf('0/0') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lvKillNow(12,20)});})()"));
+    t('U959 正常值 12/20', o3.a.indexOf('12/20') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lvKillNow(20,20)});})()"));
+    t('U960 边界 全灭20/20', o4.a.indexOf('20/20') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lvKillNow(NaN,NaN)});})()"));
+    t('U961 非法 NaN 0/0', o5.a.indexOf('0/0') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.lvKillNow(5,10);const e=document.getElementById('lvKillVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U962 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('5/10') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=957;k<=962;k++) t('U'+k+' 本关击杀',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
