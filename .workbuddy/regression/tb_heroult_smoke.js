@@ -4165,6 +4165,96 @@ async function main() {
     t('U662 收口确认', typeof o2.dom === 'string' && o2.dom.length > 10, o2.dom);
   } catch(e){ for(let k=657;k<=662;k++) t('U'+k+' 收口',false,e.message); }
 
+
+  // ===== U675~U680: 强化投入统计(v0.7.25) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bonusSpentWrap'),f:T.bonusSpentTextNow(0)});})()"));
+    t('U675 投入 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U676 零投入初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bonusSpentTextNow(5000),b:T.bonusSpentTextNow(1)});})()"));
+    t('U677 正常 5,000/1', o2.a === '📈 5000 投入' && o2.b === '📈 1 投入', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bonusSpentTextNow(-5),b:T.bonusSpentTextNow(NaN)});})()"));
+    t('U678 非法兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.bonusSpentPillDomNow(),v:T.bonusSpentNow()});})()"));
+    t('U679 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U680 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=675;k<=680;k++) t('U'+k+' 投入统计',false,e.message); }
+
+
+  // ===== U681~U686: 抽奖次数统计(v0.7.26) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('gachaCountWrap'),f:T.gachaCountTextNow(0)});})()"));
+    t('U681 抽奖 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U682 零次初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.gachaCountTextNow(10),b:T.gachaCountTextNow(1)});})()"));
+    t('U683 正常 10/1', o2.a === '🎰 10 次' && o2.b === '🎰 1 次', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.gachaCountTextNow(-1),b:T.gachaCountTextNow(NaN)});})()"));
+    t('U684 非法兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.gachaCountPillDomNow(),v:T.gachaCountNow()});})()"));
+    t('U685 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U686 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=681;k<=686;k++) t('U'+k+' 抽奖统计',false,e.message); }
+
+
+  // ===== U687~U692: 每日挑战统计(v0.7.27) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('dailyStatWrap'),f:T.dailyStatTextNow(0)});})()"));
+    t('U687 每日 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U688 零次初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dailyStatTextNow(5),b:T.dailyStatTextNow(1)});})()"));
+    t('U689 正常 5/1', o2.a === '📅 5 次挑战' && o2.b === '📅 1 次挑战', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dailyStatTextNow(-1),b:T.dailyStatTextNow('x')});})()"));
+    t('U690 非法兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.dailyStatPillDomNow(),v:T.dailyCountNow()});})()"));
+    t('U691 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U692 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=687;k<=692;k++) t('U'+k+' 每日统计',false,e.message); }
+
+
+  // ===== U693~U698: 皮肤数统计(v0.7.28) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('skinCountWrap'),f:T.skinCountTextNow(['classic'])});})()"));
+    t('U693 皮肤数 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U694 仅默认 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.skinCountTextNow(['classic','gold','silver','prism','neon']),b:T.skinCountTextNow([])});})()"));
+    t('U695 正常 5 款/空 —', o2.a === '🎨 5 款' && o2.b === '—', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.skinCountTextNow('not array'),b:T.skinCountTextNow(null)});})()"));
+    t('U696 非法兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.skinCountPillDomNow(),n:T.skinOwnedNow()});})()"));
+    t('U697 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U698 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=693;k<=698;k++) t('U'+k+' 皮肤数',false,e.message); }
+
+
+  // ===== U699~U704: 僚机皮肤数(v0.7.29) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('wsCountWrap'),f:T.wsCountTextNow(['wing-teal'])});})()"));
+    t('U699 僚机 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U700 仅默认 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.wsCountTextNow(['wing-teal','wing-crimson','wing-gold']),b:T.wsCountTextNow([])});})()"));
+    t('U701 正常 3 款/空 —', o2.a === '🛡 3 款' && o2.b === '—', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.wsCountTextNow('x'),b:T.wsCountTextNow(null)});})()"));
+    t('U702 非法兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.wsCountPillDomNow(),n:T.wsOwnedNow()});})()"));
+    t('U703 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U704 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=699;k<=704;k++) t('U'+k+' 僚机皮肤数',false,e.message); }
+
+
+  // ===== U705~U710: 宠物数(v0.7.30) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('petOwnedWrap'),f:T.petOwnedTextNow([])});})()"));
+    t('U705 宠物数 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U706 零宠物 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petOwnedTextNow(['cat']),b:T.petOwnedTextNow(['cat','turtle','bunny'])});})()"));
+    t('U707 正常 1/3 和 3/3', o2.a === '🐾 1/3' && o2.b === '🐾 3/3', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petOwnedTextNow('x'),b:T.petOwnedTextNow(null)});})()"));
+    t('U708 非法兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.petOwnedPillDomNow(),n:T.petOwnedNow()});})()"));
+    t('U709 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U710 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=705;k<=710;k++) t('U'+k+' 宠物数',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
