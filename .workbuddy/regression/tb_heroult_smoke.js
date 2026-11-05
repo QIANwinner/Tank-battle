@@ -3568,6 +3568,22 @@ async function main() {
     t('U1034 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
   } catch(e){ for(let k=1029;k<=1034;k++) t('U'+k+' 键位映射',false,e.message); }
 
+
+  // ===== U1035~U1040: 成就近在咫尺(v0.6.87) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;const L=[{id:'a',name:'A'},{id:'b',name:'B'}];return JSON.stringify({dom:!!document.getElementById('nextAchTip'),n:T.nextAchNameNow(new Set(),L)});})()"));
+    t('U1035 成就提示已加入设置页', o.dom === true, JSON.stringify(o));
+    t('U1036 未解锁取首个成就', o.n === 'A', o.n);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const L=[{id:'a',name:'A'},{id:'b',name:'B'}];return JSON.stringify({a:T.nextAchNameNow(new Set(['a']),L),b:T.nextAchNameNow(new Set(['a','b']),L)});})()"));
+    t('U1037 跳过已解锁取下一个', o2.a === 'B' && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const L=[{id:'a',name:'A'},{id:'b',name:'B'}];return JSON.stringify({t:T.nextAchTextNow(new Set(['a','b']),L)});})()"));
+    t('U1038 全部达成文案', o3.t.indexOf('全部 2 个成就已达成')>=0, o3.t);
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;const L=[{id:'a',name:'A'},{id:'b',name:'B'}];return JSON.stringify({t:T.nextAchTextNow(null,L)});})()"));
+    t('U1039 空解锁安全兜底', o4.t.indexOf('下一成就')>=0, o4.t);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.extraHudRefreshNow();const dom=T.nextAchDomNow();return JSON.stringify({dom});})()"));
+    t('U1040 DOM 文本为字符串', typeof o5.dom === 'string', JSON.stringify(o5));
+  } catch(e){ for(let k=1035;k<=1040;k++) t('U'+k+' 成就提示',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
