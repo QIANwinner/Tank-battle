@@ -4270,6 +4270,21 @@ async function main() {
     t('U716 一致性', typeof o4.dom === 'string', o4.dom);
   } catch(e){ for(let k=711;k<=716;k++) t('U'+k+' 波次',false,e.message); }
 
+
+  // ===== U717~U722: 星级总计(v0.7.32) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('totalStarsWrap'),f:T.totalStarsTextNow({})});})()"));
+    t('U717 星级 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U718 空对象初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.totalStarsTextNow({1:3,2:2,3:1}),b:T.totalStarsTextNow({5:3})});})()"));
+    t('U719 正常 6/3', o2.a === '⭐ 6' && o2.b === '⭐ 3', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.totalStarsTextNow({1:5}),b:T.totalStarsTextNow({1:-1})});})()"));
+    t('U720 非法钳制 3/0', o3.a === '⭐ 3' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.totalStarsPillDomNow(),s2:T.levelStarsNow()});})()"));
+    t('U721 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U722 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=717;k<=722;k++) t('U'+k+' 星级总计',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
