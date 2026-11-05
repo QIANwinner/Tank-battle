@@ -2821,6 +2821,22 @@ async function main() {
     t('U746 DOM 文本长度合理', o5.len > 0, JSON.stringify(o5));
   } catch(e){ for(let k=741;k<=746;k++) t('U'+k+' BOSS阶段',false,e.message); }
 
+
+  // ===== U747~U752: 宠物升级消耗(v0.6.39) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('petUpgVal'),f:T.petUpgCostTextNow(1,3)});})()"));
+    t('U747 宠物升级 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U748 初值 1级到2级花3币', o.f.indexOf('3') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petUpgCostTextNow(2,3),b:T.petUpgCostNow(2,3)});})()"));
+    t('U749 正常值 2级到3级花6币', o2.a.indexOf('6') >= 0 && o2.b === 6, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petUpgCostTextNow(3,3),b:T.petUpgCostNow(3,3)});})()"));
+    t('U750 边界 满级', o3.a === '已满级' && o3.b === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petUpgCostTextNow(NaN,NaN),b:T.petUpgCostNow(-2,1)});})()"));
+    t('U751 非法输入兜底', o4.a === '已满级' && o4.b === 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const dom=T.petUpgDomNow();return JSON.stringify({len:dom.length});})()"));
+    t('U752 DOM 文本长度合理', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=747;k<=752;k++) t('U'+k+' 宠物升级',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
