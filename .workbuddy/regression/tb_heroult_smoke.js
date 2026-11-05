@@ -3552,6 +3552,22 @@ async function main() {
     t('U1028 DOM 宽度为百分比字符串', typeof o2.s === 'string' && o2.s.endsWith('%') && o2.s.length <= 6, JSON.stringify(o2));
   } catch(e){ for(let k=1023;k<=1028;k++) t('U'+k+' 时间条',false,e.message); }
 
+
+  // ===== U1029~U1034: 键位自定义映射(v0.6.86) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('fireKeyBtn'),s:T.fireKeySummaryNow()});})()"));
+    t('U1029 开火键行已加入设置页', o.dom === true, JSON.stringify(o));
+    t('U1030 默认绑定含空格与 J', o.s.indexOf('空格')>=0 && o.s.indexOf('J')>=0 && o.s.indexOf('默认')>=0, o.s);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setCustomFireKeyNow('KeyX');return JSON.stringify({s:T.fireKeySummaryNow(),k:T.customFireKeyNow()});})()"));
+    t('U1031 自定义 KeyX 生效', o2.s.indexOf('KeyX')>=0 && o2.k === 'KeyX', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const k=T.cycleFireKeyNow();return JSON.stringify({k,s:T.fireKeySummaryNow()});})()"));
+    t('U1032 循环回默认', o3.k === '' && o3.s.indexOf('默认')>=0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setCustomFireKeyNow('  KeyZ  ');return JSON.stringify({k:T.customFireKeyNow()});})()"));
+    t('U1033 键名去空白归一', o4.k === 'KeyZ', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.extraHudRefreshNow();const dom=document.getElementById('fireKeyBtn');return JSON.stringify({dom:dom?dom.textContent:null,fn:T.fireKeySummaryNow()});})()"));
+    t('U1034 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1029;k<=1034;k++) t('U'+k+' 键位映射',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
