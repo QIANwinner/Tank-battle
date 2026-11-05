@@ -3459,6 +3459,22 @@ async function main() {
     t('U992 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('1h 30m') >= 0, JSON.stringify(o6));
   } catch(e){ for(let k=987;k<=992;k++) t('U'+k+' 生涯时长',false,e.message); }
 
+  // ===== U993~U998: 生涯总金币(v0.6.80) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerCoinVal')});})()"));
+    t('U993 生涯金币已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerCoinNow(0)});})()"));
+    t('U994 初值 零金币', o2.a.indexOf('0') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerCoinNow(1234)});})()"));
+    t('U995 正常值 1234金币', o3.a.indexOf('1234') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerCoinNow(999999)});})()"));
+    t('U996 边界 999999金币', o4.a.indexOf('999999') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerCoinNow(NaN)});})()"));
+    t('U997 非法 NaN 归零', o5.a.indexOf('0') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.careerCoinNow(456);const e=document.getElementById('careerCoinVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U998 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('456') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=993;k<=998;k++) t('U'+k+' 生涯金币',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
