@@ -3840,6 +3840,22 @@ async function main() {
     t('U1136 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
   } catch(e){ for(let k=1131;k<=1136;k++) t('U'+k+' 冲击波在场',false,e.message); }
 
+
+  // ===== U1137~U1142: 本局命中次数(v0.7.4) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runHitPill'),w:T.runHitsTextNow(0)});})()"));
+    t('U1137 命中 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1138 初值 命中 0', o.w === '命中 0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runHitsTextNow(18),b:T.runHitsTextNow(240)});})()"));
+    t('U1139 正常 18/240', o2.a === '命中 18' && o2.b === '命中 240', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runHitsTextNow(18.4),b:T.runHitsTextNow(0)});})()"));
+    t('U1140 边界 18.4 取整 18', o3.a === '命中 18' && o3.b === '命中 0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runHitsTextNow(NaN),b:T.runHitsTextNow(-3)});})()"));
+    t('U1141 非法输入兜底 0', o4.a === '命中 0' && o4.b === '命中 0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.runHitDomNow();const fn=T.runHitsTextNow(T.runHitsNow());return JSON.stringify({dom,fn});})()"));
+    t('U1142 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1137;k<=1142;k++) t('U'+k+' 本局命中',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
