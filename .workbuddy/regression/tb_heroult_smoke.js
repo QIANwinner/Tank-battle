@@ -3792,6 +3792,22 @@ async function main() {
     t('U1118 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
   } catch(e){ for(let k=1113;k<=1118;k++) t('U'+k+' 击破总数',false,e.message); }
 
+
+  // ===== U1119~U1124: 基地护墙等级(v0.7.1) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('baseFortPill'),w:T.baseFortTextNow(0)});})()"));
+    t('U1119 基地 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1120 初值 基地 护墙 Lv.0', o.w === '基地 护墙 Lv.0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseFortTextNow(3),b:T.baseFortTextNow(12)});})()"));
+    t('U1121 正常 Lv.3/Lv.12', o2.a === '基地 护墙 Lv.3' && o2.b === '基地 护墙 Lv.12', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseFortTextNow(3.9),b:T.baseFortTextNow(0)});})()"));
+    t('U1122 边界 3.9 取整 Lv.3', o3.a === '基地 护墙 Lv.3' && o3.b === '基地 护墙 Lv.0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseFortTextNow(NaN),b:T.baseFortTextNow(-1)});})()"));
+    t('U1123 非法输入兜底 Lv.0', o4.a === '基地 护墙 Lv.0' && o4.b === '基地 护墙 Lv.0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.baseFortDomNow();const fn=T.baseFortTextNow(T.baseLevelNow());return JSON.stringify({dom,fn});})()"));
+    t('U1124 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1119;k<=1124;k++) t('U'+k+' 基地护墙',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
