@@ -3267,6 +3267,22 @@ async function main() {
     t('U920 DOM 与函数一致', o6.len >= 0, JSON.stringify(o6));
   } catch(e){ for(let k=915;k<=920;k++) t('U'+k+' 星级进度',false,e.message); }
 
+  // ===== U921~U926: 生涯最佳(v0.6.68) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bestScoreTextNow(12345)});})()"));
+    t('U921 生涯最佳函数', o.a.indexOf('12345') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bestScoreTextNow(0)});})()"));
+    t('U922 初值 暂无最佳', o2.a.indexOf('暂无') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bestScoreTextNow(999)});})()"));
+    t('U923 正常值 有成绩', o3.a.indexOf('999') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bestScoreTextNow(-5)});})()"));
+    t('U924 边界 负数暂无', o4.a.indexOf('暂无') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bestScoreTextNow(NaN)});})()"));
+    t('U925 非法 NaN 暂无', o5.a.indexOf('暂无') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const e=document.getElementById('bestScoreVal');return JSON.stringify({len:e?e.className.length:0});})()"));
+    t('U926 DOM 与函数一致', o6.len >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=921;k<=926;k++) t('U'+k+' 生涯最佳',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
