@@ -3052,6 +3052,21 @@ async function main() {
     t('U836 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
   } catch(e){ for(let k=831;k<=836;k++) t('U'+k+' 评级渐变',false,e.message); }
 
+  // ===== U837~U842: 音量静音提示(v0.6.54) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('muteHint'),a:T.muteHintTextNow(false)});})()"));
+    t('U837 静音提示已加入', o.dom === true, JSON.stringify(o));
+    t('U838 初值 未静音', o.a.indexOf('M 键') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.muteHintTextNow(true)});})()"));
+    t('U839 正常值 已静音', o2.a.indexOf('已静音') >= 0 && o2.a.indexOf('恢复') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.muteHintTextNow(0)});})()"));
+    t('U840 边界 0视为未静音', o3.a.indexOf('M 键') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.muteHintTextNow(null)});})()"));
+    t('U841 非法 null 未静音', o4.a.indexOf('M 键') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('muteHint');return JSON.stringify({len:e?e.textContent.length:0});})()"));
+    t('U842 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=837;k<=842;k++) t('U'+k+' 静音提示',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
