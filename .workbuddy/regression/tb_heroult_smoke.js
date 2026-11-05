@@ -3904,6 +3904,22 @@ async function main() {
     t('U1160 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
   } catch(e){ for(let k=1155;k<=1160;k++) t('U'+k+' 本局强化',false,e.message); }
 
+
+  // ===== U1161~U1166: 本局道具拾取数(v0.7.8) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runPickPill'),w:T.runPickupTextNow(0)});})()"));
+    t('U1161 道具 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1162 初值 道具拾取 0', o.w === '道具拾取 0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runPickupTextNow(3),b:T.runPickupTextNow(15)});})()"));
+    t('U1163 正常 3/15', o2.a === '道具拾取 3' && o2.b === '道具拾取 15', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runPickupTextNow(3.2),b:T.runPickupTextNow(0)});})()"));
+    t('U1164 边界 3.2 取整 3', o3.a === '道具拾取 3' && o3.b === '道具拾取 0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runPickupTextNow(NaN),b:T.runPickupTextNow(-1)});})()"));
+    t('U1165 非法输入兜底 0', o4.a === '道具拾取 0' && o4.b === '道具拾取 0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.runPickDomNow();const fn=T.runPickupTextNow(T.runPickupsNow());return JSON.stringify({dom,fn});})()"));
+    t('U1166 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1161;k<=1166;k++) t('U'+k+' 道具拾取',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
