@@ -3082,6 +3082,21 @@ async function main() {
     t('U848 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
   } catch(e){ for(let k=843;k<=848;k++) t('U'+k+' 每日倒计时',false,e.message); }
 
+  // ===== U849~U854: 触屏布局提示(v0.6.56) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('touchBody'),a:T.touchLayoutTextNow()});})()"));
+    t('U849 触屏提示已加入', o.dom === true, JSON.stringify(o));
+    t('U850 初值 含摇杆', o.a.indexOf('摇杆') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({len:T.touchLayoutTextNow().length});})()"));
+    t('U851 正常值 文案非空', o2.len > 10, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const e=document.getElementById('touchBody');return JSON.stringify({len:e?e.textContent.length:0});})()"));
+    t('U852 边界 DOM已填充', o3.len > 10, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.touchLayoutTextNow()});})()"));
+    t('U853 非法 恒定返回', o4.a === o4.a, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('touchBox');return JSON.stringify({len:e?e.className.length:0});})()"));
+    t('U854 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=849;k<=854;k++) t('U'+k+' 触屏提示',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

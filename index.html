@@ -1838,6 +1838,7 @@
   .reportGradeVal { font-size: 12px; font-weight: 800; letter-spacing: 1px; color: #00f0ff; }
   .muteHint { padding: 6px 12px; font-size: 10px; letter-spacing: 1px; color: #8ea0b8; border-top: 1px solid #1a2740; }
   #dailyRemainWrap .v { color: #ffe9a6; font-weight: 800; font-size: 11px; }
+  #touchBody { font-size: 11px; line-height: 1.6; color: #aebbd8; padding: 4px 2px; }
 </style>
 </head>
 <body>
@@ -2010,6 +2011,7 @@
     </div>
     <div class="muteHint" id="muteHint">🔊 按 M 键一键静音</div>
     <div class="settings" id="settings">
+      <details id="touchBox" class="saveStatBox"><summary>🕹 触屏布局</summary><div id="touchBody"></div></details>
       <label class="fpsToggle"><input type="checkbox" id="fpsToggle"> 显示 FPS 帧率</label>      <details id="backupAgeBox" class="saveStatBox"><summary>📦 备份状态（点开刷新）</summary><div id="backupAgeBody">—</div></details>
       <details id="saveStatBox" class="saveStatBox"><summary>💾 存档状态（点开刷新）</summary><div id="saveStatBody">—</div></details>
       <details id="keyHintBox"><summary>⌨️ 键位速查</summary><div id="keyHintText"></div></details>
@@ -2246,7 +2248,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V6.55</div>
+  <div id="mark">DESIGNED BY QIAN · V6.56</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7487,6 +7489,8 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const h = Math.floor(ms / 3600000), m = Math.floor((ms % 3600000) / 60000);
     return '⏳ 今日挑战剩 ' + h + '时' + m + '分';
   }
+  // —— v0.6.56 触屏按钮布局可视化提示(设置页说明) ——
+  function touchLayoutText() { return '🕹 左摇杆移动 · 右侧开火 · 上排大招 / 英雄技；双人模式左右各一摇杆（P1 左 · P2 右）。'; }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -9319,7 +9323,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V6.55', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V6.56', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9537,6 +9541,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     });
   }
   applySetCollapse();
+  const tby = $('touchBody'); if (tby) tby.textContent = touchLayoutText();
   // v0.2.3 存档备份 / 恢复
   document.getElementById('btnSaveExport').addEventListener('click', () => { ensureAudio(); openSaveBox('export'); });
   document.getElementById('btnSaveImport').addEventListener('click', () => { ensureAudio(); openSaveBox('import'); });
@@ -10342,6 +10347,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       gradeGradientNow: (s) => gradeGradient(s),
       muteHintTextNow: (m) => muteHintText(m),
       dailyRemainTextNow: (n) => dailyRemainText(n),
+      touchLayoutTextNow: () => touchLayoutText(),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
