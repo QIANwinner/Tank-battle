@@ -2932,6 +2932,21 @@ async function main() {
     t('U788 DOM 尺寸合理', o5.len === 130, JSON.stringify(o5));
   } catch(e){ for(let k=783;k<=788;k++) t('U'+k+' 小地图',false,e.message); }
 
+  // ===== U789~U794: BOSS 技能标识(v0.6.46) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossSkillVal'),a:T.bossSkillLabelNow({skill:'scatter'})});})()"));
+    t('U789 BOSS技能pill已加入', o.dom === true, JSON.stringify(o));
+    t('U790 初值 散射', o.a === '🎯 散射', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossSkillLabelNow({skill:'laser'}),b:T.bossSkillLabelNow({skill:'split'})});})()"));
+    t('U791 正常值 激光/分裂', o2.a === '🔫 激光' && o2.b === '🧩 分裂', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossSkillLabelNow({})});})()"));
+    t('U792 边界 空对象', o3.a.indexOf('—') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossSkillLabelNow(null),b:T.bossSkillLabelNow(undefined)});})()"));
+    t('U793 非法输入 兜底', o4.a.indexOf('—') >= 0 && o4.b.indexOf('—') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('bossSkillVal');return JSON.stringify({len:e?e.textContent.length:0});})()"));
+    t('U794 DOM 与函数一致', o5.len >= 0, JSON.stringify(o5));
+  } catch(e){ for(let k=789;k<=794;k++) t('U'+k+' BOSS技能',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
