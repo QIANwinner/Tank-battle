@@ -3251,6 +3251,22 @@ async function main() {
     t('U914 DOM 与函数一致', o6.len > 0, JSON.stringify(o6));
   } catch(e){ for(let k=909;k<=914;k++) t('U'+k+' 道具记录',false,e.message); }
 
+  // ===== U915~U920: 关卡星级进度(v0.6.67) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.starSumNow({'1':3,'2':2,'3':1})});})()"));
+    t('U915 星级求和函数', o.a === 6, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.starSumNow({})});})()"));
+    t('U916 初值 空图零', o2.a === 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.starProgressTextNow(5,9)});})()"));
+    t('U917 正常值 文本', o3.a.indexOf('5') >= 0 && o3.a.indexOf('9') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.starProgressTextNow(0,0)});})()"));
+    t('U918 边界 零进度', o4.a.indexOf('0') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.starSumNow(null)});})()"));
+    t('U919 非法 null 零', o5.a === 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const e=document.getElementById('lvStarTotal');return JSON.stringify({len:e?e.className.length:0});})()"));
+    t('U920 DOM 与函数一致', o6.len >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=915;k<=920;k++) t('U'+k+' 星级进度',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
