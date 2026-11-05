@@ -4285,6 +4285,36 @@ async function main() {
     t('U722 一致性', typeof o4.dom === 'string', o4.dom);
   } catch(e){ for(let k=717;k<=722;k++) t('U'+k+' 星级总计',false,e.message); }
 
+
+  // ===== U723~U728: 强化种类(v0.7.33) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bonusTypeWrap'),f:T.bonusTypeCountNow({lifeup:0,cd:0,spd:0,coinup:0,shield:0,revive:0,combo:0,bulletspd:0,pierce:0,bomb:0,spread:0,bigbullet:0,fortune:0,supply:0,focus:0})});})()"));
+    t('U723 强化种类 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U724 全零初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bonusTypeCountNow({lifeup:2,cd:1,spd:0,coinup:0,shield:0,revive:0,combo:0,bulletspd:0,pierce:0,bomb:0,spread:0,bigbullet:0,fortune:0,supply:0,focus:0}));})()"));
+    t('U725 正常 2 种', o2 === '⚡ 2 种', o2);
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bonusTypeCountNow(null),b:T.bonusTypeCountNow(undefined)});})()"));
+    t('U726 非法兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.bonusTypePillDomNow()});})()"));
+    t('U727 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U728 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=723;k<=728;k++) t('U'+k+' 强化种类',false,e.message); }
+
+
+  // ===== U729~U734: 排行榜条目数(v0.7.34) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('boardCountWrap'),f:T.boardCountTextNow([])});})()"));
+    t('U729 榜单 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U730 空榜单初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.boardCountTextNow([{score:100},{score:200},{score:300}]));})()"));
+    t('U731 正常 3 条', o2 === '📋 3 条', o2);
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.boardCountTextNow(null),b:T.boardCountTextNow('x')});})()"));
+    t('U732 非法兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.boardCountPillDomNow()});})()"));
+    t('U733 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U734 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=729;k<=734;k++) t('U'+k+' 榜单数',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
