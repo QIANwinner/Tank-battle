@@ -3379,6 +3379,22 @@ async function main() {
     t('U962 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('5/10') >= 0, JSON.stringify(o6));
   } catch(e){ for(let k=957;k<=962;k++) t('U'+k+' 本关击杀',false,e.message); }
 
+  // ===== U963~U968: 连击倍率(v0.6.75) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('comboMultVal')});})()"));
+    t('U963 连击倍率已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboMultNow(0)});})()"));
+    t('U964 初值 ×1.0', o2.a.indexOf('×1.0') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboMultNow(5)});})()"));
+    t('U965 正常值 5连击×1.5', o3.a.indexOf('×1.5') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboMultNow(10)});})()"));
+    t('U966 边界 10连击×2.0', o4.a.indexOf('×2.0') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboMultNow(NaN)});})()"));
+    t('U967 非法 NaN ×1.0', o5.a.indexOf('×1.0') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.comboMultNow(8);const e=document.getElementById('comboMultVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U968 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('×1.8') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=963;k<=968;k++) t('U'+k+' 连击倍率',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
