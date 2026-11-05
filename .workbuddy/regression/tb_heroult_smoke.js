@@ -2773,6 +2773,22 @@ async function main() {
     t('U728 幂等一致', o5.a === true, JSON.stringify(o5));
   } catch(e){ for(let k=723;k<=728;k++) t('U'+k+' 色板预览',false,e.message); }
 
+
+  // ===== U729~U734: 本局战绩小结(v0.6.36) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('resultMiniBar'),f:T.resultMiniTextNow(0,1,0,0)});})()"));
+    t('U729 战绩小结已加入结算屏', o.dom === true, JSON.stringify(o));
+    t('U730 零值初值格式', o.f.indexOf('击杀 0') >= 0 && o.f.indexOf('0:00') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.resultMiniTextNow(12,6,80,90),b:T.resultMiniTextNow(12,6,80,65)});})()"));
+    t('U731 正常格式 1:30/1:05', o2.a.indexOf('1:30') >= 0 && o2.b.indexOf('1:05') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.resultMiniTextNow(5,1,120,0),b:T.resultMiniTextNow(5,1,-10,0)});})()"));
+    t('U732 命中率封顶100/兜底0', o3.a.indexOf('100%') >= 0 && o3.b.indexOf('0%') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.resultMiniTextNow(-3,0,-5,-9),b:T.resultMiniTextNow(NaN,NaN,NaN,NaN)});})()"));
+    t('U733 非法输入兜底', o4.a.indexOf('击杀 0') >= 0 && o4.b.indexOf('击杀 0') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const dom=T.resultMiniDomNow();return JSON.stringify({len:dom.length});})()"));
+    t('U734 DOM 文本长度合理', o5.len > 10, JSON.stringify(o5));
+  } catch(e){ for(let k=729;k<=734;k++) t('U'+k+' 战绩小结',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
