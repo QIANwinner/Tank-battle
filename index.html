@@ -1798,6 +1798,8 @@
   .kbBar { display: inline-flex; width: 120px; height: 8px; border-radius: 4px; overflow: hidden; background: #1a2236; margin-right: 8px; vertical-align: middle; }
   .kbBar i { display: block; height: 100%; }
   .kbNormal { background: #4da6ff; } .kbBoss { background: #ff2d55; }
+  .dmIcon { display: inline-block; margin: 0 3px; font-size: 14px; }
+  .dmNone { color: #5f6b85; font-size: 10px; letter-spacing: 1px; }
 </style>
 </head>
 <body>
@@ -1923,6 +1925,7 @@
       </div>
       <!-- v0.3.19 每日挑战「今日英雄」推荐提示(随 btnDaily 显隐) -->
       <div id="dailyHeroTip" class="dailyTip"></div>
+      <div id="dailyModIcons" class="dailyTip"></div>
     </div>
     <!-- 内容与工具 -->
     <div class="menuGroup" id="groupTools">
@@ -2185,7 +2188,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V6.33</div>
+  <div id="mark">DESIGNED BY QIAN · V6.34</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -3306,6 +3309,7 @@
     if (show) {
       const def = HEROES[dailyHero()];
       if (def) tip.innerHTML = dailyHeroTipHtml(def.icon, def.name, def.desc);
+    const dmi = $('dailyModIcons'); if (dmi) dmi.innerHTML = dailyModIconsHtml(dailyMods);
     }
   }
   let dailyMode = false;        // 本局是否每日挑战
@@ -7245,6 +7249,13 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     return '<div class="kbRow"><span class="kbBar"><i class="kbNormal" style="width:' + (100 - bp) + '%"></i><i class="kbBoss" style="width:' + bp + '%"></i></span>'
       + '<span class="kbLbl">普通 ' + k + ' · Boss ' + b + '</span></div>';
   }
+  // —— v0.6.34 每日挑战词条图标化 ——
+  function dailyModIconsHtml(mods) {
+    const icons = { fastonly: '⚡', brawlers: '🐗', doublepu: '🎁', nolives: '💀', tanky: '🛡', bossrush: '👹' };
+    const list = mods && mods._names ? mods._names : [];
+    if (!list.length) return '<span class="dmNone">今日无额外词条</span>';
+    return list.map(id => '<span class="dmIcon" title="' + id + '">' + (icons[id] || '📌') + '</span>').join('');
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -9061,7 +9072,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V6.33', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V6.34', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -10059,6 +10070,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       rarLegendHtmlNow: () => rarLegendHtml(), rarLegendDomNow: () => { const e = $('rarLegend'); return e ? e.textContent : null; }, rarLegendRefreshNow: () => { const e = $('rarLegend'); if (e) e.innerHTML = rarLegendHtml(); return true; },
       nextWavePreviewNow: (l, e) => nextWavePreview(l, e), nextWaveDomNow: () => { const e = $('nextWaveTip'); return e ? e.textContent : null; },
       killBreakdownHtmlNow: (k, b) => killBreakdownHtml(k, b), killBdDomNow: () => { const e = $('killBreakdown'); return e ? e.textContent : null; },
+      dailyModIconsHtmlNow: (m) => dailyModIconsHtml(m), dailyModIconDomNow: () => { const e = $('dailyModIcons'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

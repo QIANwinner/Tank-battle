@@ -2741,6 +2741,22 @@ async function main() {
     t('U716 DOM 文本长度合理', o5.len > 0, JSON.stringify(o5));
   } catch(e){ for(let k=711;k<=716;k++) t('U'+k+' 击杀构成',false,e.message); }
 
+
+  // ===== U717~U722: 每日词条图标(v0.6.34) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('dailyModIcons'),f:T.dailyModIconsHtmlNow({_names:['fastonly','bossrush']})});})()"));
+    t('U717 词条图标已加入每日面板', o.dom === true, JSON.stringify(o));
+    t('U718 两词条两图标', o.f.indexOf('⚡') >= 0 && o.f.indexOf('👹') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dailyModIconsHtmlNow({_names:[]}),b:T.dailyModIconsHtmlNow(null)});})()"));
+    t('U719 空词条提示 / 无数据提示', o2.a.indexOf('无额外') >= 0 && o2.b.indexOf('无额外') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dailyModIconsHtmlNow({_names:['unknown']})});})()"));
+    t('U720 未知词条兜底图标', o3.a.indexOf('📌') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dailyModIconsHtmlNow({_names:['doublepu','tanky','nolives']}).length});})()"));
+    t('U721 三词条返回合理长度', o4.a > 9, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dailyModIconsHtmlNow({_names:['fastonly']})===T.dailyModIconsHtmlNow({_names:['fastonly']})});})()"));
+    t('U722 幂等一致', o5.a === true, JSON.stringify(o5));
+  } catch(e){ for(let k=717;k<=722;k++) t('U'+k+' 词条图标',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
