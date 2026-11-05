@@ -3395,6 +3395,22 @@ async function main() {
     t('U968 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('×1.8') >= 0, JSON.stringify(o6));
   } catch(e){ for(let k=963;k<=968;k++) t('U'+k+' 连击倍率',false,e.message); }
 
+  // ===== U969~U974: 生涯击杀(v0.6.76) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerKillVal')});})()"));
+    t('U969 生涯击杀已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerKillNow(0)});})()"));
+    t('U970 初值 零', o2.a.indexOf('0') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerKillNow(456)});})()"));
+    t('U971 正常值 456', o3.a.indexOf('456') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerKillNow(99999)});})()"));
+    t('U972 边界 99999', o4.a.indexOf('99999') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerKillNow(NaN)});})()"));
+    t('U973 非法 NaN 归零', o5.a.indexOf('0') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.careerKillNow(88);const e=document.getElementById('careerKillVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U974 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('88') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=969;k<=974;k++) t('U'+k+' 生涯击杀',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
