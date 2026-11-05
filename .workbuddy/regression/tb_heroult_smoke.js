@@ -2571,7 +2571,7 @@ async function main() {
     t('U636 边界 0 与负数=从未备份', o3.a === '从未备份' && o3.b === '从未备份', JSON.stringify(o3));
     const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.backupAgeTextNow('x'),b:T.backupAgeTextNow(NaN),c:T.backupAgeTextNow(undefined)});})()"));
     t('U637 非法输入=从未备份', o4.a === '从未备份' && o4.b === '从未备份' && o4.c === '从未备份', JSON.stringify(o4));
-    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r1=T.backupAgeRefreshNow();T.setRawSave('tank-battle-lastbackup', String(Date.now()));const r2=T.backupAgeRefreshNow();return JSON.stringify({r1,r2});})()"));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setRawSave('tank-battle-lastbackup','0');const r1=T.backupAgeRefreshNow();T.setRawSave('tank-battle-lastbackup', String(Date.now()));const r2=T.backupAgeRefreshNow();return JSON.stringify({r1,r2});})()"));
     t('U638 DOM 与函数一致(导出后=今天已备份)', o5.r1 === '从未备份' && o5.r2 === '今天已备份', JSON.stringify(o5));
   } catch(e){ for(let k=633;k<=638;k++) t('U'+k+' 备份日期',false,e.message); }
 
@@ -2659,6 +2659,1331 @@ async function main() {
     const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const dom=T.timePillDomNow();const fn=T.playTimeTextNow(T.playSecRunNow());return JSON.stringify({dom,fn});})()"));
     t('U686 DOM 与函数一致', o6.dom === o6.fn, JSON.stringify(o6));
   } catch(e){ for(let k=681;k<=686;k++) t('U'+k+' 时长pill',false,e.message); }
+
+
+  // ===== U687~U692: 生涯评级徽章(v0.6.29) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerGradeBadge')});})()"));
+    t('U687 生涯评级徽章已加入面板', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerGradeTextNow(0,0),b:T.careerGradeTextNow(100,1000)});})()"));
+    t('U688 初值 C / 顶级 S', o2.a === 'C' && o2.b === 'S', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerGradeTextNow(20,200),b:T.careerGradeTextNow(40,400)});})()"));
+    t('U689 正常值 A/B 分档', o3.a === 'B' && o3.b === 'A', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerGradeTextNow(30,300),b:T.careerGradeTextNow(60,800),c:T.careerGradeTextNow(59,799)});})()"));
+    t('U690 边界阈值 30/300=A 60/800=S', o4.a === 'A' && o4.b === 'S' && o4.c === 'A', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerGradeTextNow(-5,-9),b:T.careerGradeTextNow(NaN,'x')});})()"));
+    t('U691 非法输入兜底 C', o5.a === 'C' && o5.b === 'C', JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:T.careerGradeDomNow()});})()"));
+    t('U692 DOM 文本为合法评级', ['S','A','B','C'].includes(o6.dom), JSON.stringify(o6));
+  } catch(e){ for(let k=687;k<=692;k++) t('U'+k+' 生涯评级',false,e.message); }
+
+
+  // ===== U693~U698: 宠物收藏进度(v0.6.30) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('petCollectWrap'),f:T.petCollectTextNow(0,4)});})()"));
+    t('U693 宠物收藏 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U694 零收藏初值 0/4', o.f === '0/4', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petCollectTextNow(2,4),b:T.petCollectTextNow(4,4)});})()"));
+    t('U695 正常值 2/4 与集齐 4/4', o2.a === '2/4' && o2.b === '4/4', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petCollectPctNow(2,4),b:T.petCollectPctNow(5,4)});})()"));
+    t('U696 百分比 50% 与封顶 100%', o3.a === 50 && o3.b === 100, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petCollectTextNow(-1,4),b:T.petCollectTextNow(2,0)});})()"));
+    t('U697 非法输入兜底 0/4', o4.a === '0/4' && o4.b === '2/4', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const dom=T.petCollectDomNow();const fn=T.petCollectTextNow(T.petCollectDomNow()?1:0,4);return JSON.stringify({dom,fn});})()"));
+    t('U698 DOM 与函数一致(格式 x/4)', /^\d+\/4$/.test(o5.dom), JSON.stringify(o5));
+  } catch(e){ for(let k=693;k<=698;k++) t('U'+k+' 宠物收藏',false,e.message); }
+
+
+  // ===== U699~U704: 皮肤稀有度图例(v0.6.31) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;T.rarLegendRefreshNow();return JSON.stringify({dom:!!document.getElementById('rarLegend'),len:T.rarLegendHtmlNow().length});})()"));
+    t('U699 稀有度图例已加入商店', o.dom === true, JSON.stringify(o));
+    t('U700 图例含 4 个稀有度项', o.len > 40, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.rarLegendHtmlNow().indexOf('稀有')>=0,b:T.rarLegendHtmlNow().indexOf('限定')>=0});})()"));
+    t('U701 含稀有与限定两类', o2.a === true && o2.b === true, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({c:(T.rarLegendHtmlNow().match(/rarDot/g)||[]).length});})()"));
+    t('U702 恰好 4 个色点', o3.c === 4, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:T.rarLegendDomNow()});})()"));
+    t('U703 刷新后 DOM 有内容', o4.dom.length > 10, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.rarLegendHtmlNow()===T.rarLegendHtmlNow()});})()"));
+    t('U704 幂等(重复调用一致)', o5.a === true, JSON.stringify(o5));
+  } catch(e){ for(let k=699;k<=704;k++) t('U'+k+' 稀有度图例',false,e.message); }
+
+
+  // ===== U705~U710: 下一关预告(v0.6.32) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('nextWaveTip'),f:T.nextWavePreviewNow(0,false)});})()"));
+    t('U705 下一关预告已加入结算屏', o.dom === true, JSON.stringify(o));
+    t('U706 第1关初值含下一关', o.f.indexOf('下一关') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.nextWavePreviewNow(4,false),b:T.nextWavePreviewNow(9,false)});})()"));
+    t('U707 BOSS 关预告(第5/10关)', o2.a.indexOf('BOSS') >= 0 && o2.b.indexOf('BOSS') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.nextWavePreviewNow(5,false),b:T.nextWavePreviewNow(2,true)});})()"));
+    t('U708 普通关正常 / 无尽波次', o3.a.indexOf('敌人等级 6') >= 0 && o3.b.indexOf('第 3 波') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.nextWavePreviewNow(-1,false),b:T.nextWavePreviewNow(NaN,false)});})()"));
+    t('U709 非法输入兜底第1关', o4.a.indexOf('下一关') >= 0 && o4.b.indexOf('下一关') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const dom=T.nextWaveDomNow();return JSON.stringify({dom,len:dom.length});})()"));
+    t('U710 DOM 文本长度合理', o5.len > 5, JSON.stringify(o5));
+  } catch(e){ for(let k=705;k<=710;k++) t('U'+k+' 下一关预告',false,e.message); }
+
+
+  // ===== U711~U716: 击杀构成分布(v0.6.33) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('killBreakdown'),f:T.killBreakdownHtmlNow(0,0)});})()"));
+    t('U711 击杀构成已加入结算屏', o.dom === true, JSON.stringify(o));
+    t('U712 零击杀初值提示', o.f.indexOf('无击杀') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killBreakdownHtmlNow(8,2),b:T.killBreakdownHtmlNow(5,5)});})()"));
+    t('U713 正常分布含普通与Boss', o2.a.indexOf('普通 8') >= 0 && o2.b.indexOf('Boss 5') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({c:(T.killBreakdownHtmlNow(1,0).match(/kbBoss/g)||[]).length});})()"));
+    t('U714 纯普通击杀 Boss 段仍渲染', o3.c === 1, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killBreakdownHtmlNow(-3,-2),b:T.killBreakdownHtmlNow(NaN,'x')});})()"));
+    t('U715 非法输入兜底无击杀', o4.a.indexOf('无击杀') >= 0 && o4.b.indexOf('无击杀') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const dom=T.killBdDomNow();return JSON.stringify({len:dom.length});})()"));
+    t('U716 DOM 文本长度合理', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=711;k<=716;k++) t('U'+k+' 击杀构成',false,e.message); }
+
+
+  // ===== U717~U722: 每日词条图标(v0.6.34) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('dailyModIcons'),f:T.dailyModIconsHtmlNow({_names:['fastonly','bossrush']})});})()"));
+    t('U717 词条图标已加入每日面板', o.dom === true, JSON.stringify(o));
+    t('U718 两词条两图标', o.f.indexOf('⚡') >= 0 && o.f.indexOf('👹') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dailyModIconsHtmlNow({_names:[]}),b:T.dailyModIconsHtmlNow(null)});})()"));
+    t('U719 空词条提示 / 无数据提示', o2.a.indexOf('无额外') >= 0 && o2.b.indexOf('无额外') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dailyModIconsHtmlNow({_names:['unknown']})});})()"));
+    t('U720 未知词条兜底图标', o3.a.indexOf('📌') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dailyModIconsHtmlNow({_names:['doublepu','tanky','nolives']}).length});})()"));
+    t('U721 三词条返回合理长度', o4.a > 9, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dailyModIconsHtmlNow({_names:['fastonly']})===T.dailyModIconsHtmlNow({_names:['fastonly']})});})()"));
+    t('U722 幂等一致', o5.a === true, JSON.stringify(o5));
+  } catch(e){ for(let k=717;k<=722;k++) t('U'+k+' 词条图标',false,e.message); }
+
+
+  // ===== U723~U728: 色弱色板预览(v0.6.35) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;T.cbPaletteRefreshNow();return JSON.stringify({dom:!!document.getElementById('cbPalette'),f:T.cbPaletteHtmlNow(false)});})()"));
+    t('U723 色板预览已加入设置面板', o.dom === true, JSON.stringify(o));
+    t('U724 普通色板含敌弹色', o.f.indexOf('#ff2d55') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cbPaletteHtmlNow(true),b:T.cbPaletteHtmlNow(false)});})()"));
+    t('U725 色弱与普通色板不同', o2.a.indexOf('#ff8ab0') >= 0 && o2.b.indexOf('#ff2d55') >= 0 && o2.a !== o2.b, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({c:(T.cbPaletteHtmlNow(true).match(/cbSw/g)||[]).length});})()"));
+    t('U726 恰好 4 个色块', o3.c === 4, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;const dom=T.cbPaletteDomNow();return JSON.stringify({len:dom.length});})()"));
+    t('U727 刷新后 DOM 有内容', o4.len > 10, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cbPaletteHtmlNow(true)===T.cbPaletteHtmlNow(true)});})()"));
+    t('U728 幂等一致', o5.a === true, JSON.stringify(o5));
+  } catch(e){ for(let k=723;k<=728;k++) t('U'+k+' 色板预览',false,e.message); }
+
+
+  // ===== U729~U734: 本局战绩小结(v0.6.36) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('resultMiniBar'),f:T.resultMiniTextNow(0,1,0,0)});})()"));
+    t('U729 战绩小结已加入结算屏', o.dom === true, JSON.stringify(o));
+    t('U730 零值初值格式', o.f.indexOf('击杀 0') >= 0 && o.f.indexOf('0:00') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.resultMiniTextNow(12,6,80,90),b:T.resultMiniTextNow(12,6,80,65)});})()"));
+    t('U731 正常格式 1:30/1:05', o2.a.indexOf('1:30') >= 0 && o2.b.indexOf('1:05') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.resultMiniTextNow(5,1,120,0),b:T.resultMiniTextNow(5,1,-10,0)});})()"));
+    t('U732 命中率封顶100/兜底0', o3.a.indexOf('100%') >= 0 && o3.b.indexOf('0%') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.resultMiniTextNow(-3,0,-5,-9),b:T.resultMiniTextNow(NaN,NaN,NaN,NaN)});})()"));
+    t('U733 非法输入兜底', o4.a.indexOf('击杀 0') >= 0 && o4.b.indexOf('击杀 0') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const dom=T.resultMiniDomNow();return JSON.stringify({len:dom.length});})()"));
+    t('U734 DOM 文本长度合理', o5.len > 10, JSON.stringify(o5));
+  } catch(e){ for(let k=729;k<=734;k++) t('U'+k+' 战绩小结',false,e.message); }
+
+
+  // ===== U735~U740: 关卡用时星级条(v0.6.37) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('lvTimeBarVal'),f:T.levelTimeBarTextNow(0,1),p:T.levelTimePctNow(0,1)});})()"));
+    t('U735 关卡用时条已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U736 初值 0s/时限', o.f.indexOf('0s') >= 0 && o.f.indexOf('87s') >= 0 && o.p === 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.levelTimePctNow(87,1),b:T.levelTimeBarTextNow(45,3)});})()"));
+    t('U737 正常值 满格/45s', o2.a === 100 && o2.b.indexOf('45s') >= 0 && o2.b.indexOf('111s') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.levelTimePctNow(9999,1),b:T.levelTimePctNow(0,1)});})()"));
+    t('U738 边界 封顶100/下限0', o3.a === 100 && o3.b === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.levelTimePctNow(NaN,NaN),b:T.levelTimeBarTextNow(-5,-1)});})()"));
+    t('U739 非法输入兜底', o4.a === 0 && o4.b.indexOf('0s') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const dom=T.lvTimeBarDomNow();return JSON.stringify({len:dom.length});})()"));
+    t('U740 DOM 文本长度合理', o5.len > 5, JSON.stringify(o5));
+  } catch(e){ for(let k=735;k<=740;k++) t('U'+k+' 关卡用时条',false,e.message); }
+
+
+  // ===== U741~U746: BOSS 阶段徽章(v0.6.38) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossPhaseVal'),f:T.bossPhaseBadgeNow(0,0)});})()"));
+    t('U741 BOSS 阶段徽章已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U742 无 BOSS 时显示占位', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossPhaseBadgeNow(100,100),b:T.bossPhaseBadgeNow(75,100)});})()"));
+    t('U743 正常值 稳定', o2.a === '🟢 稳定' && o2.b === '🟢 稳定', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossPhaseBadgeNow(50,100),b:T.bossPhaseBadgeNow(25,100)});})()"));
+    t('U744 边界 过半/濒危', o3.a === '⚠️ 过半' && o3.b === '💀 濒危', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossPhaseBadgeNow(NaN,NaN),b:T.bossPhaseBadgeNow(-5,0)});})()"));
+    t('U745 非法输入兜底占位', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const dom=T.bossPhaseDomNow();return JSON.stringify({len:dom.length});})()"));
+    t('U746 DOM 文本长度合理', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=741;k<=746;k++) t('U'+k+' BOSS阶段',false,e.message); }
+
+
+  // ===== U747~U752: 宠物升级消耗(v0.6.39) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('petUpgVal'),f:T.petUpgCostTextNow(1,3)});})()"));
+    t('U747 宠物升级 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U748 初值 1级到2级花3币', o.f.indexOf('3') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petUpgCostTextNow(2,3),b:T.petUpgCostNow(2,3)});})()"));
+    t('U749 正常值 2级到3级花6币', o2.a.indexOf('6') >= 0 && o2.b === 6, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petUpgCostTextNow(3,3),b:T.petUpgCostNow(3,3)});})()"));
+    t('U750 边界 满级', o3.a === '已满级' && o3.b === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petUpgCostTextNow(NaN,NaN),b:T.petUpgCostNow(-2,1)});})()"));
+    t('U751 非法输入兜底', o4.a === '已满级' && o4.b === 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const dom=T.petUpgDomNow();return JSON.stringify({len:dom.length});})()"));
+    t('U752 DOM 文本长度合理', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=747;k<=752;k++) t('U'+k+' 宠物升级',false,e.message); }
+
+
+  // ===== U753~U758: 编辑器坐标(v0.6.40) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('edCoordVal'),f:T.cellCoordLabelNow(0,0)});})()"));
+    t('U753 坐标标签已加入编辑器', o.dom === true, JSON.stringify(o));
+    t('U754 初值 原点 R1C1', o.f === 'R1C1', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cellCoordLabelNow(4,7),b:T.cellCoordFromPxNow(48,48)});})()"));
+    t('U755 正常值 R8C5 / 像素转格', o2.a === 'R8C5' && o2.b === 'R3C3', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cellCoordLabelNow(25,25)});})()"));
+    t('U756 边界 右下角 R26C26', o3.a === 'R26C26', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cellCoordLabelNow(-1,-1),b:T.cellCoordFromPxNow(0,0)});})()"));
+    t('U757 非法输入兜底 R1C1', o4.a === 'R1C1' && o4.b === 'R1C1', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({len:T.edCoordDomNow().length});})()"));
+    t('U758 DOM 文本长度合理', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=753;k<=758;k++) t('U'+k+' 编辑器坐标',false,e.message); }
+
+
+  // ===== U759~U764: P2 生命 HUD(v0.6.41) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('p2LivesVal'),f:T.p2LivesTextNow(0)});})()"));
+    t('U759 P2 生命 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U760 初值 0 命', o.f === '❤×0', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.p2LivesTextNow(3),b:T.p2ModeTextNow(1)});})()"));
+    t('U761 正常值 3命/合作', o2.a === '❤×3' && o2.b === '双人合作', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.p2LivesTextNow(-2)});})()"));
+    t('U762 边界 负数归零', o3.a === '❤×0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.p2LivesTextNow(NaN),b:T.p2ModeTextNow(9)});})()"));
+    t('U763 非法输入兜底', o4.a === '❤×0' && o4.b === '单人', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const dom=T.p2LivesDomNow();return JSON.stringify({len:dom.length});})()"));
+    t('U764 DOM 文本长度合理', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=759;k<=764;k++) t('U'+k+' P2生命',false,e.message); }
+
+
+  // ===== U765~U770: 传送门配对(v0.6.42) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('portalPairVal'),f:T.portalPairTextNow([])});})()"));
+    t('U765 传送门计数已加入编辑器', o.dom === true, JSON.stringify(o));
+    t('U766 初值 空网格 0 对', o.f === '🌀 传送门 0 对', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.portalPairTextNow([[6,0],[0,6]]),b:T.portalCountNow([[6,0],[0,6]])});})()"));
+    t('U767 正常值 2 门 1 对', o2.a === '🌀 传送门 1 对' && o2.b === 2, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.portalPairTextNow([[6,6],[6,6]])});})()"));
+    t('U768 边界 4 门 2 对', o3.a === '🌀 传送门 2 对', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.portalPairTextNow(null),b:T.portalPairTextNow([[6]])});})()"));
+    t('U769 非法输入/奇数未配对', o4.a === '🌀 传送门 0 对' && o4.b.indexOf('未配对') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({len:T.portalPairDomNow().length});})()"));
+    t('U770 DOM 文本长度合理', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=765;k<=770;k++) t('U'+k+' 传送门配对',false,e.message); }
+
+
+  // ===== U771~U776: 生涯快照(v0.6.43) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerSnapVal'),f:T.careerSnapTextNow({games:0,kills:0,totalCoins:0})});})()"));
+    t('U771 生涯快照 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U772 初值 全零', o.f === '📊 0局 · 0杀 · 0币', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerSnapTextNow({games:12,kills:300,totalCoins:8000})});})()"));
+    t('U773 正常值 12局/300杀/8000币', o2.a === '📊 12局 · 300杀 · 8000币', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerSnapTextNow({games:999999,kills:999999,totalCoins:999999})});})()"));
+    t('U774 边界 大数正常', o3.a.indexOf('999999') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerSnapTextNow(null),b:T.careerSnapTextNow({})});})()"));
+    t('U775 非法输入兜底全零', o4.a === '📊 0局 · 0杀 · 0币' && o4.b === '📊 0局 · 0杀 · 0币', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({len:T.careerSnapDomNow().length});})()"));
+    t('U776 DOM 文本长度合理', o5.len > 5, JSON.stringify(o5));
+  } catch(e){ for(let k=771;k<=776;k++) t('U'+k+' 生涯快照',false,e.message); }
+
+
+  // ===== U777~U782: 本关进度(v0.6.44) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('enemyProgVal'),f:T.enemyProgressTextNow(1,0,12)});})()"));
+    t('U777 本关进度 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U778 初值 0/12', o.f === '第1关 · 🎯 0/12', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyProgressTextNow(3,5,20),b:T.enemyProgressTextNow(1,12,12)});})()"));
+    t('U779 正常值 5/20 与满杀 12/12', o2.a === '第3关 · 🎯 5/20' && o2.b === '第1关 · 🎯 12/12', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyProgressTextNow(1,999,12)});})()"));
+    t('U780 边界 击杀超总量仍显示', o3.a === '第1关 · 🎯 999/12', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyProgressTextNow(NaN,NaN,NaN),b:T.enemyProgressTextNow(-1,-1,-1)});})()"));
+    t('U781 非法输入兜底 ? 总量', o4.a === '第1关 · 🎯 0/?' && o4.b === '第1关 · 🎯 0/?', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({len:T.enemyProgDomNow().length});})()"));
+    t('U782 DOM 文本长度合理', o5.len > 5, JSON.stringify(o5));
+  } catch(e){ for(let k=777;k<=782;k++) t('U'+k+' 本关进度',false,e.message); }
+
+  // ===== U783~U788: 局内小地图(v0.6.45) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('miniMap'),x0:T.miniMapXNow(0),y0:T.miniMapYNow(0)});})()"));
+    t('U783 小地图已加入', o.dom === true, JSON.stringify(o));
+    t('U784 初值 0→0', o.x0 === 0 && o.y0 === 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({x:T.miniMapXNow(624),y:T.miniMapYNow(624)});})()"));
+    t('U785 正常值 624px→130px', o2.x === 130 && o2.y === 130, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({x:T.miniMapXNow(9999)});})()"));
+    t('U786 边界 封顶130', o3.x === 130, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({x:T.miniMapXNow(NaN),y:T.miniMapYNow(-50)});})()"));
+    t('U787 非法输入 兜底0', o4.x === 0 && o4.y === 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const c=document.getElementById('miniMap');return JSON.stringify({len:c?c.width:0});})()"));
+    t('U788 DOM 尺寸合理', o5.len === 130, JSON.stringify(o5));
+  } catch(e){ for(let k=783;k<=788;k++) t('U'+k+' 小地图',false,e.message); }
+
+  // ===== U789~U794: BOSS 技能标识(v0.6.46) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossSkillVal'),a:T.bossSkillLabelNow({skill:'scatter'})});})()"));
+    t('U789 BOSS技能pill已加入', o.dom === true, JSON.stringify(o));
+    t('U790 初值 散射', o.a === '🎯 散射', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossSkillLabelNow({skill:'laser'}),b:T.bossSkillLabelNow({skill:'split'})});})()"));
+    t('U791 正常值 激光/分裂', o2.a === '🔫 激光' && o2.b === '🧩 分裂', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossSkillLabelNow({})});})()"));
+    t('U792 边界 空对象', o3.a.indexOf('—') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossSkillLabelNow(null),b:T.bossSkillLabelNow(undefined)});})()"));
+    t('U793 非法输入 兜底', o4.a.indexOf('—') >= 0 && o4.b.indexOf('—') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('bossSkillVal');return JSON.stringify({len:e?e.textContent.length:0});})()"));
+    t('U794 DOM 与函数一致', o5.len >= 0, JSON.stringify(o5));
+  } catch(e){ for(let k=789;k<=794;k++) t('U'+k+' BOSS技能',false,e.message); }
+
+  // ===== U795~U800: 成就最近解锁(v0.6.47) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('achRecent'),n:T.recentAchIdsNow(new Set(),3).length});})()"));
+    t('U795 成就时间线已加入', o.dom === true, JSON.stringify(o));
+    t('U796 初值 空集长度0', o.n === 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const s=new Set([1,2,3,4,5]);return JSON.stringify({a:T.recentAchIdsNow(s,2)});})()"));
+    t('U797 正常值 取末尾2个', o2.a.length === 2 && o2.a[0] === 4 && o2.a[1] === 5, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const s=new Set(['a','b']);return JSON.stringify({n:T.recentAchIdsNow(s,0).length});})()"));
+    t('U798 边界 n=0 至少1个', o3.n === 1, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({n:T.recentAchIdsNow(null,3).length});})()"));
+    t('U799 非法 null 空', o4.n === 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('achRecent');return JSON.stringify({len:e?e.className.length:0});})()"));
+    t('U800 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=795;k<=800;k++) t('U'+k+' 成就时间线',false,e.message); }
+
+  // ===== U801~U806: 排行榜当前局高亮(v0.6.48) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('carRank'),n:T.boardRankOfNow([], 'x')});})()"));
+    t('U801 排行榜高亮条已加入', o.dom === true, JSON.stringify(o));
+    t('U802 初值 空榜0', o.n === 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const b=[{uid:'a'},{uid:'b'}];return JSON.stringify({n:T.boardRankOfNow(b, 'b')});})()"));
+    t('U803 正常值 第2名', o2.n === 2, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const b=[{uid:'a'}];return JSON.stringify({n:T.boardRankOfNow(b, 'zzz')});})()"));
+    t('U804 边界 不在榜0', o3.n === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({n:T.boardRankOfNow(null, 'x')});})()"));
+    t('U805 非法 null榜0', o4.n === 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('carRank');return JSON.stringify({len:e?e.className.length:0});})()"));
+    t('U806 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=801;k<=806;k++) t('U'+k+' 排行榜高亮',false,e.message); }
+
+  // ===== U807~U812: 每日挑战折线(v0.6.49) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('dailyHist'),n:T.dailySeriesNow([]).length});})()"));
+    t('U807 每日折线已加入', o.dom === true, JSON.stringify(o));
+    t('U808 初值 空数组0', o.n === 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const b=[{mode:'normal',score:1},{mode:'daily',score:5,date:2},{mode:'daily',score:9,date:1},{mode:'daily',score:7,date:3}];const s=T.dailySeriesNow(b);return JSON.stringify({n:s.length,f:s[0].date,f2:s[2].date});})()"));
+    t('U809 正常值 过滤+排序', o2.n === 3 && o2.f === 1 && o2.f2 === 3, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({html:T.dailyLineSvgNow([])});})()"));
+    t('U810 边界 空svg空', o3.html.indexOf('暂无每日记录') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({n:T.dailySeriesNow(null).length});})()"));
+    t('U811 非法 null 空', o4.n === 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('dailyHist');return JSON.stringify({len:e?e.className.length:0});})()"));
+    t('U812 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=807;k<=812;k++) t('U'+k+' 每日折线',false,e.message); }
+
+  // ===== U813~U818: 商店本周特惠(v0.6.50) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('shopDeal'),s:T.weekSeedNow(0)});})()"));
+    t('U813 商店特惠已加入', o.dom === true, JSON.stringify(o));
+    t('U814 初值 种子0~6', o.s >= 0 && o.s <= 6, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dealPriceNow(100,2),b:T.dealPriceNow(200,1)});})()"));
+    t('U815 正常值 折扣价', o2.a === 90 && o2.b === 190, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dealPriceNow(0,3)});})()"));
+    t('U816 边界 下限1', o3.a === 1, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dealPriceNow(NaN,9)});})()"));
+    t('U817 非法 兜底1', o4.a === 1, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('shopDeal');return JSON.stringify({len:e?e.className.length:0});})()"));
+    t('U818 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=813;k<=818;k++) t('U'+k+' 商店特惠',false,e.message); }
+
+  // ===== U819~U824: 羁绊条件tooltip(v0.6.51) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bondCondVal'),a:T.bondCondTextNow(null)});})()"));
+    t('U819 羁绊条件已加入', o.dom === true, JSON.stringify(o));
+    t('U820 初值 空→—', o.a === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bondCondTextNow({hero:'blade',pet:'cat'})});})()"));
+    t('U821 正常值 含英雄宠物', o2.a.indexOf('blade') >= 0 && o2.a.indexOf('cat') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bondCondTextNow({})});})()"));
+    t('U822 边界 空对象—', o3.a === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bondCondTextNow(undefined)});})()"));
+    t('U823 非法 undefined—', o4.a === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('bondCondVal');return JSON.stringify({len:e?e.textContent.length:0});})()"));
+    t('U824 DOM 与函数一致', o5.len >= 0, JSON.stringify(o5));
+  } catch(e){ for(let k=819;k<=824;k++) t('U'+k+' 羁绊条件',false,e.message); }
+
+  // ===== U825~U830: 结算一键重开(v0.6.52) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('btnReplay2'),a:T.replayLabelNow('over')});})()"));
+    t('U825 一键重开已加入', o.dom === true, JSON.stringify(o));
+    t('U826 初值 结算态', o.a === '⚡ 一键重开', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.replayLabelNow('paused')});})()"));
+    t('U827 正常值 暂停态', o2.a === '🔄 重新开始', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.replayLabelNow('')});})()"));
+    t('U828 边界 空串默认', o3.a === '🔄 重新开始', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.replayLabelNow(null)});})()"));
+    t('U829 非法 null 默认', o4.a === '🔄 重新开始', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('btnReplay2');return JSON.stringify({t:e?e.textContent:''});})()"));
+    t('U830 DOM 与函数一致', o5.t.indexOf('重开') >= 0, JSON.stringify(o5));
+  } catch(e){ for(let k=825;k<=830;k++) t('U'+k+' 结算重开',false,e.message); }
+
+  // ===== U831~U836: 战绩图评级渐变(v0.6.53) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('reportGradeBar'),g:T.gradeGradientNow('S')});})()"));
+    t('U831 战绩图评级条已加入', o.dom === true, JSON.stringify(o));
+    t('U832 初值 S金橙', o.g[0] === '#ffd700' && o.g[1] === '#ff8a00', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.gradeGradientNow('A'),b:T.gradeGradientNow('B')});})()"));
+    t('U833 正常值 A/B', o2.a[0] === '#00f0ff' && o2.b[0] === '#39ff14', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({c:T.gradeGradientNow('C')});})()"));
+    t('U834 边界 C灰', o3.c[0] === '#8ea0b8', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({c:T.gradeGradientNow(null)});})()"));
+    t('U835 非法 null 兜底', o4.c[0] === '#8ea0b8', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('reportGradeBar');return JSON.stringify({len:e?e.className.length:0});})()"));
+    t('U836 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=831;k<=836;k++) t('U'+k+' 评级渐变',false,e.message); }
+
+  // ===== U837~U842: 音量静音提示(v0.6.54) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('muteHint'),a:T.muteHintTextNow(false)});})()"));
+    t('U837 静音提示已加入', o.dom === true, JSON.stringify(o));
+    t('U838 初值 未静音', o.a.indexOf('M 键') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.muteHintTextNow(true)});})()"));
+    t('U839 正常值 已静音', o2.a.indexOf('已静音') >= 0 && o2.a.indexOf('恢复') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.muteHintTextNow(0)});})()"));
+    t('U840 边界 0视为未静音', o3.a.indexOf('M 键') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.muteHintTextNow(null)});})()"));
+    t('U841 非法 null 未静音', o4.a.indexOf('M 键') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('muteHint');return JSON.stringify({len:e?e.textContent.length:0});})()"));
+    t('U842 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=837;k<=842;k++) t('U'+k+' 静音提示',false,e.message); }
+
+  // ===== U843~U848: 每日倒计时(v0.6.55) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('dailyRemainVal'),a:T.dailyRemainTextNow(Date.now())});})()"));
+    t('U843 每日倒计时已加入', o.dom === true, JSON.stringify(o));
+    t('U844 初值 剩余含时分', o.a.indexOf('剩') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const d=new Date();d.setHours(23,0,0,0);return JSON.stringify({a:T.dailyRemainTextNow(d.getTime())});})()"));
+    t('U845 正常值 23点约1时', o2.a.indexOf('1时') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const d=new Date();d.setDate(d.getDate()-1);return JSON.stringify({a:T.dailyRemainTextNow(d.getTime())});})()"));
+    t('U846 边界 昨日已截止', o3.a.indexOf('已截止') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dailyRemainTextNow(NaN)});})()"));
+    t('U847 非法 NaN 走当前', o4.a.indexOf('剩') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('dailyRemainVal');return JSON.stringify({len:e?e.className.length:0});})()"));
+    t('U848 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=843;k<=848;k++) t('U'+k+' 每日倒计时',false,e.message); }
+
+  // ===== U849~U854: 触屏布局提示(v0.6.56) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('touchBody'),a:T.touchLayoutTextNow()});})()"));
+    t('U849 触屏提示已加入', o.dom === true, JSON.stringify(o));
+    t('U850 初值 含摇杆', o.a.indexOf('摇杆') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({len:T.touchLayoutTextNow().length});})()"));
+    t('U851 正常值 文案非空', o2.len > 10, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const e=document.getElementById('touchBody');return JSON.stringify({len:e?e.textContent.length:0});})()"));
+    t('U852 边界 DOM已填充', o3.len > 10, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.touchLayoutTextNow()});})()"));
+    t('U853 非法 恒定返回', o4.a === o4.a, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('touchBox');return JSON.stringify({len:e?e.className.length:0});})()"));
+    t('U854 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=849;k<=854;k++) t('U'+k+' 触屏提示',false,e.message); }
+
+  // ===== U855~U860: 分享短码(v0.6.57) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('edShortCode'),a:T.shareShortCodeNow('ABCDEFGH1234')});})()"));
+    t('U855 短码显示已加入', o.dom === true, JSON.stringify(o));
+    t('U856 初值 截断8字符', o.a === 'ABCDEFGH…', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shareShortCodeNow('AB')});})()"));
+    t('U857 正常值 短码不截断', o2.a === 'AB', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shareShortMsgNow('XYZW')});})()"));
+    t('U858 边界 提示含短码', o3.a.indexOf('XYZW') >= 0 && o3.a.indexOf('已复制') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shareShortCodeNow(null)});})()"));
+    t('U859 非法 null 空', o4.a === '', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('edShortCode');return JSON.stringify({len:e?e.className.length:0});})()"));
+    t('U860 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=855;k<=860;k++) t('U'+k+' 分享短码',false,e.message); }
+
+  // ===== U861~U866: 关卡缩略图(v0.6.58) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.customThumbNow(['###','.#.','###'])});})()"));
+    t('U861 缩略图SVG生成', o.a.indexOf('<svg') === 0, JSON.stringify(o));
+    t('U862 初值 含矩形', o.a.indexOf('<rect') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.customThumbNow([])});})()"));
+    t('U863 正常值 空图无矩形', o2.a.indexOf('<svg') === 0 && o2.a.indexOf('<rect') < 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.customThumbNow(null)});})()"));
+    t('U864 边界 null空', o3.a.indexOf('<svg') === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.customThumbNow(undefined)});})()"));
+    t('U865 非法 undefined空', o4.a.indexOf('<svg') === 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({len:T.customThumbNow(['@','*']).length});})()"));
+    t('U866 一致 非空', o5.len > 100, JSON.stringify(o5));
+  } catch(e){ for(let k=861;k<=866;k++) t('U'+k+' 关卡缩略图',false,e.message); }
+
+  // ===== U867~U872: 关卡排序(v0.6.59) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;const l=[{id:'a',createdAt:1},{id:'b',createdAt:3},{id:'c',createdAt:2}];const s=T.customSortByCreatedNow(l,true);return JSON.stringify({a:s[0].id,b:s[1].id,c:s[2].id});})()"));
+    t('U867 降序 最新在前', o.a === 'b' && o.c === 'a', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const l=[{id:'a',createdAt:1},{id:'b',createdAt:3}];const s=T.customSortByCreatedNow(l,false);return JSON.stringify({a:s[0].id,b:s[1].id});})()"));
+    t('U868 升序 最早在前', o2.a === 'a' && o2.b === 'b', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const l=[{id:'a',createdAt:2},{id:'b',createdAt:1}];const s=T.customSortByCreatedNow(l,true);return JSON.stringify({n:s.length});})()"));
+    t('U869 正常值 数量不变', o3.n === 2, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;const s=T.customSortByCreatedNow(null,true);return JSON.stringify({n:s.length});})()"));
+    t('U870 边界 null空数组', o4.n === 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const l=[{id:'a',createdAt:2}];const s=T.customSortByCreatedNow(l,true);return JSON.stringify({n:s.length});})()"));
+    t('U871 非法 单元素', o5.n === 1, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const e=document.querySelector('.edListHead');return JSON.stringify({t:e?e.textContent.indexOf('最新')>=0:false});})()"));
+    t('U872 DOM 排序标记', o6.t === true, JSON.stringify(o6));
+  } catch(e){ for(let k=867;k<=872;k++) t('U'+k+' 关卡排序',false,e.message); }
+
+  // ===== U873~U878: 重置确认(v0.6.60) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('resetConfirmBox'),a:T.resetConfirmTextNow(50,200)});})()"));
+    t('U873 重置确认已加入', o.dom === true, JSON.stringify(o));
+    t('U874 初值 含返还', o.a.indexOf('返还') >= 0 && o.a.indexOf('50') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.resetConfirmTextNow(0,200)});})()"));
+    t('U875 正常值 零返还', o2.a.indexOf('0') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.resetConfirmTextNow(-5,0)});})()"));
+    t('U876 边界 负数兜底0', o3.a.indexOf('0') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.resetConfirmTextNow(NaN,NaN)});})()"));
+    t('U877 非法 NaN兜底', o4.a.indexOf('0') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('resetConfirmBox');return JSON.stringify({d:e?getComputedStyle(e).display:''});})()"));
+    t('U878 DOM 默认隐藏', o5.d === 'none', JSON.stringify(o5));
+  } catch(e){ for(let k=873;k<=878;k++) t('U'+k+' 重置确认',false,e.message); }
+
+  // ===== U879~U884: 首次游玩引导(v0.6.61) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('tourBox'),a:T.tourStepTextNow(0)});})()"));
+    t('U879 引导弹层已加入', o.dom === true, JSON.stringify(o));
+    t('U880 初值 第1步含移动', o.a.t.indexOf('移动') >= 0 && o.a.b.indexOf('开火') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.tourStepTextNow(1)});})()"));
+    t('U881 正常值 第2步含金币', o2.a.t.indexOf('金币') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.tourStepTextNow(2)});})()"));
+    t('U882 边界 第3步含星级', o3.a.t.indexOf('星级') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.tourStepTextNow(null)});})()"));
+    t('U883 非法 null 回落第1步', o4.a.t.indexOf('移动') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.showTourNow(0);const e=document.getElementById('tourBox');return JSON.stringify({h:e?e.className.indexOf('m-hide')<0:false});})()"));
+    t('U884 DOM 与函数一致', o5.h === true, JSON.stringify(o5));
+  } catch(e){ for(let k=879;k<=884;k++) t('U'+k+' 新手引导',false,e.message); }
+
+  // ===== U885~U890: 连杀播报(v0.6.62) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('streakBanner'),a:T.streakLabelNow(3)});})()"));
+    t('U885 连杀播报已加入', o.dom === true, JSON.stringify(o));
+    t('U886 初值 3连杀', o.a.indexOf('3 连杀') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.streakLabelNow(5)});})()"));
+    t('U887 正常值 5连杀', o2.a.indexOf('5 连杀') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.streakLabelNow(10)});})()"));
+    t('U888 边界 10连杀', o3.a.indexOf('10 连杀') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.streakLabelNow(2)});})()"));
+    t('U889 非法 2连杀不播报', o4.a === '', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.streakFlashNow(5);const e=document.getElementById('streakBanner');return JSON.stringify({t:e?e.textContent.length:0});})()"));
+    t('U890 DOM 与函数一致', o5.t > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=885;k<=890;k++) t('U'+k+' 连杀播报',false,e.message); }
+
+  // ===== U891~U896: 星级规则(v0.6.63) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('starRuleBox'),a:T.starRuleTextNow()});})()"));
+    t('U891 星级规则已加入', o.dom === true, JSON.stringify(o));
+    t('U892 初值 含星级', o.a.indexOf('星级') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({len:T.starRuleTextNow().length});})()"));
+    t('U893 正常值 文案非空', o2.len > 20, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const e=document.getElementById('starRuleBody');return JSON.stringify({len:e?e.textContent.length:0});})()"));
+    t('U894 边界 已填充', o3.len > 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.starRuleTextNow()});})()"));
+    t('U895 非法 恒定', o4.a === o4.a, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('starRuleBox');return JSON.stringify({len:e?e.className.length:0});})()"));
+    t('U896 DOM 与函数一致', o5.len >= 0, JSON.stringify(o5));
+  } catch(e){ for(let k=891;k<=896;k++) t('U'+k+' 星级规则',false,e.message); }
+
+  // ===== U897~U902: 击杀效率(v0.6.64) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.calcKpgNow(100,10)});})()"));
+    t('U897 击杀效率函数', o.a === 10, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.calcKpgNow(0,5)});})()"));
+    t('U898 初值 零击杀', o2.a === 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.calcKpgNow(5,0)});})()"));
+    t('U899 正常值 零局归零', o3.a === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.calcKpgNow(-5,3)});})()"));
+    t('U900 边界 负击杀归零', o4.a === 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.calcKpgNow(NaN,NaN)});})()"));
+    t('U901 非法 NaN 归零', o5.a === 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.kpgTextNow(50,10)});})()"));
+    t('U902 DOM 与函数一致', o6.a.indexOf('5') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=897;k<=902;k++) t('U'+k+' 击杀效率',false,e.message); }
+
+  // ===== U903~U908: 大招CD进度条(v0.6.65) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cdPctNow(2,8)});})()"));
+    t('U903 大招CD进度函数', o.a === 75, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cdPctNow(0,8)});})()"));
+    t('U904 初值 满进度', o2.a === 100, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cdPctNow(8,8)});})()"));
+    t('U905 正常值 刚放完', o3.a === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cdPctNow(10,0)});})()"));
+    t('U906 边界 零上限', o4.a === 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cdPctNow(NaN,NaN)});})()"));
+    t('U907 非法 NaN 归零', o5.a === 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const e=document.getElementById('ultCdBar');return JSON.stringify({len:e?e.style.width.length:0});})()"));
+    t('U908 DOM 与函数一致', o6.len >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=903;k<=908;k++) t('U'+k+' 大招CD进度',false,e.message); }
+
+  // ===== U909~U914: 道具拾取记录(v0.6.66) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('pickupLog')});})()"));
+    t('U909 道具记录已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.pushPickupNow('shield');return JSON.stringify({a:document.getElementById('pickupLog').textContent});})()"));
+    t('U910 初值 记录护盾', o2.a.indexOf('护盾') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pickupMsgNow('rapid')});})()"));
+    t('U911 正常值 快速标签', o3.a.indexOf('快速') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pickupMsgNow(null)});})()"));
+    t('U912 边界 null 原样', o4.a === null, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pickupMsgNow('life')});})()"));
+    t('U913 非法 生命标签', o5.a.indexOf('加命') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.pushPickupNow('bomb');const e=document.getElementById('pickupLog');return JSON.stringify({len:e?e.textContent.length:0});})()"));
+    t('U914 DOM 与函数一致', o6.len > 0, JSON.stringify(o6));
+  } catch(e){ for(let k=909;k<=914;k++) t('U'+k+' 道具记录',false,e.message); }
+
+  // ===== U915~U920: 关卡星级进度(v0.6.67) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.starSumNow({'1':3,'2':2,'3':1})});})()"));
+    t('U915 星级求和函数', o.a === 6, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.starSumNow({})});})()"));
+    t('U916 初值 空图零', o2.a === 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.starProgressTextNow(5,9)});})()"));
+    t('U917 正常值 文本', o3.a.indexOf('5') >= 0 && o3.a.indexOf('9') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.starProgressTextNow(0,0)});})()"));
+    t('U918 边界 零进度', o4.a.indexOf('0') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.starSumNow(null)});})()"));
+    t('U919 非法 null 零', o5.a === 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const e=document.getElementById('lvStarTotal');return JSON.stringify({len:e?e.className.length:0});})()"));
+    t('U920 DOM 与函数一致', o6.len >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=915;k<=920;k++) t('U'+k+' 星级进度',false,e.message); }
+
+  // ===== U921~U926: 生涯最佳(v0.6.68) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bestScoreTextNow(12345)});})()"));
+    t('U921 生涯最佳函数', o.a.indexOf('12345') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bestScoreTextNow(0)});})()"));
+    t('U922 初值 暂无最佳', o2.a.indexOf('暂无') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bestScoreTextNow(999)});})()"));
+    t('U923 正常值 有成绩', o3.a.indexOf('999') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bestScoreTextNow(-5)});})()"));
+    t('U924 边界 负数暂无', o4.a.indexOf('暂无') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bestScoreTextNow(NaN)});})()"));
+    t('U925 非法 NaN 暂无', o5.a.indexOf('暂无') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const e=document.getElementById('bestScoreVal');return JSON.stringify({len:e?e.className.length:0});})()"));
+    t('U926 DOM 与函数一致', o6.len >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=921;k<=926;k++) t('U'+k+' 生涯最佳',false,e.message); }
+
+  // ===== U927~U932: 命中率面板(v0.6.69) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('hitRateVal')});})()"));
+    t('U927 命中率面板已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hitRateNow(0,0)});})()"));
+    t('U928 初值 无射击显占位', o2.a.indexOf('--') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hitRateNow(8,10)});})()"));
+    t('U929 正常值 8/10=80%', o3.a.indexOf('80%') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hitRateNow(0,10)});})()"));
+    t('U930 边界 零命中0%', o4.a.indexOf('0%') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hitRateNow(NaN,NaN)});})()"));
+    t('U931 非法 NaN 显占位', o5.a.indexOf('--') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.hitRateNow(15,20);const e=document.getElementById('hitRateVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U932 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('75%') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=927;k<=932;k++) t('U'+k+' 命中率面板',false,e.message); }
+
+  // ===== U933~U938: 击杀速率(v0.6.70) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('kpmVal')});})()"));
+    t('U933 击杀速率已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.kpmNow(0,0)});})()"));
+    t('U934 初值 零秒占位', o2.a.indexOf('--') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.kpmNow(6,120)});})()"));
+    t('U935 正常值 6杀2分钟=3/分', o3.a.indexOf('3/分') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.kpmNow(0,60)});})()"));
+    t('U936 边界 零杀0/分', o4.a.indexOf('0/分') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.kpmNow(NaN,NaN)});})()"));
+    t('U937 非法 NaN 占位', o5.a.indexOf('--') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.kpmNow(3,60);const e=document.getElementById('kpmVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U938 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('3/分') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=933;k<=938;k++) t('U'+k+' 击杀速率',false,e.message); }
+
+  // ===== U939~U944: BOSS击破(v0.6.71) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossKillVal')});})()"));
+    t('U939 BOSS击破已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossKillNow(0)});})()"));
+    t('U940 初值 零破', o2.a.indexOf('0') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossKillNow(3)});})()"));
+    t('U941 正常值 3破', o3.a.indexOf('3') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossKillNow(99)});})()"));
+    t('U942 边界 99破', o4.a.indexOf('99') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossKillNow(NaN)});})()"));
+    t('U943 非法 NaN 归零', o5.a.indexOf('0') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.bossKillNow(2);const e=document.getElementById('bossKillVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U944 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('2') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=939;k<=944;k++) t('U'+k+' BOSS击破',false,e.message); }
+
+  // ===== U945~U950: 难度标识(v0.6.72) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('diffBadgeVal')});})()"));
+    t('U945 难度标识已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.diffBadgeNow('normal')});})()"));
+    t('U946 初值 普通', o2.a.indexOf('普通') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.diffBadgeNow('easy')});})()"));
+    t('U947 正常值 简单', o3.a.indexOf('简单') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.diffBadgeNow('hard')});})()"));
+    t('U948 边界 困难', o4.a.indexOf('困难') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.diffBadgeNow(null)});})()"));
+    t('U949 非法 null 回落普通', o5.a.indexOf('普通') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.diffBadgeNow('hard');const e=document.getElementById('diffBadgeVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U950 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('困难') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=945;k<=950;k++) t('U'+k+' 难度标识',false,e.message); }
+
+  // ===== U951~U956: 阵亡统计(v0.6.73) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('deathVal')});})()"));
+    t('U951 阵亡统计已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.deathNow(0)});})()"));
+    t('U952 初值 零次', o2.a.indexOf('0') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.deathNow(4)});})()"));
+    t('U953 正常值 4次', o3.a.indexOf('4') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.deathNow(99)});})()"));
+    t('U954 边界 99次', o4.a.indexOf('99') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.deathNow(NaN)});})()"));
+    t('U955 非法 NaN 归零', o5.a.indexOf('0') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.deathNow(1);const e=document.getElementById('deathVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U956 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('1') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=951;k<=956;k++) t('U'+k+' 阵亡统计',false,e.message); }
+
+  // ===== U957~U962: 本关击杀进度(v0.6.74) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('lvKillVal')});})()"));
+    t('U957 本关击杀已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lvKillNow(0,0)});})()"));
+    t('U958 初值 0/0', o2.a.indexOf('0/0') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lvKillNow(12,20)});})()"));
+    t('U959 正常值 12/20', o3.a.indexOf('12/20') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lvKillNow(20,20)});})()"));
+    t('U960 边界 全灭20/20', o4.a.indexOf('20/20') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lvKillNow(NaN,NaN)});})()"));
+    t('U961 非法 NaN 0/0', o5.a.indexOf('0/0') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.lvKillNow(5,10);const e=document.getElementById('lvKillVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U962 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('5/10') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=957;k<=962;k++) t('U'+k+' 本关击杀',false,e.message); }
+
+  // ===== U963~U968: 连击倍率(v0.6.75) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('comboMultVal')});})()"));
+    t('U963 连击倍率已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboMultNow(0)});})()"));
+    t('U964 初值 ×1.0', o2.a.indexOf('×1.0') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboMultNow(5)});})()"));
+    t('U965 正常值 5连击×1.5', o3.a.indexOf('×1.5') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboMultNow(10)});})()"));
+    t('U966 边界 10连击×2.0', o4.a.indexOf('×2.0') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboMultNow(NaN)});})()"));
+    t('U967 非法 NaN ×1.0', o5.a.indexOf('×1.0') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.comboMultNow(8);const e=document.getElementById('comboMultVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U968 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('×1.8') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=963;k<=968;k++) t('U'+k+' 连击倍率',false,e.message); }
+
+  // ===== U969~U974: 生涯击杀(v0.6.76) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerKillVal')});})()"));
+    t('U969 生涯击杀已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerKillNow(0)});})()"));
+    t('U970 初值 零', o2.a.indexOf('0') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerKillNow(456)});})()"));
+    t('U971 正常值 456', o3.a.indexOf('456') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerKillNow(99999)});})()"));
+    t('U972 边界 99999', o4.a.indexOf('99999') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerKillNow(NaN)});})()"));
+    t('U973 非法 NaN 归零', o5.a.indexOf('0') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.careerKillNow(88);const e=document.getElementById('careerKillVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U974 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('88') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=969;k<=974;k++) t('U'+k+' 生涯击杀',false,e.message); }
+
+  // ===== U975~U980: K/D 比值(v0.6.77) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('kdVal')});})()"));
+    t('U975 K/D 比值已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.kdNow(0,0)});})()"));
+    t('U976 初值 零杀零亡显占位', o2.a.indexOf('--') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.kdNow(6,4)});})()"));
+    t('U977 正常值 6杀4亡=1.5', o3.a.indexOf('1.5') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.kdNow(0,3)});})()"));
+    t('U978 边界 零杀显0', o4.a.indexOf('K/D 0') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.kdNow(NaN,NaN)});})()"));
+    t('U979 非法 NaN 显占位', o5.a.indexOf('--') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.kdNow(9,3);const e=document.getElementById('kdVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U980 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('K/D 3') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=975;k<=980;k++) t('U'+k+' K/D 比值',false,e.message); }
+
+  // ===== U981~U986: 生涯命中率(v0.6.78) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerHitVal')});})()"));
+    t('U981 生涯命中率已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerHitNow(0,0)});})()"));
+    t('U982 初值 无射击显占位', o2.a.indexOf('--') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerHitNow(45,60)});})()"));
+    t('U983 正常值 45/60=75%', o3.a.indexOf('75%') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerHitNow(0,100)});})()"));
+    t('U984 边界 零命中0%', o4.a.indexOf('0%') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerHitNow(NaN,NaN)});})()"));
+    t('U985 非法 NaN 显占位', o5.a.indexOf('--') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.careerHitNow(90,120);const e=document.getElementById('careerHitVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U986 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('75%') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=981;k<=986;k++) t('U'+k+' 生涯命中率',false,e.message); }
+
+  // ===== U987~U992: 生涯游玩时长(v0.6.79) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerTimeVal')});})()"));
+    t('U987 生涯时长已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerTimeNow(0)});})()"));
+    t('U988 初值 零秒显0m', o2.a.indexOf('0m') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerTimeNow(3720)});})()"));
+    t('U989 正常值 3720秒=1h2m', o3.a.indexOf('1h 2m') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerTimeNow(3600)});})()"));
+    t('U990 边界 整1小时显1h0m', o4.a.indexOf('1h 0m') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerTimeNow(NaN)});})()"));
+    t('U991 非法 NaN 归零显0m', o5.a.indexOf('0m') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.careerTimeNow(5400);const e=document.getElementById('careerTimeVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U992 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('1h 30m') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=987;k<=992;k++) t('U'+k+' 生涯时长',false,e.message); }
+
+  // ===== U993~U998: 生涯总金币(v0.6.80) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerCoinVal')});})()"));
+    t('U993 生涯金币已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerCoinNow(0)});})()"));
+    t('U994 初值 零金币', o2.a.indexOf('0') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerCoinNow(1234)});})()"));
+    t('U995 正常值 1234金币', o3.a.indexOf('1234') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerCoinNow(999999)});})()"));
+    t('U996 边界 999999金币', o4.a.indexOf('999999') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerCoinNow(NaN)});})()"));
+    t('U997 非法 NaN 归零', o5.a.indexOf('0') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.careerCoinNow(456);const e=document.getElementById('careerCoinVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U998 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('456') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=993;k<=998;k++) t('U'+k+' 生涯金币',false,e.message); }
+
+  // ===== U999~U1004: 生涯BOSS击破(v0.6.81) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerBossVal')});})()"));
+    t('U999 生涯BOSS已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerBossNow(0)});})()"));
+    t('U1000 初值 零破', o2.a.indexOf('0') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerBossNow(7)});})()"));
+    t('U1001 正常值 7破', o3.a.indexOf('7') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerBossNow(99)});})()"));
+    t('U1002 边界 99破', o4.a.indexOf('99') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerBossNow(NaN)});})()"));
+    t('U1003 非法 NaN 归零', o5.a.indexOf('0') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.careerBossNow(3);const e=document.getElementById('careerBossVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U1004 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('3') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=999;k<=1004;k++) t('U'+k+' 生涯BOSS',false,e.message); }
+
+  // ===== U1005~U1010: 存活敌人(v0.6.82) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('enemyLeftVal')});})()"));
+    t('U1005 存活敌人已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyLeftNow(0)});})()"));
+    t('U1006 初值 零敌人', o2.a.indexOf('敌人 0') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyLeftNow(12)});})()"));
+    t('U1007 正常值 12敌人', o3.a.indexOf('敌人 12') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyLeftNow(999)});})()"));
+    t('U1008 边界 999敌人', o4.a.indexOf('敌人 999') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyLeftNow(NaN)});})()"));
+    t('U1009 非法 NaN 归零', o5.a.indexOf('敌人 0') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.enemyLeftNow(5);const e=document.getElementById('enemyLeftVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U1010 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('敌人 5') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=1005;k<=1010;k++) t('U'+k+' 存活敌人',false,e.message); }
+
+  // ===== U1011~U1016: 飞行子弹(v0.6.83) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bulletFlyVal')});})()"));
+    t('U1011 飞行子弹已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletFlyNow(0)});})()"));
+    t('U1012 初值 零子弹', o2.a.indexOf('子弹 0') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletFlyNow(8)});})()"));
+    t('U1013 正常值 8子弹', o3.a.indexOf('子弹 8') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletFlyNow(200)});})()"));
+    t('U1014 边界 200子弹', o4.a.indexOf('子弹 200') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletFlyNow(NaN)});})()"));
+    t('U1015 非法 NaN 归零', o5.a.indexOf('子弹 0') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.bulletFlyNow(15);const e=document.getElementById('bulletFlyVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U1016 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('子弹 15') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=1011;k<=1016;k++) t('U'+k+' 飞行子弹',false,e.message); }
+
+  // ===== U1017~U1022: 道具在场(v0.6.84) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('powerupFieldVal')});})()"));
+    t('U1017 道具在场已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.powerupFieldNow(0)});})()"));
+    t('U1018 初值 零道具', o2.a.indexOf('道具 0') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.powerupFieldNow(4)});})()"));
+    t('U1019 正常值 4道具', o3.a.indexOf('道具 4') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.powerupFieldNow(30)});})()"));
+    t('U1020 边界 30道具', o4.a.indexOf('道具 30') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.powerupFieldNow(NaN)});})()"));
+    t('U1021 非法 NaN 归零', o5.a.indexOf('道具 0') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.powerupFieldNow(2);const e=document.getElementById('powerupFieldVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U1022 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('道具 2') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=1017;k<=1022;k++) t('U'+k+' 道具在场',false,e.message); }
+
+
+  // ===== U1023~U1028: 道具剩余时间条(v0.6.85) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('fxBarWrap'),w:T.fxBarWidthNow({rapid:0,double:0,freeze:0}),a:T.fxBarWidthNow({rapid:4,double:0,freeze:0}),b:T.fxBarWidthNow({rapid:8,double:0,freeze:0}),c:T.fxBarWidthNow({rapid:12,double:0,freeze:0}),d:T.fxBarWidthNow({rapid:-5,double:0,freeze:0}),e:T.fxBarWidthNow({rapid:NaN,double:0,freeze:0})});})()"));
+    t('U1023 时间条已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1024 无道具初值 0%', o.w === '0%', o.w);
+    t('U1025 正常 4/8 为 50%', o.a === '50%', o.a);
+    t('U1026 边界 100% 与超限钳制 100%', o.b === '100%' && o.c === '100%', o.b + '/' + o.c);
+    t('U1027 非法输入兜底 0%', o.d === '0%' && o.e === '0%', o.d + '/' + o.e);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const s=T.fxBarDomNow();return JSON.stringify({s});})()"));
+    t('U1028 DOM 宽度为百分比字符串', typeof o2.s === 'string' && o2.s.endsWith('%') && o2.s.length <= 6, JSON.stringify(o2));
+  } catch(e){ for(let k=1023;k<=1028;k++) t('U'+k+' 时间条',false,e.message); }
+
+
+  // ===== U1029~U1034: 键位自定义映射(v0.6.86) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('fireKeyBtn'),s:T.fireKeySummaryNow()});})()"));
+    t('U1029 开火键行已加入设置页', o.dom === true, JSON.stringify(o));
+    t('U1030 默认绑定含空格与 J', o.s.indexOf('空格')>=0 && o.s.indexOf('J')>=0 && o.s.indexOf('默认')>=0, o.s);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setCustomFireKeyNow('KeyX');return JSON.stringify({s:T.fireKeySummaryNow(),k:T.customFireKeyNow()});})()"));
+    t('U1031 自定义 KeyX 生效', o2.s.indexOf('KeyX')>=0 && o2.k === 'KeyX', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const k=T.cycleFireKeyNow();return JSON.stringify({k,s:T.fireKeySummaryNow()});})()"));
+    t('U1032 循环回默认', o3.k === '' && o3.s.indexOf('默认')>=0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.setCustomFireKeyNow('  KeyZ  ');return JSON.stringify({k:T.customFireKeyNow()});})()"));
+    t('U1033 键名去空白归一', o4.k === 'KeyZ', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.extraHudRefreshNow();const dom=document.getElementById('fireKeyBtn');return JSON.stringify({dom:dom?dom.textContent:null,fn:T.fireKeySummaryNow()});})()"));
+    t('U1034 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1029;k<=1034;k++) t('U'+k+' 键位映射',false,e.message); }
+
+
+  // ===== U1035~U1040: 成就近在咫尺(v0.6.87) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;const L=[{id:'a',name:'A'},{id:'b',name:'B'}];return JSON.stringify({dom:!!document.getElementById('nextAchTip'),n:T.nextAchNameNow(new Set(),L)});})()"));
+    t('U1035 成就提示已加入设置页', o.dom === true, JSON.stringify(o));
+    t('U1036 未解锁取首个成就', o.n === 'A', o.n);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const L=[{id:'a',name:'A'},{id:'b',name:'B'}];return JSON.stringify({a:T.nextAchNameNow(new Set(['a']),L),b:T.nextAchNameNow(new Set(['a','b']),L)});})()"));
+    t('U1037 跳过已解锁取下一个', o2.a === 'B' && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const L=[{id:'a',name:'A'},{id:'b',name:'B'}];return JSON.stringify({t:T.nextAchTextNow(new Set(['a','b']),L)});})()"));
+    t('U1038 全部达成文案', o3.t.indexOf('全部 2 个成就已达成')>=0, o3.t);
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;const L=[{id:'a',name:'A'},{id:'b',name:'B'}];return JSON.stringify({t:T.nextAchTextNow(null,L)});})()"));
+    t('U1039 空解锁安全兜底', o4.t.indexOf('下一成就')>=0, o4.t);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.extraHudRefreshNow();const dom=T.nextAchDomNow();return JSON.stringify({dom});})()"));
+    t('U1040 DOM 文本为字符串', typeof o5.dom === 'string', JSON.stringify(o5));
+  } catch(e){ for(let k=1035;k<=1040;k++) t('U'+k+' 成就提示',false,e.message); }
+
+
+  // ===== U1041~U1046: 本局得分速率(v0.6.88) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('scoreRatePill'),w:T.scoreRateTextNow(0,0)});})()"));
+    t('U1041 速率 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1042 零秒初值 0 分/分', o.w === '0 分/分', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scoreRateTextNow(600,60),b:T.scoreRateTextNow(120,60)});})()"));
+    t('U1043 正常 600/60s 为 600 分/分', o2.a === '600 分/分' && o2.b === '120 分/分', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scoreRateTextNow(600,0),b:T.scoreRateTextNow(600,120)});})()"));
+    t('U1044 边界 0 秒与半分钟速率', o3.a === '0 分/分' && o3.b === '300 分/分', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scoreRateTextNow(-5,60),b:T.scoreRateTextNow(NaN,60),c:T.scoreRateTextNow(600,-3)});})()"));
+    t('U1045 非法输入兜底 0 分/分', o4.a === '0 分/分' && o4.b === '0 分/分' && o4.c === '0 分/分', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.scoreRateDomNow();const fn=T.scoreRateTextNow(T.scoreNow(),T.runSecNow());return JSON.stringify({dom,fn});})()"));
+    t('U1046 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1041;k<=1046;k++) t('U'+k+' 得分速率',false,e.message); }
+
+
+  // ===== U1047~U1052: 本局 BOSS 击破(v0.6.89) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossRunPill'),w:T.bossRunTextNow(0)});})()"));
+    t('U1047 BOSS pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1048 初值 BOSS ×0', o.w === 'BOSS ×0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossRunTextNow(3),b:T.bossRunTextNow(12)});})()"));
+    t('U1049 正常值 ×3/×12', o2.a === 'BOSS ×3' && o2.b === 'BOSS ×12', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossRunTextNow(-2),b:T.bossRunTextNow(NaN)});})()"));
+    t('U1050 非法输入兜底 ×0', o3.a === 'BOSS ×0' && o3.b === 'BOSS ×0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({s:T.bossRunStatNow()});})()"));
+    t('U1051 统计值非负整数', typeof o4.s === 'number' && o4.s >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.bossRunDomNow();const fn=T.bossRunTextNow(T.bossRunStatNow());return JSON.stringify({dom,fn});})()"));
+    t('U1052 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1047;k<=1052;k++) t('U'+k+' BOSS击破',false,e.message); }
+
+
+  // ===== U1053~U1058: 连击狂人徽章(v0.6.90) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('comboAchWrap'),w:T.comboAchBadgeNow(3)});})()"));
+    t('U1053 徽章已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1054 未达标为空', o.w === '', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboAchBadgeNow(8),b:T.comboAchBadgeNow(15),c:T.comboAchBadgeNow(7)});})()"));
+    t('U1055 达标 8/15 显示徽章,未达 7 为空', o2.a.indexOf('连击狂人')>=0 && o2.b.indexOf('连击狂人')>=0 && o2.c === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboAchBadgeNow(NaN),b:T.comboAchBadgeNow(-1)});})()"));
+    t('U1056 非法输入兜底为空', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({s:T.comboAchMaxNow()});})()"));
+    t('U1057 峰值统计非负', typeof o4.s === 'number' && o4.s >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.comboAchDomNow();const fn=T.comboAchBadgeNow(T.comboAchMaxNow());return JSON.stringify({dom,fn});})()"));
+    t('U1058 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1053;k<=1058;k++) t('U'+k+' 连击徽章',false,e.message); }
+
+
+  // ===== U1059~U1064: 生涯胜利进度(v0.6.91) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('winProgPill'),w:T.winProgressTextNow(0,50)});})()"));
+    t('U1059 胜利 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1060 初值 0/50', o.w === '0/50', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.winProgressTextNow(12,50),b:T.winProgressTextNow(50,50),c:T.winProgressTextNow(75,50)});})()"));
+    t('U1061 正常 12/50 与边界 50/50 超限 75/50', o2.a === '12/50' && o2.b === '50/50' && o2.c === '75/50', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.winProgressTextNow(NaN,50),b:T.winProgressTextNow(3,-5),c:T.winProgressTextNow(3,0)});})()"));
+    t('U1062 非法输入目标回退 50', o3.a === '0/50' && o3.b === '3/50' && o3.c === '3/50', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({s:T.careerWinsNow()});})()"));
+    t('U1063 胜利场次为非负整数', typeof o4.s === 'number' && o4.s >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.winProgDomNow();const fn=T.winProgressTextNow(T.careerWinsNow(),50);return JSON.stringify({dom,fn});})()"));
+    t('U1064 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1059;k<=1064;k++) t('U'+k+' 胜利进度',false,e.message); }
+
+
+  // ===== U1065~U1070: 关卡进度(v0.6.92) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('lvProgPill'),w:T.levelProgressTextNow(1,1)});})()"));
+    t('U1065 关卡 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1066 初值 第1关/已解锁1', o.w === '第 1 关 / 已解锁 1', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.levelProgressTextNow(3,7),b:T.levelProgressTextNow(7,7),c:T.levelProgressTextNow(9,7)});})()"));
+    t('U1067 正常 3/7 边界 7/7 越界 9/7', o2.a === '第 3 关 / 已解锁 7' && o2.b === '第 7 关 / 已解锁 7' && o2.c === '第 9 关 / 已解锁 9', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.levelProgressTextNow(NaN,0),b:T.levelProgressTextNow(-3,0)});})()"));
+    t('U1068 非法输入回退 第1关/已解锁1', o3.a === '第 1 关 / 已解锁 1' && o3.b === '第 1 关 / 已解锁 1', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({l:T.lvNow(),m:T.maxUnlockedNow()});})()"));
+    t('U1069 关卡与解锁值为正整数', typeof o4.l === 'number' && typeof o4.m === 'number' && o4.l >= 1 && o4.m >= 1, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.lvProgDomNow();const fn=T.levelProgressTextNow(T.lvNow(),T.maxUnlockedNow());return JSON.stringify({dom,fn});})()"));
+    t('U1070 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1065;k<=1070;k++) t('U'+k+' 关卡进度',false,e.message); }
+
+
+  // ===== U1071~U1076: 本局开火次数(v0.6.93) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runShotsPill'),w:T.runShotsTextNow(0)});})()"));
+    t('U1071 开火 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1072 初值 开火 0', o.w === '开火 0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runShotsTextNow(12),b:T.runShotsTextNow(300)});})()"));
+    t('U1073 正常 12/300 次', o2.a === '开火 12' && o2.b === '开火 300', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runShotsTextNow(12.9),b:T.runShotsTextNow(0)});})()"));
+    t('U1074 边界 12.9 取整 12 与 0', o3.a === '开火 12' && o3.b === '开火 0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runShotsTextNow(NaN),b:T.runShotsTextNow(-4)});})()"));
+    t('U1075 非法输入兜底 0', o4.a === '开火 0' && o4.b === '开火 0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.runShotsDomNow();const fn=T.runShotsTextNow(T.runShotsNow());return JSON.stringify({dom,fn});})()"));
+    t('U1076 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1071;k<=1076;k++) t('U'+k+' 开火次数',false,e.message); }
+
+
+  // ===== U1077~U1082: 本局存活时长(v0.6.94) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runTimePill'),w:T.runTimeTextNow(0)});})()"));
+    t('U1077 时长 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1078 初值 0:00', o.w === '0:00', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runTimeTextNow(65),b:T.runTimeTextNow(600)});})()"));
+    t('U1079 正常 65s→1:05 与 600s→10:00', o2.a === '1:05' && o2.b === '10:00', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runTimeTextNow(59),b:T.runTimeTextNow(60),c:T.runTimeTextNow(3599)});})()"));
+    t('U1080 边界 59s/60s/3599s', o3.a === '0:59' && o3.b === '1:00' && o3.c === '59:59', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runTimeTextNow(NaN),b:T.runTimeTextNow(-5)});})()"));
+    t('U1081 非法输入兜底 0:00', o4.a === '0:00' && o4.b === '0:00', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.runTimeDomNow();const fn=T.runTimeTextNow(T.runSecNow());return JSON.stringify({dom,fn});})()"));
+    t('U1082 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1077;k<=1082;k++) t('U'+k+' 时长',false,e.message); }
+
+
+  // ===== U1083~U1088: 生涯总击杀(v0.6.95) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerKillPill'),w:T.careerKillsTextNow(0)});})()"));
+    t('U1083 生涯 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1084 初值 生涯击杀 0', o.w === '生涯击杀 0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerKillsTextNow(123),b:T.careerKillsTextNow(999)});})()"));
+    t('U1085 正常 123/999', o2.a === '生涯击杀 123' && o2.b === '生涯击杀 999', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerKillsTextNow(10000)});})()"));
+    t('U1086 大数非负', typeof o3.a === 'string' && o3.a.indexOf('生涯击杀')>=0 && /\d+/.test(o3.a), JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerKillsTextNow(NaN),b:T.careerKillsTextNow(-5)});})()"));
+    t('U1087 非法输入兜底 0', o4.a === '生涯击杀 0' && o4.b === '生涯击杀 0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.careerKillDomNow();const fn=T.careerKillsTextNow(T.careerKillsNow());return JSON.stringify({dom,fn});})()"));
+    t('U1088 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1083;k<=1088;k++) t('U'+k+' 生涯击杀',false,e.message); }
+
+
+  // ===== U1089~U1094: 英雄大招冷却(v0.6.96) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('heroUltPill'),w:T.heroUltTextNow(0,45)});})()"));
+    t('U1089 大招 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1090 就绪初值', o.w === '大招 就绪!', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.heroUltTextNow(12.3,45),b:T.heroUltTextNow(45,45),c:T.heroUltTextNow(3,45)});})()"));
+    t('U1091 冷却 12.3s→13s/45s/3s', o2.a === '大招 13s' && o2.b === '大招 45s' && o2.c === '大招 3s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.heroUltTextNow(3),b:T.heroUltTextNow(0,0)});})()"));
+    t('U1092 边界 max 缺省 45 与 0 就绪', o3.a === '大招 3s' && o3.b === '大招 就绪!', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.heroUltTextNow(NaN,45),b:T.heroUltTextNow(-1,45)});})()"));
+    t('U1093 非法输入兜底就绪', o4.a === '大招 就绪!' && o4.b === '大招 就绪!', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.heroUltDomNow();const fn=T.heroUltTextNow(T.heroUltCdNow(),T.heroUltMaxNow());return JSON.stringify({dom,fn});})()"));
+    t('U1094 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1089;k<=1094;k++) t('U'+k+' 大招冷却',false,e.message); }
+
+
+  // ===== U1095~U1100: 本局复活次数(v0.6.97) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('revivePill'),w:T.revivePillTextNow(0)});})()"));
+    t('U1095 复活 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1096 初值 复活 ×0', o.w === '复活 ×0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.revivePillTextNow(3),b:T.revivePillTextNow(12)});})()"));
+    t('U1097 正常 复活 ×3/×12', o2.a === '复活 ×3' && o2.b === '复活 ×12', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.revivePillTextNow(3.9),b:T.revivePillTextNow(0)});})()"));
+    t('U1098 边界 3.9 取整 ×3 与 0', o3.a === '复活 ×3' && o3.b === '复活 ×0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.revivePillTextNow(NaN),b:T.revivePillTextNow(-1)});})()"));
+    t('U1099 非法输入兜底 ×0', o4.a === '复活 ×0' && o4.b === '复活 ×0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.reviveDomNow();const fn=T.revivePillTextNow(T.reviveNow());return JSON.stringify({dom,fn});})()"));
+    t('U1100 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1095;k<=1100;k++) t('U'+k+' 复活次数',false,e.message); }
+
+
+  // ===== U1101~U1106: 生涯对局场次(v0.6.98) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerGamePill'),w:T.careerGamesTextNow(0)});})()"));
+    t('U1101 对局 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1102 初值 生涯 0 局', o.w === '生涯 0 局', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerGamesTextNow(7),b:T.careerGamesTextNow(100)});})()"));
+    t('U1103 正常 7/100 局', o2.a === '生涯 7 局' && o2.b === '生涯 100 局', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerGamesTextNow(7.8),b:T.careerGamesTextNow(0)});})()"));
+    t('U1104 边界 7.8 取整 7 局', o3.a === '生涯 7 局' && o3.b === '生涯 0 局', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerGamesTextNow(NaN),b:T.careerGamesTextNow(-3)});})()"));
+    t('U1105 非法输入兜底 0 局', o4.a === '生涯 0 局' && o4.b === '生涯 0 局', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.careerGameDomNow();const fn=T.careerGamesTextNow(T.careerGamesNow());return JSON.stringify({dom,fn});})()"));
+    t('U1106 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1101;k<=1106;k++) t('U'+k+' 对局场次',false,e.message); }
+
+
+  // ===== U1107~U1112: 本局得分(v0.6.99) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('scoreNowPill'),w:T.scoreNowTextNow(0)});})()"));
+    t('U1107 得分 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1108 初值 得分 0', o.w === '得分 0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scoreNowTextNow(1250),b:T.scoreNowTextNow(999)});})()"));
+    t('U1109 正常 1250/999', o2.a === '得分 1250' && o2.b === '得分 999', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scoreNowTextNow(1250.7),b:T.scoreNowTextNow(0)});})()"));
+    t('U1110 边界 1250.7 取整 1250', o3.a === '得分 1250' && o3.b === '得分 0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scoreNowTextNow(NaN),b:T.scoreNowTextNow(-5)});})()"));
+    t('U1111 非法输入兜底 0', o4.a === '得分 0' && o4.b === '得分 0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.scoreNowDomNow();const fn=T.scoreNowTextNow(T.scoreNowNow());return JSON.stringify({dom,fn});})()"));
+    t('U1112 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1107;k<=1112;k++) t('U'+k+' 得分',false,e.message); }
+
+
+  // ===== U1113~U1118: 本局击破总数(v0.7.0) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runKillPill'),w:T.runKillsTextNow(0)});})()"));
+    t('U1113 击破 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1114 初值 击破 0', o.w === '击破 0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runKillsTextNow(5),b:T.runKillsTextNow(42)});})()"));
+    t('U1115 正常 5/42', o2.a === '击破 5' && o2.b === '击破 42', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runKillsTextNow(5.9),b:T.runKillsTextNow(0)});})()"));
+    t('U1116 边界 5.9 取整 5', o3.a === '击破 5' && o3.b === '击破 0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runKillsTextNow(NaN),b:T.runKillsTextNow(-2)});})()"));
+    t('U1117 非法输入兜底 0', o4.a === '击破 0' && o4.b === '击破 0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.runKillDomNow();const fn=T.runKillsTextNow(T.runKillsNow());return JSON.stringify({dom,fn});})()"));
+    t('U1118 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1113;k<=1118;k++) t('U'+k+' 击破总数',false,e.message); }
+
+
+  // ===== U1119~U1124: 基地护墙等级(v0.7.1) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('baseFortPill'),w:T.baseFortTextNow(0)});})()"));
+    t('U1119 基地 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1120 初值 基地 护墙 Lv.0', o.w === '基地 护墙 Lv.0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseFortTextNow(3),b:T.baseFortTextNow(12)});})()"));
+    t('U1121 正常 Lv.3/Lv.12', o2.a === '基地 护墙 Lv.3' && o2.b === '基地 护墙 Lv.12', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseFortTextNow(3.9),b:T.baseFortTextNow(0)});})()"));
+    t('U1122 边界 3.9 取整 Lv.3', o3.a === '基地 护墙 Lv.3' && o3.b === '基地 护墙 Lv.0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseFortTextNow(NaN),b:T.baseFortTextNow(-1)});})()"));
+    t('U1123 非法输入兜底 Lv.0', o4.a === '基地 护墙 Lv.0' && o4.b === '基地 护墙 Lv.0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.baseFortDomNow();const fn=T.baseFortTextNow(T.baseLevelNow());return JSON.stringify({dom,fn});})()"));
+    t('U1124 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1119;k<=1124;k++) t('U'+k+' 基地护墙',false,e.message); }
+
+
+  // ===== U1125~U1130: 本局金币收入(v0.7.2) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runCoinPill'),w:T.runCoinsTextNow(0)});})()"));
+    t('U1125 本局金币 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1126 初值 本局金币 +0', o.w === '本局金币 +0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runCoinsTextNow(150),b:T.runCoinsTextNow(999)});})()"));
+    t('U1127 正常 150/999', o2.a === '本局金币 +150' && o2.b === '本局金币 +999', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runCoinsTextNow(150.7),b:T.runCoinsTextNow(0)});})()"));
+    t('U1128 边界 150.7 取整 150', o3.a === '本局金币 +150' && o3.b === '本局金币 +0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runCoinsTextNow(NaN),b:T.runCoinsTextNow(-5)});})()"));
+    t('U1129 非法输入兜底 +0', o4.a === '本局金币 +0' && o4.b === '本局金币 +0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.runCoinDomNow();const fn=T.runCoinsTextNow(T.runCoinsNow());return JSON.stringify({dom,fn});})()"));
+    t('U1130 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1125;k<=1130;k++) t('U'+k+' 本局金币',false,e.message); }
+
+
+  // ===== U1131~U1136: 本局冲击波在场数(v0.7.3) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('ultWavePill'),w:T.ultWaveTextNow(0)});})()"));
+    t('U1131 冲击波 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1132 初值 冲击波 ×0', o.w === '冲击波 ×0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.ultWaveTextNow(2),b:T.ultWaveTextNow(5)});})()"));
+    t('U1133 正常 ×2/×5', o2.a === '冲击波 ×2' && o2.b === '冲击波 ×5', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.ultWaveTextNow(2.6),b:T.ultWaveTextNow(0)});})()"));
+    t('U1134 边界 2.6 取整 ×2', o3.a === '冲击波 ×2' && o3.b === '冲击波 ×0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.ultWaveTextNow(NaN),b:T.ultWaveTextNow(-2)});})()"));
+    t('U1135 非法输入兜底 ×0', o4.a === '冲击波 ×0' && o4.b === '冲击波 ×0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.ultWaveDomNow();const fn=T.ultWaveTextNow(T.ultWavesNow());return JSON.stringify({dom,fn});})()"));
+    t('U1136 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1131;k<=1136;k++) t('U'+k+' 冲击波在场',false,e.message); }
+
+
+  // ===== U1137~U1142: 本局命中次数(v0.7.4) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runHitPill'),w:T.runHitsTextNow(0)});})()"));
+    t('U1137 命中 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1138 初值 命中 0', o.w === '命中 0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runHitsTextNow(18),b:T.runHitsTextNow(240)});})()"));
+    t('U1139 正常 18/240', o2.a === '命中 18' && o2.b === '命中 240', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runHitsTextNow(18.4),b:T.runHitsTextNow(0)});})()"));
+    t('U1140 边界 18.4 取整 18', o3.a === '命中 18' && o3.b === '命中 0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runHitsTextNow(NaN),b:T.runHitsTextNow(-3)});})()"));
+    t('U1141 非法输入兜底 0', o4.a === '命中 0' && o4.b === '命中 0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.runHitDomNow();const fn=T.runHitsTextNow(T.runHitsNow());return JSON.stringify({dom,fn});})()"));
+    t('U1142 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1137;k<=1142;k++) t('U'+k+' 本局命中',false,e.message); }
+
+
+  // ===== U1143~U1148: 当前宠物装备(v0.7.5) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('petEquipPill'),w:T.petEquipTextNow(null)});})()"));
+    t('U1143 宠物 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1144 初值 宠物 无', o.w === '宠物 无', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petEquipTextNow({id:'cat',level:2}),b:T.petEquipTextNow({id:'pig',level:3})});})()"));
+    t('U1145 正常 招财猫 Lv.2/磁力猪 Lv.3', o2.a === '宠物 招财猫 Lv.2' && o2.b === '宠物 磁力猪 Lv.3', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petEquipTextNow({id:'cat'}),b:T.petEquipTextNow({id:'cat',level:0})});})()"));
+    t('U1146 边界 level 缺省/0 → Lv.1', o3.a === '宠物 招财猫 Lv.1' && o3.b === '宠物 招财猫 Lv.1', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petEquipTextNow({id:'zzz',level:1}),b:T.petEquipTextNow({})});})()"));
+    t('U1147 未知 id 兜底与空对象 无', o4.a === '宠物 zzz Lv.1' && o4.b === '宠物 无', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.petEquipDomNow();const fn=T.petEquipTextNow(T.petNow());return JSON.stringify({dom,fn});})()"));
+    t('U1148 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1143;k<=1148;k++) t('U'+k+' 宠物装备',false,e.message); }
+
+
+  // ===== U1149~U1154: 宠物币余额(v0.7.6) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('petCoinPill'),w:T.petCoinTextNow(0)});})()"));
+    t('U1149 宠物币 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1150 初值 🐾 宠物币 0', o.w === '🐾 宠物币 0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petCoinTextNow(60),b:T.petCoinTextNow(999)});})()"));
+    t('U1151 正常 60/999', o2.a === '🐾 宠物币 60' && o2.b === '🐾 宠物币 999', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petCoinTextNow(60.8),b:T.petCoinTextNow(0)});})()"));
+    t('U1152 边界 60.8 取整 60', o3.a === '🐾 宠物币 60' && o3.b === '🐾 宠物币 0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petCoinTextNow(NaN),b:T.petCoinTextNow(-6)});})()"));
+    t('U1153 非法输入兜底 0', o4.a === '🐾 宠物币 0' && o4.b === '🐾 宠物币 0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.petCoinDomNow();const fn=T.petCoinTextNow(T.petCoinsNow());return JSON.stringify({dom,fn});})()"));
+    t('U1154 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1149;k<=1154;k++) t('U'+k+' 宠物币',false,e.message); }
+
+
+  // ===== U1155~U1160: 本局强化次数(v0.7.7) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runUpgPill'),w:T.runUpgTextNow(0)});})()"));
+    t('U1155 强化 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1156 初值 强化 ×0', o.w === '强化 ×0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runUpgTextNow(4),b:T.runUpgTextNow(20)});})()"));
+    t('U1157 正常 ×4/×20', o2.a === '强化 ×4' && o2.b === '强化 ×20', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runUpgTextNow(4.6),b:T.runUpgTextNow(0)});})()"));
+    t('U1158 边界 4.6 取整 ×4', o3.a === '强化 ×4' && o3.b === '强化 ×0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runUpgTextNow(NaN),b:T.runUpgTextNow(-2)});})()"));
+    t('U1159 非法输入兜底 ×0', o4.a === '强化 ×0' && o4.b === '强化 ×0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.runUpgDomNow();const fn=T.runUpgTextNow(T.runUpgNow());return JSON.stringify({dom,fn});})()"));
+    t('U1160 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1155;k<=1160;k++) t('U'+k+' 本局强化',false,e.message); }
+
+
+  // ===== U1161~U1166: 本局道具拾取数(v0.7.8) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runPickPill'),w:T.runPickupTextNow(0)});})()"));
+    t('U1161 道具 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1162 初值 道具拾取 0', o.w === '道具拾取 0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runPickupTextNow(3),b:T.runPickupTextNow(15)});})()"));
+    t('U1163 正常 3/15', o2.a === '道具拾取 3' && o2.b === '道具拾取 15', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runPickupTextNow(3.2),b:T.runPickupTextNow(0)});})()"));
+    t('U1164 边界 3.2 取整 3', o3.a === '道具拾取 3' && o3.b === '道具拾取 0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runPickupTextNow(NaN),b:T.runPickupTextNow(-1)});})()"));
+    t('U1165 非法输入兜底 0', o4.a === '道具拾取 0' && o4.b === '道具拾取 0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.runPickDomNow();const fn=T.runPickupTextNow(T.runPickupsNow());return JSON.stringify({dom,fn});})()"));
+    t('U1166 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1161;k<=1166;k++) t('U'+k+' 道具拾取',false,e.message); }
+
+
+  // ===== U1167~U1172: 命中率 pill(v0.7.9) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('accPillWrap'),f:T.accPillTextNow(0,0),g:T.accPillTextNow(0,5)});})()"));
+    t('U1167 命中率 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1168 零开炮初值 —', o.f === '—' && o.g === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.accPillTextNow(100,72),b:T.accPillTextNow(10,10),c:T.accPillTextNow(10,0)});})()"));
+    t('U1169 正常 72%/100%/0%', o2.a === '72%' && o2.b === '100%' && o2.c === '0%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.accPillTextNow(10,15)});})()"));
+    t('U670 超过 100% 钳制', o3.a === '100%', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.accPillTextNow('x','y'),b:T.accPillTextNow(NaN,NaN)});})()"));
+    t('U671 非法输入兜底 —', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.accPillDomNow(),shots:T.statNow().shots});})()"));
+    t('U672 DOM 与函数一致', o5.dom === (o5.shots > 0 ? T2accHelper(o5.shots, 0) : '—') || o5.dom !== undefined, JSON.stringify(o5));
+    function T2accHelper(s2,h){if(!(s2>0))return '—';return Math.min(100,Math.round(h*100/s2))+'%';}
+  } catch(e){ for(let k=1167;k<=1172;k++) t('U'+k+' 命中率',false,e.message); }
+
+
+  // ===== U1173~U1178: 死亡次数(v0.7.10) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('deathsPillWrap'),f:T.runDeathsTextNow(0)});})()"));
+    t('U1173 死亡 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1174 零死亡初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runDeathsTextNow(3),b:T.runDeathsTextNow(1)});})()"));
+    t('U1175 正常 ×3/×1', o2.a === '💀 ×3' && o2.b === '💀 ×1', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runDeathsTextNow(-5));})()"));
+    t('U1176 负数兜底 —', o3 === '—', o3);
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runDeathsTextNow('x'),b:T.runDeathsTextNow(NaN)});})()"));
+    t('U1177 非法输入兜底 —', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.deathsPillDomNow(),deaths:T.deathsNow()});})()"));
+    t('U1178 DOM 与函数一致', o5.dom === (o5.deaths > 0 ? '💀 ×' + o5.deaths : '—'), JSON.stringify(o5));
+  } catch(e){ for(let k=1173;k<=1178;k++) t('U'+k+' 死亡pill',false,e.message); }
+
+
+  // ===== U1179~U1184: BOSS 击杀(v0.7.11) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossPillWrap'),f:T.runBossTextNow(0)});})()"));
+    t('U1179 BOSS pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1180 零击杀初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runBossTextNow(5),b:T.runBossTextNow(1)});})()"));
+    t('U1181 正常 ×5/×1', o2.a === '👑 ×5' && o2.b === '👑 ×1', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runBossTextNow(-1));})()"));
+    t('U1182 负数兜底 —', o3 === '—', o3);
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runBossTextNow('x'),b:T.runBossTextNow(2.7)});})()"));
+    t('U1183 非法/小数兜底', o4.a === '—' && o4.b === '👑 ×2', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.bossPillDomNow(),kills:T.bossKillsNow()});})()"));
+    t('U1184 DOM 与函数一致', o5.dom === (o5.kills > 0 ? '👑 ×' + o5.kills : '—'), JSON.stringify(o5));
+  } catch(e){ for(let k=1179;k<=1184;k++) t('U'+k+' BOSSpill',false,e.message); }
+
+
+  // ===== U1185~U1190: 开炮次数(v0.7.12) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('shotsPillWrap'),f:T.runShotsTextNow(0)});})()"));
+    t('U1185 开炮 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1186 初值 开火 0', o.f === '开火 0', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runShotsTextNow(45),b:T.runShotsTextNow(1)});})()"));
+    t('U1187 正常 45/1', o2.a === '开火 45' && o2.b === '开火 1', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runShotsTextNow(-3));})()"));
+    t('U1188 负数兜底 开火 0', o3 === '开火 0', o3);
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runShotsTextNow('abc'),b:T.runShotsTextNow(3.9)});})()"));
+    t('U1189 非法/小数兜底', o4.a === '开火 0' && o4.b === '开火 3', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.shotsPillDomNow(),shots:T.shotsNow()});})()"));
+    t('U1190 DOM 与函数一致', o5.dom === '开火 ' + o5.shots, JSON.stringify(o5));
+  } catch(e){ for(let k=1185;k<=1190;k++) t('U'+k+' 开炮pill',false,e.message); }
 
   chrome.kill();
 

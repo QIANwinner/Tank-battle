@@ -6,7 +6,7 @@ const http = require('http');
 
 const CHROME = process.env.TB_CHROME || 'C:/Users/21889/.agent-browser/browsers/chrome-win64/chrome.exe';
 const URL = process.argv[2] || 'http://127.0.0.1:8124/index.html?test=1';
-const PORT = 9333;
+const PORT = Number(process.env.TB_CDP_PORT || 9333);
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 function httpJson(path, method = 'GET') {

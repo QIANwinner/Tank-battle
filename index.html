@@ -1789,6 +1789,160 @@
   #bestDeltaWrap .v { color: #ffd166; font-weight: 800; font-size: 11px; }
   #upgPillWrap .v { color: #ffd166; font-weight: 800; font-size: 11px; }
   #timePillWrap .v { color: #93a4c4; font-variant-numeric: tabular-nums; font-size: 11px; }
+  #careerGradeBadge { display: inline-block; margin-left: 8px; padding: 2px 9px; border-radius: 10px; font-size: 12px; font-weight: 900; letter-spacing: 1px; color: #0a0e1a; background: #5f6b85; vertical-align: middle; }
+  #petCollectWrap .v { color: #ffb347; font-weight: 800; font-size: 11px; }
+  .rarLegend { margin: 6px 0 2px; font-size: 10px; color: #aebbd8; letter-spacing: 1px; display: flex; gap: 12px; flex-wrap: wrap; }
+  .rarLegend .rarDot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 4px; vertical-align: -1px; }
+  #nextWaveTip { margin-top: 4px; font-size: 11px; color: #9fdce8; letter-spacing: 1px; }
+  .kbRow { margin-top: 4px; font-size: 10px; color: #aebbd8; }
+  .kbBar { display: inline-flex; width: 120px; height: 8px; border-radius: 4px; overflow: hidden; background: #1a2236; margin-right: 8px; vertical-align: middle; }
+  .kbBar i { display: block; height: 100%; }
+  .kbNormal { background: #4da6ff; } .kbBoss { background: #ff2d55; }
+  .dmIcon { display: inline-block; margin: 0 3px; font-size: 14px; }
+  .dmNone { color: #5f6b85; font-size: 10px; letter-spacing: 1px; }
+  .cbPalette { margin: 6px 0; font-size: 10px; color: #aebbd8; letter-spacing: 1px; }
+  .cbSw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin: 0 4px 0 8px; vertical-align: -1px; }
+  #resultMiniBar { margin-top: 6px; font-size: 11px; color: #93a4c4; letter-spacing: 1px; font-variant-numeric: tabular-nums; }
+  #lvTimeBarWrap .v { color: #4da6ff; font-weight: 800; font-size: 11px; }
+  .ltBar { display: inline-block; width: 64px; height: 6px; border-radius: 3px; background: #1a2236; overflow: hidden; vertical-align: middle; margin-left: 6px; }
+  .ltBar i { display: block; height: 100%; background: linear-gradient(90deg, #4da6ff, #00f0ff); }
+  #bossPhaseWrap .v { font-weight: 800; font-size: 11px; letter-spacing: 1px; }
+  #bossPhaseWrap[data-p='danger'] .v { color: #ff2d55; }
+  #bossPhaseWrap[data-p='warn'] .v { color: #ffd166; }
+  #bossPhaseWrap[data-p='ok'] .v { color: #39ff14; }
+  #petUpgWrap .v { color: #ffb347; font-weight: 800; font-size: 11px; }
+  .edHud { font-size: 10px; color: #93a4c4; letter-spacing: 1px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .edHud b { color: #00f0ff; }
+  #p2LivesWrap .v { color: #ff8ab0; font-weight: 800; font-size: 11px; }
+  #portalPairWrap { color: #a06bff; }
+  #careerSnapWrap .v { color: #ffe066; font-weight: 800; font-size: 11px; }
+  #enemyProgWrap .v { color: #ff8ab0; font-weight: 800; font-size: 11px; }
+  /* —— v0.6.45 局内小地图 —— */
+  #miniMap { position: fixed; right: 8px; bottom: 8px; width: 130px; height: 130px; border-radius: 6px; opacity: 0.9; pointer-events: none; z-index: 40; }
+  #bossSkillWrap .v { color: #ff8fa3; font-weight: 800; font-size: 11px; }
+  .achRecent { padding: 8px 12px; border-top: 1px solid #22304a; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .achRecent::before { content: '🕒 最近解锁:'; font-size: 10px; color: #8ea0b8; letter-spacing: 1px; margin-right: 4px; }
+  .achRecentChip { font-size: 10px; padding: 3px 8px; border-radius: 10px; background: #14213a; color: #ffe9a6; border: 1px solid #2c3e63; }
+  .achRecentEmpty { font-size: 10px; color: #5a6b85; }
+  .carRank { padding: 8px 12px; margin: 0 12px; border-radius: 8px; background: linear-gradient(90deg, #14304a, #14213a); color: #00f0ff; font-weight: 800; font-size: 12px; letter-spacing: 1px; border: 1px solid #2c4a7a; }
+  .dailyHist { padding: 6px 12px; }
+  .dailyHistEmpty { font-size: 10px; color: #5a6b85; padding: 4px 0; }
+  .dailyLineSvg { display: block; max-width: 100%; }
+  .shopDeal { padding: 8px 12px; margin: 0 12px; border-radius: 8px; background: linear-gradient(90deg, #3a2a14, #2a1f12); color: #ffe9a6; font-size: 12px; font-weight: 800; letter-spacing: 1px; border: 1px solid #6a4a2a; }
+  #bondCondWrap .v { color: #00f0ff; font-weight: 800; font-size: 11px; }
+  #btnReplay2 { background: linear-gradient(90deg, #2a5a8a, #1a3a5a); border: 1px solid #4a8ac2; }
+  #btnReplay2:hover { filter: brightness(1.2); }
+  /* —— v0.6.53 战绩图评级条 —— */
+  .reportGradeWrap { display: flex; align-items: center; gap: 8px; margin: 0 14px 8px; }
+  .reportGradeBar { display: inline-block; width: 120px; height: 10px; border-radius: 5px; background: linear-gradient(90deg, #8ea0b8, #5a6b85); }
+  .reportGradeVal { font-size: 12px; font-weight: 800; letter-spacing: 1px; color: #00f0ff; }
+  .muteHint { padding: 6px 12px; font-size: 10px; letter-spacing: 1px; color: #8ea0b8; border-top: 1px solid #1a2740; }
+  #dailyRemainWrap .v { color: #ffe9a6; font-weight: 800; font-size: 11px; }
+  #touchBody { font-size: 11px; line-height: 1.6; color: #aebbd8; padding: 4px 2px; }
+  .edShortCode { font-size: 10px; letter-spacing: 1px; color: #ffe9a6; padding: 4px 2px; min-height: 14px; }
+  .edThumb { display: inline-block; vertical-align: middle; margin-right: 6px; }
+  .edThumbSvg { border: 1px solid #2c3e63; border-radius: 3px; background: #0a0e1a; }
+  /* —— v0.6.59 排序标记 —— */
+  .edSortMark { font-size: 9px; color: #5a6b85; margin-left: 6px; }
+  /* —— v0.6.60 重置确认弹层 —— */
+  #resetConfirmBox { position: fixed; inset: 0; z-index: 90; display: none; align-items: center; justify-content: center; background: rgba(4, 8, 16, 0.7); }
+  #resetConfirmBox .rcCard { width: min(320px, 86vw); background: #101828; border: 1px solid #2c3e63; border-radius: 12px; padding: 18px; text-align: center; }
+  #resetConfirmBox .rcTitle { font-size: 16px; font-weight: 800; color: #ffd250; margin-bottom: 10px; }
+  #resetConfirmBox .rcVal { font-size: 12px; line-height: 1.6; color: #aebbd8; margin-bottom: 14px; }
+  #resetConfirmBox .rcBtns { display: flex; gap: 10px; justify-content: center; }
+  #resetConfirmBox .rcBtns button { padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; border: 1px solid #2c3e63; background: #14213a; color: #e6edf7; }
+  #resetConfirmBox .rcBtns #btnResetOk { background: #7a2a2a; border-color: #c25050; color: #ffe1e1; }
+  /* —— v0.6.61 首次游玩引导 —— */
+  #tourBox { position: fixed; inset: 0; z-index: 92; display: flex; align-items: center; justify-content: center; background: rgba(4,8,16,0.72); }
+  #tourBox .tourCard { width: min(360px, 88vw); background: #101828; border: 1px solid #2c3e63; border-radius: 14px; padding: 20px 22px; text-align: center; }
+  #tourBox .tourTitle { font-size: 17px; font-weight: 800; color: #ffe9a6; margin-bottom: 10px; }
+  #tourBox .tourBody { font-size: 12px; line-height: 1.7; color: #aebbd8; margin-bottom: 16px; }
+  #tourBox .tourBtns { display: flex; gap: 10px; justify-content: center; }
+  #tourBox .tourBtns button { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 800; cursor: pointer; border: 1px solid #2c3e63; background: #14213a; color: #e6edf7; }
+  #tourBox .tourBtns #tourNext { background: #0f6e4f; border-color: #1fa46f; color: #d8ffe9; }
+  /* —— v0.6.62 连杀播报 —— */
+  #streakBanner { position: fixed; top: 12%; left: 50%; transform: translateX(-50%); z-index: 40; padding: 8px 20px; font-size: 15px; font-weight: 900; letter-spacing: 1px; color: #ffd250; background: rgba(10,16,28,0.85); border: 1px solid #ffd250; border-radius: 20px; pointer-events: none; }
+  #streakBanner.streakPop { animation: streakPop 0.4s ease; }
+  @keyframes streakPop { 0% { transform: translateX(-50%) scale(0.7); opacity: 0; } 100% { transform: translateX(-50%) scale(1); opacity: 1; } }
+  /* —— v0.6.63 星级规则 —— */
+  #starRuleBox { margin: 6px 0 0; font-size: 11px; color: #8ea0b8; }
+  #starRuleBox summary { cursor: pointer; color: #ffe9a6; font-weight: 800; letter-spacing: 0.5px; }
+  #starRuleBox .srBody { line-height: 1.6; padding: 6px 2px; color: #aebbd8; }
+  /* —— v0.6.64 击杀效率 —— */
+  #kpgVal { color: #ffe9a6; font-weight: 800; }
+  /* —— v0.6.65 大招CD进度条 —— */
+  #ultCdWrap { width: 64px; height: 4px; border-radius: 2px; background: #1a2740; overflow: hidden; margin-top: 3px; }
+  #ultCdWrap #ultCdBar { height: 100%; width: 100%; background: linear-gradient(90deg, #00f0ff, #7c4dff); transition: width 0.1s linear; }
+  #ultCdWrap.ready #ultCdBar { background: #39ff14; }
+  /* —— v0.6.66 道具拾取记录 —— */
+  #pickupLog { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* —— v0.6.67 星级进度 —— */
+  #lvStarTotal { font-size: 12px; font-weight: 800; color: #ffe9a6; padding: 4px 2px; }
+  /* —— v0.6.68 生涯最佳 —— */
+  #bestScoreVal { color: #39ff14; font-weight: 800; }
+  /* —— v0.6.69 命中率面板 —— */
+  #hitRateVal { color: var(--cyan); font-weight: 800; }
+  /* —— v0.6.70 击杀速率 —— */
+  #kpmVal { color: #ffe9a6; font-weight: 800; }
+  /* —— v0.6.71 BOSS击破 —— */
+  #bossKillVal { color: #ff7a9e; font-weight: 800; }
+  /* —— v0.6.72 难度标识 —— */
+  #diffBadgeVal { color: #b48cff; font-weight: 800; }
+  /* —— v0.6.73 阵亡统计 —— */
+  #deathVal { color: #ff8a5c; font-weight: 800; }
+  /* —— v0.6.74 本关击杀 —— */
+  #lvKillVal { color: #6fffd0; font-weight: 800; }
+  /* —— v0.6.75 连击倍率 —— */
+  #comboMultVal { color: #ffd250; font-weight: 800; }
+  /* —— v0.6.76 生涯击杀 —— */
+  #careerKillVal { color: #39ff14; font-weight: 800; }
+  /* —— v0.6.77 K/D 比值 —— */
+  #kdVal { color: #ff9f43; font-weight: 800; }
+  /* —— v0.6.78 生涯命中率 —— */
+  #careerHitVal { color: #26c6ff; font-weight: 800; }
+  /* —— v0.6.79 生涯游玩时长 —— */
+  #careerTimeVal { color: #7ee8fa; font-weight: 800; }
+  /* —— v0.6.80 生涯总金币 —— */
+  #careerCoinVal { color: #ffd700; font-weight: 800; }
+  /* —— v0.6.81 生涯BOSS —— */
+  #careerBossVal { color: #ff5c8a; font-weight: 800; }
+  /* —— v0.6.82 存活敌人 —— */
+  #enemyLeftVal { color: #ff4d4d; font-weight: 800; }
+  /* —— v0.6.83 飞行子弹 —— */
+  #bulletFlyVal { color: #ffe066; font-weight: 800; }
+  /* —— v0.6.84 道具在场 —— */
+  #powerupFieldVal { color: #7dff7d; font-weight: 800; }
+  .fxBarWrap { height: 4px; border-radius: 2px; background: rgba(255,255,255,.12); overflow: hidden; margin: 2px 0 0; max-width: 220px; }
+  .fxBarWrap i { display: block; height: 100%; background: linear-gradient(90deg, #00f0ff, #ffd700); transition: width .2s; }
+  #fireKeyBtn { font-size: 11px; padding: 4px 10px; border-radius: 8px; border: 1px solid rgba(126,231,255,.4); background: rgba(126,231,255,.08); color: #7ee7ff; cursor: pointer; font-weight: 700; }
+  #fireKeyBtn:active { transform: translateY(1px); }
+  #nextAchTip { font-size: 11px; color: #ffd700; }
+  #scoreRatePill .v { color: #ffd166; font-variant-numeric: tabular-nums; font-size: 11px; }
+  #bossRunPill .v { color: #ff6b6b; font-weight: 800; font-size: 11px; }
+  #comboAchWrap { border-color: rgba(255,77,109,.55); background: rgba(255,77,109,.10); }
+  #comboAchWrap .v { color: #ff6b6b; font-weight: 800; font-size: 11px; }
+  #winProgPill .v { color: #ffd700; font-weight: 700; font-size: 11px; }
+  #lvProgPill .v { color: #93a4c4; font-size: 11px; }
+  #runShotsPill .v { color: #7ee7ff; font-size: 11px; }
+  #runTimePill .v { color: #7ee7ff; font-variant-numeric: tabular-nums; font-size: 11px; }
+  #careerKillPill .v { color: #ffd700; font-size: 11px; }
+  #heroUltPill .v { color: #b388ff; font-weight: 700; font-size: 11px; }
+  #revivePill .v { color: #ff9f43; font-size: 11px; }
+  #careerGamePill .v { color: #93a4c4; font-size: 11px; }
+  #scoreNowPill .v { color: #ffd166; font-size: 11px; }
+  #runKillPill .v { color: #ff6b6b; font-weight: 700; font-size: 11px; }
+  #baseFortPill .v { color: #4ecdc4; font-size: 11px; }
+  #runCoinPill .v { color: #ffd700; font-size: 11px; }
+  #ultWavePill .v { color: #b388ff; font-size: 11px; }
+  #runHitPill .v { color: #7ee7ff; font-size: 11px; }
+  #petEquipPill .v { color: #ff8ab0; font-size: 11px; }
+  #petCoinPill .v { color: #b39ddb; font-size: 11px; }
+  #runUpgPill .v { color: #ffd250; font-size: 11px; }
+  #runPickPill .v { color: #ff9f43; font-size: 11px; }
+  #accPillWrap .v { color: #7ee7ff; font-weight: 800; font-size: 11px; }
+  #deathsPillWrap .v { color: #ff5c5c; font-weight: 800; font-size: 11px; }
+  #bossPillWrap .v { color: #ffd700; font-weight: 800; font-size: 11px; }
+  #shotsPillWrap .v { color: #cfe3ff; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -1812,6 +1966,7 @@
     <div class="pill m-hide" id="modeWrap"><span class="k">模式</span><span class="v" id="modeName">标准</span></div>
     <div id="dangerTip" class="m-hide">基地状态良好</div>
     <div class="pill m-hide" id="bondBadgeWrap"><span class="k">羁绊</span><span class="v" id="bondBadge">—</span></div>
+    <div class="pill m-hide" id="bondCondWrap"><span class="k">条件</span><span class="v" id="bondCondVal">—</span></div>
     <div class="pill m-hide" id="petPillWrap"><span class="k">宠物</span><span class="v" id="petPillVal">—</span></div>
     <div class="comboBarWrap m-hide" id="comboBarWrap"><div id="comboBarFill"></div></div>
     <div class="pill m-hide" id="milestoneWrap"><span class="k">里程碑</span><span class="v" id="milestoneVal">—</span></div>
@@ -1826,6 +1981,70 @@
     <div class="pill m-hide" id="bestDeltaWrap"><span class="k">目标</span><span class="v" id="bestDeltaVal">—</span></div>
     <div class="pill m-hide" id="upgPillWrap"><span class="k">强化</span><span class="v" id="upgPillVal">—</span></div>
     <div class="pill m-hide" id="timePillWrap"><span class="k">⏱</span><span class="v" id="timePillVal">0 秒</span></div>
+      <span class="carGrade" id="careerGradeBadge">C</span>
+    <div class="pill m-hide" id="petCollectWrap"><span class="k">🐾</span><span class="v" id="petCollectVal">0/4</span></div>
+      <div id="nextWaveTip" class="m-hide"></div>
+    <div class="pill m-hide" id="lvTimeBarWrap"><span class="k">⏱</span><span class="v" id="lvTimeBarVal">0s / 87s</span><i class="ltBar"><i id="lvTimeBarFill" style="width:0%"></i></i></div>
+    <div class="pill m-hide" id="bossPhaseWrap"><span class="k">👹</span><span class="v" id="bossPhaseVal">—</span></div>
+    <div class="pill m-hide" id="bossSkillWrap"><span class="k">技</span><span class="v" id="bossSkillVal">—</span></div>
+    <div class="pill m-hide" id="petUpgWrap"><span class="k">🐾</span><span class="v" id="petUpgVal">—</span></div>
+    <div class="pill m-hide" id="p2LivesWrap"><span class="k">P2</span><span class="v" id="p2LivesVal">❤×0</span></div>
+    <div class="pill m-hide" id="careerSnapWrap"><span class="k">📊</span><span class="v" id="careerSnapVal">0局 · 0杀 · 0币</span></div>
+    <div class="pill m-hide" id="enemyProgWrap"><span class="k">🎯</span><span class="v" id="enemyProgVal">第1关 · 🎯 0/?</span></div>
+    <canvas id="miniMap" width="130" height="130" class="m-hide"></canvas>
+    <div class="pill m-hide" id="dailyRemainWrap"><span class="k">⏳</span><span class="v" id="dailyRemainVal">—</span></div>
+    <div id="tourBox" class="m-hide">
+      <div class="tourCard">
+        <div class="tourTitle" id="tourTitle"></div>
+        <div class="tourBody" id="tourBody"></div>
+        <div class="tourBtns"><button id="tourClose">跳过引导</button><button id="tourNext">下一步 →</button></div>
+      </div>
+    </div>
+    <div id="streakBanner" class="m-hide"></div>
+    <div class="pill m-hide" id="ultCdWrap"><span class="k">💥</span><div id="ultCdBar"></div></div>
+    <div class="pill m-hide" id="pickupLog"></div>
+    <div class="pill m-hide"><span class="k">🎯</span><span class="v" id="hitRateVal"></span></div>
+    <div class="pill m-hide"><span class="k">⚔</span><span class="v" id="kpmVal"></span></div>
+    <div class="pill m-hide"><span class="k">👑</span><span class="v" id="bossKillVal"></span></div>
+    <div class="pill m-hide"><span class="k">🎚</span><span class="v" id="diffBadgeVal"></span></div>
+    <div class="pill m-hide"><span class="k">💀</span><span class="v" id="deathVal"></span></div>
+    <div class="pill m-hide"><span class="k">🏁</span><span class="v" id="lvKillVal"></span></div>
+    <div class="pill m-hide"><span class="k">🔥</span><span class="v" id="comboMultVal"></span></div>
+    <div class="pill m-hide"><span class="k">🏆</span><span class="v" id="careerKillVal"></span></div>
+    <div class="pill m-hide"><span class="k">🎖</span><span class="v" id="kdVal"></span></div>
+    <div class="pill m-hide"><span class="k">🎯</span><span class="v" id="careerHitVal"></span></div>
+    <div class="pill m-hide"><span class="k">⏱</span><span class="v" id="careerTimeVal"></span></div>
+    <div class="pill m-hide"><span class="k">💰</span><span class="v" id="careerCoinVal"></span></div>
+    <div class="pill m-hide"><span class="k">🐉</span><span class="v" id="careerBossVal"></span></div>
+    <div class="pill m-hide"><span class="k">👾</span><span class="v" id="enemyLeftVal"></span></div>
+    <div class="pill m-hide"><span class="k">💥</span><span class="v" id="bulletFlyVal"></span></div>
+    <div class="pill m-hide"><span class="k">🧰</span><span class="v" id="powerupFieldVal"></span></div>
+    <div class="fxBarWrap m-hide" id="fxBarWrap"><i id="fxBarFill" style="width:0%"></i></div>
+    <div class="pill m-hide" id="scoreRatePill"><span class="k">速率</span><span class="v" id="scoreRateVal">0 分/分</span></div>
+    <div class="pill m-hide" id="bossRunPill"><span class="k">BOSS</span><span class="v" id="bossRunVal">BOSS ×0</span></div>
+    <div class="pill m-hide" id="comboAchWrap"><span class="v" id="comboAchVal"></span></div>
+    <div class="pill m-hide" id="winProgPill"><span class="k">胜利</span><span class="v" id="winProgVal">0/50</span></div>
+    <div class="pill m-hide" id="lvProgPill"><span class="k">关卡</span><span class="v" id="lvProgVal">第 1 关 / 已解锁 1</span></div>
+    <div class="pill m-hide" id="runShotsPill"><span class="k">开火</span><span class="v" id="runShotsVal">开火 0</span></div>
+    <div class="pill m-hide" id="runTimePill"><span class="k">时长</span><span class="v" id="runTimeVal">0:00</span></div>
+    <div class="pill m-hide" id="careerKillPill"><span class="k">生涯</span><span class="v" id="careerKillVal">生涯击杀 0</span></div>
+    <div class="pill m-hide" id="heroUltPill"><span class="k">英雄</span><span class="v" id="heroUltVal">大招 就绪!</span></div>
+    <div class="pill m-hide" id="revivePill"><span class="k">复活</span><span class="v" id="reviveVal">复活 ×0</span></div>
+    <div class="pill m-hide" id="careerGamePill"><span class="k">对局</span><span class="v" id="careerGameVal">生涯 0 局</span></div>
+    <div class="pill m-hide" id="scoreNowPill"><span class="k">得分</span><span class="v" id="scoreNowVal">得分 0</span></div>
+    <div class="pill m-hide" id="runKillPill"><span class="k">击破</span><span class="v" id="runKillVal">击破 0</span></div>
+    <div class="pill m-hide" id="baseFortPill"><span class="k">基地</span><span class="v" id="baseFortVal">基地 护墙 Lv.0</span></div>
+    <div class="pill m-hide" id="runCoinPill"><span class="k">金币</span><span class="v" id="runCoinVal">本局金币 +0</span></div>
+    <div class="pill m-hide" id="ultWavePill"><span class="k">大招</span><span class="v" id="ultWaveVal">冲击波 ×0</span></div>
+    <div class="pill m-hide" id="runHitPill"><span class="k">命中</span><span class="v" id="runHitVal">命中 0</span></div>
+    <div class="pill m-hide" id="petEquipPill"><span class="k">宠物</span><span class="v" id="petEquipVal">宠物 无</span></div>
+    <div class="pill m-hide" id="petCoinPill"><span class="k">🐾</span><span class="v" id="petCoinVal">🐾 宠物币 0</span></div>
+    <div class="pill m-hide" id="runUpgPill"><span class="k">强化</span><span class="v" id="runUpgVal">强化 ×0</span></div>
+    <div class="pill m-hide" id="runPickPill"><span class="k">道具</span><span class="v" id="runPickVal">道具拾取 0</span></div>
+    <div class="pill m-hide" id="accPillWrap"><span class="k">命中率</span><span class="v" id="accPillVal">—</span></div>
+    <div class="pill m-hide" id="deathsPillWrap"><span class="k">阵亡</span><span class="v" id="deathsPillVal">—</span></div>
+    <div class="pill m-hide" id="bossPillWrap"><span class="k">Boss</span><span class="v" id="bossPillVal">—</span></div>
+    <div class="pill m-hide" id="shotsPillWrap"><span class="k">开炮</span><span class="v" id="shotsPillVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1911,6 +2130,7 @@
       </div>
       <!-- v0.3.19 每日挑战「今日英雄」推荐提示(随 btnDaily 显隐) -->
       <div id="dailyHeroTip" class="dailyTip"></div>
+      <div id="dailyModIcons" class="dailyTip"></div>
     </div>
     <!-- 内容与工具 -->
     <div class="menuGroup" id="groupTools">
@@ -1932,17 +2152,25 @@
     <div class="pauseRow" id="pauseRow">
       <button id="btnRestart">🔄 重新开始本局</button>
       <button id="btnQuit">🏠 回到主菜单</button>
+      <button id="btnReplay2">⚡ 一键重开</button>
       <button id="btnRevive">🪙 花金币复活基地</button>
       <button id="btnShare">📤 分享成绩 · 发起挑战</button>
       <button id="btnReport">🖼 生成战绩图</button>
     </div>
     <div id="ovTip"></div>
+        <div id="resultMiniBar" class="m-hide"></div>
+        <div id="killBreakdown" class="m-hide"></div>
     <div class="volRow" id="volRow">
       <span class="volIcon" id="volIcon">🔊</span>
       <input id="volSlider" type="range" min="0" max="100" value="100" aria-label="主音量">
       <span class="volPct" id="volPct">100%</span>
     </div>
+    <div class="muteHint" id="muteHint">🔊 按 M 键一键静音</div>
     <div class="settings" id="settings">
+      <div class="setRow"><span class="setLabel">🏆 成就</span><span id="nextAchTip"></span></div>
+      <div class="setRow"><span class="setLabel">⌨️ 开火键</span><button id="fireKeyBtn">空格 / J（默认）</button></div>
+      <div class="setRow"><span>📖 新手引导</span><button class="setBtn" id="btnTourReplay">重新查看</button></div>
+      <details id="touchBox" class="saveStatBox"><summary>🕹 触屏布局</summary><div id="touchBody"></div></details>
       <label class="fpsToggle"><input type="checkbox" id="fpsToggle"> 显示 FPS 帧率</label>      <details id="backupAgeBox" class="saveStatBox"><summary>📦 备份状态（点开刷新）</summary><div id="backupAgeBody">—</div></details>
       <details id="saveStatBox" class="saveStatBox"><summary>💾 存档状态（点开刷新）</summary><div id="saveStatBody">—</div></details>
       <details id="keyHintBox"><summary>⌨️ 键位速查</summary><div id="keyHintText"></div></details>
@@ -1984,6 +2212,7 @@
       </div>
       <div class="setRow">
         <span class="setLabel">🌈 色弱友好<span class="hint">重映射冲突色</span></span>
+    <div class="cbPalette" id="cbPalette"></div>
         <div class="seg" id="cbSeg">
           <button data-cb="0">关</button>
           <button data-cb="1">开</button>
@@ -2025,6 +2254,7 @@
   </div>
 
   <div id="reportBox">
+    <div class="reportGradeWrap"><span class="reportGradeBar" id="reportGradeBar"></span><span class="reportGradeVal" id="reportGradeVal">C</span></div>
     <img id="reportImg" alt="战绩图">
     <div class="tip">长按图片保存 · 发给朋友</div>
     <div class="btns">
@@ -2041,6 +2271,7 @@
       <button class="achClose" id="btnAchClose" aria-label="关闭">✕</button>
     </div>
     <div class="achBody" id="achBody"></div>
+    <div class="achRecent" id="achRecent"></div>
   </div>
 
   <!-- v0.2.5 战绩档案：生涯累计 + 本地排行榜 -->
@@ -2051,6 +2282,8 @@
       <button class="carClose" id="btnCarClose" aria-label="关闭">✕</button>
     </div>
     <div class="carBody" id="carBody"></div>
+    <div class="dailyHist" id="dailyHist"></div>
+    <div class="carRank" id="carRank"></div>
     <div class="carBtns">
       <button class="carReport" id="btnCarReport">🖼 生成战绩图</button>
       <button class="carReport" id="btnCarRep">📋 生涯报告</button>
@@ -2082,7 +2315,9 @@
   <div id="lvSelect">
     <div class="lvHead">
       <div class="lvTitle">🗺 关卡选择</div>
+      <details id="starRuleBox"><summary>⭐ 星级规则</summary><div class="srBody" id="starRuleBody"></div></details>
       <div class="lvSub" id="lvSelSub"></div>
+      <div id="lvStarTotal"></div>
       <button class="lvClose" id="btnLvSelClose" aria-label="关闭">✕</button>
     </div>
     <div class="lvGrid" id="lvGrid"></div>
@@ -2124,6 +2359,8 @@
       </div>
       <div class="edBody">
         <div class="edGridWrap"><canvas id="edCanvas" width="624" height="624"></canvas></div>
+        <div class="edHud" id="portalPairWrap">🌀 传送门 <b id="portalPairVal">0 对</b></div>
+        <div class="edHud" id="edCoordWrap">📐 光标格 <b id="edCoordVal">R1C1</b></div>
         <div class="edSide">
           <div class="edPalette" id="edPalette"></div>
           <div class="edBtns" id="edBtns">
@@ -2133,7 +2370,8 @@
             <button class="edBtn" data-ed="import">📥 导入分享码</button>
             <button class="edBtn primary" data-ed="play">▶ 游玩此关卡</button>
           </div>
-          <div class="edListHead">已存关卡</div>
+          <div class="edShortCode" id="edShortCode"></div>
+          <div class="edListHead">已存关卡 <span class="edSortMark">· 最新在前</span></div>
           <div class="edList" id="edList"></div>
         </div>
       </div>
@@ -2142,6 +2380,16 @@
   </div>
 
   <!-- v0.2.3 存档备份/恢复 -->
+  <div id="resetConfirmBox">
+    <div class="rcCard">
+      <div class="rcTitle">⚠️ 确认重置强化</div>
+      <div class="rcVal" id="resetConfirmVal"></div>
+      <div class="rcBtns">
+        <button id="btnResetOk">确认重置</button>
+        <button id="btnResetCancel">取消</button>
+      </div>
+    </div>
+  </div>
   <div id="saveBox">
     <div class="achHead">
       <div class="achTitle">💾 存档</div>
@@ -2172,7 +2420,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V6.28</div>
+  <div id="mark">DESIGNED BY QIAN · V7.10</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2219,6 +2467,8 @@
       <button class="shopClose" id="btnShopClose" aria-label="关闭">✕</button>
     </div>
     <div class="petEarnHint">🐾 宠物币来源:<b>🏅成就</b> 1-3/枚(共65) · <b>📅签到</b> +1 · <b>🌊无尽</b> 每10波+1(羁绊激活×2) ｜ 消耗:宠物 · 英雄解锁</div>
+    <div class="rarLegend" id="rarLegend"></div>
+    <div class="shopDeal" id="shopDeal"></div>
     <div class="shopTabs">
       <button class="shopTab active" id="tabBonus">永久加成</button>
       <button class="shopTab" id="tabSkins">角色皮肤</button>
@@ -3051,10 +3301,14 @@
 
   // ===== 局内统计（战绩图 / 分享） =====
   let stat = { kills: 0, shots: 0, hits: 0, maxCombo: 0, bossKills: 0, deaths: 0 };
+  let runPowerups = 0;
+  let runCoins = 0;
   // —— v0.2.6 战绩图：保存上一局快照（供战绩档案「生成战绩图」复用） ——
   let lastRun = null;
   function resetStat() {
     stat = { kills: 0, shots: 0, hits: 0, maxCombo: 0, bossKills: 0, deaths: 0 };
+    runPowerups = 0;
+    runCoins = 0;
   }
 
   // ===== v0.2.5 战绩档案：生涯累计 + 本地排行榜 =====
@@ -3292,6 +3546,7 @@
     if (show) {
       const def = HEROES[dailyHero()];
       if (def) tip.innerHTML = dailyHeroTipHtml(def.icon, def.name, def.desc);
+    const dmi = $('dailyModIcons'); if (dmi) dmi.innerHTML = dailyModIconsHtml(dailyMods);
     }
   }
   let dailyMode = false;        // 本局是否每日挑战
@@ -4835,6 +5090,7 @@
   // 大招冷却 HUD：冷却时置灰显示倒计时秒，可用时高亮呼吸
   function updateUltHud() {
     const btn = document.getElementById('tUlt'), cd = document.getElementById('ultCd');
+    renderUltBar();
     if (!btn || !cd) return;
     if (player && player.ultCd > 0) {
       btn.classList.add('cooling'); btn.classList.remove('ready');
@@ -5006,6 +5262,7 @@
     coinLogPush(gain, '击杀');
     // —— v0.2.7 生涯统计：累计获得金币（recordGame 统一持久化） ——
     career.totalCoins += gain;
+    runCoins += gain;
     // —— v0.2.4 成就：金库余额达 3000 ——
     if (coins >= 3000) unlockAch('rich');
     // —— v0.3.2 金币大亨：余额达 10000 ——
@@ -5060,6 +5317,7 @@
     spawnParticles(e.x + e.size / 2, e.y + e.size / 2, e.color, e.isBoss ? 48 : 16);
     shake = e.isBoss ? 16 : 6;
     stat.kills++;
+    streakFlash(stat.kills);
     levelKills++;                                   // —— v0.2.6 本关击杀（结算界面） ——
     if (e.isBoss) stat.bossKills++;
     addKillScore(e);
@@ -5187,6 +5445,8 @@
       case 'freeze': fx.freeze = 5; break;
       case 'bomb':   bombEnemies(); break;
     }
+    runPowerups++;
+    pushPickup(type);
     showToast(powerupMsg(def.label));
   }
 
@@ -6991,6 +7251,66 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const bdV = $('bestDeltaVal'); if (bdV) bdV.textContent = bestDeltaText(score, best);
     const upv = $('upgPillVal'); if (upv) upv.textContent = upgTotalText(upgTotal);
     const tp2 = $('timePillVal'); if (tp2) tp2.textContent = playTimeText(playSecRun);
+    const pcV = $('petCollectVal'); if (pcV) pcV.textContent = petCollectText(ownedPets.length, PET_DEF.length);
+    const ltb = $('lvTimeBarVal'); if (ltb) ltb.textContent = levelTimeBarText(levelSecs, level); const ltf = $('lvTimeBarFill'); if (ltf) ltf.style.width = levelTimePct(levelSecs, level) + '%';
+    const bpv = $('bossPhaseVal'); if (bpv) bpv.textContent = bossPhaseBadge(bossHp, bossMaxHp); const bpw = $('bossPhaseWrap'); if (bpw) bpw.setAttribute('data-p', bossHp > 0 && bossHp / bossMaxHp <= 0.25 ? 'danger' : (bossHp > 0 && bossHp / bossMaxHp <= 0.5 ? 'warn' : 'ok'));
+    const puv = $('petUpgVal'); if (puv) puv.textContent = pet ? petUpgCostText(pet.level, (PET_MAP[pet.id] ? PET_MAP[pet.id].maxLv : 0)) : '未装备宠物';
+    const p2w = $('p2LivesWrap'); if (p2w) p2w.classList.toggle('m-hide', multiMode === 0); const p2v = $('p2LivesVal'); if (p2v) p2v.textContent = p2LivesText(lives2);
+    const csv = $('careerSnapVal'); if (csv) csv.textContent = careerSnapText(career);
+    const epv = $('enemyProgVal'); if (epv) epv.textContent = enemyProgressText(level, levelKills, enemiesTotal);
+    drawMiniMap();
+    const bsv = $('bossSkillVal'); if (bsv) bsv.textContent = bossSkillLabel(bossType);
+    const bcv = $('bondCondVal'); if (bcv) { const ab = activeBond(); bcv.textContent = bondCondText(ab); }
+    const drv = $('dailyRemainVal'); if (drv && dailyMode) drv.textContent = dailyRemainText(Date.now());
+    const hrV = $('hitRateVal'); if (hrV) hrV.textContent = hitRateText(stat.hits, stat.shots);
+    const kpmV = $('kpmVal'); if (kpmV) kpmV.textContent = kpmText(stat.kills, playSecRun);
+    const bkV = $('bossKillVal'); if (bkV) bkV.textContent = bossKillText(stat.bossKills);
+    const dbV = $('diffBadgeVal'); if (dbV) dbV.textContent = diffBadgeText(difficulty);
+    const dtV = $('deathVal'); if (dtV) dtV.textContent = deathText(stat.deaths);
+    const lkV = $('lvKillVal'); if (lkV) lkV.textContent = lvKillText(levelKills, enemiesTotal);
+    const cmV = $('comboMultVal'); if (cmV) cmV.textContent = comboMultText(combo);
+    const ckV = $('careerKillVal'); if (ckV) ckV.textContent = careerKillText(career.kills);
+    const kdV = $('kdVal'); if (kdV) kdV.textContent = kdText(stat.kills, stat.deaths);
+    const chV = $('careerHitVal'); if (chV) chV.textContent = careerHitText(career.hits, career.shots);
+    const ctV = $('careerTimeVal'); if (ctV) ctV.textContent = careerTimeText(career.playSec);
+    const ccV = $('careerCoinVal'); if (ccV) ccV.textContent = careerCoinText(career.totalCoins);
+    const cbV = $('careerBossVal'); if (cbV) cbV.textContent = careerBossText(career.bossKills);
+    const elV = $('enemyLeftVal'); if (elV) elV.textContent = enemyLeftText(enemies.length);
+    const bfV = $('bulletFlyVal'); if (bfV) bfV.textContent = bulletFlyText(bullets.length);
+    const pfV = $('powerupFieldVal'); if (pfV) pfV.textContent = powerupFieldText(powerups.length);
+    const fxBar = $('fxBarFill'); if (fxBar) fxBar.style.width = fxBarWidth(fx, FX_MAX);
+    const fkb = $('fireKeyBtn'); if (fkb) { if (!fkb.dataset.wired) { fkb.onclick = () => { cycleFireKey(); updateExtraHud(); }; fkb.dataset.wired = '1'; } fkb.textContent = fireKeySummary(); }
+    const nat = $('nextAchTip'); if (nat) nat.textContent = nextAchText(achUnlocked, ACHIEVE);
+    const sr = $('scoreRateVal'); if (sr) sr.textContent = scoreRateText(score, playSecRun);
+    const brv = $('bossRunVal'); if (brv) brv.textContent = bossRunText(stat.bossKills);
+    const ca = $('comboAchVal'); if (ca) ca.textContent = comboAchBadge(stat.maxCombo);
+    const wp = $('winProgVal'); if (wp) wp.textContent = winProgressText(career.wins, 50);
+    const lp = $('lvProgVal'); if (lp) lp.textContent = levelProgressText(level, maxUnlocked);
+    const rsv = $('runShotsVal'); if (rsv) rsv.textContent = runShotsText(stat.shots);
+    const rtv = $('runTimeVal'); if (rtv) rtv.textContent = runTimeText(playSecRun);
+    const ckv = $('careerKillVal'); if (ckv) ckv.textContent = careerKillsText(career.kills);
+    const huv = $('heroUltVal'); if (huv) huv.textContent = heroUltText(heroUltCd, HERO_ULT_CD);
+    const rpv = $('reviveVal'); if (rpv) rpv.textContent = revivePillText(reviveCount);
+    const cgv = $('careerGameVal'); if (cgv) cgv.textContent = careerGamesText(career.games);
+    const snv = $('scoreNowVal'); if (snv) snv.textContent = scoreNowText(score);
+    const rkv = $('runKillVal'); if (rkv) rkv.textContent = runKillsText(stat.kills);
+    const bfv = $('baseFortVal'); if (bfv) bfv.textContent = baseFortText(baseLevel);
+    const rcv = $('runCoinVal'); if (rcv) rcv.textContent = runCoinsText(runCoins);
+    const uwv = $('ultWaveVal'); if (uwv) uwv.textContent = ultWaveText(ultWaves.length);
+    const rhv = $('runHitVal'); if (rhv) rhv.textContent = runHitsText(stat.hits);
+    const pev = $('petEquipVal'); if (pev) pev.textContent = petEquipText(pet);
+    const pcv = $('petCoinVal'); if (pcv) pcv.textContent = petCoinText(petCoins);
+    const ruv = $('runUpgVal'); if (ruv) ruv.textContent = runUpgText(upgTotal);
+    const rpv2 = $('runPickVal'); if (rpv2) rpv2.textContent = runPickupText(runPowerups);
+    const acV = $('accPillVal'); if (acV) acV.textContent = accPillText(stat.shots, stat.hits);
+    const dcV = $('deathsPillVal'); if (dcV) dcV.textContent = runDeathsText(stat.deaths);
+    const bPV = $('bossPillVal'); if (bPV) bPV.textContent = runBossText(stat.bossKills);
+    const pillShots = $('shotsPillVal'); if (pillShots) pillShots.textContent = runShotsText(stat.shots);
+    const pillBase = $('basePillVal'); if (pillBase) pillBase.textContent = baseLevelText(baseLevel);
+    const pillLvK = $('lvKillsPillVal'); if (pillLvK) pillLvK.textContent = levelKillsText(levelKills);
+    const pillRev = $('revivePillVal'); if (pillRev) pillRev.textContent = reviveText(reviveCount);
+    const pillPor = $('portalPillVal'); if (pillPor) pillPor.textContent = portalText(portals.length);
+    const r21shV = $('shotsPillVal'); if (shV) shV.textContent = runShotsText(stat.shots);
     // __EXTRA_HUD__
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
   }
@@ -7188,9 +7508,584 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const sec = s2 % 60;
     return m > 0 ? m + ' 分 ' + sec + ' 秒' : sec + ' 秒';
   }
-  function insufficientMsg(kind, have, need, label) {
+  // —— v0.6.29 生涯评级徽章 ——
+  function careerGradeText(games, kills) {
+    const g = Math.max(0, safeInt(games, 0)), k = Math.max(0, safeInt(kills, 0));
+    if (g >= 60 && k >= 800) return 'S';
+    if (g >= 30 && k >= 300) return 'A';
+    if (g >= 10 && k >= 60) return 'B';
+    return 'C';
+  }
+  function careerGradeColor(grade) {
+    return grade === 'S' ? '#ffe066' : grade === 'A' ? '#ff8ab0' : grade === 'B' ? '#93a4c4' : '#5f6b85';
+  }
+  // —— v0.6.30 宠物收藏进度 ——
+  function petCollectText(owned, total) {
+    const o = Math.max(0, safeInt(owned, 0));
+    const t0 = safeInt(total, 4), tt = t0 > 0 ? t0 : 4;
+    return o + '/' + tt;
+  }
+  function petCollectPct(owned, total) {
+    const t0 = safeInt(total, 4), tt = t0 > 0 ? t0 : 4;
+    return Math.min(100, Math.round(Math.max(0, safeInt(owned, 0)) / tt * 100));
+  }
+  // —— v0.6.31 皮肤稀有度图例 ——
+  function rarLegendHtml() {
+    const map = [['rare','稀有','#4da6ff'],['epic','史诗','#c86bff'],['legendary','传奇','#ffb347'],['limited','限定','#ff2d55']];
+    return map.map(x => '<span class="rarDot" style="background:' + x[2] + '"></span>' + x[1]).join(' ');
+  }
+  // —— v0.6.32 下一关预告 ——
+  function nextWavePreview(lv, endless) {
+    const n = Math.max(0, safeInt(lv, 0));
+    if (endless) return '第 ' + (n + 1) + ' 波敌人来袭';
+    const r = (n % 5);
+    return r === 4 ? '⚠ 下一关 BOSS 战！' : '下一关 敌人等级 ' + (n + 1) + ' · 小怪 ' + (3 + (n % 3) * 2) + ' 只';
+  }
+  // —— v0.6.33 击杀构成分布 ——
+  function killBreakdownHtml(kills, bossKills) {
+    const k = Math.max(0, safeInt(kills, 0)), b = Math.max(0, safeInt(bossKills, 0));
+    const total = k + b;
+    if (total === 0) return '<div class="kbRow"><span class="kbBar"><i style="width:0%"></i></span><span class="kbLbl">本局无击杀</span></div>';
+    const bp = Math.round(b / total * 100);
+    return '<div class="kbRow"><span class="kbBar"><i class="kbNormal" style="width:' + (100 - bp) + '%"></i><i class="kbBoss" style="width:' + bp + '%"></i></span>'
+      + '<span class="kbLbl">普通 ' + k + ' · Boss ' + b + '</span></div>';
+  }
+  // —— v0.6.34 每日挑战词条图标化 ——
+  function dailyModIconsHtml(mods) {
+    const icons = { fastonly: '⚡', brawlers: '🐗', doublepu: '🎁', nolives: '💀', tanky: '🛡', bossrush: '👹' };
+    const list = mods && mods._names ? mods._names : [];
+    if (!list.length) return '<span class="dmNone">今日无额外词条</span>';
+    return list.map(id => '<span class="dmIcon" title="' + id + '">' + (icons[id] || '📌') + '</span>').join('');
+  }
+  // —— v0.6.35 色弱色板预览 ——
+  function cbPaletteHtml(on) {
+    const norm = [['#ff2d55','敌弹','#39ff14','己方'],['#4da6ff','蓝','#ffe066','金']];
+    const cb = [['#ff8ab0','敌弹','#00e5ff','己方'],['#ffd166','蓝','#ffb347','金']];
+    const set = on ? cb : norm;
+    return set.map(x => '<span class="cbSw" style="background:' + x[0] + '"></span>' + x[1] + ' <span class="cbSw" style="background:' + x[2] + '"></span>' + x[3]).join(' · ');
+  }
+  // —— v0.6.36 本局战绩小结条 ——
+  function resultMiniText(kills, maxCombo, acc, secs) {
+    const k = Math.max(0, safeInt(kills, 0)), c = Math.max(1, safeInt(maxCombo, 1));
+    const a = Math.max(0, Math.min(100, Math.round(Number(acc) || 0)));
+    const s = Math.max(0, Math.floor(Number(secs) || 0));
+    const mm = Math.floor(s / 60), ss = s % 60;
+    return '击杀 ' + k + ' · 连击 ×' + c + ' · 命中 ' + a + '% · 用时 ' + mm + ':' + (ss < 10 ? '0' : '') + ss;
+  }
+  // —— v0.6.37 关卡用时星级进度条(对照星级时限 75+lv*12 秒) ——
+  function levelTimeLimit(lv) { const L = Math.max(1, Math.floor(Number(lv) || 0)); return 75 + L * 12; }
+  function levelTimePct(secs, lv) {
+    const s = Math.max(0, Number(secs) || 0), lim = levelTimeLimit(lv);
+    return Math.min(100, Math.max(0, Math.round(s / lim * 100)));
+  }
+  function levelTimeBarText(secs, lv) {
+    const s = Math.max(0, Math.floor(Number(secs) || 0));
+    return '⏱ ' + s + 's / ' + levelTimeLimit(lv) + 's';
+  }
+  // —— v0.6.38 BOSS 阶段徽章(稳定/过半/濒危) ——
+  function bossPhaseBadge(hp, maxHp) {
+    const h = Math.max(0, Number(hp) || 0), m = Math.max(0, Number(maxHp) || 0);
+    if (m <= 0 || h <= 0) return '—';
+    const r = h / m;
+    if (r <= 0.25) return '💀 濒危';
+    if (r <= 0.5) return '⚠️ 过半';
+    return '🟢 稳定';
+  }
+  // —— v0.6.39 宠物升级消耗预览(下一级宠物币) ——
+  function petUpgCost(level, maxLv) {
+    const L = Math.max(1, Math.floor(Number(level) || 0)), M = Math.max(1, Math.floor(Number(maxLv) || 0));
+    if (L >= M) return 0;
+    return PET_LV_PET[Math.min(L, PET_LV_PET.length - 1)] || 0;
+  }
+  function petUpgCostText(level, maxLv) {
+    const L = Math.max(1, Math.floor(Number(level) || 0)), M = Math.max(1, Math.floor(Number(maxLv) || 0));
+    if (L >= M) return '已满级';
+    return '下一级 ' + petUpgCost(L, M) + '🐾';
+  }
+  // —— v0.6.40 编辑器格子坐标显示(光标所在格 R行C列) ——
+  function cellCoordLabel(gx, gy) {
+    const c = Math.max(1, Math.floor(Number(gx) || 0) + 1), r = Math.max(1, Math.floor(Number(gy) || 0) + 1);
+    return 'R' + r + 'C' + c;
+  }
+  function cellCoordFromPx(px, py, cell) {
+    const s = Math.max(1, Number(cell) || 24);
+    const c = Math.floor(Math.max(0, Number(px) || 0) / s), r = Math.floor(Math.max(0, Number(py) || 0) / s);
+    return cellCoordLabel(Math.min(25, c), Math.min(25, r));
+  }
+  // —— v0.6.41 双人 P2 生命 HUD(合作/对抗显示第二玩家生命) ——
+  function p2LivesText(lv) { return '❤×' + Math.max(0, Math.floor(Number(lv) || 0)); }
+  function p2ModeText(mode) { return mode === 1 ? '双人合作' : mode === 2 ? '双人对抗' : '单人'; }
+  // —— v0.6.42 编辑器传送门配对计数(TILE_PORTAL=6 成对出现) ——
+  function portalCount(grid) {
+    if (!Array.isArray(grid)) return 0;
+    let n = 0;
+    for (let y = 0; y < grid.length; y++) { const row = grid[y]; if (!Array.isArray(row)) continue; for (let x = 0; x < row.length; x++) if (row[x] === 6) n++; }
+    return n;
+  }
+  function portalPairText(grid) {
+    const c = portalCount(grid), p = Math.floor(c / 2);
+    return '🌀 传送门 ' + p + ' 对' + (c % 2 ? '（1 个未配对）' : '');
+  }
+  // —— v0.6.43 生涯数据快照 pill(局数/击杀/总币) ——
+  function careerSnapText(c) {
+    const g = Math.max(0, Math.floor(Number(c && c.games) || 0));
+    const k = Math.max(0, Math.floor(Number(c && c.kills) || 0));
+    const co = Math.max(0, Math.floor(Number(c && c.totalCoins) || 0));
+    return '📊 ' + g + '局 · ' + k + '杀 · ' + co + '币';
+  }
+  // —— v0.6.44 本关敌人进度 pill(击杀/总量) ——
+  function enemyProgressText(level, kills, total) {
+    const lv = Math.max(1, Math.floor(Number(level) || 0));
+    const k = Math.max(0, Math.floor(Number(kills) || 0)), t = Math.max(0, Math.floor(Number(total) || 0));
+    return '第' + lv + '关 · 🎯 ' + k + '/' + (t > 0 ? t : '?');
+  }
+  // —— v0.6.45 局内小地图：世界坐标→小地图坐标(130px)，低开销绘制 ——
+  const MM_SIZE = 130;
+  function mmX(x) { const px = Number(x) || 0; return Math.max(0, Math.min(MM_SIZE, Math.round(px / (COLS * TILE) * MM_SIZE))); }
+  function mmY(y) { const py = Number(y) || 0; return Math.max(0, Math.min(MM_SIZE, Math.round(py / (ROWS * TILE) * MM_SIZE))); }
+  function mmDots() { return (enemies || []).length + (powerups || []).length; }
+  function drawMiniMap() {
+    const c = $('miniMap'); if (!c) return; const g = c.getContext('2d');
+    g.clearRect(0, 0, MM_SIZE, MM_SIZE);
+    g.fillStyle = 'rgba(10,16,26,0.82)'; g.fillRect(0, 0, MM_SIZE, MM_SIZE);
+    g.strokeStyle = 'rgba(120,150,190,0.3)'; g.strokeRect(0.5, 0.5, MM_SIZE - 1, MM_SIZE - 1);
+    if (baseAlive) { g.fillStyle = '#39d353'; g.fillRect(mmX(BASE.x * TILE + TILE / 2) - 2, mmY(BASE.y * TILE + TILE / 2) - 2, 4, 4); }
+    for (const p of (powerups || [])) if (p && !p.dead) { g.fillStyle = '#ffd93d'; g.fillRect(mmX(p.x) - 1, mmY(p.y) - 1, 3, 3); }
+    for (const e of (enemies || [])) if (e && !e.dead) { g.fillStyle = e.isBoss ? '#ff5b5b' : '#e85d75'; g.fillRect(mmX(e.x) - 1.5, mmY(e.y) - 1.5, 3, 3); }
+    if (player && !player.dead) { g.fillStyle = '#4cc9f0'; g.fillRect(mmX(player.x) - 2, mmY(player.y) - 2, 4, 4); }
+    if (player2 && !player2.dead) { g.fillStyle = '#b388ff'; g.fillRect(mmX(player2.x) - 2, mmY(player2.y) - 2, 4, 4); }
+  }
+  // —— v0.6.46 BOSS 专属技能标识(当前关 Boss 的技能图标+名) ——
+  function bossSkillIcon(t) { const s = (t && t.skill) || ''; return s === 'scatter' ? '🎯' : s === 'laser' ? '🔫' : s === 'split' ? '🧩' : '—'; }
+  function bossSkillName(t) { const s = (t && t.skill) || ''; return s === 'scatter' ? '散射' : s === 'laser' ? '激光' : s === 'split' ? '分裂' : '—'; }
+  function bossSkillLabel(t) { return bossSkillIcon(t) + ' ' + bossSkillName(t); }
+  // —— v0.6.47 成就最近解锁时间线(按解锁顺序 Set 插入序取末尾) ——
+  function recentAchIds(set, n) { const a = Array.from(set || []); const c = Math.max(1, Math.floor(Number(n) || 1)); return a.slice(-c); }
+  function recentAchHtml(set, n) {
+    const ids = recentAchIds(set, n); const out = [];
+    for (const id of ids) { const a = ACH_MAP[id]; if (a) out.push('<span class="achRecentChip">' + (a.icon || '🏆') + ' ' + (a.name || id) + '</span>'); }
+    return out.length ? out.join('') : '<span class="achRecentEmpty">暂无最近解锁</span>';
+  }
+  // —— v0.6.48 本地排行榜当前局高亮(career.lastUid 在榜内排名) ——
+  function boardRankOf(board, uid) { const b = board || []; const i = b.findIndex(x => x && x.uid === uid); return i < 0 ? 0 : i + 1; }
+  function localRankLabel(r) { const n = Number(r) || 0; return n > 0 ? '⭐ 你的本局 第' + n + ' 名' : '本局未入榜'; }
+  // —— v0.6.49 每日挑战近7日成绩折线(inline SVG,数据来自 board mode==='daily') ——
+  function dailySeries(board) { return (board || []).filter(b => b && b.mode === 'daily').sort((a, b) => (a.date || 0) - (b.date || 0)).slice(-7); }
+  function dailyLinePath(pts) {
+    if (!pts.length) return '';
+    const W = 240, H = 48, pad = 4;
+    const max = Math.max.apply(null, pts.map(p => Number(p.score) || 0)) || 1;
+    return pts.map((p, i) => {
+      const x = pad + i * ((W - 2 * pad) / Math.max(1, pts.length - 1));
+      const y = H - pad - ((Number(p.score) || 0) / max) * (H - 2 * pad);
+      return x.toFixed(1) + ',' + y.toFixed(1);
+    }).join(' ');
+  }
+  function dailyLineSvg(pts) {
+    if (!pts.length) return '<div class="dailyHistEmpty">暂无每日记录</div>';
+    return '<svg viewBox="0 0 240 48" width="240" height="48" class="dailyLineSvg"><polyline points="' + dailyLinePath(pts) + '" fill="none" stroke="#4da6ff" stroke-width="2"/></svg>';
+  }
+  // —— v0.6.50 商店本周特惠提示(周序号%7 确定性折扣,纯展示不改价) ——
+  function weekSeed(now) { const d = new Date(Number(now) || Date.now()); const y0 = new Date(d.getFullYear(), 0, 1); const wk = Math.floor((d - y0) / 86400000 / 7); return ((wk % 7) + 7) % 7; }
+  function dealPrice(base, off) { return Math.max(1, Math.round((Number(base) || 0) * (100 - (Number(off) || 0) * 5) / 100)); }
+  function dealText(seed) { return '🛍 本周特惠 · 第' + (seed + 1) + '类商品 ' + (100 - seed * 5) + '折'; }
+  // —— v0.6.51 羁绊激活条件 tooltip(显示当前激活羁绊的激活条件) ——
+  function bondCondText(b) {
+    if (!b || !b.hero || !b.pet) return '—';
+    return '需 ' + b.hero + ' × ' + b.pet + (multiMode !== 0 ? '（仅单人局）' : '');
+  }
+  // —— v0.6.52 结算页一键重开按钮(结算态显示⚡一键重开) ——
+  function replayLabel(kind) { return kind === 'over' ? '⚡ 一键重开' : '🔄 重新开始'; }
+  // —— v0.6.53 战绩图配色随评级渐变(S/A/B/C→两端色) ——
+  function gradeGradient(grade) {
+    const g = String(grade || 'C');
+    if (g === 'S') return ['#ffd700', '#ff8a00'];
+    if (g === 'A') return ['#00f0ff', '#7c4dff'];
+    if (g === 'B') return ['#39ff14', '#00bcd4'];
+    return ['#8ea0b8', '#5a6b85'];
+  }
+  // —— v0.6.54 音量面板静音快捷键提示 ——
+  function muteHintText(muted) { return muted ? '🔇 已静音 · 按 M 键恢复' : '🔊 按 M 键一键静音'; }
+  // —— v0.6.55 每日挑战剩余时间倒计时(当日24点截止) ——
+  function dailyRemainText(now) {
+    const n = Number(now) || Date.now();
+    const d = new Date(n);
+    const real = new Date(Date.now());
+    const key = (x) => x.getFullYear() * 10000 + x.getMonth() * 100 + x.getDate();
+    if (key(d) < key(real)) return '⏳ 今日挑战已截止';
+    const end = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1, 0, 0, 0);
+    const ms = end.getTime() - n;
+    if (ms <= 0) return '⏳ 今日挑战已截止';
+    const h = Math.floor(ms / 3600000), m = Math.floor((ms % 3600000) / 60000);
+    return '⏳ 今日挑战剩 ' + h + '时' + m + '分';
+  }
+  // —— v0.6.56 触屏按钮布局可视化提示(设置页说明) ——
+  function touchLayoutText() { return '🕹 左摇杆移动 · 右侧开火 · 上排大招 / 英雄技；双人模式左右各一摇杆（P1 左 · P2 右）。'; }
+  // —— v0.6.57 分享链接短码显示与复制反馈 ——
+  function shareShortCode(code) { const s = String(code || ''); return s.length > 8 ? s.slice(0, 8) + '…' : s; }
+  function shareShortMsg(code) { return '🔗 短码 ' + shareShortCode(code) + ' · 已复制完整分享码'; }
+  // —— v0.6.58 自制关卡缩略图预览(rows→小SVG) ——
+  function customThumb(rows) {
+    const r = rows || [];
+    const W = 56, H = 56, cw = W / 26, chh = H / 26;
+    let s = '<svg class="edThumbSvg" viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '">';
+    const n = Math.min(r.length, 26);
+    for (let i = 0; i < n; i++) {
+      const row = String(r[i] || '');
+      for (let j = 0; j < Math.min(row.length, 26); j++) {
+        const ch = row[j];
+        if (!ch || ch === '.' || ch === ' ' || ch === '0') continue;
+        const col = ch === '#' ? '#3a5a8a' : ch === '@' ? '#39d353' : ch === '*' ? '#7c4dff' : ch === '=' ? '#8a6d3b' : '#5a6b85';
+        s += '<rect x="' + (j * cw).toFixed(2) + '" y="' + (i * chh).toFixed(2) + '" width="' + cw.toFixed(2) + '" height="' + chh.toFixed(2) + '" fill="' + col + '"/>';
+      }
+    }
+    s += '</svg>';
+    return s;
+  }
+  // —— v0.6.59 自制关卡列表按创建时间排序显示 ——
+  function customSortByCreated(list, desc) {
+    const a = (list || []).slice();
+    return a.sort((x, y) => desc ? ((y.createdAt || 0) - (x.createdAt || 0)) : ((x.createdAt || 0) - (y.createdAt || 0)));
+  }
+  // —— v0.6.60 重置强化二次确认弹层 ——
+  function resetConfirmText(refund, cost) {
+    const r = Math.max(0, Math.floor(Number(refund) || 0));
+    const c = Math.max(0, Math.floor(Number(cost) || 0));
+    return '🔄 将重置全部强化 · 消耗 🪙' + c + ' · 预计返还 🪙' + r + '（强化总投入的 50%）';
+  }
+  function openResetConfirm() {
+    const b = $('resetConfirmBox'); if (!b) return;
+    const rv = $('resetConfirmVal');
+    if (rv) rv.textContent = resetConfirmText(Math.floor(bonusSpent * 0.5), 200);
+    b.style.display = 'flex';
+  }
+  function closeResetConfirm() { const b = $('resetConfirmBox'); if (b) b.style.display = 'none'; }
+  function confirmResetNow() { closeResetConfirm(); return resetBonus(); }
+  (function(){
+    const ok = $('btnResetOk'), cc = $('btnResetCancel'), bx = $('resetConfirmBox');
+    if (ok) ok.addEventListener('click', confirmResetNow);
+    if (cc) cc.addEventListener('click', closeResetConfirm);
+    if (bx) bx.addEventListener('click', (e) => { if (e.target === bx) closeResetConfirm(); });
+  })();
+  // —— v0.6.61 首次游玩 3 步引导 ——
+  let tourStep = 0;
+  let tourSeen = 0;
+  (function(){ try { tourSeen = Number(localStorage.getItem('tb-tour-seen') || 0); } catch (e) { tourSeen = 0; } })();
+  function tourStepText(step) {
+    const s = Number(step) || 0;
+    if (s <= 0) return { t: '🕹 移动与开火', b: '用 WASD / 方向键移动坦克，空格或鼠标左键开火，消灭全部敌人即可过关。' };
+    if (s === 1) return { t: '💎 强化与金币', b: '击杀敌人掉落金币，在【强化】页用金币购买火力、血量与护盾，越强越能打。' };
+    return { t: '🏆 星级与奖励', b: '每关按用时 / 击杀 / 存活评定 1-3 星，集满星数解锁更多关卡与皮肤奖励。' };
+  }
+  function showTour(step) {
+    const b = document.getElementById('tourBox'); if (!b) return;
+    tourStep = Math.max(0, Math.min(2, Number(step) || 0));
+    const s = tourStepText(tourStep);
+    const tt = document.getElementById('tourTitle'), tb = document.getElementById('tourBody'), tn = document.getElementById('tourNext');
+    if (tt) tt.textContent = s.t; if (tb) tb.textContent = s.b;
+    if (tn) tn.textContent = tourStep < 2 ? '下一步 →' : '开始游戏';
+    b.classList.remove('m-hide');
+  }
+  function hideTour() {
+    const b = document.getElementById('tourBox'); if (!b) return;
+    b.classList.add('m-hide');
+    tourSeen = 1; try { localStorage.setItem('tb-tour-seen', '1'); } catch (e) {}
+  }
+  function tourNext() { if (tourStep < 2) { showTour(tourStep + 1); } else { hideTour(); } }
+  (function(){
+    const nb = document.getElementById('tourNext'), cb = document.getElementById('tourClose');
+    if (nb) nb.addEventListener('click', tourNext);
+    if (cb) cb.addEventListener('click', hideTour);
+  })();
+  function maybeShowTour() { if (!tourSeen) showTour(0); }
+  // —— v0.6.62 连杀播报 ——
+  let streakMax = 0;
+  function streakLabel(k) {
+    const n = Number(k) || 0;
+    if (n >= 10) return '💥 10 连杀！恐怖如斯';
+    if (n >= 5) return '⚡ ' + n + ' 连杀！手感火热';
+    if (n >= 3) return '🔥 ' + n + ' 连杀！势不可挡';
+    return '';
+  }
+  function streakFlash(n) {
+    if (n > streakMax) streakMax = n;
+    const s = streakLabel(n);
+    const b = document.getElementById('streakBanner');
+    if (!b) return;
+    if (s) { b.textContent = s; b.classList.remove('m-hide'); b.classList.remove('streakPop'); void b.offsetWidth; b.classList.add('streakPop'); }
+    else { b.classList.add('m-hide'); }
+  }
+  // —— v0.6.63 星级规则提示 ——
+  function starRuleText() {
+    return '★ 每关按用时、击杀数、存活血量三方面综合评定 1-3 星；集满星级可解锁新关卡，达到全星还有隐藏奖励。';
+  }
+  // —— v0.6.64 击杀效率 KPG 生涯报告 ——
+  function calcKpg(kills, games) {
+    const k = Math.max(0, Number(kills) || 0), g = Number(games) || 0;
+    if (g <= 0) return 0;
+    return Math.round((k / g) * 10) / 10;
+  }
+  function kpgText(kills, games) {
+    const v = calcKpg(kills, games);
+    return '⚔ 每局击杀 ' + v;
+  }
+  // —— v0.6.65 大招冷却进度条 ——
+  function cdPct(cur, max) {
+    const c = Number(cur), m = Number(max);
+    if (!isFinite(c) || !isFinite(m)) return 0;
+    if (m <= 0) return c <= 0 ? 100 : 0;
+    return Math.max(0, Math.min(100, Math.round((1 - c / m) * 100)));
+  }
+  function renderUltBar() {
+    const bar = document.getElementById('ultCdBar');
+    if (!bar) return;
+    const p = player ? cdPct(player.ultCd, ULT_CD) : 100;
+    bar.style.width = p + '%';
+    bar.parentNode.classList.toggle('ready', p >= 100);
+  }
+  // —— v0.6.66 道具拾取记录 ——
+  let pickupLog = [];
+  function pickupMsg(type) {
+    const def = POWERUP_DEF[type];
+    return def ? def.label : type;
+  }
+  function pushPickup(type) {
+    pickupLog.push(type);
+    if (pickupLog.length > 6) pickupLog = pickupLog.slice(-6);
+    const p = document.getElementById('pickupLog');
+    if (p) p.textContent = '🧰 ' + pickupLog.map(pickupMsg).join(' · ');
+  }
+  // —— v0.6.67 关卡星级进度 ——
+  function starSum(map) {
+    let s = 0;
+    const m = map || {};
+    for (const k in m) { const v = Number(m[k]) || 0; if (v > 0) s += v; }
+    return s;
+  }
+  function starProgressText(sum, max) {
+    const s = Number(sum) || 0, m = Math.max(0, Number(max) || 0);
+    return '⭐ ' + s + ' / ' + m + ' 星';
+  }
+  // —— v0.6.68 生涯最佳成绩汇总 ——
+  function bestScoreText(best) {
+    const b = Number(best) || 0;
+    if (b <= 0) return '🏅 暂无最佳成绩';
+    return '🏅 生涯最佳 ' + b + ' 分';
+  }
+  // —— v0.6.69 命中率面板 ——
+  function hitRateText(hits, shots) {
+    const h = Math.max(0, Number(hits) || 0), s = Math.max(0, Number(shots) || 0);
+    if (s <= 0) return '命中率 --';
+    return '命中率 ' + Math.round((h / s) * 100) + '%';
+  }
+  // —— v0.6.70 击杀速率 ——
+  function kpmText(kills, secs) {
+    const k = Math.max(0, Number(kills) || 0), s = Math.max(0, Number(secs) || 0);
+    if (s <= 0) return '速率 --';
+    return '速率 ' + (Math.round((k / s) * 60 * 10) / 10) + '/分';
+  }
+  // —— v0.6.71 BOSS 击破统计 ——
+  function bossKillText(n) {
+    const v = Math.max(0, Number(n) || 0);
+    return 'BOSS ' + v + ' 破';
+  }
+  // —— v0.6.72 难度标识 ——
+  function diffBadgeText(d) {
+    if (d === 'easy') return '难度 简单';
+    if (d === 'hard') return '难度 困难';
+    return '难度 普通';
+  }
+  // —— v0.6.73 阵亡统计 ——
+  function deathText(n) {
+    const v = Math.max(0, Number(n) || 0);
+    return '阵亡 ' + v + ' 次';
+  }
+  // —— v0.6.74 本关击杀进度 ——
+  function lvKillText(k, total) {
+    const kk = Math.max(0, Number(k) || 0), t = Math.max(0, Number(total) || 0);
+    return '本关 ' + kk + '/' + t;
+  }
+  // —— v0.6.75 连击倍率 ——
+  function comboMultText(c) {
+    const v = Math.max(0, Number(c) || 0);
+    return '连击 ×' + (1 + v * 0.1).toFixed(1);
+  }
+  // —— v0.6.76 生涯击杀总量 ——
+  function careerKillText(k) {
+    const v = Math.max(0, Number(k) || 0);
+    return '生涯击杀 ' + v;
+  }
+  // —— v0.6.77 K/D 比值 ——
+  function kdText(k, d) {
+    const kk = Math.max(0, Number(k) || 0), dd = Math.max(0, Number(d) || 0);
+    if (dd <= 0) return 'K/D --';
+    return 'K/D ' + (Math.round((kk / dd) * 100) / 100);
+  }
+  // —— v0.6.78 生涯命中率 ——
+  function careerHitText(h, s) {
+    const hh = Math.max(0, Number(h) || 0), ss = Math.max(0, Number(s) || 0);
+    if (ss <= 0) return '生涯命中 --';
+    return '生涯命中 ' + Math.round((hh / ss) * 100) + '%';
+  }
+  // —— v0.6.79 生涯游玩时长 ——
+  function careerTimeText(sec) {
+    const s = Math.max(0, Number(sec) || 0);
+    const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+    return h > 0 ? '生涯 ' + h + 'h ' + m + 'm' : '生涯 ' + m + 'm';
+  }
+  // —— v0.6.80 生涯总金币 ——
+  function careerCoinText(c) {
+    const v = Math.max(0, Number(c) || 0);
+    return '生涯金币 ' + v;
+  }
+  // —— v0.6.81 生涯 BOSS 击破 ——
+  function careerBossText(n) {
+    const v = Math.max(0, Number(n) || 0);
+    return '生涯 BOSS ' + v + ' 破';
+  }
+  // —— v0.6.82 存活敌人计数 ——
+  function enemyLeftText(n) {
+    const v = Math.max(0, Number(n) || 0);
+    return '敌人 ' + v;
+  }
+  // —— v0.6.83 飞行子弹计数 ——
+  function bulletFlyText(n) {
+    const v = Math.max(0, Number(n) || 0);
+    return '子弹 ' + v;
+  }
+  // —— v0.6.84 道具在场计数 ——
+  function powerupFieldText(n) {
+    const v = Math.max(0, Number(n) || 0);
+    return '道具 ' + v;
+  }
+  // —— v0.6.85 道具剩余时间条 ——
+  const FX_MAX = { rapid: 8, double: 10, freeze: 5 };
+  function fxBarWidth(fx, maxMap) {
+    const f = fx || {}, mm = maxMap || FX_MAX;
+    let r = 0;
+    if ((Number(f.rapid) || 0) > 0) { const w = (Number(f.rapid) || 0) / (Number(mm.rapid) || 8); if (w > r) r = w; }
+    if ((Number(f.double) || 0) > 0) { const w = (Number(f.double) || 0) / (Number(mm.double) || 10); if (w > r) r = w; }
+    if ((Number(f.freeze) || 0) > 0) { const w = (Number(f.freeze) || 0) / (Number(mm.freeze) || 5); if (w > r) r = w; }
+    return Math.min(100, Math.round(r * 100)) + '%';
+  }
+  // —— v0.6.86 键位自定义映射(简单版) ——
+  let customFireKey = '';
+  function normKey(k) { return String(k == null ? '' : k).trim(); }
+  function setCustomFireKey(k) { customFireKey = normKey(k); return customFireKey; }
+  const FIRE_PRESETS = ['', 'KeyJ', 'KeyK', 'KeyL'];
+  function cycleFireKey() {
+    const i = FIRE_PRESETS.indexOf(customFireKey);
+    customFireKey = FIRE_PRESETS[(i + 1) % FIRE_PRESETS.length];
+    return customFireKey;
+  }
+  function fireKeySummary() { return customFireKey ? '空格 / ' + customFireKey + '（自定义）' : '空格 / J（默认）'; }
+  // —— v0.6.87 成就近在咫尺提示 ——
+  function nextAchName(unlocked, list) {
+    const ul = unlocked || new Set(), ls = list || [];
+    for (const a of ls) { if (!ul.has(a.id)) return a.name; }
+    return '';
+  }
+  function nextAchText(unlocked, list) {
+    const n = nextAchName(unlocked, list);
+    const tot = (list || []).length;
+    const got = (unlocked || new Set()).size;
+    if (!n) return '🏆 全部 ' + tot + ' 个成就已达成!';
+    return '🏆 下一成就: ' + n + '（已达成 ' + got + '/' + tot + '）';
+  }
+  // —— v0.6.88 本局得分速率 pill ——
+  function scoreRateText(score, sec) {
+    const s = Math.max(0, Number(score) || 0);
+    const t = Math.max(0, Number(sec) || 0);
+    if (t <= 0) return '0 分/分';
+    return fmtNum(Math.round(s / t * 60)) + ' 分/分';
+  }
+  // —— v0.6.89 本局 BOSS 击破 pill ——
+  function bossRunText(n) { return 'BOSS ×' + Math.max(0, Math.floor(Number(n) || 0)); }
+  // —— v0.6.90 连击狂人成就达成徽章 ——
+  function comboAchBadge(maxCombo) { return (Number(maxCombo) || 0) >= 8 ? '🔥 连击狂人 达成!' : ''; }
+  // —— v0.6.91 生涯胜利进度 pill ——
+  function winProgressText(wins, target) {
+    const w = Math.max(0, Math.floor(Number(wins) || 0));
+    const tRaw = Number(target);
+    const tg = isFinite(tRaw) && tRaw > 0 ? Math.floor(tRaw) : 50;
+    return w + '/' + tg;
+  }
+  // —— v0.6.92 关卡进度 vs 已解锁最大 pill ——
+  function levelProgressText(level, maxUnlocked) {
+    const l = Math.max(1, Math.floor(Number(level) || 1));
+    const m = Math.max(l, Math.floor(Number(maxUnlocked) || l));
+    return '第 ' + l + ' 关 / 已解锁 ' + m;
+  }
+  // —— v0.6.93 本局开火次数 pill ——
+  function runShotsText(n) { return '开火 ' + Math.max(0, Math.floor(Number(n) || 0)); }
+  // —— v0.6.94 本局存活时长 pill ——
+  function runTimeText(sec) {
+    const s = Math.max(0, Math.floor(Number(sec) || 0));
+    const m = Math.floor(s / 60), r = s % 60;
+    return m + ':' + String(r).padStart(2, '0');
+  }
+  // —— v0.6.95 生涯总击杀 pill ——
+  function careerKillsText(n) { return '生涯击杀 ' + fmtNum(Math.max(0, Math.floor(Number(n) || 0))); }
+  // —— v0.6.96 英雄大招冷却/就绪 pill ——
+  function heroUltText(cd, max) {
+    const c = Math.max(0, Number(cd) || 0);
+    const m = Math.max(1, Math.floor(Number(max) || 45));
+    if (c <= 0) return '大招 就绪!';
+    return '大招 ' + Math.ceil(c) + 's';
+  }
+  // —— v0.6.97 本局复活次数 pill ——
+  function revivePillText(n) { return '复活 ×' + Math.max(0, Math.floor(Number(n) || 0)); }
+  // —— v0.6.98 生涯对局场次 pill ——
+  function careerGamesText(n) { return '生涯 ' + Math.max(0, Math.floor(Number(n) || 0)) + ' 局'; }
+  // —— v0.6.99 本局得分 pill ——
+  function scoreNowText(n) { return '得分 ' + fmtNum(Math.max(0, Math.floor(Number(n) || 0))); }
+  // —— v0.7.0 本局击破敌人总数 pill ——
+  function runKillsText(n) { return '击破 ' + Math.max(0, Math.floor(Number(n) || 0)); }
+  // —— v0.7.1 基地护墙等级 pill ——
+  function baseFortText(n) { return '基地 护墙 Lv.' + Math.max(0, Math.floor(Number(n) || 0)); }
+  // —— v0.7.2 本局金币收入 pill（击杀获得金币,局内累计） ——
+  function runCoinsText(n) { return '本局金币 +' + fmtNum(Math.max(0, Math.floor(Number(n) || 0))); }
+  // —— v0.7.3 本局冲击波在场数 pill ——
+  function ultWaveText(n) { return '冲击波 ×' + Math.max(0, Math.floor(Number(n) || 0)); }
+  // —— v0.7.4 本局命中次数 pill ——
+  function runHitsText(n) { return '命中 ' + Math.max(0, Math.floor(Number(n) || 0)); }
+  // —— v0.7.5 当前宠物装备 pill ——
+  function petEquipText(p) {
+    if (!p || !p.id) return '宠物 无';
+    const d = PET_MAP[p.id];
+    const lv = Math.max(1, Math.floor(Number(p.level) || 1));
+    return '宠物 ' + (d ? d.name : p.id) + ' Lv.' + lv;
+  }
+  // —— v0.7.6 宠物币余额 pill ——
+  function petCoinText(n) { return '🐾 宠物币 ' + fmtNum(Math.max(0, Math.floor(Number(n) || 0))); }
+  // —— v0.7.7 本局强化次数 pill（局内 Roguelite 三选一强化累计） ——
+  function runUpgText(n) { return '强化 ×' + Math.max(0, Math.floor(Number(n) || 0)); }
+  // —— v0.7.8 本局道具拾取数 pill（拾取道具累计,resetStat 清零） ——
+  function runPickupText(n) { return '道具拾取 ' + Math.max(0, Math.floor(Number(n) || 0)); }
+  // —— v0.7.9 命中率 ——
+  function accPillText(shots, hits) {
+    const s2 = Math.max(0, Math.floor(Number(shots) || 0));
+    const h2 = Math.max(0, Math.floor(Number(hits) || 0));
+    if (s2 === 0) return '—';
+    return Math.min(100, Math.round(h2 * 100 / s2)) + '%';
+  }
+  // —— v0.7.10 死亡次数 ——
+  function runDeathsText(n) {
+    const v = Math.max(0, Math.floor(Number(n) || 0));
+    return v > 0 ? '💀 ×' + v : '—';
+  }
+  // —— v0.7.11 BOSS 击杀 ——
+  function runBossText(n) {
+    const v = Math.max(0, Math.floor(Number(n) || 0));
+    return v > 0 ? '👑 ×' + v : '—';
+  }
+  // —— v0.7.12 开炮次数 ——
+  // —— v0.7.12 开炮次数 ——
+    function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
+  // —— v0.6.63 星级规则提示：加载即填充规则文案 ——
+  (function(){ const b = document.getElementById('starRuleBody'); if (b) b.textContent = starRuleText(); })();
 
   // v0.3.47: 相同提示短时间重复弹出会刷屏;含秒数的冷却提示不抑制(数值会变化)
   let lastToastMsg = '', lastToastAt = 0, toastSuppressed = 0, toastCount = 0;
@@ -7307,7 +8202,10 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
         btnRevive.style.display = 'block';
         btnRevive.textContent = reviveBtnText(rc);
       }
+          const kb = $('killBreakdown'); if (kb) { kb.innerHTML = killBreakdownHtml(stat.kills, stat.bossKills); kb.classList.remove('m-hide'); }
+          const rmb = $('resultMiniBar'); if (rmb) { rmb.innerHTML = resultMiniText(stat.kills, stat.maxCombo, acc, playSecRun); rmb.classList.remove('m-hide'); }
       ovTip.textContent = waveTipText(endlessMode, level);
+    const nw = $('nextWaveTip'); if (nw) { nw.textContent = nextWavePreview(level, endlessMode); nw.classList.remove('m-hide'); }
     }
   }
   function hideOverlay() { overlay.classList.add('hide'); }
@@ -7537,6 +8435,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   function renderShop() {
     const sc = $('shopCoins'); if (sc) sc.textContent = hudNum(coins);
     shopBody.innerHTML = '';
+    const sd = $('shopDeal'); if (sd) sd.textContent = dealText(weekSeed(Date.now()));
     if (shopTab === 'bonus') {
       // 基地升级卡（护墙阵法随等级变化）
       shopBody.appendChild(baseCardEl());
@@ -7920,7 +8819,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       '</div>' +
       v5ResetBtnHtml(canReset);
     const rbtn = rc.querySelector('.gachaBtn');
-    if (canReset) rbtn.onclick = () => { resetBonus(); };
+    if (canReset) rbtn.onclick = () => { openResetConfirm(); };
     shopBody.appendChild(rc);
   }
 
@@ -7934,6 +8833,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
 
   function applyMuteLabel() {
     muteBtn.textContent = muteIconText(muted);
+    const mh = $('muteHint'); if (mh) mh.textContent = muteHintText(muted);
   }
 
   function toggleMute() {
@@ -8293,6 +9193,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const got = achUnlocked.size;
     if (achCount) achCount.textContent = achCountText(got, ACHIEVE.length);
     achBody.innerHTML = '';
+    const ar = $('achRecent'); if (ar) ar.innerHTML = recentAchHtml(achUnlocked, 5);
     // —— v0.3.10 双币进度统计条:🐾 已解锁成就奖励 / 全部可得 ——
     const ps = achPetStats();
     const statRow = document.createElement('div');
@@ -8431,6 +9332,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (!carBox || !carBody) return;
     carBox.classList.add('show');
     if (carSub) carSub.textContent = careerSubText(career.games);
+    const cgb = $('careerGradeBadge'); if (cgb) { cgb.textContent = careerGradeText(career.games, career.kills); cgb.style.background = careerGradeColor(careerGradeText(career.games, career.kills)); }
     const rows = [];
     // 生涯累计
     rows.push('<div class="carSec">生涯累计</div><div class="carGrid">' +
@@ -8476,6 +9378,8 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       '<button class="wkBtn" data-wk="claim"' + (canClaim ? '' : ' disabled') + '>' +
       (canClaim ? '领取 +150🪙' : (done ? '已达成' : '进行中')) + '</button></div>');
     // 本地排行榜 · 分榜 Tab
+    const cr = $('carRank'); if (cr) cr.textContent = localRankLabel(boardRankOf(board, career.lastUid));
+    rows.push('<div class="carSec">每日挑战 · 近7日折线</div>'); rows.push(dailyLineSvg(dailySeries(board)));
     rows.push('<div class="carSec">本地排行榜 · 前十</div>');
     rows.push('<div class="boardTabs">' + BOARD_TABS.map(t =>
       '<button class="btab' + (boardTab === t.id ? ' on' : '') + '" data-tab="' + t.id + '">' + t.name + '</button>').join('') + '</div>');
@@ -8525,6 +9429,8 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       '<div class="repBadge">🛡️</div>' +
       '<div><div class="repHeroName">' + rankTitle() + '</div>' +
       '<div class="repHeroMeta">累计 ' + fmtPlay(career.playSec) + ' · 共 ' + career.games + ' 局 · ' + achUnlocked.size + '/' + ACHIEVE.length + ' 成就</div></div>' +
+      '<div class="repHeroMeta" id="bestScoreVal">' + bestScoreText(career.bestScore) + '</div>' +
+      '<div class="repHeroMeta" id="kpgVal">' + kpgText(career.kills, career.games) + '</div>' +
       '</div>';
     // 总览
     let html = hero;
@@ -8567,6 +9473,9 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (!lvSelect || !lvGrid) return;
     lvSelect.classList.add('show');
     if (lvSelSub) lvSelSub.textContent = levelSelSubText(maxUnlocked);
+    // —— v0.6.67 关卡星级进度 ——
+    const lvStarTotalEl = document.getElementById('lvStarTotal');
+    if (lvStarTotalEl) lvStarTotalEl.textContent = starProgressText(starSum(levelStars), maxUnlocked * 3);
     // 展示到「已解锁 + 4 关预览」，至少 5 张卡，最多 99
     const shown = Math.min(99, Math.max(maxUnlocked + 4, 5));
     const cards = [];
@@ -8714,8 +9623,10 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   function edRenderList() {
     if (!edListEl) return;
     if (!customMaps.length) { edListEl.innerHTML = '<div class="edEmpty">暂无自制关卡 · 画完点「保存」</div>'; return; }
-    edListEl.innerHTML = customMaps.map(m =>
+    const _csList = customSortByCreated(customMaps, true);
+    edListEl.innerHTML = _csList.map(m =>
       '<div class="edItem' + (m.id === edSelId ? ' on' : '') + '" data-id="' + m.id + '">' +
+        '<span class="edThumb">' + customThumb(m.rows) + '</span>' +
         '<span class="edItemName">' + escapeHtml(m.name) + '</span>' +
         '<button class="edItemDel" data-del="' + m.id + '" aria-label="删除">✕</button>' +
       '</div>').join('');
@@ -8738,6 +9649,8 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     edCanvasBound = true;
     edCanvas.addEventListener('mousedown', (e) => { edPainting = true; edPaintAt(e, e.button === 2); e.preventDefault(); });
     edCanvas.addEventListener('mousemove', (e) => { if (edPainting) edPaintAt(e, e.button === 2); });
+    edCanvas.addEventListener('mousemove', () => { const pp = $('portalPairVal'); if (pp) pp.textContent = portalPairText(edGrid); });
+    edCanvas.addEventListener('mousemove', (e) => { const p = edCanvasPos(e); const cl = $('edCoordVal'); if (cl) cl.textContent = cellCoordLabel(p.gx, p.gy); });
     window.addEventListener('mouseup', () => { edPainting = false; });
     edCanvas.addEventListener('contextmenu', (e) => e.preventDefault());
     edCanvas.addEventListener('touchstart', (e) => { edPainting = true; edPaintAt(e.touches[0], false); e.preventDefault(); }, { passive: false });
@@ -9001,7 +9914,15 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     // 底部署名
     g.fillStyle = 'rgba(120, 165, 215, 0.8)';
     g.font = '600 18px "Segoe UI", sans-serif';
-    g.fillText('DESIGNED BY QIAN · V6.28', W2 / 2, H2 - 78);
+    // —— v0.6.53 战绩图评级渐变条 ——
+    const _grade = careerGradeText(career.games, career.kills);
+    const _gg = gradeGradient(_grade);
+    const _gl = g.createLinearGradient(W2 / 2 - 140, H2 - 124, W2 / 2 + 140, H2 - 124);
+    _gl.addColorStop(0, _gg[0]); _gl.addColorStop(1, _gg[1]);
+    g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
+    g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
+    g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
+    g.fillText('DESIGNED BY QIAN · V7.10', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -9025,6 +9946,8 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (fromSnapshot && !lastRun) { showToast(reportMsg(false, '先打一局再来生成')); return; }
     try {
       const c = buildReportCanvas(fromSnapshot ? lastRun : null);
+      const _gb = $('reportGradeBar'); if (_gb) { const _g = careerGradeText(career.games, career.kills); const _gg = gradeGradient(_g); _gb.style.background = 'linear-gradient(90deg,' + _gg[0] + ',' + _gg[1] + ')'; }
+      const _gv = $('reportGradeVal'); if (_gv) _gv.textContent = careerGradeText(career.games, career.kills);
       reportImg.src = c.toDataURL('image/png');
       reportBox.classList.add('show');
     } catch (e) {
@@ -9103,6 +10026,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   muteBtn.addEventListener('click', (e) => { toggleMute(); e.currentTarget.blur(); });
   fullBtn.addEventListener('click', (e) => { toggleFullscreen(); e.currentTarget.blur(); });
   btnRestart.addEventListener('click', () => { ensureAudio(); const d = dailyMode; start(d); });
+  const br2 = $('btnReplay2'); if (br2) br2.addEventListener('click', () => { ensureAudio(); const d = dailyMode; start(d); });
   btnQuit.addEventListener('click', () => { ensureAudio(); quitToMenu(); });
   btnAch.addEventListener('click', () => { ensureAudio(); openAch(); });
   $('btnAchClose').addEventListener('click', closeAch);
@@ -9151,7 +10075,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       edSelId = null; edRender();
       showToast(editorMsg('clear'));
     } else if (act === 'save') { edSaveMap(); }
-    else if (act === 'export') { const code = edExportCode(); copyTextToClip(code); showToast(shareCodeMsg(code.length)); }
+    else if (act === 'export') { const code = edExportCode(); copyTextToClip(code); showToast(shareCodeMsg(code.length)); const esc = $('edShortCode'); if (esc) esc.textContent = shareShortMsg(code); }
     else if (act === 'import') {
       const code = window.prompt('📥 粘贴分享码：');
       if (code) { const r = edImportCode(code); showToast(shareImportMsg(r.ok, edNameEl ? edNameEl.value : '', r.err)); }
@@ -9216,6 +10140,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     });
   }
   applySetCollapse();
+  const tby = $('touchBody'); if (tby) tby.textContent = touchLayoutText();
   // v0.2.3 存档备份 / 恢复
   document.getElementById('btnSaveExport').addEventListener('click', () => { ensureAudio(); openSaveBox('export'); });
   document.getElementById('btnSaveImport').addEventListener('click', () => { ensureAudio(); openSaveBox('import'); });
@@ -9994,6 +10919,90 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       bestDeltaTextNow: (sc, bs) => bestDeltaText(sc, bs), setBestNow, bestDeltaDomNow: () => { const e = $('bestDeltaVal'); return e ? e.textContent : null; },
       upgTotalTextNow: (n) => upgTotalText(n), upgPillDomNow: () => { const e = $('upgPillVal'); return e ? e.textContent : null; }, upgTotalNow: () => upgTotal,
       playTimeTextNow: (s2) => playTimeText(s2), timePillDomNow: () => { const e = $('timePillVal'); return e ? e.textContent : null; }, playSecRunNow: () => playSecRun,
+      careerGradeTextNow: (g, k) => careerGradeText(g, k), careerGradeColorNow: (s) => careerGradeColor(s), careerGradeDomNow: () => { const e = $('careerGradeBadge'); return e ? e.textContent : null; },
+      petCollectTextNow: (o, t) => petCollectText(o, t), petCollectPctNow: (o, t) => petCollectPct(o, t), petCollectDomNow: () => { const e = $('petCollectVal'); return e ? e.textContent : null; },
+      rarLegendHtmlNow: () => rarLegendHtml(), rarLegendDomNow: () => { const e = $('rarLegend'); return e ? e.textContent : null; }, rarLegendRefreshNow: () => { const e = $('rarLegend'); if (e) e.innerHTML = rarLegendHtml(); return true; },
+      nextWavePreviewNow: (l, e) => nextWavePreview(l, e), nextWaveDomNow: () => { const e = $('nextWaveTip'); return e ? e.textContent : null; },
+      killBreakdownHtmlNow: (k, b) => killBreakdownHtml(k, b), killBdDomNow: () => { const e = $('killBreakdown'); return e ? e.textContent : null; },
+      dailyModIconsHtmlNow: (m) => dailyModIconsHtml(m), dailyModIconDomNow: () => { const e = $('dailyModIcons'); return e ? e.textContent : null; },
+      cbPaletteHtmlNow: (o) => cbPaletteHtml(o), cbPaletteDomNow: () => { const e = $('cbPalette'); return e ? e.textContent : null; }, cbPaletteRefreshNow: () => { const e = $('cbPalette'); if (e) e.innerHTML = cbPaletteHtml(colorBlind); return true; },
+      resultMiniTextNow: (k, c, a, s) => resultMiniText(k, c, a, s), resultMiniDomNow: () => { const e = $('resultMiniBar'); return e ? e.textContent : null; },
+      levelTimeLimitNow: (l) => levelTimeLimit(l), levelTimePctNow: (s, l) => levelTimePct(s, l), levelTimeBarTextNow: (s, l) => levelTimeBarText(s, l), lvTimeBarDomNow: () => { const e = $('lvTimeBarVal'); return e ? e.textContent : null; },
+      bossPhaseBadgeNow: (h, m) => bossPhaseBadge(h, m), bossPhaseDomNow: () => { const e = $('bossPhaseVal'); return e ? e.textContent : null; },
+      petUpgCostNow: (l, m) => petUpgCost(l, m), petUpgCostTextNow: (l, m) => petUpgCostText(l, m), petUpgDomNow: () => { const e = $('petUpgVal'); return e ? e.textContent : null; },
+      cellCoordLabelNow: (g, r) => cellCoordLabel(g, r), cellCoordFromPxNow: (x, y) => cellCoordFromPx(x, y, 24), edCoordDomNow: () => { const e = $('edCoordVal'); return e ? e.textContent : null; },
+      p2LivesTextNow: (l) => p2LivesText(l), p2ModeTextNow: (m) => p2ModeText(m), p2LivesDomNow: () => { const e = $('p2LivesVal'); return e ? e.textContent : null; },
+      portalCountNow: (g) => portalCount(g), portalPairTextNow: (g) => portalPairText(g), portalPairDomNow: () => { const e = $('portalPairVal'); return e ? e.textContent : null; },
+      careerSnapTextNow: (c) => careerSnapText(c), careerSnapDomNow: () => { const e = $('careerSnapVal'); return e ? e.textContent : null; },
+      enemyProgressTextNow: (l, k, t) => enemyProgressText(l, k, t), enemyProgDomNow: () => { const e = $('enemyProgVal'); return e ? e.textContent : null; },
+      miniMapXNow: (x) => mmX(x), miniMapYNow: (y) => mmY(y), miniMapDotsNow: () => mmDots(),
+      bossSkillLabelNow: (t) => bossSkillLabel(t), bossSkillIconNow: (t) => bossSkillIcon(t),
+      recentAchIdsNow: (s, n) => recentAchIds(s, n), recentAchHtmlNow: (s, n) => recentAchHtml(s, n),
+      boardRankOfNow: (b, u) => boardRankOf(b, u), localRankLabelNow: (r) => localRankLabel(r),
+      dailySeriesNow: (b) => dailySeries(b), dailyLineSvgNow: (p) => dailyLineSvg(p),
+      weekSeedNow: (n) => weekSeed(n), dealPriceNow: (b, o) => dealPrice(b, o), dealTextNow: (s) => dealText(s),
+      bondCondTextNow: (b) => bondCondText(b),
+      replayLabelNow: (k) => replayLabel(k),
+      gradeGradientNow: (s) => gradeGradient(s),
+      muteHintTextNow: (m) => muteHintText(m),
+      dailyRemainTextNow: (n) => dailyRemainText(n),
+      touchLayoutTextNow: () => touchLayoutText(),
+      shareShortCodeNow: (c) => shareShortCode(c), shareShortMsgNow: (c) => shareShortMsg(c),
+      customThumbNow: (rows) => customThumb(rows),
+      customSortByCreatedNow: (l, d) => customSortByCreated(l, d),
+      resetConfirmTextNow: (r, c) => resetConfirmText(r, c),
+      tourStepTextNow: (s) => tourStepText(s), showTourNow: (s) => showTour(s), hideTourNow: () => hideTour(),
+      streakLabelNow: (k) => streakLabel(k), streakFlashNow: (n) => streakFlash(n),
+      starRuleTextNow: () => starRuleText(),
+      calcKpgNow: (k, g) => calcKpg(k, g), kpgTextNow: (k, g) => kpgText(k, g),
+      cdPctNow: (c, m) => cdPct(c, m), renderUltBarNow: () => renderUltBar(),
+      pickupMsgNow: (t) => pickupMsg(t), pushPickupNow: (t) => pushPickup(t),
+      starSumNow: (m) => starSum(m), starProgressTextNow: (s, m) => starProgressText(s, m),
+      bestScoreTextNow: (b) => bestScoreText(b),
+      hitRateNow: (h, s) => { const t = hitRateText(h, s); const el = document.getElementById('hitRateVal'); if (el) el.textContent = t; return t; },
+      kpmNow: (k, s) => { const t = kpmText(k, s); const el = document.getElementById('kpmVal'); if (el) el.textContent = t; return t; },
+      bossKillNow: (n) => { const t = bossKillText(n); const el = document.getElementById('bossKillVal'); if (el) el.textContent = t; return t; },
+      diffBadgeNow: (d) => { const t = diffBadgeText(d); const el = document.getElementById('diffBadgeVal'); if (el) el.textContent = t; return t; },
+      deathNow: (n) => { const t = deathText(n); const el = document.getElementById('deathVal'); if (el) el.textContent = t; return t; },
+      lvKillNow: (k, t) => { const r = lvKillText(k, t); const el = document.getElementById('lvKillVal'); if (el) el.textContent = r; return r; },
+      comboMultNow: (c) => { const t = comboMultText(c); const el = document.getElementById('comboMultVal'); if (el) el.textContent = t; return t; },
+      careerKillNow: (k) => { const t = careerKillText(k); const el = document.getElementById('careerKillVal'); if (el) el.textContent = t; return t; },
+      kdNow: (k, d) => { const t = kdText(k, d); const el = document.getElementById('kdVal'); if (el) el.textContent = t; return t; },
+      careerHitNow: (h, s) => { const t = careerHitText(h, s); const el = document.getElementById('careerHitVal'); if (el) el.textContent = t; return t; },
+      careerTimeNow: (s) => { const t = careerTimeText(s); const el = document.getElementById('careerTimeVal'); if (el) el.textContent = t; return t; },
+      careerCoinNow: (c) => { const t = careerCoinText(c); const el = document.getElementById('careerCoinVal'); if (el) el.textContent = t; return t; },
+      careerBossNow: (n) => { const t = careerBossText(n); const el = document.getElementById('careerBossVal'); if (el) el.textContent = t; return t; },
+      enemyLeftNow: (n) => { const t = enemyLeftText(n); const el = document.getElementById('enemyLeftVal'); if (el) el.textContent = t; return t; },
+      bulletFlyNow: (n) => { const t = bulletFlyText(n); const el = document.getElementById('bulletFlyVal'); if (el) el.textContent = t; return t; },
+      powerupFieldNow: (n) => { const t = powerupFieldText(n); const el = document.getElementById('powerupFieldVal'); if (el) el.textContent = t; return t; },
+      fxBarWidthNow: (f, mm) => fxBarWidth(f, mm || FX_MAX), fxBarDomNow: () => { const e = $('fxBarFill'); return e ? e.style.width : null; }, fxMaxNow: () => FX_MAX,
+      fireKeySummaryNow: () => fireKeySummary(), setCustomFireKeyNow: (k) => setCustomFireKey(k), cycleFireKeyNow: () => cycleFireKey(), customFireKeyNow: () => customFireKey,
+      nextAchNameNow: (u, l) => nextAchName(u, l), nextAchTextNow: (u, l) => nextAchText(u, l), nextAchDomNow: () => { const e = $('nextAchTip'); return e ? e.textContent : null; },
+      scoreRateTextNow: (s, t) => scoreRateText(s, t), scoreRateDomNow: () => { const e = $('scoreRateVal'); return e ? e.textContent : null; }, scoreNow: () => score, runSecNow: () => playSecRun,
+      bossRunTextNow: (n) => bossRunText(n), bossRunDomNow: () => { const e = $('bossRunVal'); return e ? e.textContent : null; }, bossRunStatNow: () => stat.bossKills,
+      comboAchBadgeNow: (n) => comboAchBadge(n), comboAchDomNow: () => { const e = $('comboAchVal'); return e ? e.textContent : null; }, comboAchMaxNow: () => stat.maxCombo,
+      winProgressTextNow: (w, t) => winProgressText(w, t), winProgDomNow: () => { const e = $('winProgVal'); return e ? e.textContent : null; }, careerWinsNow: () => career.wins,
+      levelProgressTextNow: (l, m) => levelProgressText(l, m), lvProgDomNow: () => { const e = $('lvProgVal'); return e ? e.textContent : null; }, lvNow: () => level, maxUnlockedNow: () => maxUnlocked,
+      runShotsTextNow: (n) => runShotsText(n), runShotsDomNow: () => { const e = $('runShotsVal'); return e ? e.textContent : null; }, runShotsNow: () => stat.shots,
+      runTimeTextNow: (s) => runTimeText(s), runTimeDomNow: () => { const e = $('runTimeVal'); return e ? e.textContent : null; }, runSecNow: () => playSecRun,
+      careerKillsTextNow: (n) => careerKillsText(n), careerKillDomNow: () => { const e = $('careerKillVal'); return e ? e.textContent : null; }, careerKillsNow: () => career.kills,
+      heroUltTextNow: (c, m) => heroUltText(c, m), heroUltDomNow: () => { const e = $('heroUltVal'); return e ? e.textContent : null; }, heroUltCdNow: () => heroUltCd, heroUltMaxNow: () => HERO_ULT_CD,
+      revivePillTextNow: (n) => revivePillText(n), reviveDomNow: () => { const e = $('reviveVal'); return e ? e.textContent : null; }, reviveNow: () => reviveCount,
+      careerGamesTextNow: (n) => careerGamesText(n), careerGameDomNow: () => { const e = $('careerGameVal'); return e ? e.textContent : null; }, careerGamesNow: () => career.games,
+      scoreNowTextNow: (n) => scoreNowText(n), scoreNowDomNow: () => { const e = $('scoreNowVal'); return e ? e.textContent : null; }, scoreNowNow: () => score,
+      runKillsTextNow: (n) => runKillsText(n), runKillDomNow: () => { const e = $('runKillVal'); return e ? e.textContent : null; }, runKillsNow: () => stat.kills,
+      baseFortTextNow: (n) => baseFortText(n), baseFortDomNow: () => { const e = $('baseFortVal'); return e ? e.textContent : null; }, baseLevelNow: () => baseLevel,
+      runCoinsTextNow: (n) => runCoinsText(n), runCoinDomNow: () => { const e = $('runCoinVal'); return e ? e.textContent : null; }, runCoinsNow: () => runCoins,
+      ultWaveTextNow: (n) => ultWaveText(n), ultWaveDomNow: () => { const e = $('ultWaveVal'); return e ? e.textContent : null; }, ultWavesNow: () => ultWaves.length,
+      runHitsTextNow: (n) => runHitsText(n), runHitDomNow: () => { const e = $('runHitVal'); return e ? e.textContent : null; }, runHitsNow: () => stat.hits,
+      petEquipTextNow: (p) => petEquipText(p), petEquipDomNow: () => { const e = $('petEquipVal'); return e ? e.textContent : null; }, petNow: () => pet,
+      petCoinTextNow: (n) => petCoinText(n), petCoinDomNow: () => { const e = $('petCoinVal'); return e ? e.textContent : null; }, petCoinsNow: () => petCoins,
+      runUpgTextNow: (n) => runUpgText(n), runUpgDomNow: () => { const e = $('runUpgVal'); return e ? e.textContent : null; }, runUpgNow: () => upgTotal,
+      runPickupTextNow: (n) => runPickupText(n), runPickDomNow: () => { const e = $('runPickVal'); return e ? e.textContent : null; }, runPickupsNow: () => runPowerups,
+      accPillTextNow: (s2, h) => accPillText(s2, h), accPillDomNow: () => { const e = $('accPillVal'); return e ? e.textContent : null; }, statNow: () => ({ shots: stat.shots, hits: stat.hits }),
+      runDeathsTextNow: (n) => runDeathsText(n), deathsPillDomNow: () => { const e = $('deathsPillVal'); return e ? e.textContent : null; }, deathsNow: () => stat.deaths,
+      runBossTextNow: (n) => runBossText(n), bossPillDomNow: () => { const e = $('bossPillVal'); return e ? e.textContent : null; }, bossKillsNow: () => stat.bossKills,
+      runShotsTextNow: (n) => runShotsText(n), shotsPillDomNow: () => { const e = $('shotsPillVal'); return e ? e.textContent : null; }, shotsNow: () => stat.shots,
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

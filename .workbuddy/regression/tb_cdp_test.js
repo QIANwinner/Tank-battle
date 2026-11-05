@@ -7,7 +7,7 @@ const http = require('http');
 
 const CHROME = process.env.TB_CHROME || 'C:/Users/21889/.agent-browser/browsers/chrome-win64/chrome.exe';
 const URL = process.argv[2] || 'http://127.0.0.1:8124/index.html?test=1';
-const PORT = 9333;
+const PORT = Number(process.env.TB_CDP_PORT || 9333);
 const SHOT = process.argv[3] || 'shot.png';
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
@@ -233,7 +233,7 @@ async function main() {
 
     // ===== E. 接线到游戏逻辑 =====
     try {
-      reset(); T.setBonus({ lifeup:2 }); T.startGame();
+      reset(); T.setHero('none'); T.setBonus({ lifeup:2 }); T.startGame();
       t('E1 lifeup 永久加成 → 开局 5 生命', T.livesNow() === 5, 'lives=' + T.livesNow());
     } catch (e) { t('E1 lifeup 永久加成 → 开局 5 生命', false, e.message); }
 
