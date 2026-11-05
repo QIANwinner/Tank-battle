@@ -4122,6 +4122,21 @@ async function main() {
     t('U644 一致性', typeof o4.dom === 'string' && o4.dom.length > 0, o4.dom);
   } catch(e){ for(let k=639;k<=644;k++) t('U'+k+' 速率',false,e.message); }
 
+
+  // ===== U645~U650: 连续无伤(v0.7.22) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('noHitWrap'),f:T.noHitTextNow(false,5)});})()"));
+    t('U645 无伤 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U646 无伤 5 关', o.f === '🛡 连续无伤 5 关', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.noHitTextNow(true,5),b:T.noHitTextNow(false,1)});})()"));
+    t('U647 受伤中断 / 首关', o2.a === '🛡 无伤中断' && o2.b === '🛡 连续无伤 1 关', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.noHitTextNow(false,NaN),b:T.noHitTextNow(false,-5)});})()"));
+    t('U648 非法钳制为 1', o3.a === '🛡 连续无伤 1 关' && o3.b === '🛡 连续无伤 1 关', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.noHitDomNow(),took:T.tookHitNow()});})()"));
+    t('U649 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U650 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=645;k<=650;k++) t('U'+k+' 无伤计数',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
