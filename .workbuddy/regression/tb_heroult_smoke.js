@@ -3888,6 +3888,22 @@ async function main() {
     t('U1154 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
   } catch(e){ for(let k=1149;k<=1154;k++) t('U'+k+' 宠物币',false,e.message); }
 
+
+  // ===== U1155~U1160: 本局强化次数(v0.7.7) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runUpgPill'),w:T.runUpgTextNow(0)});})()"));
+    t('U1155 强化 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1156 初值 强化 ×0', o.w === '强化 ×0', o.w);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runUpgTextNow(4),b:T.runUpgTextNow(20)});})()"));
+    t('U1157 正常 ×4/×20', o2.a === '强化 ×4' && o2.b === '强化 ×20', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runUpgTextNow(4.6),b:T.runUpgTextNow(0)});})()"));
+    t('U1158 边界 4.6 取整 ×4', o3.a === '强化 ×4' && o3.b === '强化 ×0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runUpgTextNow(NaN),b:T.runUpgTextNow(-2)});})()"));
+    t('U1159 非法输入兜底 ×0', o4.a === '强化 ×0' && o4.b === '强化 ×0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const dom=T.runUpgDomNow();const fn=T.runUpgTextNow(T.runUpgNow());return JSON.stringify({dom,fn});})()"));
+    t('U1160 DOM 与函数一致', o5.dom === o5.fn, JSON.stringify(o5));
+  } catch(e){ for(let k=1155;k<=1160;k++) t('U'+k+' 本局强化',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
