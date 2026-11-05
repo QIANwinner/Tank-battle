@@ -3067,6 +3067,21 @@ async function main() {
     t('U842 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
   } catch(e){ for(let k=837;k<=842;k++) t('U'+k+' 静音提示',false,e.message); }
 
+  // ===== U843~U848: 每日倒计时(v0.6.55) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('dailyRemainVal'),a:T.dailyRemainTextNow(Date.now())});})()"));
+    t('U843 每日倒计时已加入', o.dom === true, JSON.stringify(o));
+    t('U844 初值 剩余含时分', o.a.indexOf('剩') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const d=new Date();d.setHours(23,0,0,0);return JSON.stringify({a:T.dailyRemainTextNow(d.getTime())});})()"));
+    t('U845 正常值 23点约1时', o2.a.indexOf('1时') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const d=new Date();d.setDate(d.getDate()-1);return JSON.stringify({a:T.dailyRemainTextNow(d.getTime())});})()"));
+    t('U846 边界 昨日已截止', o3.a.indexOf('已截止') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dailyRemainTextNow(NaN)});})()"));
+    t('U847 非法 NaN 走当前', o4.a.indexOf('剩') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('dailyRemainVal');return JSON.stringify({len:e?e.className.length:0});})()"));
+    t('U848 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=843;k<=848;k++) t('U'+k+' 每日倒计时',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
