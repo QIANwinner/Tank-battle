@@ -3523,6 +3523,22 @@ async function main() {
     t('U1016 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('子弹 15') >= 0, JSON.stringify(o6));
   } catch(e){ for(let k=1011;k<=1016;k++) t('U'+k+' 飞行子弹',false,e.message); }
 
+  // ===== U1017~U1022: 道具在场(v0.6.84) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('powerupFieldVal')});})()"));
+    t('U1017 道具在场已加入', o.dom === true, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.powerupFieldNow(0)});})()"));
+    t('U1018 初值 零道具', o2.a.indexOf('道具 0') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.powerupFieldNow(4)});})()"));
+    t('U1019 正常值 4道具', o3.a.indexOf('道具 4') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.powerupFieldNow(30)});})()"));
+    t('U1020 边界 30道具', o4.a.indexOf('道具 30') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.powerupFieldNow(NaN)});})()"));
+    t('U1021 非法 NaN 归零', o5.a.indexOf('道具 0') >= 0, JSON.stringify(o5));
+    const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.powerupFieldNow(2);const e=document.getElementById('powerupFieldVal');return JSON.stringify({r:r,d:e?e.textContent:''});})()"));
+    t('U1022 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('道具 2') >= 0, JSON.stringify(o6));
+  } catch(e){ for(let k=1017;k<=1022;k++) t('U'+k+' 道具在场',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
