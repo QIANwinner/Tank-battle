@@ -3097,6 +3097,21 @@ async function main() {
     t('U854 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
   } catch(e){ for(let k=849;k<=854;k++) t('U'+k+' 触屏提示',false,e.message); }
 
+  // ===== U855~U860: 分享短码(v0.6.57) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('edShortCode'),a:T.shareShortCodeNow('ABCDEFGH1234')});})()"));
+    t('U855 短码显示已加入', o.dom === true, JSON.stringify(o));
+    t('U856 初值 截断8字符', o.a === 'ABCDEFGH…', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shareShortCodeNow('AB')});})()"));
+    t('U857 正常值 短码不截断', o2.a === 'AB', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shareShortMsgNow('XYZW')});})()"));
+    t('U858 边界 提示含短码', o3.a.indexOf('XYZW') >= 0 && o3.a.indexOf('已复制') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shareShortCodeNow(null)});})()"));
+    t('U859 非法 null 空', o4.a === '', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const e=document.getElementById('edShortCode');return JSON.stringify({len:e?e.className.length:0});})()"));
+    t('U860 DOM 与函数一致', o5.len > 0, JSON.stringify(o5));
+  } catch(e){ for(let k=855;k<=860;k++) t('U'+k+' 分享短码',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
