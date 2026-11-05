@@ -3539,6 +3539,19 @@ async function main() {
     t('U1022 DOM 与函数一致', o6.r === o6.d && o6.r.indexOf('道具 2') >= 0, JSON.stringify(o6));
   } catch(e){ for(let k=1017;k<=1022;k++) t('U'+k+' 道具在场',false,e.message); }
 
+
+  // ===== U1023~U1028: 道具剩余时间条(v0.6.85) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('fxBarWrap'),w:T.fxBarWidthNow({rapid:0,double:0,freeze:0}),a:T.fxBarWidthNow({rapid:4,double:0,freeze:0}),b:T.fxBarWidthNow({rapid:8,double:0,freeze:0}),c:T.fxBarWidthNow({rapid:12,double:0,freeze:0}),d:T.fxBarWidthNow({rapid:-5,double:0,freeze:0}),e:T.fxBarWidthNow({rapid:NaN,double:0,freeze:0})});})()"));
+    t('U1023 时间条已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1024 无道具初值 0%', o.w === '0%', o.w);
+    t('U1025 正常 4/8 为 50%', o.a === '50%', o.a);
+    t('U1026 边界 100% 与超限钳制 100%', o.b === '100%' && o.c === '100%', o.b + '/' + o.c);
+    t('U1027 非法输入兜底 0%', o.d === '0%' && o.e === '0%', o.d + '/' + o.e);
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const s=T.fxBarDomNow();return JSON.stringify({s});})()"));
+    t('U1028 DOM 宽度为百分比字符串', typeof o2.s === 'string' && o2.s.endsWith('%') && o2.s.length <= 6, JSON.stringify(o2));
+  } catch(e){ for(let k=1023;k<=1028;k++) t('U'+k+' 时间条',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

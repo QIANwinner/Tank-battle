@@ -1912,6 +1912,8 @@
   #bulletFlyVal { color: #ffe066; font-weight: 800; }
   /* —— v0.6.84 道具在场 —— */
   #powerupFieldVal { color: #7dff7d; font-weight: 800; }
+  .fxBarWrap { height: 4px; border-radius: 2px; background: rgba(255,255,255,.12); overflow: hidden; margin: 2px 0 0; max-width: 220px; }
+  .fxBarWrap i { display: block; height: 100%; background: linear-gradient(90deg, #00f0ff, #ffd700); transition: width .2s; }
 </style>
 </head>
 <body>
@@ -1988,6 +1990,7 @@
     <div class="pill m-hide"><span class="k">👾</span><span class="v" id="enemyLeftVal"></span></div>
     <div class="pill m-hide"><span class="k">💥</span><span class="v" id="bulletFlyVal"></span></div>
     <div class="pill m-hide"><span class="k">🧰</span><span class="v" id="powerupFieldVal"></span></div>
+    <div class="fxBarWrap m-hide" id="fxBarWrap"><i id="fxBarFill" style="width:0%"></i></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -2361,7 +2364,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V6.84</div>
+  <div id="mark">DESIGNED BY QIAN · V6.85</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7213,6 +7216,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const elV = $('enemyLeftVal'); if (elV) elV.textContent = enemyLeftText(enemies.length);
     const bfV = $('bulletFlyVal'); if (bfV) bfV.textContent = bulletFlyText(bullets.length);
     const pfV = $('powerupFieldVal'); if (pfV) pfV.textContent = powerupFieldText(powerups.length);
+    const fxBar = $('fxBarFill'); if (fxBar) fxBar.style.width = fxBarWidth(fx, FX_MAX);
     // __EXTRA_HUD__
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
   }
@@ -7859,6 +7863,16 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   function powerupFieldText(n) {
     const v = Math.max(0, Number(n) || 0);
     return '道具 ' + v;
+  }
+  // —— v0.6.85 道具剩余时间条 ——
+  const FX_MAX = { rapid: 8, double: 10, freeze: 5 };
+  function fxBarWidth(fx, maxMap) {
+    const f = fx || {}, mm = maxMap || FX_MAX;
+    let r = 0;
+    if ((Number(f.rapid) || 0) > 0) { const w = (Number(f.rapid) || 0) / (Number(mm.rapid) || 8); if (w > r) r = w; }
+    if ((Number(f.double) || 0) > 0) { const w = (Number(f.double) || 0) / (Number(mm.double) || 10); if (w > r) r = w; }
+    if ((Number(f.freeze) || 0) > 0) { const w = (Number(f.freeze) || 0) / (Number(mm.freeze) || 5); if (w > r) r = w; }
+    return Math.min(100, Math.round(r * 100)) + '%';
   }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
@@ -9701,7 +9715,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V6.84', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V6.85', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -10754,6 +10768,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       enemyLeftNow: (n) => { const t = enemyLeftText(n); const el = document.getElementById('enemyLeftVal'); if (el) el.textContent = t; return t; },
       bulletFlyNow: (n) => { const t = bulletFlyText(n); const el = document.getElementById('bulletFlyVal'); if (el) el.textContent = t; return t; },
       powerupFieldNow: (n) => { const t = powerupFieldText(n); const el = document.getElementById('powerupFieldVal'); if (el) el.textContent = t; return t; },
+      fxBarWidthNow: (f, mm) => fxBarWidth(f, mm || FX_MAX), fxBarDomNow: () => { const e = $('fxBarFill'); return e ? e.style.width : null; }, fxMaxNow: () => FX_MAX,
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
