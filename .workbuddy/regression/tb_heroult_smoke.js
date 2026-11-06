@@ -4983,6 +4983,22 @@ async function main() {
     t('U1574 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1569;k<=1574;k++) t('U'+k+' 生涯K/D',false,e.message); }
 
+
+  // ===== U1575~U1580: 当前慢动作状态(v0.7.77) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('timeScaleWrap'),f:T.timeScaleTextNow(1)});})()"));
+    t('U1575 慢动作 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1576 常速初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.timeScaleTextNow(0.5),b:T.timeScaleTextNow(0.25)});})()"));
+    t('U1577 正常 x0.5/x0.25', o2.a === '🐢 慢动作 x0.5' && o2.b === '🐢 慢动作 x0.3', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.timeScaleTextNow(0.1),b:T.timeScaleTextNow(0)});})()"));
+    t('U1578 边界:x0.1/零', o3.a === '🐢 慢动作 x0.1' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.timeScaleTextNow(NaN),b:T.timeScaleTextNow(2)});})()"));
+    t('U1579 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r77tsNow();return JSON.stringify({dom:T.timeScaleDomNow(),exp:T.timeScaleTextNow(v)});})()"));
+    t('U1580 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1575;k<=1580;k++) t('U'+k+' 慢动作',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
