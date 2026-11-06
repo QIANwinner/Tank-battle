@@ -4438,6 +4438,22 @@ async function main() {
     t('U1370 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1365;k<=1370;k++) t('U'+k+' 无尽最佳',false,e.message); }
 
+
+  // ===== U1371~U1376: 金币余额(v0.7.43) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('coinBalWrap'),f:T.coinBalanceTextNow(0)});})()"));
+    t('U1371 钱包 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1372 零余额初值', o.f === '🪙 0', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinBalanceTextNow(500),b:T.coinBalanceTextNow(12000)});})()"));
+    t('U1373 正常 500/12,000', o2.a === '🪙 500' && o2.b === '🪙 12,000', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinBalanceTextNow(9999),b:T.coinBalanceTextNow(10000)});})()"));
+    t('U1374 边界:9999/10000', o3.a === '🪙 9999' && o3.b === '🪙 10,000', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinBalanceTextNow(NaN),b:T.coinBalanceTextNow(-5)});})()"));
+    t('U1375 非法输入兜底', o4.a === '🪙 0' && o4.b === '🪙 0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const c=T.coinNow();return JSON.stringify({dom:T.coinBalancePillDomNow(),exp:T.coinBalanceTextNow(c)});})()"));
+    t('U1376 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1371;k<=1376;k++) t('U'+k+' 金币余额',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
