@@ -5548,6 +5548,22 @@ async function main() {
     t('U1784 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1779;k<=1784;k++) t('U'+k+' 玩家朝向',false,e.message); }
 
+
+  // ===== U1785~U1790: 波次休整倒计时(v0.8.12) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('waveGapWrap'),f:T.waveGapTextNow(0)});})()"));
+    t('U1785 波间倒计时 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1786 无休整初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveGapTextNow(120),b:T.waveGapTextNow(30)});})()"));
+    t('U1787 正常 2s/0.5s', o2.a === '⏳ 下波 2s' && o2.b === '⏳ 下波 0.5s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveGapTextNow(6),b:T.waveGapTextNow(600)});})()"));
+    t('U1788 边界 0.1s/10s', o3.a === '⏳ 下波 0.1s' && o3.b === '⏳ 下波 10s', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveGapTextNow(NaN),b:T.waveGapTextNow(-5)});})()"));
+    t('U1789 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r12gNow();return JSON.stringify({dom:T.waveGapDomNow(),exp:T.waveGapTextNow(v)});})()"));
+    t('U1790 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1785;k<=1790;k++) t('U'+k+' 波间倒计时',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
