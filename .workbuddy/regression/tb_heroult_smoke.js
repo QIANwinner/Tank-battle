@@ -4775,6 +4775,22 @@ async function main() {
     t('U1496 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1491;k<=1496;k++) t('U'+k+' BOSS血量',false,e.message); }
 
+
+  // ===== U1497~U1502: 磁暴剩余时间(v0.7.64) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('magnetTimeWrap'),f:T.magnetTimeTextNow(0)});})()"));
+    t('U1497 磁暴 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1498 未激活初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.magnetTimeTextNow(3),b:T.magnetTimeTextNow(2.5)});})()"));
+    t('U1499 正常 3s/2.5s', o2.a === '🧲 磁暴 3s' && o2.b === '🧲 磁暴 2.5s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.magnetTimeTextNow(0.1),b:T.magnetTimeTextNow(0)});})()"));
+    t('U1500 边界:0.1s/零', o3.a === '🧲 磁暴 0.1s' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.magnetTimeTextNow(NaN),b:T.magnetTimeTextNow(-2)});})()"));
+    t('U1501 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r64msNow();return JSON.stringify({dom:T.magnetTimeDomNow(),exp:T.magnetTimeTextNow(v)});})()"));
+    t('U1502 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1497;k<=1502;k++) t('U'+k+' 磁暴',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
