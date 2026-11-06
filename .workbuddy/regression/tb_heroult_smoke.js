@@ -5564,6 +5564,22 @@ async function main() {
     t('U1790 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1785;k<=1790;k++) t('U'+k+' 波间倒计时',false,e.message); }
 
+
+  // ===== U1791~U1796: 玩家-基地距离(v0.8.13) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('playerBaseWrap'),f:T.playerBaseDistTextNow(null,null)});})()"));
+    t('U1791 距基 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1792 无玩家初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const bx=T.r13bcxNow(),by=T.r13bcyNow();return JSON.stringify({a:T.playerBaseDistTextNow(bx,by),b:T.playerBaseDistTextNow(bx+2*T.r13tileNow(),by)});})()"));
+    t('U1793 正常 0格/2格', o2.a === '🏠 距基 0 格' && o2.b === '🏠 距基 2 格', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const bx=T.r13bcxNow(),by=T.r13bcyNow();return JSON.stringify({a:T.playerBaseDistTextNow(bx+T.r13tileNow()/2,by)});})()"));
+    t('U1794 边界 0.5格', o3.a === '🏠 距基 0.5 格', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.playerBaseDistTextNow(NaN,564)});})()"));
+    t('U1795 非法输入兜底', o4.a === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const px=T.r13pxNow(),py=T.r13pyNow();return JSON.stringify({dom:T.playerBaseDomNow(),exp:T.playerBaseDistTextNow(px,py)});})()"));
+    t('U1796 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1791;k<=1796;k++) t('U'+k+' 距基',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
