@@ -1,3 +1,16 @@
+# v0.8.45 · BOSS 死亡演出剩余 pill(bossDeathT,独立ID)
+
+> BOSS 死亡演出剩余 pill(bossDeathT,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1988/1988。
+
+## 🅰 改进
+
+- BOSS 死亡演出剩余 pill(bossDeathT,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+
+## 🅱 验证
+
+- 主套件 169/169 + 反馈专项 1988/1988；内联脚本语法 SYNTAX OK
+- SW 缓存 v08450，游戏内版本 V8.45；远程树与本地树一致（sync_push）
+
 # v0.8.44 · 下一敌刷新倒计时 pill(enemySpawnTimer,独立ID)
 
 > 下一敌刷新倒计时 pill(enemySpawnTimer,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1982/1982。

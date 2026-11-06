@@ -6077,6 +6077,22 @@ async function main() {
     t('U1982 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1977;k<=1982;k++) t('U'+k+' 刷敌倒计时',false,e.message); }
 
+
+  // ===== U1983~U1988: BOSS 死亡演出剩余(v0.8.45) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossDeathWrap'),f:T.bossDeathTextNow(0)});})()"));
+    t('U1983 BOSS 死亡演出 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1984 初值 关', o.f === '💀 演出 关', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossDeathTextNow(1.15),b:T.bossDeathTextNow(0.5)});})()"));
+    t('U1985 正常 1.15s/0.5s', o2.a === '💀 演出 1.15s' && o2.b === '💀 演出 0.5s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossDeathTextNow(0.01),b:T.bossDeathTextNow(2)});})()"));
+    t('U1986 边界 0.01s/2s', o3.a === '💀 演出 0.01s' && o3.b === '💀 演出 2s', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossDeathTextNow(NaN),b:T.bossDeathTextNow(-2)});})()"));
+    t('U1987 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const bd=T.r45bdNow();return JSON.stringify({dom:T.bossDeathDomNow(),exp:T.bossDeathTextNow(bd)});})()"));
+    t('U1988 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1983;k<=1988;k++) t('U'+k+' BOSS死亡演出',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
