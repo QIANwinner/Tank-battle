@@ -5772,6 +5772,22 @@ async function main() {
     t('U1868 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1863;k<=1868;k++) t('U'+k+' 波次进度',false,e.message); }
 
+
+  // ===== U1869~U1874: 玩家-基地曼哈顿距(v0.8.26) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('manhattanWrap'),f:T.manhattanBaseTextNow(null,null)});})()"));
+    t('U1869 曼哈顿距 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1870 无玩家初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const bx=T.r26bcxNow(),by=T.r26bcyNow();return JSON.stringify({a:T.manhattanBaseTextNow(bx,by),b:T.manhattanBaseTextNow(bx+3*T.r26tileNow(),by)});})()"));
+    t('U1871 正常 0格/3格', o2.a === '📏 曼哈顿 0 格' && o2.b === '📏 曼哈顿 3 格', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const bx=T.r26bcxNow(),by=T.r26bcyNow();return JSON.stringify({a:T.manhattanBaseTextNow(bx+2*T.r26tileNow(),by-3*T.r26tileNow())});})()"));
+    t('U1872 边界 对角 5格', o3.a === '📏 曼哈顿 5 格', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.manhattanBaseTextNow(NaN,564)});})()"));
+    t('U1873 非法输入兜底', o4.a === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const px=T.r26pxNow(),py=T.r26pyNow();return JSON.stringify({dom:T.manhattanDomNow(),exp:T.manhattanBaseTextNow(px,py)});})()"));
+    t('U1874 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1869;k<=1874;k++) t('U'+k+' 曼哈顿距',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

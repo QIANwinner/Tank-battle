@@ -2056,6 +2056,7 @@
   #moveStateWrap .v { color: #54a0ff; font-weight: 800; font-size: 11px; }
   #spawnProgWrap .v { color: #ffbe76; font-weight: 800; font-size: 11px; }
   #wavePhaseWrap .v { color: #4cc9f0; font-weight: 800; font-size: 11px; }
+  #manhattanWrap .v { color: #7bed9f; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -2271,6 +2272,7 @@
     <div class="pill m-hide" id="moveStateWrap"><span class="k">移动</span><span class="v" id="moveStateVal">—</span></div>
     <div class="pill m-hide" id="spawnProgWrap"><span class="k">刷敌</span><span class="v" id="spawnProgVal">—</span></div>
     <div class="pill m-hide" id="wavePhaseWrap"><span class="k">波次</span><span class="v" id="wavePhaseVal">—</span></div>
+    <div class="pill m-hide" id="manhattanWrap"><span class="k">曼哈顿</span><span class="v" id="manhattanVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -2646,7 +2648,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V8.25</div>
+  <div id="mark">DESIGNED BY QIAN · V8.26</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7656,6 +7658,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r23mv = $('moveStateVal'); if (r23mv) r23mv.textContent = playerMoveText(!!player && !player.dead && ((keys['w'] || keys['W'] || keys['s'] || keys['S'] || keys['a'] || keys['A'] || keys['d'] || keys['D'] || (!multiMode && (keys['ArrowUp'] || keys['ArrowDown'] || keys['ArrowLeft'] || keys['ArrowRight'])))));
     const r24sp = $('spawnProgVal'); if (r24sp) r24sp.textContent = spawnProgText(enemiesSpawned, enemiesTotal);
     const r25wp = $('wavePhaseVal'); if (r25wp) r25wp.textContent = wavePhaseText(wave, wavesTotal);
+    const r26mv = $('manhattanVal'); if (r26mv) r26mv.textContent = manhattanBaseText(player && !player.dead ? player.x + TANK_SIZE / 2 : null, player && !player.dead ? player.y + TANK_SIZE / 2 : null);
     // __EXTRA_HUD__
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
   }
@@ -9260,6 +9263,13 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const tv = Math.max(0, Math.floor(Number(total) || 0));
     if (wv <= 0 || tv <= 0) return '—';
     return '🌊 波 ' + wv + '/' + tv;
+  }
+  // —— v0.8.26 玩家-基地曼哈顿距 ——
+  function manhattanBaseText(px, py) {
+    if (px === null || py === null || !isFinite(px) || !isFinite(py)) return '—';
+    const bx = BASE.x * TILE + TILE / 2, by = BASE.y * TILE + TILE / 2;
+    const d = Math.round((Math.abs(px - bx) + Math.abs(py - by)) / TILE);
+    return '📏 曼哈顿 ' + d + ' 格';
   }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
@@ -11102,7 +11112,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V8.25', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V8.26', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -12296,6 +12306,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       playerMoveTextNow: (m) => playerMoveText(m), moveStateDomNow: () => { const e = $('moveStateVal'); return e ? e.textContent : null; }, r23mvNow: () => !!(player && !player.dead && ((keys['w'] || keys['W'] || keys['s'] || keys['S'] || keys['a'] || keys['A'] || keys['d'] || keys['D'] || (!multiMode && (keys['ArrowUp'] || keys['ArrowDown'] || keys['ArrowLeft'] || keys['ArrowRight']))))),
       spawnProgTextNow: (s, t) => spawnProgText(s, t), spawnProgDomNow: () => { const e = $('spawnProgVal'); return e ? e.textContent : null; }, r24spNow: () => enemiesSpawned, r24toNow: () => enemiesTotal,
       wavePhaseTextNow: (w, t) => wavePhaseText(w, t), wavePhaseDomNow: () => { const e = $('wavePhaseVal'); return e ? e.textContent : null; }, r25wNow: () => wave, r25tNow: () => wavesTotal,
+      manhattanBaseTextNow: (px, py) => manhattanBaseText(px, py), manhattanDomNow: () => { const e = $('manhattanVal'); return e ? e.textContent : null; }, r26pxNow: () => player && !player.dead ? player.x + TANK_SIZE / 2 : null, r26pyNow: () => player && !player.dead ? player.y + TANK_SIZE / 2 : null, r26bcxNow: () => BASE.x * TILE + TILE / 2, r26bcyNow: () => BASE.y * TILE + TILE / 2, r26tileNow: () => TILE,
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
