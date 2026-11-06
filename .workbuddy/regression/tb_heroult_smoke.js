@@ -5468,6 +5468,22 @@ async function main() {
     t('U1754 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1749;k<=1754;k++) t('U'+k+' 瞄准偏差',false,e.message); }
 
+
+  // ===== U1755~U1760: 最近道具距离(v0.8.07) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('nearestPuWrap'),f:T.nearestPuDistTextNow(null,null,[])});})()"));
+    t('U1755 近道具 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1756 无玩家初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.nearestPuDistTextNow(300,564,[{x:292,y:556,dead:false}]),b:T.nearestPuDistTextNow(300,564,[{x:292,y:532,dead:false}])});})()"));
+    t('U1757 正常 0格/1格', o2.a === '🧲 道具 0 格' && o2.b === '🧲 道具 1 格', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.nearestPuDistTextNow(300,564,[{x:292,y:556,dead:false},{x:292,y:532,dead:true}]),b:T.nearestPuDistTextNow(300,564,[{x:292,y:532,dead:true}])});})()"));
+    t('U1758 边界:死亡排除/全无', o3.a === '🧲 道具 0 格' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.nearestPuDistTextNow(NaN,564,[])});})()"));
+    t('U1759 非法输入兜底', o4.a === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const px=T.r07pxNow(),py=T.r07pyNow(),pu=T.r07puNow();return JSON.stringify({dom:T.nearestPuDomNow(),exp:T.nearestPuDistTextNow(px,py,pu)});})()"));
+    t('U1760 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1755;k<=1760;k++) t('U'+k+' 近道具',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
