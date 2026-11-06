@@ -5740,6 +5740,22 @@ async function main() {
     t('U1856 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1851;k<=1856;k++) t('U'+k+' 移动状态',false,e.message); }
 
+
+  // ===== U1857~U1862: 本关已刷敌进度(v0.8.24) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('spawnProgWrap'),f:T.spawnProgTextNow(0,0)});})()"));
+    t('U1857 刷敌进度 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1858 无总敌初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.spawnProgTextNow(5,12),b:T.spawnProgTextNow(12,12)});})()"));
+    t('U1859 正常 5/12 与 12/12', o2.a === '🕐 已刷 5/12' && o2.b === '🕐 已刷 12/12', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.spawnProgTextNow(0,1),b:T.spawnProgTextNow(1,1)});})()"));
+    t('U1860 边界 0/1 与 1/1', o3.a === '🕐 已刷 0/1' && o3.b === '🕐 已刷 1/1', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.spawnProgTextNow(NaN,10),b:T.spawnProgTextNow(3,-5)});})()"));
+    t('U1861 非法输入兜底', o4.a === '🕐 已刷 0/10' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const s=T.r24spNow(),to=T.r24toNow();return JSON.stringify({dom:T.spawnProgDomNow(),exp:T.spawnProgTextNow(s,to)});})()"));
+    t('U1862 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1857;k<=1862;k++) t('U'+k+' 刷敌进度',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
