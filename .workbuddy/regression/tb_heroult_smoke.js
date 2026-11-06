@@ -5047,6 +5047,22 @@ async function main() {
     t('U1598 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1593;k<=1598;k++) t('U'+k+' 本波已刷',false,e.message); }
 
+
+  // ===== U1599~U1604: BOSS 剩余血量数值(v0.7.81) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossHpNumWrap'),f:T.bossHpNumTextNow(0)});})()"));
+    t('U1599 BOSS血量 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1600 无BOSS初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossHpNumTextNow(240),b:T.bossHpNumTextNow(120)});})()"));
+    t('U1601 正常 240/120', o2.a === '👑 HP 240' && o2.b === '👑 HP 120', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossHpNumTextNow(1),b:T.bossHpNumTextNow(9999)});})()"));
+    t('U1602 边界:1/9999', o3.a === '👑 HP 1' && o3.b === '👑 HP 9999', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossHpNumTextNow(NaN),b:T.bossHpNumTextNow(-5)});})()"));
+    t('U1603 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r81hpNow();return JSON.stringify({dom:T.bossHpNumDomNow(),exp:T.bossHpNumTextNow(v)});})()"));
+    t('U1604 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1599;k<=1604;k++) t('U'+k+' BOSS血量',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
