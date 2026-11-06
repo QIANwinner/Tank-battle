@@ -1,3 +1,16 @@
+# v0.8.30 · 场上敌人最大生命 pill(enemies 最大 e.hp,独立ID)
+
+> 场上敌人最大生命 pill(enemies 最大 e.hp,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1898/1898。
+
+## 🅰 改进
+
+- 场上敌人最大生命 pill(enemies 最大 e.hp,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+
+## 🅱 验证
+
+- 主套件 169/169 + 反馈专项 1898/1898；内联脚本语法 SYNTAX OK
+- SW 缓存 v08300，游戏内版本 V8.30；远程树与本地树一致（sync_push）
+
 # v0.8.29 · BOSS 已造成伤害 pill(bossMaxHp-bossHp,独立ID)
 
 > BOSS 已造成伤害 pill(bossMaxHp-bossHp,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1892/1892。

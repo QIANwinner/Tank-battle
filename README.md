@@ -162,6 +162,12 @@ Tank-battle/
 
 ## 🆕 更新日志
 
+### v0.8.30 · 2026-11-06
+**场上敌人最大生命 pill(enemies 最大 e.hp,独立ID)**
+- 场上敌人最大生命 pill(enemies 最大 e.hp,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+- ✅ 回归验证：主套件 169/169 + 反馈专项 1898/1898（无回归）
+- 📴 Service Worker 缓存版本更新至 **v08300**，游戏内版本 **V8.30**
+
 ### v0.8.29 · 2026-11-06
 **BOSS 已造成伤害 pill(bossMaxHp-bossHp,独立ID)**
 - BOSS 已造成伤害 pill(bossMaxHp-bossHp,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）

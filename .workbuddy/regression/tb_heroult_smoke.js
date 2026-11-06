@@ -5837,6 +5837,22 @@ async function main() {
     t('U1892 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1887;k<=1892;k++) t('U'+k+' BOSS已伤',false,e.message); }
 
+
+  // ===== U1893~U1898: 场上敌人最大生命(v0.8.30) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('enemyMaxWrap'),f:T.enemyMaxHpTextNow([])});})()"));
+    t('U1893 敌血峰 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1894 无敌人初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyMaxHpTextNow([{hp:50},{hp:120},{hp:80}]),b:T.enemyMaxHpTextNow([{hp:200}])});})()"));
+    t('U1895 正常 120/200', o2.a === '💀 敌血峰 120' && o2.b === '💀 敌血峰 200', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyMaxHpTextNow([{hp:1}]),b:T.enemyMaxHpTextNow([{hp:0},{hp:3}])});})()"));
+    t('U1896 边界 1/3', o3.a === '💀 敌血峰 1' && o3.b === '💀 敌血峰 3', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyMaxHpTextNow([{hp:NaN}]),b:T.enemyMaxHpTextNow(null)});})()"));
+    t('U1897 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const en=T.r30enNow();return JSON.stringify({dom:T.enemyMaxDomNow(),exp:T.enemyMaxHpTextNow(en)});})()"));
+    t('U1898 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1893;k<=1898;k++) t('U'+k+' 敌血峰',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
