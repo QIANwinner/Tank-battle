@@ -1,3 +1,16 @@
+# v0.8.02 · 本局道具种类数 pill(需新状态 runPickupKinds:Set,在 applyPowerup 处累计去重)
+
+> 本局道具种类数 pill(需新状态 runPickupKinds:Set,在 applyPowerup 处累计去重)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1730/1730。
+
+## 🅰 改进
+
+- 本局道具种类数 pill(需新状态 runPickupKinds:Set,在 applyPowerup 处累计去重)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+
+## 🅱 验证
+
+- 主套件 169/169 + 反馈专项 1730/1730；内联脚本语法 SYNTAX OK
+- SW 缓存 v08020，游戏内版本 V8.02；远程树与本地树一致（sync_push）
+
 # v0.8.01 · 弹幕威胁等级 pill(bullets.length 分四级,独立ID)
 
 > 弹幕威胁等级 pill(bullets.length 分四级,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1724/1724。

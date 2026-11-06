@@ -5383,6 +5383,22 @@ async function main() {
     t('U1724 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1719;k<=1724;k++) t('U'+k+' 弹幕威胁',false,e.message); }
 
+
+  // ===== U1725~U1730: 本局道具种类数(v0.8.02) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runPickupKindsWrap'),f:T.runPickupKindsTextNow(0)});})()"));
+    t('U1725 道具种类 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1726 无拾取初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runPickupKindsTextNow(3),b:T.runPickupKindsTextNow(8)});})()"));
+    t('U1727 正常 3种/8种', o2.a === '🧩 道具 3 种' && o2.b === '🧩 道具 8 种', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runPickupKindsTextNow(1),b:T.runPickupKindsTextNow(20)});})()"));
+    t('U1728 边界 1种/20种', o3.a === '🧩 道具 1 种' && o3.b === '🧩 道具 20 种', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runPickupKindsTextNow(NaN)});})()"));
+    t('U1729 非法输入兜底', o4.a === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.r02kReset();T.r02kAdd('a');T.r02kAdd('b');T.r02kAdd('a');T.extraHudRefreshNow();const v=T.r02kNow();return JSON.stringify({dom:T.runPickupKindsDomNow(),exp:T.runPickupKindsTextNow(v)});})()"));
+    t('U1730 DOM 与函数一致(Set去重)', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1725;k<=1730;k++) t('U'+k+' 道具种类',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

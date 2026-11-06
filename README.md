@@ -162,6 +162,12 @@ Tank-battle/
 
 ## 🆕 更新日志
 
+### v0.8.02 · 2026-11-06
+**本局道具种类数 pill(需新状态 runPickupKinds:Set,在 applyPowerup 处累计去重)**
+- 本局道具种类数 pill(需新状态 runPickupKinds:Set,在 applyPowerup 处累计去重)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+- ✅ 回归验证：主套件 169/169 + 反馈专项 1730/1730（无回归）
+- 📴 Service Worker 缓存版本更新至 **v08020**，游戏内版本 **V8.02**
+
 ### v0.8.01 · 2026-11-06
 **弹幕威胁等级 pill(bullets.length 分四级,独立ID)**
 - 弹幕威胁等级 pill(bullets.length 分四级,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
