@@ -4502,6 +4502,22 @@ async function main() {
     t('U1394 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1389;k<=1394;k++) t('U'+k+' 生涯星数',false,e.message); }
 
+
+  // ===== U1395~U1400: 连击剩余秒数(v0.7.47) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('comboLeftWrap'),f:T.comboLeftTextNow(0)});})()"));
+    t('U1395 连击剩余 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1396 零计时初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboLeftTextNow(3.2),b:T.comboLeftTextNow(5)});})()"));
+    t('U1397 正常 3.2s/5s', o2.a === '⏳ 3.2s' && o2.b === '⏳ 5s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboLeftTextNow(0.1),b:T.comboLeftTextNow(9.96)});})()"));
+    t('U1398 边界:0.1s/9.96s', o3.a === '⏳ 0.1s' && o3.b === '⏳ 10s', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboLeftTextNow(NaN),b:T.comboLeftTextNow(-5)});})()"));
+    t('U1399 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const t=T.comboTimerLeftNow();return JSON.stringify({dom:T.comboLeftDomNow(),exp:T.comboLeftTextNow(t)});})()"));
+    t('U1400 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1395;k<=1400;k++) t('U'+k+' 连击剩余',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
