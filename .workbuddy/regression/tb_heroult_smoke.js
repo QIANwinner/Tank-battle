@@ -4951,6 +4951,22 @@ async function main() {
     t('U1562 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1557;k<=1562;k++) t('U'+k+' 激光',false,e.message); }
 
+
+  // ===== U1563~U1568: 当前每日词条数(v0.7.75) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('dailyCountWrap'),f:T.dailyCountTextNow({_names:[]})});})()"));
+    t('U1563 词条 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1564 无词条初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dailyCountTextNow({_names:['疾风骤雨','丰饶战场']}),b:T.dailyCountTextNow({_names:['钢铁防线','后勤休假','狙击天团']})});})()"));
+    t('U1565 正常 2/3条', o2.a === '📜 词条 2' && o2.b === '📜 词条 3', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dailyCountTextNow({_names:['x']}),b:T.dailyCountTextNow({_names:[]})});})()"));
+    t('U1566 边界:1条/零', o3.a === '📜 词条 1' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dailyCountTextNow(null),b:T.dailyCountTextNow({})});})()"));
+    t('U1567 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r75dmNow();return JSON.stringify({dom:T.dailyCountDomNow(),exp:T.dailyCountTextNow(v)});})()"));
+    t('U1568 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1563;k<=1568;k++) t('U'+k+' 词条',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
