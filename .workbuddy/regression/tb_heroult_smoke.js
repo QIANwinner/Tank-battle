@@ -5885,6 +5885,22 @@ async function main() {
     t('U1910 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1905;k<=1910;k++) t('U'+k+' 复活成本',false,e.message); }
 
+
+  // ===== U1911~U1916: 金运金币加成(v0.8.33) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('goldBonusWrap'),f:T.goldBonusTextNow(0)});})()"));
+    t('U1911 金运加成 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1912 初值 x1.0', o.f === '🍀 金运 x1.0', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.goldBonusTextNow(1),b:T.goldBonusTextNow(2)});})()"));
+    t('U1913 正常 x1.2/x1.3', o2.a === '🍀 金运 x1.2' && o2.b === '🍀 金运 x1.3', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.goldBonusTextNow(3),b:T.goldBonusTextNow(10)});})()"));
+    t('U1914 边界 x1.5/x2.5', o3.a === '🍀 金运 x1.5' && o3.b === '🍀 金运 x2.5', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.goldBonusTextNow(NaN),b:T.goldBonusTextNow(-1)});})()"));
+    t('U1915 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const cu=T.r33cuNow();return JSON.stringify({dom:T.goldBonusDomNow(),exp:T.goldBonusTextNow(cu)});})()"));
+    t('U1916 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1911;k<=1916;k++) t('U'+k+' 金运加成',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

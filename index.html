@@ -2063,6 +2063,7 @@
   #enemyMaxWrap .v { color: #ff7f50; font-weight: 800; font-size: 11px; }
   #coinShareWrap .v { color: #f9ca24; font-weight: 800; font-size: 11px; }
   #reviveCostWrap .v { color: #7bed9f; font-weight: 800; font-size: 11px; }
+  #goldBonusWrap .v { color: #2ed573; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -2285,6 +2286,7 @@
     <div class="pill m-hide" id="enemyMaxWrap"><span class="k">敌血峰</span><span class="v" id="enemyMaxVal">—</span></div>
     <div class="pill m-hide" id="coinShareWrap"><span class="k">金币占</span><span class="v" id="coinShareVal">—</span></div>
     <div class="pill m-hide" id="reviveCostWrap"><span class="k">复活</span><span class="v" id="reviveCostVal">—</span></div>
+    <div class="pill m-hide" id="goldBonusWrap"><span class="k">金运</span><span class="v" id="goldBonusVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -2660,7 +2662,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V8.32</div>
+  <div id="mark">DESIGNED BY QIAN · V8.33</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7677,6 +7679,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r30mv = $('enemyMaxVal'); if (r30mv) r30mv.textContent = enemyMaxHpText(enemies);
     const r31cs = $('coinShareVal'); if (r31cs) r31cs.textContent = coinShareText(runCoins, career.totalCoins);
     const r32rv = $('reviveCostVal'); if (r32rv) r32rv.textContent = reviveCostText(reviveCost());
+    const r33gb = $('goldBonusVal'); if (r33gb) r33gb.textContent = goldBonusText(bonus.coinup);
     // __EXTRA_HUD__
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
   }
@@ -9331,6 +9334,13 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const c = Number(cost);
     if (!isFinite(c) || c < 0) return '—';
     return '🔧 复活 ' + fmtNum(c) + '金';
+  }
+  // —— v0.8.33 金运金币加成 ——
+  function goldBonusText(coinup) {
+    const c = Number(coinup);
+    if (!isFinite(c) || c < 0) return '—';
+    const tenths = Math.round((100 + 15 * c) / 10);
+    return '🍀 金运 x' + Math.floor(tenths / 10) + '.' + (tenths % 10);
   }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
@@ -11173,7 +11183,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V8.32', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V8.33', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -12374,6 +12384,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       enemyMaxHpTextNow: (e) => enemyMaxHpText(e), enemyMaxDomNow: () => { const e = $('enemyMaxVal'); return e ? e.textContent : null; }, r30enNow: () => enemies,
       coinShareTextNow: (r, c) => coinShareText(r, c), coinShareDomNow: () => { const e = $('coinShareVal'); return e ? e.textContent : null; }, r31rcNow: () => runCoins, r31ctNow: () => career.totalCoins,
       reviveCostTextNow: (c) => reviveCostText(c), reviveCostDomNow: () => { const e = $('reviveCostVal'); return e ? e.textContent : null; }, r32rcNow: () => reviveCost(),
+      goldBonusTextNow: (c) => goldBonusText(c), goldBonusDomNow: () => { const e = $('goldBonusVal'); return e ? e.textContent : null; }, r33cuNow: () => bonus.coinup,
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
