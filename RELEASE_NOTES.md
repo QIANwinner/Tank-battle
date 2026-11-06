@@ -1,3 +1,16 @@
+# v0.8.21 · 玩家攻击冷却剩余 pill(player.cooldown 帧→秒,独立ID)
+
+> 玩家攻击冷却剩余 pill(player.cooldown 帧→秒,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1844/1844。
+
+## 🅰 改进
+
+- 玩家攻击冷却剩余 pill(player.cooldown 帧→秒,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+
+## 🅱 验证
+
+- 主套件 169/169 + 反馈专项 1844/1844；内联脚本语法 SYNTAX OK
+- SW 缓存 v08210，游戏内版本 V8.21；远程树与本地树一致（sync_push）
+
 # v0.8.20 · 玩家狙击待命 pill(player.ultSnipe 是否就绪,独立ID)
 
 > 玩家狙击待命 pill(player.ultSnipe 是否就绪,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1838/1838。

@@ -5692,6 +5692,22 @@ async function main() {
     t('U1838 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1833;k<=1838;k++) t('U'+k+' 狙击待命',false,e.message); }
 
+
+  // ===== U1839~U1844: 玩家攻击冷却剩余(v0.8.21) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('atkCdWrap'),f:T.atkCdTextNow(0)});})()"));
+    t('U1839 攻击冷却 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1840 无冷却初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.atkCdTextNow(40),b:T.atkCdTextNow(24)});})()"));
+    t('U1841 正常 0.7s/0.4s', o2.a === '🔥 冷却 0.7s' && o2.b === '🔥 冷却 0.4s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.atkCdTextNow(6),b:T.atkCdTextNow(300)});})()"));
+    t('U1842 边界 0.1s/5s', o3.a === '🔥 冷却 0.1s' && o3.b === '🔥 冷却 5s', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.atkCdTextNow(NaN),b:T.atkCdTextNow(-3)});})()"));
+    t('U1843 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r21cdNow();return JSON.stringify({dom:T.atkCdDomNow(),exp:T.atkCdTextNow(v)});})()"));
+    t('U1844 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1839;k<=1844;k++) t('U'+k+' 攻击冷却',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
