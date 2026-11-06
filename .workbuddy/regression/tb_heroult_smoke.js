@@ -4486,6 +4486,22 @@ async function main() {
     t('U1388 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1383;k<=1388;k++) t('U'+k+' 生涯阵亡',false,e.message); }
 
+
+  // ===== U1389~U1394: 生涯总星级(v0.7.46) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerStarWrap'),f:T.careerStarsTextNow(0)});})()"));
+    t('U1389 生涯星数 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1390 零星初值', o.f === '⭐ 0', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerStarsTextNow(75),b:T.careerStarsTextNow(150)});})()"));
+    t('U1391 正常 75/150', o2.a === '⭐ 75' && o2.b === '⭐ 150', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerStarsTextNow(9999),b:T.careerStarsTextNow(12000)});})()"));
+    t('U1392 边界:9999/12,000', o3.a === '⭐ 9999' && o3.b === '⭐ 12,000', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerStarsTextNow(NaN),b:T.careerStarsTextNow(-10)});})()"));
+    t('U1393 非法输入兜底', o4.a === '⭐ 0' && o4.b === '⭐ 0', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const st=T.careerStarsNow();return JSON.stringify({dom:T.careerStarsPillDomNow(),exp:T.careerStarsTextNow(st)});})()"));
+    t('U1394 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1389;k<=1394;k++) t('U'+k+' 生涯星数',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
