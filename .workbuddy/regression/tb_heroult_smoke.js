@@ -4550,6 +4550,22 @@ async function main() {
     t('U1412 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1407;k<=1412;k++) t('U'+k+' BOSS占比',false,e.message); }
 
+
+  // ===== U1413~U1418: 宠物等级进度(v0.7.50) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('petLvWrap'),f:T.petLvTextNow(0,0)});})()"));
+    t('U1413 宠物级 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1414 零上限初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petLvTextNow(2,3),b:T.petLvTextNow(1,3)});})()"));
+    t('U1415 正常 2/3 与 1/3', o2.a === '🐾 Lv 2/3' && o2.b === '🐾 Lv 1/3', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petLvTextNow(3,3),b:T.petLvTextNow(5,3)});})()"));
+    t('U1416 边界:满级MAX/超限', o3.a === '🐾 MAX' && o3.b === '🐾 MAX', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petLvTextNow(NaN,3),b:T.petLvTextNow(2,NaN)});})()"));
+    t('U1417 非法输入兜底', o4.a === '🐾 Lv 0/3' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const l=T.petLvNow(),m=T.petMaxLvNow();return JSON.stringify({dom:T.petLvDomNow(),exp:T.petLvTextNow(l,m)});})()"));
+    t('U1418 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1413;k<=1418;k++) t('U'+k+' 宠物级',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
