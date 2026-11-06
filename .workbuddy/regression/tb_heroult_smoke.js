@@ -4935,6 +4935,22 @@ async function main() {
     t('U1556 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1551;k<=1556;k++) t('U'+k+' BOSS警报',false,e.message); }
 
+
+  // ===== U1557~U1562: 当前猎手激光数(v0.7.74) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('lasersWrap'),f:T.lasersTextNow(0)});})()"));
+    t('U1557 激光 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1558 无激光初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lasersTextNow(2),b:T.lasersTextNow(5)});})()"));
+    t('U1559 正常 2/5', o2.a === '🔦 激光 2' && o2.b === '🔦 激光 5', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lasersTextNow(1),b:T.lasersTextNow(12)});})()"));
+    t('U1560 边界:1/12', o3.a === '🔦 激光 1' && o3.b === '🔦 激光 12', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lasersTextNow(NaN),b:T.lasersTextNow(-4)});})()"));
+    t('U1561 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r74lsNow();return JSON.stringify({dom:T.lasersDomNow(),exp:T.lasersTextNow(v)});})()"));
+    t('U1562 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1557;k<=1562;k++) t('U'+k+' 激光',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
