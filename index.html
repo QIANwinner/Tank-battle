@@ -2050,6 +2050,7 @@
   #noHurtWrap .v { color: #2ed573; font-weight: 800; font-size: 11px; }
   #bossDistWrap .v { color: #ffa94d; font-weight: 800; font-size: 11px; }
   #spawnInvWrap .v { color: #f9ca24; font-weight: 800; font-size: 11px; }
+  #snipeReadyWrap .v { color: #ff6b81; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -2259,6 +2260,7 @@
     <div class="pill m-hide" id="noHurtWrap"><span class="k">无伤</span><span class="v" id="noHurtVal">—</span></div>
     <div class="pill m-hide" id="bossDistWrap"><span class="k">BOSS距</span><span class="v" id="bossDistVal">—</span></div>
     <div class="pill m-hide" id="spawnInvWrap"><span class="k">无敌</span><span class="v" id="spawnInvVal">—</span></div>
+    <div class="pill m-hide" id="snipeReadyWrap"><span class="k">狙击</span><span class="v" id="snipeReadyVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -2634,7 +2636,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V8.19</div>
+  <div id="mark">DESIGNED BY QIAN · V8.20</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7638,6 +7640,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
       if (r18p && !r18p.dead) r18d = bossDistCalc(enemies, r18p.x + TILE / 2, r18p.y + TILE / 2);
       const r18dv = $('bossDistVal'); if (r18dv) r18dv.textContent = bossDistText(r18d); }
     const r19sv = $('spawnInvVal'); if (r19sv) r19sv.textContent = spawnInvText(player ? player.spawnInv : 0);
+    const r20sv = $('snipeReadyVal'); if (r20sv) r20sv.textContent = snipeReadyText(player && player.ultSnipe);
     // __EXTRA_HUD__
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
   }
@@ -9208,6 +9211,10 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const v = Math.floor(Number(f) || 0);
     if (!isFinite(v) || v <= 0) return '—';
     return '🛡 无敌 ' + (Math.round(v / 6) / 10) + 's';
+  }
+  // —— v0.8.20 玩家狙击待命 ——
+  function snipeReadyText(ready) {
+    return ready ? '🎯 狙击就绪' : '—';
   }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
@@ -11050,7 +11057,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V8.19', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V8.20', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -12238,6 +12245,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       noHurtLvTextNow: (hurt) => noHurtLvText(hurt), noHurtDomNow: () => { const e = $('noHurtVal'); return e ? e.textContent : null; }, r17hNow: () => tookHitThisLevel,
       bossDistCalcNow: (arr, px, py) => bossDistCalc(arr, px, py), bossDistTextNow: (d) => bossDistText(d), bossDistDomNow: () => { const e = $('bossDistVal'); return e ? e.textContent : null; }, r18posNow: () => { const p = player; return p ? { px: p.x + TILE / 2, py: p.y + TILE / 2 } : { px: 0, py: 0 }; }, r18enNow: () => enemies,
       spawnInvTextNow: (f) => spawnInvText(f), spawnInvDomNow: () => { const e = $('spawnInvVal'); return e ? e.textContent : null; }, r19svNow: () => player ? player.spawnInv : 0,
+      snipeReadyTextNow: (r) => snipeReadyText(r), snipeReadyDomNow: () => { const e = $('snipeReadyVal'); return e ? e.textContent : null; }, r20srNow: () => !!(player && player.ultSnipe),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

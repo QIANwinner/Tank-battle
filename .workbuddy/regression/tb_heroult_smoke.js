@@ -5676,6 +5676,22 @@ async function main() {
     t('U1832 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1827;k<=1832;k++) t('U'+k+' 无敌剩余',false,e.message); }
 
+
+  // ===== U1833~U1838: 玩家狙击待命(v0.8.20) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('snipeReadyWrap'),f:T.snipeReadyTextNow(false)});})()"));
+    t('U1833 狙击待命 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1834 未就绪初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.snipeReadyTextNow(true)});})()"));
+    t('U1835 正常 就绪', o2.a === '🎯 狙击就绪', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.snipeReadyTextNow(1),b:T.snipeReadyTextNow(0)});})()"));
+    t('U1836 边界 1就绪/0未就绪', o3.a === '🎯 狙击就绪' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.snipeReadyTextNow(undefined),b:T.snipeReadyTextNow(null)});})()"));
+    t('U1837 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const r=T.r20srNow();return JSON.stringify({dom:T.snipeReadyDomNow(),exp:T.snipeReadyTextNow(r)});})()"));
+    t('U1838 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1833;k<=1838;k++) t('U'+k+' 狙击待命',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

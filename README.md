@@ -162,6 +162,12 @@ Tank-battle/
 
 ## 🆕 更新日志
 
+### v0.8.20 · 2026-11-06
+**玩家狙击待命 pill(player.ultSnipe 是否就绪,独立ID)**
+- 玩家狙击待命 pill(player.ultSnipe 是否就绪,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+- ✅ 回归验证：主套件 169/169 + 反馈专项 1838/1838（无回归）
+- 📴 Service Worker 缓存版本更新至 **v08200**，游戏内版本 **V8.20**
+
 ### v0.8.19 · 2026-11-06
 **玩家出生无敌剩余 pill(player.spawnInv 帧→秒,独立ID)**
 - 玩家出生无敌剩余 pill(player.spawnInv 帧→秒,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
