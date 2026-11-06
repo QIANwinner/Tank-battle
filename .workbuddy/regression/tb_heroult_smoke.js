@@ -4678,6 +4678,22 @@ async function main() {
     t('U1460 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1455;k<=1460;k++) t('U'+k+' 困难最佳',false,e.message); }
 
+
+  // ===== U1461~U1466: 生涯模式场次分布(v0.7.58) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('modeGamesWrap'),f:T.modeGamesTextNow({})});})()"));
+    t('U1461 场次 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1462 零场次初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.modeGamesTextNow({normal:12,daily:3,timed:1,endless:2,hard:0}),b:T.modeGamesTextNow({normal:5})});})()"));
+    t('U1463 正常 分布', o2.a === '🎮 标准12·每日3·限时1·无尽2·困难0' && o2.b === '🎮 标准5·每日0·限时0·无尽0·困难0', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.modeGamesTextNow({normal:1}),b:T.modeGamesTextNow({normal:0,daily:0,timed:0,endless:0,hard:1})});})()"));
+    t('U1464 边界:单场/仅困难', o3.a === '🎮 标准1·每日0·限时0·无尽0·困难0' && o3.b === '🎮 标准0·每日0·限时0·无尽0·困难1', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.modeGamesTextNow(null),b:T.modeGamesTextNow({normal:NaN})});})()"));
+    t('U1465 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r58mgNow();return JSON.stringify({dom:T.modeGamesDomNow(),exp:T.modeGamesTextNow(v)});})()"));
+    t('U1466 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1461;k<=1466;k++) t('U'+k+' 场次',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
