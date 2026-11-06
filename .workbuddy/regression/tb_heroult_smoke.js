@@ -4967,6 +4967,22 @@ async function main() {
     t('U1568 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1563;k<=1568;k++) t('U'+k+' 词条',false,e.message); }
 
+
+  // ===== U1569~U1574: 生涯 K/D 比值(v0.7.76) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerKDWrap'),f:T.careerKDTextNow(0,0)});})()"));
+    t('U1569 生涯K/D pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1570 无数据初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerKDTextNow(120,40),b:T.careerKDTextNow(50,20)});})()"));
+    t('U1571 正常 3 与 2.5', o2.a === '⚖ 生涯 K/D 3' && o2.b === '⚖ 生涯 K/D 2.5', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerKDTextNow(0,5),b:T.careerKDTextNow(10,0)});})()"));
+    t('U1572 边界:零击杀/零阵亡', o3.a === '⚖ 生涯 K/D 0' && o3.b === '⚖ 生涯 K/D ∞', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerKDTextNow(NaN,0),b:T.careerKDTextNow(10,NaN)});})()"));
+    t('U1573 非法输入兜底', o4.a === '—' && o4.b === '⚖ 生涯 K/D ∞', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const k=T.r76kNow(),d=T.r76dNow();return JSON.stringify({dom:T.careerKDDomNow(),exp:T.careerKDTextNow(k,d)});})()"));
+    t('U1574 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1569;k<=1574;k++) t('U'+k+' 生涯K/D',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
