@@ -5287,6 +5287,22 @@ async function main() {
     t('U1688 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1683;k<=1688;k++) t('U'+k+' 朝向',false,e.message); }
 
+
+  // ===== U1689~U1694: 基地距离(v0.7.96) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('baseDistWrap'),f:T.baseDistTextNow(null,null)});})()"));
+    t('U1689 基地距 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1690 无玩家初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseDistTextNow(300,564),b:T.baseDistTextNow(300,540)});})()"));
+    t('U1691 正常 0格/1格', o2.a === '🏯 基地 0 格' && o2.b === '🏯 基地 1 格', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseDistTextNow(300,516),b:T.baseDistTextNow(348,564)});})()"));
+    t('U1692 边界:2格/2格', o3.a === '🏯 基地 2 格' && o3.b === '🏯 基地 2 格', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseDistTextNow(NaN,100)});})()"));
+    t('U1693 非法输入兜底', o4.a === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const px=T.r96pxNow(),py=T.r96pyNow();return JSON.stringify({dom:T.baseDistDomNow(),exp:T.baseDistTextNow(px,py)});})()"));
+    t('U1694 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1689;k<=1694;k++) t('U'+k+' 基地距',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
