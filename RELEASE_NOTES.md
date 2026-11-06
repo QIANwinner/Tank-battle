@@ -1,3 +1,16 @@
+# v0.7.94 · 本局道具拾取速率 pill(独立ID,runPowerups/playSecRun)
+
+> 本局道具拾取速率 pill(独立ID,runPowerups/playSecRun)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1682/1682。
+
+## 🅰 改进
+
+- 本局道具拾取速率 pill(独立ID,runPowerups/playSecRun)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+
+## 🅱 验证
+
+- 主套件 169/169 + 反馈专项 1682/1682；内联脚本语法 SYNTAX OK
+- SW 缓存 v07940，游戏内版本 V7.94；远程树与本地树一致（sync_push）
+
 # v0.7.93 · 当前波次编号 pill(wave,独立ID)
 
 > 当前波次编号 pill(wave,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1676/1676。

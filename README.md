@@ -162,6 +162,12 @@ Tank-battle/
 
 ## 🆕 更新日志
 
+### v0.7.94 · 2026-11-06
+**本局道具拾取速率 pill(独立ID,runPowerups/playSecRun)**
+- 本局道具拾取速率 pill(独立ID,runPowerups/playSecRun)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+- ✅ 回归验证：主套件 169/169 + 反馈专项 1682/1682（无回归）
+- 📴 Service Worker 缓存版本更新至 **v07940**，游戏内版本 **V7.94**
+
 ### v0.7.93 · 2026-11-06
 **当前波次编号 pill(wave,独立ID)**
 - 当前波次编号 pill(wave,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）

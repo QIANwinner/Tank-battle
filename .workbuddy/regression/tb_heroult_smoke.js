@@ -5255,6 +5255,22 @@ async function main() {
     t('U1676 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1671;k<=1676;k++) t('U'+k+' 波次',false,e.message); }
 
+
+  // ===== U1677~U1682: 本局道具拾取速率(v0.7.94) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('puRateNowWrap'),f:T.puRateNowTextNow(0,10)});})()"));
+    t('U1677 拾取率 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1678 无拾取初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.puRateNowTextNow(3,60),b:T.puRateNowTextNow(8,80)});})()"));
+    t('U1679 正常 0.05/s 与 0.1/s', o2.a === '🧺 拾取率 0.05/s' && o2.b === '🧺 拾取率 0.1/s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.puRateNowTextNow(1,100),b:T.puRateNowTextNow(10,100)});})()"));
+    t('U1680 边界:0.01/s 与 0.1/s', o3.a === '🧺 拾取率 0.01/s' && o3.b === '🧺 拾取率 0.1/s', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.puRateNowTextNow(NaN,10),b:T.puRateNowTextNow(3,0)});})()"));
+    t('U1681 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const n=T.r94nNow(),s=T.r94sNow();return JSON.stringify({dom:T.puRateNowDomNow(),exp:T.puRateNowTextNow(n,s)});})()"));
+    t('U1682 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1677;k<=1682;k++) t('U'+k+' 拾取率',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
