@@ -162,6 +162,12 @@ Tank-battle/
 
 ## 🆕 更新日志
 
+### v0.7.90 · 2026-11-06
+**基地状态 pill(存活+护墙数,baseAlive 布尔 + BASE_LEVELS[baseLevel].walls 数)**
+- 基地状态 pill(存活+护墙数,baseAlive 布尔 + BASE_LEVELS[baseLevel].walls 数)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+- ✅ 回归验证：主套件 169/169 + 反馈专项 1658/1658（无回归）
+- 📴 Service Worker 缓存版本更新至 **v07900**，游戏内版本 **V7.90**
+
 ### v0.7.89 · 2026-11-06
 **本局道具金币收益 pill(需新状态 runPickupGold,在 applyPowerup 金币处累计)**
 - 本局道具金币收益 pill(需新状态 runPickupGold,在 applyPowerup 金币处累计)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）

@@ -1,3 +1,16 @@
+# v0.7.90 · 基地状态 pill(存活+护墙数,baseAlive 布尔 + BASE_LEVELS[baseLevel].walls 数)
+
+> 基地状态 pill(存活+护墙数,baseAlive 布尔 + BASE_LEVELS[baseLevel].walls 数)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1658/1658。
+
+## 🅰 改进
+
+- 基地状态 pill(存活+护墙数,baseAlive 布尔 + BASE_LEVELS[baseLevel].walls 数)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+
+## 🅱 验证
+
+- 主套件 169/169 + 反馈专项 1658/1658；内联脚本语法 SYNTAX OK
+- SW 缓存 v07900，游戏内版本 V7.90；远程树与本地树一致（sync_push）
+
 # v0.7.89 · 本局道具金币收益 pill(需新状态 runPickupGold,在 applyPowerup 金币处累计)
 
 > 本局道具金币收益 pill(需新状态 runPickupGold,在 applyPowerup 金币处累计)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1652/1652。

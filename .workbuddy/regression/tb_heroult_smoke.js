@@ -5191,6 +5191,22 @@ async function main() {
     t('U1652 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1647;k<=1652;k++) t('U'+k+' 道具金币',false,e.message); }
 
+
+  // ===== U1653~U1658: 基地状态(v0.7.90) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('baseStatusWrap'),f:T.baseStatusTextNow(true,0)});})()"));
+    t('U1653 基地状态 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1654 存活无墙初值', o.f === '🏰 基地 0 墙', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseStatusTextNow(true,8),b:T.baseStatusTextNow(false,8)});})()"));
+    t('U1655 正常:存活8墙/被毁', o2.a === '🏰 基地 8 墙' && o2.b === '💥 基地被毁', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseStatusTextNow(true,1),b:T.baseStatusTextNow(true,30)});})()"));
+    t('U1656 边界:1墙/30墙', o3.a === '🏰 基地 1 墙' && o3.b === '🏰 基地 30 墙', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseStatusTextNow(true,NaN),b:T.baseStatusTextNow(false,NaN)});})()"));
+    t('U1657 非法输入兜底', o4.a === '🏰 基地 0 墙' && o4.b === '💥 基地被毁', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const a=T.r90aliveNow(),w=T.r90wallsNow();return JSON.stringify({dom:T.baseStatusDomNow(),exp:T.baseStatusTextNow(a,w)});})()"));
+    t('U1658 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1653;k<=1658;k++) t('U'+k+' 基地状态',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
