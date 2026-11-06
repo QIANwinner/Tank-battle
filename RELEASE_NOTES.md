@@ -1,3 +1,16 @@
+# v0.8.48 · 本关已得星级 pill(levelStars[level],独立ID)
+
+> 本关已得星级 pill(levelStars[level],独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 2006/2006。
+
+## 🅰 改进
+
+- 本关已得星级 pill(levelStars[level],独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+
+## 🅱 验证
+
+- 主套件 169/169 + 反馈专项 2006/2006；内联脚本语法 SYNTAX OK
+- SW 缓存 v08480，游戏内版本 V8.48；远程树与本地树一致（sync_push）
+
 # v0.8.47 · 宠物当前反应 pill(petFx.type,独立ID)
 
 > 宠物当前反应 pill(petFx.type,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 2000/2000。

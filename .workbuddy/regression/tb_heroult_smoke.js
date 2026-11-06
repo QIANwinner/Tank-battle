@@ -6125,6 +6125,22 @@ async function main() {
     t('U2000 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1995;k<=2000;k++) t('U'+k+' 宠物反应',false,e.message); }
 
+
+  // ===== U2001~U2006: 本关已得星级(v0.8.48) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('levelStarWrap'),f:T.levelStarTextNow(0)});})()"));
+    t('U2001 本关星级 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2002 初值 0/3', o.f === '⭐ 本关 0/3', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.levelStarTextNow(1),b:T.levelStarTextNow(3)});})()"));
+    t('U2003 正常 1/3、3/3', o2.a === '⭐ 本关 1/3' && o2.b === '⭐ 本关 3/3', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.levelStarTextNow(0),b:T.levelStarTextNow(2.6)});})()"));
+    t('U2004 边界 0/3、2/3(截断)', o3.a === '⭐ 本关 0/3' && o3.b === '⭐ 本关 2/3', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.levelStarTextNow(NaN),b:T.levelStarTextNow(-1)});})()"));
+    t('U2005 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const ls=T.r48lsNow();return JSON.stringify({dom:T.levelStarDomNow(),exp:T.levelStarTextNow(ls)});})()"));
+    t('U2006 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=2001;k<=2006;k++) t('U'+k+' 本关星级',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
