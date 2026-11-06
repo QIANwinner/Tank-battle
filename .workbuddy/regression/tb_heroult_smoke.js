@@ -10,6 +10,11 @@ const URL = process.argv[2] || 'http://127.0.0.1:8124/index.html?test=1';
 const PORT = 9339;
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+// 终止整个 Chrome 进程树(Windows: taskkill /T /F;否则 chrome.kill() 只杀父进程,子进程残留占端口造成跨轮污染)
+function killTree(pid) {
+  try { require('child_process').execSync('taskkill /PID ' + pid + ' /T /F', { stdio: 'ignore' }); } catch (e) {}
+  try { process.kill(pid); } catch (e) {}
+}
 function httpJson(path, method = 'GET') {
   return new Promise((resolve, reject) => {
     const req = http.request({ host: '127.0.0.1', port: PORT, path, method }, res => {
@@ -78,7 +83,7 @@ async function main() {
     const r = await client.send('Runtime.evaluate', { expression: '!!window.__tbTest', returnByValue: true });
     ready = r.result && r.result.result && r.result.result.value === true;
   }
-  if (!ready) { console.log('FAIL: game test hook never appeared'); chrome.kill(); process.exit(2); }
+  if (!ready) { console.log('FAIL: game test hook never appeared'); killTree(chrome.pid); process.exit(2); }
   console.log('game test hook ready');
   // —— 状态卫生:清上一轮残留的宠物/英雄/加成(僵尸 Chrome 占 profile 时 rmSync 会静默失败) ——
   await ev('window.__tbTest.setBonus({}); window.__tbTest.clearPet(); window.__tbTest.setHero("none");');
@@ -5415,7 +5420,23 @@ async function main() {
     t('U1736 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1731;k<=1736;k++) t('U'+k+' 敌总血',false,e.message); }
 
-  chrome.kill();
+
+  // ===== U1737~U1742: 本局累计造成伤害(v0.8.04) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runDmgWrap'),f:T.runDmgTextNow(0)});})()"));
+    t('U1737 累计伤害 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1738 无伤害初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runDmgTextNow(123),b:T.runDmgTextNow(4567)});})()"));
+    t('U1739 正常 123/4567', o2.a === '⚔ 伤害 123' && o2.b === '⚔ 伤害 4567', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runDmgTextNow(1),b:T.runDmgTextNow(99999)});})()"));
+    t('U1740 边界 1/99999', o3.a === '⚔ 伤害 1' && o3.b === '⚔ 伤害 99999', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runDmgTextNow(NaN),b:T.runDmgTextNow(-5)});})()"));
+    t('U1741 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.r04dmgReset();T.r04dmgAdd(50);T.r04dmgAdd(30);T.r04dmgAdd(-9);T.extraHudRefreshNow();const v=T.r04dmgNow();return JSON.stringify({dom:T.runDmgDomNow(),exp:T.runDmgTextNow(v)});})()"));
+    t('U1742 DOM 与函数一致(累计)', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1737;k<=1742;k++) t('U'+k+' 累计伤害',false,e.message); }
+
+  chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
   for (const r of R) {
