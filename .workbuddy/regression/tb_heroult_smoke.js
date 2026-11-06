@@ -5239,6 +5239,22 @@ async function main() {
     t('U1670 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1665;k<=1670;k++) t('U'+k+' 连击峰值',false,e.message); }
 
+
+  // ===== U1671~U1676: 当前波次编号(v0.7.93) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('waveNumWrap'),f:T.waveNumTextNow(0)});})()"));
+    t('U1671 波次 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1672 无波次初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveNumTextNow(3),b:T.waveNumTextNow(12)});})()"));
+    t('U1673 正常 3/12', o2.a === '🌊 第 3 波' && o2.b === '🌊 第 12 波', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveNumTextNow(1),b:T.waveNumTextNow(99)});})()"));
+    t('U1674 边界:1/99', o3.a === '🌊 第 1 波' && o3.b === '🌊 第 99 波', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveNumTextNow(NaN),b:T.waveNumTextNow(-1)});})()"));
+    t('U1675 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r93wNow();return JSON.stringify({dom:T.waveNumDomNow(),exp:T.waveNumTextNow(v)});})()"));
+    t('U1676 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1671;k<=1676;k++) t('U'+k+' 波次',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
