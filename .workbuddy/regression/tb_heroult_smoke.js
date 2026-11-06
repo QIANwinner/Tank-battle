@@ -4566,6 +4566,22 @@ async function main() {
     t('U1418 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1413;k<=1418;k++) t('U'+k+' 宠物级',false,e.message); }
 
+
+  // ===== U1419~U1424: 本局得分占生涯最高(v0.7.51) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('scorePctWrap'),f:T.scorePctTextNow(0,0)});})()"));
+    t('U1419 得分进度 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1420 无纪录初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scorePctTextNow(620,1000),b:T.scorePctTextNow(250,400)});})()"));
+    t('U1421 正常 62%/63%', o2.a === '📈 62%' && o2.b === '📈 63%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scorePctTextNow(1000,1000),b:T.scorePctTextNow(1500,1000)});})()"));
+    t('U1422 边界:追平/超限钳制', o3.a === '📈 100%' && o3.b === '📈 100%', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scorePctTextNow(NaN,1000),b:T.scorePctTextNow(620,NaN)});})()"));
+    t('U1423 非法输入兜底', o4.a === '📈 0%' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const s=T.scoreNow2(),b=T.bestScoreNow();return JSON.stringify({dom:T.scorePctDomNow(),exp:T.scorePctTextNow(s,b)});})()"));
+    t('U1424 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1419;k<=1424;k++) t('U'+k+' 得分进度',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
