@@ -4999,6 +4999,22 @@ async function main() {
     t('U1580 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1575;k<=1580;k++) t('U'+k+' 慢动作',false,e.message); }
 
+
+  // ===== U1581~U1586: 本局击杀目标进度(v0.7.78) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('killPctWrap'),f:T.killPctTextNow(0,0)});})()"));
+    t('U1581 击杀进度 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1582 无目标初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killPctTextNow(10,40),b:T.killPctTextNow(30,40)});})()"));
+    t('U1583 正常 25%/75%', o2.a === '🎯 击杀 25%' && o2.b === '🎯 击杀 75%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killPctTextNow(40,40),b:T.killPctTextNow(0,40)});})()"));
+    t('U1584 边界:满/零', o3.a === '🎯 击杀 100%' && o3.b === '🎯 击杀 0%', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killPctTextNow(NaN,40),b:T.killPctTextNow(10,NaN)});})()"));
+    t('U1585 非法输入兜底', o4.a === '🎯 击杀 0%' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const s=T.r78spNow(),t=T.r78ttNow();return JSON.stringify({dom:T.killPctDomNow(),exp:T.killPctTextNow(s,t)});})()"));
+    t('U1586 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1581;k<=1586;k++) t('U'+k+' 击杀进度',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
