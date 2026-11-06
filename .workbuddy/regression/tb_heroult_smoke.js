@@ -4710,6 +4710,22 @@ async function main() {
     t('U1472 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1467;k<=1472;k++) t('U'+k+' 破纪录',false,e.message); }
 
+
+  // ===== U1473~U1478: 本局击杀占生涯(v0.7.60) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('killShareWrap'),f:T.killShareTextNow(0,0)});})()"));
+    t('U1473 击杀占比 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1474 无生涯击杀初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killShareTextNow(30,200),b:T.killShareTextNow(1,4)});})()"));
+    t('U1475 正常 15%/25%', o2.a === '⚔ 本局占生涯 15%' && o2.b === '⚔ 本局占生涯 25%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killShareTextNow(200,200),b:T.killShareTextNow(0,200)});})()"));
+    t('U1476 边界:满/零', o3.a === '⚔ 本局占生涯 100%' && o3.b === '⚔ 本局占生涯 0%', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killShareTextNow(NaN,200),b:T.killShareTextNow(30,NaN)});})()"));
+    t('U1477 非法输入兜底', o4.a === '⚔ 本局占生涯 0%' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const c=T.r60curNow(),k=T.r60carNow();return JSON.stringify({dom:T.killShareDomNow(),exp:T.killShareTextNow(c,k)});})()"));
+    t('U1478 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1473;k<=1478;k++) t('U'+k+' 击杀占比',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
