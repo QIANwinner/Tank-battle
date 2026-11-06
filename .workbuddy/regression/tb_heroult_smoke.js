@@ -5821,6 +5821,22 @@ async function main() {
     t('U1886 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1881;k<=1886;k++) t('U'+k+' 基地花费',false,e.message); }
 
+
+  // ===== U1887~U1892: BOSS 已造成伤害(v0.8.29) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossDmgWrap'),f:T.bossDmgDealtTextNow(0,0)});})()"));
+    t('U1887 BOSS 已伤 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1888 无BOSS初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossDmgDealtTextNow(366,600),b:T.bossDmgDealtTextNow(120,600)});})()"));
+    t('U1889 正常 234/480', o2.a === '💥 BOSS 已伤 234' && o2.b === '💥 BOSS 已伤 480', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossDmgDealtTextNow(0,600),b:T.bossDmgDealtTextNow(700,600)});})()"));
+    t('U1890 边界 600/钳制0', o3.a === '💥 BOSS 已伤 600' && o3.b === '💥 BOSS 已伤 0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossDmgDealtTextNow(NaN,600),b:T.bossDmgDealtTextNow(-5,600)});})()"));
+    t('U1891 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const h=T.r29bhNow(),m=T.r29bmNow();return JSON.stringify({dom:T.bossDmgDomNow(),exp:T.bossDmgDealtTextNow(h,m)});})()"));
+    t('U1892 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1887;k<=1892;k++) t('U'+k+' BOSS已伤',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
