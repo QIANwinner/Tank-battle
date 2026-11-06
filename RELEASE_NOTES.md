@@ -1,3 +1,16 @@
+# v0.8.34 · 羁绊激活计数 pill(activeBond()/PET_BONDS.length,独立ID)
+
+> 羁绊激活计数 pill(activeBond()/PET_BONDS.length,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1922/1922。
+
+## 🅰 改进
+
+- 羁绊激活计数 pill(activeBond()/PET_BONDS.length,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+
+## 🅱 验证
+
+- 主套件 169/169 + 反馈专项 1922/1922；内联脚本语法 SYNTAX OK
+- SW 缓存 v08340，游戏内版本 V8.34；远程树与本地树一致（sync_push）
+
 # v0.8.33 · 金运金币加成 pill(bonus.coinup 倍率,独立ID)
 
 > 金运金币加成 pill(bonus.coinup 倍率,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1916/1916。

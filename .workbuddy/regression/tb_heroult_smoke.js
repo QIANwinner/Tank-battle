@@ -5901,6 +5901,22 @@ async function main() {
     t('U1916 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1911;k<=1916;k++) t('U'+k+' 金运加成',false,e.message); }
 
+
+  // ===== U1917~U1922: 羁绊激活计数(v0.8.34) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bondCntWrap'),f:T.bondActiveCountTextNow(0,5)});})()"));
+    t('U1917 羁绊计数 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1918 初值 0/5', o.f === '⚡ 羁绊 0/5', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bondActiveCountTextNow(1,5),b:T.bondActiveCountTextNow(2,5)});})()"));
+    t('U1919 正常 1/5/2/5', o2.a === '⚡ 羁绊 1/5' && o2.b === '⚡ 羁绊 2/5', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bondActiveCountTextNow(5,5),b:T.bondActiveCountTextNow(3,3)});})()"));
+    t('U1920 边界 5/5/3/3', o3.a === '⚡ 羁绊 5/5' && o3.b === '⚡ 羁绊 3/3', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bondActiveCountTextNow(NaN,5),b:T.bondActiveCountTextNow(-1,5)});})()"));
+    t('U1921 非法输入兜底', o4.a === '—' && o4.b === '⚡ 羁绊 0/5', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const a=T.r34baNow(),bt=T.r34btNow();return JSON.stringify({dom:T.bondCntDomNow(),exp:T.bondActiveCountTextNow(a,bt)});})()"));
+    t('U1922 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1917;k<=1922;k++) t('U'+k+' 羁绊计数',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
