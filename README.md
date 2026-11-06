@@ -162,6 +162,12 @@ Tank-battle/
 
 ## 🆕 更新日志
 
+### v0.8.36 · 2026-11-06
+**近战大招冷却 pill(player.ultCd/ULT_CD,独立ID)**
+- 近战大招冷却 pill(player.ultCd/ULT_CD,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+- ✅ 回归验证：主套件 169/169 + 反馈专项 1934/1934（无回归）
+- 📴 Service Worker 缓存版本更新至 **v08360**，游戏内版本 **V8.36**
+
 ### v0.8.35 · 2026-11-06
 **英雄大招冷却 pill(heroUltCd/HERO_ULT_CD,独立ID)**
 - 英雄大招冷却 pill(heroUltCd/HERO_ULT_CD,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
