@@ -6013,6 +6013,22 @@ async function main() {
     t('U1958 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1953;k<=1958;k++) t('U'+k+' 震屏',false,e.message); }
 
+
+  // ===== U1959~U1964: 关卡进场倒计时(v0.8.41) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('lvIntroWrap'),f:T.lvIntroTextNow(0)});})()"));
+    t('U1959 进场 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1960 初值 0s', o.f === '🚀 进场 0s', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lvIntroTextNow(1.2),b:T.lvIntroTextNow(2.5)});})()"));
+    t('U1961 正常 1.2s/2.5s', o2.a === '🚀 进场 1.2s' && o2.b === '🚀 进场 2.5s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lvIntroTextNow(0),b:T.lvIntroTextNow(4)});})()"));
+    t('U1962 边界 0s/4s', o3.a === '🚀 进场 0s' && o3.b === '🚀 进场 4s', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lvIntroTextNow(NaN),b:T.lvIntroTextNow(-1)});})()"));
+    t('U1963 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const li=T.r41liNow();return JSON.stringify({dom:T.lvIntroDomNow(),exp:T.lvIntroTextNow(li)});})()"));
+    t('U1964 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1959;k<=1964;k++) t('U'+k+' 进场',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
