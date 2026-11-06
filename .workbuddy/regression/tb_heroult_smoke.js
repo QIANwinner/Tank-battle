@@ -5500,6 +5500,22 @@ async function main() {
     t('U1766 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1761;k<=1766;k++) t('U'+k+' 敌均血',false,e.message); }
 
+
+  // ===== U1767~U1772: 基地方向威胁(v0.8.09) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('baseDirWrap'),f:T.baseDirThreatTextNow([])});})()"));
+    t('U1767 基地威胁向 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1768 无敌人初值 无威胁', o.f === '🟢 基地无威胁', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseDirThreatTextNow([{x:289,y:529,size:22,dead:false},{x:311,y:553,size:22,dead:false},{x:323,y:553,size:22,dead:false},{x:311,y:575,size:22,dead:999}])});})()"));
+    t('U1769 正常 右2敌胜出', o2.a === '🔴 基地右 2敌', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseDirThreatTextNow([{x:289,y:25,size:22,dead:false}]),b:T.baseDirThreatTextNow([{x:289,y:529,size:22,dead:true}])});})()"));
+    t('U1770 边界:远敌排除/死亡排除', o3.a === '🟢 基地无威胁' && o3.b === '🟢 基地无威胁', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseDirThreatTextNow([{x:NaN,y:529,size:22,dead:false}])});})()"));
+    t('U1771 非法输入兜底', o4.a === '🟢 基地无威胁', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const en=T.r09enNow();return JSON.stringify({dom:T.baseDirDomNow(),exp:T.baseDirThreatTextNow(en)});})()"));
+    t('U1772 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1767;k<=1772;k++) t('U'+k+' 基地威胁向',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
