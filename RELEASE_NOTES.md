@@ -1,3 +1,16 @@
+# v0.7.95 · 当前移动方向 pill(player.dir,八方向名,独立ID)
+
+> 当前移动方向 pill(player.dir,八方向名,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1688/1688。
+
+## 🅰 改进
+
+- 当前移动方向 pill(player.dir,八方向名,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+
+## 🅱 验证
+
+- 主套件 169/169 + 反馈专项 1688/1688；内联脚本语法 SYNTAX OK
+- SW 缓存 v07950，游戏内版本 V7.95；远程树与本地树一致（sync_push）
+
 # v0.7.94 · 本局道具拾取速率 pill(独立ID,runPowerups/playSecRun)
 
 > 本局道具拾取速率 pill(独立ID,runPowerups/playSecRun)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1682/1682。

@@ -5271,6 +5271,22 @@ async function main() {
     t('U1682 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1677;k<=1682;k++) t('U'+k+' 拾取率',false,e.message); }
 
+
+  // ===== U1683~U1688: 当前移动方向(v0.7.95) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('dirPillWrap'),f:T.dirTextNow(-1)});})()"));
+    t('U1683 朝向 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1684 无朝向初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dirTextNow(0),b:T.dirTextNow(2)});})()"));
+    t('U1685 正常 上/右', o2.a === '🧭 上' && o2.b === '🧭 右', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dirTextNow(1),b:T.dirTextNow(7)});})()"));
+    t('U1686 边界:右上/左上', o3.a === '🧭 右上' && o3.b === '🧭 左上', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dirTextNow(8),b:T.dirTextNow(NaN)});})()"));
+    t('U1687 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r95dirNow();return JSON.stringify({dom:T.dirDomNow(),exp:T.dirTextNow(v)});})()"));
+    t('U1688 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1683;k<=1688;k++) t('U'+k+' 朝向',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

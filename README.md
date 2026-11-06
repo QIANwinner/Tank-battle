@@ -162,6 +162,12 @@ Tank-battle/
 
 ## 🆕 更新日志
 
+### v0.7.95 · 2026-11-06
+**当前移动方向 pill(player.dir,八方向名,独立ID)**
+- 当前移动方向 pill(player.dir,八方向名,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+- ✅ 回归验证：主套件 169/169 + 反馈专项 1688/1688（无回归）
+- 📴 Service Worker 缓存版本更新至 **v07950**，游戏内版本 **V7.95**
+
 ### v0.7.94 · 2026-11-06
 **本局道具拾取速率 pill(独立ID,runPowerups/playSecRun)**
 - 本局道具拾取速率 pill(独立ID,runPowerups/playSecRun)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
