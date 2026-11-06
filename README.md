@@ -162,6 +162,12 @@ Tank-battle/
 
 ## 🆕 更新日志
 
+### v0.8.15 · 2026-11-06
+**场上 BOSS 存活 pill(enemies 中 isBoss 存活/已灭,独立ID)**
+- 场上 BOSS 存活 pill(enemies 中 isBoss 存活/已灭,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+- ✅ 回归验证：主套件 169/169 + 反馈专项 1808/1808（无回归）
+- 📴 Service Worker 缓存版本更新至 **v08150**，游戏内版本 **V8.15**
+
 ### v0.8.14 · 2026-11-06
 **本关用时 pill(levelSecs 秒→分秒,独立ID)**
 - 本关用时 pill(levelSecs 秒→分秒,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）

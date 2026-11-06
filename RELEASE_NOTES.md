@@ -1,3 +1,16 @@
+# v0.8.15 · 场上 BOSS 存活 pill(enemies 中 isBoss 存活/已灭,独立ID)
+
+> 场上 BOSS 存活 pill(enemies 中 isBoss 存活/已灭,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1808/1808。
+
+## 🅰 改进
+
+- 场上 BOSS 存活 pill(enemies 中 isBoss 存活/已灭,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+
+## 🅱 验证
+
+- 主套件 169/169 + 反馈专项 1808/1808；内联脚本语法 SYNTAX OK
+- SW 缓存 v08150，游戏内版本 V8.15；远程树与本地树一致（sync_push）
+
 # v0.8.14 · 本关用时 pill(levelSecs 秒→分秒,独立ID)
 
 > 本关用时 pill(levelSecs 秒→分秒,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1802/1802。

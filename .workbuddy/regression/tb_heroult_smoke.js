@@ -5596,6 +5596,22 @@ async function main() {
     t('U1802 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1797;k<=1802;k++) t('U'+k+' 本关用时',false,e.message); }
 
+
+  // ===== U1803~U1808: 场上 BOSS 存活(v0.8.15) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossAliveWrap'),f:T.bossAliveTextNow([])});})()"));
+    t('U1803 BOSS 存活 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1804 无 BOSS 初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossAliveTextNow([{isBoss:true,dead:false}]),b:T.bossAliveTextNow([{isBoss:true,dead:false},{isBoss:false,dead:false}])});})()"));
+    t('U1805 正常 存活1', o2.a === '☠ BOSS 存活 1' && o2.b === '☠ BOSS 存活 1', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossAliveTextNow([{isBoss:true,dead:true}])});})()"));
+    t('U1806 边界 已灭', o3.a === '✅ BOSS 已灭', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossAliveTextNow([{isBoss:true,dead:null}])});})()"));
+    t('U1807 非法输入兜底(无dead视为存活)', o4.a === '☠ BOSS 存活 1', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const en=T.r15enNow();return JSON.stringify({dom:T.bossAliveDomNow(),exp:T.bossAliveTextNow(en)});})()"));
+    t('U1808 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1803;k<=1808;k++) t('U'+k+' BOSS 存活',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
