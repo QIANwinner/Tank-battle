@@ -1,3 +1,16 @@
+# v0.7.91 · BOSS 击杀计数 pill(生涯BOSS击破,career.bossKills)
+
+> BOSS 击杀计数 pill(生涯BOSS击破,career.bossKills)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1664/1664。
+
+## 🅰 改进
+
+- BOSS 击杀计数 pill(生涯BOSS击破,career.bossKills)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+
+## 🅱 验证
+
+- 主套件 169/169 + 反馈专项 1664/1664；内联脚本语法 SYNTAX OK
+- SW 缓存 v07910，游戏内版本 V7.91；远程树与本地树一致（sync_push）
+
 # v0.7.90 · 基地状态 pill(存活+护墙数,baseAlive 布尔 + BASE_LEVELS[baseLevel].walls 数)
 
 > 基地状态 pill(存活+护墙数,baseAlive 布尔 + BASE_LEVELS[baseLevel].walls 数)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1658/1658。

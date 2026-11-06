@@ -162,6 +162,12 @@ Tank-battle/
 
 ## 🆕 更新日志
 
+### v0.7.91 · 2026-11-06
+**BOSS 击杀计数 pill(生涯BOSS击破,career.bossKills)**
+- BOSS 击杀计数 pill(生涯BOSS击破,career.bossKills)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+- ✅ 回归验证：主套件 169/169 + 反馈专项 1664/1664（无回归）
+- 📴 Service Worker 缓存版本更新至 **v07910**，游戏内版本 **V7.91**
+
 ### v0.7.90 · 2026-11-06
 **基地状态 pill(存活+护墙数,baseAlive 布尔 + BASE_LEVELS[baseLevel].walls 数)**
 - 基地状态 pill(存活+护墙数,baseAlive 布尔 + BASE_LEVELS[baseLevel].walls 数)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
