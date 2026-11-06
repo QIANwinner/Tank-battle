@@ -4807,6 +4807,22 @@ async function main() {
     t('U1508 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1503;k<=1508;k++) t('U'+k+' 增益',false,e.message); }
 
+
+  // ===== U1509~U1514: 本局剩余生命(v0.7.66) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('lifePctWrap'),f:T.lifePctTextNow(3,3)});})()"));
+    t('U1509 生命 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1510 满血初值 3/3', o.f === '❤ 生命 3/3', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lifePctTextNow(2,3),b:T.lifePctTextNow(1,3)});})()"));
+    t('U1511 正常 2/3 与 1/3', o2.a === '❤ 生命 2/3' && o2.b === '❤ 生命 1/3', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lifePctTextNow(0,3),b:T.lifePctTextNow(4,3)});})()"));
+    t('U1512 边界:零/溢出', o3.a === '❤ 生命 0/3' && o3.b === '❤ 生命 4/3', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lifePctTextNow(NaN,3),b:T.lifePctTextNow(2,NaN)});})()"));
+    t('U1513 非法输入兜底', o4.a === '❤ 生命 0/3' && o4.b === '❤ 生命 2/1', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const l=T.r66lvNow();return JSON.stringify({dom:T.lifePctDomNow(),exp:T.lifePctTextNow(l,3)});})()"));
+    t('U1514 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1509;k<=1514;k++) t('U'+k+' 生命',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
