@@ -6173,6 +6173,22 @@ async function main() {
     t('U2018 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=2013;k<=2018;k++) t('U'+k+' 基地被围',false,e.message); }
 
+
+  // ===== U2019~U2024: 穿透弹头(v0.8.51) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('piercePillWrap'),f:T.pierceTotalTextNow(0,0)});})()"));
+    t('U2019 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2020 零等级 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pierceTotalTextNow(2,1),b:T.pierceTotalTextNow(1,0)});})()"));
+    t('U2021 正常 ×3/×1', o2.a === '🎯 穿透 ×3' && o2.b === '🎯 穿透 ×1', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.pierceTotalTextNow(-1,-1));})()"));
+    t('U2022 负数兜底 —', o3 === '—', o3);
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pierceTotalTextNow('x','y'),b:T.pierceTotalTextNow(NaN,NaN)});})()"));
+    t('U2023 非法兜底 —', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.piercePillDomNow()});})()"));
+    t('U2024 DOM 可读', !!o5.dom, JSON.stringify(o5));
+  } catch(e){ for(let k=2019;k<=2024;k++) t('U'+k+' 穿透pill',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
