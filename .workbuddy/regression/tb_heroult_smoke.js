@@ -4534,6 +4534,22 @@ async function main() {
     t('U1406 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1401;k<=1406;k++) t('U'+k+' 成就率',false,e.message); }
 
+
+  // ===== U1407~U1412: 本局BOSS击杀占比(v0.7.49) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossShareWrap'),f:T.bossShareTextNow(0,0)});})()"));
+    t('U1407 BOSS占比 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1408 零击杀初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossShareTextNow(2,25),b:T.bossShareTextNow(1,4)});})()"));
+    t('U1409 正常 8%/25%', o2.a === '👑 8%' && o2.b === '👑 25%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossShareTextNow(1,1),b:T.bossShareTextNow(0,25)});})()"));
+    t('U1410 边界:满/零', o3.a === '👑 100%' && o3.b === '👑 0%', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossShareTextNow(NaN,25),b:T.bossShareTextNow(2,NaN)});})()"));
+    t('U1411 非法输入兜底', o4.a === '👑 0%' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const b=T.statBossKillNow(),k=T.statKillNow();return JSON.stringify({dom:T.bossShareDomNow(),exp:T.bossShareTextNow(b,k)});})()"));
+    t('U1412 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1407;k<=1412;k++) t('U'+k+' BOSS占比',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
