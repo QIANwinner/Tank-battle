@@ -4374,6 +4374,22 @@ async function main() {
     t('U758 一致性', typeof o4.dom === 'string', o4.dom);
   } catch(e){ for(let k=753;k<=758;k++) t('U'+k+' 每日最佳',false,e.message); }
 
+
+  // ===== U1347~U1352: 本局VS生涯最高分(v0.7.39) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('vsBestWrap'),f:T.scoreVsBestTextNow(0,0)});})()"));
+    t('U1347 VS纪录 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1348 无纪录初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scoreVsBestTextNow(3000,1000),b:T.scoreVsBestTextNow(500,1000),c:T.scoreVsBestTextNow(1000,1000)});})()"));
+    t('U1349 领先/落后/追平', o2.a === '📈 领先 2000' && o2.b === '📉 落后 500' && o2.c === '⚖ 追平', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scoreVsBestTextNow(12000,2000),b:T.scoreVsBestTextNow(0,0)});})()"));
+    t('U1350 边界:千分位/无纪录', o3.a === '📈 领先 10,000' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scoreVsBestTextNow(NaN,100),b:T.scoreVsBestTextNow(100,NaN)});})()"));
+    t('U1351 非法输入兜底', o4.a === '📉 落后 100' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const s=T.scoreNow(),b=T.careerBestNow();return JSON.stringify({dom:T.scoreVsBestPillDomNow(),exp:T.scoreVsBestTextNow(s,b)});})()"));
+    t('U1352 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1347;k<=1352;k++) t('U'+k+' VS纪录',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
