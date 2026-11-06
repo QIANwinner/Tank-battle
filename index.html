@@ -1975,6 +1975,7 @@
   #endlessBestWrap .v { color: #4dd4ff; font-weight: 800; font-size: 11px; }
   #coinBalWrap .v { color: #ffd700; font-weight: 800; font-size: 11px; }
   #winRateWrap .v { color: #7bed9f; font-weight: 800; font-size: 11px; }
+  #careerDeathWrap .v { color: #ff7f7f; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -2109,6 +2110,7 @@
     <div class="pill m-hide" id="endlessBestWrap"><span class="k">无尽最佳</span><span class="v" id="endlessBestVal">—</span></div>
     <div class="pill m-hide" id="coinBalWrap"><span class="k">钱包</span><span class="v" id="coinBalVal">—</span></div>
     <div class="pill m-hide" id="winRateWrap"><span class="k">胜率</span><span class="v" id="winRateVal">—</span></div>
+    <div class="pill m-hide" id="careerDeathWrap"><span class="k">生涯阵亡</span><span class="v" id="careerDeathVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -2484,7 +2486,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V7.44</div>
+  <div id="mark">DESIGNED BY QIAN · V7.45</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7407,6 +7409,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r42ebV = $('endlessBestVal'); if (r42ebV) r42ebV.textContent = endlessBestText(career.bestEndless, level);
     const r43cbV = $('coinBalVal'); if (r43cbV) r43cbV.textContent = coinBalanceText(coins);
     const r44wrV = $('winRateVal'); if (r44wrV) r44wrV.textContent = winRateText(career.wins, career.games);
+    const r45cdV = $('careerDeathVal'); if (r45cdV) r45cdV.textContent = careerDeathsText(career.deaths);
     // __EXTRA_HUD__
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
   }
@@ -8352,6 +8355,11 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const g = Math.max(0, Math.floor(Number(games) || 0));
     if (g <= 0) return '—';
     return '🏆 ' + Math.round((w / g) * 100) + '%';
+  }
+  // —— v0.7.45 生涯死亡总数 ——
+  function careerDeathsText(deaths) {
+    const d = Math.max(0, Math.floor(Number(deaths) || 0));
+    return '💀 ' + fmtNum(d);
   }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
@@ -10194,7 +10202,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V7.44', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V7.45', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -11307,6 +11315,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       endlessBestTextNow: (b, c) => endlessBestText(b, c), endlessBestPillDomNow: () => { const e = $('endlessBestVal'); return e ? e.textContent : null; }, endlessBestNow: () => career.bestEndless, levelNow: () => level,
       coinBalanceTextNow: (c) => coinBalanceText(c), coinBalancePillDomNow: () => { const e = $('coinBalVal'); return e ? e.textContent : null; }, coinNow: () => coins,
       winRateTextNow: (w, g) => winRateText(w, g), winRatePillDomNow: () => { const e = $('winRateVal'); return e ? e.textContent : null; }, careerWinsNow: () => career.wins,
+      careerDeathsTextNow: (d) => careerDeathsText(d), careerDeathsPillDomNow: () => { const e = $('careerDeathVal'); return e ? e.textContent : null; }, careerDeathsNow: () => career.deaths,
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
