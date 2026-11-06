@@ -4823,6 +4823,22 @@ async function main() {
     t('U1514 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1509;k<=1514;k++) t('U'+k+' 生命',false,e.message); }
 
+
+  // ===== U1515~U1520: 本局道具获取速率(v0.7.67) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('puRateWrap'),f:T.puRateTextNow(0,0)});})()"));
+    t('U1515 道具速 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1516 无数据初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.puRateTextNow(3,60),b:T.puRateTextNow(10,120)});})()"));
+    t('U1517 正常 3/分 与 5/分', o2.a === '🎁 道具 3/分' && o2.b === '🎁 道具 5/分', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.puRateTextNow(1,60),b:T.puRateTextNow(0,60)});})()"));
+    t('U1518 边界:1/分 与 0/分', o3.a === '🎁 道具 1/分' && o3.b === '🎁 道具 0/分', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.puRateTextNow(NaN,60),b:T.puRateTextNow(3,NaN)});})()"));
+    t('U1519 非法输入兜底', o4.a === '🎁 道具 0/分' && o4.b === '🎁 道具 —/分', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const p=T.r67puNow(),s=T.r67psNow();return JSON.stringify({dom:T.puRateDomNow(),exp:T.puRateTextNow(p,s)});})()"));
+    t('U1520 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1515;k<=1520;k++) t('U'+k+' 道具速',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
