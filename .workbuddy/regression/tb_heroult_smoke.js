@@ -4919,6 +4919,22 @@ async function main() {
     t('U1550 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1545;k<=1550;k++) t('U'+k+' 命中',false,e.message); }
 
+
+  // ===== U1551~U1556: BOSS 出场警报(v0.7.73) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossWarnWrap'),f:T.bossWarnTextNow(0)});})()"));
+    t('U1551 BOSS警报 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1552 无警报初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossWarnTextNow(1.8),b:T.bossWarnTextNow(0.5)});})()"));
+    t('U1553 正常 1.8s/0.5s', o2.a === '🚨 BOSS 来袭 1.8s' && o2.b === '🚨 BOSS 来袭 0.5s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossWarnTextNow(0.1),b:T.bossWarnTextNow(0)});})()"));
+    t('U1554 边界:0.1s/零', o3.a === '🚨 BOSS 来袭 0.1s' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossWarnTextNow(NaN),b:T.bossWarnTextNow(-1)});})()"));
+    t('U1555 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r73bwNow();return JSON.stringify({dom:T.bossWarnDomNow(),exp:T.bossWarnTextNow(v)});})()"));
+    t('U1556 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1551;k<=1556;k++) t('U'+k+' BOSS警报',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
