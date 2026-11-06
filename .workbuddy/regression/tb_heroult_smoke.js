@@ -5724,6 +5724,22 @@ async function main() {
     t('U1850 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1845;k<=1850;k++) t('U'+k+' 格坐标',false,e.message); }
 
+
+  // ===== U1851~U1856: 玩家移动状态(v0.8.23) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('moveStateWrap'),f:T.playerMoveTextNow(false)});})()"));
+    t('U1851 移动状态 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1852 静止初值', o.f === '🧍 静止', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.playerMoveTextNow(true)});})()"));
+    t('U1853 正常 移动中', o2.a === '🏃 移动中', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.playerMoveTextNow(1),b:T.playerMoveTextNow(0)});})()"));
+    t('U1854 边界 1移动/0静止', o3.a === '🏃 移动中' && o3.b === '🧍 静止', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.playerMoveTextNow(undefined),b:T.playerMoveTextNow(null)});})()"));
+    t('U1855 非法输入兜底', o4.a === '🧍 静止' && o4.b === '🧍 静止', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const m=T.r23mvNow();return JSON.stringify({dom:T.moveStateDomNow(),exp:T.playerMoveTextNow(m)});})()"));
+    t('U1856 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1851;k<=1856;k++) t('U'+k+' 移动状态',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
