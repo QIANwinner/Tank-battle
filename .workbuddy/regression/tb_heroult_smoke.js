@@ -6093,6 +6093,22 @@ async function main() {
     t('U1988 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1983;k<=1988;k++) t('U'+k+' BOSS死亡演出',false,e.message); }
 
+
+  // ===== U1989~U1994: 宠物动画计时(v0.8.46) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('petAnimWrap'),f:T.petAnimTextNow(0)});})()"));
+    t('U1989 宠物动画 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1990 初值 0s', o.f === '🐾 宠物动 0s', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petAnimTextNow(60),b:T.petAnimTextNow(300)});})()"));
+    t('U1991 正常 1s/5s', o2.a === '🐾 宠物动 1s' && o2.b === '🐾 宠物动 5s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petAnimTextNow(1),b:T.petAnimTextNow(1200)});})()"));
+    t('U1992 边界 0.02s/20s', o3.a === '🐾 宠物动 0.02s' && o3.b === '🐾 宠物动 20s', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petAnimTextNow(NaN),b:T.petAnimTextNow(-3)});})()"));
+    t('U1993 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const pa=T.r46paNow();return JSON.stringify({dom:T.petAnimDomNow(),exp:T.petAnimTextNow(pa)});})()"));
+    t('U1994 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1989;k<=1994;k++) t('U'+k+' 宠物动画',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

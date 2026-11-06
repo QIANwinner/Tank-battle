@@ -162,6 +162,12 @@ Tank-battle/
 
 ## 🆕 更新日志
 
+### v0.8.46 · 2026-11-06
+**宠物动画计时 pill(petAnim,独立ID)**
+- 宠物动画计时 pill(petAnim,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+- ✅ 回归验证：主套件 169/169 + 反馈专项 1994/1994（无回归）
+- 📴 Service Worker 缓存版本更新至 **v08460**，游戏内版本 **V8.46**
+
 ### v0.8.45 · 2026-11-06
 **BOSS 死亡演出剩余 pill(bossDeathT,独立ID)**
 - BOSS 死亡演出剩余 pill(bossDeathT,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
