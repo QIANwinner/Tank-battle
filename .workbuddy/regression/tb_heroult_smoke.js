@@ -5063,6 +5063,22 @@ async function main() {
     t('U1604 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1599;k<=1604;k++) t('U'+k+' BOSS血量',false,e.message); }
 
+
+  // ===== U1605~U1610: 生涯场均得分(v0.7.82) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('avgScoreWrap'),f:T.avgScoreTextNow(0,0)});})()"));
+    t('U1605 场均得分 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1606 无场次初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.avgScoreTextNow(1200,3),b:T.avgScoreTextNow(5000,4)});})()"));
+    t('U1607 正常 400/1250', o2.a === '📈 场均 400' && o2.b === '📈 场均 1250', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.avgScoreTextNow(0,3),b:T.avgScoreTextNow(999,1)});})()"));
+    t('U1608 边界:零分/一场', o3.a === '📈 场均 0' && o3.b === '📈 场均 999', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.avgScoreTextNow(NaN,3),b:T.avgScoreTextNow(100,NaN)});})()"));
+    t('U1609 非法输入兜底', o4.a === '📈 场均 0' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const b=T.r82bNow(),g=T.r82gNow();return JSON.stringify({dom:T.avgScoreDomNow(),exp:T.avgScoreTextNow(b,g)});})()"));
+    t('U1610 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1605;k<=1610;k++) t('U'+k+' 场均得分',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
