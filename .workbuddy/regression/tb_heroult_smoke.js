@@ -5580,6 +5580,22 @@ async function main() {
     t('U1796 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1791;k<=1796;k++) t('U'+k+' 距基',false,e.message); }
 
+
+  // ===== U1797~U1802: 本关用时(v0.8.14) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('levelSecsWrap'),f:T.levelSecsTextNow(0)});})()"));
+    t('U1797 本关用时 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1798 无用时初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.levelSecsTextNow(45),b:T.levelSecsTextNow(125)});})()"));
+    t('U1799 正常 45s/2m5s', o2.a === '⏱ 本关 45s' && o2.b === '⏱ 本关 2m5s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.levelSecsTextNow(1),b:T.levelSecsTextNow(3599)});})()"));
+    t('U1800 边界 1s/59m59s', o3.a === '⏱ 本关 1s' && o3.b === '⏱ 本关 59m59s', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.levelSecsTextNow(NaN),b:T.levelSecsTextNow(-5)});})()"));
+    t('U1801 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r14lNow();return JSON.stringify({dom:T.levelSecsDomNow(),exp:T.levelSecsTextNow(v)});})()"));
+    t('U1802 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1797;k<=1802;k++) t('U'+k+' 本关用时',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
