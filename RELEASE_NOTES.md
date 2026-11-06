@@ -1,3 +1,16 @@
+# v0.8.35 · 英雄大招冷却 pill(heroUltCd/HERO_ULT_CD,独立ID)
+
+> 英雄大招冷却 pill(heroUltCd/HERO_ULT_CD,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1928/1928。
+
+## 🅰 改进
+
+- 英雄大招冷却 pill(heroUltCd/HERO_ULT_CD,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+
+## 🅱 验证
+
+- 主套件 169/169 + 反馈专项 1928/1928；内联脚本语法 SYNTAX OK
+- SW 缓存 v08350，游戏内版本 V8.35；远程树与本地树一致（sync_push）
+
 # v0.8.34 · 羁绊激活计数 pill(activeBond()/PET_BONDS.length,独立ID)
 
 > 羁绊激活计数 pill(activeBond()/PET_BONDS.length,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1922/1922。

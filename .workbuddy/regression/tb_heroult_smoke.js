@@ -5917,6 +5917,22 @@ async function main() {
     t('U1922 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1917;k<=1922;k++) t('U'+k+' 羁绊计数',false,e.message); }
 
+
+  // ===== U1923~U1928: 英雄大招冷却(v0.8.35) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('heroUltWrap'),f:T.heroUltCdTextNow(0)});})()"));
+    t('U1923 英雄技冷却 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1924 初值 就绪', o.f === '🅱 英雄技 就绪', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.heroUltCdTextNow(12.3),b:T.heroUltCdTextNow(30)});})()"));
+    t('U1925 正常 12.3s/30s', o2.a === '🅱 英雄技 12.3s' && o2.b === '🅱 英雄技 30s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.heroUltCdTextNow(0.1),b:T.heroUltCdTextNow(45)});})()"));
+    t('U1926 边界 0.1s/45s', o3.a === '🅱 英雄技 0.1s' && o3.b === '🅱 英雄技 45s', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.heroUltCdTextNow(NaN),b:T.heroUltCdTextNow(-1)});})()"));
+    t('U1927 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const hu=T.r35huNow();return JSON.stringify({dom:T.r35HeroUltDomNow(),exp:T.heroUltCdTextNow(hu)});})()"));
+    t('U1928 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1923;k<=1928;k++) t('U'+k+' 英雄技冷却',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
