@@ -5516,6 +5516,22 @@ async function main() {
     t('U1772 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1767;k<=1772;k++) t('U'+k+' 基地威胁向',false,e.message); }
 
+
+  // ===== U1773~U1778: 连击得分增益(v0.8.10) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('comboGainWrap'),f:T.comboGainTextNow(0)});})()"));
+    t('U1773 连击增益 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1774 无连击初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboGainTextNow(3),b:T.comboGainTextNow(11)});})()"));
+    t('U1775 正常 +20%/+100%', o2.a === '🔥 连击 +20%' && o2.b === '🔥 连击 +100%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboGainTextNow(1),b:T.comboGainTextNow(21)});})()"));
+    t('U1776 边界 +0%/+200%', o3.a === '🔥 连击 +0%' && o3.b === '🔥 连击 +200%', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboGainTextNow(NaN),b:T.comboGainTextNow(-3)});})()"));
+    t('U1777 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r10comboNow();return JSON.stringify({dom:T.comboGainDomNow(),exp:T.comboGainTextNow(v)});})()"));
+    t('U1778 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1773;k<=1778;k++) t('U'+k+' 连击增益',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
