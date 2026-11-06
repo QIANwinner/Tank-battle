@@ -4759,6 +4759,22 @@ async function main() {
     t('U1490 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1485;k<=1490;k++) t('U'+k+' 皮肤缺口',false,e.message); }
 
+
+  // ===== U1491~U1496: 本局 BOSS 剩余血量百分比(v0.7.63) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossPctWrap'),f:T.bossPctTextNow(0,0)});})()"));
+    t('U1491 BOSS血量 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1492 无BOSS初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossPctTextNow(65,100),b:T.bossPctTextNow(30,100)});})()"));
+    t('U1493 正常 65%/30%', o2.a === '👹 BOSS 65%' && o2.b === '👹 BOSS 30%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossPctTextNow(100,100),b:T.bossPctTextNow(0,100)});})()"));
+    t('U1494 边界:满血/空血', o3.a === '👹 BOSS 100%' && o3.b === '👹 BOSS 0%', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossPctTextNow(NaN,100),b:T.bossPctTextNow(50,NaN)});})()"));
+    t('U1495 非法输入兜底', o4.a === '👹 BOSS 0%' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const h=T.r63hpNow(),m=T.r63mxNow();return JSON.stringify({dom:T.bossPctDomNow(),exp:T.bossPctTextNow(h,m)});})()"));
+    t('U1496 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1491;k<=1496;k++) t('U'+k+' BOSS血量',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
