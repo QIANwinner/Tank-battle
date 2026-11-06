@@ -6189,6 +6189,21 @@ async function main() {
     t('U2024 DOM 可读', !!o5.dom, JSON.stringify(o5));
   } catch(e){ for(let k=2019;k<=2024;k++) t('U'+k+' 穿透pill',false,e.message); }
 
+
+  // ===== U2025~U2030: 炸弹弹头(v0.8.52) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bombPillWrap'),f:T.bombStatusTextNow(0)});})()"));
+    t('U2025 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2026 未装备 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bombStatusTextNow(1));})()"));
+    t('U2027 已装备 💣', o2 === '💣 已装备', o2);
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bombStatusTextNow(-1),b:T.bombStatusTextNow(NaN)});})()"));
+    t('U2028 非法兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.bombPillDomNow()});})()"));
+    t('U2029 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U2030 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=2025;k<=2030;k++) t('U'+k+' 炸弹pill',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
