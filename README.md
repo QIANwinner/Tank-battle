@@ -162,6 +162,12 @@ Tank-battle/
 
 ## 🆕 更新日志
 
+### v0.8.03 · 2026-11-06
+**敌方剩余总血量 pill(存活敌 e.hp 求和,独立ID)**
+- 敌方剩余总血量 pill(存活敌 e.hp 求和,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+- ✅ 回归验证：主套件 169/169 + 反馈专项 1736/1736（无回归）
+- 📴 Service Worker 缓存版本更新至 **v08030**，游戏内版本 **V8.03**
+
 ### v0.8.02 · 2026-11-06
 **本局道具种类数 pill(需新状态 runPickupKinds:Set,在 applyPowerup 处累计去重)**
 - 本局道具种类数 pill(需新状态 runPickupKinds:Set,在 applyPowerup 处累计去重)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）

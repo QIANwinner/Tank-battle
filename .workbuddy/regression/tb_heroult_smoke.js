@@ -5399,6 +5399,22 @@ async function main() {
     t('U1730 DOM 与函数一致(Set去重)', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1725;k<=1730;k++) t('U'+k+' 道具种类',false,e.message); }
 
+
+  // ===== U1731~U1736: 敌方剩余总血量(v0.8.03) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('enemyHpSumWrap'),f:T.enemyHpSumTextNow([])});})()"));
+    t('U1731 敌总血 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1732 无敌人初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyHpSumTextNow([{hp:30,dead:false},{hp:70,dead:false}])});})()"));
+    t('U1733 正常 30+70=100', o2.a === '💪 敌血 100', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyHpSumTextNow([{hp:30,dead:false},{hp:0,dead:true},{hp:70,dead:false}]),b:T.enemyHpSumTextNow([{hp:30,dead:true}])});})()"));
+    t('U1734 边界:死亡排除/全灭', o3.a === '💪 敌血 100' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyHpSumTextNow([{hp:NaN,dead:false}])});})()"));
+    t('U1735 非法输入兜底', o4.a === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const en=T.r03enNow();return JSON.stringify({dom:T.enemyHpSumDomNow(),exp:T.enemyHpSumTextNow(en)});})()"));
+    t('U1736 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1731;k<=1736;k++) t('U'+k+' 敌总血',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
