@@ -5335,6 +5335,22 @@ async function main() {
     t('U1706 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1701;k<=1706;k++) t('U'+k+' 实速',false,e.message); }
 
+
+  // ===== U1707~U1712: 最近敌人类型(v0.7.99) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('nearEnemyTypeWrap'),f:T.nearEnemyTypeTextNow(null,null,[])});})()"));
+    t('U1707 近敌类型 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1708 无敌人初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.nearEnemyTypeTextNow(300,564,[{x:289,y:553,size:22,dead:false,type:'tank'}])});})()"));
+    t('U1709 正常 重坦', o2.a === '🎯 重坦', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.nearEnemyTypeTextNow(300,564,[{x:289,y:553,size:22,dead:false,type:'boss',isBoss:true}]),b:T.nearEnemyTypeTextNow(300,564,[{x:289,y:553,size:22,dead:false,type:'grunt'}])});})()"));
+    t('U1710 边界:BOSS/未知', o3.a === '👑 BOSS' && o3.b === '🎯 敌·grunt', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.nearEnemyTypeTextNow(NaN,564,[])});})()"));
+    t('U1711 非法输入兜底', o4.a === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const px=T.r99txNow(),py=T.r99tyNow(),en=T.r99enNow();return JSON.stringify({dom:T.nearEnemyTypeDomNow(),exp:T.nearEnemyTypeTextNow(px,py,en)});})()"));
+    t('U1712 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1707;k<=1712;k++) t('U'+k+' 近敌类型',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

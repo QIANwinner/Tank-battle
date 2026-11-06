@@ -162,6 +162,12 @@ Tank-battle/
 
 ## 🆕 更新日志
 
+### v0.7.99 · 2026-11-06
+**最近敌人类型 pill(存活最近敌 type,含 BOSS 判定,独立ID)**
+- 最近敌人类型 pill(存活最近敌 type,含 BOSS 判定,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+- ✅ 回归验证：主套件 169/169 + 反馈专项 1712/1712（无回归）
+- 📴 Service Worker 缓存版本更新至 **v07990**，游戏内版本 **V7.99**
+
 ### v0.7.98 · 2026-11-06
 **本局实际移速% pill(player.speed 相对基础 PLAYER_SPEED,独立ID,区别于升级倍率)**
 - 本局实际移速% pill(player.speed 相对基础 PLAYER_SPEED,独立ID,区别于升级倍率)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
