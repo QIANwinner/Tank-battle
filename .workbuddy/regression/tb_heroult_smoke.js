@@ -6313,6 +6313,21 @@ async function main() {
     t('U2072 一致性', typeof o4.dom === 'string', o4.dom);
   } catch(e){ for(let k=2067;k<=2072;k++) t('U'+k+' 敌人在场',false,e.message); }
 
+
+  // ===== U2073~U2078: 子弹在飞(v0.8.60) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bulletFlyCountWrap'),f:T.bulletFlyCountTextNow(0)});})()"));
+    t('U2073 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2074 零子弹初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletFlyCountTextNow(5),b:T.bulletFlyCountTextNow(1)});})()"));
+    t('U2075 正常 5/1', o2.a === '💥 5 飞行' && o2.b === '💥 1 飞行', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletFlyCountTextNow(-1),b:T.bulletFlyCountTextNow(NaN)});})()"));
+    t('U2076 非法兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.bulletFlyCountPillDomNow()});})()"));
+    t('U2077 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U2078 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=2073;k<=2078;k++) t('U'+k+' 子弹在飞',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
