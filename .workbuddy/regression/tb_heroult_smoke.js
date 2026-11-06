@@ -5015,6 +5015,22 @@ async function main() {
     t('U1586 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1581;k<=1586;k++) t('U'+k+' 击杀进度',false,e.message); }
 
+
+  // ===== U1587~U1592: 场上弹幕数(v0.7.79) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bulletsWrap'),f:T.bulletsTextNow(0)});})()"));
+    t('U1587 弹幕 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1588 无弹幕初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletsTextNow(5),b:T.bulletsTextNow(12)});})()"));
+    t('U1589 正常 5/12', o2.a === '💥 弹幕 5' && o2.b === '💥 弹幕 12', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletsTextNow(1),b:T.bulletsTextNow(50)});})()"));
+    t('U1590 边界:1/50', o3.a === '💥 弹幕 1' && o3.b === '💥 弹幕 50', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletsTextNow(NaN),b:T.bulletsTextNow(-3)});})()"));
+    t('U1591 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r79bNow();return JSON.stringify({dom:T.bulletsDomNow(),exp:T.bulletsTextNow(v)});})()"));
+    t('U1592 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1587;k<=1592;k++) t('U'+k+' 弹幕',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
