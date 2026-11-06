@@ -6109,6 +6109,22 @@ async function main() {
     t('U1994 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1989;k<=1994;k++) t('U'+k+' 宠物动画',false,e.message); }
 
+
+  // ===== U1995~U2000: 宠物当前反应(v0.8.47) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('petReactWrap'),f:T.petReactTextNow('idle')});})()"));
+    t('U1995 宠物反应 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1996 初值 待机', o.f === '🐾 反应 待机', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petReactTextNow('fire'),b:T.petReactTextNow('kill')});})()"));
+    t('U1997 正常 射击/欢跳', o2.a === '🐾 反应 射击' && o2.b === '🐾 反应 欢跳', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petReactTextNow('hit'),b:T.petReactTextNow('idle')});})()"));
+    t('U1998 边界 受击/待机', o3.a === '🐾 反应 受击' && o3.b === '🐾 反应 待机', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petReactTextNow(''),b:T.petReactTextNow('bogus')});})()"));
+    t('U1999 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const pr=T.r47prNow();return JSON.stringify({dom:T.petReactDomNow(),exp:T.petReactTextNow(pr)});})()"));
+    t('U2000 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1995;k<=2000;k++) t('U'+k+' 宠物反应',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
