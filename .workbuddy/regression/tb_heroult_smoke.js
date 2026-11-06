@@ -5319,6 +5319,22 @@ async function main() {
     t('U1700 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1695;k<=1700;k++) t('U'+k+' 最近敌距',false,e.message); }
 
+
+  // ===== U1701~U1706: 本局实际移速%(v0.7.98) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('absSpeedWrap'),f:T.absSpeedTextNow(-1)});})()"));
+    t('U1701 实速 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1702 无玩家初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.absSpeedTextNow(2.4),b:T.absSpeedTextNow(2.76)});})()"));
+    t('U1703 正常 100%/115%', o2.a === '💨 移速 100%' && o2.b === '💨 移速 115%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.absSpeedTextNow(1.2),b:T.absSpeedTextNow(3.6)});})()"));
+    t('U1704 边界:50%/150%', o3.a === '💨 移速 50%' && o3.b === '💨 移速 150%', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.absSpeedTextNow(NaN)});})()"));
+    t('U1705 非法输入兜底', o4.a === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r98spdNow();return JSON.stringify({dom:T.absSpeedDomNow(),exp:T.absSpeedTextNow(v)});})()"));
+    t('U1706 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1701;k<=1706;k++) t('U'+k+' 实速',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
