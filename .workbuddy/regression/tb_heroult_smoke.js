@@ -6204,6 +6204,22 @@ async function main() {
     t('U2030 一致性', typeof o4.dom === 'string', o4.dom);
   } catch(e){ for(let k=2025;k<=2030;k++) t('U'+k+' 炸弹pill',false,e.message); }
 
+
+  // ===== U2031~U2036: 三向散射(v0.8.53) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('spreadPillWrap'),f:T.spreadTextNow(0)});})()"));
+    t('U2031 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2032 零等级 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.spreadTextNow(2),b:T.spreadTextNow(1)});})()"));
+    t('U2033 正常 ×2/×1', o2.a === '🔸 ×2' && o2.b === '🔸 ×1', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.spreadTextNow(-1));})()"));
+    t('U2034 负数兜底 —', o3 === '—', o3);
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.spreadTextNow('x'),b:T.spreadTextNow(NaN)});})()"));
+    t('U2035 非法兜底 —', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.spreadPillDomNow()});})()"));
+    t('U2036 DOM 可读', !!o5.dom, JSON.stringify(o5));
+  } catch(e){ for(let k=2031;k<=2036;k++) t('U'+k+' 散射pill',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
