@@ -1,3 +1,16 @@
+# v0.8.38 · BOSS 出场计数 pill(bossCount,独立ID)
+
+> BOSS 出场计数 pill(bossCount,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1946/1946。
+
+## 🅰 改进
+
+- BOSS 出场计数 pill(bossCount,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+
+## 🅱 验证
+
+- 主套件 169/169 + 反馈专项 1946/1946；内联脚本语法 SYNTAX OK
+- SW 缓存 v08380，游戏内版本 V8.38；远程树与本地树一致（sync_push）
+
 # v0.8.37 · 本局复活次数 pill(reviveCount,独立ID)
 
 > 本局复活次数 pill(reviveCount,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1940/1940。

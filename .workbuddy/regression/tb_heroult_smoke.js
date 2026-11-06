@@ -5965,6 +5965,22 @@ async function main() {
     t('U1940 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1935;k<=1940;k++) t('U'+k+' 复活次数',false,e.message); }
 
+
+  // ===== U1941~U1946: BOSS 出场计数(v0.8.38) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossCntWrap'),f:T.bossCountTextNow(0)});})()"));
+    t('U1941 BOSS 计数 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1942 初值 x0', o.f === '👹 BOSS x0', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossCountTextNow(2),b:T.bossCountTextNow(5)});})()"));
+    t('U1943 正常 x2/x5', o2.a === '👹 BOSS x2' && o2.b === '👹 BOSS x5', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossCountTextNow(0),b:T.bossCountTextNow(12)});})()"));
+    t('U1944 边界 x0/x12', o3.a === '👹 BOSS x0' && o3.b === '👹 BOSS x12', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossCountTextNow(NaN),b:T.bossCountTextNow(-1)});})()"));
+    t('U1945 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const bc=T.r38bcNow();return JSON.stringify({dom:T.bossCntDomNow(),exp:T.bossCountTextNow(bc)});})()"));
+    t('U1946 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1941;k<=1946;k++) t('U'+k+' BOSS计数',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
