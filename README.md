@@ -162,6 +162,12 @@ Tank-battle/
 
 ## 🆕 更新日志
 
+### v0.8.42 · 2026-11-06
+**爆破弹头等级 pill(upgrades.bomb,独立ID)**
+- 爆破弹头等级 pill(upgrades.bomb,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+- ✅ 回归验证：主套件 169/169 + 反馈专项 1970/1970（无回归）
+- 📴 Service Worker 缓存版本更新至 **v08420**，游戏内版本 **V8.42**
+
 ### v0.8.41 · 2026-11-06
 **关卡进场倒计时 pill(lvIntroT,独立ID)**
 - 关卡进场倒计时 pill(lvIntroT,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）

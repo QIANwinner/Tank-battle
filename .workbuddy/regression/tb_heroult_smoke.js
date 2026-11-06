@@ -6029,6 +6029,22 @@ async function main() {
     t('U1964 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1959;k<=1964;k++) t('U'+k+' 进场',false,e.message); }
 
+
+  // ===== U1965~U1970: 爆破弹头等级(v0.8.42) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bombLvWrap'),f:T.bombLvTextNow(0)});})()"));
+    t('U1965 爆破等级 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1966 初值 Lv0', o.f === '🧨 爆破 Lv0', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bombLvTextNow(1),b:T.bombLvTextNow(2)});})()"));
+    t('U1967 正常 Lv1/Lv2', o2.a === '🧨 爆破 Lv1' && o2.b === '🧨 爆破 Lv2', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bombLvTextNow(0),b:T.bombLvTextNow(5)});})()"));
+    t('U1968 边界 Lv0/Lv5', o3.a === '🧨 爆破 Lv0' && o3.b === '🧨 爆破 Lv5', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bombLvTextNow(NaN),b:T.bombLvTextNow(-1)});})()"));
+    t('U1969 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const bm=T.r42bmNow();return JSON.stringify({dom:T.bombLvDomNow(),exp:T.bombLvTextNow(bm)});})()"));
+    t('U1970 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1965;k<=1970;k++) t('U'+k+' 爆破等级',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
