@@ -4598,6 +4598,22 @@ async function main() {
     t('U1430 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1425;k<=1430;k++) t('U'+k+' 命中率',false,e.message); }
 
+
+  // ===== U1431~U1436: 本局金币速率VS生涯(v0.7.53) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('goldVsWrap'),f:T.goldVsTextNow(0,0,0,0)});})()"));
+    t('U1431 金币速 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1432 无数据初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.goldVsTextNow(120,60,0,0),b:T.goldVsTextNow(50,20,300,100)});})()"));
+    t('U1433 正常 2.0/s 与 2.5/3.0', o2.a === '💰 本局 2.0/s · 生涯 —/s' && o2.b === '💰 本局 2.5/s · 生涯 3.0/s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.goldVsTextNow(5,10,1,1),b:T.goldVsTextNow(0,0,300,100)});})()"));
+    t('U1434 边界:低速/无本局', o3.a === '💰 本局 0.5/s · 生涯 1.0/s' && o3.b === '💰 本局 0.0/s · 生涯 3.0/s', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.goldVsTextNow(NaN,60,300,100),b:T.goldVsTextNow(50,20,NaN,0)});})()"));
+    t('U1435 非法输入兜底', o4.a === '💰 本局 0.0/s · 生涯 3.0/s' && o4.b === '💰 本局 2.5/s · 生涯 —/s', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const rc=T.runCoinsNow(),rs=T.playSecRunNow(),cc=T.careerTotalCoinsNow(),cs=T.careerPlaySecNow();return JSON.stringify({dom:T.goldVsDomNow(),exp:T.goldVsTextNow(rc,rs,cc,cs)});})()"));
+    t('U1436 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1431;k<=1436;k++) t('U'+k+' 金币速',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
