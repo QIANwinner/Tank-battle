@@ -5949,6 +5949,22 @@ async function main() {
     t('U1934 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1929;k<=1934;k++) t('U'+k+' 大招冷却',false,e.message); }
 
+
+  // ===== U1935~U1940: 本局复活次数(v0.8.37) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('reviveCntWrap'),f:T.reviveCountTextNow(0)});})()"));
+    t('U1935 复活次数 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1936 初值 0', o.f === '🔄 复活 0', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reviveCountTextNow(1),b:T.reviveCountTextNow(3)});})()"));
+    t('U1937 正常 x1/x3', o2.a === '🔄 复活 x1' && o2.b === '🔄 复活 x3', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reviveCountTextNow(0),b:T.reviveCountTextNow(9)});})()"));
+    t('U1938 边界 0/x9', o3.a === '🔄 复活 0' && o3.b === '🔄 复活 x9', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reviveCountTextNow(NaN),b:T.reviveCountTextNow(-2)});})()"));
+    t('U1939 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const rc=T.r37rcNow();return JSON.stringify({dom:T.reviveCntDomNow(),exp:T.reviveCountTextNow(rc)});})()"));
+    t('U1940 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1935;k<=1940;k++) t('U'+k+' 复活次数',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
