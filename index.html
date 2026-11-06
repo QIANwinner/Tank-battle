@@ -7537,6 +7537,7 @@ function v5SkinDescHtml(d){return '<span class="siDesc">'+d+'</span>';}
 function v5BaseIconHtml(){return '<span class="baseIcon">🏰</span>';}
 function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n) || 0))); }
   function updateExtraHud() {
+  try {
     const fxEl = $('fxText'); if (fxEl) fxEl.textContent = activeFxText(fx);
     const bs = $('bossSoonNum'); if (bs) bs.textContent = bossSoonText(level);
     const cl = $('coinLogText'); if (cl) cl.textContent = coinLogText(coinLog);
@@ -7769,6 +7770,8 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r43baV = $('baseAliveVal'); if (r43baV) { let nearCount = 0; for (const e of enemies) { if (!e.dead && Math.abs(e.x - 12 * 24) < 5 * 24 && Math.abs(e.y - 23 * 24) < 5 * 24) nearCount++; } r43baV.textContent = baseAliveText(baseAlive, near); }
     // __EXTRA_HUD__
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
+  
+  } catch (e) { /* pill defense */ }
   }
 function activeFxText(fx) { const a = []; if (fx.rapid > 0) a.push('⚡速射 ' + Math.ceil(fx.rapid) + 's'); if (fx.double > 0) a.push('✨双倍 ' + Math.ceil(fx.double) + 's'); if (fx.freeze > 0) a.push('❄冰冻 ' + Math.ceil(fx.freeze) + 's'); return a.length ? a.join(' · ') : '无'; }
 function nextBossIn(lv) { const r = Math.max(0, Math.floor(Number(lv) || 1)) % 5; return r === 0 ? 5 : 5 - r; }
