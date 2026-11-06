@@ -6283,6 +6283,21 @@ async function main() {
     t('U2060 DOM 可读', !!o5.dom, JSON.stringify(o5));
   } catch(e){ for(let k=2055;k<=2060;k++) t('U'+k+' 冷却pill',false,e.message); }
 
+
+  // ===== U2061~U2066: 冰冻效果(v0.8.58) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('freezePillWrap'),f:T.freezeTextNow(0)});})()"));
+    t('U2061 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2062 零冰冻初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.freezeTextNow(3),b:T.freezeTextNow(0.5)});})()"));
+    t('U2063 正常 3s/1s(取整)', o2.a === '❄ 3s' && o2.b === '❄ 1s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.freezeTextNow(-1),b:T.freezeTextNow(NaN)});})()"));
+    t('U2064 非法兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.freezePillDomNow()});})()"));
+    t('U2065 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U2066 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=2061;k<=2066;k++) t('U'+k+' 冰冻pill',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
