@@ -6373,6 +6373,21 @@ async function main() {
     t('U2096 一致性', typeof o4.dom === 'string', o4.dom);
   } catch(e){ for(let k=2091;k<=2096;k++) t('U'+k+' 宠物距离',false,e.message); }
 
+
+  // ===== U2097~U2102: Wingman 状态(v0.8.64) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('wingmanStatusWrap'),f:T.wingmanStatusTextNow(null)});})()"));
+    t('U2097 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2098 无僚机初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.wingmanStatusTextNow({dead:false}));})()"));
+    t('U2099 僚机存活', o2 === '🤖 协战中', o2);
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.wingmanStatusTextNow({dead:true}),b:T.wingmanStatusTextNow(undefined)});})()"));
+    t('U2100 非法兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.wingmanStatusPillDomNow()});})()"));
+    t('U2101 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U2102 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=2097;k<=2102;k++) t('U'+k+' Wingman',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
