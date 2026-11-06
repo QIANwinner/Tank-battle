@@ -5788,6 +5788,22 @@ async function main() {
     t('U1874 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1869;k<=1874;k++) t('U'+k+' 曼哈顿距',false,e.message); }
 
+
+  // ===== U1875~U1880: 连击窗口剩余进度(v0.8.27) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('comboWinWrap'),f:T.comboWinPctTextNow(0,5),g:T.comboWinPctTextNow(0,0)});})()"));
+    t('U1875 连击窗口 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1876 无窗口初值 —', o.g === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboWinPctTextNow(3.4,5),b:T.comboWinPctTextNow(2.5,5)});})()"));
+    t('U1877 正常 68%/50%', o2.a === '⏱ 窗口 68%' && o2.b === '⏱ 窗口 50%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboWinPctTextNow(5,5),b:T.comboWinPctTextNow(6,5)});})()"));
+    t('U1878 边界 100%/钳制100%', o3.a === '⏱ 窗口 100%' && o3.b === '⏱ 窗口 100%', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboWinPctTextNow(NaN,5),b:T.comboWinPctTextNow(2,0)});})()"));
+    t('U1879 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const ct=T.r27ctNow(),cw=T.r27cwNow();return JSON.stringify({dom:T.comboWinDomNow(),exp:T.comboWinPctTextNow(ct,cw)});})()"));
+    t('U1880 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1875;k<=1880;k++) t('U'+k+' 连击窗口',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

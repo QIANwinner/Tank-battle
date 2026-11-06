@@ -1,3 +1,16 @@
+# v0.8.27 · 连击窗口剩余进度 pill(comboTimer/comboWindowMax %,独立ID)
+
+> 连击窗口剩余进度 pill(comboTimer/comboWindowMax %,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1880/1880。
+
+## 🅰 改进
+
+- 连击窗口剩余进度 pill(comboTimer/comboWindowMax %,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+
+## 🅱 验证
+
+- 主套件 169/169 + 反馈专项 1880/1880；内联脚本语法 SYNTAX OK
+- SW 缓存 v08270，游戏内版本 V8.27；远程树与本地树一致（sync_push）
+
 # v0.8.26 · 玩家-基地曼哈顿距 pill(|dx|+|dy| 格,独立ID)
 
 > 玩家-基地曼哈顿距 pill(|dx|+|dy| 格,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1874/1874。
