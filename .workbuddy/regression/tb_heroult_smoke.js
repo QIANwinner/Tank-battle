@@ -4839,6 +4839,22 @@ async function main() {
     t('U1520 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1515;k<=1520;k++) t('U'+k+' 道具速',false,e.message); }
 
+
+  // ===== U1521~U1526: 当前波次进度(v0.7.68) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('waveProgWrap'),f:T.waveProgTextNow(1,1)});})()"));
+    t('U1521 波次 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1522 单波初值 1/1', o.f === '🌊 波次 1/1', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveProgTextNow(2,5),b:T.waveProgTextNow(3,3)});})()"));
+    t('U1523 正常 2/5 与 3/3', o2.a === '🌊 波次 2/5' && o2.b === '🌊 波次 3/3', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveProgTextNow(0,1),b:T.waveProgTextNow(5,5)});})()"));
+    t('U1524 边界:零/满', o3.a === '🌊 波次 0/1' && o3.b === '🌊 波次 5/5', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveProgTextNow(1,NaN),b:T.waveProgTextNow(NaN,5)});})()"));
+    t('U1525 非法输入兜底', o4.a === '—' && o4.b === '🌊 波次 0/5', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const w=T.r68wNow(),wt=T.r68wtNow();return JSON.stringify({dom:T.waveProgDomNow(),exp:T.waveProgTextNow(w,wt)});})()"));
+    t('U1526 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1521;k<=1526;k++) t('U'+k+' 波次',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
