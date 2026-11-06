@@ -4694,6 +4694,22 @@ async function main() {
     t('U1466 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1461;k<=1466;k++) t('U'+k+' 场次',false,e.message); }
 
+
+  // ===== U1467~U1472: 本局实时破纪录(v0.7.59) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('newRecordWrap'),f:T.newRecordTextNow(0,0)});})()"));
+    t('U1467 破纪录 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1468 零分初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.newRecordTextNow(620,1000),b:T.newRecordTextNow(1500,1000)});})()"));
+    t('U1469 正常 距纪录380/新纪录', o2.a === '📊 距纪录 380' && o2.b === '🚀 新纪录!', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.newRecordTextNow(1000,1000),b:T.newRecordTextNow(1,0)});})()"));
+    t('U1470 边界:追平/无纪录', o3.a === '📊 距纪录 0' && o3.b === '🚀 新纪录!', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.newRecordTextNow(NaN,1000),b:T.newRecordTextNow(620,NaN)});})()"));
+    t('U1471 非法输入兜底', o4.a === '—' && o4.b === '🚀 新纪录!', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const s=T.r59scNow(),b=T.r59bsNow();return JSON.stringify({dom:T.newRecordDomNow(),exp:T.newRecordTextNow(s,b)});})()"));
+    t('U1472 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1467;k<=1472;k++) t('U'+k+' 破纪录',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
