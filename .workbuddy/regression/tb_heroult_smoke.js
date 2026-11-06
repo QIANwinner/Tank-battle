@@ -4871,6 +4871,22 @@ async function main() {
     t('U1532 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1527;k<=1532;k++) t('U'+k+' BOSS型',false,e.message); }
 
+
+  // ===== U1533~U1538: 当前强化叠加最多项(v0.7.70) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('topUpgWrap'),f:T.topUpgTextNow({})});})()"));
+    t('U1533 强化 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1534 无强化初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.topUpgTextNow({rapid:3,speed:1}),b:T.topUpgTextNow({hp:2})});})()"));
+    t('U1535 正常 快速装填x3/装甲x2', o2.a === '🧪 快速装填x3' && o2.b === '🧪 装甲强化x2', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.topUpgTextNow({hp:1}),b:T.topUpgTextNow({})});})()"));
+    t('U1536 边界:单层/空', o3.a === '🧪 装甲强化x1' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.topUpgTextNow(null),b:T.topUpgTextNow({rapid:NaN})});})()"));
+    t('U1537 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const u=T.r70upNow();return JSON.stringify({dom:T.topUpgDomNow(),exp:T.topUpgTextNow(u)});})()"));
+    t('U1538 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1533;k<=1538;k++) t('U'+k+' 强化',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
