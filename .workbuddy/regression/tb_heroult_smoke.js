@@ -4406,6 +4406,22 @@ async function main() {
     t('U1358 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1353;k<=1358;k++) t('U'+k+' 场均击杀',false,e.message); }
 
+
+  // ===== U1359~U1364: 英雄收集进度(v0.7.41) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('heroOwnWrap'),f:T.heroOwnedTextNow(0,0)});})()"));
+    t('U1359 英雄收集 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1360 零总数初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.heroOwnedTextNow(3,5),b:T.heroOwnedTextNow(5,5)});})()"));
+    t('U1361 正常 3/5 与满 5/5', o2.a === '🦸 3/5' && o2.b === '🦸 5/5', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.heroOwnedTextNow(7,5),b:T.heroOwnedTextNow(0,5)});})()"));
+    t('U1362 边界:超限钳制/零拥有', o3.a === '🦸 5/5' && o3.b === '🦸 0/5', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.heroOwnedTextNow(-1,5),b:T.heroOwnedTextNow(3,NaN)});})()"));
+    t('U1363 非法输入兜底', o4.a === '🦸 0/5' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const ow=T.heroOwnCountNow(),tt=T.heroTotalNow();return JSON.stringify({dom:T.heroOwnPillDomNow(),exp:T.heroOwnedTextNow(ow,tt)});})()"));
+    t('U1364 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1359;k<=1364;k++) t('U'+k+' 英雄收集',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
