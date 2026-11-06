@@ -5436,6 +5436,22 @@ async function main() {
     t('U1742 DOM 与函数一致(累计)', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1737;k<=1742;k++) t('U'+k+' 累计伤害',false,e.message); }
 
+
+  // ===== U1743~U1748: 道具剩余总时长(v0.8.05) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('puLifeSumWrap'),f:T.puLifeSumTextNow([])});})()"));
+    t('U1743 道具时长 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1744 无道具初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.puLifeSumTextNow([{life:12,dead:false},{life:8,dead:false}])});})()"));
+    t('U1745 正常 12+8=20s', o2.a === '⏱ 道具 20s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.puLifeSumTextNow([{life:12,dead:false},{life:3.5,dead:true},{life:8,dead:false}]),b:T.puLifeSumTextNow([{life:12,dead:true}])});})()"));
+    t('U1746 边界:死亡排除/全无', o3.a === '⏱ 道具 20s' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.puLifeSumTextNow([{life:NaN,dead:false}])});})()"));
+    t('U1747 非法输入兜底', o4.a === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const pu=T.r05puNow();return JSON.stringify({dom:T.puLifeSumDomNow(),exp:T.puLifeSumTextNow(pu)});})()"));
+    t('U1748 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1743;k<=1748;k++) t('U'+k+' 道具时长',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
