@@ -5756,6 +5756,22 @@ async function main() {
     t('U1862 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1857;k<=1862;k++) t('U'+k+' 刷敌进度',false,e.message); }
 
+
+  // ===== U1863~U1868: 波次总进度(v0.8.25) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('wavePhaseWrap'),f:T.wavePhaseTextNow(0,0)});})()"));
+    t('U1863 波次进度 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1864 无波次初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.wavePhaseTextNow(3,7),b:T.wavePhaseTextNow(7,7)});})()"));
+    t('U1865 正常 3/7 与 7/7', o2.a === '🌊 波 3/7' && o2.b === '🌊 波 7/7', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.wavePhaseTextNow(1,1),b:T.wavePhaseTextNow(5,5)});})()"));
+    t('U1866 边界 1/1 与 5/5', o3.a === '🌊 波 1/1' && o3.b === '🌊 波 5/5', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.wavePhaseTextNow(NaN,7),b:T.wavePhaseTextNow(3,-1)});})()"));
+    t('U1867 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const w=T.r25wNow(),to=T.r25tNow();return JSON.stringify({dom:T.wavePhaseDomNow(),exp:T.wavePhaseTextNow(w,to)});})()"));
+    t('U1868 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1863;k<=1868;k++) t('U'+k+' 波次进度',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

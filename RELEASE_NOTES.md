@@ -1,3 +1,16 @@
+# v0.8.25 · 波次总进度 pill(wave/wavesTotal,独立ID)
+
+> 波次总进度 pill(wave/wavesTotal,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1868/1868。
+
+## 🅰 改进
+
+- 波次总进度 pill(wave/wavesTotal,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+
+## 🅱 验证
+
+- 主套件 169/169 + 反馈专项 1868/1868；内联脚本语法 SYNTAX OK
+- SW 缓存 v08250，游戏内版本 V8.25；远程树与本地树一致（sync_push）
+
 # v0.8.24 · 本关已刷敌进度 pill(enemiesSpawned/enemiesTotal,独立ID)
 
 > 本关已刷敌进度 pill(enemiesSpawned/enemiesTotal,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1862/1862。

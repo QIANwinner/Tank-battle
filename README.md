@@ -162,6 +162,12 @@ Tank-battle/
 
 ## 🆕 更新日志
 
+### v0.8.25 · 2026-11-06
+**波次总进度 pill(wave/wavesTotal,独立ID)**
+- 波次总进度 pill(wave/wavesTotal,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+- ✅ 回归验证：主套件 169/169 + 反馈专项 1868/1868（无回归）
+- 📴 Service Worker 缓存版本更新至 **v08250**，游戏内版本 **V8.25**
+
 ### v0.8.24 · 2026-11-06
 **本关已刷敌进度 pill(enemiesSpawned/enemiesTotal,独立ID)**
 - 本关已刷敌进度 pill(enemiesSpawned/enemiesTotal,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
