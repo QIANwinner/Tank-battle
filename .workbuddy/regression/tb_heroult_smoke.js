@@ -5708,6 +5708,22 @@ async function main() {
     t('U1844 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1839;k<=1844;k++) t('U'+k+' 攻击冷却',false,e.message); }
 
+
+  // ===== U1845~U1850: 玩家格坐标(v0.8.22) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('playerPosWrap'),f:T.playerPosTextNow(null,null)});})()"));
+    t('U1845 玩家格坐标 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1846 无玩家初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const tl=T.r22tileNow();return JSON.stringify({a:T.playerPosTextNow(tl*12,tl*23),b:T.playerPosTextNow(tl*3,tl*5)});})()"));
+    t('U1847 正常 格(12,23)/(3,5)', o2.a === '📍 格(12,23)' && o2.b === '📍 格(3,5)', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const tl=T.r22tileNow();return JSON.stringify({a:T.playerPosTextNow(tl*0.4,tl*0.6),b:T.playerPosTextNow(tl*0.6,tl*0.4)});})()"));
+    t('U1848 边界 四舍五入 格(0,1)/(1,0)', o3.a === '📍 格(0,1)' && o3.b === '📍 格(1,0)', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.playerPosTextNow(NaN,564)});})()"));
+    t('U1849 非法输入兜底', o4.a === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const px=T.r22pxNow(),py=T.r22pyNow();return JSON.stringify({dom:T.playerPosDomNow(),exp:T.playerPosTextNow(px,py)});})()"));
+    t('U1850 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1845;k<=1850;k++) t('U'+k+' 格坐标',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
