@@ -5484,6 +5484,22 @@ async function main() {
     t('U1760 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1755;k<=1760;k++) t('U'+k+' 近道具',false,e.message); }
 
+
+  // ===== U1761~U1766: 敌方平均血量(v0.8.08) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('enemyAvgWrap'),f:T.enemyAvgHpTextNow([])});})()"));
+    t('U1761 敌均血 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1762 无敌人初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyAvgHpTextNow([{hp:30,dead:false},{hp:70,dead:false}]),b:T.enemyAvgHpTextNow([{hp:50,dead:false}])});})()"));
+    t('U1763 正常 均50', o2.a === '📊 均血 50' && o2.b === '📊 均血 50', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyAvgHpTextNow([{hp:30,dead:false},{hp:70,dead:false},{hp:999,dead:true}]),b:T.enemyAvgHpTextNow([{hp:30,dead:true}])});})()"));
+    t('U1764 边界:死亡排除/全灭', o3.a === '📊 均血 50' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyAvgHpTextNow([{hp:NaN,dead:false},{hp:10,dead:false}])});})()"));
+    t('U1765 非法输入兜底', o4.a === '📊 均血 10', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const en=T.r08enNow();return JSON.stringify({dom:T.enemyAvgDomNow(),exp:T.enemyAvgHpTextNow(en)});})()"));
+    t('U1766 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1761;k<=1766;k++) t('U'+k+' 敌均血',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
