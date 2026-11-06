@@ -4887,6 +4887,22 @@ async function main() {
     t('U1538 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1533;k<=1538;k++) t('U'+k+' 强化',false,e.message); }
 
+
+  // ===== U1539~U1544: 本局已发射子弹数(v0.7.71) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('shotsWrap'),f:T.shotsTextNow(0)});})()"));
+    t('U1539 发射 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1540 零发射初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shotsTextNow(12),b:T.shotsTextNow(100)});})()"));
+    t('U1541 正常 12/100', o2.a === '🔫 发射 12' && o2.b === '🔫 发射 100', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shotsTextNow(1),b:T.shotsTextNow(999)});})()"));
+    t('U1542 边界:1/999', o3.a === '🔫 发射 1' && o3.b === '🔫 发射 999', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shotsTextNow(NaN),b:T.shotsTextNow(-3)});})()"));
+    t('U1543 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r71shNow();return JSON.stringify({dom:T.shotsDomNow(),exp:T.shotsTextNow(v)});})()"));
+    t('U1544 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1539;k<=1544;k++) t('U'+k+' 发射',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
