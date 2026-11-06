@@ -5111,6 +5111,22 @@ async function main() {
     t('U1622 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1617;k<=1622;k++) t('U'+k+' 弹速',false,e.message); }
 
+
+  // ===== U1623~U1628: 玩家射速冷却倍率(v0.7.85) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('cooldownWrap'),f:T.cooldownTextNow(1)});})()"));
+    t('U1623 冷却 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1624 基础冷却 x1', o.f === '🔥 冷却 x1', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cooldownTextNow(0.8),b:T.cooldownTextNow(0.64)});})()"));
+    t('U1625 正常 x0.8/x0.64', o2.a === '🔥 冷却 x0.8' && o2.b === '🔥 冷却 x0.64', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cooldownTextNow(0.5),b:T.cooldownTextNow(1)});})()"));
+    t('U1626 边界:x0.5/x1', o3.a === '🔥 冷却 x0.5' && o3.b === '🔥 冷却 x1', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cooldownTextNow(NaN),b:T.cooldownTextNow(-0.5)});})()"));
+    t('U1627 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r85cdNow();return JSON.stringify({dom:T.cooldownDomNow(),exp:T.cooldownTextNow(v)});})()"));
+    t('U1628 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1623;k<=1628;k++) t('U'+k+' 冷却',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
