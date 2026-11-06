@@ -1,3 +1,16 @@
+# v0.8.44 · 下一敌刷新倒计时 pill(enemySpawnTimer,独立ID)
+
+> 下一敌刷新倒计时 pill(enemySpawnTimer,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1982/1982。
+
+## 🅰 改进
+
+- 下一敌刷新倒计时 pill(enemySpawnTimer,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+
+## 🅱 验证
+
+- 主套件 169/169 + 反馈专项 1982/1982；内联脚本语法 SYNTAX OK
+- SW 缓存 v08440，游戏内版本 V8.44；远程树与本地树一致（sync_push）
+
 # v0.8.43 · 击杀定格剩余 pill(hitStop,独立ID)
 
 > 击杀定格剩余 pill(hitStop,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1976/1976。

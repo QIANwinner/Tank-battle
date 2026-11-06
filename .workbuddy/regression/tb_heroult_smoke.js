@@ -6061,6 +6061,22 @@ async function main() {
     t('U1976 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1971;k<=1976;k++) t('U'+k+' 击杀定格',false,e.message); }
 
+
+  // ===== U1977~U1982: 下一敌刷新倒计时(v0.8.44) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('nextEnemyWrap'),f:T.nextEnemyTextNow(0)});})()"));
+    t('U1977 刷敌倒计时 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1978 初值 即刻', o.f === '👾 刷敌 即刻', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.nextEnemyTextNow(30),b:T.nextEnemyTextNow(180)});})()"));
+    t('U1979 正常 0.5s/3s', o2.a === '👾 刷敌 0.5s' && o2.b === '👾 刷敌 3s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.nextEnemyTextNow(1),b:T.nextEnemyTextNow(600)});})()"));
+    t('U1980 边界 即刻/10s', o3.a === '👾 刷敌 0s' && o3.b === '👾 刷敌 10s', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.nextEnemyTextNow(NaN),b:T.nextEnemyTextNow(-5)});})()"));
+    t('U1981 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const es=T.r44esNow();return JSON.stringify({dom:T.nextEnemyDomNow(),exp:T.nextEnemyTextNow(es)});})()"));
+    t('U1982 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1977;k<=1982;k++) t('U'+k+' 刷敌倒计时',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
