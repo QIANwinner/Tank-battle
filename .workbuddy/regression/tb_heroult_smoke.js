@@ -5127,6 +5127,22 @@ async function main() {
     t('U1628 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1623;k<=1628;k++) t('U'+k+' 冷却',false,e.message); }
 
+
+  // ===== U1629~U1634: 玩家子弹穿透数(v0.7.86) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('pierceWrap'),f:T.pierceTextNow(0)});})()"));
+    t('U1629 穿透 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1630 无穿透初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pierceTextNow(2),b:T.pierceTextNow(3)});})()"));
+    t('U1631 正常 2/3', o2.a === '🔱 穿透 2' && o2.b === '🔱 穿透 3', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pierceTextNow(1),b:T.pierceTextNow(9)});})()"));
+    t('U1632 边界:1/9', o3.a === '🔱 穿透 1' && o3.b === '🔱 穿透 9', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pierceTextNow(NaN),b:T.pierceTextNow(-1)});})()"));
+    t('U1633 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r86pNow();return JSON.stringify({dom:T.pierceDomNow(),exp:T.pierceTextNow(v)});})()"));
+    t('U1634 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1629;k<=1634;k++) t('U'+k+' 穿透',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
