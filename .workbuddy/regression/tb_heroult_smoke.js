@@ -6045,6 +6045,22 @@ async function main() {
     t('U1970 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1965;k<=1970;k++) t('U'+k+' 爆破等级',false,e.message); }
 
+
+  // ===== U1971~U1976: 击杀定格剩余(v0.8.43) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('hitStopWrap'),f:T.hitStopTextNow(0)});})()"));
+    t('U1971 击杀定格 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1972 初值 关', o.f === '✋ 定格 关', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hitStopTextNow(0.07),b:T.hitStopTextNow(0.03)});})()"));
+    t('U1973 正常 0.07s/0.03s', o2.a === '✋ 定格 0.07s' && o2.b === '✋ 定格 0.03s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hitStopTextNow(0.01),b:T.hitStopTextNow(0.1)});})()"));
+    t('U1974 边界 0.01s/0.1s', o3.a === '✋ 定格 0.01s' && o3.b === '✋ 定格 0.1s', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hitStopTextNow(NaN),b:T.hitStopTextNow(-1)});})()"));
+    t('U1975 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const hs=T.r43hsNow();return JSON.stringify({dom:T.hitStopDomNow(),exp:T.hitStopTextNow(hs)});})()"));
+    t('U1976 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1971;k<=1976;k++) t('U'+k+' 击杀定格',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
