@@ -5612,6 +5612,22 @@ async function main() {
     t('U1808 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1803;k<=1808;k++) t('U'+k+' BOSS 存活',false,e.message); }
 
+
+  // ===== U1809~U1814: 基地被围敌数(v0.8.16) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('baseBesiegedWrap'),f:T.baseBesiegedTextNow([])});})()"));
+    t('U1809 基地围困 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1810 无敌人初值 无围', o.f === '🟢 基地无围', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseBesiegedTextNow([{x:289,y:529,size:22,dead:false},{x:311,y:553,size:22,dead:false}])});})()"));
+    t('U1811 正常 被围2', o2.a === '🏯 基地被围 2', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseBesiegedTextNow([{x:289,y:25,size:22,dead:false}]),b:T.baseBesiegedTextNow([{x:289,y:529,size:22,dead:true}])});})()"));
+    t('U1812 边界:远敌排除/死亡排除', o3.a === '🟢 基地无围' && o3.b === '🟢 基地无围', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseBesiegedTextNow([{x:NaN,y:529,size:22,dead:false}])});})()"));
+    t('U1813 非法输入兜底', o4.a === '🟢 基地无围', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const en=T.r16enNow();return JSON.stringify({dom:T.baseBesiegedDomNow(),exp:T.baseBesiegedTextNow(en)});})()"));
+    t('U1814 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1809;k<=1814;k++) t('U'+k+' 基地围困',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
