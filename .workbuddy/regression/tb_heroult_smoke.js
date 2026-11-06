@@ -6298,6 +6298,21 @@ async function main() {
     t('U2066 一致性', typeof o4.dom === 'string', o4.dom);
   } catch(e){ for(let k=2061;k<=2066;k++) t('U'+k+' 冰冻pill',false,e.message); }
 
+
+  // ===== U2067~U2072: 敌人在场(v0.8.59) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('enemyOnFieldWrap'),f:T.enemyOnFieldTextNow(0)});})()"));
+    t('U2067 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2068 零敌初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyOnFieldTextNow(5),b:T.enemyOnFieldTextNow(1)});})()"));
+    t('U2069 正常 5/1', o2.a === '👾 5 在场' && o2.b === '👾 1 在场', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyOnFieldTextNow(-1),b:T.enemyOnFieldTextNow(NaN)});})()"));
+    t('U2070 非法兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.enemyOnFieldPillDomNow(),n:T.aliveEnemiesNow()});})()"));
+    t('U2071 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U2072 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=2067;k<=2072;k++) t('U'+k+' 敌人在场',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
