@@ -4855,6 +4855,22 @@ async function main() {
     t('U1526 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1521;k<=1526;k++) t('U'+k+' 波次',false,e.message); }
 
+
+  // ===== U1527~U1532: 本关 BOSS 类型(v0.7.69) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossTypeWrap'),f:T.bossTypeTextNow(false,null)});})()"));
+    t('U1527 BOSS型 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1528 非BOSS关初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossTypeTextNow(true,{name:'散射型'}),b:T.bossTypeTextNow(true,{name:'重装型'})});})()"));
+    t('U1529 正常 散射型/重装型', o2.a === '👹 散射型' && o2.b === '👹 重装型', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossTypeTextNow(true,null),b:T.bossTypeTextNow(false,{name:'X'})});})()"));
+    t('U1530 边界:无名/非关', o3.a === '👹 BOSS' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossTypeTextNow(null,{name:'X'}),b:T.bossTypeTextNow(true,{})});})()"));
+    t('U1531 非法输入兜底', o4.a === '—' && o4.b === '👹 BOSS', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const b=T.r69blNow(),t=T.r69btNow();return JSON.stringify({dom:T.bossTypeDomNow(),exp:T.bossTypeTextNow(b,t)});})()"));
+    t('U1532 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1527;k<=1532;k++) t('U'+k+' BOSS型',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
