@@ -6388,6 +6388,21 @@ async function main() {
     t('U2102 一致性', typeof o4.dom === 'string', o4.dom);
   } catch(e){ for(let k=2097;k<=2102;k++) t('U'+k+' Wingman',false,e.message); }
 
+
+  // ===== U2103~U2108: 星级预览(v0.8.65) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('starPreviewWrap'),f:T.starPreviewTextNow(true,3)});})()"));
+    t('U2103 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2104 无伤满命 3 星预览', o.f === '⭐⭐⭐ 预览', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.starPreviewTextNow(false,2),b:T.starPreviewTextNow(false,1)});})()"));
+    t('U2105 有伤降星', o2.a === '⭐⭐ 预览' && o2.b === '⭐ 预览', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.starPreviewTextNow(false,NaN),b:T.starPreviewTextNow(false,-1)});})()"));
+    t('U206 异常命数=1 星', o3.a === '⭐ 预览' && o3.b === '⭐ 预览', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.starPreviewPillDomNow()});})()"));
+    t('U207 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U208 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=2103;k<=2108;k++) t('U'+k+' 星级预览',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
