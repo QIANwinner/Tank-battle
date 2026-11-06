@@ -4630,6 +4630,22 @@ async function main() {
     t('U1442 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1437;k<=1442;k++) t('U'+k+' 击杀速',false,e.message); }
 
+
+  // ===== U1443~U1448: 本局每关平均用时(v0.7.55) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('avgLvTimeWrap'),f:T.avgLvTimeTextNow(0,0)});})()"));
+    t('U1443 每关均时 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1444 零关初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.avgLvTimeTextNow(180,5),b:T.avgLvTimeTextNow(60,3)});})()"));
+    t('U1445 正常 36s/关 与 20s/关', o2.a === '⏱ 均 36s/关' && o2.b === '⏱ 均 20s/关', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.avgLvTimeTextNow(10,1),b:T.avgLvTimeTextNow(100,0)});})()"));
+    t('U1446 边界:10s/关 与 零关', o3.a === '⏱ 均 10s/关' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.avgLvTimeTextNow(NaN,5),b:T.avgLvTimeTextNow(60,NaN)});})()"));
+    t('U1447 非法输入兜底', o4.a === '⏱ 均 0s/关' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const p=T.r55psNow(),l=T.r55lvNow();return JSON.stringify({dom:T.avgLvTimeDomNow(),exp:T.avgLvTimeTextNow(p,l)});})()"));
+    t('U1448 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1443;k<=1448;k++) t('U'+k+' 每关均时',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
