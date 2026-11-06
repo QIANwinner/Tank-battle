@@ -4791,6 +4791,22 @@ async function main() {
     t('U1502 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1497;k<=1502;k++) t('U'+k+' 磁暴',false,e.message); }
 
+
+  // ===== U1503~U1508: 当前增益生效(v0.7.65) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('fxActiveWrap'),f:T.fxActiveTextNow({})});})()"));
+    t('U1503 增益 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1504 无增益初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.fxActiveTextNow({rapid:5,double:10}),b:T.fxActiveTextNow({freeze:5})});})()"));
+    t('U1505 正常 急速双发/冰冻', o2.a === '✨ 急速5s·双发10s' && o2.b === '✨ 冰冻5s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.fxActiveTextNow({rapid:0.1}),b:T.fxActiveTextNow({rapid:0})});})()"));
+    t('U1506 边界:0.1s/零', o3.a === '✨ 急速0.1s' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.fxActiveTextNow(null),b:T.fxActiveTextNow({rapid:NaN})});})()"));
+    t('U1507 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r65fxNow();return JSON.stringify({dom:T.fxActiveDomNow(),exp:T.fxActiveTextNow(v)});})()"));
+    t('U1508 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1503;k<=1508;k++) t('U'+k+' 增益',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

@@ -1995,6 +1995,7 @@
   #missingSkinWrap .v { color: #ffca3a; font-weight: 800; font-size: 11px; }
   #bossPctWrap .v { color: #ff7b7b; font-weight: 800; font-size: 11px; }
   #magnetTimeWrap .v { color: #7bdff2; font-weight: 800; font-size: 11px; }
+  #fxActiveWrap .v { color: #ffd166; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -2149,6 +2150,7 @@
     <div class="pill m-hide" id="missingSkinWrap"><span class="k">皮肤缺口</span><span class="v" id="missingSkinVal">—</span></div>
     <div class="pill m-hide" id="bossPctWrap"><span class="k">BOSS</span><span class="v" id="bossPctVal">—</span></div>
     <div class="pill m-hide" id="magnetTimeWrap"><span class="k">磁暴</span><span class="v" id="magnetTimeVal">—</span></div>
+    <div class="pill m-hide" id="fxActiveWrap"><span class="k">增益</span><span class="v" id="fxActiveVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -2524,7 +2526,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V7.64</div>
+  <div id="mark">DESIGNED BY QIAN · V7.65</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7467,6 +7469,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r62msV = $('missingSkinVal'); if (r62msV) r62msV.textContent = missingSkinText(ownedSkins);
     const r63bpV = $('bossPctVal'); if (r63bpV) r63bpV.textContent = bossPctText(bossHp, bossMaxHp);
     const r64mtV = $('magnetTimeVal'); if (r64mtV) r64mtV.textContent = magnetTimeText(magnetStorm);
+    const r65fxV = $('fxActiveVal'); if (r65fxV) r65fxV.textContent = fxActiveText(fx);
     // __EXTRA_HUD__
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
   }
@@ -8566,6 +8569,19 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const v = Math.max(0, Number(t) || 0);
     if (v <= 0) return '—';
     return '🧲 磁暴 ' + (Math.round(v * 10) / 10) + 's';
+  }
+  // —— v0.7.65 当前增益生效 ——
+  function fxActiveText(fx) {
+    const f = fx || {};
+    const parts = [];
+    const r = Math.max(0, Number(f.rapid) || 0);
+    const d = Math.max(0, Number(f.double) || 0);
+    const z = Math.max(0, Number(f.freeze) || 0);
+    if (r > 0) parts.push('急速' + (Math.round(r * 10) / 10) + 's');
+    if (d > 0) parts.push('双发' + (Math.round(d * 10) / 10) + 's');
+    if (z > 0) parts.push('冰冻' + (Math.round(z * 10) / 10) + 's');
+    if (!parts.length) return '—';
+    return '✨ ' + parts.join('·');
   }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
@@ -10408,7 +10424,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V7.64', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V7.65', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -11541,6 +11557,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       missingSkinTextNow: (o) => missingSkinText(o), missingSkinDomNow: () => { const e = $('missingSkinVal'); return e ? e.textContent : null; }, r62ownNow: () => ownedSkins, missingSkinTotalNow: () => Object.keys(SKINS).length,
       bossPctTextNow: (h, m) => bossPctText(h, m), bossPctDomNow: () => { const e = $('bossPctVal'); return e ? e.textContent : null; }, r63hpNow: () => bossHp, r63mxNow: () => bossMaxHp,
       magnetTimeTextNow: (t) => magnetTimeText(t), magnetTimeDomNow: () => { const e = $('magnetTimeVal'); return e ? e.textContent : null; }, r64msNow: () => magnetStorm,
+      fxActiveTextNow: (f) => fxActiveText(f), fxActiveDomNow: () => { const e = $('fxActiveVal'); return e ? e.textContent : null; }, r65fxNow: () => fx,
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
