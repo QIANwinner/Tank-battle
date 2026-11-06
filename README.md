@@ -162,6 +162,12 @@ Tank-battle/
 
 ## 🆕 更新日志
 
+### v0.8.18 · 2026-11-06
+**玩家-BOSS 距离 pill(玩家中心 vs 存活 BOSS 中心,单位格,独立ID)**
+- 玩家-BOSS 距离 pill(玩家中心 vs 存活 BOSS 中心,单位格,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+- ✅ 回归验证：主套件 169/169 + 反馈专项 1826/1826（无回归）
+- 📴 Service Worker 缓存版本更新至 **v08180**，游戏内版本 **V8.18**
+
 ### v0.8.17 · 2026-11-06
 **本关无伤状态 pill(tookHitThisLevel 是否掉过命,独立ID)**
 - 本关无伤状态 pill(tookHitThisLevel 是否掉过命,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）

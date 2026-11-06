@@ -5644,6 +5644,22 @@ async function main() {
     t('U1820 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1815;k<=1820;k++) t('U'+k+' 无伤',false,e.message); }
 
+
+  // ===== U1821~U1826: 玩家-BOSS 距离(v0.8.18) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossDistWrap'),f:T.bossDistTextNow(T.bossDistCalcNow([],0,0))});})()"));
+    t('U1821 玩家-BOSS 距离 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1822 无 BOSS 初值 场上无 BOSS', o.f === '👹 场上无 BOSS', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({d:T.bossDistCalcNow([{isBoss:true,dead:false,x:0,y:0,size:24}],60,12),t:T.bossDistTextNow(2),t2:T.bossDistTextNow(1.5)});})()"));
+    t('U1823 正常 距离2格/文本', o2.d === 2 && o2.t === '👹 BOSS 2 格' && o2.t2 === '👹 BOSS 1.5 格', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossDistTextNow(0),b:T.bossDistCalcNow([{isBoss:true,dead:true,x:0,y:0,size:24}],0,0)});})()"));
+    t('U1824 边界 0格/已灭无BOSS', o3.a === '👹 BOSS 0 格' && o3.b === -1, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossDistTextNow(NaN),b:T.bossDistTextNow(undefined),c:T.bossDistTextNow(-3)});})()"));
+    t('U1825 非法输入兜底', o4.a === '👹 场上无 BOSS' && o4.b === '👹 场上无 BOSS' && o4.c === '👹 场上无 BOSS', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const arr=T.r18enNow(),p=T.r18posNow();return JSON.stringify({dom:T.bossDistDomNow(),exp:T.bossDistTextNow(T.bossDistCalcNow(arr,p.px,p.py))});})()"));
+    t('U1826 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1821;k<=1826;k++) t('U'+k+' BOSS 距离',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
