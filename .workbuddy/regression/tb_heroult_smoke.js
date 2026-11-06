@@ -5031,6 +5031,22 @@ async function main() {
     t('U1592 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1587;k<=1592;k++) t('U'+k+' 弹幕',false,e.message); }
 
+
+  // ===== U1593~U1598: 本波已刷敌数(v0.7.80) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('waveSpawnedWrap'),f:T.waveSpawnedTextNow(0)});})()"));
+    t('U1593 本波已刷 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1594 未刷敌初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveSpawnedTextNow(4),b:T.waveSpawnedTextNow(9)});})()"));
+    t('U1595 正常 4/9', o2.a === '🌊 本波 4' && o2.b === '🌊 本波 9', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveSpawnedTextNow(1),b:T.waveSpawnedTextNow(40)});})()"));
+    t('U1596 边界:1/40', o3.a === '🌊 本波 1' && o3.b === '🌊 本波 40', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveSpawnedTextNow(NaN),b:T.waveSpawnedTextNow(-2)});})()"));
+    t('U1597 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r80wNow();return JSON.stringify({dom:T.waveSpawnedDomNow(),exp:T.waveSpawnedTextNow(v)});})()"));
+    t('U1598 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1593;k<=1598;k++) t('U'+k+' 本波已刷',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
