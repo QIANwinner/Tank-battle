@@ -6220,6 +6220,21 @@ async function main() {
     t('U2036 DOM 可读', !!o5.dom, JSON.stringify(o5));
   } catch(e){ for(let k=2031;k<=2036;k++) t('U'+k+' 散射pill',false,e.message); }
 
+
+  // ===== U2037~U2042: 巨弹头(v0.8.54) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bigBulletPillWrap'),f:T.bigBulletTextNow(0)});})()"));
+    t('U2037 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2038 未装备 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bigBulletTextNow(1));})()"));
+    t('U2039 已装备 🔴', o2 === '🔴 已装备', o2);
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bigBulletTextNow(-1),b:T.bigBulletTextNow(NaN)});})()"));
+    t('U2040 非法兜底 —', o3.a === '—' && o3.b === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.bigBulletPillDomNow()});})()"));
+    t('U2041 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U2042 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=2037;k<=2042;k++) t('U'+k+' 巨弹pill',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
