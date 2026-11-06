@@ -4726,6 +4726,22 @@ async function main() {
     t('U1478 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1473;k<=1478;k++) t('U'+k+' 击杀占比',false,e.message); }
 
+
+  // ===== U1479~U1484: 宠物币获取速率(v0.7.61) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('petCoinRateWrap'),f:T.petCoinRateTextNow(0,0)});})()"));
+    t('U1479 宠物币速 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1480 无数据初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petCoinRateTextNow(30,60),b:T.petCoinRateTextNow(10,120)});})()"));
+    t('U1481 正常 30/分 与 5/分', o2.a === '🐾 宠物币 30/分' && o2.b === '🐾 宠物币 5/分', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petCoinRateTextNow(1,60),b:T.petCoinRateTextNow(0,60)});})()"));
+    t('U1482 边界:1/分 与 0/分', o3.a === '🐾 宠物币 1/分' && o3.b === '🐾 宠物币 0/分', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.petCoinRateTextNow(NaN,60),b:T.petCoinRateTextNow(30,NaN)});})()"));
+    t('U1483 非法输入兜底', o4.a === '🐾 宠物币 0/分' && o4.b === '🐾 宠物币 —/分', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const p=T.r61pcNow(),s=T.r61psNow();return JSON.stringify({dom:T.petCoinRateDomNow(),exp:T.petCoinRateTextNow(p,s)});})()"));
+    t('U1484 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1479;k<=1484;k++) t('U'+k+' 宠物币速',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
