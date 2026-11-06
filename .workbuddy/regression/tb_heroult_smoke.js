@@ -4742,6 +4742,23 @@ async function main() {
     t('U1484 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1479;k<=1484;k++) t('U'+k+' 宠物币速',false,e.message); }
 
+
+  // ===== U1485~U1490: 未拥有皮肤数(v0.7.62) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('missingSkinWrap'),f:T.missingSkinTextNow(null)});})()"));
+    t('U1485 皮肤缺口 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;const total=T.missingSkinTotalNow();return JSON.stringify({f:T.missingSkinTextNow(['classic']),exp:'🎨 未拥有 '+(total-1)+' 款'});})()"));
+    t('U1486 初值(默认皮肤)', o1.f === o1.exp, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const total=T.missingSkinTotalNow();return JSON.stringify({a:T.missingSkinTextNow(['classic','gold']),exp:'🎨 未拥有 '+(total-2)+' 款'});})()"));
+    t('U1487 正常(部分收集)', o2.a === o2.exp, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const total=T.missingSkinTotalNow();return JSON.stringify({a:T.missingSkinTextNow(new Array(total)),b:T.missingSkinTextNow([]),ex1:'🎨 已集齐',ex2:'🎨 未拥有 '+total+' 款'});})()"));
+    t('U1488 边界:集齐/零拥有', o3.a === o3.ex1 && o3.b === o3.ex2, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;const total=T.missingSkinTotalNow();return JSON.stringify({a:T.missingSkinTextNow(42),exp:'🎨 未拥有 '+total+' 款'});})()"));
+    t('U1489 非法输入兜底', o4.a === o4.exp, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const ow=T.r62ownNow();return JSON.stringify({dom:T.missingSkinDomNow(),exp:T.missingSkinTextNow(ow)});})()"));
+    t('U1490 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1485;k<=1490;k++) t('U'+k+' 皮肤缺口',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
