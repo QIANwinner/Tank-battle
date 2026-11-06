@@ -1,3 +1,16 @@
+# v0.8.39 · 本局最大生命 pill(3+upgrades.hp,独立ID)
+
+> 本局最大生命 pill(3+upgrades.hp,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1952/1952。
+
+## 🅰 改进
+
+- 本局最大生命 pill(3+upgrades.hp,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+
+## 🅱 验证
+
+- 主套件 169/169 + 反馈专项 1952/1952；内联脚本语法 SYNTAX OK
+- SW 缓存 v08390，游戏内版本 V8.39；远程树与本地树一致（sync_push）
+
 # v0.8.38 · BOSS 出场计数 pill(bossCount,独立ID)
 
 > BOSS 出场计数 pill(bossCount,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1946/1946。

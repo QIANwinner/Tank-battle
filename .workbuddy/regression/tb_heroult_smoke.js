@@ -5981,6 +5981,22 @@ async function main() {
     t('U1946 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1941;k<=1946;k++) t('U'+k+' BOSS计数',false,e.message); }
 
+
+  // ===== U1947~U1952: 本局最大生命(v0.8.39) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('maxLivesWrap'),f:T.maxLivesTextNow(3,0)});})()"));
+    t('U1947 最大生命 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1948 初值 3', o.f === '❤ 生命 3', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.maxLivesTextNow(3,1),b:T.maxLivesTextNow(3,3)});})()"));
+    t('U1949 正常 4/6', o2.a === '❤ 生命 4' && o2.b === '❤ 生命 6', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.maxLivesTextNow(3,0),b:T.maxLivesTextNow(3,9)});})()"));
+    t('U1950 边界 3/12', o3.a === '❤ 生命 3' && o3.b === '❤ 生命 12', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.maxLivesTextNow(NaN,1),b:T.maxLivesTextNow(3,-1)});})()"));
+    t('U1951 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const hp=T.r39hpNow();return JSON.stringify({dom:T.maxLivesDomNow(),exp:T.maxLivesTextNow(3,hp)});})()"));
+    t('U1952 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1947;k<=1952;k++) t('U'+k+' 最大生命',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

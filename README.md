@@ -162,6 +162,12 @@ Tank-battle/
 
 ## 🆕 更新日志
 
+### v0.8.39 · 2026-11-06
+**本局最大生命 pill(3+upgrades.hp,独立ID)**
+- 本局最大生命 pill(3+upgrades.hp,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+- ✅ 回归验证：主套件 169/169 + 反馈专项 1952/1952（无回归）
+- 📴 Service Worker 缓存版本更新至 **v08390**，游戏内版本 **V8.39**
+
 ### v0.8.38 · 2026-11-06
 **BOSS 出场计数 pill(bossCount,独立ID)**
 - BOSS 出场计数 pill(bossCount,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
