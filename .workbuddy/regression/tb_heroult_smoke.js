@@ -6328,6 +6328,21 @@ async function main() {
     t('U2078 一致性', typeof o4.dom === 'string', o4.dom);
   } catch(e){ for(let k=2073;k<=2078;k++) t('U'+k+' 子弹在飞',false,e.message); }
 
+
+  // ===== U2079~U2084: Boss 类型名(v0.8.61) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossTypeNameWrap'),f:T.bossTypeNameTextNow(null,false)});})()"));
+    t('U2079 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2080 非 BOSS 关 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bossTypeNameTextNow({name:'壁垒'},true));})()"));
+    t('U2081 BOSS 关显示类型名', o2 === '👹 壁垒', o2);
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bossTypeNameTextNow(null,true));})()"));
+    t('U2082 空类型兜底 ???', o3 === '👹 ???', o3);
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.bossTypeNamePillDomNow()});})()"));
+    t('U2083 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U2084 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=2079;k<=2084;k++) t('U'+k+' Boss类型',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
