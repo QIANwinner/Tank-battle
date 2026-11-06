@@ -5143,6 +5143,22 @@ async function main() {
     t('U1634 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1629;k<=1634;k++) t('U'+k+' 穿透',false,e.message); }
 
+
+  // ===== U1635~U1640: 本局击杀数(v0.7.87) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runKillsValWrap'),f:T.runKillsValTextNow(0)});})()"));
+    t('U1635 本局击杀 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1636 无击杀初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runKillsValTextNow(5),b:T.runKillsValTextNow(18)});})()"));
+    t('U1637 正常 5/18', o2.a === '🎯 击杀 5' && o2.b === '🎯 击杀 18', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runKillsValTextNow(1),b:T.runKillsValTextNow(99)});})()"));
+    t('U1638 边界:1/99', o3.a === '🎯 击杀 1' && o3.b === '🎯 击杀 99', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runKillsValTextNow(NaN),b:T.runKillsValTextNow(-4)});})()"));
+    t('U1639 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r87killNow();return JSON.stringify({dom:T.runKillsValDomNow(),exp:T.runKillsValTextNow(v)});})()"));
+    t('U1640 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1635;k<=1640;k++) t('U'+k+' 本局击杀',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
