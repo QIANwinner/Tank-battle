@@ -5804,6 +5804,23 @@ async function main() {
     t('U1880 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1875;k<=1880;k++) t('U'+k+' 连击窗口',false,e.message); }
 
+
+  // ===== U1881~U1886: 基地下一级升级花费(v0.8.28) =====
+  try {
+    const L = [{price:0},{price:250},{price:650},{price:1400},{price:3000},{price:6000}];
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('baseUpgWrap'),f:T.baseUpgPriceTextNow(0,[{price:0},{price:250},{price:650}])});})()"));
+    t('U1881 基地升级花费 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1882 初值 250金', o.f === '🏰 下阶 250金', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseUpgPriceTextNow(1,[{price:0},{price:250},{price:650}]),b:T.baseUpgPriceTextNow(2,[{price:0},{price:250},{price:650},{price:1400}])});})()"));
+    t('U1883 正常 650金/1400金', o2.a === '🏰 下阶 650金' && o2.b === '🏰 下阶 1400金', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseUpgPriceTextNow(5,[{price:0},{price:250},{price:650},{price:1400},{price:3000},{price:6000}])});})()"));
+    t('U1884 边界 满级', o3.a === '🏰 基地满级', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseUpgPriceTextNow(-1,[{price:0}]),b:T.baseUpgPriceTextNow(NaN,[{price:0}])});})()"));
+    t('U1885 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const bl=T.r28blNow(),ls=T.r28levelsNow();return JSON.stringify({dom:T.baseUpgDomNow(),exp:T.baseUpgPriceTextNow(bl,ls)});})()"));
+    t('U1886 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1881;k<=1886;k++) t('U'+k+' 基地花费',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

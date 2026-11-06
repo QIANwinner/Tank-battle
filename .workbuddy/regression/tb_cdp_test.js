@@ -65,7 +65,8 @@ function cdp(wsUrl) {
 
 async function main() {
   // 1) 启动无头 Chrome
-  const profile = process.env.TB_PROFILE || 'C:/tmp/tbchrome-profile';
+  // 默认 profile 用独立测试目录 tbchrome-run,彻底避开 WorkBuddy 浏览器占用的 tbchrome-profile(不可杀,会锁死主回归)
+  const profile = process.env.TB_PROFILE || 'C:/tmp/tbchrome-run';
   try { fs.rmSync(profile, { recursive: true, force: true }); } catch (e) {}
   const chrome = spawn(CHROME, [
     '--headless=new', '--disable-gpu', '--no-sandbox', '--disable-dev-shm-usage',
