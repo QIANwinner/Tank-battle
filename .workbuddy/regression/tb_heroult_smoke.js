@@ -6343,6 +6343,21 @@ async function main() {
     t('U2084 一致性', typeof o4.dom === 'string', o4.dom);
   } catch(e){ for(let k=2079;k<=2084;k++) t('U'+k+' Boss类型',false,e.message); }
 
+
+  // ===== U2085~U2090: 基地存活增强(v0.8.62) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('baseAliveWrap'),f:T.baseAliveTextNow(false,5)});})()"));
+    t('U2085 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2086 基地被毁提示', o.f === '💥 基地被毁', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseAliveTextNow(true,0),b:T.baseAliveTextNow(true,3)});})()"));
+    t('U2087 安全/围敌', o2.a === '🏰 基地安全' && o2.b === '🏰 基地存活 · 3 围', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseAliveTextNow(true,-1),b:T.baseAliveTextNow(true,NaN)});})()"));
+    t('U2088 非法兜底安全', o3.a === '🏰 基地安全' && o3.b === '🏰 基地安全', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.baseAlivePillDomNow()});})()"));
+    t('U2089 DOM 可读', !!o4.dom, JSON.stringify(o4));
+    t('U2090 一致性', typeof o4.dom === 'string', o4.dom);
+  } catch(e){ for(let k=2085;k<=2090;k++) t('U'+k+' 基地存活',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
