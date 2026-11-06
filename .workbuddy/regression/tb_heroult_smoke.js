@@ -5367,6 +5367,22 @@ async function main() {
     t('U1718 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1713;k<=1718;k++) t('U'+k+' 基地威胁',false,e.message); }
 
+
+  // ===== U1719~U1724: 弹幕威胁等级(v0.8.01) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bulletThreatWrap'),f:T.bulletThreatTextNow(0)});})()"));
+    t('U1719 弹幕威胁 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1720 平静初值', o.f === '🟢 弹幕平静', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletThreatTextNow(3),b:T.bulletThreatTextNow(8)});})()"));
+    t('U1721 正常 3发/8发', o2.a === '🟡 弹幕 3 发' && o2.b === '🟠 弹幕密集 8 发', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletThreatTextNow(5),b:T.bulletThreatTextNow(12)});})()"));
+    t('U1722 边界 5发/12发', o3.a === '🟡 弹幕 5 发' && o3.b === '🟠 弹幕密集 12 发', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletThreatTextNow(20),b:T.bulletThreatTextNow(NaN)});})()"));
+    t('U1723 暴雨20/非法', o4.a === '🔴 弹幕暴雨 20 发' && o4.b === '🟢 弹幕平静', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r01blNow();return JSON.stringify({dom:T.bulletThreatDomNow(),exp:T.bulletThreatTextNow(v)});})()"));
+    t('U1724 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1719;k<=1724;k++) t('U'+k+' 弹幕威胁',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
