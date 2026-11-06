@@ -5452,6 +5452,22 @@ async function main() {
     t('U1748 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1743;k<=1748;k++) t('U'+k+' 道具时长',false,e.message); }
 
+
+  // ===== U1749~U1754: 瞄准偏差(v0.8.06) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('aimGapWrap'),f:T.aimGapTextNow(null,null,0,[])});})()"));
+    t('U1749 瞄准偏差 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1750 无玩家初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.aimGapTextNow(300,564,0,[{x:289,y:529,size:22,dead:false}]),b:T.aimGapTextNow(300,564,0,[{x:311,y:553,size:22,dead:false}])});})()"));
+    t('U1751 正常 上对0°/右90°', o2.a === '🎯 偏差 0°' && o2.b === '🎯 偏差 90°', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.aimGapTextNow(300,564,0,[{x:289,y:577,size:22,dead:false}]),b:T.aimGapTextNow(300,564,2,[{x:311,y:553,size:22,dead:false}])});})()"));
+    t('U1752 边界:背对180°/右对0°', o3.a === '🎯 偏差 180°' && o3.b === '🎯 偏差 0°', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.aimGapTextNow(300,564,9,[]),b:T.aimGapTextNow(300,564,0,[{x:289,y:553,size:22,dead:true}])});})()"));
+    t('U1753 非法输入/无敌人 —', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const px=T.r06pxNow(),py=T.r06pyNow(),dr=T.r06dirNow(),en=T.r06enNow();return JSON.stringify({dom:T.aimGapDomNow(),exp:T.aimGapTextNow(px,py,dr,en)});})()"));
+    t('U1754 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1749;k<=1754;k++) t('U'+k+' 瞄准偏差',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
