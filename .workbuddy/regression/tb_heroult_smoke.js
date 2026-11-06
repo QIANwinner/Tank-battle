@@ -4662,6 +4662,22 @@ async function main() {
     t('U1454 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1449;k<=1454;k++) t('U'+k+' 限时最佳',false,e.message); }
 
+
+  // ===== U1455~U1460: 生涯困难最佳(v0.7.57) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bestHardWrap'),f:T.bestHardTextNow(0)});})()"));
+    t('U1455 困难最佳 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1456 无纪录初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bestHardTextNow(8000),b:T.bestHardTextNow(15600)});})()"));
+    t('U1457 正常 8000/15,600', o2.a === '🔥 困难最佳 8000' && o2.b === '🔥 困难最佳 15,600', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bestHardTextNow(1),b:T.bestHardTextNow(99999)});})()"));
+    t('U1458 边界:1/99,999', o3.a === '🔥 困难最佳 1' && o3.b === '🔥 困难最佳 99,999', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bestHardTextNow(NaN),b:T.bestHardTextNow(-3)});})()"));
+    t('U1459 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r57bhNow();return JSON.stringify({dom:T.bestHardDomNow(),exp:T.bestHardTextNow(v)});})()"));
+    t('U1460 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1455;k<=1460;k++) t('U'+k+' 困难最佳',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
