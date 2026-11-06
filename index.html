@@ -2092,6 +2092,7 @@
   #enemyOnFieldWrap .v { color: #ff5c5c; font-weight: 800; font-size: 11px; }
   #bulletFlyCountWrap .v { color: #ffd166; font-weight: 800; font-size: 11px; }
   #bossTypeNameWrap .v { color: #ff2d55; font-weight: 800; font-size: 11px; }
+  #baseAliveWrap .v { color: #39ff14; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -2343,6 +2344,7 @@
     <div class="pill m-hide" id="enemyOnFieldWrap"><span class="k">在场</span><span class="v" id="enemyOnFieldVal">—</span></div>
     <div class="pill m-hide" id="bulletFlyCountWrap"><span class="k">弹</span><span class="v" id="bulletFlyCountVal">—</span></div>
     <div class="pill m-hide" id="bossTypeNameWrap"><span class="k">Boss</span><span class="v" id="bossTypeNameVal">—</span></div>
+    <div class="pill m-hide" id="baseAliveWrap"><span class="k">基地</span><span class="v" id="baseAliveVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -7764,6 +7766,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r44eoV = $('enemyOnFieldVal'); if (r44eoV) r44eoV.textContent = enemyOnFieldText(enemies.length);
     const r44bfV = $('bulletFlyCountVal'); if (r44bfV) r44bfV.textContent = bulletFlyCountText(bullets.length);
     const r43btnV = $('bossTypeNameVal'); if (r43btnV) r43btnV.textContent = bossTypeNameText(bossType, bossLevel);
+    const r43baV = $('baseAliveVal'); if (r43baV) { let nearCount = 0; for (const e of enemies) { if (!e.dead && Math.abs(e.x - 12 * 24) < 5 * 24 && Math.abs(e.y - 23 * 24) < 5 * 24) nearCount++; } r43baV.textContent = baseAliveText(baseAlive, near); }
     // __EXTRA_HUD__
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
   }
@@ -9607,6 +9610,12 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // —— v0.8.61 Boss 类型名 ——
   function bossTypeNameText(bt, isBoss) {
     return isBoss ? '👹 ' + (bt && bt.name || '???') : '—';
+  }
+  // —— v0.8.62 基地存活增强 ——
+  function baseAliveText(alive, enemies) {
+    if (!alive) return '💥 基地被毁';
+    const n = Math.max(0, Math.floor(Number(enemies) || 0));
+    return n > 0 ? '🏰 基地存活 · ' + n + ' 围' : '🏰 基地安全';
   }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
@@ -12679,6 +12688,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       enemyOnFieldTextNow: (n) => enemyOnFieldText(n), enemyOnFieldPillDomNow: () => { const e = $('enemyOnFieldVal'); return e ? e.textContent : null; }, aliveEnemiesNow: () => enemies.length.length,
       bulletFlyCountTextNow: (n) => bulletFlyCountText(n), bulletFlyCountPillDomNow: () => { const e = $('bulletFlyCountVal'); return e ? e.textContent : null; },
       bossTypeNameTextNow: (bt, is) => bossTypeNameText(bt, is), bossTypeNamePillDomNow: () => { const e = $('bossTypeNameVal'); return e ? e.textContent : null; },
+      baseAliveTextNow: (a, e) => baseAliveText(a, e), baseAlivePillDomNow: () => { const e = $('baseAliveVal'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
