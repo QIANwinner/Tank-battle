@@ -5175,6 +5175,22 @@ async function main() {
     t('U1646 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1641;k<=1646;k++) t('U'+k+' 受击',false,e.message); }
 
+
+  // ===== U1647~U1652: 本局道具金币收益(v0.7.89) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runPickupGoldWrap'),f:T.runPickupGoldTextNow(0)});})()"));
+    t('U1647 道具金币 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1648 无收益初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runPickupGoldTextNow(50),b:T.runPickupGoldTextNow(120)});})()"));
+    t('U1649 正常 50/120', o2.a === '💰 道具币 50' && o2.b === '💰 道具币 120', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runPickupGoldTextNow(10),b:T.runPickupGoldTextNow(999)});})()"));
+    t('U1650 边界:10/999', o3.a === '💰 道具币 10' && o3.b === '💰 道具币 999', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runPickupGoldTextNow(NaN),b:T.runPickupGoldTextNow(-10)});})()"));
+    t('U1651 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.r89pgReset();T.r89pgAdd(30);T.r89pgAdd(20);T.extraHudRefreshNow();const v=T.r89pgNow();return JSON.stringify({dom:T.runPickupGoldDomNow(),exp:T.runPickupGoldTextNow(v)});})()"));
+    t('U1652 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1647;k<=1652;k++) t('U'+k+' 道具金币',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;

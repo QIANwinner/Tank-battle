@@ -1,3 +1,16 @@
+# v0.7.89 · 本局道具金币收益 pill(需新状态 runPickupGold,在 applyPowerup 金币处累计)
+
+> 本局道具金币收益 pill(需新状态 runPickupGold,在 applyPowerup 金币处累计)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1652/1652。
+
+## 🅰 改进
+
+- 本局道具金币收益 pill(需新状态 runPickupGold,在 applyPowerup 金币处累计)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+
+## 🅱 验证
+
+- 主套件 169/169 + 反馈专项 1652/1652；内联脚本语法 SYNTAX OK
+- SW 缓存 v07890，游戏内版本 V7.89；远程树与本地树一致（sync_push）
+
 # v0.7.88 · 本局受击数 pill(需新状态 hurtCount,在玩家受击处累计)
 
 > 本局受击数 pill(需新状态 hurtCount,在玩家受击处累计)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1646/1646。
