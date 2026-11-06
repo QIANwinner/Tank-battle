@@ -162,6 +162,12 @@ Tank-battle/
 
 ## 🆕 更新日志
 
+### v0.8.32 · 2026-11-06
+**复活成本 pill(reviveCost() 金币,独立ID)**
+- 复活成本 pill(reviveCost() 金币,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+- ✅ 回归验证：主套件 169/169 + 反馈专项 1910/1910（无回归）
+- 📴 Service Worker 缓存版本更新至 **v08320**，游戏内版本 **V8.32**
+
 ### v0.8.31 · 2026-11-06
 **本局金币占生涯比例 pill(runCoins/career.totalCoins %,独立ID)**
 - 本局金币占生涯比例 pill(runCoins/career.totalCoins %,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）

@@ -5869,6 +5869,22 @@ async function main() {
     t('U1904 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1899;k<=1904;k++) t('U'+k+' 金币占比',false,e.message); }
 
+
+  // ===== U1905~U1910: 复活成本(v0.8.32) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('reviveCostWrap'),f:T.reviveCostTextNow(40)});})()"));
+    t('U1905 复活成本 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1906 初值 40金', o.f === '🔧 复活 40金', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reviveCostTextNow(160),b:T.reviveCostTextNow(12345)});})()"));
+    t('U1907 正常 160金/千分位', o2.a === '🔧 复活 160金' && o2.b === '🔧 复活 12,345金', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reviveCostTextNow(999999),b:T.reviveCostTextNow(0)});})()"));
+    t('U1908 边界 999,999金/0金', o3.a === '🔧 复活 999,999金' && o3.b === '🔧 复活 0金', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reviveCostTextNow(NaN),b:T.reviveCostTextNow(-5)});})()"));
+    t('U1909 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const rc=T.r32rcNow();return JSON.stringify({dom:T.reviveCostDomNow(),exp:T.reviveCostTextNow(rc)});})()"));
+    t('U1910 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1905;k<=1910;k++) t('U'+k+' 复活成本',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
