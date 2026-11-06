@@ -4454,6 +4454,22 @@ async function main() {
     t('U1376 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1371;k<=1376;k++) t('U'+k+' 金币余额',false,e.message); }
 
+
+  // ===== U1377~U1382: 生涯胜率(v0.7.44) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('winRateWrap'),f:T.winRateTextNow(0,0)});})()"));
+    t('U1377 胜率 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1378 零场初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.winRateTextNow(3,4),b:T.winRateTextNow(1,3)});})()"));
+    t('U1379 正常 75%/33%', o2.a === '🏆 75%' && o2.b === '🏆 33%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.winRateTextNow(5,5),b:T.winRateTextNow(0,5)});})()"));
+    t('U1380 边界:满胜/零胜', o3.a === '🏆 100%' && o3.b === '🏆 0%', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.winRateTextNow(NaN,4),b:T.winRateTextNow(3,NaN)});})()"));
+    t('U1381 非法输入兜底', o4.a === '🏆 0%' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const w=T.careerWinsNow(),g=T.careerGamesNow();return JSON.stringify({dom:T.winRatePillDomNow(),exp:T.winRateTextNow(w,g)});})()"));
+    t('U1382 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1377;k<=1382;k++) t('U'+k+' 胜率',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
