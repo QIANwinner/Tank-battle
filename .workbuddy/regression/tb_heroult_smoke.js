@@ -4390,6 +4390,22 @@ async function main() {
     t('U1352 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1347;k<=1352;k++) t('U'+k+' VS纪录',false,e.message); }
 
+
+  // ===== U1353~U1358: 生涯场均击杀(v0.7.40) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('avgKillWrap'),f:T.avgKillsTextNow(0,0)});})()"));
+    t('U1353 场均击杀 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1354 零场初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.avgKillsTextNow(150,30),b:T.avgKillsTextNow(100,3)});})()"));
+    t('U1355 正常 5/33.3', o2.a === '⚔ 场均 5' && o2.b === '⚔ 场均 33.3', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.avgKillsTextNow(0,5),b:T.avgKillsTextNow(50,1)});})()"));
+    t('U1356 边界:零击杀/单场', o3.a === '⚔ 场均 0' && o3.b === '⚔ 场均 50', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.avgKillsTextNow(NaN,5),b:T.avgKillsTextNow(50,NaN)});})()"));
+    t('U1357 非法输入兜底', o4.a === '⚔ 场均 0' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const k=T.careerKillsNow(),g=T.careerGamesNow();return JSON.stringify({dom:T.avgKillsPillDomNow(),exp:T.avgKillsTextNow(k,g)});})()"));
+    t('U1358 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1353;k<=1358;k++) t('U'+k+' 场均击杀',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
