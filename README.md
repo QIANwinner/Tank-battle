@@ -162,6 +162,12 @@ Tank-battle/
 
 ## 🆕 更新日志
 
+### v0.8.49 · 2026-11-06
+**传送门冷却 pill(player.portalCd,独立ID)**
+- 传送门冷却 pill(player.portalCd,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+- ✅ 回归验证：主套件 169/169 + 反馈专项 2012/2012（无回归）
+- 📴 Service Worker 缓存版本更新至 **v08490**，游戏内版本 **V8.49**
+
 ### v0.8.48 · 2026-11-06
 **本关已得星级 pill(levelStars[level],独立ID)**
 - 本关已得星级 pill(levelStars[level],独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）

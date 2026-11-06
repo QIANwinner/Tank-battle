@@ -6141,6 +6141,22 @@ async function main() {
     t('U2006 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=2001;k<=2006;k++) t('U'+k+' 本关星级',false,e.message); }
 
+
+  // ===== U2007~U2012: 传送门冷却(v0.8.49) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('portalCdWrap'),f:T.portalCdTextNow(0)});})()"));
+    t('U2007 传送门冷却 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2008 初值 就绪', o.f === '🌀 传送 就绪', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.portalCdTextNow(45),b:T.portalCdTextNow(90)});})()"));
+    t('U2009 正常 0.75s/1.5s', o2.a === '🌀 传送 0.75s' && o2.b === '🌀 传送 1.5s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.portalCdTextNow(1),b:T.portalCdTextNow(180)});})()"));
+    t('U2010 边界 0.02s/3s', o3.a === '🌀 传送 0.02s' && o3.b === '🌀 传送 3s', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.portalCdTextNow(NaN),b:T.portalCdTextNow(-1)});})()"));
+    t('U2011 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const pc=T.r49pcNow();return JSON.stringify({dom:T.portalCdDomNow(),exp:T.portalCdTextNow(pc)});})()"));
+    t('U2012 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=2007;k<=2012;k++) t('U'+k+' 传送门冷却',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

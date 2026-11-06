@@ -1,3 +1,16 @@
+# v0.8.49 · 传送门冷却 pill(player.portalCd,独立ID)
+
+> 传送门冷却 pill(player.portalCd,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 2012/2012。
+
+## 🅰 改进
+
+- 传送门冷却 pill(player.portalCd,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+
+## 🅱 验证
+
+- 主套件 169/169 + 反馈专项 2012/2012；内联脚本语法 SYNTAX OK
+- SW 缓存 v08490，游戏内版本 V8.49；远程树与本地树一致（sync_push）
+
 # v0.8.48 · 本关已得星级 pill(levelStars[level],独立ID)
 
 > 本关已得星级 pill(levelStars[level],独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 2006/2006。
