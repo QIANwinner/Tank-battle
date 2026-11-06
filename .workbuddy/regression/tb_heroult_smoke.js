@@ -5853,6 +5853,22 @@ async function main() {
     t('U1898 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1893;k<=1898;k++) t('U'+k+' 敌血峰',false,e.message); }
 
+
+  // ===== U1899~U1904: 本局金币占生涯比例(v0.8.31) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('coinShareWrap'),f:T.coinShareTextNow(0,0)});})()"));
+    t('U1899 金币占比 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1900 无生涯初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinShareTextNow(36,300),b:T.coinShareTextNow(150,300)});})()"));
+    t('U1901 正常 12%/50%', o2.a === '💰 本局占生涯 12%' && o2.b === '💰 本局占生涯 50%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinShareTextNow(300,300),b:T.coinShareTextNow(900,300)});})()"));
+    t('U1902 边界 100%/钳制100%', o3.a === '💰 本局占生涯 100%' && o3.b === '💰 本局占生涯 100%', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinShareTextNow(NaN,300),b:T.coinShareTextNow(50,-1)});})()"));
+    t('U1903 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const rc=T.r31rcNow(),ct=T.r31ctNow();return JSON.stringify({dom:T.coinShareDomNow(),exp:T.coinShareTextNow(rc,ct)});})()"));
+    t('U1904 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1899;k<=1904;k++) t('U'+k+' 金币占比',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

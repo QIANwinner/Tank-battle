@@ -1,3 +1,16 @@
+# v0.8.31 · 本局金币占生涯比例 pill(runCoins/career.totalCoins %,独立ID)
+
+> 本局金币占生涯比例 pill(runCoins/career.totalCoins %,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1904/1904。
+
+## 🅰 改进
+
+- 本局金币占生涯比例 pill(runCoins/career.totalCoins %,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+
+## 🅱 验证
+
+- 主套件 169/169 + 反馈专项 1904/1904；内联脚本语法 SYNTAX OK
+- SW 缓存 v08310，游戏内版本 V8.31；远程树与本地树一致（sync_push）
+
 # v0.8.30 · 场上敌人最大生命 pill(enemies 最大 e.hp,独立ID)
 
 > 场上敌人最大生命 pill(enemies 最大 e.hp,独立ID)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1898/1898。
