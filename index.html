@@ -2030,6 +2030,7 @@
   #nearEnemyDistWrap .v { color: #ff6b6b; font-weight: 800; font-size: 11px; }
   #absSpeedWrap .v { color: #7bed9f; font-weight: 800; font-size: 11px; }
   #nearEnemyTypeWrap .v { color: #ff3860; font-weight: 800; font-size: 11px; }
+  #baseThreatWrap .v { color: #ffbe76; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -2219,6 +2220,7 @@
     <div class="pill m-hide" id="nearEnemyDistWrap"><span class="k">最近敌距</span><span class="v" id="nearEnemyDistVal">—</span></div>
     <div class="pill m-hide" id="absSpeedWrap"><span class="k">实速</span><span class="v" id="absSpeedVal">—</span></div>
     <div class="pill m-hide" id="nearEnemyTypeWrap"><span class="k">近敌</span><span class="v" id="nearEnemyTypeVal">—</span></div>
+    <div class="pill m-hide" id="baseThreatWrap"><span class="k">基地威胁</span><span class="v" id="baseThreatVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -2594,7 +2596,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V7.99</div>
+  <div id="mark">DESIGNED BY QIAN · V8.00</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7572,6 +7574,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r97nv = $('nearEnemyDistVal'); if (r97nv) r97nv.textContent = nearEnemyDistText(player && !player.dead ? player.x + TANK_SIZE / 2 : null, player && !player.dead ? player.y + TANK_SIZE / 2 : null, enemies);
     const r98sv = $('absSpeedVal'); if (r98sv) r98sv.textContent = absSpeedText(player ? player.speed : -1);
     const r99tv = $('nearEnemyTypeVal'); if (r99tv) r99tv.textContent = nearEnemyTypeText(player && !player.dead ? player.x + TANK_SIZE / 2 : null, player && !player.dead ? player.y + TANK_SIZE / 2 : null, enemies);
+    const r00tv = $('baseThreatVal'); if (r00tv) r00tv.textContent = baseThreatText(enemies);
     // __EXTRA_HUD__
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
   }
@@ -8927,6 +8930,20 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (!best) return '—';
     if (best.isBoss) return '👑 BOSS';
     return '🎯 ' + (ENEMY_TYPE_NM[best.type] || ('敌·' + best.type));
+  }
+  // —— v0.8.00 基地被围程度 ——
+  function baseThreatText(arr) {
+    const bx = BASE.x * TILE + TILE / 2, by = BASE.y * TILE + TILE / 2;
+    let n = 0;
+    for (const e of (arr || [])) {
+      if (!e || e.dead) continue;
+      const d = Math.hypot((e.x + (e.size || TANK_SIZE) / 2) - bx, (e.y + (e.size || TANK_SIZE) / 2) - by) / TILE;
+      if (d <= 6) n++;
+    }
+    if (n <= 0) return '🟢 基地安全';
+    if (n <= 2) return '🟡 基地附近 ' + n + ' 敌';
+    if (n <= 5) return '🟠 基地受威胁 ' + n + ' 敌';
+    return '🔴 基地危急 ' + n + ' 敌';
   }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
@@ -10769,7 +10786,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V7.99', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V8.00', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -11937,6 +11954,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       nearEnemyDistTextNow: (px, py, arr) => nearEnemyDistText(px, py, arr), nearEnemyDistDomNow: () => { const e = $('nearEnemyDistVal'); return e ? e.textContent : null; }, r97pxNow: () => player && !player.dead ? player.x + TANK_SIZE / 2 : null, r97pyNow: () => player && !player.dead ? player.y + TANK_SIZE / 2 : null, r97enNow: () => enemies,
       absSpeedTextNow: (spd) => absSpeedText(spd), absSpeedDomNow: () => { const e = $('absSpeedVal'); return e ? e.textContent : null; }, r98spdNow: () => player ? player.speed : -1,
       nearEnemyTypeTextNow: (px, py, arr) => nearEnemyTypeText(px, py, arr), nearEnemyTypeDomNow: () => { const e = $('nearEnemyTypeVal'); return e ? e.textContent : null; }, r99txNow: () => player && !player.dead ? player.x + TANK_SIZE / 2 : null, r99tyNow: () => player && !player.dead ? player.y + TANK_SIZE / 2 : null, r99enNow: () => enemies,
+      baseThreatTextNow: (arr) => baseThreatText(arr), baseThreatDomNow: () => { const e = $('baseThreatVal'); return e ? e.textContent : null; }, r00thNow: () => enemies,
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

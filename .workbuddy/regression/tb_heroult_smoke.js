@@ -5351,6 +5351,22 @@ async function main() {
     t('U1712 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1707;k<=1712;k++) t('U'+k+' 近敌类型',false,e.message); }
 
+
+  // ===== U1713~U1718: 基地被围程度(v0.8.00) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('baseThreatWrap'),f:T.baseThreatTextNow([])});})()"));
+    t('U1713 基地威胁 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1714 无敌人初值 安全', o.f === '🟢 基地安全', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseThreatTextNow([{x:289,y:553,size:22,dead:false}]),b:T.baseThreatTextNow([{x:289,y:553,size:22,dead:false},{x:300,y:560,size:22,dead:false},{x:280,y:545,size:22,dead:false}])});})()"));
+    t('U1715 正常 1敌/3敌', o2.a === '🟡 基地附近 1 敌' && o2.b === '🟠 基地受威胁 3 敌', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseThreatTextNow([{x:289,y:553,size:22,dead:false},{x:300,y:560,size:22,dead:false},{x:280,y:545,size:22,dead:false},{x:312,y:570,size:22,dead:false},{x:288,y:575,size:22,dead:false},{x:305,y:548,size:22,dead:false}]),b:T.baseThreatTextNow([{x:289,y:385,size:22,dead:false}])});})()"));
+    t('U1716 边界:6敌危急/远敌安全', o3.a === '🔴 基地危急 6 敌' && o3.b === '🟢 基地安全', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseThreatTextNow([{x:289,y:553,size:22,dead:true}])});})()"));
+    t('U1717 死亡排除 安全', o4.a === '🟢 基地安全', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const en=T.r00thNow();return JSON.stringify({dom:T.baseThreatDomNow(),exp:T.baseThreatTextNow(en)});})()"));
+    t('U1718 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1713;k<=1718;k++) t('U'+k+' 基地威胁',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
