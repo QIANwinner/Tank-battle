@@ -4582,6 +4582,22 @@ async function main() {
     t('U1424 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1419;k<=1424;k++) t('U'+k+' 得分进度',false,e.message); }
 
+
+  // ===== U1425~U1430: 本局命中率VS生涯(v0.7.52) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('hitVsWrap'),f:T.hitVsTextNow(0,0,0,0)});})()"));
+    t('U1425 命中率 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1426 无数据初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hitVsTextNow(8,10,0,0),b:T.hitVsTextNow(8,10,70,100)});})()"));
+    t('U1427 正常 本局80% 生涯70%', o2.a === '🎯 本局 80% · 生涯 —' && o2.b === '🎯 本局 80% · 生涯 70%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hitVsTextNow(0,10,0,100),b:T.hitVsTextNow(10,10,100,100)});})()"));
+    t('U1428 边界:全空/全中', o3.a === '🎯 本局 0% · 生涯 0%' && o3.b === '🎯 本局 100% · 生涯 100%', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hitVsTextNow(NaN,10,70,100),b:T.hitVsTextNow(8,10,NaN,NaN)});})()"));
+    t('U1429 非法输入兜底', o4.a === '🎯 本局 0% · 生涯 70%' && o4.b === '🎯 本局 80% · 生涯 —', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const ch=T.statHitsNow(),cs=T.statShotsNow(),ah=T.careerHitsNow(),aS=T.careerShotsNow();return JSON.stringify({dom:T.hitVsDomNow(),exp:T.hitVsTextNow(ch,cs,ah,aS)});})()"));
+    t('U1430 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1425;k<=1430;k++) t('U'+k+' 命中率',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
