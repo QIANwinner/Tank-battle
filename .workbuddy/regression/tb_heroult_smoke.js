@@ -5660,6 +5660,22 @@ async function main() {
     t('U1826 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1821;k<=1826;k++) t('U'+k+' BOSS 距离',false,e.message); }
 
+
+  // ===== U1827~U1832: 玩家出生无敌剩余(v0.8.19) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('spawnInvWrap'),f:T.spawnInvTextNow(0)});})()"));
+    t('U1827 无敌剩余 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1828 无无敌初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.spawnInvTextNow(90),b:T.spawnInvTextNow(30)});})()"));
+    t('U1829 正常 1.5s/0.5s', o2.a === '🛡 无敌 1.5s' && o2.b === '🛡 无敌 0.5s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.spawnInvTextNow(6),b:T.spawnInvTextNow(300)});})()"));
+    t('U1830 边界 0.1s/5s', o3.a === '🛡 无敌 0.1s' && o3.b === '🛡 无敌 5s', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.spawnInvTextNow(NaN),b:T.spawnInvTextNow(-5)});})()"));
+    t('U1831 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r19svNow();return JSON.stringify({dom:T.spawnInvDomNow(),exp:T.spawnInvTextNow(v)});})()"));
+    t('U1832 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1827;k<=1832;k++) t('U'+k+' 无敌剩余',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
