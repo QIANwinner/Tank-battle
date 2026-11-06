@@ -5095,6 +5095,22 @@ async function main() {
     t('U1616 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1611;k<=1616;k++) t('U'+k+' 移速',false,e.message); }
 
+
+  // ===== U1617~U1622: 玩家子弹速度倍率(v0.7.84) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bulletSpeedWrap'),f:T.bulletSpeedMultTextNow(1)});})()"));
+    t('U1617 弹速 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1618 基础弹速 x1', o.f === '🚀 弹速 x1', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletSpeedMultTextNow(1.2),b:T.bulletSpeedMultTextNow(1.4)});})()"));
+    t('U1619 正常 x1.2/x1.4', o2.a === '🚀 弹速 x1.2' && o2.b === '🚀 弹速 x1.4', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletSpeedMultTextNow(1),b:T.bulletSpeedMultTextNow(2)});})()"));
+    t('U1620 边界:x1/x2', o3.a === '🚀 弹速 x1' && o3.b === '🚀 弹速 x2', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletSpeedMultTextNow(NaN),b:T.bulletSpeedMultTextNow(-2)});})()"));
+    t('U1621 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r84bsdNow();return JSON.stringify({dom:T.bulletSpeedDomNow(),exp:T.bulletSpeedMultTextNow(v)});})()"));
+    t('U1622 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1617;k<=1622;k++) t('U'+k+' 弹速',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
