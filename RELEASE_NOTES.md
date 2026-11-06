@@ -1,3 +1,16 @@
+# v0.7.92 · 本局连击峰值 pill(独立,stat.maxCombo)
+
+> 本局连击峰值 pill(独立,stat.maxCombo)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1670/1670。
+
+## 🅰 改进
+
+- 本局连击峰值 pill(独立,stat.maxCombo)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+
+## 🅱 验证
+
+- 主套件 169/169 + 反馈专项 1670/1670；内联脚本语法 SYNTAX OK
+- SW 缓存 v07920，游戏内版本 V7.92；远程树与本地树一致（sync_push）
+
 # v0.7.91 · BOSS 击杀计数 pill(生涯BOSS击破,career.bossKills)
 
 > BOSS 击杀计数 pill(生涯BOSS击破,career.bossKills)（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1664/1664。

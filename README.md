@@ -162,6 +162,12 @@ Tank-battle/
 
 ## 🆕 更新日志
 
+### v0.7.92 · 2026-11-06
+**本局连击峰值 pill(独立,stat.maxCombo)**
+- 本局连击峰值 pill(独立,stat.maxCombo)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）
+- ✅ 回归验证：主套件 169/169 + 反馈专项 1670/1670（无回归）
+- 📴 Service Worker 缓存版本更新至 **v07920**，游戏内版本 **V7.92**
+
 ### v0.7.91 · 2026-11-06
 **BOSS 击杀计数 pill(生涯BOSS击破,career.bossKills)**
 - BOSS 击杀计数 pill(生涯BOSS击破,career.bossKills)（新增 DOM/CSS/状态逻辑 + 6 条专项断言）

@@ -5223,6 +5223,22 @@ async function main() {
     t('U1664 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1659;k<=1664;k++) t('U'+k+' BOSS击破',false,e.message); }
 
+
+  // ===== U1665~U1670: 本局连击峰值(v0.7.92) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runComboPeakWrap'),f:T.runComboPeakTextNow(0)});})()"));
+    t('U1665 连击峰值 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1666 无连击初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runComboPeakTextNow(8),b:T.runComboPeakTextNow(15)});})()"));
+    t('U1667 正常 8/15', o2.a === '🔥 峰值 8连' && o2.b === '🔥 峰值 15连', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runComboPeakTextNow(1),b:T.runComboPeakTextNow(99)});})()"));
+    t('U1668 边界:1/99', o3.a === '🔥 峰值 1连' && o3.b === '🔥 峰值 99连', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runComboPeakTextNow(NaN),b:T.runComboPeakTextNow(-3)});})()"));
+    t('U1669 非法输入兜底', o4.a === '—' && o4.b === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const v=T.r92cpNow();return JSON.stringify({dom:T.runComboPeakDomNow(),exp:T.runComboPeakTextNow(v)});})()"));
+    t('U1670 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1665;k<=1670;k++) t('U'+k+' 连击峰值',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
