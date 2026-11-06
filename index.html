@@ -2085,6 +2085,7 @@
   #bombPillWrap .v { color: #ff5c5c; font-weight: 800; font-size: 11px; }
   #spreadPillWrap .v { color: #ff9f43; font-weight: 800; font-size: 11px; }
   #bigBulletPillWrap .v { color: #ff5c5c; font-weight: 800; font-size: 11px; }
+  #bulletSpdPillWrap .v { color: #7ee7ff; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -2329,6 +2330,7 @@
     <div class="pill m-hide" id="bombPillWrap"><span class="k">炸弹</span><span class="v" id="bombPillVal">—</span></div>
     <div class="pill m-hide" id="spreadPillWrap"><span class="k">散射</span><span class="v" id="spreadPillVal">—</span></div>
     <div class="pill m-hide" id="bigBulletPillWrap"><span class="k">巨弹</span><span class="v" id="bigBulletPillVal">—</span></div>
+    <div class="pill m-hide" id="bulletSpdPillWrap"><span class="k">弹速</span><span class="v" id="bulletSpdPillVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -2704,7 +2706,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V8.54</div>
+  <div id="mark">DESIGNED BY QIAN · V8.55</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7743,6 +7745,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r43bmV = $('bombPillVal'); if (r43bmV) r43bmV.textContent = bombStatusText(upgrades.bomb);
     const r43spV = $('spreadPillVal'); if (r43spV) r43spV.textContent = spreadText(upgrades.spread);
     const r43bbV = $('bigBulletPillVal'); if (r43bbV) r43bbV.textContent = bigBulletText(upgrades.bigbullet);
+    const r43bsV = $('bulletSpdPillVal'); if (r43bsV) r43bsV.textContent = bulletSpdTotalText(upgrades.bulletspd, bonus.bulletspd);
     // __EXTRA_HUD__
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
   }
@@ -9550,6 +9553,13 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // —— v0.8.54 巨弹头 ——
   function bigBulletText(lv) {
     return Math.max(0, Math.floor(Number(lv) || 0)) > 0 ? '🔴 已装备' : '—';
+  }
+  // —— v0.8.55 弹速加成 ——
+  function bulletSpdTotalText(up, bo) {
+    const u = Math.max(0, Math.floor(Number(up) || 0));
+    const b = Math.max(0, Math.floor(Number(bo) || 0));
+    const total = u + b;
+    return total > 0 ? '🚀 +' + (u * 20 + b * 5) + '%' : '—';
   }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
@@ -11392,7 +11402,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V8.54', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V8.55', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -12615,6 +12625,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       bombStatusTextNow: (lv) => bombStatusText(lv), bombPillDomNow: () => { const e = $('bombPillVal'); return e ? e.textContent : null; },
       spreadTextNow: (lv) => spreadText(lv), spreadPillDomNow: () => { const e = $('spreadPillVal'); return e ? e.textContent : null; },
       bigBulletTextNow: (lv) => bigBulletText(lv), bigBulletPillDomNow: () => { const e = $('bigBulletPillVal'); return e ? e.textContent : null; },
+      bulletSpdTotalTextNow: (u, b) => bulletSpdTotalText(u, b), bulletSpdPillDomNow: () => { const e = $('bulletSpdPillVal'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

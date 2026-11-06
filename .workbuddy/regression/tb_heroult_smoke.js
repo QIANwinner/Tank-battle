@@ -6235,6 +6235,22 @@ async function main() {
     t('U2042 一致性', typeof o4.dom === 'string', o4.dom);
   } catch(e){ for(let k=2037;k<=2042;k++) t('U'+k+' 巨弹pill',false,e.message); }
 
+
+  // ===== U2043~U2048: 弹速加成(v0.8.55) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bulletSpdPillWrap'),f:T.bulletSpdTotalTextNow(0,0)});})()"));
+    t('U2043 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2044 零加成 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletSpdTotalTextNow(2,1)});})()"));
+    t('U2045 强化2+永久1=+45%', o2.a === '🚀 +45%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bulletSpdTotalTextNow(-1,-1));})()"));
+    t('U2046 负数兜底 —', o3 === '—', o3);
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletSpdTotalTextNow('x',NaN)});})()"));
+    t('U2047 非法兜底 —', o4.a === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({dom:T.bulletSpdPillDomNow()});})()"));
+    t('U2048 DOM 可读', !!o5.dom, JSON.stringify(o5));
+  } catch(e){ for(let k=2043;k<=2048;k++) t('U'+k+' 弹速pill',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
