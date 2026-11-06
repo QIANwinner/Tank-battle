@@ -5628,6 +5628,22 @@ async function main() {
     t('U1814 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1809;k<=1814;k++) t('U'+k+' 基地围困',false,e.message); }
 
+
+  // ===== U1815~U1820: 本关无伤状态(v0.8.17) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('noHurtWrap'),f:T.noHurtLvTextNow(false)});})()"));
+    t('U1815 无伤 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1816 未掉命初值 无伤', o.f === '🛡 本关无伤', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.noHurtLvTextNow(true)});})()"));
+    t('U1817 正常 已伤', o2.a === '💔 本关已伤', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.noHurtLvTextNow(0),b:T.noHurtLvTextNow(1)});})()"));
+    t('U1818 边界 0无伤/1已伤', o3.a === '🛡 本关无伤' && o3.b === '💔 本关已伤', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.noHurtLvTextNow(undefined),b:T.noHurtLvTextNow(null)});})()"));
+    t('U1819 非法输入兜底', o4.a === '🛡 本关无伤' && o4.b === '🛡 本关无伤', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const h=T.r17hNow();return JSON.stringify({dom:T.noHurtDomNow(),exp:T.noHurtLvTextNow(h)});})()"));
+    t('U1820 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1815;k<=1820;k++) t('U'+k+' 无伤',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
