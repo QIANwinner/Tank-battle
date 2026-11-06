@@ -5303,6 +5303,22 @@ async function main() {
     t('U1694 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1689;k<=1694;k++) t('U'+k+' 基地距',false,e.message); }
 
+
+  // ===== U1695~U1700: 最近敌人距离(v0.7.97) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('nearEnemyDistWrap'),f:T.nearEnemyDistTextNow(300,564,[])});})()"));
+    t('U1695 最近敌距 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1696 无敌人初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.nearEnemyDistTextNow(300,564,[{x:289,y:553,size:22,dead:false}])});})()"));
+    t('U1697 正常 0格', o2.a === '⚠ 最近 0 格', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.nearEnemyDistTextNow(300,564,[{x:289,y:553,size:22,dead:false},{x:289,y:517,size:22,dead:true}]),b:T.nearEnemyDistTextNow(300,564,[{x:289,y:529,size:22,dead:false}])});})()"));
+    t('U1698 边界:死亡排除/1格', o3.a === '⚠ 最近 0 格' && o3.b === '⚠ 最近 1 格', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.nearEnemyDistTextNow(NaN,564,[])});})()"));
+    t('U1699 非法输入兜底', o4.a === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const px=T.r97pxNow(),py=T.r97pyNow(),en=T.r97enNow();return JSON.stringify({dom:T.nearEnemyDistDomNow(),exp:T.nearEnemyDistTextNow(px,py,en)});})()"));
+    t('U1700 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1695;k<=1700;k++) t('U'+k+' 最近敌距',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
