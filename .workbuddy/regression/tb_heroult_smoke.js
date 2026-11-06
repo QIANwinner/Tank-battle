@@ -4422,6 +4422,22 @@ async function main() {
     t('U1364 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
   } catch(e){ for(let k=1359;k<=1364;k++) t('U'+k+' 英雄收集',false,e.message); }
 
+
+  // ===== U1365~U1370: 无尽最佳波次(v0.7.42) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('endlessBestWrap'),f:T.endlessBestTextNow(0,1)});})()"));
+    t('U1365 无尽最佳 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U1366 无纪录初值 —', o.f === '—', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.endlessBestTextNow(12,5),b:T.endlessBestTextNow(12,15)});})()"));
+    t('U1367 正常 未超/已超', o2.a === '🌊 最佳 12' && o2.b === '🌊 最佳 12 🚀', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.endlessBestTextNow(1,1),b:T.endlessBestTextNow(1,2)});})()"));
+    t('U1368 边界:持平不超/超一', o3.a === '🌊 最佳 1' && o3.b === '🌊 最佳 1 🚀', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.endlessBestTextNow(NaN,5),b:T.endlessBestTextNow(5,NaN)});})()"));
+    t('U1369 非法输入兜底', o4.a === '—' && o4.b === '🌊 最佳 5', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();const be=T.endlessBestNow(),lv=T.levelNow();return JSON.stringify({dom:T.endlessBestPillDomNow(),exp:T.endlessBestTextNow(be,lv)});})()"));
+    t('U1370 DOM 与函数一致', o5.dom === o5.exp, JSON.stringify(o5));
+  } catch(e){ for(let k=1365;k<=1370;k++) t('U'+k+' 无尽最佳',false,e.message); }
+
   chrome.kill();
 
   let pass = 0, fail = 0;
