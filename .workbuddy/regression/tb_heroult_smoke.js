@@ -7523,6 +7523,22 @@ async function main() {
     t('U2534 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2529;k<=2534;k++) t('U'+k+' 每波存活时长',false,e.message); }
 
+
+  // ===== U2535~U2540: 每波平均击杀(v0.10.28) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('waveKillShareWrap'),f:T.waveKillShareTextNow(16,4)});})()"));
+    t('U2535 每波平均击杀 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2536 正常 16杀/4波 4.0/波', o.f === '均杀 4.0/波', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveKillShareTextNow(0,4),b:T.waveKillShareTextNow(10,2),c:T.waveKillShareTextNow(9,3)});})()"));
+    t('U2537 边界零杀/高击杀/常规', o2.a === '' && o2.b === '均杀 5.0/波' && o2.c === '均杀 3.0/波', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveKillShareTextNow(-3,4),b:T.waveKillShareTextNow(10,0),c:T.waveKillShareTextNow(10,-1)});})()"));
+    t('U2538 非法输入/零波未知', o3.a === '' && o3.b === '均杀 —' && o3.c === '均杀 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.waveKillShareTextNow('16','4'));})()"));
+    t('U2539 数字字符串转数', o4 === '均杀 4.0/波', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.waveKillShareDangerNow()==='boolean'});})()"));
+    t('U2540 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2535;k<=2540;k++) t('U'+k+' 每波平均击杀',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
