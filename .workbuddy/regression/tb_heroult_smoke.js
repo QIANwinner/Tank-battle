@@ -8371,6 +8371,22 @@ async function main() {
     t('U2852 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2847;k<=2852;k++) t('U'+k+' 生成节奏',false,e.message); }
 
+
+  // ===== U2853~U2858: 每杀弹数(v0.10.81) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('shotsPerKillWrap'),f:T.shotsPerKillTextNow(32,8)});})()"));
+    t('U2853 每杀弹数 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2854 正常 32/8=4发', o.f === '每杀弹 4 发', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shotsPerKillTextNow(0,8),b:T.shotsPerKillTextNow(48,8),c:T.shotsPerKillTextNow(16,8)});})()"));
+    t('U2855 边界零弹/6虚/2', o2.a === '每杀弹 —' && o2.b === '每杀弹 6 发 · 虚' && o2.c === '每杀弹 2 发', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shotsPerKillTextNow(-5,8),b:T.shotsPerKillTextNow(NaN,8)});})()"));
+    t('U2856 非法输入/空值', o3.a === '每杀弹 —' && o3.b === '每杀弹 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.shotsPerKillTextNow('32','8'));})()"));
+    t('U2857 数字字符串转数', o4 === '每杀弹 4 发', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.shotsPerKillDangerNow()==='boolean'});})()"));
+    t('U2858 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2853;k<=2858;k++) t('U'+k+' 每杀弹数',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
