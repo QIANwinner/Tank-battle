@@ -6723,6 +6723,22 @@ async function main() {
     t('U2228 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2223;k<=2228;k++) t('U'+k+' 护盾加成',false,e.message); }
 
+
+  // ===== U2229~U2234: 复活加成(v0.8.87) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bonusReviveWrap'),f:T.bonusReviveTextNow({revive:1})});})()"));
+    t('U2229 复活加成 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2230 正常 +1 级', o.f.indexOf('复活加成 +1') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bonusReviveTextNow({revive:4}),b:T.bonusReviveTextNow({revive:0})});})()"));
+    t('U2231 +4 级/0 级为空', o2.a.indexOf('+4') >= 0 && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bonusReviveTextNow({revive:-2}),b:T.bonusReviveTextNow({})});})()"));
+    t('U2232 负数/缺字段安全', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bonusReviveTextNow(undefined));})()"));
+    t('U2233 undefined 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.bonusReviveDangerNow()==='boolean'});})()"));
+    t('U2234 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2229;k<=2234;k++) t('U'+k+' 复活加成',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
