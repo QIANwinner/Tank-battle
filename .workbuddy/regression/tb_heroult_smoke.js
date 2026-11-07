@@ -6435,6 +6435,22 @@ async function main() {
     t('U2120 DOM 与函数一致性', typeof o5.d === 'boolean', JSON.stringify(o5));
   } catch(e){ for(let k=2115;k<=2120;k++) t('U'+k+' Boss临近',false,e.message); }
 
+
+  // ===== U2121~U2126: 连杀将断(v0.8.69) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('comboBreakAlertWrap'),f:T.comboBreakAlertTextNow(0,1)});})()"));
+    t('U2121 警报 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2122 无连杀不触发', o.f === '', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboBreakAlertTextNow(5,1),b:T.comboBreakAlertTextNow(5,3)});})()"));
+    t('U2123 连杀将断触发', o2.a.indexOf('⚠') >= 0 && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboBreakAlertTextNow(-3,1),b:T.comboBreakAlertTextNow(5,-2)});})()"));
+    t('U2124 边界负数安全', o3.a === '' && typeof o3.b === 'string', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.comboBreakAlertTextNow(NaN,NaN));})()"));
+    t('U2125 NaN 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({d:T.comboBreakAlertDangerNow()});})()"));
+    t('U2126 DOM 与函数一致性', typeof o5.d === 'boolean', JSON.stringify(o5));
+  } catch(e){ for(let k=2121;k<=2126;k++) t('U'+k+' 连杀将断',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
