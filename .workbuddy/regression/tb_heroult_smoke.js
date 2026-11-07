@@ -7235,6 +7235,22 @@ async function main() {
     t('U2420 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2415;k<=2420;k++) t('U'+k+' 强化组合盘点',false,e.message); }
 
+
+  // ===== U2421~U2426: 道具即时价值(v0.10.9) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('pickupValueWrap'),f:T.pickupValueTextNow(['shield','life'])});})()"));
+    t('U2421 道具即时价值 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2422 正常护盾+加命 90', o.f === '价值 90', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pickupValueTextNow([]),b:T.pickupValueTextNow(['life','double','bomb']),c:T.pickupValueTextNow(['shield','rapid'])});})()"));
+    t('U2423 边界空场/高价值/低价值', o2.a === '' && o2.b === '价值 145' && o2.c === '价值 55', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pickupValueTextNow(null),b:T.pickupValueTextNow('shield')});})()"));
+    t('U2424 非法输入非数组为空', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pickupValueTextNow(['rapid','freeze']),b:T.pickupValueTextNow(['unknown'])});})()"));
+    t('U2425 类型价值映射/默认值', o4.a === '价值 60' && o4.b === '价值 20', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.pickupValueDangerNow()==='boolean'});})()"));
+    t('U2426 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2421;k<=2426;k++) t('U'+k+' 道具即时价值',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
