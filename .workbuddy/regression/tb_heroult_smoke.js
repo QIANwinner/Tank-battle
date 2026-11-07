@@ -7059,6 +7059,22 @@ async function main() {
     t('U2354 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2349;k<=2354;k++) t('U'+k+' 弹幕安全边际',false,e.message); }
 
+
+  // ===== U2355~U2360: 敌方阵线密度(v0.9.8) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('enemyDensityWrap'),f:T.enemyDensityTextNow(3)});})()"));
+    t('U2355 敌方阵线密度 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2356 正常 3 敌中等', o.f === '中等', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyDensityTextNow(0),b:T.enemyDensityTextNow(2),c:T.enemyDensityTextNow(4),d:T.enemyDensityTextNow(5)});})()"));
+    t('U2357 边界稀疏/中等/密集', o2.a === '' && o2.b === '稀疏' && o2.c === '中等' && o2.d === '密集', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyDensityTextNow(-1),b:T.enemyDensityTextNow(NaN),c:T.enemyDensityTextNow(undefined)});})()"));
+    t('U2358 非法输入为空', o3.a === '' && o3.b === '' && o3.c === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.enemyDensityTextNow('6'));})()"));
+    t('U2359 数字字符串转数', o4 === '密集', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.enemyDensityDangerNow()==='boolean'});})()"));
+    t('U2360 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2355;k<=2360;k++) t('U'+k+' 敌方阵线密度',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
