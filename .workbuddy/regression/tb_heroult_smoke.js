@@ -6531,6 +6531,22 @@ async function main() {
     t('U2156 DOM 与函数一致性', typeof o5.d === 'boolean', JSON.stringify(o5));
   } catch(e){ for(let k=2151;k<=2156;k++) t('U'+k+' 最终波',false,e.message); }
 
+
+  // ===== U2157~U2162: 难度倍率(v0.8.75) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('diffModWrap'),f:T.diffModTextNow({spd:1,hp:1})});})()"));
+    t('U2157 倍率 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2158 普通难度显示×1.00', o.f.indexOf('×1.00') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.diffModTextNow({spd:1.18,hp:1.3}),b:T.diffModTextNow({spd:0.85,hp:1})});})()"));
+    t('U2159 困难/简单倍率正确', o2.a.indexOf('1.18') >= 0 && o2.b.indexOf('0.85') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.diffModTextNow({spd:0,hp:-1}),b:T.diffModTextNow(null)});})()"));
+    t('U2160 边界 0/负数/空兜底', o3.a.indexOf('×0.00') >= 0 && o3.b.indexOf('×1.00') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.diffModTextNow({spd:NaN,hp:NaN}));})()"));
+    t('U2161 NaN 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.diffModDangerNow()==='boolean'});})()"));
+    t('U2162 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2157;k<=2162;k++) t('U'+k+' 难度倍率',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
