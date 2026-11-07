@@ -8627,6 +8627,22 @@ async function main() {
     t('U2948 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2943;k<=2948;k++) t('U'+k+' 清场评级',false,e.message); }
 
+
+  // ===== U2949~U2954: 道具评级(v0.10.97) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('pickupGapWrap'),st:T.pickupGapStateNow(150,10)});})()"));
+    t('U2949 道具评级 DOM 已加入 HUD', o.dom === true && typeof o.st.tier === 'string', JSON.stringify(o));
+    t('U2950 正常 150/10=15 → A', o.st.tier === 'A' && o.st.txt === '道具 A 密', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pickupGapStateNow(0,10),b:T.pickupGapStateNow(80,10),c:T.pickupGapStateNow(40,10)});})()"));
+    t('U2951 边界 0→D/80→B/40→C', o2.a.tier === 'D' && o2.b.tier === 'B' && o2.c.tier === 'C', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pickupGapStateNow(-5,10),b:T.pickupGapStateNow(NaN,10)});})()"));
+    t('U2952 非法输入/空值', o3.a.tier === 'D' && o3.b.tier === 'D', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.pickupGapStateNow('150','10').tier);})()"));
+    t('U2953 数字字符串转数', o4 === 'A', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.pickupGapDangerNow()==='boolean'});})()"));
+    t('U2954 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2949;k<=2954;k++) t('U'+k+' 道具评级',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

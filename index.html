@@ -2267,6 +2267,11 @@
   #clearPressureWrap.g-b .v { color: #f1c40f; }
   #clearPressureWrap.g-c .v { color: #e67e22; }
   #clearPressureWrap.g-d .v { color: #e74c3c; }
+  #pickupGapWrap .v { color: #9b59b6; font-weight: 800; font-size: 11px; }
+  #pickupGapWrap.g-a .v { color: #2ecc71; }
+  #pickupGapWrap.g-b .v { color: #f1c40f; }
+  #pickupGapWrap.g-c .v { color: #e67e22; }
+  #pickupGapWrap.g-d .v { color: #e74c3c; }
 </style>
 </head>
 <body>
@@ -2661,6 +2666,7 @@
     <div class="pill m-hide" id="lifeYieldWrap"><span class="k">⚔️</span><span class="v" id="lifeYieldVal">—</span></div>
     <div class="pill m-hide" id="upgWorthWrap"><span class="k">🔨</span><span class="v" id="upgWorthVal">—</span></div>
     <div class="pill m-hide" id="clearPressureWrap"><span class="k">🌊</span><span class="v" id="clearPressureVal">—</span></div>
+    <div class="pill m-hide" id="pickupGapWrap"><span class="k">📦</span><span class="v" id="pickupGapVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -3036,7 +3042,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V10.96</div>
+  <div id="mark">DESIGNED BY QIAN · V10.97</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -8232,6 +8238,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r62lyS = lifeYieldTier(stat.kills, lives); const r62lyV = $('lifeYieldVal'); if (r62lyV) r62lyV.textContent = r62lyS.txt; const r62lyW = $('lifeYieldWrap'); if (r62lyW) { r62lyW.classList.remove('g-a','g-b','g-c','g-d'); if (r62lyS.tier !== '-') r62lyW.classList.add('g-' + r62lyS.tier.toLowerCase()); r62lyW.classList.toggle('danger', r62lyS.tier === 'D'); }
     const r62uwS = upgWorthTier(runCoins, upgTotal); const r62uwV = $('upgWorthVal'); if (r62uwV) r62uwV.textContent = r62uwS.txt; const r62uwW = $('upgWorthWrap'); if (r62uwW) { r62uwW.classList.remove('g-a','g-b','g-c','g-d'); if (r62uwS.tier !== '-') r62uwW.classList.add('g-' + r62uwS.tier.toLowerCase()); r62uwW.classList.toggle('danger', r62uwS.tier === 'D'); }
     const r62cpS = clearPressureTier(enemies.length, wave); const r62cpV = $('clearPressureVal'); if (r62cpV) r62cpV.textContent = r62cpS.txt; const r62cpW = $('clearPressureWrap'); if (r62cpW) { r62cpW.classList.remove('g-a','g-b','g-c','g-d'); if (r62cpS.tier !== '-') r62cpW.classList.add('g-' + r62cpS.tier.toLowerCase()); r62cpW.classList.toggle('danger', r62cpS.tier === 'D'); }
+    const r62pgS = pickupGapTier(playSecRun, runPowerups); const r62pgV = $('pickupGapVal'); if (r62pgV) r62pgV.textContent = r62pgS.txt; const r62pgW = $('pickupGapWrap'); if (r62pgW) { r62pgW.classList.remove('g-a','g-b','g-c','g-d'); if (r62pgS.tier !== '-') r62pgW.classList.add('g-' + r62pgS.tier.toLowerCase()); r62pgW.classList.toggle('danger', r62pgS.tier === 'D'); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -11222,6 +11229,17 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (a <= w * 8) return { tier: 'C', txt: '清压 C 紧' };
     return { tier: 'D', txt: '清压 D 危' };
   }
+  // —— v0.10.97 道具评级 ——
+  function pickupGapTier(secs, picks) {
+    const s = Math.max(0, Math.floor(Number(secs) || 0));
+    const p = Math.max(0, Math.floor(Number(picks) || 0));
+    if (p <= 0) return { tier: '-', txt: '道具 —' };
+    const g = s / p;
+    if (g >= 15) return { tier: 'A', txt: '道具 A 密' };
+    if (g >= 8) return { tier: 'B', txt: '道具 B 常' };
+    if (g >= 4) return { tier: 'C', txt: '道具 C 稀' };
+    return { tier: 'D', txt: '道具 D 枯' };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -13063,7 +13081,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V10.96', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V10.97', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -14436,6 +14454,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       lifeYieldStateNow: (k, l) => lifeYieldTier(k, l), lifeYieldDangerNow: () => { const w = $('lifeYieldWrap'); return !!(w && w.classList.contains('danger')); },
       upgWorthStateNow: (c, u) => upgWorthTier(c, u), upgWorthDangerNow: () => { const w = $('upgWorthWrap'); return !!(w && w.classList.contains('danger')); },
       clearPressureStateNow: (a, w) => clearPressureTier(a, w), clearPressureDangerNow: () => { const w = $('clearPressureWrap'); return !!(w && w.classList.contains('danger')); },
+      pickupGapStateNow: (s, p) => pickupGapTier(s, p), pickupGapDangerNow: () => { const w = $('pickupGapWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
