@@ -8003,6 +8003,22 @@ async function main() {
     t('U2714 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2709;k<=2714;k++) t('U'+k+' 开火倾斜',false,e.message); }
 
+
+  // ===== U2715~U2720: 金币效率(v0.10.58) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('coinPaceWrap'),f:T.coinPaceTextNow(30,60)});})()"));
+    t('U2715 金币效率 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2716 正常 30/60s=30分', o.f === '金币 30/分', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinPaceTextNow(0,60),b:T.coinPaceTextNow(15,0),c:T.coinPaceTextNow(20,60)});})()"));
+    t('U2717 边界零金币/零时/20分', o2.a === '' && o2.b === '15 金币' && o2.c === '金币 20/分', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinPaceTextNow(-1,60),b:T.coinPaceTextNow(NaN,60)});})()"));
+    t('U2718 非法输入/空值', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.coinPaceTextNow('30','60'));})()"));
+    t('U2719 数字字符串转数', o4 === '金币 30/分', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.coinPaceDangerNow()==='boolean'});})()"));
+    t('U2720 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2715;k<=2720;k++) t('U'+k+' 金币效率',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
