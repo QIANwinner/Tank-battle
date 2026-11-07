@@ -6835,6 +6835,22 @@ async function main() {
     t('U2270 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2265;k<=2270;k++) t('U'+k+' 穿透加成',false,e.message); }
 
+
+  // ===== U2271~U2276: 猎手锁定(v0.8.94) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('hunterLockedWrap'),f:T.hunterLockedTextNow([{type:'hunter',dead:false},{type:'hunter',dead:false}])});})()"));
+    t('U2271 猎手锁定 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2272 正常 2 猎手', o.f.indexOf('猎手 2') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hunterLockedTextNow([{type:'hunter',dead:false}]),b:T.hunterLockedTextNow([{type:'small',dead:false}])});})()"));
+    t('U2273 1 猎手/无猎手空', o2.a.indexOf('猎手 1') >= 0 && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hunterLockedTextNow([{type:'hunter',dead:true}]),b:T.hunterLockedTextNow([])});})()"));
+    t('U2274 死亡猎手不计/空数组空', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.hunterLockedTextNow(null));})()"));
+    t('U2275 null 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.hunterLockedDangerNow()==='boolean'});})()"));
+    t('U2276 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2271;k<=2276;k++) t('U'+k+' 猎手锁定',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
