@@ -7027,6 +7027,22 @@ async function main() {
     t('U2342 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2337;k<=2342;k++) t('U'+k+' 飘字计数',false,e.message); }
 
+
+  // ===== U2343~U2348: 粒子池使用(v0.9.6) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('poolUseWrap'),f:T.poolUseTextNow(10,512)});})()"));
+    t('U2343 粒子池使用 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2344 正常 10/512', o.f.indexOf('池 10/512') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.poolUseTextNow(0,512),b:T.poolUseTextNow(512,512)});})()"));
+    t('U2345 0 池/满池', o2.a.indexOf('池 0/512') >= 0 && o2.b.indexOf('池 512/512') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.poolUseTextNow(-1,512),b:T.poolUseTextNow(5,0)});})()"));
+    t('U2346 负数/最大0为空', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.poolUseTextNow(NaN,512));})()"));
+    t('U2347 NaN 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.poolUseDangerNow()==='boolean'});})()"));
+    t('U2348 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2343;k<=2348;k++) t('U'+k+' 粒子池使用',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
