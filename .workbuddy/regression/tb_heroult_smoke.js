@@ -8099,6 +8099,22 @@ async function main() {
     t('U2750 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2745;k<=2750;k++) t('U'+k+' 复活总花费',false,e.message); }
 
+
+  // ===== U2751~U2756: 平均每波得分(v0.10.64) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('scoreRhythmWrap'),f:T.scoreRhythmTextNow(9000,3)});})()"));
+    t('U2751 平均每波得分 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2752 正常 9000/3=3000', o.f === '每波 3000 分', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scoreRhythmTextNow(0,3),b:T.scoreRhythmTextNow(15000,3),c:T.scoreRhythmTextNow(6000,3)});})()"));
+    t('U2753 边界零分/5000高/2000', o2.a === '每波 —' && o2.b === '每波 5000 分 · 高' && o2.c === '每波 2000 分', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scoreRhythmTextNow(9000,-3),b:T.scoreRhythmTextNow(NaN,3)});})()"));
+    t('U2754 非法输入/空值', o3.a === '每波 —' && o3.b === '每波 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.scoreRhythmTextNow('9000','3'));})()"));
+    t('U2755 数字字符串转数', o4 === '每波 3000 分', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.scoreRhythmDangerNow()==='boolean'});})()"));
+    t('U2756 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2751;k<=2756;k++) t('U'+k+' 平均每波得分',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
