@@ -8531,6 +8531,22 @@ async function main() {
     t('U2912 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2907;k<=2912;k++) t('U'+k+' 命均击杀',false,e.message); }
 
+
+  // ===== U2913~U2918: 敌存活率(v0.10.91) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('enemyAliveRateWrap'),f:T.enemyAliveRateTextNow(40,8)});})()"));
+    t('U2913 敌存活率 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2914 正常 8/40=20%', o.f === '存活 20%', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyAliveRateTextNow(0,8),b:T.enemyAliveRateTextNow(16,8),c:T.enemyAliveRateTextNow(40,8)});})()"));
+    t('U2915 边界零生/50堵/20', o2.a === '存活 —' && o2.b === '存活 50% · 堵' && o2.c === '存活 20%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyAliveRateTextNow(-5,8),b:T.enemyAliveRateTextNow(NaN,8)});})()"));
+    t('U2916 非法输入/空值', o3.a === '存活 —' && o3.b === '存活 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.enemyAliveRateTextNow('40','8'));})()"));
+    t('U2917 数字字符串转数', o4 === '存活 20%', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.enemyAliveRateDangerNow()==='boolean'});})()"));
+    t('U2918 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2913;k<=2918;k++) t('U'+k+' 敌存活率',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
