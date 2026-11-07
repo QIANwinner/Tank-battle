@@ -7651,6 +7651,22 @@ async function main() {
     t('U2582 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2577;k<=2582;k++) t('U'+k+' 命中致死率',false,e.message); }
 
+
+  // ===== U2583~U2588: 战局评分(v0.10.36) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('battleScoreWrap'),f:T.battleScoreTextNow(5,3,200,120)});})()"));
+    t('U2583 战局评分 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2584 正常 5杀3波200币120s=1140', o.f === '战局分 1140', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.battleScoreTextNow(0,0,0,0),b:T.battleScoreTextNow(1,1,0,0),c:T.battleScoreTextNow(10,5,1000,300)});})()"));
+    t('U2585 边界空局/基础/大值', o2.a === '' && o2.b === '战局分 160' && o2.c === '战局分 2700', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.battleScoreTextNow(-1,0,0,0),b:T.battleScoreTextNow(0,0,NaN,0),c:T.battleScoreTextNow(0,0,-5,-5)});})()"));
+    t('U2586 非法输入/空值', o3.a === '' && o3.b === '' && o3.c === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.battleScoreTextNow('5','3','200','120'));})()"));
+    t('U2587 数字字符串转数', o4 === '战局分 1140', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.battleScoreDangerNow()==='boolean'});})()"));
+    t('U2588 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2583;k<=2588;k++) t('U'+k+' 战局评分',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
