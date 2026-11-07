@@ -6979,6 +6979,22 @@ async function main() {
     t('U2324 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2319;k<=2324;k++) t('U'+k+' Boss击破白闪',false,e.message); }
 
+
+  // ===== U2325~U2330: 刷敌预警(v0.9.3) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('spawnWarnWrap'),f:T.spawnWarnTextNow({x:12,y:10})});})()"));
+    t('U2325 刷敌预警 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2326 正常有预告点显示', o.f.indexOf('刷敌预警') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.spawnWarnTextNow(null),b:T.spawnWarnTextNow(undefined)});})()"));
+    t('U2327 null/undefined为空', o2.a === '' && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.spawnWarnTextNow('str'));})()"));
+    t('U2328 非对象为空', o3 === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.spawnWarnTextNow({}),b:T.spawnWarnTextNow({x:0})});})()"));
+    t('U2329 空对象为空/x=0显示', o4.a === '' && o4.b.indexOf('刷敌预警') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.spawnWarnDangerNow()==='boolean'});})()"));
+    t('U2330 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2325;k<=2330;k++) t('U'+k+' 刷敌预警',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
