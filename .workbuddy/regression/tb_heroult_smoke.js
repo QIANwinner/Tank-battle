@@ -6803,6 +6803,22 @@ async function main() {
     t('U2258 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2253;k<=2258;k++) t('U'+k+' 速度加成',false,e.message); }
 
+
+  // ===== U2259~U2264: 弹速加成(v0.8.92) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bonusBulletspdWrap'),f:T.bonusBulletspdTextNow({bulletspd:1})});})()"));
+    t('U2259 弹速加成 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2260 正常 +1 级', o.f.indexOf('弹速加成 +1') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bonusBulletspdTextNow({bulletspd:2}),b:T.bonusBulletspdTextNow({bulletspd:0})});})()"));
+    t('U2261 +2 级/0 级为空', o2.a.indexOf('+2') >= 0 && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bonusBulletspdTextNow({bulletspd:-1}),b:T.bonusBulletspdTextNow({})});})()"));
+    t('U2262 负数/缺字段安全', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bonusBulletspdTextNow(undefined));})()"));
+    t('U2263 undefined 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.bonusBulletspdDangerNow()==='boolean'});})()"));
+    t('U2264 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2259;k<=2264;k++) t('U'+k+' 弹速加成',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
