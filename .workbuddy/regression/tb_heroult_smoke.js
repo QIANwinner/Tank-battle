@@ -8339,6 +8339,22 @@ async function main() {
     t('U2840 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2835;k<=2840;k++) t('U'+k+' 命中节奏',false,e.message); }
 
+
+  // ===== U2841~U2846: 命亡比(v0.10.79) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('lifeRatioWrap'),f:T.lifeRatioTextNow(6,3)});})()"));
+    t('U2841 命亡比 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2842 正常 6/3=2', o.f === '命亡比 2', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lifeRatioTextNow(0,3),b:T.lifeRatioTextNow(2,3),c:T.lifeRatioTextNow(9,3)});})()"));
+    t('U2843 边界零命/0.7危/3', o2.a === '命亡比 —' && o2.b === '命亡比 0.7 · 危' && o2.c === '命亡比 3', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lifeRatioTextNow(-3,3),b:T.lifeRatioTextNow(NaN,3)});})()"));
+    t('U2844 非法输入/空值', o3.a === '命亡比 —' && o3.b === '命亡比 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.lifeRatioTextNow('6','3'));})()"));
+    t('U2845 数字字符串转数', o4 === '命亡比 2', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.lifeRatioDangerNow()==='boolean'});})()"));
+    t('U2846 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2841;k<=2846;k++) t('U'+k+' 命亡比',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
