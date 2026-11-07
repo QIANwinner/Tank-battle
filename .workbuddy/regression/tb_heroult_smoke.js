@@ -7139,6 +7139,22 @@ async function main() {
     t('U2384 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2379;k<=2384;k++) t('U'+k+' 连击破峰',false,e.message); }
 
+
+  // ===== U2385~U2390: BOSS阶段读条(v0.10.3) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossStageWrap'),f:T.bossStageTextNow(80,100)});})()"));
+    t('U2385 BOSS阶段读条 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2386 正常 P1', o.f === '👹 P1', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossStageTextNow(40,100),b:T.bossStageTextNow(20,100),c:T.bossStageTextNow(51,100)});})()"));
+    t('U2387 边界阶段', o2.a === '👹 P2' && o2.b === '👹 P3' && o2.c === '👹 P1', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossStageTextNow(0,100),b:T.bossStageTextNow(50,0),c:T.bossStageTextNow(120,100)});})()"));
+    t('U2388 非法输入为空', o3.a === '' && o3.b === '' && o3.c === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bossStageTextNow('30','100'));})()"));
+    t('U2389 数字字符串转数', o4 === '👹 P2', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.bossStageDangerNow()==='boolean'});})()"));
+    t('U2390 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2385;k<=2390;k++) t('U'+k+' BOSS阶段读条',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
