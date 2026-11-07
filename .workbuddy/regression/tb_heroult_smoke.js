@@ -8035,6 +8035,22 @@ async function main() {
     t('U2726 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2721;k<=2726;k++) t('U'+k+' 无敌帧倒计时',false,e.message); }
 
+
+  // ===== U2727~U2732: 玩家锚定(v0.10.60) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('playerAnchorWrap'),f:T.playerAnchorTextNow(8)});})()"));
+    t('U2727 玩家锚定 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2728 正常 8格远行', o.f === '远行 8 格', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.playerAnchorTextNow(0),b:T.playerAnchorTextNow(1),c:T.playerAnchorTextNow(6),d:T.playerAnchorTextNow(7)});})()"));
+    t('U2729 边界驻守/近基地/6格/7格', o2.a === '驻守' && o2.b === '近基地' && o2.c === '近基地' && o2.d === '远行 7 格', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.playerAnchorTextNow(-1),b:T.playerAnchorTextNow(NaN)});})()"));
+    t('U2730 非法输入/空值', o3.a === '驻守' && o3.b === '驻守', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.playerAnchorTextNow('8'));})()"));
+    t('U2731 数字字符串转数', o4 === '远行 8 格', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.playerAnchorDangerNow()==='boolean'});})()"));
+    t('U2732 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2727;k<=2732;k++) t('U'+k+' 玩家锚定',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
