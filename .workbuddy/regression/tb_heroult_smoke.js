@@ -8515,6 +8515,22 @@ async function main() {
     t('U2906 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2901;k<=2906;k++) t('U'+k+' 道具均伤',false,e.message); }
 
+
+  // ===== U2907~U2912: 命均击杀(v0.10.90) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('killPerLifeWrap'),f:T.killPerLifeTextNow(30,3)});})()"));
+    t('U2907 命均击杀 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2908 正常 30/3=10', o.f === '命均 10 杀', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killPerLifeTextNow(0,3),b:T.killPerLifeTextNow(6,3),c:T.killPerLifeTextNow(30,3)});})()"));
+    t('U2909 边界零杀/2脆/10', o2.a === '命均 —' && o2.b === '命均 2 杀 · 脆' && o2.c === '命均 10 杀', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killPerLifeTextNow(-5,3),b:T.killPerLifeTextNow(NaN,3)});})()"));
+    t('U2910 非法输入/空值', o3.a === '命均 —' && o3.b === '命均 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.killPerLifeTextNow('30','3'));})()"));
+    t('U2911 数字字符串转数', o4 === '命均 10 杀', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.killPerLifeDangerNow()==='boolean'});})()"));
+    t('U2912 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2907;k<=2912;k++) t('U'+k+' 命均击杀',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

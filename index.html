@@ -2244,6 +2244,7 @@
   #upgCoinWrap .v { color: #e67e22; font-weight: 800; font-size: 11px; }
   #scoreCoinWrap .v { color: #16a085; font-weight: 800; font-size: 11px; }
   #dmgPerPickupWrap .v { color: #e74c3c; font-weight: 800; font-size: 11px; }
+  #killPerLifeWrap .v { color: #2c3e50; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -2631,6 +2632,7 @@
     <div class="pill m-hide" id="upgCoinWrap"><span class="k">🔨</span><span class="v" id="upgCoinVal">—</span></div>
     <div class="pill m-hide" id="scoreCoinWrap"><span class="k">💹</span><span class="v" id="scoreCoinVal">—</span></div>
     <div class="pill m-hide" id="dmgPerPickupWrap"><span class="k">💥</span><span class="v" id="dmgPerPickupVal">—</span></div>
+    <div class="pill m-hide" id="killPerLifeWrap"><span class="k">⚔️</span><span class="v" id="killPerLifeVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -3006,7 +3008,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V10.89</div>
+  <div id="mark">DESIGNED BY QIAN · V10.90</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -8195,6 +8197,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r61ucV = $('upgCoinVal'); if (r61ucV) { const r61ucT = upgCoinText(runCoins, upgTotal); r61ucV.textContent = r61ucT; const r61ucW = $('upgCoinWrap'); if (r61ucW) r61ucW.classList.toggle('danger', runCoins > 0 && upgTotal > 0 && runCoins / upgTotal >= 200); }
     const r61scV = $('scoreCoinVal'); if (r61scV) { const r61scT = scoreCoinText(score, runCoins); r61scV.textContent = r61scT; const r61scW = $('scoreCoinWrap'); if (r61scW) r61scW.classList.toggle('danger', score > 0 && runCoins > 0 && score / runCoins < 5); }
     const r61dpV = $('dmgPerPickupVal'); if (r61dpV) { const r61dpT = dmgPerPickupText(runDmg, runPowerups); r61dpV.textContent = r61dpT; const r61dpW = $('dmgPerPickupWrap'); if (r61dpW) r61dpW.classList.toggle('danger', runDmg > 0 && runPowerups > 0 && runDmg / runPowerups < 30); }
+    const r61klV = $('killPerLifeVal'); if (r61klV) { const r61klT = killPerLifeText(stat.kills, lives); r61klV.textContent = r61klT; const r61klW = $('killPerLifeWrap'); if (r61klW) r61klW.classList.toggle('danger', stat.kills > 0 && lives > 0 && stat.kills / lives < 3); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -11119,6 +11122,14 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const v = Math.round(d / p);
     return '道具均 ' + v + ' 伤' + (v < 30 ? ' · 乏' : '');
   }
+  // —— v0.10.90 命均击杀 ——
+  function killPerLifeText(kills, lives) {
+    const k = Math.max(0, Math.floor(Number(kills) || 0));
+    const l = Math.max(0, Math.floor(Number(lives) || 0));
+    if (k <= 0 || l <= 0) return '命均 —';
+    const v = Math.round(k / l);
+    return '命均 ' + v + ' 杀' + (v < 3 ? ' · 脆' : '');
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -12960,7 +12971,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V10.89', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V10.90', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -14326,6 +14337,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       upgCoinTextNow: (c, u) => upgCoinText(c, u), upgCoinDangerNow: () => { const w = $('upgCoinWrap'); return !!(w && w.classList.contains('danger')); },
       scoreCoinTextNow: (s, c) => scoreCoinText(s, c), scoreCoinDangerNow: () => { const w = $('scoreCoinWrap'); return !!(w && w.classList.contains('danger')); },
       dmgPerPickupTextNow: (d, p) => dmgPerPickupText(d, p), dmgPerPickupDangerNow: () => { const w = $('dmgPerPickupWrap'); return !!(w && w.classList.contains('danger')); },
+      killPerLifeTextNow: (k, l) => killPerLifeText(k, l), killPerLifeDangerNow: () => { const w = $('killPerLifeWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
