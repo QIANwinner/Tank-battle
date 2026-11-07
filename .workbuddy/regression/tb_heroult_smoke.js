@@ -8147,6 +8147,22 @@ async function main() {
     t('U2768 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2763;k<=2768;k++) t('U'+k+' 每杀伤害',false,e.message); }
 
+
+  // ===== U2769~U2774: 每波金币(v0.10.67) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('coinPerWaveWrap'),f:T.coinPerWaveTextNow(150,3)});})()"));
+    t('U2769 每波金币 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2770 正常 150/3=50', o.f === '每波 50 金币', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinPerWaveTextNow(0,3),b:T.coinPerWaveTextNow(300,3),c:T.coinPerWaveTextNow(90,3)});})()"));
+    t('U2771 边界零币/100富/30', o2.a === '波金 —' && o2.b === '每波 100 金币 · 富' && o2.c === '每波 30 金币', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinPerWaveTextNow(150,-3),b:T.coinPerWaveTextNow(NaN,3)});})()"));
+    t('U2772 非法输入/空值', o3.a === '波金 —' && o3.b === '波金 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.coinPerWaveTextNow('150','3'));})()"));
+    t('U2773 数字字符串转数', o4 === '每波 50 金币', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.coinPerWaveDangerNow()==='boolean'});})()"));
+    t('U2774 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2769;k<=2774;k++) t('U'+k+' 每波金币',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
