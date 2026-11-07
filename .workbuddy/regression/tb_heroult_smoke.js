@@ -7347,6 +7347,22 @@ async function main() {
     t('U2468 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2463;k<=2468;k++) t('U'+k+' 击杀里程碑进度',false,e.message); }
 
+
+  // ===== U2469~U2474: 命中质量评级(v0.10.17) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('hitQualityWrap'),f:T.hitQualityTextNow(20,40,2)});})()"));
+    t('U2469 命中质量评级 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2470 正常 20/40 穿2 为 A', o.f === '质量 A', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hitQualityTextNow(40,50,5),b:T.hitQualityTextNow(0,40,0),c:T.hitQualityTextNow(15,40,1)});})()"));
+    t('U2471 边界 S/C/B 级', o2.a === '质量 S' && o2.b === '质量 C' && o2.c === '质量 B', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hitQualityTextNow(10,0,2),b:T.hitQualityTextNow(NaN,40,2),c:T.hitQualityTextNow(-1,40,2)});})()"));
+    t('U2472 非法输入/零射未知', o3.a === '' && o3.b === '质量 C' && o3.c === '质量 C', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.hitQualityTextNow('20','40','2'));})()"));
+    t('U2473 数字字符串转数', o4 === '质量 A', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.hitQualityDangerNow()==='boolean'});})()"));
+    t('U2474 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2469;k<=2474;k++) t('U'+k+' 命中质量评级',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
