@@ -2199,6 +2199,7 @@
   #reviveAffordWrap .v { color: #7bed9f; font-weight: 800; font-size: 11px; }
   #shieldLvWrap .v { color: #74b9ff; font-weight: 800; font-size: 11px; }
   #surviveGradeWrap .v { color: #2ed573; font-weight: 800; font-size: 11px; }
+  #foeSpeedWrap .v { color: #feca57; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -2541,6 +2542,7 @@
     <div class="pill m-hide" id="reviveAffordWrap"><span class="k">💗</span><span class="v" id="reviveAffordVal">—</span></div>
     <div class="pill m-hide" id="shieldLvWrap"><span class="k">🛡️</span><span class="v" id="shieldLvVal">—</span></div>
     <div class="pill m-hide" id="surviveGradeWrap"><span class="k">⏱️</span><span class="v" id="surviveGradeVal">—</span></div>
+    <div class="pill m-hide" id="foeSpeedWrap"><span class="k">⚡</span><span class="v" id="foeSpeedVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -2916,7 +2918,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V10.44</div>
+  <div id="mark">DESIGNED BY QIAN · V10.45</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -8060,6 +8062,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r55raV = $('reviveAffordVal'); if (r55raV) { const r55raC = reviveCost(); const r55raT = reviveAffordText(runCoins, r55raC); r55raV.textContent = r55raT || '—'; const r55raW = $('reviveAffordWrap'); if (r55raW) { const r55raD = r55raC > 0 && runCoins < r55raC; r55raW.classList.toggle('danger', r55raD); } }
     const r55slV = $('shieldLvVal'); if (r55slV) { const r55slT = shieldLvText(upgrades.shield); r55slV.textContent = r55slT || '—'; const r55slW = $('shieldLvWrap'); if (r55slW) r55slW.classList.toggle('danger', (upgrades.shield || 0) <= 0); }
     const r55sgV = $('surviveGradeVal'); if (r55sgV) { const r55sgT = surviveGradeText(playSecRun, stat.deaths); r55sgV.textContent = r55sgT || '—'; const r55sgW = $('surviveGradeWrap'); if (r55sgW) r55sgW.classList.toggle('danger', stat.deaths >= 3); }
+    const r56fsV = $('foeSpeedVal'); if (r56fsV) { let r56fsMax = 0; for (const en of enemies) { const r56sp = Math.max(0, Number(en.speed) || 0); if (r56sp > r56fsMax) r56fsMax = r56sp; } const r56fsT = foeSpeedText(r56fsMax, player ? Math.max(0, Number(player.speed) || 0) : 0); r56fsV.textContent = r56fsT || '—'; const r56fsW = $('foeSpeedWrap'); if (r56fsW) { const r56fsR = (player && r56fsMax > 0) ? (r56fsMax / Math.max(0, Number(player.speed) || 1) - 1) : 0; r56fsW.classList.toggle('danger', r56fsR >= 0.5); } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -10632,6 +10635,15 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (per >= 30) return '生存 B';
     return '生存 C';
   }
+  // —— v0.10.45 敌阵速度威胁 ——
+  function foeSpeedText(fast, mine) {
+    const f = Math.max(0, Number(fast) || 0);
+    const m = Math.max(0, Number(mine) || 0);
+    if (f <= 0 || m <= 0) return '';
+    const pct = (f / m - 1) * 100;
+    if (pct <= 0) return '敌速安全';
+    return '敌快 ' + Math.round(pct) + '%';
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -12473,7 +12485,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V10.44', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V10.45', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -13794,6 +13806,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       reviveAffordTextNow: (c, t) => reviveAffordText(c, t), reviveAffordDangerNow: () => { const w = $('reviveAffordWrap'); return !!(w && w.classList.contains('danger')); },
       shieldLvTextNow: (n) => shieldLvText(n), shieldLvDangerNow: () => { const w = $('shieldLvWrap'); return !!(w && w.classList.contains('danger')); },
       surviveGradeTextNow: (s, d) => surviveGradeText(s, d), surviveGradeDangerNow: () => { const w = $('surviveGradeWrap'); return !!(w && w.classList.contains('danger')); },
+      foeSpeedTextNow: (f, m) => foeSpeedText(f, m), foeSpeedDangerNow: () => { const w = $('foeSpeedWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
