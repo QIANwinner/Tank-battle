@@ -7811,6 +7811,22 @@ async function main() {
     t('U2642 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2637;k<=2642;k++) t('U'+k+' 敌阵速度威胁',false,e.message); }
 
+
+  // ===== U2643~U2648: 敌阵血量占比(v0.10.46) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('foeHpRatioWrap'),f:T.foeHpRatioTextNow(500,1000)});})()"));
+    t('U2643 敌阵血量占比 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2644 正常 500/1000 敌阵50%', o.f === '敌阵 50%', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.foeHpRatioTextNow(0,1000),b:T.foeHpRatioTextNow(1000,1000),c:T.foeHpRatioTextNow(250,1000)});})()"));
+    t('U2645 边界零血/满血/四分之一', o2.a === '' && o2.b === '敌阵 100%' && o2.c === '敌阵 25%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.foeHpRatioTextNow(1000,0),b:T.foeHpRatioTextNow(1000,-5),c:T.foeHpRatioTextNow(NaN,1000)});})()"));
+    t('U2646 非法输入/空值', o3.a === '' && o3.b === '' && o3.c === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.foeHpRatioTextNow('500','1000'));})()"));
+    t('U2647 数字字符串转数', o4 === '敌阵 50%', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.foeHpRatioDangerNow()==='boolean'});})()"));
+    t('U2648 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2643;k<=2648;k++) t('U'+k+' 敌阵血量占比',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
