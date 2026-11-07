@@ -7955,6 +7955,22 @@ async function main() {
     t('U2696 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2691;k<=2696;k++) t('U'+k+' 敌阵推近',false,e.message); }
 
+
+  // ===== U2697~U2702: 道具节奏(v0.10.55) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('powerupPaceWrap'),f:T.powerupPaceTextNow(6,60)});})()"));
+    t('U2697 道具节奏 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2698 正常 6/60s=6分', o.f === '道具 6/分', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.powerupPaceTextNow(0,60),b:T.powerupPaceTextNow(3,0),c:T.powerupPaceTextNow(4,30)});})()"));
+    t('U2699 边界零道具/零时/8分', o2.a === '' && o2.b === '3 道具' && o2.c === '道具 8/分', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.powerupPaceTextNow(-1,60),b:T.powerupPaceTextNow(NaN,60)});})()"));
+    t('U2700 非法输入/空值', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.powerupPaceTextNow('6','60'));})()"));
+    t('U2701 数字字符串转数', o4 === '道具 6/分', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.powerupPaceDangerNow()==='boolean'});})()"));
+    t('U2702 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2697;k<=2702;k++) t('U'+k+' 道具节奏',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
