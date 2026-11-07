@@ -6419,6 +6419,22 @@ async function main() {
     t('U2114 DOM 与函数一致性', typeof o5.d === 'boolean', JSON.stringify(o5));
   } catch(e){ for(let k=2109;k<=2114;k++) t('U'+k+' 低血量',false,e.message); }
 
+
+  // ===== U2115~U2120: Boss 临近(v0.8.68) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossNearAlertWrap'),f:T.bossNearAlertTextNow(1)});})()"));
+    t('U2115 预警 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2116 距 Boss 远不触发', o.f === '', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossNearAlertTextNow(3),b:T.bossNearAlertTextNow(4)});})()"));
+    t('U2117 临近触发预警', o2.a.indexOf('👹') >= 0 && o2.b.indexOf('👹') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossNearAlertTextNow(2),b:T.bossNearAlertTextNow(0)});})()"));
+    t('U2118 边界关 2 不警/0 兜底', o3.a === '' && typeof o3.b === 'string', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bossNearAlertTextNow(NaN));})()"));
+    t('U2119 NaN 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({d:T.bossNearAlertDangerNow()});})()"));
+    t('U2120 DOM 与函数一致性', typeof o5.d === 'boolean', JSON.stringify(o5));
+  } catch(e){ for(let k=2115;k<=2120;k++) t('U'+k+' Boss临近',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
