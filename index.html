@@ -2215,6 +2215,7 @@
   #coinPaceWrap .v { color: #fdcb6e; font-weight: 800; font-size: 11px; }
   #invincibleWrap .v { color: #f9ca24; font-weight: 800; font-size: 11px; }
   #playerAnchorWrap .v { color: #74b9ff; font-weight: 800; font-size: 11px; }
+  #coinCadenceWrap .v { color: #f9ca24; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -2573,6 +2574,7 @@
     <div class="pill m-hide" id="coinPaceWrap"><span class="k">🪙</span><span class="v" id="coinPaceVal">—</span></div>
     <div class="pill m-hide" id="invincibleWrap"><span class="k">🛡️</span><span class="v" id="invincibleVal">—</span></div>
     <div class="pill m-hide" id="playerAnchorWrap"><span class="k">📍</span><span class="v" id="playerAnchorVal">—</span></div>
+    <div class="pill m-hide" id="coinCadenceWrap"><span class="k">💰</span><span class="v" id="coinCadenceVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -2948,7 +2950,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V10.60</div>
+  <div id="mark">DESIGNED BY QIAN · V10.61</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -8108,6 +8110,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r57cpV = $('coinPaceVal'); if (r57cpV) { const r57cpT = coinPaceText(runCoins, playSecRun); r57cpV.textContent = r57cpT || '—'; const r57cpW = $('coinPaceWrap'); if (r57cpW) r57cpW.classList.toggle('danger', runCoins > 0 && playSecRun > 0 && (runCoins / (playSecRun / 60)) >= 30); }
     const r57ivV = $('invincibleVal'); if (r57ivV) { const r57ivF = player ? Math.max(0, Number(player.spawnInv) || 0) : 0; const r57ivT = invincibleText(r57ivF); r57ivV.textContent = r57ivT || '—'; const r57ivW = $('invincibleWrap'); if (r57ivW) r57ivW.classList.toggle('danger', r57ivF > 0 && Math.ceil(r57ivF / 60) <= 2); }
     const r57paV = $('playerAnchorVal'); if (r57paV) { let r57paD = 0; if (player) r57paD = Math.hypot(player.x + player.size / 2 - BASE.x * TILE, player.y + player.size / 2 - BASE.y * TILE) / TILE; const r57paT = playerAnchorText(r57paD); r57paV.textContent = r57paT || '—'; const r57paW = $('playerAnchorWrap'); if (r57paW) r57paW.classList.toggle('danger', r57paD > 8); }
+    const r58ccV = $('coinCadenceVal'); if (r58ccV) { const r58cc = coinLog.length; const r58ccT = coinCadenceText(r58cc, playSecRun); r58ccV.textContent = r58ccT; const r58ccW = $('coinCadenceWrap'); if (r58ccW) r58ccW.classList.toggle('danger', r58cc > 0 && playSecRun / Math.max(1, r58cc) >= 8); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -10802,6 +10805,14 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (d <= 6) return '近基地';
     return '远行 ' + d + ' 格';
   }
+  // —— v0.10.61 金币入账节奏 ——
+  function coinCadenceText(n, sec) {
+    const c = Math.max(0, Math.floor(Number(n) || 0));
+    const s = Math.max(0, Number(sec) || 0);
+    if (c <= 0 || s <= 0) return '金币 —';
+    const r = Math.round(s / c);
+    return (r >= 8 ? '金币慢' : '金币') + ' ' + c + ' 笔 · 每' + r + 's';
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -12643,7 +12654,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V10.60', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V10.61', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -13980,6 +13991,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       coinPaceTextNow: (n, s) => coinPaceText(n, s), coinPaceDangerNow: () => { const w = $('coinPaceWrap'); return !!(w && w.classList.contains('danger')); },
       invincibleTextNow: (f) => invincibleText(f), invincibleDangerNow: () => { const w = $('invincibleWrap'); return !!(w && w.classList.contains('danger')); },
       playerAnchorTextNow: (d) => playerAnchorText(d), playerAnchorDangerNow: () => { const w = $('playerAnchorWrap'); return !!(w && w.classList.contains('danger')); },
+      coinCadenceTextNow: (n, s) => coinCadenceText(n, s), coinCadenceDangerNow: () => { const w = $('coinCadenceWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

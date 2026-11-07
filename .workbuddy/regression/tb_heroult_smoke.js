@@ -8051,6 +8051,22 @@ async function main() {
     t('U2732 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2727;k<=2732;k++) t('U'+k+' 玩家锚定',false,e.message); }
 
+
+  // ===== U2733~U2738: 金币入账节奏(v0.10.61) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('coinCadenceWrap'),f:T.coinCadenceTextNow(4,20)});})()"));
+    t('U2733 金币入账节奏 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2734 正常 4笔20s=每5s', o.f === '金币 4 笔 · 每5s', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinCadenceTextNow(0,10),b:T.coinCadenceTextNow(2,16),c:T.coinCadenceTextNow(1,6)});})()"));
+    t('U2735 边界无笔/8s临界/6s快', o2.a === '金币 —' && o2.b === '金币慢 2 笔 · 每8s' && o2.c === '金币 1 笔 · 每6s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinCadenceTextNow(-3,10),b:T.coinCadenceTextNow(NaN,10)});})()"));
+    t('U2736 非法输入/空值', o3.a === '金币 —' && o3.b === '金币 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.coinCadenceTextNow('4','20'));})()"));
+    t('U2737 数字字符串转数', o4 === '金币 4 笔 · 每5s', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.coinCadenceDangerNow()==='boolean'});})()"));
+    t('U2738 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2733;k<=2738;k++) t('U'+k+' 金币入账节奏',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
