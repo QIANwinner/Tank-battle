@@ -8467,6 +8467,22 @@ async function main() {
     t('U2888 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2883;k<=2888;k++) t('U'+k+' 波均道具',false,e.message); }
 
+
+  // ===== U2889~U2894: 强化均币(v0.10.87) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('upgCoinWrap'),f:T.upgCoinTextNow(600,6)});})()"));
+    t('U2889 强化均币 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2890 正常 600/6=100', o.f === '强化均 100 币', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.upgCoinTextNow(0,6),b:T.upgCoinTextNow(1200,6),c:T.upgCoinTextNow(600,6)});})()"));
+    t('U2891 边界零币/200贵/100', o2.a === '强化均 —' && o2.b === '强化均 200 币 · 贵' && o2.c === '强化均 100 币', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.upgCoinTextNow(-5,6),b:T.upgCoinTextNow(NaN,6)});})()"));
+    t('U2892 非法输入/空值', o3.a === '强化均 —' && o3.b === '强化均 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.upgCoinTextNow('600','6'));})()"));
+    t('U2893 数字字符串转数', o4 === '强化均 100 币', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.upgCoinDangerNow()==='boolean'});})()"));
+    t('U2894 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2889;k<=2894;k++) t('U'+k+' 强化均币',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
