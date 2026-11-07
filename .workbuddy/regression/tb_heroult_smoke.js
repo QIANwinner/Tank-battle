@@ -6851,6 +6851,38 @@ async function main() {
     t('U2276 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2271;k<=2276;k++) t('U'+k+' 猎手锁定',false,e.message); }
 
+
+  // ===== U2277~U2282: 治疗威胁(v0.8.95) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('healerThreatWrap'),f:T.healerThreatTextNow([{type:'healer',dead:false},{type:'healer',dead:false}])});})()"));
+    t('U2277 治疗威胁 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2278 正常 2 治疗', o.f.indexOf('治疗 2') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.healerThreatTextNow([{type:'healer',dead:false}]),b:T.healerThreatTextNow([{type:'tank',dead:false}])});})()"));
+    t('U2279 1 治疗/无治疗空', o2.a.indexOf('治疗 1') >= 0 && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.healerThreatTextNow([{type:'healer',dead:true}]),b:T.healerThreatTextNow([])});})()"));
+    t('U2280 死亡治疗不计/空数组空', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.healerThreatTextNow(undefined));})()"));
+    t('U2281 undefined 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.healerThreatDangerNow()==='boolean'});})()"));
+    t('U2282 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2277;k<=2282;k++) t('U'+k+' 治疗威胁',false,e.message); }
+
+
+  // ===== U2283~U2288: 分裂威胁(v0.8.96) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('splitThreatWrap'),f:T.splitThreatTextNow([{type:'split',dead:false},{type:'split',dead:false}])});})()"));
+    t('U2283 分裂威胁 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2284 正常 2 分裂', o.f.indexOf('分裂 2') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.splitThreatTextNow([{type:'split',dead:false}]),b:T.splitThreatTextNow([{type:'rush',dead:false}])});})()"));
+    t('U2285 1 分裂/无分裂空', o2.a.indexOf('分裂 1') >= 0 && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.splitThreatTextNow([{type:'split',dead:true}]),b:T.splitThreatTextNow([])});})()"));
+    t('U2286 死亡分裂不计/空数组空', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.splitThreatTextNow(null));})()"));
+    t('U2287 null 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.splitThreatDangerNow()==='boolean'});})()"));
+    t('U2288 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2283;k<=2288;k++) t('U'+k+' 分裂威胁',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
