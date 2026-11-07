@@ -7091,6 +7091,22 @@ async function main() {
     t('U2366 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2361;k<=2366;k++) t('U'+k+' 增援节奏',false,e.message); }
 
+
+  // ===== U2367~U2372: 道具磁吸预览(v0.10.0) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('magnetWrap'),f:T.magnetTextNow(2)});})()"));
+    t('U2367 道具磁吸预览 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2368 正常 2 道具', o.f === '磁吸 2', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.magnetTextNow(0),b:T.magnetTextNow(1)});})()"));
+    t('U2369 零空/单道具', o2.a === '' && o2.b === '磁吸 1', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.magnetTextNow(-1),b:T.magnetTextNow(NaN),c:T.magnetTextNow(undefined)});})()"));
+    t('U2370 非法输入为空', o3.a === '' && o3.b === '' && o3.c === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.magnetTextNow('3.9'));})()"));
+    t('U2371 小数取整', o4 === '磁吸 3', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.magnetDangerNow()==='boolean'});})()"));
+    t('U2372 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2367;k<=2372;k++) t('U'+k+' 道具磁吸预览',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
