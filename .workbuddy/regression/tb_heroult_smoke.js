@@ -6515,6 +6515,22 @@ async function main() {
     t('U2150 DOM 与函数一致性', typeof o5.d === 'boolean', JSON.stringify(o5));
   } catch(e){ for(let k=2145;k<=2150;k++) t('U'+k+' 关卡偏慢',false,e.message); }
 
+
+  // ===== U2151~U2156: 最终波(v0.8.74) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('finalWaveAlertWrap'),f:T.finalWaveAlertTextNow(2,8)});})()"));
+    t('U2151 提示 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2152 非最终波不触发', o.f === '', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.finalWaveAlertTextNow(8,8),b:T.finalWaveAlertTextNow(7,8)});})()"));
+    t('U2153 最终波触发', o2.a.indexOf('🌊') >= 0 && o2.b.indexOf('🌊') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.finalWaveAlertTextNow(1,8),b:T.finalWaveAlertTextNow(0,8)});})()"));
+    t('U2154 边界早波不警/0 安全', o3.a === '' && typeof o3.b === 'string', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.finalWaveAlertTextNow(NaN,NaN));})()"));
+    t('U2155 NaN 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({d:T.finalWaveAlertDangerNow()});})()"));
+    t('U2156 DOM 与函数一致性', typeof o5.d === 'boolean', JSON.stringify(o5));
+  } catch(e){ for(let k=2151;k<=2156;k++) t('U'+k+' 最终波',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
