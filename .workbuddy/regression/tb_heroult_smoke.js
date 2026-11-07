@@ -7843,6 +7843,22 @@ async function main() {
     t('U2654 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2649;k<=2654;k++) t('U'+k+' 敌阵残血分布',false,e.message); }
 
+
+  // ===== U2655~U2660: 波次类型(v0.10.48) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('waveTypeWrap'),f:T.waveTypeTextNow(3,8,0)});})()"));
+    t('U2655 波次类型 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2656 正常 3/8 普通波', o.f === '普通波 3/8', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveTypeTextNow(1,8,0),b:T.waveTypeTextNow(8,8,0),c:T.waveTypeTextNow(3,8,500)});})()"));
+    t('U2657 边界首波/最终波/BOSS波', o2.a === '普通波 1/8' && o2.b === '最终波' && o2.c === 'BOSS波', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveTypeTextNow(0,8,0),b:T.waveTypeTextNow(-5,-5,-1)});})()"));
+    t('U2658 非法输入/空值', o3.a === '普通波 1/8' && o3.b === '最终波', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.waveTypeTextNow('3','8','0'));})()"));
+    t('U2659 数字字符串转数', o4 === '普通波 3/8', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.waveTypeDangerNow()==='boolean'});})()"));
+    t('U2660 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2655;k<=2660;k++) t('U'+k+' 波次类型',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
