@@ -7587,6 +7587,22 @@ async function main() {
     t('U2558 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2553;k<=2558;k++) t('U'+k+' 强化总次数',false,e.message); }
 
+
+  // ===== U2559~U2564: 金币来源(v0.10.32) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('coinSourceWrap'),f:T.coinSourceTextNow([{n:100,label:'击杀'},{n:50,label:'拾取'},{n:30,label:'击杀'}])});})()"));
+    t('U2559 金币来源 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2560 正常 击杀130>拾取50 金币源 击杀', o.f === '金币源 击杀', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinSourceTextNow([]),b:T.coinSourceTextNow([{n:50,label:'拾取'}]),c:T.coinSourceTextNow([{n:50,label:'击杀'},{n:50,label:'拾取'}])});})()"));
+    t('U2561 边界空/单源/平手', o2.a === '' && o2.b === '金币源 拾取' && o2.c === '金币源 击杀', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinSourceTextNow(null),b:T.coinSourceTextNow([{n:-5,label:'x'}]),c:T.coinSourceTextNow([{n:NaN}])})})()"));
+    t('U2562 非法输入/空日志', o3.a === '' && o3.b === '' && o3.c === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.coinSourceTextNow([{n:'80',label:'击杀'},{n:'20',label:'拾取'}]));})()"));
+    t('U2563 字符串金额转数', o4 === '金币源 击杀', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.coinSourceDangerNow()==='boolean'});})()"));
+    t('U2564 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2559;k<=2564;k++) t('U'+k+' 金币来源',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
