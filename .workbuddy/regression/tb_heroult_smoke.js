@@ -8387,6 +8387,22 @@ async function main() {
     t('U2858 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2853;k<=2858;k++) t('U'+k+' 每杀弹数',false,e.message); }
 
+
+  // ===== U2859~U2864: 受击节奏(v0.10.82) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('hurtPaceWrap'),f:T.hurtPaceTextNow(6,60)});})()"));
+    t('U2859 受击节奏 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2860 正常 6/60s=6/分', o.f === '受击 6/分', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hurtPaceTextNow(0,60),b:T.hurtPaceTextNow(12,60),c:T.hurtPaceTextNow(6,60)});})()"));
+    t('U2861 边界零受/12挨/6', o2.a === '受击 —' && o2.b === '受击 12/分 · 挨' && o2.c === '受击 6/分', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hurtPaceTextNow(-5,60),b:T.hurtPaceTextNow(NaN,60)});})()"));
+    t('U2862 非法输入/空值', o3.a === '受击 —' && o3.b === '受击 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.hurtPaceTextNow('6','60'));})()"));
+    t('U2863 数字字符串转数', o4 === '受击 6/分', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.hurtPaceDangerNow()==='boolean'});})()"));
+    t('U2864 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2859;k<=2864;k++) t('U'+k+' 受击节奏',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
