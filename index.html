@@ -2203,6 +2203,7 @@
   #foeHpRatioWrap .v { color: #ff6b81; font-weight: 800; font-size: 11px; }
   #foeWoundWrap .v { color: #e17055; font-weight: 800; font-size: 11px; }
   #waveTypeWrap .v { color: #a29bfe; font-weight: 800; font-size: 11px; }
+  #magnetCatchWrap .v { color: #55efc4; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -2549,6 +2550,7 @@
     <div class="pill m-hide" id="foeHpRatioWrap"><span class="k">🩸</span><span class="v" id="foeHpRatioVal">—</span></div>
     <div class="pill m-hide" id="foeWoundWrap"><span class="k">🩹</span><span class="v" id="foeWoundVal">—</span></div>
     <div class="pill m-hide" id="waveTypeWrap"><span class="k">🌊</span><span class="v" id="waveTypeVal">—</span></div>
+    <div class="pill m-hide" id="magnetCatchWrap"><span class="k">🧲</span><span class="v" id="magnetCatchVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -2924,7 +2926,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V10.48</div>
+  <div id="mark">DESIGNED BY QIAN · V10.49</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -8072,6 +8074,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r56hrV = $('foeHpRatioVal'); if (r56hrV) { let r56hrH = 0, r56hrM = 0; for (const en of enemies) { r56hrH += Math.max(0, Number(en.hp) || 0); r56hrM += Math.max(0, Number(en.maxHp) || 0); } const r56hrT = foeHpRatioText(r56hrH, r56hrM); r56hrV.textContent = r56hrT || '—'; const r56hrW = $('foeHpRatioWrap'); if (r56hrW) { const r56hrP = r56hrM > 0 ? (r56hrH / r56hrM) : 0; r56hrW.classList.toggle('danger', r56hrP >= 0.7); } }
     const r56wdV = $('foeWoundVal'); if (r56wdV) { let r56wdL = 0, r56wdC = 0; for (const en of enemies) { const r56mx = Math.max(0, Number(en.maxHp) || 1); const r56hp = Math.max(0, Number(en.hp) || 0); if (r56mx > 0 && r56hp <= r56mx * 0.5) r56wdL++; if (r56mx > 0 && r56hp <= r56mx * 0.25) r56wdC++; } const r56wdT = foeWoundText(r56wdL, r56wdC); r56wdV.textContent = r56wdT || '—'; const r56wdW = $('foeWoundWrap'); if (r56wdW) r56wdW.classList.toggle('danger', r56wdC >= 2); }
     const r56wtV = $('waveTypeVal'); if (r56wtV) { const r56wtT = waveTypeText(wave, wavesTotal, bossHp); r56wtV.textContent = r56wtT || '—'; const r56wtW = $('waveTypeWrap'); if (r56wtW) r56wtW.classList.toggle('danger', bossHp > 0); }
+    const r56mcV = $('magnetCatchVal'); if (r56mcV) { let r56mcN = 0; if (player && magnetStorm > 0) { const r56mr = magnetRadius(); for (const p of powerups) { if (p.dead) continue; const r56dd = Math.hypot(p.x - player.x, p.y - player.y); if (r56dd <= r56mr) r56mcN++; } } const r56mcT = magnetCatchText(magnetStorm, r56mcN); r56mcV.textContent = r56mcT || '—'; const r56mcW = $('magnetCatchWrap'); if (r56mcW) r56mcW.classList.toggle('danger', magnetStorm > 0 && r56mcN >= 3); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -10677,6 +10680,14 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (wv >= tv) return '最终波';
     return '普通波 ' + wv + '/' + tv;
   }
+  // —— v0.10.49 磁吸捕获 ——
+  function magnetCatchText(storm, inside) {
+    const s = Math.max(0, Number(storm) || 0);
+    const i = Math.max(0, Math.floor(Number(inside) || 0));
+    if (s <= 0) return '';
+    if (i <= 0) return '磁吸空';
+    return '磁吸 ' + i + ' 道具';
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -12518,7 +12529,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V10.48', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V10.49', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -13843,6 +13854,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       foeHpRatioTextNow: (h, m) => foeHpRatioText(h, m), foeHpRatioDangerNow: () => { const w = $('foeHpRatioWrap'); return !!(w && w.classList.contains('danger')); },
       foeWoundTextNow: (l, c) => foeWoundText(l, c), foeWoundDangerNow: () => { const w = $('foeWoundWrap'); return !!(w && w.classList.contains('danger')); },
       waveTypeTextNow: (w, t, b) => waveTypeText(w, t, b), waveTypeDangerNow: () => { const w = $('waveTypeWrap'); return !!(w && w.classList.contains('danger')); },
+      magnetCatchTextNow: (s, i) => magnetCatchText(s, i), magnetCatchDangerNow: () => { const w = $('magnetCatchWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

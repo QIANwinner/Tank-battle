@@ -7859,6 +7859,22 @@ async function main() {
     t('U2660 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2655;k<=2660;k++) t('U'+k+' 波次类型',false,e.message); }
 
+
+  // ===== U2661~U2666: 磁吸捕获(v0.10.49) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('magnetCatchWrap'),f:T.magnetCatchTextNow(3,2)});})()"));
+    t('U2661 磁吸捕获 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2662 正常 磁暴3 吸2', o.f === '磁吸 2 道具', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.magnetCatchTextNow(3,0),b:T.magnetCatchTextNow(0,2),c:T.magnetCatchTextNow(3,5)});})()"));
+    t('U2663 边界空吸/无磁暴/多道具', o2.a === '磁吸空' && o2.b === '' && o2.c === '磁吸 5 道具', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.magnetCatchTextNow(-1,-1),b:T.magnetCatchTextNow(NaN,NaN)});})()"));
+    t('U2664 非法输入/空值', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.magnetCatchTextNow('3','2'));})()"));
+    t('U2665 数字字符串转数', o4 === '磁吸 2 道具', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.magnetCatchDangerNow()==='boolean'});})()"));
+    t('U2666 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2661;k<=2666;k++) t('U'+k+' 磁吸捕获',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
