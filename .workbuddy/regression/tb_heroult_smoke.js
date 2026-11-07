@@ -7667,6 +7667,22 @@ async function main() {
     t('U2588 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2583;k<=2588;k++) t('U'+k+' 战局评分',false,e.message); }
 
+
+  // ===== U2589~U2594: 生存压力评级(v0.10.37) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('pressGradeWrap'),f:T.pressGradeTextNow(3,5)});})()"));
+    t('U2589 生存压力评级 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2590 正常 3命5敌 压力 Lv3', o.f === '压力 Lv3', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pressGradeTextNow(5,0),b:T.pressGradeTextNow(1,10),c:T.pressGradeTextNow(0,0)});})()"));
+    t('U2591 边界满血安全/濒死高压/空局', o2.a === '压力 Lv1' && o2.b === '压力 Lv5' && o2.c === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pressGradeTextNow(-1,-1),b:T.pressGradeTextNow(NaN,NaN)});})()"));
+    t('U2592 非法输入/空值', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.pressGradeTextNow('3','5'));})()"));
+    t('U2593 数字字符串转数', o4 === '压力 Lv3', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.pressGradeDangerNow()==='boolean'});})()"));
+    t('U2594 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2589;k<=2594;k++) t('U'+k+' 生存压力评级',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
