@@ -2282,6 +2282,11 @@
   #wavePaceWrap.g-b .v { color: #f1c40f; }
   #wavePaceWrap.g-c .v { color: #e67e22; }
   #wavePaceWrap.g-d .v { color: #e74c3c; }
+  #battleGradeWrap .v { color: #f1c40f; font-weight: 800; font-size: 11px; }
+  #battleGradeWrap.g-a .v { color: #2ecc71; }
+  #battleGradeWrap.g-b .v { color: #f1c40f; }
+  #battleGradeWrap.g-c .v { color: #e67e22; }
+  #battleGradeWrap.g-d .v { color: #e74c3c; }
 </style>
 </head>
 <body>
@@ -2679,6 +2684,7 @@
     <div class="pill m-hide" id="pickupGapWrap"><span class="k">📦</span><span class="v" id="pickupGapVal">—</span></div>
     <div class="pill m-hide" id="comboYieldWrap"><span class="k">🔥</span><span class="v" id="comboYieldVal">—</span></div>
     <div class="pill m-hide" id="wavePaceWrap"><span class="k">🚀</span><span class="v" id="wavePaceVal">—</span></div>
+    <div class="pill m-hide" id="battleGradeWrap"><span class="k">🏆</span><span class="v" id="battleGradeVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -3054,7 +3060,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V10.99</div>
+  <div id="mark">DESIGNED BY QIAN · V11.00</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -8253,6 +8259,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r62pgS = pickupGapTier(playSecRun, runPowerups); const r62pgV = $('pickupGapVal'); if (r62pgV) r62pgV.textContent = r62pgS.txt; const r62pgW = $('pickupGapWrap'); if (r62pgW) { r62pgW.classList.remove('g-a','g-b','g-c','g-d'); if (r62pgS.tier !== '-') r62pgW.classList.add('g-' + r62pgS.tier.toLowerCase()); r62pgW.classList.toggle('danger', r62pgS.tier === 'D'); }
     const r62cyS = comboYieldTier(combo, score); const r62cyV = $('comboYieldVal'); if (r62cyV) r62cyV.textContent = r62cyS.txt; const r62cyW = $('comboYieldWrap'); if (r62cyW) { r62cyW.classList.remove('g-a','g-b','g-c','g-d'); if (r62cyS.tier !== '-') r62cyW.classList.add('g-' + r62cyS.tier.toLowerCase()); r62cyW.classList.toggle('danger', r62cyS.tier === 'D'); }
     const r62wpS = wavePaceTier(wave, playSecRun); const r62wpV = $('wavePaceVal'); if (r62wpV) r62wpV.textContent = r62wpS.txt; const r62wpW = $('wavePaceWrap'); if (r62wpW) { r62wpW.classList.remove('g-a','g-b','g-c','g-d'); if (r62wpS.tier !== '-') r62wpW.classList.add('g-' + r62wpS.tier.toLowerCase()); r62wpW.classList.toggle('danger', r62wpS.tier === 'D'); }
+    const r62bgS = battleGradeTier(score, wave); const r62bgV = $('battleGradeVal'); if (r62bgV) r62bgV.textContent = r62bgS.txt; const r62bgW = $('battleGradeWrap'); if (r62bgW) { r62bgW.classList.remove('g-a','g-b','g-c','g-d'); if (r62bgS.tier !== '-') r62bgW.classList.add('g-' + r62bgS.tier.toLowerCase()); r62bgW.classList.toggle('danger', r62bgS.tier === 'D'); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -11276,6 +11283,17 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (rate >= 0.4) return { tier: 'C', txt: '波速 C 缓' };
     return { tier: 'D', txt: '波速 D 慢' };
   }
+  // —— v0.11.00 战局总评 ——
+  function battleGradeTier(score, wave) {
+    const s = Math.max(0, Math.floor(Number(score) || 0));
+    const w = Math.max(0, Math.floor(Number(wave) || 0));
+    if (w <= 0) return { tier: '-', txt: '战局 —' };
+    const r = s / w;
+    if (r >= 150) return { tier: 'A', txt: '战局 A 强' };
+    if (r >= 80) return { tier: 'B', txt: '战局 B 良' };
+    if (r >= 40) return { tier: 'C', txt: '战局 C 中' };
+    return { tier: 'D', txt: '战局 D 危' };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -13117,7 +13135,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V10.99', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V11.00', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -14493,6 +14511,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       pickupGapStateNow: (s, p) => pickupGapTier(s, p), pickupGapDangerNow: () => { const w = $('pickupGapWrap'); return !!(w && w.classList.contains('danger')); },
       comboYieldStateNow: (c, s) => comboYieldTier(c, s), comboYieldDangerNow: () => { const w = $('comboYieldWrap'); return !!(w && w.classList.contains('danger')); },
       wavePaceStateNow: (w, s) => wavePaceTier(w, s), wavePaceDangerNow: () => { const w = $('wavePaceWrap'); return !!(w && w.classList.contains('danger')); },
+      battleGradeStateNow: (s, w) => battleGradeTier(s, w), battleGradeDangerNow: () => { const w = $('battleGradeWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

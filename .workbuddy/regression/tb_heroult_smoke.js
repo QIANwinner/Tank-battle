@@ -8675,6 +8675,22 @@ async function main() {
     t('U2966 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2961;k<=2966;k++) t('U'+k+' 波速评级',false,e.message); }
 
+
+  // ===== U2967~U2972: 战局总评(v0.11.00) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('battleGradeWrap'),st:T.battleGradeStateNow(900,6)});})()"));
+    t('U2967 战局总评 DOM 已加入 HUD', o.dom === true && typeof o.st.tier === 'string', JSON.stringify(o));
+    t('U2968 正常 900/6=150 → A', o.st.tier === 'A' && o.st.txt === '战局 A 强', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.battleGradeStateNow(0,6),b:T.battleGradeStateNow(240,6),c:T.battleGradeStateNow(480,6)});})()"));
+    t('U2969 边界 0→D/240→C/480→B', o2.a.tier === 'D' && o2.b.tier === 'C' && o2.c.tier === 'B', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.battleGradeStateNow(-5,6),b:T.battleGradeStateNow(NaN,6)});})()"));
+    t('U2970 非法输入/空值', o3.a.tier === 'D' && o3.b.tier === 'D', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.battleGradeStateNow('900','6').tier);})()"));
+    t('U2971 数字字符串转数', o4 === 'A', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.battleGradeDangerNow()==='boolean'});})()"));
+    t('U2972 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2967;k<=2972;k++) t('U'+k+' 战局总评',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
