@@ -1,6 +1,6 @@
 /* QIAN 坦克大战 · Service Worker
    network-first 降级 cache：有网用最新，断网用缓存，实现离线可玩 */
-const CACHE = 'tank-battle-v010830';
+const CACHE = 'tank-battle-v010840';
 const ASSETS = [
   './',
   './index.html',

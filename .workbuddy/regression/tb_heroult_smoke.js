@@ -8419,6 +8419,22 @@ async function main() {
     t('U2870 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2865;k<=2870;k++) t('U'+k+' 复活占比',false,e.message); }
 
+
+  // ===== U2871~U2876: 道具币节奏(v0.10.84) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('pickupRateWrap'),f:T.pickupRateTextNow(150,60)});})()"));
+    t('U2871 道具币节奏 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2872 正常 150/60s=150/分', o.f === '道具币 150/分', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pickupRateTextNow(0,60),b:T.pickupRateTextNow(300,60),c:T.pickupRateTextNow(90,60)});})()"));
+    t('U2873 边界零币/300富/90', o2.a === '道具币 —' && o2.b === '道具币 300/分 · 富' && o2.c === '道具币 90/分', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pickupRateTextNow(-5,60),b:T.pickupRateTextNow(NaN,60)});})()"));
+    t('U2874 非法输入/空值', o3.a === '道具币 —' && o3.b === '道具币 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.pickupRateTextNow('150','60'));})()"));
+    t('U2875 数字字符串转数', o4 === '道具币 150/分', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.pickupRateDangerNow()==='boolean'});})()"));
+    t('U2876 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2871;k<=2876;k++) t('U'+k+' 道具币节奏',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
