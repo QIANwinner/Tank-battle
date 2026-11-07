@@ -7011,6 +7011,22 @@ async function main() {
     t('U2336 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2331;k<=2336;k++) t('U'+k+' 粒子活跃度',false,e.message); }
 
+
+  // ===== U2337~U2342: 飘字计数(v0.9.5) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('floatTextWrap'),f:T.floatTextCountTextNow(3)});})()"));
+    t('U2337 飘字计数 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2338 正常 3 飘字', o.f.indexOf('飘字 3') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.floatTextCountTextNow(0),b:T.floatTextCountTextNow(-1)});})()"));
+    t('U2339 0/负数为空', o2.a === '' && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.floatTextCountTextNow(undefined));})()"));
+    t('U2340 undefined 安全返回字符串', typeof o3 === 'string', o3);
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.floatTextCountTextNow('2'));})()"));
+    t('U2341 数字字符串转数', o4.indexOf('飘字 2') >= 0, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.floatTextDangerNow()==='boolean'});})()"));
+    t('U2342 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2337;k<=2342;k++) t('U'+k+' 飘字计数',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

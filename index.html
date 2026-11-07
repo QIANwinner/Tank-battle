@@ -2150,6 +2150,7 @@
   #bossWhiteFlashWrap .v { color: #70a1ff; font-weight: 800; font-size: 11px; }
   #spawnWarnWrap .v { color: #ff6348; font-weight: 800; font-size: 11px; }
   #particleActiveWrap .v { color: #7bed9f; font-weight: 800; font-size: 11px; }
+  #floatTextWrap .v { color: #ff7f50; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -2443,6 +2444,7 @@
     <div class="pill m-hide" id="bossWhiteFlashWrap"><span class="k">✨</span><span class="v" id="bossWhiteFlashVal">—</span></div>
     <div class="pill m-hide" id="spawnWarnWrap"><span class="k">⚠</span><span class="v" id="spawnWarnVal">—</span></div>
     <div class="pill m-hide" id="particleActiveWrap"><span class="k">✨</span><span class="v" id="particleActiveVal">—</span></div>
+    <div class="pill m-hide" id="floatTextWrap"><span class="k">💬</span><span class="v" id="floatTextVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -2818,7 +2820,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V9.4</div>
+  <div id="mark">DESIGNED BY QIAN · V9.5</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7913,6 +7915,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r49wfV = $('bossWhiteFlashVal'); if (r49wfV) { const r49wfT = bossWhiteFlashText(whiteFlash); r49wfV.textContent = r49wfT || '—'; const r49wfW = $('bossWhiteFlashWrap'); if (r49wfW) r49wfW.classList.toggle('danger', !!r49wfT); }
     const r49swV = $('spawnWarnVal'); if (r49swV) { const r49swT = spawnWarnText(spawnWarnPt); r49swV.textContent = r49swT || '—'; const r49swW = $('spawnWarnWrap'); if (r49swW) r49swW.classList.toggle('danger', !!r49swT); }
     const r49paV = $('particleActiveVal'); if (r49paV) { const r49paT = particleActiveText(particles.length); r49paV.textContent = r49paT || '—'; }
+    const r49ftV = $('floatTextVal'); if (r49ftV) { const r49ftT = floatTextCountText(texts.length); r49ftV.textContent = r49ftT || '—'; }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -10049,6 +10052,12 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (v <= 0) return '';
     return '✨ 粒子 ' + v;
   }
+  // —— v0.9.5 飘字计数 ——
+  function floatTextCountText(n) {
+    const v = Math.floor(Number(n) || 0);
+    if (v <= 0) return '';
+    return '💬 飘字 ' + v;
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -11890,7 +11899,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V9.4', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V9.5', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -13162,6 +13171,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       bossWhiteFlashTextNow: (v) => bossWhiteFlashText(v), bossWhiteFlashDangerNow: () => { const w = $('bossWhiteFlashWrap'); return !!(w && w.classList.contains('danger')); },
       spawnWarnTextNow: (pt) => spawnWarnText(pt), spawnWarnDangerNow: () => { const w = $('spawnWarnWrap'); return !!(w && w.classList.contains('danger')); },
       particleActiveTextNow: (n) => particleActiveText(n), particleActiveDangerNow: () => { const w = $('particleActiveWrap'); return !!(w && w.classList.contains('danger')); },
+      floatTextCountTextNow: (n) => floatTextCountText(n), floatTextDangerNow: () => { const w = $('floatTextWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
