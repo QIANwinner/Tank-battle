@@ -7699,6 +7699,22 @@ async function main() {
     t('U2600 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2595;k<=2600;k++) t('U'+k+' 弹幕密度警戒',false,e.message); }
 
+
+  // ===== U2601~U2606: BOSS血量百分比(v0.10.39) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossHpPctWrap'),f:T.bossHpPctTextNow(500,1000)});})()"));
+    t('U2601 BOSS血量百分比 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2602 正常 500/1000 50%', o.f === 'BOSS 50%', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossHpPctTextNow(0,1000),b:T.bossHpPctTextNow(1000,1000),c:T.bossHpPctTextNow(250,1000)});})()"));
+    t('U2603 边界零血/满血/阶段阈值', o2.a === '' && o2.b === 'BOSS 100%' && o2.c === 'BOSS 25%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossHpPctTextNow(1000,0),b:T.bossHpPctTextNow(1000,-5),c:T.bossHpPctTextNow(NaN,1000)});})()"));
+    t('U2604 非法输入/空值', o3.a === '' && o3.b === '' && o3.c === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bossHpPctTextNow('500','1000'));})()"));
+    t('U2605 数字字符串转数', o4 === 'BOSS 50%', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.bossHpPctDangerNow()==='boolean'});})()"));
+    t('U2606 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2601;k<=2606;k++) t('U'+k+' BOSS血量百分比',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
