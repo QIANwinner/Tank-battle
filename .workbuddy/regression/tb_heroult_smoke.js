@@ -6899,6 +6899,22 @@ async function main() {
     t('U2294 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2289;k<=2294;k++) t('U'+k+' 狙击威胁',false,e.message); }
 
+
+  // ===== U2295~U2300: 敌类全景(v0.8.98) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('enemyMixWrap'),f:T.enemyMixTextNow([{type:'small',dead:false},{type:'tank',dead:false}])});})()"));
+    t('U2295 敌类全景 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2296 正常 小车1+重坦1', o.f.indexOf('小车1') >= 0 && o.f.indexOf('重坦1') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyMixTextNow([{type:'small',dead:false},{type:'small',dead:false}]),b:T.enemyMixTextNow([])});})()"));
+    t('U2297 同类累计 2/空数组空', o2.a.indexOf('小车2') >= 0 && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.enemyMixTextNow([{type:'small',dead:true},{type:'tank',dead:true}]));})()"));
+    t('U2298 全死亡为空', o3 === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.enemyMixTextNow(null));})()"));
+    t('U2299 null 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.enemyMixDangerNow()==='boolean'});})()"));
+    t('U2300 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2295;k<=2300;k++) t('U'+k+' 敌类全景',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
