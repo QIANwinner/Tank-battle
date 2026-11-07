@@ -7283,6 +7283,22 @@ async function main() {
     t('U2438 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2433;k<=2438;k++) t('U'+k+' 击杀节奏评级',false,e.message); }
 
+
+  // ===== U2445~U2450: 清场时间预估(v0.10.13) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('clearEstWrap'),f:T.clearEstTextNow(800,10,20)});})()"));
+    t('U2445 清场时间预估 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2446 正常 800血/10中/20s ~40s', o.f === '清场 ~40s', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.clearEstTextNow(0,10,20),b:T.clearEstTextNow(1200,10,20),c:T.clearEstTextNow(400,20,20)});})()"));
+    t('U2447 边界空场/高压/快速', o2.a === '' && o2.b === '清场 ~60s' && o2.c === '清场 ~10s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.clearEstTextNow(-100,5,10),b:T.clearEstTextNow(NaN,5,10),c:T.clearEstTextNow(500,0,10)});})()"));
+    t('U2448 非法输入/零命中未知', o3.a === '' && o3.b === '' && o3.c === '清场 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.clearEstTextNow('800','10','20'));})()"));
+    t('U2449 数字字符串转数', o4 === '清场 ~40s', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.clearEstDangerNow()==='boolean'});})()"));
+    t('U2450 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2445;k<=2450;k++) t('U'+k+' 清场时间预估',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
