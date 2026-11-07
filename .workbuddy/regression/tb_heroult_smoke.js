@@ -7043,6 +7043,22 @@ async function main() {
     t('U2348 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2343;k<=2348;k++) t('U'+k+' 粒子池使用',false,e.message); }
 
+
+  // ===== U2349~U2354: 弹幕安全边际(v0.9.7) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bulletMarginWrap'),f:T.bulletMarginTextNow(5)});})()"));
+    t('U2349 弹幕安全边际 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2350 正常安全距离', o.f === '安全', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletMarginTextNow(0),b:T.bulletMarginTextNow(2),c:T.bulletMarginTextNow(4)});})()"));
+    t('U2351 边界危险/警戒', o2.a === '危险' && o2.b === '危险' && o2.c === '警戒', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletMarginTextNow(-1),b:T.bulletMarginTextNow(NaN),c:T.bulletMarginTextNow(undefined)});})()"));
+    t('U2352 非法输入为空', o3.a === '' && o3.b === '' && o3.c === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bulletMarginTextNow('3'));})()"));
+    t('U2353 数字字符串转数', o4 === '警戒', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.bulletMarginDangerNow()==='boolean'});})()"));
+    t('U2354 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2349;k<=2354;k++) t('U'+k+' 弹幕安全边际',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
