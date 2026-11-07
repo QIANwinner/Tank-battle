@@ -7363,6 +7363,22 @@ async function main() {
     t('U2474 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2469;k<=2474;k++) t('U'+k+' 命中质量评级',false,e.message); }
 
+
+  // ===== U2475~U2480: 每命存活时长(v0.10.18) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('surviveEffWrap'),f:T.surviveEffTextNow(100,2)});})()"));
+    t('U2475 每命存活时长 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2476 正常 100s/2命 33s', o.f === '每命 33s', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.surviveEffTextNow(0,0),b:T.surviveEffTextNow(100,0),c:T.surviveEffTextNow(60,3)});})()"));
+    t('U2477 边界零/无死/多死', o2.a === '' && o2.b === '每命 100s' && o2.c === '每命 15s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.surviveEffTextNow(-5,0),b:T.surviveEffTextNow(NaN,0),c:T.surviveEffTextNow(100,-1)});})()"));
+    t('U2478 非法输入钳制', o3.a === '' && o3.b === '' && o3.c === '每命 100s', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.surviveEffTextNow('100','2'));})()"));
+    t('U2479 数字字符串转数', o4 === '每命 33s', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.surviveEffDangerNow()==='boolean'});})()"));
+    t('U2480 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2475;k<=2480;k++) t('U'+k+' 每命存活时长',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
