@@ -8211,6 +8211,22 @@ async function main() {
     t('U2792 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2787;k<=2792;k++) t('U'+k+' 道具均赚',false,e.message); }
 
+
+  // ===== U2793~U2798: 强化投入回报(v0.10.71) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('upgRoiWrap'),f:T.upgRoiTextNow(100,600)});})()"));
+    t('U2793 强化投入回报 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2794 正常 100/600=6分', o.f === '每投入 6 分', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.upgRoiTextNow(0,600),b:T.upgRoiTextNow(100,100),c:T.upgRoiTextNow(100,150)});})()"));
+    t('U2795 边界零投/1分亏/2分', o2.a === '投入 —' && o2.b === '每投入 1 分 · 亏' && o2.c === '每投入 2 分', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.upgRoiTextNow(-5,600),b:T.upgRoiTextNow(NaN,600)});})()"));
+    t('U2796 非法输入/空值', o3.a === '投入 —' && o3.b === '投入 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.upgRoiTextNow('100','600'));})()"));
+    t('U2797 数字字符串转数', o4 === '每投入 6 分', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.upgRoiDangerNow()==='boolean'});})()"));
+    t('U2798 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2793;k<=2798;k++) t('U'+k+' 强化投入回报',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
