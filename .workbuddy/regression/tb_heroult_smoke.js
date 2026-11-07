@@ -8499,6 +8499,22 @@ async function main() {
     t('U2900 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2895;k<=2900;k++) t('U'+k+' 得分含金',false,e.message); }
 
+
+  // ===== U2901~U2906: 道具均伤(v0.10.89) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('dmgPerPickupWrap'),f:T.dmgPerPickupTextNow(300,10)});})()"));
+    t('U2901 道具均伤 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2902 正常 300/10=30', o.f === '道具均 30 伤', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dmgPerPickupTextNow(0,10),b:T.dmgPerPickupTextNow(250,10),c:T.dmgPerPickupTextNow(300,10)});})()"));
+    t('U2903 边界零伤/25乏/30', o2.a === '道具均 —' && o2.b === '道具均 25 伤 · 乏' && o2.c === '道具均 30 伤', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dmgPerPickupTextNow(-5,10),b:T.dmgPerPickupTextNow(NaN,10)});})()"));
+    t('U2904 非法输入/空值', o3.a === '道具均 —' && o3.b === '道具均 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.dmgPerPickupTextNow('300','10'));})()"));
+    t('U2905 数字字符串转数', o4 === '道具均 30 伤', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.dmgPerPickupDangerNow()==='boolean'});})()"));
+    t('U2906 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2901;k<=2906;k++) t('U'+k+' 道具均伤',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
