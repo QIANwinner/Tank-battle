@@ -7379,6 +7379,22 @@ async function main() {
     t('U2480 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2475;k<=2480;k++) t('U'+k+' 每命存活时长',false,e.message); }
 
+
+  // ===== U2481~U2486: 复活经济节省(v0.10.19) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('reviveSaveWrap'),f:T.reviveSaveTextNow(2,50)});})()"));
+    t('U2481 复活经济节省 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2482 正常 2次×50 省100', o.f === '复活省 100', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reviveSaveTextNow(0,50),b:T.reviveSaveTextNow(1,50),c:T.reviveSaveTextNow(4,50)});})()"));
+    t('U2483 边界零/单/多', o2.a === '' && o2.b === '复活省 50' && o2.c === '复活省 200', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reviveSaveTextNow(-1,50),b:T.reviveSaveTextNow(NaN,50),c:T.reviveSaveTextNow(2,0)});})()"));
+    t('U2484 非法输入/零成本', o3.a === '' && o3.b === '' && o3.c === '复活省 0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.reviveSaveTextNow('2','50'));})()"));
+    t('U2485 数字字符串转数', o4 === '复活省 100', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.reviveSaveDangerNow()==='boolean'});})()"));
+    t('U2486 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2481;k<=2486;k++) t('U'+k+' 复活经济节省',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
