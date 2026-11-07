@@ -6483,6 +6483,22 @@ async function main() {
     t('U2138 DOM 与函数一致性', typeof o5.d === 'boolean', JSON.stringify(o5));
   } catch(e){ for(let k=2133;k<=2138;k++) t('U'+k+' 基地被围',false,e.message); }
 
+
+  // ===== U2139~U2144: 敌军压境(v0.8.72) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('enemySurgeAlertWrap'),f:T.enemySurgeAlertTextNow(3)});})()"));
+    t('U2139 警报 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2140 敌少不触发', o.f === '', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemySurgeAlertTextNow(12),b:T.enemySurgeAlertTextNow(9)});})()"));
+    t('U2141 压境触发', o2.a.indexOf('⚠') >= 0 && o2.b.indexOf('⚠') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemySurgeAlertTextNow(8),b:T.enemySurgeAlertTextNow(-3)});})()"));
+    t('U2142 边界 8 不警/负数安全', o3.a === '' && typeof o3.b === 'string', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.enemySurgeAlertTextNow(NaN));})()"));
+    t('U2143 NaN 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({d:T.enemySurgeAlertDangerNow()});})()"));
+    t('U2144 DOM 与函数一致性', typeof o5.d === 'boolean', JSON.stringify(o5));
+  } catch(e){ for(let k=2139;k<=2144;k++) t('U'+k+' 敌军压境',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
