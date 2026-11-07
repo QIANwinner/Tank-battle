@@ -7715,6 +7715,22 @@ async function main() {
     t('U2606 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2601;k<=2606;k++) t('U'+k+' BOSS血量百分比',false,e.message); }
 
+
+  // ===== U2607~U2612: 道具拾取速率(v0.10.40) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('itemRateWrap'),f:T.itemRateTextNow(6,120)});})()"));
+    t('U2607 道具拾取速率 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2608 正常 6个/120s 3.0/分', o.f === '道具 3.0/分', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.itemRateTextNow(0,120),b:T.itemRateTextNow(6,0),c:T.itemRateTextNow(3,60),d:T.itemRateTextNow(1,120)});})()"));
+    t('U2609 边界零道具/零秒/常规/小数', o2.a === '' && o2.b === '' && o2.c === '道具 3.0/分' && o2.d === '道具 0.5/分', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.itemRateTextNow(-1,120),b:T.itemRateTextNow(NaN,120)});})()"));
+    t('U2610 非法输入/空值', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.itemRateTextNow('6','120'));})()"));
+    t('U2611 数字字符串转数', o4 === '道具 3.0/分', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.itemRateDangerNow()==='boolean'});})()"));
+    t('U2612 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2607;k<=2612;k++) t('U'+k+' 道具拾取速率',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
