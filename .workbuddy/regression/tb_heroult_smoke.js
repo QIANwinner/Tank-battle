@@ -6707,6 +6707,22 @@ async function main() {
     t('U2222 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2217;k<=2222;k++) t('U'+k+' 生命加成',false,e.message); }
 
+
+  // ===== U2223~U2228: 护盾加成(v0.8.86) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bonusShieldWrap'),f:T.bonusShieldTextNow({shield:2})});})()"));
+    t('U2223 护盾加成 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2224 正常 +2 级', o.f.indexOf('护盾加成 +2') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bonusShieldTextNow({shield:5}),b:T.bonusShieldTextNow({shield:0})});})()"));
+    t('U2225 +5 级/0 级为空', o2.a.indexOf('+5') >= 0 && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bonusShieldTextNow({shield:-3}),b:T.bonusShieldTextNow({})});})()"));
+    t('U2226 负数/缺字段安全', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bonusShieldTextNow(NaN));})()"));
+    t('U2227 NaN 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.bonusShieldDangerNow()==='boolean'});})()"));
+    t('U2228 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2223;k<=2228;k++) t('U'+k+' 护盾加成',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
