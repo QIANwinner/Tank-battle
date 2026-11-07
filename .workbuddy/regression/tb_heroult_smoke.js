@@ -8275,6 +8275,22 @@ async function main() {
     t('U2816 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2811;k<=2816;k++) t('U'+k+' 敌欠',false,e.message); }
 
+
+  // ===== U2817~U2822: 命亡记录(v0.10.75) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('lifeMarginWrap'),f:T.lifeMarginTextNow(3,0)});})()"));
+    t('U2817 命亡记录 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2818 正常 命3亡0', o.f === '命 3 · 亡 0', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lifeMarginTextNow(0,0),b:T.lifeMarginTextNow(1,1),c:T.lifeMarginTextNow(3,1)});})()"));
+    t('U2819 边界双零/1危/3-1', o2.a === '命亡 —' && o2.b === '命 1 · 亡 1 · 危' && o2.c === '命 3 · 亡 1', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lifeMarginTextNow(-1,-1),b:T.lifeMarginTextNow(NaN,0)});})()"));
+    t('U2820 非法输入/空值', o3.a === '命亡 —' && o3.b === '命亡 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.lifeMarginTextNow('3','0'));})()"));
+    t('U2821 数字字符串转数', o4 === '命 3 · 亡 0', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.lifeMarginDangerNow()==='boolean'});})()"));
+    t('U2822 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2817;k<=2822;k++) t('U'+k+' 命亡记录',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
