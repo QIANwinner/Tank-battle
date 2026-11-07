@@ -8243,6 +8243,22 @@ async function main() {
     t('U2804 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2799;k<=2804;k++) t('U'+k+' 每中弹数',false,e.message); }
 
+
+  // ===== U2805~U2810: 连击击杀比(v0.10.73) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('comboPerKillWrap'),f:T.comboPerKillTextNow(15,50)});})()"));
+    t('U2805 连击击杀比 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2806 正常 15/50=30%', o.f === '连击/击杀 30%', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboPerKillTextNow(0,50),b:T.comboPerKillTextNow(50,50),c:T.comboPerKillTextNow(20,40)});})()"));
+    t('U2807 边界零连/100炸/50', o2.a === '连杀 —' && o2.b === '连击/击杀 100% · 炸' && o2.c === '连击/击杀 50% · 炸', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboPerKillTextNow(-5,50),b:T.comboPerKillTextNow(NaN,50)});})()"));
+    t('U2808 非法输入/空值', o3.a === '连杀 —' && o3.b === '连杀 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.comboPerKillTextNow('15','50'));})()"));
+    t('U2809 数字字符串转数', o4 === '连击/击杀 30%', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.comboPerKillDangerNow()==='boolean'});})()"));
+    t('U2810 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2805;k<=2810;k++) t('U'+k+' 连击击杀比',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
