@@ -7683,6 +7683,22 @@ async function main() {
     t('U2594 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2589;k<=2594;k++) t('U'+k+' 生存压力评级',false,e.message); }
 
+
+  // ===== U2595~U2600: 弹幕密度警戒(v0.10.38) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bulletDensityWrap'),f:T.bulletDensityTextNow(30)});})()"));
+    t('U2595 弹幕密度警戒 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2596 正常 30弹 弹幕 高', o.f === '弹幕 高', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletDensityTextNow(0),b:T.bulletDensityTextNow(25),c:T.bulletDensityTextNow(12),d:T.bulletDensityTextNow(11)});})()"));
+    t('U2597 边界零弹/高界/中界/低界', o2.a === '' && o2.b === '弹幕 高' && o2.c === '弹幕 中' && o2.d === '弹幕 低', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletDensityTextNow(-1),b:T.bulletDensityTextNow(NaN)});})()"));
+    t('U2598 非法输入/空值', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bulletDensityTextNow('30'));})()"));
+    t('U2599 数字字符串转数', o4 === '弹幕 高', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.bulletDensityDangerNow()==='boolean'});})()"));
+    t('U2600 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2595;k<=2600;k++) t('U'+k+' 弹幕密度警戒',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
