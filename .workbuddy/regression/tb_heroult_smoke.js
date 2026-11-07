@@ -8067,6 +8067,22 @@ async function main() {
     t('U2738 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2733;k<=2738;k++) t('U'+k+' 金币入账节奏',false,e.message); }
 
+
+  // ===== U2739~U2744: 已过波数(v0.10.62) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('waveClearedWrap'),f:T.waveClearedTextNow(4)});})()"));
+    t('U2739 已过波数 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2740 正常 已过3波', o.f === '已过 3 波', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveClearedTextNow(1),b:T.waveClearedTextNow(2),c:T.waveClearedTextNow(9)});})()"));
+    t('U2741 边界首波/过1/过8', o2.a === '首波' && o2.b === '已过 1 波' && o2.c === '已过 8 波', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveClearedTextNow(-2),b:T.waveClearedTextNow(NaN)});})()"));
+    t('U2742 非法输入/空值', o3.a === '波次 —' && o3.b === '波次 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.waveClearedTextNow('4'));})()"));
+    t('U2743 数字字符串转数', o4 === '已过 3 波', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.waveClearedDangerNow()==='boolean'});})()"));
+    t('U2744 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2739;k<=2744;k++) t('U'+k+' 已过波数',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
