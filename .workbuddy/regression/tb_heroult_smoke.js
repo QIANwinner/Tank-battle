@@ -8563,6 +8563,22 @@ async function main() {
     t('U2924 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2919;k<=2924;k++) t('U'+k+' 道具覆盖',false,e.message); }
 
+
+  // ===== U2925~U2930: 复活值得(v0.10.93) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('reviveWorthWrap'),st:T.reviveWorthStateNow(900,300)});})()"));
+    t('U2925 复活值得 DOM 已加入 HUD', o.dom === true && typeof o.st.tier === 'string', JSON.stringify(o));
+    t('U2926 正常 900/300=3 → A', o.st.tier === 'A' && o.st.txt === '复活 A 充裕', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reviveWorthStateNow(0,300),b:T.reviveWorthStateNow(450,300),c:T.reviveWorthStateNow(900,300)});})()"));
+    t('U2927 边界 0→D/450→B/900→A', o2.a.tier === 'D' && o2.b.tier === 'B' && o2.c.tier === 'A', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reviveWorthStateNow(-5,300),b:T.reviveWorthStateNow(NaN,300)});})()"));
+    t('U2928 非法输入/空值', o3.a.tier === 'D' && o3.b.tier === 'D', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.reviveWorthStateNow('900','300').tier);})()"));
+    t('U2929 数字字符串转数', o4 === 'A', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.reviveWorthDangerNow()==='boolean'});})()"));
+    t('U2930 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2925;k<=2930;k++) t('U'+k+' 复活值得',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
