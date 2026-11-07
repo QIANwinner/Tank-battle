@@ -8131,6 +8131,22 @@ async function main() {
     t('U2762 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2757;k<=2762;k++) t('U'+k+' 最高连击进度',false,e.message); }
 
+
+  // ===== U2763~U2768: 每杀伤害(v0.10.66) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('dmgPerKillWrap'),f:T.dmgPerKillTextNow(400,5)});})()"));
+    t('U2763 每杀伤害 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2764 正常 400/5=80', o.f === '每杀 80 伤害', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dmgPerKillTextNow(0,5),b:T.dmgPerKillTextNow(600,5),c:T.dmgPerKillTextNow(100,5)});})()"));
+    t('U2765 边界零伤/120狠/20', o2.a === '每杀 —' && o2.b === '每杀 120 伤害 · 狠' && o2.c === '每杀 20 伤害', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dmgPerKillTextNow(400,-5),b:T.dmgPerKillTextNow(NaN,5)});})()"));
+    t('U2766 非法输入/空值', o3.a === '每杀 —' && o3.b === '每杀 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.dmgPerKillTextNow('400','5'));})()"));
+    t('U2767 数字字符串转数', o4 === '每杀 80 伤害', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.dmgPerKillDangerNow()==='boolean'});})()"));
+    t('U2768 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2763;k<=2768;k++) t('U'+k+' 每杀伤害',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
