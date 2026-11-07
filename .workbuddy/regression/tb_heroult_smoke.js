@@ -6547,6 +6547,22 @@ async function main() {
     t('U2162 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2157;k<=2162;k++) t('U'+k+' 难度倍率',false,e.message); }
 
+
+  // ===== U2163~U2168: 道具金币占比(v0.8.76) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('pickupShareWrap'),f:T.pickupShareTextNow(500,1000)});})()"));
+    t('U2163 占比 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2164 正常占比 50%', o.f.indexOf('50.0%') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pickupShareTextNow(1000,1000),b:T.pickupShareTextNow(0,500)});})()"));
+    t('U2165 全道具/零道具占比', o2.a.indexOf('100.0%') >= 0 && o2.b.indexOf('0.0%') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pickupShareTextNow(100,0),b:T.pickupShareTextNow(-5,-3)});})()"));
+    t('U2166 边界 0 总额/负数安全', o3.a === '' && typeof o3.b === 'string', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.pickupShareTextNow(NaN,NaN));})()"));
+    t('U2167 NaN 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.pickupShareDangerNow()==='boolean'});})()"));
+    t('U2168 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2163;k<=2168;k++) t('U'+k+' 道具金币占比',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
