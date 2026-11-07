@@ -6451,6 +6451,22 @@ async function main() {
     t('U2126 DOM 与函数一致性', typeof o5.d === 'boolean', JSON.stringify(o5));
   } catch(e){ for(let k=2121;k<=2126;k++) t('U'+k+' 连杀将断',false,e.message); }
 
+
+  // ===== U2127~U2132: 护盾将尽(v0.8.70) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('shieldWarnAlertWrap'),f:T.shieldWarnAlertTextNow(5)});})()"));
+    t('U2127 警报 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2128 护盾充足不触发', o.f === '', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shieldWarnAlertTextNow(1.5),b:T.shieldWarnAlertTextNow(0)});})()"));
+    t('U2129 将尽触发/无盾不触发', o2.a.indexOf('🛡') >= 0 && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shieldWarnAlertTextNow(-1),b:T.shieldWarnAlertTextNow(2)});})()"));
+    t('U2130 边界负数/2s 安全', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.shieldWarnAlertTextNow(NaN));})()"));
+    t('U2131 NaN 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({d:T.shieldWarnAlertDangerNow()});})()"));
+    t('U2132 DOM 与函数一致性', typeof o5.d === 'boolean', JSON.stringify(o5));
+  } catch(e){ for(let k=2127;k<=2132;k++) t('U'+k+' 护盾将尽',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
