@@ -7171,6 +7171,22 @@ async function main() {
     t('U2396 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2391;k<=2396;k++) t('U'+k+' 道具利用效率',false,e.message); }
 
+
+  // ===== U2397~U2402: 火力交换比(v0.10.5) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('fireExchangeWrap'),f:T.fireExchangeTextNow(6,3)});})()"));
+    t('U2397 火力交换比 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2398 正常 6:3 优势 2.0x', o.f === '火力 2.0x', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.fireExchangeTextNow(0,0),b:T.fireExchangeTextNow(4,0),c:T.fireExchangeTextNow(1,4)});})()"));
+    t('U2399 边界空战/无解/劣势', o2.a === '' && o2.b === '火力 ∞' && o2.c === '火力 0.3x', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.fireExchangeTextNow(-2,-1),b:T.fireExchangeTextNow(NaN,3),c:T.fireExchangeTextNow(2,undefined)});})()"));
+    t('U2400 非法输入', o3.a === '' && o3.b === '火力 0.0x' && o3.c === '火力 ∞', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.fireExchangeTextNow('8','4'));})()"));
+    t('U2401 数字字符串转数', o4 === '火力 2.0x', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.fireExchangeDangerNow()==='boolean'});})()"));
+    t('U2402 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2397;k<=2402;k++) t('U'+k+' 火力交换比',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
