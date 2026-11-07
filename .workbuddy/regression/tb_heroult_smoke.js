@@ -8227,6 +8227,22 @@ async function main() {
     t('U2798 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2793;k<=2798;k++) t('U'+k+' 强化投入回报',false,e.message); }
 
+
+  // ===== U2799~U2804: 每中弹数(v0.10.72) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('shotsPerHitWrap'),f:T.shotsPerHitTextNow(12,4)});})()"));
+    t('U2799 每中弹数 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2800 正常 12/4=3发', o.f === '每中 3 发', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shotsPerHitTextNow(0,4),b:T.shotsPerHitTextNow(20,4),c:T.shotsPerHitTextNow(20,10)});})()"));
+    t('U2801 边界零发/5飘/2', o2.a === '每中 —' && o2.b === '每中 5 发 · 飘' && o2.c === '每中 2 发', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shotsPerHitTextNow(-5,4),b:T.shotsPerHitTextNow(NaN,4)});})()"));
+    t('U2802 非法输入/空值', o3.a === '每中 —' && o3.b === '每中 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.shotsPerHitTextNow('12','4'));})()"));
+    t('U2803 数字字符串转数', o4 === '每中 3 发', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.shotsPerHitDangerNow()==='boolean'});})()"));
+    t('U2804 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2799;k<=2804;k++) t('U'+k+' 每中弹数',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
