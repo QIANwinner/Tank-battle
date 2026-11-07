@@ -8611,6 +8611,22 @@ async function main() {
     t('U2942 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2937;k<=2942;k++) t('U'+k+' 强化评级',false,e.message); }
 
+
+  // ===== U2943~U2948: 清场评级(v0.10.96) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('clearPressureWrap'),st:T.clearPressureStateNow(10,5)});})()"));
+    t('U2943 清场评级 DOM 已加入 HUD', o.dom === true && typeof o.st.tier === 'string', JSON.stringify(o));
+    t('U2944 正常 10/波5 → A', o.st.tier === 'A' && o.st.txt === '清压 A 顺', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.clearPressureStateNow(0,5),b:T.clearPressureStateNow(25,5),c:T.clearPressureStateNow(45,5)});})()"));
+    t('U2945 边界 0→A/25→C/45→D', o2.a.tier === 'A' && o2.b.tier === 'C' && o2.c.tier === 'D', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.clearPressureStateNow(-5,5),b:T.clearPressureStateNow(NaN,5)});})()"));
+    t('U2946 非法输入/空值', o3.a.tier === 'A' && o3.b.tier === 'A', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.clearPressureStateNow('10','5').tier);})()"));
+    t('U2947 数字字符串转数', o4 === 'A', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.clearPressureDangerNow()==='boolean'});})()"));
+    t('U2948 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2943;k<=2948;k++) t('U'+k+' 清场评级',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
