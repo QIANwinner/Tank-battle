@@ -7827,6 +7827,22 @@ async function main() {
     t('U2648 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2643;k<=2648;k++) t('U'+k+' 敌阵血量占比',false,e.message); }
 
+
+  // ===== U2649~U2654: 敌阵残血分布(v0.10.47) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('foeWoundWrap'),f:T.foeWoundTextNow(3,1)});})()"));
+    t('U2649 敌阵残血分布 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2650 正常 3伤1危', o.f === '危 1 / 伤 3', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.foeWoundTextNow(0,0),b:T.foeWoundTextNow(2,0),c:T.foeWoundTextNow(0,1)});})()"));
+    t('U2651 边界空局/纯伤/纯危', o2.a === '' && o2.b === '伤 2' && o2.c === '危 1 / 伤 0', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.foeWoundTextNow(-1,-1),b:T.foeWoundTextNow(NaN,NaN)});})()"));
+    t('U2652 非法输入/空值', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.foeWoundTextNow('3','1'));})()"));
+    t('U2653 数字字符串转数', o4 === '危 1 / 伤 3', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.foeWoundDangerNow()==='boolean'});})()"));
+    t('U2654 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2649;k<=2654;k++) t('U'+k+' 敌阵残血分布',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
