@@ -8083,6 +8083,22 @@ async function main() {
     t('U2744 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2739;k<=2744;k++) t('U'+k+' 已过波数',false,e.message); }
 
+
+  // ===== U2745~U2750: 复活总花费(v0.10.63) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('reviveSpendWrap'),f:T.reviveSpendTextNow(2,50)});})()"));
+    t('U2745 复活总花费 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2746 正常 2次50=100', o.f === '复活费 100 金币', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reviveSpendTextNow(0,50),b:T.reviveSpendTextNow(10,50),c:T.reviveSpendTextNow(3,50)});})()"));
+    t('U2747 边界零次/500高/150', o2.a === '复活费 0' && o2.b === '复活费 500 金币 · 高' && o2.c === '复活费 150 金币', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reviveSpendTextNow(2,-50),b:T.reviveSpendTextNow(NaN,50)});})()"));
+    t('U2748 非法输入/空值', o3.a === '复活费 0' && o3.b === '复活费 0', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.reviveSpendTextNow('2','50'));})()"));
+    t('U2749 数字字符串转数', o4 === '复活费 100 金币', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.reviveSpendDangerNow()==='boolean'});})()"));
+    t('U2750 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2745;k<=2750;k++) t('U'+k+' 复活总花费',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
