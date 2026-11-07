@@ -7635,6 +7635,22 @@ async function main() {
     t('U2576 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2571;k<=2576;k++) t('U'+k+' 每杀金币',false,e.message); }
 
+
+  // ===== U2577~U2582: 命中致死率(v0.10.35) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('killPerHitWrap'),f:T.killPerHitTextNow(40,50)});})()"));
+    t('U2577 命中致死率 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2578 正常 40/50=80% 命中致死 80%', o.f === '命中致死 80%', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killPerHitTextNow(0,50),b:T.killPerHitTextNow(50,50),c:T.killPerHitTextNow(10,20)});})()"));
+    t('U2579 边界零杀/满致死/常规', o2.a === '' && o2.b === '命中致死 100%' && o2.c === '命中致死 50%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killPerHitTextNow(-1,50),b:T.killPerHitTextNow(10,0),c:T.killPerHitTextNow(10,NaN)});})()"));
+    t('U2580 非法输入/零命中未知', o3.a === '' && o3.b === '' && o3.c === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.killPerHitTextNow('40','50'));})()"));
+    t('U2581 数字字符串转数', o4 === '命中致死 80%', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.killPerHitDangerNow()==='boolean'});})()"));
+    t('U2582 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2577;k<=2582;k++) t('U'+k+' 命中致死率',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
