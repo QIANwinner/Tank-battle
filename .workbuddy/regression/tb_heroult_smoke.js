@@ -8643,6 +8643,22 @@ async function main() {
     t('U2954 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2949;k<=2954;k++) t('U'+k+' 道具评级',false,e.message); }
 
+
+  // ===== U2955~U2960: 连击评级(v0.10.98) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('comboYieldWrap'),st:T.comboYieldStateNow(30,900)});})()"));
+    t('U2955 连击评级 DOM 已加入 HUD', o.dom === true && typeof o.st.tier === 'string', JSON.stringify(o));
+    t('U2956 正常 900/30=30 → A', o.st.tier === 'A' && o.st.txt === '连击 A 强', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboYieldStateNow(0,900),b:T.comboYieldStateNow(30,150),c:T.comboYieldStateNow(30,900)});})()"));
+    t('U2957 边界 0→-/30/150→C/30/900→A', o2.a.tier === '-' && o2.b.tier === 'C' && o2.c.tier === 'A', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboYieldStateNow(-5,900),b:T.comboYieldStateNow(NaN,900)});})()"));
+    t('U2958 非法输入/空值', o3.a.tier === '-' && o3.b.tier === '-', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.comboYieldStateNow('30','900').tier);})()"));
+    t('U2959 数字字符串转数', o4 === 'A', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.comboYieldDangerNow()==='boolean'});})()"));
+    t('U2960 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2955;k<=2960;k++) t('U'+k+' 连击评级',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
