@@ -7891,6 +7891,22 @@ async function main() {
     t('U2672 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2667;k<=2672;k++) t('U'+k+' 敌阵纵深',false,e.message); }
 
+
+  // ===== U2673~U2678: 敌阵规模(v0.10.51) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('foeCountWrap'),f:T.foeCountTextNow(8)});})()"));
+    t('U2673 敌阵规模 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2674 正常 8台', o.f === '敌 8 台', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.foeCountTextNow(0),b:T.foeCountTextNow(1),c:T.foeCountTextNow(9),d:T.foeCountTextNow(10),e:T.foeCountTextNow(20)});})()"));
+    t('U2675 边界空局/1台/9台/10台/爆满', o2.a === '' && o2.b === '敌 1 台' && o2.c === '敌 9 台' && o2.d === '敌阵 10 台' && o2.e === '敌阵 20 台', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.foeCountTextNow(-1),b:T.foeCountTextNow(NaN)});})()"));
+    t('U2676 非法输入/空值', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.foeCountTextNow('8'));})()"));
+    t('U2677 数字字符串转数', o4 === '敌 8 台', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.foeCountDangerNow()==='boolean'});})()"));
+    t('U2678 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2673;k<=2678;k++) t('U'+k+' 敌阵规模',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
