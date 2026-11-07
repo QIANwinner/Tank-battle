@@ -6691,6 +6691,22 @@ async function main() {
     t('U2216 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2211;k<=2216;k++) t('U'+k+' 加成合计',false,e.message); }
 
+
+  // ===== U2217~U2222: 生命加成(v0.8.85) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bonusLifeupWrap'),f:T.bonusLifeupTextNow({lifeup:1})});})()"));
+    t('U2217 生命加成 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2218 正常 +1 级', o.f.indexOf('生命加成 +1') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bonusLifeupTextNow({lifeup:3}),b:T.bonusLifeupTextNow({lifeup:0})});})()"));
+    t('U2219 +3 级/0 级为空', o2.a.indexOf('+3') >= 0 && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bonusLifeupTextNow({lifeup:-1}),b:T.bonusLifeupTextNow({})});})()"));
+    t('U2220 负数/缺字段安全', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bonusLifeupTextNow(null));})()"));
+    t('U2221 null 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.bonusLifeupDangerNow()==='boolean'});})()"));
+    t('U2222 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2217;k<=2222;k++) t('U'+k+' 生命加成',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
