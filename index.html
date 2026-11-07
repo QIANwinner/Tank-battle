@@ -2178,6 +2178,7 @@
   #fireRateWrap .v { color: #00f0ff; font-weight: 800; font-size: 11px; }
   #coinFlowWrap .v { color: #ffd32a; font-weight: 800; font-size: 11px; }
   #upgDensityWrap .v { color: #7ee7ff; font-weight: 800; font-size: 11px; }
+  #waveLeftWrap .v { color: #2ed573; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -2499,6 +2500,7 @@
     <div class="pill m-hide" id="fireRateWrap"><span class="k">🎯</span><span class="v" id="fireRateVal">—</span></div>
     <div class="pill m-hide" id="coinFlowWrap"><span class="k">💸</span><span class="v" id="coinFlowVal">—</span></div>
     <div class="pill m-hide" id="upgDensityWrap"><span class="k">🧬</span><span class="v" id="upgDensityVal">—</span></div>
+    <div class="pill m-hide" id="waveLeftWrap"><span class="k">🌊</span><span class="v" id="waveLeftVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -2874,7 +2876,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V10.23</div>
+  <div id="mark">DESIGNED BY QIAN · V10.24</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7997,6 +7999,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r53frV = $('fireRateVal'); if (r53frV) { const r53frT = fireRateText(stat.shots, playSecRun); r53frV.textContent = r53frT || '—'; const r53frW = $('fireRateWrap'); if (r53frW) { const r53frR = (stat.shots > 0 && playSecRun > 0) ? (stat.shots / playSecRun) : 0; r53frW.classList.toggle('danger', r53frR > 0 && r53frR < 1.0); } }
     const r53cfV = $('coinFlowVal'); if (r53cfV) { const r53cfT = coinFlowText(runCoins, playSecRun); r53cfV.textContent = r53cfT || '—'; const r53cfW = $('coinFlowWrap'); if (r53cfW) { const r53cfM = (runCoins > 0 && playSecRun > 0) ? (runCoins / playSecRun) * 60 : 0; r53cfW.classList.toggle('danger', r53cfM > 0 && r53cfM < 30); } }
     const r53udV = $('upgDensityVal'); if (r53udV) { const r53udT = upgDensityText(upgTotal, wave); r53udV.textContent = r53udT || '—'; const r53udW = $('upgDensityWrap'); if (r53udW) { const r53udD = (upgTotal > 0 && wave > 0) ? (upgTotal / wave) : 0; r53udW.classList.toggle('danger', r53udD > 0 && r53udD < 0.5); } }
+    const r53wlV = $('waveLeftVal'); if (r53wlV) { const r53wlT = waveLeftText(wave, wavesTotal); r53wlV.textContent = r53wlT || '—'; const r53wlW = $('waveLeftWrap'); if (r53wlW) r53wlW.classList.toggle('danger', r53wlT === '剩 1 波' || r53wlT === '最终波'); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -10376,6 +10379,15 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (!(d > 0)) return '强化 —';
     return '强化 ' + d.toFixed(1) + '/波';
   }
+  // —— v0.10.24 剩余波次 ——
+  function waveLeftText(wave, total) {
+    const w = Math.max(0, Math.floor(Number(wave) || 0));
+    const t = Math.max(0, Math.floor(Number(total) || 0));
+    if (w <= 0) return '';
+    if (t <= 0) return '无尽';
+    if (t <= w) return '最终波';
+    return '剩 ' + (t - w) + ' 波';
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -12217,7 +12229,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V10.23', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V10.24', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -13517,6 +13529,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       fireRateTextNow: (s, t) => fireRateText(s, t), fireRateDangerNow: () => { const w = $('fireRateWrap'); return !!(w && w.classList.contains('danger')); },
       coinFlowTextNow: (c, t) => coinFlowText(c, t), coinFlowDangerNow: () => { const w = $('coinFlowWrap'); return !!(w && w.classList.contains('danger')); },
       upgDensityTextNow: (u, w) => upgDensityText(u, w), upgDensityDangerNow: () => { const w = $('upgDensityWrap'); return !!(w && w.classList.contains('danger')); },
+      waveLeftTextNow: (w, t) => waveLeftText(w, t), waveLeftDangerNow: () => { const w = $('waveLeftWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

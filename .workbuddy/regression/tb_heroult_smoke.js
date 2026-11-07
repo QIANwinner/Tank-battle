@@ -7459,6 +7459,22 @@ async function main() {
     t('U2510 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2505;k<=2510;k++) t('U'+k+' 强化密度',false,e.message); }
 
+
+  // ===== U2511~U2516: 剩余波次(v0.10.24) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('waveLeftWrap'),f:T.waveLeftTextNow(2,5)});})()"));
+    t('U2511 剩余波次 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2512 正常 2/5 剩 3 波', o.f === '剩 3 波', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveLeftTextNow(0,5),b:T.waveLeftTextNow(5,5),c:T.waveLeftTextNow(4,5)});})()"));
+    t('U2513 边界零波/最终波/剩1', o2.a === '' && o2.b === '最终波' && o2.c === '剩 1 波', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveLeftTextNow(-1,5),b:T.waveLeftTextNow(2,0),c:T.waveLeftTextNow(2,-3)});})()"));
+    t('U2514 非法输入/无尽模式', o3.a === '' && o3.b === '无尽' && o3.c === '无尽', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.waveLeftTextNow('2','5'));})()"));
+    t('U2515 数字字符串转数', o4 === '剩 3 波', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.waveLeftDangerNow()==='boolean'});})()"));
+    t('U2516 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2511;k<=2516;k++) t('U'+k+' 剩余波次',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
