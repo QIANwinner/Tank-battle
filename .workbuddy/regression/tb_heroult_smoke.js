@@ -8403,6 +8403,22 @@ async function main() {
     t('U2864 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2859;k<=2864;k++) t('U'+k+' 受击节奏',false,e.message); }
 
+
+  // ===== U2865~U2870: 复活占比(v0.10.83) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('reviveRatioWrap'),f:T.reviveRatioTextNow(2,5)});})()"));
+    t('U2865 复活占比 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2866 正常 2/5=40%', o.f === '复活 40%', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reviveRatioTextNow(0,5),b:T.reviveRatioTextNow(5,5),c:T.reviveRatioTextNow(1,5)});})()"));
+    t('U2867 边界零复/100赖/20', o2.a === '复活 —' && o2.b === '复活 100% · 赖' && o2.c === '复活 20%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reviveRatioTextNow(-2,5),b:T.reviveRatioTextNow(NaN,5)});})()"));
+    t('U2868 非法输入/空值', o3.a === '复活 —' && o3.b === '复活 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.reviveRatioTextNow('2','5'));})()"));
+    t('U2869 数字字符串转数', o4 === '复活 40%', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.reviveRatioDangerNow()==='boolean'});})()"));
+    t('U2870 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2865;k<=2870;k++) t('U'+k+' 复活占比',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
