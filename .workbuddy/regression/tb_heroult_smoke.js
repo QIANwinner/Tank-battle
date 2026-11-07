@@ -7155,6 +7155,22 @@ async function main() {
     t('U2390 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2385;k<=2390;k++) t('U'+k+' BOSS阶段读条',false,e.message); }
 
+
+  // ===== U2391~U2396: 道具利用效率(v0.10.4) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('powerupRateWrap'),f:T.powerupRateTextNow(3,60)});})()"));
+    t('U2391 道具利用效率 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2392 正常 3/60 道具/分', o.f === '道具 3.0/分', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.powerupRateTextNow(0,60),b:T.powerupRateTextNow(2,30)});})()"));
+    t('U2393 零/倍率', o2.a === '道具 0.0/分' && o2.b === '道具 4.0/分', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.powerupRateTextNow(5,0),b:T.powerupRateTextNow(5,-3),c:T.powerupRateTextNow(NaN,60)});})()"));
+    t('U2394 非法输入', o3.a === '' && o3.b === '' && o3.c === '道具 0.0/分', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.powerupRateTextNow(1,40));})()"));
+    t('U2395 小数精度', o4 === '道具 1.5/分', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.powerupRateDangerNow()==='boolean'});})()"));
+    t('U2396 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2391;k<=2396;k++) t('U'+k+' 道具利用效率',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
