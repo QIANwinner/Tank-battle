@@ -7491,6 +7491,22 @@ async function main() {
     t('U2522 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2517;k<=2522;k++) t('U'+k+' 最大单笔金币',false,e.message); }
 
+
+  // ===== U2523~U2528: 击杀效率(v0.10.26) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('killEffWrap'),f:T.killEffTextNow(4,10)});})()"));
+    t('U2523 击杀效率 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2524 正常 4杀/10发 0.40', o.f === '击杀/发 0.40', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killEffTextNow(0,10),b:T.killEffTextNow(1,1),c:T.killEffTextNow(10,20)});})()"));
+    t('U2525 边界零杀/满效率/半效率', o2.a === '' && o2.b === '击杀/发 1.00' && o2.c === '击杀/发 0.50', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killEffTextNow(-2,10),b:T.killEffTextNow(4,0),c:T.killEffTextNow(4,-5)});})()"));
+    t('U2526 非法输入/零发未知', o3.a === '' && o3.b === '击杀 —' && o3.c === '击杀 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.killEffTextNow('4','10'));})()"));
+    t('U2527 数字字符串转数', o4 === '击杀/发 0.40', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.killEffDangerNow()==='boolean'});})()"));
+    t('U2528 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2523;k<=2528;k++) t('U'+k+' 击杀效率',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
