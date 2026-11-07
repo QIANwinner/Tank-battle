@@ -7779,6 +7779,22 @@ async function main() {
     t('U2630 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2625;k<=2630;k++) t('U'+k+' 护盾等级',false,e.message); }
 
+
+  // ===== U2631~U2636: 战局生存评级(v0.10.44) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('surviveGradeWrap'),f:T.surviveGradeTextNow(600,1)});})()"));
+    t('U2631 战局生存评级 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2632 正常 600s/1死 生存 S', o.f === '生存 S', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.surviveGradeTextNow(600,0),b:T.surviveGradeTextNow(300,5),c:T.surviveGradeTextNow(120,3),d:T.surviveGradeTextNow(60,3),e:T.surviveGradeTextNow(0,0)});})()"));
+    t('U2633 边界零死/60s每命/40s/20s/空局', o2.a === '生存 S' && o2.b === '生存 A' && o2.c === '生存 B' && o2.d === '生存 C' && o2.e === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.surviveGradeTextNow(-1,0),b:T.surviveGradeTextNow(NaN,0)});})()"));
+    t('U2634 非法输入/空值', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.surviveGradeTextNow('600','0'));})()"));
+    t('U2635 数字字符串转数', o4 === '生存 S', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.surviveGradeDangerNow()==='boolean'});})()"));
+    t('U2636 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2631;k<=2636;k++) t('U'+k+' 战局生存评级',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
