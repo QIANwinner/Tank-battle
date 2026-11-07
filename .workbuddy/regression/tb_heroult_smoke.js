@@ -6611,6 +6611,22 @@ async function main() {
     t('U2186 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2181;k<=2186;k++) t('U'+k+' 命中未中',false,e.message); }
 
+
+  // ===== U2187~U2192: 生涯每击杀耗弹(v0.8.80) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerKillPerShotWrap'),f:T.careerKillPerShotTextNow(10,50)});})()"));
+    t('U2187 耗弹 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2188 正常 50 弹/10 杀=5.0', o.f.indexOf('5.0') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerKillPerShotTextNow(1,1),b:T.careerKillPerShotTextNow(0,99)});})()"));
+    t('U2189 单发一杀/0 杀为空', o2.a.indexOf('1.0') >= 0 && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerKillPerShotTextNow(-10,-50),b:T.careerKillPerShotTextNow(5,0)});})()"));
+    t('U2190 边界负数安全/0 弹 0.0', o3.a === '' && o3.b.indexOf('0.0') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.careerKillPerShotTextNow(NaN,NaN));})()"));
+    t('U2191 NaN 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.careerKillPerShotDangerNow()==='boolean'});})()"));
+    t('U2192 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2187;k<=2192;k++) t('U'+k+' 每击杀耗弹',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
