@@ -7299,6 +7299,22 @@ async function main() {
     t('U2450 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2445;k<=2450;k++) t('U'+k+' 清场时间预估',false,e.message); }
 
+
+  // ===== U2451~U2456: 输出潜力评级(v0.10.14) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('dpsGradeWrap'),f:T.dpsGradeTextNow(2,2,2)});})()"));
+    t('U2451 输出潜力评级 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2452 正常 2/2/2 为 A', o.f === '输出 A', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dpsGradeTextNow(5,4,5),b:T.dpsGradeTextNow(0,0,0),c:T.dpsGradeTextNow(1,1,1)});})()"));
+    t('U2453 边界 S/C/B 级', o2.a === '输出 S' && o2.b === '输出 C' && o2.c === '输出 B', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dpsGradeTextNow(-1,2,2),b:T.dpsGradeTextNow(2,2,NaN),c:T.dpsGradeTextNow(2,2,-1)});})()"));
+    t('U2454 非法输入钳制', o3.a === '输出 B' && o3.b === '输出 B' && o3.c === '输出 B', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.dpsGradeTextNow('2','2','2'));})()"));
+    t('U2455 数字字符串转数', o4 === '输出 A', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.dpsGradeDangerNow()==='boolean'});})()"));
+    t('U2456 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2451;k<=2456;k++) t('U'+k+' 输出潜力评级',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
