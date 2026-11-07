@@ -7427,6 +7427,22 @@ async function main() {
     t('U2498 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2493;k<=2498;k++) t('U'+k+' 本局射速',false,e.message); }
 
+
+  // ===== U2499~U2504: 金币流速(v0.10.22) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('coinFlowWrap'),f:T.coinFlowTextNow(120,60)});})()"));
+    t('U2499 金币流速 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2500 正常 120币/60s 120/分', o.f === '金币 120/分', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinFlowTextNow(0,60),b:T.coinFlowTextNow(300,60),c:T.coinFlowTextNow(5,10)});})()"));
+    t('U2501 边界零币/高流速/低流速', o2.a === '' && o2.b === '金币 300/分' && o2.c === '金币 30/分', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinFlowTextNow(-5,60),b:T.coinFlowTextNow(120,NaN),c:T.coinFlowTextNow(120,0)});})()"));
+    t('U2502 非法输入/零秒未知', o3.a === '' && o3.b === '金币 —' && o3.c === '金币 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.coinFlowTextNow('120','60'));})()"));
+    t('U2503 数字字符串转数', o4 === '金币 120/分', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.coinFlowDangerNow()==='boolean'});})()"));
+    t('U2504 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2499;k<=2504;k++) t('U'+k+' 金币流速',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
