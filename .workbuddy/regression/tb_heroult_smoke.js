@@ -6627,6 +6627,22 @@ async function main() {
     t('U2192 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2187;k<=2192;k++) t('U'+k+' 每击杀耗弹',false,e.message); }
 
+
+  // ===== U2193~U2198: 每命击杀数(v0.8.81) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('killsPerLifeWrap'),f:T.killsPerLifeTextNow(20,3)});})()"));
+    t('U2193 每命 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2194 正常 20 杀/3 死=5.0', o.f.indexOf('5.0') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killsPerLifeTextNow(10,0),b:T.killsPerLifeTextNow(0,5)});})()"));
+    t('U2195 0 死 10.0/0 杀 0.0', o2.a.indexOf('10.0') >= 0 && o2.b.indexOf('0.0') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killsPerLifeTextNow(-20,-3),b:T.killsPerLifeTextNow(NaN,NaN)});})()"));
+    t('U2196 边界负数/NaN 安全', typeof o3.a === 'string' && typeof o3.b === 'string', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.killsPerLifeTextNow(undefined,undefined));})()"));
+    t('U2197 undefined 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.killsPerLifeDangerNow()==='boolean'});})()"));
+    t('U2198 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2193;k<=2198;k++) t('U'+k+' 每命击杀',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
