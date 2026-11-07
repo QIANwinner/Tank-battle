@@ -7747,6 +7747,22 @@ async function main() {
     t('U2618 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2613;k<=2618;k++) t('U'+k+' 连击峰值达成',false,e.message); }
 
+
+  // ===== U2619~U2624: 复活可负担(v0.10.42) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('reviveAffordWrap'),f:T.reviveAffordTextNow(500,300)});})()"));
+    t('U2619 复活可负担 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2620 正常 500>=300 可复活', o.f === '可复活', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reviveAffordTextNow(100,300),b:T.reviveAffordTextNow(300,300),c:T.reviveAffordTextNow(0,300)});})()"));
+    t('U2621 边界缺口/刚够/零金币', o2.a === '复活差 200' && o2.b === '可复活' && o2.c === '复活差 300', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reviveAffordTextNow(100,0),b:T.reviveAffordTextNow(100,-5),c:T.reviveAffordTextNow(100,NaN)});})()"));
+    t('U2622 非法输入/无成本', o3.a === '' && o3.b === '' && o3.c === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.reviveAffordTextNow('500','300'));})()"));
+    t('U2623 数字字符串转数', o4 === '可复活', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.reviveAffordDangerNow()==='boolean'});})()"));
+    t('U2624 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2619;k<=2624;k++) t('U'+k+' 复活可负担',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
