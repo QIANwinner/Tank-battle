@@ -7731,6 +7731,22 @@ async function main() {
     t('U2612 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2607;k<=2612;k++) t('U'+k+' 道具拾取速率',false,e.message); }
 
+
+  // ===== U2613~U2618: 连击峰值达成(v0.10.41) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('comboPeakGapWrap'),f:T.comboPeakGapTextNow(20,30)});})()"));
+    t('U2613 连击峰值达成 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2614 正常 20/30 距峰 10', o.f === '距峰 10', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboPeakGapTextNow(0,30),b:T.comboPeakGapTextNow(30,30),c:T.comboPeakGapTextNow(10,100)});})()"));
+    t('U2615 边界零连击/达峰/大差距', o2.a === '' && o2.b === '连击 达峰' && o2.c === '距峰 90', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboPeakGapTextNow(-1,30),b:T.comboPeakGapTextNow(NaN,30)});})()"));
+    t('U2616 非法输入/空值', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.comboPeakGapTextNow('20','30'));})()"));
+    t('U2617 数字字符串转数', o4 === '距峰 10', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.comboPeakGapDangerNow()==='boolean'});})()"));
+    t('U2618 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2613;k<=2618;k++) t('U'+k+' 连击峰值达成',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
