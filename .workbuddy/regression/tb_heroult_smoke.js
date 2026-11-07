@@ -8195,6 +8195,22 @@ async function main() {
     t('U2786 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2781;k<=2786;k++) t('U'+k+' 命中安全比',false,e.message); }
 
+
+  // ===== U2787~U2792: 道具均赚(v0.10.70) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('pickupGainPerKindWrap'),f:T.pickupGainPerKindTextNow(450,3)});})()"));
+    t('U2787 道具均赚 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2788 正常 450/3=150', o.f === '道具均赚 150 金币', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pickupGainPerKindTextNow(0,3),b:T.pickupGainPerKindTextNow(200,1),c:T.pickupGainPerKindTextNow(90,3)});})()"));
+    t('U2789 边界零币/200富/30', o2.a === '道具 —' && o2.b === '道具均赚 200 金币 · 富' && o2.c === '道具均赚 30 金币', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pickupGainPerKindTextNow(450,-3),b:T.pickupGainPerKindTextNow(NaN,3)});})()"));
+    t('U2790 非法输入/空值', o3.a === '道具 —' && o3.b === '道具 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.pickupGainPerKindTextNow('450','3'));})()"));
+    t('U2791 数字字符串转数', o4 === '道具均赚 150 金币', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.pickupGainPerKindDangerNow()==='boolean'});})()"));
+    t('U2792 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2787;k<=2792;k++) t('U'+k+' 道具均赚',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
