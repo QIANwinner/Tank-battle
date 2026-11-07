@@ -7187,6 +7187,22 @@ async function main() {
     t('U2402 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2397;k<=2402;k++) t('U'+k+' 火力交换比',false,e.message); }
 
+
+  // ===== U2403~U2408: 敌我兵力比(v0.10.6) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('forceRatioWrap'),f:T.forceRatioTextNow(3,1)});})()"));
+    t('U2403 敌我兵力比 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2404 正常 3:1', o.f === '兵力 3:1', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.forceRatioTextNow(0,1),b:T.forceRatioTextNow(6,2),c:T.forceRatioTextNow(5,1)});})()"));
+    t('U2405 边界空敌/多敌', o2.a === '' && o2.b === '兵力 6:2' && o2.c === '兵力 5:1', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.forceRatioTextNow(-1,1),b:T.forceRatioTextNow(NaN,1),c:T.forceRatioTextNow(3,0)});})()"));
+    t('U2406 非法输入/单位钳制', o3.a === '' && o3.b === '' && o3.c === '兵力 3:1', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.forceRatioTextNow('6','2'));})()"));
+    t('U2407 数字字符串转数', o4 === '兵力 6:2', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.forceRatioDangerNow()==='boolean'});})()"));
+    t('U2408 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2403;k<=2408;k++) t('U'+k+' 敌我兵力比',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
