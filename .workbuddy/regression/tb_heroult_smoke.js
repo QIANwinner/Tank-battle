@@ -7267,6 +7267,22 @@ async function main() {
     t('U2432 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2427;k<=2432;k++) t('U'+k+' 战局推进指数',false,e.message); }
 
+
+  // ===== U2433~U2438: 击杀节奏评级(v0.10.11) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('killPaceGradeWrap'),f:T.killPaceGradeTextNow(30,60)});})()"));
+    t('U2433 击杀节奏评级 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2434 正常 30/分 A 级', o.f === '节奏 A', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killPaceGradeTextNow(60,60),b:T.killPaceGradeTextNow(0,60),c:T.killPaceGradeTextNow(20,60)});})()"));
+    t('U2435 边界 S/C/B 级', o2.a === '节奏 S' && o2.b === '节奏 C' && o2.c === '节奏 B', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killPaceGradeTextNow(5,0),b:T.killPaceGradeTextNow(5,-3),c:T.killPaceGradeTextNow(NaN,60)});})()"));
+    t('U2436 非法输入/零秒', o3.a === '' && o3.b === '' && o3.c === '节奏 C', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.killPaceGradeTextNow('30','60'));})()"));
+    t('U2437 数字字符串转数', o4 === '节奏 A', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.killPaceGradeDangerNow()==='boolean'});})()"));
+    t('U2438 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2433;k<=2438;k++) t('U'+k+' 击杀节奏评级',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
