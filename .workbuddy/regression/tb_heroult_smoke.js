@@ -6931,6 +6931,22 @@ async function main() {
     t('U2306 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2301;k<=2306;k++) t('U'+k+' 受击红闪',false,e.message); }
 
+
+  // ===== U2307~U2312: 大招白闪(v0.9.0) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('ultFlashWrap'),f:T.ultFlashTextNow(0.2)});})()"));
+    t('U2307 大招白闪 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2308 正常大招显示', o.f.indexOf('大招') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.ultFlashTextNow(0),b:T.ultFlashTextNow(-3)});})()"));
+    t('U2309 0/负数为空', o2.a === '' && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.ultFlashTextNow(undefined));})()"));
+    t('U2310 undefined 安全返回字符串', typeof o3 === 'string', o3);
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.ultFlashTextNow('1.5'));})()"));
+    t('U2311 数字字符串转数', o4.indexOf('大招') >= 0, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.ultFlashDangerNow()==='boolean'});})()"));
+    t('U2312 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2307;k<=2312;k++) t('U'+k+' 大招白闪',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
