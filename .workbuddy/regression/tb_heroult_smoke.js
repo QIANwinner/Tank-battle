@@ -8019,6 +8019,22 @@ async function main() {
     t('U2720 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2715;k<=2720;k++) t('U'+k+' 金币效率',false,e.message); }
 
+
+  // ===== U2721~U2726: 无敌帧倒计时(v0.10.59) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('invincibleWrap'),f:T.invincibleTextNow(90)});})()"));
+    t('U2721 无敌帧倒计时 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2722 正常 90帧=2s', o.f === '无敌 2s', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.invincibleTextNow(0),b:T.invincibleTextNow(60),c:T.invincibleTextNow(300)});})()"));
+    t('U2723 边界空/1s/5s', o2.a === '' && o2.b === '无敌 1s' && o2.c === '无敌 5s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.invincibleTextNow(-1),b:T.invincibleTextNow(NaN)});})()"));
+    t('U2724 非法输入/空值', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.invincibleTextNow('90'));})()"));
+    t('U2725 数字字符串转数', o4 === '无敌 2s', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.invincibleDangerNow()==='boolean'});})()"));
+    t('U2726 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2721;k<=2726;k++) t('U'+k+' 无敌帧倒计时',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
