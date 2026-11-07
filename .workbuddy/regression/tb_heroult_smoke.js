@@ -7203,6 +7203,22 @@ async function main() {
     t('U2408 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2403;k<=2408;k++) t('U'+k+' 敌我兵力比',false,e.message); }
 
+
+  // ===== U2409~U2414: 生存容错度(v0.10.7) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('survToleranceWrap'),f:T.survivalToleranceTextNow(2,1,2,1,1)});})()"));
+    t('U2409 生存容错度 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2410 正常容错 6', o.f === '容错 6', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.survivalToleranceTextNow(1,0,0,1,0),b:T.survivalToleranceTextNow(0,0,0,0,0),c:T.survivalToleranceTextNow(3,1,0,1,0)});})()"));
+    t('U2411 边界低容错/零/护盾', o2.a === '容错 1' && o2.b === '容错 0' && o2.c === '容错 4', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.survivalToleranceTextNow(-1,0,0,1,0),b:T.survivalToleranceTextNow(NaN,0,0,1,0),c:T.survivalToleranceTextNow(2,0,-1,1,0)});})()"));
+    t('U2412 非法输入钳制', o3.a === '容错 0' && o3.b === '容错 0' && o3.c === '容错 2', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.survivalToleranceTextNow('2','1','2','1','1'));})()"));
+    t('U2413 数字字符串转数', o4 === '容错 6', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.survivalToleranceDangerNow()==='boolean'});})()"));
+    t('U2414 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2409;k<=2414;k++) t('U'+k+' 生存容错度',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

@@ -2162,6 +2162,7 @@
   #powerupRateWrap .v { color: #2ed573; font-weight: 800; font-size: 11px; }
   #fireExchangeWrap .v { color: #ff7f50; font-weight: 800; font-size: 11px; }
   #forceRatioWrap .v { color: #eccc68; font-weight: 800; font-size: 11px; }
+  #survToleranceWrap .v { color: #7bed9f; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -2467,6 +2468,7 @@
     <div class="pill m-hide" id="powerupRateWrap"><span class="k">🧰</span><span class="v" id="powerupRateVal">—</span></div>
     <div class="pill m-hide" id="fireExchangeWrap"><span class="k">⚖</span><span class="v" id="fireExchangeVal">—</span></div>
     <div class="pill m-hide" id="forceRatioWrap"><span class="k">🪖</span><span class="v" id="forceRatioVal">—</span></div>
+    <div class="pill m-hide" id="survToleranceWrap"><span class="k">🛡</span><span class="v" id="survToleranceVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -2842,7 +2844,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V10.6</div>
+  <div id="mark">DESIGNED BY QIAN · V10.7</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7949,6 +7951,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r50prV = $('powerupRateVal'); if (r50prV) { const r50prT = powerupRateText(runPowerups, playSecRun); r50prV.textContent = r50prT || '—'; }
     const r51fxV = $('fireExchangeVal'); if (r51fxV) { let r51o = 0, r51f = 0; for (const b of bullets) { if (b.owner && b.owner.isPlayer) r51o++; else r51f++; } const r51fxT = fireExchangeText(r51o, r51f); r51fxV.textContent = r51fxT || '—'; const r51fxW = $('fireExchangeWrap'); if (r51fxW) r51fxW.classList.toggle('danger', r51f > r51o); }
     const r51frV = $('forceRatioVal'); if (r51frV) { let r51eN = 0; for (const en of enemies) { if (en.dead) continue; r51eN++; } const r51uN = 1 + (multiMode === 1 ? 1 : 0); const r51frT = forceRatioText(r51eN, r51uN); r51frV.textContent = r51frT || '—'; const r51frW = $('forceRatioWrap'); if (r51frW) r51frW.classList.toggle('danger', r51eN >= Math.max(1, r51uN) * 3); }
+    const r51svV = $('survToleranceVal'); if (r51svV) { const r51inv = (player && player.spawnInv > 0) ? 1 : 0; const r51bk = baseAlive ? 1 : 0; const r51svT = survivalToleranceText(lives, r51inv, baseLevel, r51bk, reviveCount); r51svV.textContent = r51svT; const r51svW = $('survToleranceWrap'); if (r51svW) r51svW.classList.toggle('danger', lives <= 1); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -10179,6 +10182,16 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const uu = Math.max(1, u);
     return '兵力 ' + e + ':' + uu;
   }
+  // —— v0.10.7 生存容错度 ——
+  function survivalToleranceText(lives, invOn, baseUp, baseOk, revived) {
+    const l = Math.max(0, Math.floor(Number(lives) || 0));
+    const b = Math.max(0, Math.floor(Number(baseUp) || 0));
+    let r = l;
+    if (Number(invOn)) r += 1;
+    if (Number(baseOk)) r += b;
+    r += Math.max(0, Math.floor(Number(revived) || 0));
+    return '容错 ' + r;
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -12020,7 +12033,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V10.6', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V10.7', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -13304,6 +13317,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       powerupRateTextNow: (n, s) => powerupRateText(n, s), powerupRateDangerNow: () => { const w = $('powerupRateWrap'); return !!(w && w.classList.contains('danger')); },
       fireExchangeTextNow: (o, f) => fireExchangeText(o, f), fireExchangeDangerNow: () => { const w = $('fireExchangeWrap'); return !!(w && w.classList.contains('danger')); },
       forceRatioTextNow: (e, u) => forceRatioText(e, u), forceRatioDangerNow: () => { const w = $('forceRatioWrap'); return !!(w && w.classList.contains('danger')); },
+      survivalToleranceTextNow: (l, i, b, k, r) => survivalToleranceText(l, i, b, k, r), survivalToleranceDangerNow: () => { const w = $('survToleranceWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
