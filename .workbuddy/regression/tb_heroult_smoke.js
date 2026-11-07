@@ -8451,6 +8451,22 @@ async function main() {
     t('U2882 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2877;k<=2882;k++) t('U'+k+' 道具均收益',false,e.message); }
 
+
+  // ===== U2883~U2888: 波均道具(v0.10.86) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('puPerWaveWrap'),f:T.puPerWaveTextNow(15,5)});})()"));
+    t('U2883 波均道具 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2884 正常 15/5=3', o.f === '波均 3 件', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.puPerWaveTextNow(0,5),b:T.puPerWaveTextNow(2,5),c:T.puPerWaveTextNow(15,5)});})()"));
+    t('U2885 边界零件/0稀/3', o2.a === '波均 —' && o2.b === '波均 0 件 · 稀' && o2.c === '波均 3 件', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.puPerWaveTextNow(-5,5),b:T.puPerWaveTextNow(NaN,5)});})()"));
+    t('U2886 非法输入/空值', o3.a === '波均 —' && o3.b === '波均 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.puPerWaveTextNow('15','5'));})()"));
+    t('U2887 数字字符串转数', o4 === '波均 3 件', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.puPerWaveDangerNow()==='boolean'});})()"));
+    t('U2888 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2883;k<=2888;k++) t('U'+k+' 波均道具',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
