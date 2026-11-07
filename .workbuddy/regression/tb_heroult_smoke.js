@@ -7395,6 +7395,22 @@ async function main() {
     t('U2486 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2481;k<=2486;k++) t('U'+k+' 复活经济节省',false,e.message); }
 
+
+  // ===== U2487~U2492: 护墙完整度(v0.10.20) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('wallIntactWrap'),f:T.wallIntactTextNow(2,3)});})()"));
+    t('U2487 护墙完整度 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2488 正常 2/3', o.f === '护墙 2/3', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.wallIntactTextNow(0,3),b:T.wallIntactTextNow(3,3),c:T.wallIntactTextNow(1,4)});})()"));
+    t('U2489 边界全灭/满墙/少墙', o2.a === '护墙 0/3' && o2.b === '护墙 3/3' && o2.c === '护墙 1/4', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.wallIntactTextNow(-1,3),b:T.wallIntactTextNow(NaN,3),c:T.wallIntactTextNow(2,0)});})()"));
+    t('U2490 非法输入/零上限', o3.a === '护墙 0/3' && o3.b === '护墙 0/3' && o3.c === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.wallIntactTextNow('2','3'));})()"));
+    t('U2491 数字字符串转数', o4 === '护墙 2/3', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.wallIntactDangerNow()==='boolean'});})()"));
+    t('U2492 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2487;k<=2492;k++) t('U'+k+' 护墙完整度',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
