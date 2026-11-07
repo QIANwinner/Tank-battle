@@ -6579,6 +6579,22 @@ async function main() {
     t('U2174 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2169;k<=2174;k++) t('U'+k+' 生涯平均用时',false,e.message); }
 
+
+  // ===== U2175~U2180: 得分效率评级(v0.8.78) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('scoreRateGradeWrap'),f:T.scoreRateGradeTextNow(300,10)});})()"));
+    t('U2175 评级 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2176 正常 30/s 得 A', o.f.indexOf('A') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scoreRateGradeTextNow(500,10),b:T.scoreRateGradeTextNow(100,10)});})()"));
+    t('U2177 高 50/s 得 S/低 10/s 得 C', o2.a.indexOf('S') >= 0 && o2.b.indexOf('C') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scoreRateGradeTextNow(100,0),b:T.scoreRateGradeTextNow(-50,-5)});})()"));
+    t('U2178 边界 0 秒为空/负数安全', o3.a === '' && typeof o3.b === 'string', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.scoreRateGradeTextNow(NaN,NaN));})()"));
+    t('U2179 NaN 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.scoreRateGradeDangerNow()==='boolean'});})()"));
+    t('U2180 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2175;k<=2180;k++) t('U'+k+' 得分效率',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
