@@ -162,6 +162,12 @@ Tank-battle/
 
 ## 🆕 更新日志
 
+### v0.8.66 · 2026-11-07
+**磁暴剩余 pill（修复 shV/near 引用错误，恢复全部 pill 渲染）**
+- 修复 updateExtraHud 两个 ReferenceError，恢复所有 pill 实时渲染
+- ✅ 回归验证：主套件 169/169 + 反馈专项 2090/2090（无回归）
+- 📴 Service Worker 缓存版本更新至 **v08660**，游戏内版本 **V8.66**
+
 ### v0.8.64 · 2026-11-06
 **Wingman 存活状态 pill**
 - Wingman 存活状态 pill（新增 DOM/CSS/状态逻辑 + 6 条专项断言）

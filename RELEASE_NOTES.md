@@ -1,3 +1,16 @@
+# v0.8.66 · 磁暴剩余 pill（修复 shV/near 引用错误，恢复全部 pill 渲染）
+
+> 修复 updateExtraHud 两个 ReferenceError，恢复所有 pill 实时渲染 回归：主套件 169/169 + 反馈专项 2090/2090。
+
+## 🅰 改进
+
+- 修复 updateExtraHud 两个 ReferenceError，恢复所有 pill 实时渲染
+
+## 🅱 验证
+
+- 主套件 169/169 + 反馈专项 2090/2090；内联脚本语法 SYNTAX OK
+- SW 缓存 v08660，游戏内版本 V8.66；远程树与本地树一致（sync_push）
+
 # v0.8.64 · Wingman 存活状态 pill
 
 > Wingman 存活状态 pill（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 1502/1502。
