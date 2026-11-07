@@ -6963,6 +6963,22 @@ async function main() {
     t('U2318 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2313;k<=2318;k++) t('U'+k+' Boss受击闪白',false,e.message); }
 
+
+  // ===== U2319~U2324: Boss击破白闪(v0.9.2) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossWhiteFlashWrap'),f:T.bossWhiteFlashTextNow(0.5)});})()"));
+    t('U2319 Boss击破白闪 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2320 正常 Boss击破显示', o.f.indexOf('Boss击破') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossWhiteFlashTextNow(0),b:T.bossWhiteFlashTextNow(-1)});})()"));
+    t('U2321 0/负数为空', o2.a === '' && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bossWhiteFlashTextNow(undefined));})()"));
+    t('U2322 undefined 安全返回字符串', typeof o3 === 'string', o3);
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bossWhiteFlashTextNow('0.1'));})()"));
+    t('U2323 数字字符串转数', o4.indexOf('Boss击破') >= 0, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.bossWhiteFlashDangerNow()==='boolean'});})()"));
+    t('U2324 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2319;k<=2324;k++) t('U'+k+' Boss击破白闪',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

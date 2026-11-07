@@ -2147,6 +2147,7 @@
   #hitFlashWrap .v { color: #ff4757; font-weight: 800; font-size: 11px; }
   #ultFlashWrap .v { color: #ffa502; font-weight: 800; font-size: 11px; }
   #bossHitFlashWrap .v { color: #eccc68; font-weight: 800; font-size: 11px; }
+  #bossWhiteFlashWrap .v { color: #70a1ff; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -2437,6 +2438,7 @@
     <div class="pill m-hide" id="hitFlashWrap"><span class="k">💥</span><span class="v" id="hitFlashVal">—</span></div>
     <div class="pill m-hide" id="ultFlashWrap"><span class="k">⚡</span><span class="v" id="ultFlashVal">—</span></div>
     <div class="pill m-hide" id="bossHitFlashWrap"><span class="k">🩸</span><span class="v" id="bossHitFlashVal">—</span></div>
+    <div class="pill m-hide" id="bossWhiteFlashWrap"><span class="k">✨</span><span class="v" id="bossWhiteFlashVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -2812,7 +2814,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V9.1</div>
+  <div id="mark">DESIGNED BY QIAN · V9.2</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7904,6 +7906,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r49hfV = $('hitFlashVal'); if (r49hfV) { const r49hfT = hitFlashText(hurtFlash); r49hfV.textContent = r49hfT || '—'; const r49hfW = $('hitFlashWrap'); if (r49hfW) r49hfW.classList.toggle('danger', !!r49hfT); }
     const r49ufV = $('ultFlashVal'); if (r49ufV) { const r49ufT = ultFlashText(ultFlash); r49ufV.textContent = r49ufT || '—'; const r49ufW = $('ultFlashWrap'); if (r49ufW) r49ufW.classList.toggle('danger', !!r49ufT); }
     const r49bhV = $('bossHitFlashVal'); if (r49bhV) { const r49bhT = bossHitFlashText(bossHitFlash); r49bhV.textContent = r49bhT || '—'; const r49bhW = $('bossHitFlashWrap'); if (r49bhW) r49bhW.classList.toggle('danger', !!r49bhT); }
+    const r49wfV = $('bossWhiteFlashVal'); if (r49wfV) { const r49wfT = bossWhiteFlashText(whiteFlash); r49wfV.textContent = r49wfT || '—'; const r49wfW = $('bossWhiteFlashWrap'); if (r49wfW) r49wfW.classList.toggle('danger', !!r49wfT); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -10022,6 +10025,12 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (n <= 0) return '';
     return '🩸 Boss受击';
   }
+  // —— v0.9.2 Boss击破白闪 ——
+  function bossWhiteFlashText(v) {
+    const n = Number(v) || 0;
+    if (n <= 0) return '';
+    return '✨ Boss击破';
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -11863,7 +11872,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V9.1', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V9.2', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -13132,6 +13141,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       hitFlashTextNow: (v) => hitFlashText(v), hitFlashDangerNow: () => { const w = $('hitFlashWrap'); return !!(w && w.classList.contains('danger')); },
       ultFlashTextNow: (v) => ultFlashText(v), ultFlashDangerNow: () => { const w = $('ultFlashWrap'); return !!(w && w.classList.contains('danger')); },
       bossHitFlashTextNow: (v) => bossHitFlashText(v), bossHitFlashDangerNow: () => { const w = $('bossHitFlashWrap'); return !!(w && w.classList.contains('danger')); },
+      bossWhiteFlashTextNow: (v) => bossWhiteFlashText(v), bossWhiteFlashDangerNow: () => { const w = $('bossWhiteFlashWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
