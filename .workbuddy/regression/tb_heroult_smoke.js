@@ -6643,6 +6643,22 @@ async function main() {
     t('U2198 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2193;k<=2198;k++) t('U'+k+' 每命击杀',false,e.message); }
 
+
+  // ===== U2199~U2204: 波次节奏(v0.8.82) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('wavePaceWrap'),f:T.wavePaceTextNow(4,240)});})()"));
+    t('U2199 节奏 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2200 正常 4 波 240s 均 1m00s', o.f.indexOf('1m00s') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.wavePaceTextNow(1,30),b:T.wavePaceTextNow(2,180)});})()"));
+    t('U2201 单波 0m30s/双波 1m30s', o2.a.indexOf('0m30s') >= 0 && o2.b.indexOf('1m30s') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.wavePaceTextNow(0,100),b:T.wavePaceTextNow(3,0)});})()"));
+    t('U2202 边界 0 波/0 秒为空', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.wavePaceTextNow(NaN,NaN));})()"));
+    t('U2203 NaN 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.wavePaceDangerNow()==='boolean'});})()"));
+    t('U2204 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2199;k<=2204;k++) t('U'+k+' 波次节奏',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
