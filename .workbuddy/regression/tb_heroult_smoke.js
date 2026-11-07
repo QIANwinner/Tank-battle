@@ -6819,6 +6819,22 @@ async function main() {
     t('U2264 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2259;k<=2264;k++) t('U'+k+' 弹速加成',false,e.message); }
 
+
+  // ===== U2265~U2270: 穿透加成(v0.8.93) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bonusPierceWrap'),f:T.bonusPierceTextNow({pierce:1})});})()"));
+    t('U2265 穿透加成 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2266 正常 +1 级', o.f.indexOf('穿透加成 +1') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bonusPierceTextNow({pierce:3}),b:T.bonusPierceTextNow({pierce:0})});})()"));
+    t('U2267 +3 级/0 级为空', o2.a.indexOf('+3') >= 0 && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bonusPierceTextNow({pierce:-5}),b:T.bonusPierceTextNow({})});})()"));
+    t('U2268 负数/缺字段安全', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bonusPierceTextNow(NaN));})()"));
+    t('U2269 NaN 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.bonusPierceDangerNow()==='boolean'});})()"));
+    t('U2270 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2265;k<=2270;k++) t('U'+k+' 穿透加成',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
