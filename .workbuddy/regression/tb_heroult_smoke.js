@@ -7107,6 +7107,22 @@ async function main() {
     t('U2372 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2367;k<=2372;k++) t('U'+k+' 道具磁吸预览',false,e.message); }
 
+
+  // ===== U2373~U2378: 威胁热力评级(v0.10.1) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('threatWrap'),f:T.threatRatingTextNow(3,1,0)});})()"));
+    t('U2373 威胁热力评级 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2374 正常低威胁 1/5', o.f === '⚠ 威胁 1/5', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.threatRatingTextNow(20,5,1),b:T.threatRatingTextNow(10,3,0),c:T.threatRatingTextNow(0,0,0)});})()"));
+    t('U2375 边界高威胁/钳制', o2.a === '⚠ 威胁 5/5' && o2.b === '⚠ 威胁 3/5' && o2.c === '⚠ 威胁 1/5', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.threatRatingTextNow(-5,-2,0),b:T.threatRatingTextNow(NaN,NaN,0)});})()"));
+    t('U2376 非法输入钳制到 1/5', o3.a === '⚠ 威胁 1/5' && o3.b === '⚠ 威胁 1/5', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.threatRatingTextNow(0,0,1));})()"));
+    t('U2377 低血标志提升评级', o4 === '⚠ 威胁 2/5', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.threatDangerNow()==='boolean'});})()"));
+    t('U2378 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2373;k<=2378;k++) t('U'+k+' 威胁热力评级',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
