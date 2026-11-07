@@ -7987,6 +7987,22 @@ async function main() {
     t('U2708 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2703;k<=2708;k++) t('U'+k+' 近敌威胁带',false,e.message); }
 
+
+  // ===== U2709~U2714: 开火倾斜(v0.10.57) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('fireTiltWrap'),f:T.fireTiltTextNow(3,5)});})()"));
+    t('U2709 开火倾斜 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2710 正常 3友5敌', o.f === '火力 -2', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.fireTiltTextNow(0,0),b:T.fireTiltTextNow(4,4),c:T.fireTiltTextNow(5,0)});})()"));
+    t('U2711 边界空火/均衡/压制', o2.a === '' && o2.b === '火力均' && o2.c === '火力 +5', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.fireTiltTextNow(-1,-1),b:T.fireTiltTextNow(NaN,NaN)});})()"));
+    t('U2712 非法输入/空值', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.fireTiltTextNow('3','5'));})()"));
+    t('U2713 数字字符串转数', o4 === '火力 -2', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.fireTiltDangerNow()==='boolean'});})()"));
+    t('U2714 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2709;k<=2714;k++) t('U'+k+' 开火倾斜',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
