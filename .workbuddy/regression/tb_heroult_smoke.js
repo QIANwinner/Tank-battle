@@ -7475,6 +7475,22 @@ async function main() {
     t('U2516 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2511;k<=2516;k++) t('U'+k+' 剩余波次',false,e.message); }
 
+
+  // ===== U2517~U2522: 最大单笔金币(v0.10.25) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('maxGainWrap'),f:T.maxGainTextNow([{n:120},{n:80},{n:40}])});})()"));
+    t('U2517 最大单笔金币 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2518 正常 120/80/40 最大 120', o.f === '单笔最大 +120', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.maxGainTextNow([]),b:T.maxGainTextNow([{n:50}]),c:T.maxGainTextNow([{n:99},{n:99}])});})()"));
+    t('U2519 边界空/单笔/平手', o2.a === '' && o2.b === '单笔最大 +50' && o2.c === '单笔最大 +99', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.maxGainTextNow([{n:-5},{n:NaN}]),b:T.maxGainTextNow(null),c:T.maxGainTextNow([{n:0}])});})()"));
+    t('U2520 非法输入/空日志', o3.a === '' && o3.b === '' && o3.c === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.maxGainTextNow([{n:'150'},{n:30}]));})()"));
+    t('U2521 字符串金额转数', o4 === '单笔最大 +150', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.maxGainDangerNow()==='boolean'});})()"));
+    t('U2522 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2517;k<=2522;k++) t('U'+k+' 最大单笔金币',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
