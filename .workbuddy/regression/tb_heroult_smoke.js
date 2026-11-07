@@ -8547,6 +8547,22 @@ async function main() {
     t('U2918 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2913;k<=2918;k++) t('U'+k+' 敌存活率',false,e.message); }
 
+
+  // ===== U2919~U2924: 道具覆盖(v0.10.92) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('puCoverWrap'),f:T.puCoverTextNow(4,6)});})()"));
+    t('U2919 道具覆盖 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2920 正常 4/6', o.f === '覆盖 4/6', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.puCoverTextNow(0,6),b:T.puCoverTextNow(3,6),c:T.puCoverTextNow(6,6)});})()"));
+    t('U2921 边界零覆/3窄/6', o2.a === '覆盖 —' && o2.b === '覆盖 3/6 · 窄' && o2.c === '覆盖 6/6', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.puCoverTextNow(-5,6),b:T.puCoverTextNow(NaN,6)});})()"));
+    t('U2922 非法输入/空值', o3.a === '覆盖 —' && o3.b === '覆盖 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.puCoverTextNow('4','6'));})()"));
+    t('U2923 数字字符串转数', o4 === '覆盖 4/6', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.puCoverDangerNow()==='boolean'});})()"));
+    t('U2924 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2919;k<=2924;k++) t('U'+k+' 道具覆盖',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
