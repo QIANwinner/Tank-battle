@@ -6467,6 +6467,22 @@ async function main() {
     t('U2132 DOM 与函数一致性', typeof o5.d === 'boolean', JSON.stringify(o5));
   } catch(e){ for(let k=2127;k<=2132;k++) t('U'+k+' 护盾将尽',false,e.message); }
 
+
+  // ===== U2133~U2138: 基地被围(v0.8.71) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('baseSiegeAlertWrap'),f:T.baseSiegeAlertTextNow(true,0)});})()"));
+    t('U2133 警报 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2134 基地安全不触发', o.f === '', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseSiegeAlertTextNow(true,3),b:T.baseSiegeAlertTextNow(false,0)});})()"));
+    t('U2135 被围触发/已毁提示', o2.a.indexOf('🏰') >= 0 && o2.b.indexOf('💥') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.baseSiegeAlertTextNow(true,-1),b:T.baseSiegeAlertTextNow(true,NaN)});})()"));
+    t('U2136 边界负数/NaN 安全', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.baseSiegeAlertTextNow(undefined,undefined));})()"));
+    t('U2137 undefined 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({d:T.baseSiegeAlertDangerNow()});})()"));
+    t('U2138 DOM 与函数一致性', typeof o5.d === 'boolean', JSON.stringify(o5));
+  } catch(e){ for(let k=2133;k<=2138;k++) t('U'+k+' 基地被围',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
