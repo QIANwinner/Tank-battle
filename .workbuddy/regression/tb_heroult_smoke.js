@@ -6659,6 +6659,22 @@ async function main() {
     t('U2204 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2199;k<=2204;k++) t('U'+k+' 波次节奏',false,e.message); }
 
+
+  // ===== U2205~U2210: 被冻敌数(v0.8.83) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('frozenEnemyWrap'),f:T.frozenEnemyTextNow([{dead:false,freezeT:30},{dead:false,freezeT:20}],0)});})()"));
+    t('U2205 冻敌 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2206 正常 2 敌被冻', o.f.indexOf('冻敌 2') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.frozenEnemyTextNow([{dead:false,freezeT:0},{dead:false,freezeT:0},{dead:true,freezeT:99}],1),b:T.frozenEnemyTextNow([{dead:false,freezeT:0}],0)});})()"));
+    t('U2207 全局冰冻计活敌/无冻敌空', o2.a.indexOf('冻敌 2') >= 0 && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.frozenEnemyTextNow([],0),b:T.frozenEnemyTextNow(null,0)});})()"));
+    t('U2208 边界 空数组/null 为空', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.frozenEnemyTextNow([],NaN));})()"));
+    t('U2209 NaN 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.frozenEnemyDangerNow()==='boolean'});})()"));
+    t('U2210 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2205;k<=2210;k++) t('U'+k+' 被冻敌数',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
