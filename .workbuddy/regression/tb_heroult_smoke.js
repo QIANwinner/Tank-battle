@@ -7875,6 +7875,22 @@ async function main() {
     t('U2666 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2661;k<=2666;k++) t('U'+k+' 磁吸捕获',false,e.message); }
 
+
+  // ===== U2667~U2672: 敌阵纵深(v0.10.50) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('foeDepthWrap'),f:T.foeDepthTextNow(12)});})()"));
+    t('U2667 敌阵纵深 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2668 正常 12格', o.f === '敌深入 12 格', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.foeDepthTextNow(0),b:T.foeDepthTextNow(1),c:T.foeDepthTextNow(20)});})()"));
+    t('U2669 边界空局/首格/深格', o2.a === '' && o2.b === '敌深入 1 格' && o2.c === '敌深入 20 格', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.foeDepthTextNow(-1),b:T.foeDepthTextNow(NaN)});})()"));
+    t('U2670 非法输入/空值', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.foeDepthTextNow('12'));})()"));
+    t('U2671 数字字符串转数', o4 === '敌深入 12 格', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.foeDepthDangerNow()==='boolean'});})()"));
+    t('U2672 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2667;k<=2672;k++) t('U'+k+' 敌阵纵深',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
