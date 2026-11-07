@@ -7123,6 +7123,22 @@ async function main() {
     t('U2378 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2373;k<=2378;k++) t('U'+k+' 威胁热力评级',false,e.message); }
 
+
+  // ===== U2379~U2384: 连击破峰(v0.10.2) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('comboPeakWrap'),f:T.comboPeakTextNow(5,8)});})()"));
+    t('U2379 连击破峰 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2380 正常距峰 3', o.f === '距峰 3', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboPeakTextNow(10,10),b:T.comboPeakTextNow(12,10)});})()"));
+    t('U2381 边界破峰', o2.a === '破峰 +0' && o2.b === '破峰 +2', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboPeakTextNow(0,10),b:T.comboPeakTextNow(-3,10),c:T.comboPeakTextNow(NaN,10)});})()"));
+    t('U2382 非法输入为空', o3.a === '' && o3.b === '' && o3.c === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.comboPeakTextNow('7','10'));})()"));
+    t('U2383 数字字符串转数', o4 === '距峰 3', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.comboPeakDangerNow()==='boolean'});})()"));
+    t('U2384 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2379;k<=2384;k++) t('U'+k+' 连击破峰',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
