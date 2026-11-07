@@ -7539,6 +7539,22 @@ async function main() {
     t('U2540 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2535;k<=2540;k++) t('U'+k+' 每波平均击杀',false,e.message); }
 
+
+  // ===== U2541~U2546: 已战斗时长(v0.10.29) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('battleTimeWrap'),f:T.battleTimeTextNow(300)});})()"));
+    t('U2541 已战斗时长 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2542 正常 300s=5m', o.f === '已战 5m', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.battleTimeTextNow(0),b:T.battleTimeTextNow(45),c:T.battleTimeTextNow(90)});})()"));
+    t('U2543 边界零/分内/跨分', o2.a === '' && o2.b === '已战 45s' && o2.c === '已战 1m30s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.battleTimeTextNow(-5),b:T.battleTimeTextNow(NaN),c:T.battleTimeTextNow('')});})()"));
+    t('U2544 非法输入/空值', o3.a === '' && o3.b === '' && o3.c === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.battleTimeTextNow('300'));})()"));
+    t('U2545 数字字符串转数', o4 === '已战 5m', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.battleTimeDangerNow()==='boolean'});})()"));
+    t('U2546 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2541;k<=2546;k++) t('U'+k+' 已战斗时长',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
