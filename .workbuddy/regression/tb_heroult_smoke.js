@@ -7411,6 +7411,22 @@ async function main() {
     t('U2492 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2487;k<=2492;k++) t('U'+k+' 护墙完整度',false,e.message); }
 
+
+  // ===== U2493~U2498: 本局射速(v0.10.21) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('fireRateWrap'),f:T.fireRateTextNow(50,20)});})()"));
+    t('U2493 本局射速 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2494 正常 50发/20s 2.5/s', o.f === '射速 2.5/s', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.fireRateTextNow(0,20),b:T.fireRateTextNow(100,20),c:T.fireRateTextNow(10,10)});})()"));
+    t('U2495 边界零发/高压/基准', o2.a === '' && o2.b === '射速 5.0/s' && o2.c === '射速 1.0/s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.fireRateTextNow(-5,20),b:T.fireRateTextNow(50,NaN),c:T.fireRateTextNow(50,0)});})()"));
+    t('U2496 非法输入/零秒未知', o3.a === '' && o3.b === '射速 —' && o3.c === '射速 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.fireRateTextNow('50','20'));})()"));
+    t('U2497 数字字符串转数', o4 === '射速 2.5/s', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.fireRateDangerNow()==='boolean'});})()"));
+    t('U2498 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2493;k<=2498;k++) t('U'+k+' 本局射速',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
