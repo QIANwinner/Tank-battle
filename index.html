@@ -2165,6 +2165,7 @@
   #survToleranceWrap .v { color: #7bed9f; font-weight: 800; font-size: 11px; }
   #buildMixWrap .v { color: #a29bfe; font-weight: 800; font-size: 11px; }
   #pickupValueWrap .v { color: #ffd32a; font-weight: 800; font-size: 11px; }
+  #advanceIndexWrap .v { color: #1e90ff; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -2473,6 +2474,7 @@
     <div class="pill m-hide" id="survToleranceWrap"><span class="k">🛡</span><span class="v" id="survToleranceVal">—</span></div>
     <div class="pill m-hide" id="buildMixWrap"><span class="k">🧬</span><span class="v" id="buildMixVal">—</span></div>
     <div class="pill m-hide" id="pickupValueWrap"><span class="k">💰</span><span class="v" id="pickupValueVal">—</span></div>
+    <div class="pill m-hide" id="advanceIndexWrap"><span class="k">🧭</span><span class="v" id="advanceIndexVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -2848,7 +2850,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V10.9</div>
+  <div id="mark">DESIGNED BY QIAN · V10.10</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7958,6 +7960,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r51svV = $('survToleranceVal'); if (r51svV) { const r51inv = (player && player.spawnInv > 0) ? 1 : 0; const r51bk = baseAlive ? 1 : 0; const r51svT = survivalToleranceText(lives, r51inv, baseLevel, r51bk, reviveCount); r51svV.textContent = r51svT; const r51svW = $('survToleranceWrap'); if (r51svW) r51svW.classList.toggle('danger', lives <= 1); }
     const r51bmV = $('buildMixVal'); if (r51bmV) { let r51d = 0; for (const k in upgrades) { if (upgrades[k] > 0) r51d++; } const r51bmT = buildMixText(r51d, upgTotal); r51bmV.textContent = r51bmT || '—'; const r51bmW = $('buildMixWrap'); if (r51bmW) r51bmW.classList.toggle('danger', r51d >= 4); }
     const r51pvV = $('pickupValueVal'); if (r51pvV) { let r51v = 0; const r51types = []; for (const p of powerups) { if (p.dead) continue; r51types.push(p.type); r51v += R51_PU_VALUE[p.type] || 20; } const r51pvT = pickupValueText(r51types); r51pvV.textContent = r51pvT || '—'; const r51pvW = $('pickupValueWrap'); if (r51pvW) r51pvW.classList.toggle('danger', r51v >= 100); }
+    const r51aiV = $('advanceIndexVal'); if (r51aiV) { const r51aiT = advanceIndexText(wave, wavesTotal, waveSpawned, enemiesTotal); r51aiV.textContent = r51aiT || '—'; const r51aiN = parseInt(String(r51aiT).replace(/[^0-9]/g, ''), 10) || 0; const r51aiW = $('advanceIndexWrap'); if (r51aiW) r51aiW.classList.toggle('danger', r51aiN >= 80); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -10213,6 +10216,18 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     for (const t of types) v += R51_PU_VALUE[t] || 20;
     return '价值 ' + v;
   }
+  // —— v0.10.10 战局推进指数 ——
+  function advanceIndexText(wave, waves, spawned, total) {
+    const w = Math.max(0, Math.floor(Number(wave) || 0));
+    const ws = Math.max(0, Math.floor(Number(waves) || 0));
+    const s = Math.max(0, Math.floor(Number(spawned) || 0));
+    const t = Math.max(0, Math.floor(Number(total) || 0));
+    if (ws <= 0) return '';
+    const waveFrac = Math.max(0, Math.min(1, (w - 1) / ws));
+    const spawnFrac = t > 0 ? Math.min(1, s / t) : 0;
+    const pct = Math.round((waveFrac * 0.5 + spawnFrac * 0.5) * 100);
+    return '推进 ' + pct + '%';
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -12054,7 +12069,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V10.9', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V10.10', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -13341,6 +13356,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       survivalToleranceTextNow: (l, i, b, k, r) => survivalToleranceText(l, i, b, k, r), survivalToleranceDangerNow: () => { const w = $('survToleranceWrap'); return !!(w && w.classList.contains('danger')); },
       buildMixTextNow: (d, t) => buildMixText(d, t), buildMixDangerNow: () => { const w = $('buildMixWrap'); return !!(w && w.classList.contains('danger')); },
       pickupValueTextNow: (t) => pickupValueText(t), pickupValueDangerNow: () => { const w = $('pickupValueWrap'); return !!(w && w.classList.contains('danger')); },
+      advanceIndexTextNow: (w, ws, s, t) => advanceIndexText(w, ws, s, t), advanceIndexDangerNow: () => { const w = $('advanceIndexWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
