@@ -6563,6 +6563,22 @@ async function main() {
     t('U2168 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2163;k<=2168;k++) t('U'+k+' 道具金币占比',false,e.message); }
 
+
+  // ===== U2169~U2174: 生涯平均用时(v0.8.77) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerAvgTimeWrap'),f:T.careerAvgTimeTextNow(300,3)});})()"));
+    t('U2169 均时 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2170 正常 3 局 300s 均 1m40s', o.f.indexOf('1m40s') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerAvgTimeTextNow(90,1),b:T.careerAvgTimeTextNow(100,0)});})()"));
+    t('U2171 单局均时/0 局为空', o2.a.indexOf('1m30s') >= 0 && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerAvgTimeTextNow(-30,-1),b:T.careerAvgTimeTextNow(0,5)});})()"));
+    t('U2172 边界负数安全/0 秒均 0', o3.a === '' && o3.b.indexOf('0m00s') >= 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.careerAvgTimeTextNow(NaN,NaN));})()"));
+    t('U2173 NaN 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.careerAvgTimeDangerNow()==='boolean'});})()"));
+    t('U2174 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2169;k<=2174;k++) t('U'+k+' 生涯平均用时',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
