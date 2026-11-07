@@ -6883,6 +6883,22 @@ async function main() {
     t('U2288 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2283;k<=2288;k++) t('U'+k+' 分裂威胁',false,e.message); }
 
+
+  // ===== U2289~U2294: 狙击威胁(v0.8.97) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('sniperThreatWrap'),f:T.sniperThreatTextNow([{type:'sniper',dead:false},{type:'sniper',dead:false}])});})()"));
+    t('U2289 狙击威胁 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2290 正常 2 狙击', o.f.indexOf('狙击 2') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.sniperThreatTextNow([{type:'sniper',dead:false}]),b:T.sniperThreatTextNow([{type:'small',dead:false}])});})()"));
+    t('U2291 1 狙击/无狙击空', o2.a.indexOf('狙击 1') >= 0 && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.sniperThreatTextNow([{type:'sniper',dead:true}]),b:T.sniperThreatTextNow([])});})()"));
+    t('U2292 死亡狙击不计/空数组空', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.sniperThreatTextNow(NaN));})()"));
+    t('U2293 NaN 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.sniperThreatDangerNow()==='boolean'});})()"));
+    t('U2294 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2289;k<=2294;k++) t('U'+k+' 狙击威胁',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
