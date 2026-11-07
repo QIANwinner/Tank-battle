@@ -6595,6 +6595,22 @@ async function main() {
     t('U2180 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2175;k<=2180;k++) t('U'+k+' 得分效率',false,e.message); }
 
+
+  // ===== U2181~U2186: 命中/未命中(v0.8.79) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('hitMissWrap'),f:T.hitMissTextNow(80,100)});})()"));
+    t('U2181 命中 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2182 正常 80/100 命中 80%', o.f.indexOf('80%') >= 0 && o.f.indexOf('失 20') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hitMissTextNow(100,100),b:T.hitMissTextNow(50,100)});})()"));
+    t('U2183 全中 100%/失 50 正确', o2.a.indexOf('100%') >= 0 && o2.a.indexOf('失 0') >= 0 && o2.b.indexOf('失 50') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hitMissTextNow(10,0),b:T.hitMissTextNow(-8,-3)});})()"));
+    t('U2184 边界 0 弹为空/负数安全', o3.a === '' && typeof o3.b === 'string', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.hitMissTextNow(NaN,NaN));})()"));
+    t('U2185 NaN 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.hitMissDangerNow()==='boolean'});})()"));
+    t('U2186 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2181;k<=2186;k++) t('U'+k+' 命中未中',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
