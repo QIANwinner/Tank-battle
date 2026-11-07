@@ -6739,6 +6739,22 @@ async function main() {
     t('U2234 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2229;k<=2234;k++) t('U'+k+' 复活加成',false,e.message); }
 
+
+  // ===== U2235~U2240: 连击加成(v0.8.88) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bonusComboWrap'),f:T.bonusComboTextNow({combo:2})});})()"));
+    t('U2235 连击加成 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2236 正常 +2 级', o.f.indexOf('连击加成 +2') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bonusComboTextNow({combo:6}),b:T.bonusComboTextNow({combo:0})});})()"));
+    t('U2237 +6 级/0 级为空', o2.a.indexOf('+6') >= 0 && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bonusComboTextNow({combo:-1}),b:T.bonusComboTextNow({})});})()"));
+    t('U2238 负数/缺字段安全', o3.a === '' && o3.b === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bonusComboTextNow(NaN));})()"));
+    t('U2239 NaN 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.bonusComboDangerNow()==='boolean'});})()"));
+    t('U2240 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2235;k<=2240;k++) t('U'+k+' 连击加成',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
