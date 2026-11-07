@@ -2187,6 +2187,7 @@
   #deathsWrap .v { color: #ff6348; font-weight: 800; font-size: 11px; }
   #upgCountWrap .v { color: #7ee7ff; font-weight: 800; font-size: 11px; }
   #coinSourceWrap .v { color: #ffd32a; font-weight: 800; font-size: 11px; }
+  #avgCoinWrap .v { color: #ffb142; font-weight: 800; font-size: 11px; }
 </style>
 </head>
 <body>
@@ -2517,6 +2518,7 @@
     <div class="pill m-hide" id="deathsWrap"><span class="k">💀</span><span class="v" id="deathsVal">—</span></div>
     <div class="pill m-hide" id="upgCountWrap"><span class="k">🧬</span><span class="v" id="upgCountVal">—</span></div>
     <div class="pill m-hide" id="coinSourceWrap"><span class="k">💰</span><span class="v" id="coinSourceVal">—</span></div>
+    <div class="pill m-hide" id="avgCoinWrap"><span class="k">🪙</span><span class="v" id="avgCoinVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -2892,7 +2894,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V10.32</div>
+  <div id="mark">DESIGNED BY QIAN · V10.33</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -8024,6 +8026,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r54dV = $('deathsVal'); if (r54dV) { const r54dT = deathsText(stat.deaths); r54dV.textContent = r54dT || '—'; const r54dW = $('deathsWrap'); if (r54dW) { r54dW.classList.toggle('danger', stat.deaths >= 3); } }
     const r54ucV = $('upgCountVal'); if (r54ucV) { const r54ucT = upgCountText(upgTotal); r54ucV.textContent = r54ucT || '—'; const r54ucW = $('upgCountWrap'); if (r54ucW) { r54ucW.classList.toggle('danger', upgTotal >= 10); } }
     const r54csV = $('coinSourceVal'); if (r54csV) { const r54csT = coinSourceText(coinLog); r54csV.textContent = r54csT || '—'; const r54csW = $('coinSourceWrap'); if (r54csW) { const r54csSet = new Set(); for (const e of coinLog) { const n = Number(e && e.n); if (n > 0) r54csSet.add(String((e && e.label) || '金币')); } r54csW.classList.toggle('danger', r54csSet.size === 1 && coinLog.length > 0); } }
+    const r54avV = $('avgCoinVal'); if (r54avV) { const r54avT = avgCoinText(coinLog); r54avV.textContent = r54avT || '—'; const r54avW = $('avgCoinWrap'); if (r54avW) { let r54avS = 0, r54avC = 0; for (const e of coinLog) { const n = Number(e && e.n); if (n > 0) { r54avS += n; r54avC++; } } r54avW.classList.toggle('danger', r54avC > 0 && (r54avS / r54avC) < 10); } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -10484,6 +10487,19 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (!best) return '';
     return '金币源 ' + best;
   }
+  // —— v0.10.33 均笔金币 ——
+  function avgCoinText(log) {
+    const a = log || [];
+    let sum = 0, cnt = 0;
+    for (const e of a) {
+      const n = Number(e && e.n);
+      if (n > 0) { sum += n; cnt++; }
+    }
+    if (cnt <= 0) return '';
+    const avg = sum / cnt;
+    if (!(avg > 0)) return '';
+    return '均笔 +' + Math.round(avg);
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -12325,7 +12341,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V10.32', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V10.33', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -13634,6 +13650,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       deathsTextNow: (d) => deathsText(d), deathsDangerNow: () => { const w = $('deathsWrap'); return !!(w && w.classList.contains('danger')); },
       upgCountTextNow: (u) => upgCountText(u), upgCountDangerNow: () => { const w = $('upgCountWrap'); return !!(w && w.classList.contains('danger')); },
       coinSourceTextNow: (a) => coinSourceText(a), coinSourceDangerNow: () => { const w = $('coinSourceWrap'); return !!(w && w.classList.contains('danger')); },
+      avgCoinTextNow: (a) => avgCoinText(a), avgCoinDangerNow: () => { const w = $('avgCoinWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

@@ -7603,6 +7603,22 @@ async function main() {
     t('U2564 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2559;k<=2564;k++) t('U'+k+' 金币来源',false,e.message); }
 
+
+  // ===== U2565~U2570: 均笔金币(v0.10.33) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('avgCoinWrap'),f:T.avgCoinTextNow([{n:100},{n:50},{n:30}])});})()"));
+    t('U2565 均笔金币 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2566 正常 180/3=60 均笔 +60', o.f === '均笔 +60', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.avgCoinTextNow([]),b:T.avgCoinTextNow([{n:50}]),c:T.avgCoinTextNow([{n:10},{n:20}])});})()"));
+    t('U2567 边界空/单笔/双笔', o2.a === '' && o2.b === '均笔 +50' && o2.c === '均笔 +15', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.avgCoinTextNow(null),b:T.avgCoinTextNow([{n:-5}]),c:T.avgCoinTextNow([{n:NaN}])});})()"));
+    t('U2568 非法输入/负值/空日志', o3.a === '' && o3.b === '' && o3.c === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.avgCoinTextNow([{n:'80'},{n:'40'}]));})()"));
+    t('U2569 字符串金额转数', o4 === '均笔 +60', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.avgCoinDangerNow()==='boolean'});})()"));
+    t('U2570 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2565;k<=2570;k++) t('U'+k+' 均笔金币',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
