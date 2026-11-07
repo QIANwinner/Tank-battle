@@ -6995,6 +6995,22 @@ async function main() {
     t('U2330 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2325;k<=2330;k++) t('U'+k+' 刷敌预警',false,e.message); }
 
+
+  // ===== U2331~U2336: 粒子活跃度(v0.9.4) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('particleActiveWrap'),f:T.particleActiveTextNow(5)});})()"));
+    t('U2331 粒子活跃度 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2332 正常 5 粒子', o.f.indexOf('粒子 5') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.particleActiveTextNow(0),b:T.particleActiveTextNow(-2)});})()"));
+    t('U2333 0/负数为空', o2.a === '' && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.particleActiveTextNow(NaN));})()"));
+    t('U2334 NaN 安全返回字符串', typeof o3 === 'string', o3);
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.particleActiveTextNow(3.7));})()"));
+    t('U2335 小数取整', o4.indexOf('粒子 3') >= 0, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.particleActiveDangerNow()==='boolean'});})()"));
+    t('U2336 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2331;k<=2336;k++) t('U'+k+' 粒子活跃度',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
