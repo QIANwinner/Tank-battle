@@ -7315,6 +7315,22 @@ async function main() {
     t('U2456 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2451;k<=2456;k++) t('U'+k+' 输出潜力评级',false,e.message); }
 
+
+  // ===== U2457~U2462: 金币里程碑进度(v0.10.15) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('coinGoalWrap'),f:T.coinGoalTextNow(320)});})()"));
+    t('U2457 金币里程碑 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2458 正常 320/500', o.f === '金币 320/500', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinGoalTextNow(0),b:T.coinGoalTextNow(500),c:T.coinGoalTextNow(999)});})()"));
+    t('U2459 边界零/进位/逼近', o2.a === '' && o2.b === '金币 500/1000' && o2.c === '金币 999/1000', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinGoalTextNow(-50),b:T.coinGoalTextNow(NaN),c:T.coinGoalTextNow('320')});})()"));
+    t('U2460 非法输入/字符串转数', o3.a === '' && o3.b === '' && o3.c === '金币 320/500', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.coinGoalTextNow(1250));})()"));
+    t('U2461 大额多进位', o4 === '金币 1250/1500', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.coinGoalDangerNow()==='boolean'});})()"));
+    t('U2462 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2457;k<=2462;k++) t('U'+k+' 金币里程碑进度',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
