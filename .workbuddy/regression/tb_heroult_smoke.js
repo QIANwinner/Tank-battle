@@ -6915,6 +6915,22 @@ async function main() {
     t('U2300 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2295;k<=2300;k++) t('U'+k+' 敌类全景',false,e.message); }
 
+
+  // ===== U2301~U2306: 受击红闪(v0.8.99) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('hitFlashWrap'),f:T.hitFlashTextNow(0.4)});})()"));
+    t('U2301 受击红闪 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2302 正常受击显示', o.f.indexOf('受击') >= 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hitFlashTextNow(0),b:T.hitFlashTextNow(-1)});})()"));
+    t('U2303 0/负数为空', o2.a === '' && o2.b === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.hitFlashTextNow(NaN));})()"));
+    t('U2304 NaN 安全返回字符串', typeof o3 === 'string', o3);
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.hitFlashTextNow('2'));})()"));
+    t('U2305 数字字符串转数', o4.indexOf('受击') >= 0, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.hitFlashDangerNow()==='boolean'});})()"));
+    t('U2306 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2301;k<=2306;k++) t('U'+k+' 受击红闪',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
