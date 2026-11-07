@@ -7619,6 +7619,22 @@ async function main() {
     t('U2570 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2565;k<=2570;k++) t('U'+k+' 均笔金币',false,e.message); }
 
+
+  // ===== U2571~U2576: 每杀金币(v0.10.34) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('coinsPerKillWrap'),f:T.coinsPerKillTextNow(500,50)});})()"));
+    t('U2571 每杀金币 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2572 正常 500/50=10 每杀 +10 币', o.f === '每杀 +10 币', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinsPerKillTextNow(0,10),b:T.coinsPerKillTextNow(100,1),c:T.coinsPerKillTextNow(300,10)});})()"));
+    t('U2573 边界零金币/单杀/常规', o2.a === '' && o2.b === '每杀 +100 币' && o2.c === '每杀 +30 币', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinsPerKillTextNow(500,-5),b:T.coinsPerKillTextNow(0,10),c:T.coinsPerKillTextNow(NaN,10)});})()"));
+    t('U2574 非法输入/零杀未知', o3.a === '' && o3.b === '' && o3.c === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.coinsPerKillTextNow('500','50'));})()"));
+    t('U2575 数字字符串转数', o4 === '每杀 +10 币', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.coinsPerKillDangerNow()==='boolean'});})()"));
+    t('U2576 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2571;k<=2576;k++) t('U'+k+' 每杀金币',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
