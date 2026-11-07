@@ -8179,6 +8179,22 @@ async function main() {
     t('U2780 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2775;k<=2780;k++) t('U'+k+' 命均得分',false,e.message); }
 
+
+  // ===== U2781~U2786: 命中安全比(v0.10.69) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('hitSafetyWrap'),f:T.hitSafetyTextNow(30,3)});})()"));
+    t('U2781 命中安全比 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2782 正常 30/3=10倍', o.f === '命中/受击 10 倍', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hitSafetyTextNow(0,3),b:T.hitSafetyTextNow(10,10),c:T.hitSafetyTextNow(4,8)});})()"));
+    t('U2783 边界零中/1倍/0.5倍险', o2.a === '命中 —' && o2.b === '命中/受击 1 倍' && o2.c === '命中/受击 0.5 倍 · 险', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hitSafetyTextNow(-3,3),b:T.hitSafetyTextNow(NaN,3)});})()"));
+    t('U2784 非法输入/空值', o3.a === '命中 —' && o3.b === '命中 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.hitSafetyTextNow('30','3'));})()"));
+    t('U2785 数字字符串转数', o4 === '命中/受击 10 倍', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.hitSafetyDangerNow()==='boolean'});})()"));
+    t('U2786 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2781;k<=2786;k++) t('U'+k+' 命中安全比',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
