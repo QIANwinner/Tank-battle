@@ -8307,6 +8307,22 @@ async function main() {
     t('U2828 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2823;k<=2828;k++) t('U'+k+' 每波命',false,e.message); }
 
+
+  // ===== U2829~U2834: 每发伤害(v0.10.77) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('dmgPerShotWrap'),f:T.dmgPerShotTextNow(120,40)});})()"));
+    t('U2829 每发伤害 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2830 正常 120/40=3', o.f === '每发 3 伤害', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dmgPerShotTextNow(0,40),b:T.dmgPerShotTextNow(200,5),c:T.dmgPerShotTextNow(60,20)});})()"));
+    t('U2831 边界零伤/40重/3', o2.a === '每发 —' && o2.b === '每发 40 伤害 · 重' && o2.c === '每发 3 伤害', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dmgPerShotTextNow(-5,40),b:T.dmgPerShotTextNow(NaN,40)});})()"));
+    t('U2832 非法输入/空值', o3.a === '每发 —' && o3.b === '每发 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.dmgPerShotTextNow('120','40'));})()"));
+    t('U2833 数字字符串转数', o4 === '每发 3 伤害', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.dmgPerShotDangerNow()==='boolean'});})()"));
+    t('U2834 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2829;k<=2834;k++) t('U'+k+' 每发伤害',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
