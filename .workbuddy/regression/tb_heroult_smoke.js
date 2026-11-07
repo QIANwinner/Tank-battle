@@ -8259,6 +8259,22 @@ async function main() {
     t('U2810 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2805;k<=2810;k++) t('U'+k+' 连击击杀比',false,e.message); }
 
+
+  // ===== U2811~U2816: 敌欠(v0.10.74) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('enemyBacklogWrap'),f:T.enemyBacklogTextNow(30,22)});})()"));
+    t('U2811 敌欠 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2812 正常 30-22=8', o.f === '敌欠 8', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyBacklogTextNow(0,22),b:T.enemyBacklogTextNow(30,15),c:T.enemyBacklogTextNow(10,10)});})()"));
+    t('U2813 边界零生/15挤/0', o2.a === '敌欠 —' && o2.b === '敌欠 15 · 挤' && o2.c === '敌欠 0', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyBacklogTextNow(-5,22),b:T.enemyBacklogTextNow(NaN,22)});})()"));
+    t('U2814 非法输入/空值', o3.a === '敌欠 —' && o3.b === '敌欠 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.enemyBacklogTextNow('30','22'));})()"));
+    t('U2815 数字字符串转数', o4 === '敌欠 8', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.enemyBacklogDangerNow()==='boolean'});})()"));
+    t('U2816 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2811;k<=2816;k++) t('U'+k+' 敌欠',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
