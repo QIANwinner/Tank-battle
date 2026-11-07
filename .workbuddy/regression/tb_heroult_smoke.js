@@ -8291,6 +8291,22 @@ async function main() {
     t('U2822 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2817;k<=2822;k++) t('U'+k+' 命亡记录',false,e.message); }
 
+
+  // ===== U2823~U2828: 每波命(v0.10.76) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('surviveDensityWrap'),f:T.surviveDensityTextNow(6,3)});})()"));
+    t('U2823 每波命 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2824 正常 6/3=2', o.f === '每波命 2', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.surviveDensityTextNow(0,3),b:T.surviveDensityTextNow(3,3),c:T.surviveDensityTextNow(3,6)});})()"));
+    t('U2825 边界零命/1/0.5紧', o2.a === '每波命 —' && o2.b === '每波命 1' && o2.c === '每波命 0.5 · 紧', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.surviveDensityTextNow(-3,3),b:T.surviveDensityTextNow(NaN,3)});})()"));
+    t('U2826 非法输入/空值', o3.a === '每波命 —' && o3.b === '每波命 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.surviveDensityTextNow('6','3'));})()"));
+    t('U2827 数字字符串转数', o4 === '每波命 2', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.surviveDensityDangerNow()==='boolean'});})()"));
+    t('U2828 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2823;k<=2828;k++) t('U'+k+' 每波命',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
