@@ -7555,6 +7555,22 @@ async function main() {
     t('U2546 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2541;k<=2546;k++) t('U'+k+' 已战斗时长',false,e.message); }
 
+
+  // ===== U2547~U2552: 阵亡数(v0.10.30) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('deathsWrap'),f:T.deathsTextNow(3)});})()"));
+    t('U2547 阵亡数 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2548 正常 3次 阵亡 3 次', o.f === '阵亡 3 次', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.deathsTextNow(0),b:T.deathsTextNow(1),c:T.deathsTextNow(9)});})()"));
+    t('U2549 边界零阵亡/首次/多次', o2.a === '' && o2.b === '阵亡 1 次' && o2.c === '阵亡 9 次', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.deathsTextNow(-1),b:T.deathsTextNow(NaN),c:T.deathsTextNow('')});})()"));
+    t('U2550 非法输入/空值', o3.a === '' && o3.b === '' && o3.c === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.deathsTextNow('4'));})()"));
+    t('U2551 数字字符串转数', o4 === '阵亡 4 次', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.deathsDangerNow()==='boolean'});})()"));
+    t('U2552 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2547;k<=2552;k++) t('U'+k+' 阵亡数',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
