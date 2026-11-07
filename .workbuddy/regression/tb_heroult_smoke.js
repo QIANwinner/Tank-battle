@@ -7907,6 +7907,22 @@ async function main() {
     t('U2678 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2673;k<=2678;k++) t('U'+k+' 敌阵规模',false,e.message); }
 
+
+  // ===== U2679~U2684: 首领威胁(v0.10.52) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossThreatWrap'),f:T.bossThreatTextNow(70,100)});})()"));
+    t('U2679 首领威胁 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2680 正常 70/100', o.f === 'BOSS 70%', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossThreatTextNow(0,100),b:T.bossThreatTextNow(100,100),c:T.bossThreatTextNow(0,0)});})()"));
+    t('U2681 边界已灭/满血/无首领', o2.a === 'BOSS 已灭' && o2.b === 'BOSS 满血' && o2.c === '', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossThreatTextNow(-5,100),b:T.bossThreatTextNow(NaN,100),c:T.bossThreatTextNow(50,0)});})()"));
+    t('U2682 非法输入/空值', o3.a === 'BOSS 已灭' && o3.b === 'BOSS 已灭' && o3.c === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bossThreatTextNow('30','100'));})()"));
+    t('U2683 数字字符串转数', o4 === 'BOSS 30%', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.bossThreatDangerNow()==='boolean'});})()"));
+    t('U2684 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2679;k<=2684;k++) t('U'+k+' 首领威胁',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
