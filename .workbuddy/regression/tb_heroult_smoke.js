@@ -8659,6 +8659,22 @@ async function main() {
     t('U2960 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2955;k<=2960;k++) t('U'+k+' 连击评级',false,e.message); }
 
+
+  // ===== U2961~U2966: 波速评级(v0.10.99) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('wavePaceWrap'),st:T.wavePaceStateNow(6,300)});})()"));
+    t('U2961 波速评级 DOM 已加入 HUD', o.dom === true && typeof o.st.tier === 'string', JSON.stringify(o));
+    t('U2962 正常 6/300*60=1.2 → A', o.st.tier === 'A' && o.st.txt === '波速 A 快', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.wavePaceStateNow(0,300),b:T.wavePaceStateNow(2,300),c:T.wavePaceStateNow(6,300)});})()"));
+    t('U2963 边界 0→-/2→C/6→A', o2.a.tier === '-' && o2.b.tier === 'C' && o2.c.tier === 'A', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.wavePaceStateNow(-5,300),b:T.wavePaceStateNow(NaN,300)});})()"));
+    t('U2964 非法输入/空值', o3.a.tier === '-' && o3.b.tier === '-', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.wavePaceStateNow('6','300').tier);})()"));
+    t('U2965 数字字符串转数', o4 === 'A', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.wavePaceDangerNow()==='boolean'});})()"));
+    t('U2966 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2961;k<=2966;k++) t('U'+k+' 波速评级',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
