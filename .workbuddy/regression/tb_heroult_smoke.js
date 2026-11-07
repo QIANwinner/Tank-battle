@@ -7075,6 +7075,22 @@ async function main() {
     t('U2360 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2355;k<=2360;k++) t('U'+k+' 敌方阵线密度',false,e.message); }
 
+
+  // ===== U2361~U2366: 增援节奏(v0.9.9) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('reinforceWrap'),f:T.reinforceTextNow(5,10)});})()"));
+    t('U2361 增援节奏 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2362 正常 5/10', o.f === '增援 5/10', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reinforceTextNow(10,10),b:T.reinforceTextNow(0,10),c:T.reinforceTextNow(12,10)});})()"));
+    t('U2363 完成/零/超额', o2.a.indexOf('完成') >= 0 && o2.b === '增援 0/10' && o2.c.indexOf('完成') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reinforceTextNow(-1,10),b:T.reinforceTextNow(0,0),c:T.reinforceTextNow(5,-3)});})()"));
+    t('U2364 非法输入为空', o3.a === '' && o3.b === '' && o3.c === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.reinforceTextNow('3','8'));})()"));
+    t('U2365 数字字符串转数', o4 === '增援 3/8', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.reinforceDangerNow()==='boolean'});})()"));
+    t('U2366 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2361;k<=2366;k++) t('U'+k+' 增援节奏',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
