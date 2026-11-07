@@ -8355,6 +8355,22 @@ async function main() {
     t('U2846 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2841;k<=2846;k++) t('U'+k+' 命亡比',false,e.message); }
 
+
+  // ===== U2847~U2852: 生成节奏(v0.10.80) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('spawnPaceWrap'),f:T.spawnPaceTextNow(30,60)});})()"));
+    t('U2847 生成节奏 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2848 正常 30/60s=30/分', o.f === '生成 30/分', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.spawnPaceTextNow(0,60),b:T.spawnPaceTextNow(40,60),c:T.spawnPaceTextNow(20,60)});})()"));
+    t('U2849 边界零生/40涌/20', o2.a === '生成 —' && o2.b === '生成 40/分 · 涌' && o2.c === '生成 20/分', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.spawnPaceTextNow(-5,60),b:T.spawnPaceTextNow(NaN,60)});})()"));
+    t('U2850 非法输入/空值', o3.a === '生成 —' && o3.b === '生成 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.spawnPaceTextNow('30','60'));})()"));
+    t('U2851 数字字符串转数', o4 === '生成 30/分', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.spawnPaceDangerNow()==='boolean'});})()"));
+    t('U2852 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2847;k<=2852;k++) t('U'+k+' 生成节奏',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
