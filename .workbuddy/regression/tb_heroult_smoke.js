@@ -7219,6 +7219,22 @@ async function main() {
     t('U2414 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2409;k<=2414;k++) t('U'+k+' 生存容错度',false,e.message); }
 
+
+  // ===== U2415~U2420: 强化组合盘点(v0.10.8) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('buildMixWrap'),f:T.buildMixTextNow(3,5)});})()"));
+    t('U2415 强化组合盘点 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2416 正常 3种×5', o.f === '强化 3种×5', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.buildMixTextNow(0,0),b:T.buildMixTextNow(4,8),c:T.buildMixTextNow(1,1)});})()"));
+    t('U2417 边界空/丰富/单', o2.a === '' && o2.b === '强化 4种×8' && o2.c === '强化 1种×1', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.buildMixTextNow(-1,3),b:T.buildMixTextNow(NaN,2),c:T.buildMixTextNow(2,0)});})()"));
+    t('U2418 非法输入/零总钳制', o3.a === '强化 0种×3' && o3.b === '强化 0种×2' && o3.c === '', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.buildMixTextNow('3','5'));})()"));
+    t('U2419 数字字符串转数', o4 === '强化 3种×5', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.buildMixDangerNow()==='boolean'});})()"));
+    t('U2420 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2415;k<=2420;k++) t('U'+k+' 强化组合盘点',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
