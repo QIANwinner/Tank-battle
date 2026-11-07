@@ -6499,6 +6499,22 @@ async function main() {
     t('U2144 DOM 与函数一致性', typeof o5.d === 'boolean', JSON.stringify(o5));
   } catch(e){ for(let k=2139;k<=2144;k++) t('U'+k+' 敌军压境',false,e.message); }
 
+
+  // ===== U2145~U2150: 关卡偏慢(v0.8.73) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('levelSlowAlertWrap'),f:T.levelSlowAlertTextNow(10,1)});})()"));
+    t('U2145 警报 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2146 正常节奏不触发', o.f === '', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.levelSlowAlertTextNow(60,1),b:T.levelSlowAlertTextNow(60,5)});})()"));
+    t('U2147 超时触发', o2.a.indexOf('⏱') >= 0 && typeof o2.b === 'string', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.levelSlowAlertTextNow(33,1),b:T.levelSlowAlertTextNow(-5,1)});})()"));
+    t('U2148 边界 33s 触发/负数安全', typeof o3.a === 'string' && typeof o3.b === 'string', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.levelSlowAlertTextNow(NaN,NaN));})()"));
+    t('U2149 NaN 安全返回字符串', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();T.extraHudRefreshNow();return JSON.stringify({d:T.levelSlowAlertDangerNow()});})()"));
+    t('U2150 DOM 与函数一致性', typeof o5.d === 'boolean', JSON.stringify(o5));
+  } catch(e){ for(let k=2145;k<=2150;k++) t('U'+k+' 关卡偏慢',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
