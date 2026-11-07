@@ -7331,6 +7331,22 @@ async function main() {
     t('U2462 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2457;k<=2462;k++) t('U'+k+' 金币里程碑进度',false,e.message); }
 
+
+  // ===== U2463~U2468: 击杀里程碑进度(v0.10.16) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('killGoalWrap'),f:T.killGoalTextNow(42)});})()"));
+    t('U2463 击杀里程碑 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2464 正常 42/50', o.f === '击杀 42/50', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killGoalTextNow(0),b:T.killGoalTextNow(25),c:T.killGoalTextNow(49)});})()"));
+    t('U2465 边界零/进位/逼近', o2.a === '' && o2.b === '击杀 25/50' && o2.c === '击杀 49/50', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killGoalTextNow(-1),b:T.killGoalTextNow(NaN),c:T.killGoalTextNow('42')});})()"));
+    t('U2466 非法输入/字符串转数', o3.a === '' && o3.b === '' && o3.c === '击杀 42/50', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.killGoalTextNow(101));})()"));
+    t('U2467 大额多进位', o4 === '击杀 101/125', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.killGoalDangerNow()==='boolean'});})()"));
+    t('U2468 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2463;k<=2468;k++) t('U'+k+' 击杀里程碑进度',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
