@@ -7939,6 +7939,22 @@ async function main() {
     t('U2690 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2685;k<=2690;k++) t('U'+k+' 来袭弹幕',false,e.message); }
 
+
+  // ===== U2691~U2696: 敌阵推近(v0.10.54) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('enemyPushWrap'),f:T.enemyPushTextNow(2)});})()"));
+    t('U2691 敌阵推近 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2692 正常 推2格', o.f === '敌推 +2 格', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyPushTextNow(0),b:T.enemyPushTextNow(-3),c:T.enemyPushTextNow(5)});})()"));
+    t('U2693 边界稳/退/大推', o2.a === '敌稳' && o2.b === '敌退 3 格' && o2.c === '敌推 +5 格', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyPushTextNow(NaN),b:T.enemyPushTextNow(-999)});})()"));
+    t('U2694 非法输入/空值', o3.a === '敌稳' && o3.b === '敌退 999 格', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.enemyPushTextNow('2'));})()"));
+    t('U2695 数字字符串转数', o4 === '敌推 +2 格', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.enemyPushDangerNow()==='boolean'});})()"));
+    t('U2696 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2691;k<=2696;k++) t('U'+k+' 敌阵推近',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
