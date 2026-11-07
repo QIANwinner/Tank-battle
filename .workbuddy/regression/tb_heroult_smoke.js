@@ -7763,6 +7763,22 @@ async function main() {
     t('U2624 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2619;k<=2624;k++) t('U'+k+' 复活可负担',false,e.message); }
 
+
+  // ===== U2625~U2630: 护盾等级(v0.10.43) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('shieldLvWrap'),f:T.shieldLvTextNow(2)});})()"));
+    t('U2625 护盾等级 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2626 正常 2级 盾 Lv2', o.f === '盾 Lv2', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shieldLvTextNow(0),b:T.shieldLvTextNow(1),c:T.shieldLvTextNow(9)});})()"));
+    t('U2627 边界零级/一级/高级', o2.a === '无盾' && o2.b === '盾 Lv1' && o2.c === '盾 Lv9', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shieldLvTextNow(-1),b:T.shieldLvTextNow(NaN)});})()"));
+    t('U2628 非法输入/空值', o3.a === '无盾' && o3.b === '无盾', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.shieldLvTextNow('3'));})()"));
+    t('U2629 数字字符串转数', o4 === '盾 Lv3', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.shieldLvDangerNow()==='boolean'});})()"));
+    t('U2630 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2625;k<=2630;k++) t('U'+k+' 护盾等级',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
