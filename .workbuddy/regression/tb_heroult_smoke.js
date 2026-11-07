@@ -8115,6 +8115,22 @@ async function main() {
     t('U2756 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2751;k<=2756;k++) t('U'+k+' 平均每波得分',false,e.message); }
 
+
+  // ===== U2757~U2762: 最高连击进度(v0.10.65) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('comboBestWrap'),f:T.comboBestTextNow(3,7)});})()"));
+    t('U2757 最高连击进度 DOM 已加入 HUD', o.dom === true, JSON.stringify(o));
+    t('U2758 正常 3/7', o.f === '连击 3/7', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboBestTextNow(0,0),b:T.comboBestTextNow(7,7),c:T.comboBestTextNow(10,7)});})()"));
+    t('U2759 边界零/齐平新高/超出', o2.a === '连击 —' && o2.b === '连击 7 · 新高' && o2.c === '连击 7 · 新高', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboBestTextNow(-1,5),b:T.comboBestTextNow(NaN,5)});})()"));
+    t('U2760 非法钳零/空值', o3.a === '连击 0/5' && o3.b === '连击 0/5', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.comboBestTextNow('3','7'));})()"));
+    t('U2761 数字字符串转数', o4 === '连击 3/7', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,d:typeof T.comboBestDangerNow()==='boolean'});})()"));
+    t('U2762 DOM 与函数一致性', o5.ok === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2757;k<=2762;k++) t('U'+k+' 最高连击进度',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
