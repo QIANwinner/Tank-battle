@@ -10099,6 +10099,22 @@ async function main() {
     t('U3500 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.l === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3495;k<=3500;k++) t('U'+k+' 每波得分',false,e.message); }
 
+
+  // ===== U3501~U3506: 攻防平衡(v0.11.89) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('threatBalanceWrap'),st:T.threatBalanceStateNow(40,4,3)});})()"));
+    t('U3501 攻防平衡 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3502 正常 40命中/4受击/3敌→73% 均势', o.st.pct === 73 && o.st.txt === '攻防 均势 3.6', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.threatBalanceStateNow(0,4,3).pct,b:T.threatBalanceStateNow(400,0,0).pct,c:T.threatBalanceStateNow(40,0,0).pct,d:T.threatBalanceStateNow(40,4,3).cls});})()"));
+    t('U3503 边界 0→0/400→100/40→100/均势', o2.a === 0 && o2.b === 100 && o2.c === 100 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.threatBalanceStateNow(-1,4,3).pct,b:T.threatBalanceStateNow(NaN,4,3).pct,c:T.threatBalanceStateNow(40,-1,3).pct,d:T.threatBalanceStateNow(40,4,-1).pct});})()"));
+    t('U3504 非法输入/空值/负受击/负敌 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.threatBalanceStateNow('40','4','3').pct);})()"));
+    t('U3505 数字字符串转数', o4 === 73, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.threatBalanceFillNow()==='string',d:typeof T.threatBalanceDangerNow()==='boolean'});})()"));
+    t('U3506 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=3501;k<=3506;k++) t('U'+k+' 攻防平衡',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
