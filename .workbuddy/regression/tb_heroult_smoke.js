@@ -10307,6 +10307,22 @@ async function main() {
     t('U3578 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.h === 'number' && typeof o5.s === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3573;k<=3578;k++) t('U'+k+' 生涯命中率',false,e.message); }
 
+
+  // ===== U3579~U3584: 生涯击杀速率(v0.12.2) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerKillRateWrap'),st:T.careerKillRateStateNow(60,60)});})()"));
+    t('U3579 生涯击杀速率 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3580 正常 60杀/60秒→1/s 100%', o.st.pct === 100 && o.st.txt === '击杀 1/s', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerKillRateStateNow(0,60).pct,b:T.careerKillRateStateNow(120,60).pct,c:T.careerKillRateStateNow(30,60).pct,d:T.careerKillRateStateNow(60,60).cls});})()"));
+    t('U3581 边界 0→0/120→100/30→50/好', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-good', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerKillRateStateNow(-1,60).pct,b:T.careerKillRateStateNow(NaN,60).pct,c:T.careerKillRateStateNow(60,0).pct,d:T.careerKillRateStateNow(60,-1).pct});})()"));
+    t('U3582 非法/空值/零秒/负秒 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.careerKillRateStateNow('60','60').pct);})()"));
+    t('U3583 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.careerKillRateFillNow()==='string',d:typeof T.careerKillRateDangerNow()==='boolean',k:T.careerKillRateKillNow(),s:T.careerKillRateSecsNow()});})()"));
+    t('U3584 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.k === 'number' && typeof o5.s === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3579;k<=3584;k++) t('U'+k+' 生涯击杀速率',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
