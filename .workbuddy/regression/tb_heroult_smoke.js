@@ -9075,6 +9075,22 @@ async function main() {
     t('U3116 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=3111;k<=3116;k++) t('U'+k+' 命中转化率',false,e.message); }
 
+
+  // ===== U3117~U3122: 波次燃速(v0.11.25) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('waveBurnWrap'),st:T.waveBurnStateNow(5,300)});})()"));
+    t('U3117 波次燃速 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3118 正常 5波300秒→60s/波100%', o.st.pct === 100 && o.st.txt === '燃速 60s/波', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveBurnStateNow(1,30).pct,b:T.waveBurnStateNow(5,300).pct,c:T.waveBurnStateNow(10,600).pct,d:T.waveBurnStateNow(5,60).pct});})()"));
+    t('U3119 边界 1波30s→50/5波300→100/5波60→20', o2.a === 50 && o2.b === 100 && o2.c === 100 && o2.d === 20, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveBurnStateNow(0,300).pct,b:T.waveBurnStateNow(NaN,300).pct,c:T.waveBurnStateNow(5,0).pct});})()"));
+    t('U3120 非法输入/空值/零秒 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.waveBurnStateNow('5','300').pct);})()"));
+    t('U3121 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.waveBurnFillNow()==='string',d:typeof T.waveBurnDangerNow()==='boolean'});})()"));
+    t('U3122 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=3117;k<=3122;k++) t('U'+k+' 波次燃速',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
