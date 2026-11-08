@@ -11411,6 +11411,22 @@ async function main() {
     t('U3992 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3987;k<=3992;k++) t('U'+k+' 本局每死道具',false,e.message); }
 
+
+  // ===== U3993~U3998: 本局每死升级(v0.12.71) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runUpgPerDeathWrap'),st:T.runUpgPerDeathStateNow(18,6)});})()"));
+    t('U3993 本局每死升级 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3994 正常 18升级/6死→3/死 100%', o.st.pct === 100 && o.st.txt === '升级 3/死' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runUpgPerDeathStateNow(0,6).pct,b:T.runUpgPerDeathStateNow(18,6).pct,c:T.runUpgPerDeathStateNow(9,6).pct,d:T.runUpgPerDeathStateNow(9,6).cls});})()"));
+    t('U3995 边界 0→0/18→100/9→50/偏低', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runUpgPerDeathStateNow(-1,6).pct,b:T.runUpgPerDeathStateNow(NaN,6).pct,c:T.runUpgPerDeathStateNow(18,0).pct,d:T.runUpgPerDeathStateNow(18,-1).pct});})()"));
+    t('U3996 非法/空值/零死/负死 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runUpgPerDeathStateNow('18','6').pct);})()"));
+    t('U3997 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.runUpgPerDeathFillNow()==='string',d:typeof T.runUpgPerDeathDangerNow()==='boolean',a:T.runUpgPerDeathANow(),b:T.runUpgPerDeathBNow()});})()"));
+    t('U3998 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3993;k<=3998;k++) t('U'+k+' 本局每死升级',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
