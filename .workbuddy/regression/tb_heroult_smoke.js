@@ -10435,6 +10435,22 @@ async function main() {
     t('U3626 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.k === 'number' && typeof o5.g === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3621;k<=3626;k++) t('U'+k+' 生涯场均击杀',false,e.message); }
 
+
+  // ===== U3627~U3632: 单局击杀收益(v0.12.10) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runKillScoreWrap'),st:T.runKillScoreStateNow(500,5)});})()"));
+    t('U3627 单局击杀收益 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3628 正常 500分/5杀→100/个 100%', o.st.pct === 100 && o.st.txt === '收益 100/个' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runKillScoreStateNow(0,5).pct,b:T.runKillScoreStateNow(1000,5).pct,c:T.runKillScoreStateNow(250,5).pct,d:T.runKillScoreStateNow(250,5).cls});})()"));
+    t('U3629 边界 0→0/1000→100/250→50/偏弱', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runKillScoreStateNow(-1,5).pct,b:T.runKillScoreStateNow(NaN,5).pct,c:T.runKillScoreStateNow(500,0).pct,d:T.runKillScoreStateNow(500,-1).pct});})()"));
+    t('U3630 非法/空值/零杀/负杀 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runKillScoreStateNow('500','5').pct);})()"));
+    t('U3631 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.runKillScoreFillNow()==='string',d:typeof T.runKillScoreDangerNow()==='boolean',s:T.runKillScoreScoreNow(),k:T.runKillScoreKillNow()});})()"));
+    t('U3632 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.s === 'number' && typeof o5.k === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3627;k<=3632;k++) t('U'+k+' 单局击杀收益',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
