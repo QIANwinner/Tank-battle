@@ -9187,6 +9187,22 @@ async function main() {
     t('U3158 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.e === 'number' && typeof o5.o === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3153;k<=3158;k++) t('U'+k+' 敌弹速度比',false,e.message); }
 
+
+  // ===== U3159~U3164: 敌方血量压力(v0.11.32) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('enemyPressureWrap'),st:T.enemyPressureStateNow(5,800)});})()"));
+    t('U3159 敌方血量压力 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3160 正常 5个800血→80%', o.st.pct === 80 && o.st.txt === '敌压 5·800血', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyPressureStateNow(0,0).pct,b:T.enemyPressureStateNow(5,200).pct,c:T.enemyPressureStateNow(5,1000).pct,d:T.enemyPressureStateNow(5,2000).pct});})()"));
+    t('U3161 边界 0→0/200→20/1000→100/2000→100', o2.a === 0 && o2.b === 20 && o2.c === 100 && o2.d === 100, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemyPressureStateNow(-5,800).pct,b:T.enemyPressureStateNow(NaN,800).pct,c:T.enemyPressureStateNow(5,-3).pct});})()"));
+    t('U3162 非法输入/空值/负血量 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.enemyPressureStateNow('5','800').pct);})()"));
+    t('U3163 数字字符串转数', o4 === 80, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.enemyPressureFillNow()==='string',d:typeof T.enemyPressureDangerNow()==='boolean',c:T.enemyCountNow(),h:T.enemyHpSumNow()});})()"));
+    t('U3164 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.c === 'number' && typeof o5.h === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3159;k<=3164;k++) t('U'+k+' 敌方血量压力',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
