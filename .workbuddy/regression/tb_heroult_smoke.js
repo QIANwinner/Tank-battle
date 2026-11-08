@@ -10403,6 +10403,22 @@ async function main() {
     t('U3614 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.c === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3609;k<=3614;k++) t('U'+k+' 生存达标',false,e.message); }
 
+
+  // ===== U3615~U3620: 战局综合效能(v0.12.8) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runOverallWrap'),st:T.runOverallStateNow(80,100,30,60,20)});})()"));
+    t('U3615 战局综合效能 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3616 正常 80/100/30/60/20→72%', o.st.pct === 72 && o.st.txt === '效能 72%', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runOverallStateNow(0,0,0,0,0).pct,b:T.runOverallStateNow(100,100,60,60,20).pct,c:T.runOverallStateNow(50,100,0,60,10).pct,d:T.runOverallStateNow(50,100,0,60,10).cls});})()"));
+    t('U3617 边界 0→0/满分→100/弱→30/不佳', o2.a === 0 && o2.b === 100 && o2.c === 30 && o2.d === 'g-bad', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runOverallStateNow(-1,100,30,60,20).pct,b:T.runOverallStateNow(NaN,100,30,60,20).pct,c:T.runOverallStateNow(80,100,30,60,-1).pct,d:T.runOverallStateNow(80,100,30,60,undefined).pct});})()"));
+    t('U3618 非法/空值/负波/未定义 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runOverallStateNow('80','100','30','60','20').pct);})()"));
+    t('U3619 数字字符串转数', o4 === 72, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.runOverallFillNow()==='string',d:typeof T.runOverallDangerNow()==='boolean',a:T.runOverallHitsNow(),b:T.runOverallShotsNow(),c:T.runOverallKillsNow(),e:T.runOverallSecsNow(),g:T.runOverallWaveNow()});})()"));
+    t('U3620 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number' && typeof o5.c === 'number' && typeof o5.e === 'number' && typeof o5.g === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3615;k<=3620;k++) t('U'+k+' 战局综合效能',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
