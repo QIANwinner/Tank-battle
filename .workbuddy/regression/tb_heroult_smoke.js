@@ -10259,6 +10259,22 @@ async function main() {
     t('U3560 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.m === 'number' && typeof o5.g === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3555;k<=3560;k++) t('U'+k+' 金币火力',false,e.message); }
 
+
+  // ===== U3561~U3566: 连击势能(v0.11.99) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('streakPowerWrap'),st:T.streakPowerStateNow(20,39)});})()"));
+    t('U3561 连击势能 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3562 正常 20连/39杀→0.5 100%', o.st.pct === 100 && o.st.txt === '势能 0.5', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.streakPowerStateNow(0,39).pct,b:T.streakPowerStateNow(50,39).pct,c:T.streakPowerStateNow(10,39).pct,d:T.streakPowerStateNow(20,39).cls});})()"));
+    t('U3563 边界 0→0/50→100/10→50/好', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-good', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.streakPowerStateNow(-1,39).pct,b:T.streakPowerStateNow(NaN,39).pct,c:T.streakPowerStateNow(20,-1).pct,d:T.streakPowerStateNow(20,NaN).pct});})()"));
+    t('U3564 非法/空值/负杀/空杀 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.streakPowerStateNow('20','39').pct);})()"));
+    t('U3565 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.streakPowerFillNow()==='string',d:typeof T.streakPowerDangerNow()==='boolean',m:T.streakPowerComboNow(),k:T.streakPowerKillNow()});})()"));
+    t('U3566 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.m === 'number' && typeof o5.k === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3561;k<=3566;k++) t('U'+k+' 连击势能',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
