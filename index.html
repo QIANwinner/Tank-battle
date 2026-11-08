@@ -2782,6 +2782,11 @@
   #streakPowerWrap.g-good .pfill { background:#2ecc71; }
   #streakPowerWrap.g-warn .pfill { background:#f1c40f; }
   #streakPowerWrap.g-bad .pfill { background:#e74c3c; }
+  #surviveTempoWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #surviveTempoWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #surviveTempoWrap.g-good .pfill { background:#2ecc71; }
+  #surviveTempoWrap.g-warn .pfill { background:#f1c40f; }
+  #surviveTempoWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -3279,6 +3284,7 @@
     <div class="pill m-hide" id="reviveKillValueWrap"><span class="k">♻</span><i class="pbar"><i class="pfill" id="reviveKillValueFill"></i></i><span class="v" id="reviveKillValueVal">—</span></div>
     <div class="pill m-hide" id="coinDmgWrap"><span class="k">💥</span><i class="pbar"><i class="pfill" id="coinDmgFill"></i></i><span class="v" id="coinDmgVal">—</span></div>
     <div class="pill m-hide" id="streakPowerWrap"><span class="k">⚡</span><i class="pbar"><i class="pfill" id="streakPowerFill"></i></i><span class="v" id="streakPowerVal">—</span></div>
+    <div class="pill m-hide" id="surviveTempoWrap"><span class="k">⏱</span><i class="pbar"><i class="pfill" id="surviveTempoFill"></i></i><span class="v" id="surviveTempoVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -8953,6 +8959,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r76rvS = reviveKillValueText(stat.kills, reviveCount); const r76rvF = $('reviveKillValueFill'); if (r76rvF) r76rvF.style.width = r76rvS.pct + '%'; const r76rvV = $('reviveKillValueVal'); if (r76rvV) r76rvV.textContent = r76rvS.txt; const r76rvW = $('reviveKillValueWrap'); if (r76rvW) { r76rvW.classList.remove('g-good','g-warn','g-bad'); if (r76rvS.cls) r76rvW.classList.add(r76rvS.cls); r76rvW.classList.toggle('danger', !!r76rvS.danger); }
     const r76cdS = coinDmgText(runDmg, runPickupGold); const r76cdF = $('coinDmgFill'); if (r76cdF) r76cdF.style.width = r76cdS.pct + '%'; const r76cdV = $('coinDmgVal'); if (r76cdV) r76cdV.textContent = r76cdS.txt; const r76cdW = $('coinDmgWrap'); if (r76cdW) { r76cdW.classList.remove('g-good','g-warn','g-bad'); if (r76cdS.cls) r76cdW.classList.add(r76cdS.cls); r76cdW.classList.toggle('danger', !!r76cdS.danger); }
     const r76spS = streakPowerText(combo, stat.kills); const r76spF = $('streakPowerFill'); if (r76spF) r76spF.style.width = r76spS.pct + '%'; const r76spV = $('streakPowerVal'); if (r76spV) r76spV.textContent = r76spS.txt; const r76spW = $('streakPowerWrap'); if (r76spW) { r76spW.classList.remove('g-good','g-warn','g-bad'); if (r76spS.cls) r76spW.classList.add(r76spS.cls); r76spW.classList.toggle('danger', !!r76spS.danger); }
+    const r76stS = surviveTempoText(playSecRun, stat.deaths); const r76stF = $('surviveTempoFill'); if (r76stF) r76stF.style.width = r76stS.pct + '%'; const r76stV = $('surviveTempoVal'); if (r76stV) r76stV.textContent = r76stS.txt; const r76stW = $('surviveTempoWrap'); if (r76stW) { r76stW.classList.remove('g-good','g-warn','g-bad'); if (r76stS.cls) r76stW.classList.add(r76stS.cls); r76stW.classList.toggle('danger', !!r76stS.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -13053,6 +13060,17 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 0.15) { cls = 'g-bad'; danger = true; } else if (val < 0.3) { cls = 'g-warn'; }
     return { pct: pct, txt: '势能 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— v0.12.0 生存节奏：已玩秒数 / (死亡+1) 的每命平均生存时长（续航反馈）——
+  function surviveTempoText(secs, deaths) {
+    const ns = Number(secs), nd = Number(deaths);
+    if (!isFinite(ns) || ns < 0 || !isFinite(nd) || nd < 0) return { pct: 0, txt: '节奏 —', cls: 'g-good', danger: false };
+    const s = Math.max(0, ns), d = Math.max(0, Math.floor(nd));
+    const val = s / (d + 1);
+    const pct = Math.max(0, Math.min(100, Math.round(val / 60 * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 20) { cls = 'g-bad'; danger = true; } else if (val < 40) { cls = 'g-warn'; }
+    return { pct: pct, txt: '节奏 ' + (Math.round(val * 10) / 10) + 's/命', cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -16370,6 +16388,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       reviveKillValueStateNow: (k, r) => reviveKillValueText(k, r), reviveKillValueKillNow: () => stat.kills, reviveKillValueRevNow: () => reviveCount, reviveKillValueFillNow: () => { const f = $('reviveKillValueFill'); return f ? f.style.width : ''; }, reviveKillValueDangerNow: () => { const w = $('reviveKillValueWrap'); return !!(w && w.classList.contains('danger')); },
       coinDmgStateNow: (d, g) => coinDmgText(d, g), coinDmgDmgNow: () => runDmg, coinDmgGoldNow: () => runPickupGold, coinDmgFillNow: () => { const f = $('coinDmgFill'); return f ? f.style.width : ''; }, coinDmgDangerNow: () => { const w = $('coinDmgWrap'); return !!(w && w.classList.contains('danger')); },
       streakPowerStateNow: (c, k) => streakPowerText(c, k), streakPowerComboNow: () => combo, streakPowerKillNow: () => stat.kills, streakPowerFillNow: () => { const f = $('streakPowerFill'); return f ? f.style.width : ''; }, streakPowerDangerNow: () => { const w = $('streakPowerWrap'); return !!(w && w.classList.contains('danger')); },
+      surviveTempoStateNow: (s, d) => surviveTempoText(s, d), surviveTempoSecsNow: () => playSecRun, surviveTempoDeathNow: () => stat.deaths, surviveTempoFillNow: () => { const f = $('surviveTempoFill'); return f ? f.style.width : ''; }, surviveTempoDangerNow: () => { const w = $('surviveTempoWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
