@@ -8915,6 +8915,22 @@ async function main() {
     t('U3056 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=3051;k<=3056;k++) t('U'+k+' BOSS压制',false,e.message); }
 
+
+  // ===== U3057~U3062: 复活可负担(v0.11.15) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('reviveAffordBarWrap'),st:T.reviveAffordStateNow(100,200)});})()"));
+    t('U3057 复活可负担 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3058 正常 100/200=50%', o.st.pct === 50 && o.st.txt === '可负担 100/200', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reviveAffordStateNow(0,200).pct,b:T.reviveAffordStateNow(200,200).pct,c:T.reviveAffordStateNow(500,200).pct});})()"));
+    t('U3059 边界 0→0/200→100/500→100', o2.a === 0 && o2.b === 100 && o2.c === 100, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reviveAffordStateNow(-5,200).pct,b:T.reviveAffordStateNow(NaN,200).pct,c:T.reviveAffordStateNow(100,0).pct});})()"));
+    t('U3060 非法输入/空值/零成本 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.reviveAffordStateNow('100','200').pct);})()"));
+    t('U3061 数字字符串转数', o4 === 50, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.reviveAffordFillNow()==='string',d:typeof T.reviveAffordDangerNow()==='boolean'});})()"));
+    t('U3062 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=3057;k<=3062;k++) t('U'+k+' 复活可负担',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
