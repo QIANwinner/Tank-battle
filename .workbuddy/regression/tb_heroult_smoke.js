@@ -9363,6 +9363,22 @@ async function main() {
     t('U3224 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.c === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3219;k<=3224;k++) t('U'+k+' 敌群规模',false,e.message); }
 
+
+  // ===== U3225~U3230: 波次构成(v0.11.43) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('waveMixWrap'),st:T.waveMixStateNow(3,10)});})()"));
+    t('U3225 波次构成 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3226 正常 3/10→30%', o.st.pct === 30 && o.st.txt === '波次 3/10', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveMixStateNow(0,10).pct,b:T.waveMixStateNow(10,10).pct,c:T.waveMixStateNow(5,10).pct,d:T.waveMixStateNow(10,10).danger});})()"));
+    t('U3227 边界 0→0/10→100/5→50/最终波danger', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === true, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveMixStateNow(-1,10).pct,b:T.waveMixStateNow(NaN,10).pct,c:T.waveMixStateNow(3,0).pct,d:T.waveMixStateNow(3,-2).pct});})()"));
+    t('U3228 非法输入/空值/零总/负总 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.waveMixStateNow('3','10').pct);})()"));
+    t('U3229 数字字符串转数', o4 === 30, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.waveMixFillNow()==='string',d:typeof T.waveMixDangerNow()==='boolean',w:T.waveMixCurNow(),t:T.waveMixTotNow()});})()"));
+    t('U3230 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.w === 'number' && typeof o5.t === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3225;k<=3230;k++) t('U'+k+' 波次构成',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
