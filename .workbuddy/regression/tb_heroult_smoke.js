@@ -9059,6 +9059,22 @@ async function main() {
     t('U3110 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=3105;k<=3110;k++) t('U'+k+' 空枪率',false,e.message); }
 
+
+  // ===== U3111~U3116: 命中转化率(v0.11.24) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('killConvWrap'),st:T.killConvStateNow(30,60)});})()"));
+    t('U3111 命中转化率 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3112 正常 30杀60中→50%', o.st.pct === 50 && o.st.txt === '转化 50%', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killConvStateNow(0,60).pct,b:T.killConvStateNow(30,60).pct,c:T.killConvStateNow(60,60).pct,d:T.killConvStateNow(120,60).pct});})()"));
+    t('U3113 边界 0→0/30→50/60→100/120→100', o2.a === 0 && o2.b === 50 && o2.c === 100 && o2.d === 100, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killConvStateNow(-5,60).pct,b:T.killConvStateNow(NaN,60).pct,c:T.killConvStateNow(30,0).pct});})()"));
+    t('U3114 非法输入/空值/零命中 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.killConvStateNow('30','60').pct);})()"));
+    t('U3115 数字字符串转数', o4 === 50, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.killConvFillNow()==='string',d:typeof T.killConvDangerNow()==='boolean'});})()"));
+    t('U3116 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=3111;k<=3116;k++) t('U'+k+' 命中转化率',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
