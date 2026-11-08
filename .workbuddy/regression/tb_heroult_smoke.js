@@ -9651,6 +9651,22 @@ async function main() {
     t('U3332 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.w === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3327;k<=3332;k++) t('U'+k+' 每波伤害',false,e.message); }
 
+
+  // ===== U3333~U3338: 每波受击(v0.11.61) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('hurtPerWaveWrap'),st:T.hurtPerWaveStateNow(8,2)});})()"));
+    t('U3333 每波受击 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3334 正常 8/2波→4/波 50%', o.st.pct === 50 && o.st.txt === '受击 4/波', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hurtPerWaveStateNow(0,2).pct,b:T.hurtPerWaveStateNow(16,2).pct,c:T.hurtPerWaveStateNow(8,2).pct,d:T.hurtPerWaveStateNow(4,2).pct});})()"));
+    t('U3335 边界 0→100/16→0/8→50/4→75', o2.a === 100 && o2.b === 0 && o2.c === 50 && o2.d === 75, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hurtPerWaveStateNow(-1,2).pct,b:T.hurtPerWaveStateNow(NaN,2).pct,c:T.hurtPerWaveStateNow(8,0).pct,d:T.hurtPerWaveStateNow(8,-2).pct});})()"));
+    t('U3336 非法输入/空值/零波/负波 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.hurtPerWaveStateNow('8','2').pct);})()"));
+    t('U3337 数字字符串转数', o4 === 50, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.hurtPerWaveFillNow()==='string',d:typeof T.hurtPerWaveDangerNow()==='boolean',v:T.hurtPerWaveHurtNow(),w:T.hurtPerWaveWaveNow()});})()"));
+    t('U3338 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.w === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3333;k<=3338;k++) t('U'+k+' 每波受击',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
