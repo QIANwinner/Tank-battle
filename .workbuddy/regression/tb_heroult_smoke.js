@@ -10755,6 +10755,22 @@ async function main() {
     t('U3746 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.p === 'number' && typeof o5.h === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3741;k<=3746;k++) t('U'+k+' 道具受击比',false,e.message); }
 
+
+  // ===== U3747~U3752: 生涯每死秒数(v0.12.30) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerSecPerDeathWrap'),st:T.careerSecPerDeathStateNow(1200,10)});})()"));
+    t('U3747 生涯每死秒数 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3748 正常 1200秒/10死→120s/死 100%', o.st.pct === 100 && o.st.txt === '存活 120s/死' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerSecPerDeathStateNow(0,10).pct,b:T.careerSecPerDeathStateNow(2400,10).pct,c:T.careerSecPerDeathStateNow(600,10).pct,d:T.careerSecPerDeathStateNow(600,10).cls});})()"));
+    t('U3749 边界 0→0/2400→100/600→50/偏短', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerSecPerDeathStateNow(-1,10).pct,b:T.careerSecPerDeathStateNow(NaN,10).pct,c:T.careerSecPerDeathStateNow(1200,0).pct,d:T.careerSecPerDeathStateNow(1200,-1).pct});})()"));
+    t('U3750 非法/空值/零死/负死 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.careerSecPerDeathStateNow('1200','10').pct);})()"));
+    t('U3751 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.careerSecPerDeathFillNow()==='string',d:typeof T.careerSecPerDeathDangerNow()==='boolean',s:T.careerSecPerDeathSecNow(),x:T.careerSecPerDeathDeathNow()});})()"));
+    t('U3752 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.s === 'number' && typeof o5.x === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3747;k<=3752;k++) t('U'+k+' 生涯每死秒数',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
