@@ -8803,6 +8803,22 @@ async function main() {
     t('U3014 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=3009;k<=3014;k++) t('U'+k+' 命中质量',false,e.message); }
 
+
+  // ===== U3015~U3020: 金币效率(v0.11.08) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('coinRateBarWrap'),st:T.coinRateStateNow(60,30)});})()"));
+    t('U3015 金币效率 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3016 正常 60枚/30秒=120/分', o.st.pct === 100 && o.st.txt === '金币 120/分', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinRateStateNow(0,60).pct,b:T.coinRateStateNow(30,60).pct,c:T.coinRateStateNow(120,60).pct});})()"));
+    t('U3017 边界 0→0/30→25/120→100', o2.a === 0 && o2.b === 25 && o2.c === 100, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinRateStateNow(-5,60).pct,b:T.coinRateStateNow(NaN,60).pct,c:T.coinRateStateNow(10,0).pct});})()"));
+    t('U3018 非法输入/空值/零秒 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.coinRateStateNow('60','30').pct);})()"));
+    t('U3019 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.coinRateFillNow()==='string',d:typeof T.coinRateDangerNow()==='boolean'});})()"));
+    t('U3020 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=3015;k<=3020;k++) t('U'+k+' 金币效率',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
