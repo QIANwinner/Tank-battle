@@ -10787,6 +10787,22 @@ async function main() {
     t('U3758 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.s === 'number' && typeof o5.h === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3753;k<=3758;k++) t('U'+k+' 本局未命中数',false,e.message); }
 
+
+  // ===== U3759~U3764: 生涯击杀转化率(v0.12.32) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerKillConvWrap'),st:T.careerKillConvStateNow(30,60)});})()"));
+    t('U3759 生涯击杀转化率 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3760 正常 30杀/60中→50% 100%', o.st.pct === 100 && o.st.txt === '转化 50%' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerKillConvStateNow(0,60).pct,b:T.careerKillConvStateNow(60,60).pct,c:T.careerKillConvStateNow(21,60).pct,d:T.careerKillConvStateNow(21,60).cls});})()"));
+    t('U3761 边界 0→0/60→100/21→70/偏低', o2.a === 0 && o2.b === 100 && o2.c === 70 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerKillConvStateNow(-1,60).pct,b:T.careerKillConvStateNow(NaN,60).pct,c:T.careerKillConvStateNow(30,0).pct,d:T.careerKillConvStateNow(30,-1).pct});})()"));
+    t('U3762 非法/空值/零击/负击 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.careerKillConvStateNow('30','60').pct);})()"));
+    t('U3763 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.careerKillConvFillNow()==='string',d:typeof T.careerKillConvDangerNow()==='boolean',k:T.careerKillConvKillNow(),h:T.careerKillConvHitNow()});})()"));
+    t('U3764 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.k === 'number' && typeof o5.h === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3759;k<=3764;k++) t('U'+k+' 生涯击杀转化率',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
