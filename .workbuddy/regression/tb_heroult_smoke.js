@@ -10739,6 +10739,22 @@ async function main() {
     t('U3740 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.c === 'number' && typeof o5.l === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3735;k<=3740;k++) t('U'+k+' 每命金币',false,e.message); }
 
+
+  // ===== U3741~U3746: 道具受击比(v0.12.29) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runPuHurtRatioWrap'),st:T.runPuHurtRatioStateNow(20,10)});})()"));
+    t('U3741 道具受击比 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3742 正常 20道具/10受击→2.0 100%', o.st.pct === 100 && o.st.txt === '受击比 2' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runPuHurtRatioStateNow(0,10).pct,b:T.runPuHurtRatioStateNow(40,10).pct,c:T.runPuHurtRatioStateNow(10,10).pct,d:T.runPuHurtRatioStateNow(10,10).cls});})()"));
+    t('U3743 边界 0→0/40→100/10→50/偏少', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runPuHurtRatioStateNow(-1,10).pct,b:T.runPuHurtRatioStateNow(NaN,10).pct,c:T.runPuHurtRatioStateNow(20,-1).pct,d:T.runPuHurtRatioStateNow(20,0).pct});})()"));
+    t('U3744 非法/空值/负受击→0 / 零受击按满', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 100, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runPuHurtRatioStateNow('20','10').pct);})()"));
+    t('U3745 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.runPuHurtRatioFillNow()==='string',d:typeof T.runPuHurtRatioDangerNow()==='boolean',p:T.runPuHurtRatioPuNow(),h:T.runPuHurtRatioHurtNow()});})()"));
+    t('U3746 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.p === 'number' && typeof o5.h === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3741;k<=3746;k++) t('U'+k+' 道具受击比',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
