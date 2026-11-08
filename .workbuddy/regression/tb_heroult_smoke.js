@@ -8787,6 +8787,22 @@ async function main() {
     t('U3008 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=3003;k<=3008;k++) t('U'+k+' 生存时长',false,e.message); }
 
+
+  // ===== U3009~U3014: 命中质量(v0.11.07) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('hitQualityBarWrap'),st:T.hitQualityStateNow(6,12)});})()"));
+    t('U3009 命中质量 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3010 正常 6/12=50%', o.st.pct === 50 && o.st.txt === '命中 6/12', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hitQualityStateNow(0,12).pct,b:T.hitQualityStateNow(6,12).pct,c:T.hitQualityStateNow(12,12).pct});})()"));
+    t('U3011 边界 0→0/6→50/12→100', o2.a === 0 && o2.b === 50 && o2.c === 100, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hitQualityStateNow(-5,12).pct,b:T.hitQualityStateNow(NaN,12).pct});})()"));
+    t('U3012 非法输入/空值 → 0', o3.a === 0 && o3.b === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.hitQualityStateNow('6','12').pct);})()"));
+    t('U3013 数字字符串转数', o4 === 50, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.hitQualityFillNow()==='string',d:typeof T.hitQualityDangerNow()==='boolean'});})()"));
+    t('U3014 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=3009;k<=3014;k++) t('U'+k+' 命中质量',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
