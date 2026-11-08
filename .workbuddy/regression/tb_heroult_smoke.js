@@ -9091,6 +9091,22 @@ async function main() {
     t('U3122 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=3117;k<=3122;k++) t('U'+k+' 波次燃速',false,e.message); }
 
+
+  // ===== U3123~U3128: 每杀耗弹(v0.11.26) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('ammoPerKillWrap'),st:T.ammoPerKillStateNow(30,10)});})()"));
+    t('U3123 每杀耗弹 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3124 正常 30弹10杀→3.0/杀100%', o.st.pct === 100 && o.st.txt === '耗弹 3.0/杀', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.ammoPerKillStateNow(0,10).pct,b:T.ammoPerKillStateNow(30,10).pct,c:T.ammoPerKillStateNow(60,10).pct,d:T.ammoPerKillStateNow(100,10).pct});})()"));
+    t('U3125 边界 0→0/30→100/60→100/100→100', o2.a === 0 && o2.b === 100 && o2.c === 100 && o2.d === 100, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.ammoPerKillStateNow(-5,10).pct,b:T.ammoPerKillStateNow(NaN,10).pct,c:T.ammoPerKillStateNow(30,0).pct});})()"));
+    t('U3126 非法输入/空值/零杀 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.ammoPerKillStateNow('30','10').pct);})()"));
+    t('U3127 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.ammoPerKillFillNow()==='string',d:typeof T.ammoPerKillDangerNow()==='boolean'});})()"));
+    t('U3128 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=3123;k<=3128;k++) t('U'+k+' 每杀耗弹',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

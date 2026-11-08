@@ -2412,6 +2412,11 @@
   #waveBurnWrap.g-good .pfill { background:#2ecc71; }
   #waveBurnWrap.g-warn .pfill { background:#f1c40f; }
   #waveBurnWrap.g-bad .pfill { background:#e74c3c; }
+  #ammoPerKillWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #ammoPerKillWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #ammoPerKillWrap.g-good .pfill { background:#2ecc71; }
+  #ammoPerKillWrap.g-warn .pfill { background:#f1c40f; }
+  #ammoPerKillWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -2835,6 +2840,7 @@
     <div class="pill m-hide" id="fireMissWrap"><span class="k">🎯</span><i class="pbar"><i class="pfill" id="fireMissFill"></i></i><span class="v" id="fireMissVal">—</span></div>
     <div class="pill m-hide" id="killConvWrap"><span class="k">💥</span><i class="pbar"><i class="pfill" id="killConvFill"></i></i><span class="v" id="killConvVal">—</span></div>
     <div class="pill m-hide" id="waveBurnWrap"><span class="k">🔥</span><i class="pbar"><i class="pfill" id="waveBurnFill"></i></i><span class="v" id="waveBurnVal">—</span></div>
+    <div class="pill m-hide" id="ammoPerKillWrap"><span class="k">🧨</span><i class="pbar"><i class="pfill" id="ammoPerKillFill"></i></i><span class="v" id="ammoPerKillVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -3210,7 +3216,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V11.25</div>
+  <div id="mark">DESIGNED BY QIAN · V11.26</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -8435,6 +8441,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r66fmS = fireMissText(stat.shots, stat.hits); const r66fmF = $('fireMissFill'); if (r66fmF) r66fmF.style.width = r66fmS.pct + '%'; const r66fmV = $('fireMissVal'); if (r66fmV) r66fmV.textContent = r66fmS.txt; const r66fmW = $('fireMissWrap'); if (r66fmW) { r66fmW.classList.remove('g-good','g-warn','g-bad'); if (r66fmS.cls) r66fmW.classList.add(r66fmS.cls); r66fmW.classList.toggle('danger', !!r66fmS.danger); }
     const r66kcS = killConvText(stat.kills, stat.hits); const r66kcF = $('killConvFill'); if (r66kcF) r66kcF.style.width = r66kcS.pct + '%'; const r66kcV = $('killConvVal'); if (r66kcV) r66kcV.textContent = r66kcS.txt; const r66kcW = $('killConvWrap'); if (r66kcW) { r66kcW.classList.remove('g-good','g-warn','g-bad'); if (r66kcS.cls) r66kcW.classList.add(r66kcS.cls); r66kcW.classList.toggle('danger', !!r66kcS.danger); }
     const r66wbS = waveBurnText(wave, playSecRun); const r66wbF = $('waveBurnFill'); if (r66wbF) r66wbF.style.width = r66wbS.pct + '%'; const r66wbV = $('waveBurnVal'); if (r66wbV) r66wbV.textContent = r66wbS.txt; const r66wbW = $('waveBurnWrap'); if (r66wbW) { r66wbW.classList.remove('g-good','g-warn','g-bad'); if (r66wbS.cls) r66wbW.classList.add(r66wbS.cls); r66wbW.classList.toggle('danger', !!r66wbS.danger); }
+    const r66apS = ammoPerKillText(stat.shots, stat.kills); const r66apF = $('ammoPerKillFill'); if (r66apF) r66apF.style.width = r66apS.pct + '%'; const r66apV = $('ammoPerKillVal'); if (r66apV) r66apV.textContent = r66apS.txt; const r66apW = $('ammoPerKillWrap'); if (r66apW) { r66apW.classList.remove('g-good','g-warn','g-bad'); if (r66apS.cls) r66apW.classList.add(r66apS.cls); r66apW.classList.toggle('danger', !!r66apS.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -11743,6 +11750,16 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (spw > 90) { cls = 'g-bad'; danger = true; } else if (spw > 60) { cls = 'g-warn'; }
     return { pct: pct, txt: '燃速 ' + Math.floor(spw) + 's/波', cls: cls, danger: danger };
   }
+  // —— v0.11.26 每杀耗弹：平均每击杀消耗子弹数 ——
+  function ammoPerKillText(shots, kills) {
+    const s = Number(shots), k = Number(kills);
+    if (!isFinite(s) || s < 0 || !isFinite(k) || k <= 0) return { pct: 0, txt: '耗弹 —', cls: 'g-bad', danger: true };
+    const spk = s / k;
+    const pct = Math.max(0, Math.min(100, Math.floor(spk / 3 * 100)));
+    let cls = 'g-good', danger = false;
+    if (spk > 6) { cls = 'g-bad'; danger = true; } else if (spk > 4) { cls = 'g-warn'; }
+    return { pct: pct, txt: '耗弹 ' + spk.toFixed(1) + '/杀', cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -13584,7 +13601,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V11.25', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V11.26', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -14986,6 +15003,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       fireMissStateNow: (s, h) => fireMissText(s, h), fireMissFillNow: () => { const f = $('fireMissFill'); return f ? f.style.width : ''; }, fireMissDangerNow: () => { const w = $('fireMissWrap'); return !!(w && w.classList.contains('danger')); },
       killConvStateNow: (k, h) => killConvText(k, h), killConvFillNow: () => { const f = $('killConvFill'); return f ? f.style.width : ''; }, killConvDangerNow: () => { const w = $('killConvWrap'); return !!(w && w.classList.contains('danger')); },
       waveBurnStateNow: (w, s) => waveBurnText(w, s), waveBurnFillNow: () => { const f = $('waveBurnFill'); return f ? f.style.width : ''; }, waveBurnDangerNow: () => { const w = $('waveBurnWrap'); return !!(w && w.classList.contains('danger')); },
+      ammoPerKillStateNow: (s, k) => ammoPerKillText(s, k), ammoPerKillFillNow: () => { const f = $('ammoPerKillFill'); return f ? f.style.width : ''; }, ammoPerKillDangerNow: () => { const w = $('ammoPerKillWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
