@@ -9347,6 +9347,22 @@ async function main() {
     t('U3218 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.s === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3213;k<=3218;k++) t('U'+k+' 生存时钟',false,e.message); }
 
+
+  // ===== U3219~U3224: 敌群规模(v0.11.42) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('enemySwarmWrap'),st:T.enemySwarmStateNow(6)});})()"));
+    t('U3219 敌群规模 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3220 正常 6/15→40%', o.st.pct === 40 && o.st.txt === '敌群 6/15', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemySwarmStateNow(0).pct,b:T.enemySwarmStateNow(15).pct,c:T.enemySwarmStateNow(30).pct,d:T.enemySwarmStateNow(3).pct});})()"));
+    t('U3221 边界 0→0/15→100/30→100/3→20', o2.a === 0 && o2.b === 100 && o2.c === 100 && o2.d === 20, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.enemySwarmStateNow(-5).pct,b:T.enemySwarmStateNow(NaN).pct});})()"));
+    t('U3222 非法输入/空值 → 0', o3.a === 0 && o3.b === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.enemySwarmStateNow('6').pct);})()"));
+    t('U3223 数字字符串转数', o4 === 40, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.enemySwarmFillNow()==='string',d:typeof T.enemySwarmDangerNow()==='boolean',c:T.enemySwarmCountNow()});})()"));
+    t('U3224 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.c === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3219;k<=3224;k++) t('U'+k+' 敌群规模',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
