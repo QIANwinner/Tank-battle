@@ -11331,6 +11331,22 @@ async function main() {
     t('U3962 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3957;k<=3962;k++) t('U'+k+' 本局每命中击杀',false,e.message); }
 
+
+  // ===== U3963~U3968: 本局每死受击(v0.12.66) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runHurtPerDeathWrap'),st:T.runHurtPerDeathStateNow(24,6)});})()"));
+    t('U3963 本局每死受击 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3964 正常 24受击/6死→4/死 100%', o.st.pct === 100 && o.st.txt === '受击 4/死' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runHurtPerDeathStateNow(0,6).pct,b:T.runHurtPerDeathStateNow(24,6).pct,c:T.runHurtPerDeathStateNow(12,6).pct,d:T.runHurtPerDeathStateNow(12,6).cls});})()"));
+    t('U3965 边界 0→0/24→100/12→50/偏低', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runHurtPerDeathStateNow(-1,6).pct,b:T.runHurtPerDeathStateNow(NaN,6).pct,c:T.runHurtPerDeathStateNow(24,0).pct,d:T.runHurtPerDeathStateNow(24,-1).pct});})()"));
+    t('U3966 非法/空值/零死/负死 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runHurtPerDeathStateNow('24','6').pct);})()"));
+    t('U3967 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.runHurtPerDeathFillNow()==='string',d:typeof T.runHurtPerDeathDangerNow()==='boolean',a:T.runHurtPerDeathANow(),b:T.runHurtPerDeathBNow()});})()"));
+    t('U3968 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3963;k<=3968;k++) t('U'+k+' 本局每死受击',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
