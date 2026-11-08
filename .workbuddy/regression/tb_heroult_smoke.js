@@ -9251,6 +9251,22 @@ async function main() {
     t('U3182 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=3177;k<=3182;k++) t('U'+k+' 生存续航',false,e.message); }
 
+
+  // ===== U3183~U3188: 道具活跃度(v0.11.36) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('puActiveWrap'),st:T.puActiveStateNow(3,2)});})()"));
+    t('U3183 道具活跃度 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3184 正常 3个2种→50%', o.st.pct === 50 && o.st.txt === '道具 3种2', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.puActiveStateNow(0,0).pct,b:T.puActiveStateNow(6,3).pct,c:T.puActiveStateNow(12,3).pct,d:T.puActiveStateNow(2,1).pct});})()"));
+    t('U3185 边界 0→0/6→100/12→100/2→33', o2.a === 0 && o2.b === 100 && o2.c === 100 && o2.d === 33, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.puActiveStateNow(-5,2).pct,b:T.puActiveStateNow(NaN,2).pct,c:T.puActiveStateNow(3,-2).pct});})()"));
+    t('U3186 非法输入/空值/负种类 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.puActiveStateNow('3','2').pct);})()"));
+    t('U3187 数字字符串转数', o4 === 50, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.puActiveFillNow()==='string',d:typeof T.puActiveDangerNow()==='boolean',c:T.puActiveCountNow(),k:T.puActiveKindsNow()});})()"));
+    t('U3188 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.c === 'number' && typeof o5.k === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3183;k<=3188;k++) t('U'+k+' 道具活跃度',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
