@@ -9955,6 +9955,22 @@ async function main() {
     t('U3446 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.l === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3441;k<=3446;k++) t('U'+k+' 每金币击杀',false,e.message); }
 
+
+  // ===== U3447~U3452: 每金币伤害(v0.11.80) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('dmgPerCoinWrap'),st:T.dmgPerCoinStateNow(1000,50)});})()"));
+    t('U3447 每金币伤害 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3448 正常 1000伤/50金→20/金 50%', o.st.pct === 50 && o.st.txt === '每金币 20', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dmgPerCoinStateNow(0,50).pct,b:T.dmgPerCoinStateNow(2000,50).pct,c:T.dmgPerCoinStateNow(100,50).pct,d:T.dmgPerCoinStateNow(1000,100).pct});})()"));
+    t('U3449 边界 0→0/2000→100/100→5/1000→25', o2.a === 0 && o2.b === 100 && o2.c === 5 && o2.d === 25, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dmgPerCoinStateNow(-1,50).pct,b:T.dmgPerCoinStateNow(NaN,50).pct,c:T.dmgPerCoinStateNow(1000,0).pct,d:T.dmgPerCoinStateNow(1000,-5).pct});})()"));
+    t('U3450 非法输入/空值/零金/负金 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.dmgPerCoinStateNow('1000','50').pct);})()"));
+    t('U3451 数字字符串转数', o4 === 50, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.dmgPerCoinFillNow()==='string',d:typeof T.dmgPerCoinDangerNow()==='boolean',v:T.dmgPerCoinDmgNow(),l:T.dmgPerCoinCoinsNow()});})()"));
+    t('U3452 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.l === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3447;k<=3452;k++) t('U'+k+' 每金币伤害',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
