@@ -11059,6 +11059,22 @@ async function main() {
     t('U3860 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.s === 'number' && typeof o5.p === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3855;k<=3860;k++) t('U'+k+' 本局每道具得分',false,e.message); }
 
+
+  // ===== U3861~U3866: 本局每升级得分(v0.12.49) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runScorePerUpgWrap'),st:T.runScorePerUpgStateNow(3000,6)});})()"));
+    t('U3861 本局每升级得分 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3862 正常 3000得分/6升级→500/升级 100%', o.st.pct === 100 && o.st.txt === '得分 500/升级' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runScorePerUpgStateNow(0,6).pct,b:T.runScorePerUpgStateNow(3000,6).pct,c:T.runScorePerUpgStateNow(1500,6).pct,d:T.runScorePerUpgStateNow(1500,6).cls});})()"));
+    t('U3863 边界 0→0/3000→100/1500→50/偏低', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runScorePerUpgStateNow(-1,6).pct,b:T.runScorePerUpgStateNow(NaN,6).pct,c:T.runScorePerUpgStateNow(3000,0).pct,d:T.runScorePerUpgStateNow(3000,-1).pct});})()"));
+    t('U3864 非法/空值/零升级/负升级 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runScorePerUpgStateNow('3000','6').pct);})()"));
+    t('U3865 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.runScorePerUpgFillNow()==='string',d:typeof T.runScorePerUpgDangerNow()==='boolean',a:T.runScorePerUpgANow(),b:T.runScorePerUpgBNow()});})()"));
+    t('U3866 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3861;k<=3866;k++) t('U'+k+' 本局每升级得分',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
