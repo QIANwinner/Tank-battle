@@ -8867,6 +8867,22 @@ async function main() {
     t('U3038 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=3033;k<=3038;k++) t('U'+k+' 伤害速率',false,e.message); }
 
+
+  // ===== U3039~U3044: 强化投入里程碑(v0.11.12) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('upgSpendBarWrap'),st:T.upgSpendStateNow(150,300)});})()"));
+    t('U3039 强化投入 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3040 正常 150/300=50%', o.st.pct === 50 && o.st.txt === '投入 150/300', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.upgSpendStateNow(0,300).pct,b:T.upgSpendStateNow(150,300).pct,c:T.upgSpendStateNow(300,300).pct,d:T.upgSpendStateNow(600,300).pct});})()"));
+    t('U3041 边界 0→0/150→50/300→100/600→100', o2.a === 0 && o2.b === 50 && o2.c === 100 && o2.d === 100, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.upgSpendStateNow(-5,300).pct,b:T.upgSpendStateNow(NaN,300).pct});})()"));
+    t('U3042 非法输入/空值 → 0', o3.a === 0 && o3.b === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.upgSpendStateNow('150','300').pct);})()"));
+    t('U3043 数字字符串转数', o4 === 50, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.upgSpendFillNow()==='string',d:typeof T.upgSpendDangerNow()==='boolean'});})()"));
+    t('U3044 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=3039;k<=3044;k++) t('U'+k+' 强化投入里程碑',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
