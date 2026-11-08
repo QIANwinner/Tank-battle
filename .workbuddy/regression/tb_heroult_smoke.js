@@ -9267,6 +9267,22 @@ async function main() {
     t('U3188 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.c === 'number' && typeof o5.k === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3183;k<=3188;k++) t('U'+k+' 道具活跃度',false,e.message); }
 
+
+  // ===== U3189~U3194: BOSS阶段进度(v0.11.37) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossPhasePctWrap'),st:T.bossPhasePctStateNow(80,100)});})()"));
+    t('U3189 BOSS阶段进度 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3190 正常 80/100→P1 80%', o.st.pct === 80 && o.st.txt === 'BOSS P1 80%', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossPhasePctStateNow(100,100).pct,b:T.bossPhasePctStateNow(50,100).pct,c:T.bossPhasePctStateNow(30,100).pct,d:T.bossPhasePctStateNow(10,100).pct});})()"));
+    t('U3191 边界 满血P1 0/半血P3 0/30%血P3 80/10%血P4 60', o2.a === 0 && o2.b === 0 && o2.c === 80 && o2.d === 60, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossPhasePctStateNow(-5,100).pct,b:T.bossPhasePctStateNow(NaN,100).pct,c:T.bossPhasePctStateNow(80,0).pct,d:T.bossPhasePctStateNow(80,-3).pct});})()"));
+    t('U3192 非法输入/空值/零最大/负最大 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bossPhasePctStateNow('80','100').pct);})()"));
+    t('U3193 数字字符串转数', o4 === 80, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.bossPhasePctFillNow()==='string',d:typeof T.bossPhasePctDangerNow()==='boolean'});})()"));
+    t('U3194 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=3189;k<=3194;k++) t('U'+k+' BOSS阶段进度',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
