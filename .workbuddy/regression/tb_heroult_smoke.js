@@ -8899,6 +8899,22 @@ async function main() {
     t('U3050 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=3045;k<=3050;k++) t('U'+k+' 大招充能',false,e.message); }
 
+
+  // ===== U3051~U3056: BOSS压制(v0.11.14) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossPressBarWrap'),st:T.bossPressStateNow(75,100)});})()"));
+    t('U3051 BOSS压制 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3052 正常 75/100→25%', o.st.pct === 25 && o.st.txt === '压制 25%', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossPressStateNow(100,100).pct,b:T.bossPressStateNow(50,100).pct,c:T.bossPressStateNow(0,100).pct});})()"));
+    t('U3053 边界 100→0/50→50/0→100', o2.a === 0 && o2.b === 50 && o2.c === 100, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossPressStateNow(-5,100).pct,b:T.bossPressStateNow(NaN,100).pct,c:T.bossPressStateNow(50,0).pct});})()"));
+    t('U3054 非法输入/空值/零上限 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bossPressStateNow('75','100').pct);})()"));
+    t('U3055 数字字符串转数', o4 === 25, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.bossPressFillNow()==='string',d:typeof T.bossPressDangerNow()==='boolean'});})()"));
+    t('U3056 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=3051;k<=3056;k++) t('U'+k+' BOSS压制',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
