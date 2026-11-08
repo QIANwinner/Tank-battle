@@ -10899,6 +10899,22 @@ async function main() {
     t('U3800 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.b === 'number' && typeof o5.g === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3795;k<=3800;k++) t('U'+k+' 生涯每局BOSS',false,e.message); }
 
+
+  // ===== U3801~U3806: 本局波次/生涯最佳(v0.12.39) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runWaveToBestWrap'),st:T.runWaveToBestStateNow(8,8)});})()"));
+    t('U3801 本局波次/生涯最佳 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3802 正常 8波/8最佳→100% 达最佳', o.st.pct === 100 && o.st.txt === '最佳 100%' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runWaveToBestStateNow(0,8).pct,b:T.runWaveToBestStateNow(16,8).pct,c:T.runWaveToBestStateNow(6,8).pct,d:T.runWaveToBestStateNow(6,8).cls});})()"));
+    t('U3803 边界 0→0/16→100/6→75/偏低', o2.a === 0 && o2.b === 100 && o2.c === 75 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runWaveToBestStateNow(8,0).pct,b:T.runWaveToBestStateNow(NaN,8).pct,c:T.runWaveToBestStateNow(8,-1).pct,d:T.runWaveToBestStateNow(8,0).txt});})()"));
+    t('U3804 非法/空值/零最佳/负最佳 → 占位 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === '最佳 —', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runWaveToBestStateNow('8','8').pct);})()"));
+    t('U3805 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.runWaveToBestFillNow()==='string',d:typeof T.runWaveToBestDangerNow()==='boolean',w:T.runWaveToBestWaveNow(),b:T.runWaveToBestBestNow()});})()"));
+    t('U3806 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.w === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3801;k<=3806;k++) t('U'+k+' 本局波次/生涯最佳',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
