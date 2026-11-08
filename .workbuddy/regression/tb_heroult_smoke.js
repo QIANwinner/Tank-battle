@@ -10643,6 +10643,22 @@ async function main() {
     t('U3704 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.s === 'number' && typeof o5.t === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3699;k<=3704;k++) t('U'+k+' 单局得分速率',false,e.message); }
 
+
+  // ===== U3705~U3710: 单局K/D(v0.12.23) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runKDWrap'),st:T.runKDStateNow(40,10)});})()"));
+    t('U3705 单局K/D DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3706 正常 40杀/10死→4.0 100%', o.st.pct === 100 && o.st.txt === 'K/D 4' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runKDStateNow(0,10).pct,b:T.runKDStateNow(80,10).pct,c:T.runKDStateNow(20,10).pct,d:T.runKDStateNow(10,10).cls});})()"));
+    t('U3707 边界 0→0/8.0→100/2.0→50/平衡偏弱', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runKDStateNow(-1,10).pct,b:T.runKDStateNow(NaN,10).pct,c:T.runKDStateNow(10,-1).pct,d:T.runKDStateNow(10,0).pct});})()"));
+    t('U3708 非法/空值/负死→0 / 零死按击杀计', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 100, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runKDStateNow('40','10').pct);})()"));
+    t('U3709 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.runKDFillNow()==='string',d:typeof T.runKDDangerNow()==='boolean',k:T.runKDKillNow(),x:T.runKDDeathNow()});})()"));
+    t('U3710 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.k === 'number' && typeof o5.x === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3705;k<=3710;k++) t('U'+k+' 单局K/D',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
