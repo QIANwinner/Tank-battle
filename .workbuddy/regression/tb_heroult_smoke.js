@@ -10579,6 +10579,22 @@ async function main() {
     t('U3680 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.p === 'number' && typeof o5.g === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3675;k<=3680;k++) t('U'+k+' 生涯平均时长',false,e.message); }
 
+
+  // ===== U3681~U3686: 生涯场均星数(v0.12.19) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerStarPerGameWrap'),st:T.careerStarPerGameStateNow(15,5)});})()"));
+    t('U3681 生涯场均星数 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3682 正常 15星/5局→3/局 100%', o.st.pct === 100 && o.st.txt === '星级 3/局' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerStarPerGameStateNow(0,5).pct,b:T.careerStarPerGameStateNow(30,5).pct,c:T.careerStarPerGameStateNow(7.5,5).pct,d:T.careerStarPerGameStateNow(7.5,5).cls});})()"));
+    t('U3683 边界 0→0/30→100/7.5→50/偏少', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerStarPerGameStateNow(-1,5).pct,b:T.careerStarPerGameStateNow(NaN,5).pct,c:T.careerStarPerGameStateNow(15,0).pct,d:T.careerStarPerGameStateNow(15,-1).pct});})()"));
+    t('U3684 非法/空值/零局/负局 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.careerStarPerGameStateNow('15','5').pct);})()"));
+    t('U3685 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.careerStarPerGameFillNow()==='string',d:typeof T.careerStarPerGameDangerNow()==='boolean',s:T.careerStarPerGameStarNow(),g:T.careerStarPerGameGameNow()});})()"));
+    t('U3686 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.s === 'number' && typeof o5.g === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3681;k<=3686;k++) t('U'+k+' 生涯场均星数',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
