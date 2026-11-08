@@ -9011,6 +9011,22 @@ async function main() {
     t('U3092 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=3087;k<=3092;k++) t('U'+k+' 强化性价比',false,e.message); }
 
+
+  // ===== U3093~U3098: 金币波动(v0.11.21) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('coinVolWrap'),st:T.coinVolStateNow(30,60)});})()"));
+    t('U3093 金币波动 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3094 正常 30金/60秒=30/分→50%', o.st.pct === 50 && o.st.txt === '金币 30/分', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinVolStateNow(0,60).pct,b:T.coinVolStateNow(15,60).pct,c:T.coinVolStateNow(60,60).pct,d:T.coinVolStateNow(120,60).pct});})()"));
+    t('U3095 边界 0→0/15→25/60→100/120→100', o2.a === 0 && o2.b === 25 && o2.c === 100 && o2.d === 100, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinVolStateNow(-5,60).pct,b:T.coinVolStateNow(NaN,60).pct,c:T.coinVolStateNow(30,0).pct});})()"));
+    t('U3096 非法输入/空值/零秒 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.coinVolStateNow('30','60').pct);})()"));
+    t('U3097 数字字符串转数', o4 === 50, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.coinVolFillNow()==='string',d:typeof T.coinVolDangerNow()==='boolean'});})()"));
+    t('U3098 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=3093;k<=3098;k++) t('U'+k+' 金币波动',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
