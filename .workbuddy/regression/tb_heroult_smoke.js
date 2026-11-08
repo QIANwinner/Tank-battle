@@ -10563,6 +10563,22 @@ async function main() {
     t('U3674 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.s === 'number' && typeof o5.k === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3669;k<=3674;k++) t('U'+k+' 生涯弹药效率',false,e.message); }
 
+
+  // ===== U3675~U3680: 生涯平均时长(v0.12.18) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerGameLenWrap'),st:T.careerGameLenStateNow(600,5)});})()"));
+    t('U3675 生涯平均时长 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3676 正常 600秒/5局→120s 100%', o.st.pct === 100 && o.st.txt === '时长 120s' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerGameLenStateNow(0,5).pct,b:T.careerGameLenStateNow(1200,5).pct,c:T.careerGameLenStateNow(300,5).pct,d:T.careerGameLenStateNow(300,5).cls});})()"));
+    t('U3677 边界 0→0/1200→100/300→50/偏短', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerGameLenStateNow(-1,5).pct,b:T.careerGameLenStateNow(NaN,5).pct,c:T.careerGameLenStateNow(600,0).pct,d:T.careerGameLenStateNow(600,-1).pct});})()"));
+    t('U3678 非法/空值/零局/负局 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.careerGameLenStateNow('600','5').pct);})()"));
+    t('U3679 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.careerGameLenFillNow()==='string',d:typeof T.careerGameLenDangerNow()==='boolean',p:T.careerGameLenSecNow(),g:T.careerGameLenGameNow()});})()"));
+    t('U3680 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.p === 'number' && typeof o5.g === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3675;k<=3680;k++) t('U'+k+' 生涯平均时长',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
