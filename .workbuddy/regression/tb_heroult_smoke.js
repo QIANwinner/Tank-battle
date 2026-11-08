@@ -9395,6 +9395,22 @@ async function main() {
     t('U3236 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.c === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3231;k<=3236;k++) t('U'+k+' 弹幕密度',false,e.message); }
 
+
+  // ===== U3237~U3242: 高危占比(v0.11.45) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('highRiskShareWrap'),st:T.highRiskShareStateNow(2,3)});})()"));
+    t('U3237 高危占比 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3238 正常 2/3→67%', o.st.pct === 67 && o.st.txt === '高危 2/3', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.highRiskShareStateNow(0,0).pct,b:T.highRiskShareStateNow(3,3).pct,c:T.highRiskShareStateNow(0,3).pct,d:T.highRiskShareStateNow(1,2).pct});})()"));
+    t('U3239 边界 0/0→0/3/3→100/0/3→0/1/2→50', o2.a === 0 && o2.b === 100 && o2.c === 0 && o2.d === 50, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.highRiskShareStateNow(-1,3).pct,b:T.highRiskShareStateNow(NaN,3).pct,c:T.highRiskShareStateNow(2,-1).pct,d:T.highRiskShareStateNow(2,NaN).pct});})()"));
+    t('U3240 非法输入/空值/负高危/负总数 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.highRiskShareStateNow('2','3').pct);})()"));
+    t('U3241 数字字符串转数', o4 === 67, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.highRiskShareFillNow()==='string',d:typeof T.highRiskShareDangerNow()==='boolean',r:T.highRiskCountNow(),t:T.highRiskTotalNow()});})()"));
+    t('U3242 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.r === 'number' && typeof o5.t === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3237;k<=3242;k++) t('U'+k+' 高危占比',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
