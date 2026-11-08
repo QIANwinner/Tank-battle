@@ -9027,6 +9027,22 @@ async function main() {
     t('U3098 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=3093;k<=3098;k++) t('U'+k+' 金币波动',false,e.message); }
 
+
+  // ===== U3099~U3104: 生存综合(v0.11.22) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('survCompWrap'),st:T.survCompStateNow(2,1,true,3)});})()"));
+    t('U3099 生存综合 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3100 正常 2命+护盾+基地/3=60%', o.st.pct === 80 && o.st.txt === '生存 80%', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.survCompStateNow(3,1,true,3).pct,b:T.survCompStateNow(1,0,false,3).pct,c:T.survCompStateNow(0,0,false,3).pct});})()"));
+    t('U3101 边界 3命→80/1命无盾→20/0命→0', o2.a === 100 && o2.b === 20 && o2.c === 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.survCompStateNow(-5,1,true,3).pct,b:T.survCompStateNow(NaN,1,true,3).pct,c:T.survCompStateNow(2,1,true,0).pct});})()"));
+    t('U3102 非法输入/空值/零上限 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.survCompStateNow('2','1',true,'3').pct);})()"));
+    t('U3103 数字字符串转数', o4 === 80, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.survCompFillNow()==='string',d:typeof T.survCompDangerNow()==='boolean'});})()"));
+    t('U3104 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=3099;k<=3104;k++) t('U'+k+' 生存综合',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
