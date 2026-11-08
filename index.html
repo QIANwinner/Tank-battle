@@ -2787,6 +2787,11 @@
   #surviveTempoWrap.g-good .pfill { background:#2ecc71; }
   #surviveTempoWrap.g-warn .pfill { background:#f1c40f; }
   #surviveTempoWrap.g-bad .pfill { background:#e74c3c; }
+  #careerAccWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #careerAccWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #careerAccWrap.g-good .pfill { background:#2ecc71; }
+  #careerAccWrap.g-warn .pfill { background:#f1c40f; }
+  #careerAccWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -3285,6 +3290,7 @@
     <div class="pill m-hide" id="coinDmgWrap"><span class="k">💥</span><i class="pbar"><i class="pfill" id="coinDmgFill"></i></i><span class="v" id="coinDmgVal">—</span></div>
     <div class="pill m-hide" id="streakPowerWrap"><span class="k">⚡</span><i class="pbar"><i class="pfill" id="streakPowerFill"></i></i><span class="v" id="streakPowerVal">—</span></div>
     <div class="pill m-hide" id="surviveTempoWrap"><span class="k">⏱</span><i class="pbar"><i class="pfill" id="surviveTempoFill"></i></i><span class="v" id="surviveTempoVal">—</span></div>
+    <div class="pill m-hide" id="careerAccWrap"><span class="k">🎯</span><i class="pbar"><i class="pfill" id="careerAccFill"></i></i><span class="v" id="careerAccVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -3660,7 +3666,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V12.0</div>
+  <div id="mark">DESIGNED BY QIAN · V12.1</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -8960,6 +8966,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r76cdS = coinDmgText(runDmg, runPickupGold); const r76cdF = $('coinDmgFill'); if (r76cdF) r76cdF.style.width = r76cdS.pct + '%'; const r76cdV = $('coinDmgVal'); if (r76cdV) r76cdV.textContent = r76cdS.txt; const r76cdW = $('coinDmgWrap'); if (r76cdW) { r76cdW.classList.remove('g-good','g-warn','g-bad'); if (r76cdS.cls) r76cdW.classList.add(r76cdS.cls); r76cdW.classList.toggle('danger', !!r76cdS.danger); }
     const r76spS = streakPowerText(combo, stat.kills); const r76spF = $('streakPowerFill'); if (r76spF) r76spF.style.width = r76spS.pct + '%'; const r76spV = $('streakPowerVal'); if (r76spV) r76spV.textContent = r76spS.txt; const r76spW = $('streakPowerWrap'); if (r76spW) { r76spW.classList.remove('g-good','g-warn','g-bad'); if (r76spS.cls) r76spW.classList.add(r76spS.cls); r76spW.classList.toggle('danger', !!r76spS.danger); }
     const r76stS = surviveTempoText(playSecRun, stat.deaths); const r76stF = $('surviveTempoFill'); if (r76stF) r76stF.style.width = r76stS.pct + '%'; const r76stV = $('surviveTempoVal'); if (r76stV) r76stV.textContent = r76stS.txt; const r76stW = $('surviveTempoWrap'); if (r76stW) { r76stW.classList.remove('g-good','g-warn','g-bad'); if (r76stS.cls) r76stW.classList.add(r76stS.cls); r76stW.classList.toggle('danger', !!r76stS.danger); }
+    const r77caS = careerAccText(career.hits, career.shots); const r77caF = $('careerAccFill'); if (r77caF) r77caF.style.width = r77caS.pct + '%'; const r77caV = $('careerAccVal'); if (r77caV) r77caV.textContent = r77caS.txt; const r77caW = $('careerAccWrap'); if (r77caW) { r77caW.classList.remove('g-good','g-warn','g-bad'); if (r77caS.cls) r77caW.classList.add(r77caS.cls); r77caW.classList.toggle('danger', !!r77caS.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -13071,6 +13078,17 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 20) { cls = 'g-bad'; danger = true; } else if (val < 40) { cls = 'g-warn'; }
     return { pct: pct, txt: '节奏 ' + (Math.round(val * 10) / 10) + 's/命', cls: cls, danger: danger };
   }
+  // —— v0.12.1 生涯命中率：生涯命中 / 生涯射击 的总命中率（长期枪法反馈）——
+  function careerAccText(hits, shots) {
+    const nh = Number(hits), ns = Number(shots);
+    if (!isFinite(nh) || nh < 0 || !isFinite(ns) || ns < 0 || ns === 0) return { pct: 0, txt: '命中 —', cls: 'g-good', danger: false };
+    const h = Math.max(0, nh), s = Math.max(0, ns);
+    const val = h / s;
+    const pct = Math.max(0, Math.min(100, Math.round(val * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 0.35) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
+    return { pct: pct, txt: '命中 ' + Math.round(val * 100) + '%', cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -14912,7 +14930,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V12.0', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V12.1', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -16389,6 +16407,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       coinDmgStateNow: (d, g) => coinDmgText(d, g), coinDmgDmgNow: () => runDmg, coinDmgGoldNow: () => runPickupGold, coinDmgFillNow: () => { const f = $('coinDmgFill'); return f ? f.style.width : ''; }, coinDmgDangerNow: () => { const w = $('coinDmgWrap'); return !!(w && w.classList.contains('danger')); },
       streakPowerStateNow: (c, k) => streakPowerText(c, k), streakPowerComboNow: () => combo, streakPowerKillNow: () => stat.kills, streakPowerFillNow: () => { const f = $('streakPowerFill'); return f ? f.style.width : ''; }, streakPowerDangerNow: () => { const w = $('streakPowerWrap'); return !!(w && w.classList.contains('danger')); },
       surviveTempoStateNow: (s, d) => surviveTempoText(s, d), surviveTempoSecsNow: () => playSecRun, surviveTempoDeathNow: () => stat.deaths, surviveTempoFillNow: () => { const f = $('surviveTempoFill'); return f ? f.style.width : ''; }, surviveTempoDangerNow: () => { const w = $('surviveTempoWrap'); return !!(w && w.classList.contains('danger')); },
+      careerAccStateNow: (h, s) => careerAccText(h, s), careerAccHitNow: () => career.hits, careerAccShotNow: () => career.shots, careerAccFillNow: () => { const f = $('careerAccFill'); return f ? f.style.width : ''; }, careerAccDangerNow: () => { const w = $('careerAccWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
