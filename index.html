@@ -2632,6 +2632,11 @@
   #wavePerLifeWrap.g-good .pfill { background:#2ecc71; }
   #wavePerLifeWrap.g-warn .pfill { background:#f1c40f; }
   #wavePerLifeWrap.g-bad .pfill { background:#e74c3c; }
+  #bossPerWaveWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #bossPerWaveWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #bossPerWaveWrap.g-good .pfill { background:#2ecc71; }
+  #bossPerWaveWrap.g-warn .pfill { background:#f1c40f; }
+  #bossPerWaveWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -3099,6 +3104,7 @@
     <div class="pill m-hide" id="hurtPerLifeWrap"><span class="k">💔</span><i class="pbar"><i class="pfill" id="hurtPerLifeFill"></i></i><span class="v" id="hurtPerLifeVal">—</span></div>
     <div class="pill m-hide" id="scorePerPuWrap"><span class="k">🏆</span><i class="pbar"><i class="pfill" id="scorePerPuFill"></i></i><span class="v" id="scorePerPuVal">—</span></div>
     <div class="pill m-hide" id="wavePerLifeWrap"><span class="k">🌊</span><i class="pbar"><i class="pfill" id="wavePerLifeFill"></i></i><span class="v" id="wavePerLifeVal">—</span></div>
+    <div class="pill m-hide" id="bossPerWaveWrap"><span class="k">👹</span><i class="pbar"><i class="pfill" id="bossPerWaveFill"></i></i><span class="v" id="bossPerWaveVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -3474,7 +3480,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V11.69</div>
+  <div id="mark">DESIGNED BY QIAN · V11.70</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -8743,6 +8749,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r71hplS = hurtPerLifeText(hurtCount, lives); const r71hplF = $('hurtPerLifeFill'); if (r71hplF) r71hplF.style.width = r71hplS.pct + '%'; const r71hplV = $('hurtPerLifeVal'); if (r71hplV) r71hplV.textContent = r71hplS.txt; const r71hplW = $('hurtPerLifeWrap'); if (r71hplW) { r71hplW.classList.remove('g-good','g-warn','g-bad'); if (r71hplS.cls) r71hplW.classList.add(r71hplS.cls); r71hplW.classList.toggle('danger', !!r71hplS.danger); }
     const r71spuS = scorePerPuText(score, runPowerups); const r71spuF = $('scorePerPuFill'); if (r71spuF) r71spuF.style.width = r71spuS.pct + '%'; const r71spuV = $('scorePerPuVal'); if (r71spuV) r71spuV.textContent = r71spuS.txt; const r71spuW = $('scorePerPuWrap'); if (r71spuW) { r71spuW.classList.remove('g-good','g-warn','g-bad'); if (r71spuS.cls) r71spuW.classList.add(r71spuS.cls); r71spuW.classList.toggle('danger', !!r71spuS.danger); }
     const r71wplS = wavePerLifeText(wave, lives); const r71wplF = $('wavePerLifeFill'); if (r71wplF) r71wplF.style.width = r71wplS.pct + '%'; const r71wplV = $('wavePerLifeVal'); if (r71wplV) r71wplV.textContent = r71wplS.txt; const r71wplW = $('wavePerLifeWrap'); if (r71wplW) { r71wplW.classList.remove('g-good','g-warn','g-bad'); if (r71wplS.cls) r71wplW.classList.add(r71wplS.cls); r71wplW.classList.toggle('danger', !!r71wplS.danger); }
+    const r71bpwS = bossPerWaveText(stat.bossKills, wave); const r71bpwF = $('bossPerWaveFill'); if (r71bpwF) r71bpwF.style.width = r71bpwS.pct + '%'; const r71bpwV = $('bossPerWaveVal'); if (r71bpwV) r71bpwV.textContent = r71bpwS.txt; const r71bpwW = $('bossPerWaveWrap'); if (r71bpwW) { r71bpwW.classList.remove('g-good','g-warn','g-bad'); if (r71bpwS.cls) r71bpwW.classList.add(r71bpwS.cls); r71bpwW.classList.toggle('danger', !!r71bpwS.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -12508,6 +12515,17 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (per < 3) { cls = 'g-bad'; danger = true; } else if (per < 5) { cls = 'g-warn'; }
     return { pct: pct, txt: '每波 ' + (Math.round(per * 10) / 10), cls: cls, danger: danger };
   }
+  // —— v0.11.70 每波BOSS：本局BOSS击杀数相对波次数的平均（BOSS压制率，越高越好）——
+  function bossPerWaveText(boss, wave) {
+    const nb = Number(boss), nw = Number(wave);
+    if (!isFinite(nb) || nb < 0 || !isFinite(nw) || nw <= 0) return { pct: 0, txt: '每波 —', cls: 'g-good', danger: false };
+    const b = Math.max(0, nb), w = Math.max(0, Math.floor(nw));
+    const per = b / w;
+    const pct = Math.max(0, Math.min(100, Math.round(per / 0.1 * 100)));
+    let cls = 'g-good', danger = false;
+    if (per < 0.02) { cls = 'g-bad'; danger = true; } else if (per < 0.04) { cls = 'g-warn'; }
+    return { pct: pct, txt: '每波 ' + (Math.round(per * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -14349,7 +14367,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V11.69', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V11.70', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -15795,6 +15813,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       hurtPerLifeStateNow: (h, l) => hurtPerLifeText(h, l), hurtPerLifeHurtNow: () => hurtCount, hurtPerLifeLivesNow: () => lives, hurtPerLifeFillNow: () => { const f = $('hurtPerLifeFill'); return f ? f.style.width : ''; }, hurtPerLifeDangerNow: () => { const w = $('hurtPerLifeWrap'); return !!(w && w.classList.contains('danger')); },
       scorePerPuStateNow: (s, p) => scorePerPuText(s, p), scorePerPuScoreNow: () => score, scorePerPuPuNow: () => runPowerups, scorePerPuFillNow: () => { const f = $('scorePerPuFill'); return f ? f.style.width : ''; }, scorePerPuDangerNow: () => { const w = $('scorePerPuWrap'); return !!(w && w.classList.contains('danger')); },
       wavePerLifeStateNow: (w, l) => wavePerLifeText(w, l), wavePerLifeWaveNow: () => wave, wavePerLifeLivesNow: () => lives, wavePerLifeFillNow: () => { const f = $('wavePerLifeFill'); return f ? f.style.width : ''; }, wavePerLifeDangerNow: () => { const w = $('wavePerLifeWrap'); return !!(w && w.classList.contains('danger')); },
+      bossPerWaveStateNow: (b, w) => bossPerWaveText(b, w), bossPerWaveBossNow: () => stat.bossKills, bossPerWaveWaveNow: () => wave, bossPerWaveFillNow: () => { const f = $('bossPerWaveFill'); return f ? f.style.width : ''; }, bossPerWaveDangerNow: () => { const w = $('bossPerWaveWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
