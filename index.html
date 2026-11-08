@@ -2287,6 +2287,11 @@
   #battleGradeWrap.g-b .v { color: #f1c40f; }
   #battleGradeWrap.g-c .v { color: #e67e22; }
   #battleGradeWrap.g-d .v { color: #e74c3c; }
+  #comboMilestoneBarWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #comboMilestoneBarWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #comboMilestoneBarWrap.g-good .pfill { background:#2ecc71; }
+  #comboMilestoneBarWrap.g-warn .pfill { background:#f1c40f; }
+  #comboMilestoneBarWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -2685,6 +2690,7 @@
     <div class="pill m-hide" id="comboYieldWrap"><span class="k">🔥</span><span class="v" id="comboYieldVal">—</span></div>
     <div class="pill m-hide" id="wavePaceWrap"><span class="k">🚀</span><span class="v" id="wavePaceVal">—</span></div>
     <div class="pill m-hide" id="battleGradeWrap"><span class="k">🏆</span><span class="v" id="battleGradeVal">—</span></div>
+    <div class="pill m-hide" id="comboMilestoneBarWrap"><span class="k">🔥</span><i class="pbar"><i class="pfill" id="comboMilestoneBarFill"></i></i><span class="v" id="comboMilestoneBarVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -3060,7 +3066,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V11.00</div>
+  <div id="mark">DESIGNED BY QIAN · V11.01</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -8260,6 +8266,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r62cyS = comboYieldTier(combo, score); const r62cyV = $('comboYieldVal'); if (r62cyV) r62cyV.textContent = r62cyS.txt; const r62cyW = $('comboYieldWrap'); if (r62cyW) { r62cyW.classList.remove('g-a','g-b','g-c','g-d'); if (r62cyS.tier !== '-') r62cyW.classList.add('g-' + r62cyS.tier.toLowerCase()); r62cyW.classList.toggle('danger', r62cyS.tier === 'D'); }
     const r62wpS = wavePaceTier(wave, playSecRun); const r62wpV = $('wavePaceVal'); if (r62wpV) r62wpV.textContent = r62wpS.txt; const r62wpW = $('wavePaceWrap'); if (r62wpW) { r62wpW.classList.remove('g-a','g-b','g-c','g-d'); if (r62wpS.tier !== '-') r62wpW.classList.add('g-' + r62wpS.tier.toLowerCase()); r62wpW.classList.toggle('danger', r62wpS.tier === 'D'); }
     const r62bgS = battleGradeTier(score, wave); const r62bgV = $('battleGradeVal'); if (r62bgV) r62bgV.textContent = r62bgS.txt; const r62bgW = $('battleGradeWrap'); if (r62bgW) { r62bgW.classList.remove('g-a','g-b','g-c','g-d'); if (r62bgS.tier !== '-') r62bgW.classList.add('g-' + r62bgS.tier.toLowerCase()); r62bgW.classList.toggle('danger', r62bgS.tier === 'D'); }
+    const r63cmS = comboMilestoneBar(combo); const r63cmF = $('comboMilestoneBarFill'); if (r63cmF) r63cmF.style.width = r63cmS.pct + '%'; const r63cmV = $('comboMilestoneBarVal'); if (r63cmV) r63cmV.textContent = r63cmS.txt; const r63cmW = $('comboMilestoneBarWrap'); if (r63cmW) { r63cmW.classList.remove('g-good','g-warn','g-bad'); if (r63cmS.cls) r63cmW.classList.add(r63cmS.cls); r63cmW.classList.toggle('danger', !!r63cmS.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -11294,6 +11301,18 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (r >= 40) return { tier: 'C', txt: '战局 C 中' };
     return { tier: 'D', txt: '战局 D 危' };
   }
+  // —— v0.11.01 连击里程碑 ——
+  function comboMilestoneBar(combo) {
+    const c = Math.max(0, Math.floor(Number(combo) || 0));
+    const M = [5, 10, 20, 30, 50, 100];
+    for (const m of M) {
+      if (c < m) {
+        const pct = Math.floor(c / m * 100);
+        return { pct: pct, txt: '连击 ' + c + '/' + m, cls: pct >= 80 ? 'g-good' : (pct >= 40 ? 'g-warn' : 'g-bad'), danger: false };
+      }
+    }
+    return { pct: 100, txt: '连击满 ' + c, cls: 'g-good', danger: false };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -13135,7 +13154,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V11.00', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V11.01', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -14512,6 +14531,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       comboYieldStateNow: (c, s) => comboYieldTier(c, s), comboYieldDangerNow: () => { const w = $('comboYieldWrap'); return !!(w && w.classList.contains('danger')); },
       wavePaceStateNow: (w, s) => wavePaceTier(w, s), wavePaceDangerNow: () => { const w = $('wavePaceWrap'); return !!(w && w.classList.contains('danger')); },
       battleGradeStateNow: (s, w) => battleGradeTier(s, w), battleGradeDangerNow: () => { const w = $('battleGradeWrap'); return !!(w && w.classList.contains('danger')); },
+      comboMilestoneStateNow: (c) => comboMilestoneBar(c), comboMilestoneFillNow: () => { const f = $('comboMilestoneBarFill'); return f ? f.style.width : ''; }, comboMilestoneDangerNow: () => { const w = $('comboMilestoneBarWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
