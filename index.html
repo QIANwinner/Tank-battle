@@ -2952,6 +2952,11 @@
   #runScorePerKillWrap.g-good .pfill { background:#2ecc71; }
   #runScorePerKillWrap.g-warn .pfill { background:#f1c40f; }
   #runScorePerKillWrap.g-bad .pfill { background:#e74c3c; }
+  #runScorePerLifeWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #runScorePerLifeWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #runScorePerLifeWrap.g-good .pfill { background:#2ecc71; }
+  #runScorePerLifeWrap.g-warn .pfill { background:#f1c40f; }
+  #runScorePerLifeWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -3483,6 +3488,7 @@
     <div class="pill m-hide" id="runMissCountWrap"><span class="k">❌</span><i class="pbar"><i class="pfill" id="runMissCountFill"></i></i><span class="v" id="runMissCountVal">—</span></div>
     <div class="pill m-hide" id="careerKillConvWrap"><span class="k">🎖️</span><i class="pbar"><i class="pfill" id="careerKillConvFill"></i></i><span class="v" id="careerKillConvVal">—</span></div>
     <div class="pill m-hide" id="runScorePerKillWrap"><span class="k">🎯</span><i class="pbar"><i class="pfill" id="runScorePerKillFill"></i></i><span class="v" id="runScorePerKillVal">—</span></div>
+    <div class="pill m-hide" id="runScorePerLifeWrap"><span class="k">🛡️</span><i class="pbar"><i class="pfill" id="runScorePerLifeFill"></i></i><span class="v" id="runScorePerLifeVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -3858,7 +3864,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V12.33</div>
+  <div id="mark">DESIGNED BY QIAN · V12.34</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -9191,6 +9197,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r80mcS = runMissCountText(stat.shots, stat.hits); const r80mcF = $('runMissCountFill'); if (r80mcF) r80mcF.style.width = r80mcS.pct + '%'; const r80mcV = $('runMissCountVal'); if (r80mcV) r80mcV.textContent = r80mcS.txt; const r80mcW = $('runMissCountWrap'); if (r80mcW) { r80mcW.classList.remove('g-good','g-warn','g-bad'); if (r80mcS.cls) r80mcW.classList.add(r80mcS.cls); r80mcW.classList.toggle('danger', !!r80mcS.danger); }
     const r80kcS = careerKillConvText(career.kills, career.hits); const r80kcF = $('careerKillConvFill'); if (r80kcF) r80kcF.style.width = r80kcS.pct + '%'; const r80kcV = $('careerKillConvVal'); if (r80kcV) r80kcV.textContent = r80kcS.txt; const r80kcW = $('careerKillConvWrap'); if (r80kcW) { r80kcW.classList.remove('g-good','g-warn','g-bad'); if (r80kcS.cls) r80kcW.classList.add(r80kcS.cls); r80kcW.classList.toggle('danger', !!r80kcS.danger); }
     const r81spkS = runScorePerKillText(score, stat.kills); const r81spkF = $('runScorePerKillFill'); if (r81spkF) r81spkF.style.width = r81spkS.pct + '%'; const r81spkV = $('runScorePerKillVal'); if (r81spkV) r81spkV.textContent = r81spkS.txt; const r81spkW = $('runScorePerKillWrap'); if (r81spkW) { r81spkW.classList.remove('g-good','g-warn','g-bad'); if (r81spkS.cls) r81spkW.classList.add(r81spkS.cls); r81spkW.classList.toggle('danger', !!r81spkS.danger); }
+    const r81splS = runScorePerLifeText(score, lives); const r81splF = $('runScorePerLifeFill'); if (r81splF) r81splF.style.width = r81splS.pct + '%'; const r81splV = $('runScorePerLifeVal'); if (r81splV) r81splV.textContent = r81splS.txt; const r81splW = $('runScorePerLifeWrap'); if (r81splW) { r81splW.classList.remove('g-good','g-warn','g-bad'); if (r81splS.cls) r81splW.classList.add(r81splS.cls); r81splW.classList.toggle('danger', !!r81splS.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -13667,6 +13674,17 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 60) { cls = 'g-bad'; danger = true; } else if (val < 120) { cls = 'g-warn'; }
     return { pct: pct, txt: '得分 ' + Math.round(val) + '/杀', cls: cls, danger: danger };
   }
+  // —— v0.12.34 每命得分：本局得分 / 当前生命 的每命得分（生存与输出联动反馈，500/命满分）——
+  function runScorePerLifeText(score, lives) {
+    const ns = Number(score), nl = Number(lives);
+    if (!isFinite(ns) || ns < 0 || !isFinite(nl) || nl < 0 || nl === 0) return { pct: 0, txt: '得分 —', cls: 'g-good', danger: false };
+    const s = Math.max(0, ns), l = Math.max(0, nl);
+    const val = s / l;
+    const pct = Math.max(0, Math.min(100, Math.round(val / 500 * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 150) { cls = 'g-bad'; danger = true; } else if (val < 300) { cls = 'g-warn'; }
+    return { pct: pct, txt: '得分 ' + Math.round(val) + '/命', cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -15508,7 +15526,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V12.33', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V12.34', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -17018,6 +17036,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       runMissCountStateNow: (s, h) => runMissCountText(s, h), runMissCountShotNow: () => stat.shots, runMissCountHitNow: () => stat.hits, runMissCountFillNow: () => { const f = $('runMissCountFill'); return f ? f.style.width : ''; }, runMissCountDangerNow: () => { const w = $('runMissCountWrap'); return !!(w && w.classList.contains('danger')); },
       careerKillConvStateNow: (k, h) => careerKillConvText(k, h), careerKillConvKillNow: () => career.kills, careerKillConvHitNow: () => career.hits, careerKillConvFillNow: () => { const f = $('careerKillConvFill'); return f ? f.style.width : ''; }, careerKillConvDangerNow: () => { const w = $('careerKillConvWrap'); return !!(w && w.classList.contains('danger')); },
       runScorePerKillStateNow: (s, k) => runScorePerKillText(s, k), runScorePerKillScoreNow: () => score, runScorePerKillKillNow: () => stat.kills, runScorePerKillFillNow: () => { const f = $('runScorePerKillFill'); return f ? f.style.width : ''; }, runScorePerKillDangerNow: () => { const w = $('runScorePerKillWrap'); return !!(w && w.classList.contains('danger')); },
+      runScorePerLifeStateNow: (s, l) => runScorePerLifeText(s, l), runScorePerLifeScoreNow: () => score, runScorePerLifeLifeNow: () => lives, runScorePerLifeFillNow: () => { const f = $('runScorePerLifeFill'); return f ? f.style.width : ''; }, runScorePerLifeDangerNow: () => { const w = $('runScorePerLifeWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
