@@ -2327,6 +2327,11 @@
   #coinRateBarWrap.g-good .pfill { background:#2ecc71; }
   #coinRateBarWrap.g-warn .pfill { background:#f1c40f; }
   #coinRateBarWrap.g-bad .pfill { background:#e74c3c; }
+  #clearRateBarWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #clearRateBarWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #clearRateBarWrap.g-good .pfill { background:#2ecc71; }
+  #clearRateBarWrap.g-warn .pfill { background:#f1c40f; }
+  #clearRateBarWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -2733,6 +2738,7 @@
     <div class="pill m-hide" id="surviveTimeBarWrap"><span class="k">⏱️</span><i class="pbar"><i class="pfill" id="surviveTimeBarFill"></i></i><span class="v" id="surviveTimeBarVal">—</span></div>
     <div class="pill m-hide" id="hitQualityBarWrap"><span class="k">🎯</span><i class="pbar"><i class="pfill" id="hitQualityBarFill"></i></i><span class="v" id="hitQualityBarVal">—</span></div>
     <div class="pill m-hide" id="coinRateBarWrap"><span class="k">🪙</span><i class="pbar"><i class="pfill" id="coinRateBarFill"></i></i><span class="v" id="coinRateBarVal">—</span></div>
+    <div class="pill m-hide" id="clearRateBarWrap"><span class="k">🧹</span><i class="pbar"><i class="pfill" id="clearRateBarFill"></i></i><span class="v" id="clearRateBarVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -3108,7 +3114,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V11.08</div>
+  <div id="mark">DESIGNED BY QIAN · V11.09</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -8316,6 +8322,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r63stS = surviveTimeFillBar(playSecRun, 120); const r63stF = $('surviveTimeBarFill'); if (r63stF) r63stF.style.width = r63stS.pct + '%'; const r63stV = $('surviveTimeBarVal'); if (r63stV) r63stV.textContent = r63stS.txt; const r63stW = $('surviveTimeBarWrap'); if (r63stW) { r63stW.classList.remove('g-good','g-warn','g-bad'); if (r63stS.cls) r63stW.classList.add(r63stS.cls); r63stW.classList.toggle('danger', !!r63stS.danger); }
     const r63hqS = hitQualityFillBar(stat.hits, stat.shots); const r63hqF = $('hitQualityBarFill'); if (r63hqF) r63hqF.style.width = r63hqS.pct + '%'; const r63hqV = $('hitQualityBarVal'); if (r63hqV) r63hqV.textContent = r63hqS.txt; const r63hqW = $('hitQualityBarWrap'); if (r63hqW) { r63hqW.classList.remove('g-good','g-warn','g-bad'); if (r63hqS.cls) r63hqW.classList.add(r63hqS.cls); r63hqW.classList.toggle('danger', !!r63hqS.danger); }
     const r63crS = coinRateFillBar(runCoins, playSecRun); const r63crF = $('coinRateBarFill'); if (r63crF) r63crF.style.width = r63crS.pct + '%'; const r63crV = $('coinRateBarVal'); if (r63crV) r63crV.textContent = r63crS.txt; const r63crW = $('coinRateBarWrap'); if (r63crW) { r63crW.classList.remove('g-good','g-warn','g-bad'); if (r63crS.cls) r63crW.classList.add(r63crS.cls); r63crW.classList.toggle('danger', !!r63crS.danger); }
+    const r64crS = clearRateFillBar(stat.kills, enemiesSpawned); const r64crF = $('clearRateBarFill'); if (r64crF) r64crF.style.width = r64crS.pct + '%'; const r64crV = $('clearRateBarVal'); if (r64crV) r64crV.textContent = r64crS.txt; const r64crW = $('clearRateBarWrap'); if (r64crW) { r64crW.classList.remove('g-good','g-warn','g-bad'); if (r64crS.cls) r64crW.classList.add(r64crS.cls); r64crW.classList.toggle('danger', !!r64crS.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -11424,6 +11431,15 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (pct <= 33) { cls = 'g-bad'; danger = true; } else if (pct <= 66) { cls = 'g-warn'; }
     return { pct: pct, txt: '金币 ' + rate + '/分', cls: cls, danger: danger };
   }
+  // —— v0.11.09 清剿进度 ——
+  function clearRateFillBar(kills, spawned) {
+    const k = Math.max(0, Math.floor(Number(kills) || 0));
+    const s = Math.max(1, Math.floor(Number(spawned) || 1));
+    const pct = Math.max(0, Math.min(100, Math.floor(k / s * 100)));
+    let cls = 'g-good', danger = false;
+    if (pct <= 50) { cls = 'g-bad'; danger = true; } else if (pct <= 75) { cls = 'g-warn'; }
+    return { pct: pct, txt: '清剿 ' + k + '/' + s, cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -13265,7 +13281,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V11.08', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V11.09', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -14650,6 +14666,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       surviveTimeStateNow: (s, t) => surviveTimeFillBar(s, t), surviveTimeFillNow: () => { const f = $('surviveTimeBarFill'); return f ? f.style.width : ''; }, surviveTimeDangerNow: () => { const w = $('surviveTimeBarWrap'); return !!(w && w.classList.contains('danger')); },
       hitQualityStateNow: (h, s) => hitQualityFillBar(h, s), hitQualityFillNow: () => { const f = $('hitQualityBarFill'); return f ? f.style.width : ''; }, hitQualityDangerNow: () => { const w = $('hitQualityBarWrap'); return !!(w && w.classList.contains('danger')); },
       coinRateStateNow: (c, s) => coinRateFillBar(c, s), coinRateFillNow: () => { const f = $('coinRateBarFill'); return f ? f.style.width : ''; }, coinRateDangerNow: () => { const w = $('coinRateBarWrap'); return !!(w && w.classList.contains('danger')); },
+      clearRateStateNow: (k, s) => clearRateFillBar(k, s), clearRateFillNow: () => { const f = $('clearRateBarFill'); return f ? f.style.width : ''; }, clearRateDangerNow: () => { const w = $('clearRateBarWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

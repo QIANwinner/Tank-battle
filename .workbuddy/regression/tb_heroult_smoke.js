@@ -8819,6 +8819,22 @@ async function main() {
     t('U3020 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=3015;k<=3020;k++) t('U'+k+' 金币效率',false,e.message); }
 
+
+  // ===== U3021~U3026: 清剿进度(v0.11.09) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('clearRateBarWrap'),st:T.clearRateStateNow(6,12)});})()"));
+    t('U3021 清剿进度 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3022 正常 6/12=50%', o.st.pct === 50 && o.st.txt === '清剿 6/12', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.clearRateStateNow(0,10).pct,b:T.clearRateStateNow(5,10).pct,c:T.clearRateStateNow(10,10).pct,d:T.clearRateStateNow(15,10).pct});})()"));
+    t('U3023 边界 0→0/5→50/10→100/15→100', o2.a === 0 && o2.b === 50 && o2.c === 100 && o2.d === 100, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.clearRateStateNow(-5,10).pct,b:T.clearRateStateNow(NaN,10).pct});})()"));
+    t('U3024 非法输入/空值 → 0', o3.a === 0 && o3.b === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.clearRateStateNow('6','12').pct);})()"));
+    t('U3025 数字字符串转数', o4 === 50, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.clearRateFillNow()==='string',d:typeof T.clearRateDangerNow()==='boolean'});})()"));
+    t('U3026 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=3021;k<=3026;k++) t('U'+k+' 清剿进度',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
