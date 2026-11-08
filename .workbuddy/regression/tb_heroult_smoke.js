@@ -9299,6 +9299,22 @@ async function main() {
     t('U3200 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.r === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3195;k<=3200;k++) t('U'+k+' 命中手感缺口',false,e.message); }
 
+
+  // ===== U3201~U3206: 连击窗口剩余(v0.11.39) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('comboWindowLeftWrap'),st:T.comboWindowLeftStateNow(1.5,3)});})()"));
+    t('U3201 连击窗口剩余 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3202 正常 1.5/3→50%', o.st.pct === 50 && o.st.txt === '窗口 1.5s', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboWindowLeftStateNow(0,3).pct,b:T.comboWindowLeftStateNow(3,3).pct,c:T.comboWindowLeftStateNow(6,3).pct,d:T.comboWindowLeftStateNow(1.5,3).pct});})()"));
+    t('U3203 边界 0→0/3→100/6→100/1.5→50', o2.a === 0 && o2.b === 100 && o2.c === 100 && o2.d === 50, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboWindowLeftStateNow(-1,3).pct,b:T.comboWindowLeftStateNow(NaN,3).pct,c:T.comboWindowLeftStateNow(1.5,0).pct,d:T.comboWindowLeftStateNow(1.5,-2).pct});})()"));
+    t('U3204 非法输入/空值/零窗口/负窗口 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.comboWindowLeftStateNow('1.5','3').pct);})()"));
+    t('U3205 数字字符串转数', o4 === 50, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.comboWindowLeftFillNow()==='string',d:typeof T.comboWindowLeftDangerNow()==='boolean',r:T.comboWindowRemainNow(),m:T.comboWindowMaxNow()});})()"));
+    t('U3206 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.r === 'number' && typeof o5.m === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3201;k<=3206;k++) t('U'+k+' 连击窗口剩余',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
