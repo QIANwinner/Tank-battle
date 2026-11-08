@@ -10371,6 +10371,22 @@ async function main() {
     t('U3602 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.c === 'number' && typeof o5.s === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3597;k<=3602;k++) t('U'+k+' 战局压力指数',false,e.message); }
 
+
+  // ===== U3603~U3608: 火力密度(v0.12.6) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('fireDensityWrap'),st:T.fireDensityStateNow(90,60)});})()"));
+    t('U3603 火力密度 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3604 正常 90发/60秒→1.5/s 100%', o.st.pct === 100 && o.st.txt === '火力 1.5/s', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.fireDensityStateNow(0,60).pct,b:T.fireDensityStateNow(90,60).pct,c:T.fireDensityStateNow(45,60).pct,d:T.fireDensityStateNow(45,60).cls});})()"));
+    t('U3605 边界 0→0/90→100/45→50/偏弱', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.fireDensityStateNow(-1,60).pct,b:T.fireDensityStateNow(NaN,60).pct,c:T.fireDensityStateNow(30,0).pct,d:T.fireDensityStateNow(30,-1).pct});})()"));
+    t('U3606 非法/空值/零秒/负秒 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.fireDensityStateNow('90','60').pct);})()"));
+    t('U3607 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.fireDensityFillNow()==='string',d:typeof T.fireDensityDangerNow()==='boolean',c:T.fireDensityShotNow(),s:T.fireDensitySecsNow()});})()"));
+    t('U3608 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.c === 'number' && typeof o5.s === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3603;k<=3608;k++) t('U'+k+' 火力密度',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
