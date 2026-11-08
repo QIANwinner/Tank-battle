@@ -10627,6 +10627,22 @@ async function main() {
     t('U3698 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.c === 'number' && typeof o5.s === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3693;k<=3698;k++) t('U'+k+' 单局金币速率',false,e.message); }
 
+
+  // ===== U3699~U3704: 单局得分速率(v0.12.22) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runScoreRateWrap'),st:T.runScoreRateStateNow(6000,60)});})()"));
+    t('U3699 单局得分速率 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3700 正常 6000分/60秒→100/s 100%', o.st.pct === 100 && o.st.txt === '得分 100/s' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runScoreRateStateNow(0,60).pct,b:T.runScoreRateStateNow(12000,60).pct,c:T.runScoreRateStateNow(6000,60).pct,d:T.runScoreRateStateNow(3000,60).cls});})()"));
+    t('U3701 边界 0→0/12000→100/6000→100/偏弱', o2.a === 0 && o2.b === 100 && o2.c === 100 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runScoreRateStateNow(-1,60).pct,b:T.runScoreRateStateNow(NaN,60).pct,c:T.runScoreRateStateNow(6000,0).pct,d:T.runScoreRateStateNow(6000,-1).pct});})()"));
+    t('U3702 非法/空值/零秒/负秒 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runScoreRateStateNow('6000','60').pct);})()"));
+    t('U3703 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.runScoreRateFillNow()==='string',d:typeof T.runScoreRateDangerNow()==='boolean',s:T.runScoreRateScoreNow(),t:T.runScoreRateSecNow()});})()"));
+    t('U3704 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.s === 'number' && typeof o5.t === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3699;k<=3704;k++) t('U'+k+' 单局得分速率',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
