@@ -10323,6 +10323,22 @@ async function main() {
     t('U3584 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.k === 'number' && typeof o5.s === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3579;k<=3584;k++) t('U'+k+' 生涯击杀速率',false,e.message); }
 
+
+  // ===== U3585~U3590: 生涯金币速率(v0.12.3) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerCoinRateWrap'),st:T.careerCoinRateStateNow(300,60)});})()"));
+    t('U3585 生涯金币速率 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3586 正常 300币/60秒→5/s 100%', o.st.pct === 100 && o.st.txt === '金币 5/s', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerCoinRateStateNow(0,60).pct,b:T.careerCoinRateStateNow(600,60).pct,c:T.careerCoinRateStateNow(150,60).pct,d:T.careerCoinRateStateNow(300,60).cls});})()"));
+    t('U3587 边界 0→0/600→100/150→50/好', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-good', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerCoinRateStateNow(-1,60).pct,b:T.careerCoinRateStateNow(NaN,60).pct,c:T.careerCoinRateStateNow(300,0).pct,d:T.careerCoinRateStateNow(300,-1).pct});})()"));
+    t('U3588 非法/空值/零秒/负秒 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.careerCoinRateStateNow('300','60').pct);})()"));
+    t('U3589 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.careerCoinRateFillNow()==='string',d:typeof T.careerCoinRateDangerNow()==='boolean',c:T.careerCoinRateCoinNow(),s:T.careerCoinRateSecsNow()});})()"));
+    t('U3590 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.c === 'number' && typeof o5.s === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3585;k<=3590;k++) t('U'+k+' 生涯金币速率',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
