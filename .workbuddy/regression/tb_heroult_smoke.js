@@ -9475,6 +9475,22 @@ async function main() {
     t('U3266 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3261;k<=3266;k++) t('U'+k+' 速度增益',false,e.message); }
 
+
+  // ===== U3267~U3272: 每波得分(v0.11.50) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('waveScoreWrap'),st:T.waveScoreStateNow(3000,2)});})()"));
+    t('U3267 每波得分 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3268 正常 3000/2波→1500/波 75%', o.st.pct === 75 && o.st.txt === '每波 1500', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveScoreStateNow(0,1).pct,b:T.waveScoreStateNow(2000,1).pct,c:T.waveScoreStateNow(4000,1).pct,d:T.waveScoreStateNow(1000,2).pct});})()"));
+    t('U3269 边界 0→0/2000→100/4000→100/1000/2→25', o2.a === 0 && o2.b === 100 && o2.c === 100 && o2.d === 25, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveScoreStateNow(-1,1).pct,b:T.waveScoreStateNow(NaN,1).pct,c:T.waveScoreStateNow(1000,0).pct,d:T.waveScoreStateNow(1000,-2).pct});})()"));
+    t('U3270 非法输入/空值/零波/负波 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.waveScoreStateNow('3000','2').pct);})()"));
+    t('U3271 数字字符串转数', o4 === 75, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.waveScoreFillNow()==='string',d:typeof T.waveScoreDangerNow()==='boolean',v:T.waveScoreNow(),w:T.waveScoreCurNow()});})()"));
+    t('U3272 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.w === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3267;k<=3272;k++) t('U'+k+' 每波得分',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
