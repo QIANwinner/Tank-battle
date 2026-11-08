@@ -9235,6 +9235,22 @@ async function main() {
     t('U3176 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.c === 'number' && o5.c > 0, JSON.stringify(o5));
   } catch(e){ for(let k=3171;k<=3176;k++) t('U'+k+' 复活预算',false,e.message); }
 
+
+  // ===== U3177~U3182: 生存续航(v0.11.35) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('survExpectWrap'),st:T.survExpectStateNow(3,5,true)});})()"));
+    t('U3177 生存续航 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3178 正常 3命+基地@5→100%', o.st.pct === 100 && o.st.txt === '续航 3命+基@5', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.survExpectStateNow(0,5,false).pct,b:T.survExpectStateNow(2,5,true).pct,c:T.survExpectStateNow(1,5,true).pct,d:T.survExpectStateNow(0,5,true).pct});})()"));
+    t('U3179 边界 0命无基→0/2命+基→75/1命+基→50/0命+基→25', o2.a === 0 && o2.b === 75 && o2.c === 50 && o2.d === 25, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.survExpectStateNow(-5,5,true).pct,b:T.survExpectStateNow(NaN,5,true).pct,c:T.survExpectStateNow(3,0,true).pct,d:T.survExpectStateNow(3,-2,true).pct});})()"));
+    t('U3180 非法输入/空值/零波/负波 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.survExpectStateNow('3','5',true).pct);})()"));
+    t('U3181 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.survExpectFillNow()==='string',d:typeof T.survExpectDangerNow()==='boolean'});})()"));
+    t('U3182 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=3177;k<=3182;k++) t('U'+k+' 生存续航',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
