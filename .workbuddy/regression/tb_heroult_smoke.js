@@ -9411,6 +9411,22 @@ async function main() {
     t('U3242 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.r === 'number' && typeof o5.t === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3237;k<=3242;k++) t('U'+k+' 高危占比',false,e.message); }
 
+
+  // ===== U3243~U3248: BOSS总血(v0.11.46) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossBarWrap'),st:T.bossBarStateNow(80,100)});})()"));
+    t('U3243 BOSS总血 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3244 正常 80/100→80%', o.st.pct === 80 && o.st.txt === 'BOSS 80%', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossBarStateNow(100,100).pct,b:T.bossBarStateNow(0,100).pct,c:T.bossBarStateNow(50,100).pct,d:T.bossBarStateNow(25,100).pct});})()"));
+    t('U3245 边界 满血100/0血0/半血50/25血25', o2.a === 100 && o2.b === 0 && o2.c === 50 && o2.d === 25, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossBarStateNow(-5,100).pct,b:T.bossBarStateNow(NaN,100).pct,c:T.bossBarStateNow(80,0).pct,d:T.bossBarStateNow(80,-3).pct});})()"));
+    t('U3246 非法输入/空值/零最大/负最大 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bossBarStateNow('80','100').pct);})()"));
+    t('U3247 数字字符串转数', o4 === 80, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.bossBarFillNow()==='string',d:typeof T.bossBarDangerNow()==='boolean'});})()"));
+    t('U3248 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=3243;k<=3248;k++) t('U'+k+' BOSS总血',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
