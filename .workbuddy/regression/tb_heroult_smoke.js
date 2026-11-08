@@ -10691,6 +10691,22 @@ async function main() {
     t('U3722 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.c === 'number' && typeof o5.s === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3717;k<=3722;k++) t('U'+k+' 生涯金币速率',false,e.message); }
 
+
+  // ===== U3723~U3728: 生涯每杀耗时(v0.12.26) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerTimePerKillWrap'),st:T.careerTimePerKillStateNow(600,60)});})()"));
+    t('U3723 生涯每杀耗时 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3724 正常 600秒/60杀→10s/杀 100%', o.st.pct === 100 && o.st.txt === '耗时 10s/杀' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerTimePerKillStateNow(0,60).pct,b:T.careerTimePerKillStateNow(1200,60).pct,c:T.careerTimePerKillStateNow(900,60).pct,d:T.careerTimePerKillStateNow(900,60).cls});})()"));
+    t('U3725 边界 0→100/1200→0/900→50/偏慢', o2.a === 100 && o2.b === 0 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerTimePerKillStateNow(-1,60).pct,b:T.careerTimePerKillStateNow(NaN,60).pct,c:T.careerTimePerKillStateNow(600,0).pct,d:T.careerTimePerKillStateNow(600,-1).pct});})()"));
+    t('U3726 非法/空值/零杀/负杀 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.careerTimePerKillStateNow('600','60').pct);})()"));
+    t('U3727 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.careerTimePerKillFillNow()==='string',d:typeof T.careerTimePerKillDangerNow()==='boolean',s:T.careerTimePerKillSecNow(),k:T.careerTimePerKillKillNow()});})()"));
+    t('U3728 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.s === 'number' && typeof o5.k === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3723;k<=3728;k++) t('U'+k+' 生涯每杀耗时',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
