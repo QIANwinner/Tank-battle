@@ -9491,6 +9491,22 @@ async function main() {
     t('U3272 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.w === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3267;k<=3272;k++) t('U'+k+' 每波得分',false,e.message); }
 
+
+  // ===== U3273~U3278: 每杀金币(v0.11.51) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('goldPerKillWrap'),st:T.goldPerKillStateNow(100,10)});})()"));
+    t('U3273 每杀金币 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3274 正常 100/10→10金/杀 20%', o.st.pct === 20 && o.st.txt === '每杀 10金', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.goldPerKillStateNow(0,10).pct,b:T.goldPerKillStateNow(500,10).pct,c:T.goldPerKillStateNow(1000,10).pct,d:T.goldPerKillStateNow(50,10).pct});})()"));
+    t('U3275 边界 0→0/500→100/1000→100/50→10', o2.a === 0 && o2.b === 100 && o2.c === 100 && o2.d === 10, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.goldPerKillStateNow(-1,10).pct,b:T.goldPerKillStateNow(NaN,10).pct,c:T.goldPerKillStateNow(100,0).pct,d:T.goldPerKillStateNow(100,-3).pct});})()"));
+    t('U3276 非法输入/空值/零杀/负杀 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.goldPerKillStateNow('100','10').pct);})()"));
+    t('U3277 数字字符串转数', o4 === 20, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.goldPerKillFillNow()==='string',d:typeof T.goldPerKillDangerNow()==='boolean',v:T.goldPerKillGoldNow(),k:T.goldPerKillKillsNow()});})()"));
+    t('U3278 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.k === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3273;k<=3278;k++) t('U'+k+' 每杀金币',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
