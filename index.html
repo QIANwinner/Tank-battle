@@ -2712,6 +2712,11 @@
   #hurtPerReviveWrap.g-good .pfill { background:#2ecc71; }
   #hurtPerReviveWrap.g-warn .pfill { background:#f1c40f; }
   #hurtPerReviveWrap.g-bad .pfill { background:#e74c3c; }
+  #scorePerHitWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #scorePerHitWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #scorePerHitWrap.g-good .pfill { background:#2ecc71; }
+  #scorePerHitWrap.g-warn .pfill { background:#f1c40f; }
+  #scorePerHitWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -3195,6 +3200,7 @@
     <div class="pill m-hide" id="timePerBossWrap"><span class="k">⏱️</span><i class="pbar"><i class="pfill" id="timePerBossFill"></i></i><span class="v" id="timePerBossVal">—</span></div>
     <div class="pill m-hide" id="hurtPerPuWrap"><span class="k">🧩</span><i class="pbar"><i class="pfill" id="hurtPerPuFill"></i></i><span class="v" id="hurtPerPuVal">—</span></div>
     <div class="pill m-hide" id="hurtPerReviveWrap"><span class="k">💔</span><i class="pbar"><i class="pfill" id="hurtPerReviveFill"></i></i><span class="v" id="hurtPerReviveVal">—</span></div>
+    <div class="pill m-hide" id="scorePerHitWrap"><span class="k">🎯</span><i class="pbar"><i class="pfill" id="scorePerHitFill"></i></i><span class="v" id="scorePerHitVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -3570,7 +3576,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V11.85</div>
+  <div id="mark">DESIGNED BY QIAN · V11.86</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -8855,6 +8861,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r73tpbS = timePerBossText(playSecRun, stat.bossKills); const r73tpbF = $('timePerBossFill'); if (r73tpbF) r73tpbF.style.width = r73tpbS.pct + '%'; const r73tpbV = $('timePerBossVal'); if (r73tpbV) r73tpbV.textContent = r73tpbS.txt; const r73tpbW = $('timePerBossWrap'); if (r73tpbW) { r73tpbW.classList.remove('g-good','g-warn','g-bad'); if (r73tpbS.cls) r73tpbW.classList.add(r73tpbS.cls); r73tpbW.classList.toggle('danger', !!r73tpbS.danger); }
     const r73hppS = hurtPerPuText(hurtCount, runPowerups); const r73hppF = $('hurtPerPuFill'); if (r73hppF) r73hppF.style.width = r73hppS.pct + '%'; const r73hppV = $('hurtPerPuVal'); if (r73hppV) r73hppV.textContent = r73hppS.txt; const r73hppW = $('hurtPerPuWrap'); if (r73hppW) { r73hppW.classList.remove('g-good','g-warn','g-bad'); if (r73hppS.cls) r73hppW.classList.add(r73hppS.cls); r73hppW.classList.toggle('danger', !!r73hppS.danger); }
     const r73hprS = hurtPerReviveText(hurtCount, reviveCount); const r73hprF = $('hurtPerReviveFill'); if (r73hprF) r73hprF.style.width = r73hprS.pct + '%'; const r73hprV = $('hurtPerReviveVal'); if (r73hprV) r73hprV.textContent = r73hprS.txt; const r73hprW = $('hurtPerReviveWrap'); if (r73hprW) { r73hprW.classList.remove('g-good','g-warn','g-bad'); if (r73hprS.cls) r73hprW.classList.add(r73hprS.cls); r73hprW.classList.toggle('danger', !!r73hprS.danger); }
+    const r73sphS = scorePerHitText(score, stat.hits); const r73sphF = $('scorePerHitFill'); if (r73sphF) r73sphF.style.width = r73sphS.pct + '%'; const r73sphV = $('scorePerHitVal'); if (r73sphV) r73sphV.textContent = r73sphS.txt; const r73sphW = $('scorePerHitWrap'); if (r73sphW) { r73sphW.classList.remove('g-good','g-warn','g-bad'); if (r73sphS.cls) r73sphW.classList.add(r73sphS.cls); r73sphW.classList.toggle('danger', !!r73sphS.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -12799,6 +12806,17 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (per > 30) { cls = 'g-bad'; danger = true; } else if (per > 22) { cls = 'g-warn'; }
     return { pct: pct, txt: '每复活 ' + Math.round(per), cls: cls, danger: danger };
   }
+  // —— v0.11.86 每命中得分：本局得分相对命中次数的平均（命中质量回报）——
+  function scorePerHitText(score, hits) {
+    const ns = Number(score), nh = Number(hits);
+    if (!isFinite(ns) || ns < 0 || !isFinite(nh) || nh <= 0) return { pct: 0, txt: '每命中 —', cls: 'g-good', danger: false };
+    const s = Math.max(0, ns), h = Math.max(0, nh);
+    const per = s / h;
+    const pct = Math.max(0, Math.min(100, Math.round(per / 10 * 100)));
+    let cls = 'g-good', danger = false;
+    if (per < 3) { cls = 'g-bad'; danger = true; } else if (per < 6) { cls = 'g-warn'; }
+    return { pct: pct, txt: '每命中 ' + (Math.round(per * 10) / 10), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -14640,7 +14658,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V11.85', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V11.86', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -16102,6 +16120,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       timePerBossStateNow: (s, b) => timePerBossText(s, b), timePerBossTimeNow: () => playSecRun, timePerBossBossNow: () => stat.bossKills, timePerBossFillNow: () => { const f = $('timePerBossFill'); return f ? f.style.width : ''; }, timePerBossDangerNow: () => { const w = $('timePerBossWrap'); return !!(w && w.classList.contains('danger')); },
       hurtPerPuStateNow: (h, p) => hurtPerPuText(h, p), hurtPerPuHurtNow: () => hurtCount, hurtPerPuPuNow: () => runPowerups, hurtPerPuFillNow: () => { const f = $('hurtPerPuFill'); return f ? f.style.width : ''; }, hurtPerPuDangerNow: () => { const w = $('hurtPerPuWrap'); return !!(w && w.classList.contains('danger')); },
       hurtPerReviveStateNow: (h, r) => hurtPerReviveText(h, r), hurtPerReviveHurtNow: () => hurtCount, hurtPerReviveReviveNow: () => reviveCount, hurtPerReviveFillNow: () => { const f = $('hurtPerReviveFill'); return f ? f.style.width : ''; }, hurtPerReviveDangerNow: () => { const w = $('hurtPerReviveWrap'); return !!(w && w.classList.contains('danger')); },
+      scorePerHitStateNow: (s, h) => scorePerHitText(s, h), scorePerHitScoreNow: () => score, scorePerHitHitsNow: () => stat.hits, scorePerHitFillNow: () => { const f = $('scorePerHitFill'); return f ? f.style.width : ''; }, scorePerHitDangerNow: () => { const w = $('scorePerHitWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
