@@ -10147,6 +10147,22 @@ async function main() {
     t('U3518 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=3513;k<=3518;k++) t('U'+k+' 防御余量',false,e.message); }
 
+
+  // ===== U3519~U3524: 输出密度(v0.11.92) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('dpsDensityWrap'),st:T.dpsDensityStateNow(480,60)});})()"));
+    t('U3519 输出密度 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3520 正常 480伤/60秒→8/s 100%', o.st.pct === 100 && o.st.txt === '输出 8/s', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dpsDensityStateNow(0,60).pct,b:T.dpsDensityStateNow(800,60).pct,c:T.dpsDensityStateNow(120,60).pct,d:T.dpsDensityStateNow(480,60).cls});})()"));
+    t('U3521 边界 0→0/800→100/120→25/好', o2.a === 0 && o2.b === 100 && o2.c === 25 && o2.d === 'g-good', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dpsDensityStateNow(-1,60).pct,b:T.dpsDensityStateNow(NaN,60).pct,c:T.dpsDensityStateNow(480,-1).pct,d:T.dpsDensityStateNow(480,NaN).pct});})()"));
+    t('U3522 非法输入/空值/负秒/空秒 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.dpsDensityStateNow('480','60').pct);})()"));
+    t('U3523 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.dpsDensityFillNow()==='string',d:typeof T.dpsDensityDangerNow()==='boolean',m:T.dpsDensityDmgNow(),s:T.dpsDensitySecsNow()});})()"));
+    t('U3524 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.m === 'number' && typeof o5.s === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3519;k<=3524;k++) t('U'+k+' 输出密度',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
