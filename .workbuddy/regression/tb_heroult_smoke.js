@@ -9443,6 +9443,22 @@ async function main() {
     t('U3254 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3249;k<=3254;k++) t('U'+k+' 阵亡代价',false,e.message); }
 
+
+  // ===== U3255~U3260: BOSS讨伐(v0.11.48) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bossTallyWrap'),st:T.bossTallyStateNow(1,2)});})()"));
+    t('U3255 BOSS讨伐 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3256 正常 1/2→50%', o.st.pct === 50 && o.st.txt === '讨伐 1/2', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossTallyStateNow(0,2).pct,b:T.bossTallyStateNow(2,2).pct,c:T.bossTallyStateNow(4,2).pct,d:T.bossTallyStateNow(2,2).danger});})()"));
+    t('U3257 边界 0→0/2→100/4→100/满额danger', o2.a === 0 && o2.b === 100 && o2.c === 100 && o2.d === true, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bossTallyStateNow(-1,2).pct,b:T.bossTallyStateNow(NaN,2).pct,c:T.bossTallyStateNow(1,0).pct,d:T.bossTallyStateNow(1,-2).pct});})()"));
+    t('U3258 非法输入/空值/零目标/负目标 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bossTallyStateNow('1','2').pct);})()"));
+    t('U3259 数字字符串转数', o4 === 50, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.bossTallyFillNow()==='string',d:typeof T.bossTallyDangerNow()==='boolean',v:T.bossTallyKillsNow()});})()"));
+    t('U3260 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3255;k<=3260;k++) t('U'+k+' BOSS讨伐',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
