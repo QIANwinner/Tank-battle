@@ -10003,6 +10003,22 @@ async function main() {
     t('U3464 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.l === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3459;k<=3464;k++) t('U'+k+' 每复活金币',false,e.message); }
 
+
+  // ===== U3465~U3470: 每BOSS耗时(v0.11.83) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('timePerBossWrap'),st:T.timePerBossStateNow(1200,9)});})()"));
+    t('U3465 每BOSS耗时 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3466 正常 1200s/9BOSS→120s/BOSS 50%', o.st.pct === 50 && o.st.txt === '每BOSS 120s', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.timePerBossStateNow(1200,9).pct,b:T.timePerBossStateNow(60,9).pct,c:T.timePerBossStateNow(6000,9).pct,d:T.timePerBossStateNow(2400,9).pct});})()"));
+    t('U3467 边界 120→50/60→100/600→10/240→25', o2.a === 50 && o2.b === 100 && o2.c === 10 && o2.d === 25, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.timePerBossStateNow(-1,9).pct,b:T.timePerBossStateNow(NaN,9).pct,c:T.timePerBossStateNow(600,-1).pct,d:T.timePerBossStateNow(600,NaN).pct});})()"));
+    t('U3468 非法输入/空值/负BOSS/空BOSS → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.timePerBossStateNow('600','9').pct);})()"));
+    t('U3469 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.timePerBossFillNow()==='string',d:typeof T.timePerBossDangerNow()==='boolean',v:T.timePerBossTimeNow(),l:T.timePerBossBossNow()});})()"));
+    t('U3470 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.l === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3465;k<=3470;k++) t('U'+k+' 每BOSS耗时',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
