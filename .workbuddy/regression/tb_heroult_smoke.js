@@ -9715,6 +9715,22 @@ async function main() {
     t('U3356 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.l === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3351;k<=3356;k++) t('U'+k+' 每命道具',false,e.message); }
 
+
+  // ===== U3357~U3362: 每道具击杀(v0.11.65) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('killPerPuWrap'),st:T.killPerPuStateNow(6,2)});})()"));
+    t('U3357 每道具击杀 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3358 正常 6杀/2道具→3/道具 50%', o.st.pct === 50 && o.st.txt === '每道具 3', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killPerPuStateNow(0,2).pct,b:T.killPerPuStateNow(12,2).pct,c:T.killPerPuStateNow(18,2).pct,d:T.killPerPuStateNow(3,2).pct});})()"));
+    t('U3359 边界 0→0/12→100/18→100/3→25', o2.a === 0 && o2.b === 100 && o2.c === 100 && o2.d === 25, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killPerPuStateNow(-1,2).pct,b:T.killPerPuStateNow(NaN,2).pct,c:T.killPerPuStateNow(6,0).pct,d:T.killPerPuStateNow(6,-2).pct});})()"));
+    t('U3360 非法输入/空值/零道具/负道具 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.killPerPuStateNow('6','2').pct);})()"));
+    t('U3361 数字字符串转数', o4 === 50, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.killPerPuFillNow()==='string',d:typeof T.killPerPuDangerNow()==='boolean',v:T.killPerPuKillsNow(),p:T.killPerPuPuNow()});})()"));
+    t('U3362 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.p === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3357;k<=3362;k++) t('U'+k+' 每道具击杀',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
