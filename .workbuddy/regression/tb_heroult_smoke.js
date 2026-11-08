@@ -8755,6 +8755,22 @@ async function main() {
     t('U2996 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2991;k<=2996;k++) t('U'+k+' 波次推进',false,e.message); }
 
+
+  // ===== U2997~U3002: 道具覆盖(v0.11.05) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('pickupCoverBarWrap'),st:T.pickupCoverStateNow(6,12)});})()"));
+    t('U2997 道具覆盖 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U2998 正常 6/12=50%', o.st.pct === 50 && o.st.txt === '道具 6/12', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pickupCoverStateNow(0,12).pct,b:T.pickupCoverStateNow(6,12).pct,c:T.pickupCoverStateNow(12,12).pct});})()"));
+    t('U2999 边界 0→0/6→50/12→100', o2.a === 0 && o2.b === 50 && o2.c === 100, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pickupCoverStateNow(-5,12).pct,b:T.pickupCoverStateNow(NaN,12).pct});})()"));
+    t('U3000 非法输入/空值 → 0', o3.a === 0 && o3.b === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.pickupCoverStateNow('6','12').pct);})()"));
+    t('U3001 数字字符串转数', o4 === 50, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.pickupCoverFillNow()==='string',d:typeof T.pickupCoverDangerNow()==='boolean'});})()"));
+    t('U3002 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2997;k<=3002;k++) t('U'+k+' 道具覆盖',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
