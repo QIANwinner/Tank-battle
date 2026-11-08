@@ -8979,6 +8979,22 @@ async function main() {
     t('U3080 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=3075;k<=3080;k++) t('U'+k+' 安全窗口',false,e.message); }
 
+
+  // ===== U3081~U3086: 掉落期望(v0.11.19) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('dropExpWrap'),st:T.dropExpStateNow(3,0.15)});})()"));
+    t('U3081 掉落期望 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3082 正常 3杀/15% → 距下次+4', o.st.pct === 45 && o.st.txt === '掉落 +4杀', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dropExpStateNow(0,0.15).pct,b:T.dropExpStateNow(5,0.15).pct,c:T.dropExpStateNow(6,0.15).pct});})()"));
+    t('U3083 边界 0→0/5→75/6→90', o2.a === 0 && o2.b === 75 && o2.c === 90, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dropExpStateNow(-5,0.15).pct,b:T.dropExpStateNow(NaN,0.15).pct,c:T.dropExpStateNow(3,0).pct});})()"));
+    t('U3084 非法输入/空值/零概率 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.dropExpStateNow('3','0.15').pct);})()"));
+    t('U3085 数字字符串转数', o4 === 45, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.dropExpFillNow()==='string',d:typeof T.dropExpDangerNow()==='boolean'});})()"));
+    t('U3086 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=3081;k<=3086;k++) t('U'+k+' 掉落期望',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
