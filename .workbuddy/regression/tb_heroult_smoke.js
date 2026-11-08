@@ -10931,6 +10931,22 @@ async function main() {
     t('U3812 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.h === 'number' && typeof o5.g === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3807;k<=3812;k++) t('U'+k+' 生涯每局困难最佳分',false,e.message); }
 
+
+  // ===== U3813~U3818: 本局每命中得分(v0.12.41) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runScorePerHitWrap'),st:T.runScorePerHitStateNow(600,6)});})()"));
+    t('U3813 本局每命中得分 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3814 正常 600分/6命中→100/命中 100%', o.st.pct === 100 && o.st.txt === '得分 100/命中' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runScorePerHitStateNow(0,6).pct,b:T.runScorePerHitStateNow(1200,6).pct,c:T.runScorePerHitStateNow(300,6).pct,d:T.runScorePerHitStateNow(300,6).cls});})()"));
+    t('U3815 边界 0→0/1200→100/300→50/偏低', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runScorePerHitStateNow(-1,6).pct,b:T.runScorePerHitStateNow(NaN,6).pct,c:T.runScorePerHitStateNow(600,0).pct,d:T.runScorePerHitStateNow(600,-1).pct});})()"));
+    t('U3816 非法/空值/零命中/负命中 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runScorePerHitStateNow('600','6').pct);})()"));
+    t('U3817 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.runScorePerHitFillNow()==='string',d:typeof T.runScorePerHitDangerNow()==='boolean',s:T.runScorePerHitScoreNow(),h:T.runScorePerHitHitNow()});})()"));
+    t('U3818 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.s === 'number' && typeof o5.h === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3813;k<=3818;k++) t('U'+k+' 本局每命中得分',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
