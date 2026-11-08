@@ -9203,6 +9203,22 @@ async function main() {
     t('U3164 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.c === 'number' && typeof o5.h === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3159;k<=3164;k++) t('U'+k+' 敌方血量压力',false,e.message); }
 
+
+  // ===== U3165~U3170: 金币流速(v0.11.33) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('goldEarnRateWrap'),st:T.goldEarnRateStateNow(150,100)});})()"));
+    t('U3165 金币流速 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3166 正常 150币100秒→1.5/s 50%', o.st.pct === 50 && o.st.txt === '金币 1.5/s', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.goldEarnRateStateNow(0,100).pct,b:T.goldEarnRateStateNow(30,100).pct,c:T.goldEarnRateStateNow(300,100).pct,d:T.goldEarnRateStateNow(600,100).pct});})()"));
+    t('U3167 边界 0→0/30→10/300→100/600→100', o2.a === 0 && o2.b === 10 && o2.c === 100 && o2.d === 100, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.goldEarnRateStateNow(-5,100).pct,b:T.goldEarnRateStateNow(NaN,100).pct,c:T.goldEarnRateStateNow(150,0).pct,d:T.goldEarnRateStateNow(150,-3).pct});})()"));
+    t('U3168 非法输入/空值/零秒/负秒 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.goldEarnRateStateNow('150','100').pct);})()"));
+    t('U3169 数字字符串转数', o4 === 50, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.goldEarnRateFillNow()==='string',d:typeof T.goldEarnRateDangerNow()==='boolean'});})()"));
+    t('U3170 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=3165;k<=3170;k++) t('U'+k+' 金币流速',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
