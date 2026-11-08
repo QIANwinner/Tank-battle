@@ -8883,6 +8883,22 @@ async function main() {
     t('U3044 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=3039;k<=3044;k++) t('U'+k+' 强化投入里程碑',false,e.message); }
 
+
+  // ===== U3045~U3050: 大招充能(v0.11.13) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('ultChargeBarWrap'),st:T.ultChargeStateNow(2,8)});})()"));
+    t('U3045 大招充能 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3046 正常 冷却2/8→75%', o.st.pct === 75 && o.st.txt === '充能 75%', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.ultChargeStateNow(8,8).pct,b:T.ultChargeStateNow(4,8).pct,c:T.ultChargeStateNow(0,8).pct});})()"));
+    t('U3047 边界 8→0/4→50/0→100', o2.a === 0 && o2.b === 50 && o2.c === 100, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.ultChargeStateNow(-5,8).pct,b:T.ultChargeStateNow(NaN,8).pct,c:T.ultChargeStateNow(2,0).pct});})()"));
+    t('U3048 非法输入/空值/零上限 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.ultChargeStateNow('2','8').pct);})()"));
+    t('U3049 数字字符串转数', o4 === 75, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.ultChargeFillNow()==='string',d:typeof T.ultChargeDangerNow()==='boolean'});})()"));
+    t('U3050 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=3045;k<=3050;k++) t('U'+k+' 大招充能',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
