@@ -10835,6 +10835,22 @@ async function main() {
     t('U3776 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.s === 'number' && typeof o5.l === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3771;k<=3776;k++) t('U'+k+' 每命得分',false,e.message); }
 
+
+  // ===== U3777~U3782: 金币得分比(v0.12.35) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runCoinScoreRatioWrap'),st:T.runCoinScoreRatioStateNow(30,60)});})()"));
+    t('U3777 金币得分比 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3778 正常 30币/60分→0.5/分 100%', o.st.pct === 100 && o.st.txt === '币比 0.5/分' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runCoinScoreRatioStateNow(0,60).pct,b:T.runCoinScoreRatioStateNow(60,60).pct,c:T.runCoinScoreRatioStateNow(15,60).pct,d:T.runCoinScoreRatioStateNow(15,60).cls});})()"));
+    t('U3779 边界 0→0/60→100/15→50/偏低', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runCoinScoreRatioStateNow(-1,60).pct,b:T.runCoinScoreRatioStateNow(NaN,60).pct,c:T.runCoinScoreRatioStateNow(30,0).pct,d:T.runCoinScoreRatioStateNow(30,-1).pct});})()"));
+    t('U3780 非法/空值/零分/负分 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runCoinScoreRatioStateNow('30','60').pct);})()"));
+    t('U3781 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.runCoinScoreRatioFillNow()==='string',d:typeof T.runCoinScoreRatioDangerNow()==='boolean',c:T.runCoinScoreRatioCoinNow(),s:T.runCoinScoreRatioScoreNow()});})()"));
+    t('U3782 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.c === 'number' && typeof o5.s === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3777;k<=3782;k++) t('U'+k+' 金币得分比',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
