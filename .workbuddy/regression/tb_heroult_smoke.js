@@ -9859,6 +9859,22 @@ async function main() {
     t('U3410 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.l === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3405;k<=3410;k++) t('U'+k+' 每受击得分',false,e.message); }
 
+
+  // ===== U3411~U3416: 每复活得分(v0.11.74) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('scorePerReviveWrap'),st:T.scorePerReviveStateNow(2000,1)});})()"));
+    t('U3411 每复活得分 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3412 正常 2000分/1复活→1000/复活 50%', o.st.pct === 50 && o.st.txt === '每复活 1000', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scorePerReviveStateNow(0,1).pct,b:T.scorePerReviveStateNow(8000,1).pct,c:T.scorePerReviveStateNow(200,9).pct,d:T.scorePerReviveStateNow(2000,3).pct});})()"));
+    t('U3413 边界 0→0/8000→100/200→1/2000→25', o2.a === 0 && o2.b === 100 && o2.c === 1 && o2.d === 25, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scorePerReviveStateNow(-1,1).pct,b:T.scorePerReviveStateNow(NaN,1).pct,c:T.scorePerReviveStateNow(2000,-1).pct,d:T.scorePerReviveStateNow(2000,NaN).pct});})()"));
+    t('U3414 非法输入/空值/负复活/空复活 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.scorePerReviveStateNow('2000','1').pct);})()"));
+    t('U3415 数字字符串转数', o4 === 50, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.scorePerReviveFillNow()==='string',d:typeof T.scorePerReviveDangerNow()==='boolean',v:T.scorePerReviveScoreNow(),l:T.scorePerReviveReviveNow()});})()"));
+    t('U3416 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.l === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3411;k<=3416;k++) t('U'+k+' 每复活得分',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
