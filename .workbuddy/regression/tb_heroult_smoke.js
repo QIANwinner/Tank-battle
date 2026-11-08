@@ -9555,6 +9555,22 @@ async function main() {
     t('U3296 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3291;k<=3296;k++) t('U'+k+' 金币储备',false,e.message); }
 
+
+  // ===== U3297~U3302: 每命伤害(v0.11.55) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('dmgPerLifeWrap'),st:T.dmgPerLifeStateNow(600,3)});})()"));
+    t('U3297 每命伤害 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3298 正常 600/3命→200/命 67%', o.st.pct === 67 && o.st.txt === '每命 200', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dmgPerLifeStateNow(0,3).pct,b:T.dmgPerLifeStateNow(900,3).pct,c:T.dmgPerLifeStateNow(1200,3).pct,d:T.dmgPerLifeStateNow(300,3).pct});})()"));
+    t('U3299 边界 0→0/900→100/1200→100/300→33', o2.a === 0 && o2.b === 100 && o2.c === 100 && o2.d === 33, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dmgPerLifeStateNow(-1,3).pct,b:T.dmgPerLifeStateNow(NaN,3).pct,c:T.dmgPerLifeStateNow(600,0).pct,d:T.dmgPerLifeStateNow(600,-2).pct});})()"));
+    t('U3300 非法输入/空值/零命/负命 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.dmgPerLifeStateNow('600','3').pct);})()"));
+    t('U3301 数字字符串转数', o4 === 67, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.dmgPerLifeFillNow()==='string',d:typeof T.dmgPerLifeDangerNow()==='boolean',v:T.dmgPerLifeDmgNow(),l:T.dmgPerLifeLivesNow()});})()"));
+    t('U3302 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.l === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3297;k<=3302;k++) t('U'+k+' 每命伤害',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

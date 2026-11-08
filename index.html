@@ -2557,6 +2557,11 @@
   #coinStockWrap.g-good .pfill { background:#2ecc71; }
   #coinStockWrap.g-warn .pfill { background:#f1c40f; }
   #coinStockWrap.g-bad .pfill { background:#e74c3c; }
+  #dmgPerLifeWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #dmgPerLifeWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #dmgPerLifeWrap.g-good .pfill { background:#2ecc71; }
+  #dmgPerLifeWrap.g-warn .pfill { background:#f1c40f; }
+  #dmgPerLifeWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -3009,6 +3014,7 @@
     <div class="pill m-hide" id="foeBulletShareWrap"><span class="k">🎯</span><i class="pbar"><i class="pfill" id="foeBulletShareFill"></i></i><span class="v" id="foeBulletShareVal">—</span></div>
     <div class="pill m-hide" id="fireRhythmWrap"><span class="k">🔫</span><i class="pbar"><i class="pfill" id="fireRhythmFill"></i></i><span class="v" id="fireRhythmVal">—</span></div>
     <div class="pill m-hide" id="coinStockWrap"><span class="k">🪙</span><i class="pbar"><i class="pfill" id="coinStockFill"></i></i><span class="v" id="coinStockVal">—</span></div>
+    <div class="pill m-hide" id="dmgPerLifeWrap"><span class="k">💥</span><i class="pbar"><i class="pfill" id="dmgPerLifeFill"></i></i><span class="v" id="dmgPerLifeVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -3384,7 +3390,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V11.54</div>
+  <div id="mark">DESIGNED BY QIAN · V11.55</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -8638,6 +8644,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r69fsB = bullets.filter(function(b){ return b && b.owner && !b.owner.isPlayer; }).length; const r69fsS = foeBulletShareText(r69fsB, bullets.length); const r69fsF = $('foeBulletShareFill'); if (r69fsF) r69fsF.style.width = r69fsS.pct + '%'; const r69fsV = $('foeBulletShareVal'); if (r69fsV) r69fsV.textContent = r69fsS.txt; const r69fsW = $('foeBulletShareWrap'); if (r69fsW) { r69fsW.classList.remove('g-good','g-warn','g-bad'); if (r69fsS.cls) r69fsW.classList.add(r69fsS.cls); r69fsW.classList.toggle('danger', !!r69fsS.danger); }
     const r69frS = fireRhythmText(player ? player.cooldown : 0, 14); const r69frF = $('fireRhythmFill'); if (r69frF) r69frF.style.width = r69frS.pct + '%'; const r69frV = $('fireRhythmVal'); if (r69frV) r69frV.textContent = r69frS.txt; const r69frW = $('fireRhythmWrap'); if (r69frW) { r69frW.classList.remove('g-good','g-warn','g-bad'); if (r69frS.cls) r69frW.classList.add(r69frS.cls); r69frW.classList.toggle('danger', !!r69frS.danger); }
     const r69csS = coinStockText(coins, 500); const r69csF = $('coinStockFill'); if (r69csF) r69csF.style.width = r69csS.pct + '%'; const r69csV = $('coinStockVal'); if (r69csV) r69csV.textContent = r69csS.txt; const r69csW = $('coinStockWrap'); if (r69csW) { r69csW.classList.remove('g-good','g-warn','g-bad'); if (r69csS.cls) r69csW.classList.add(r69csS.cls); r69csW.classList.toggle('danger', !!r69csS.danger); }
+    const r70dlS = dmgPerLifeText(runDmg, lives); const r70dlF = $('dmgPerLifeFill'); if (r70dlF) r70dlF.style.width = r70dlS.pct + '%'; const r70dlV = $('dmgPerLifeVal'); if (r70dlV) r70dlV.textContent = r70dlS.txt; const r70dlW = $('dmgPerLifeWrap'); if (r70dlW) { r70dlW.classList.remove('g-good','g-warn','g-bad'); if (r70dlS.cls) r70dlW.classList.add(r70dlS.cls); r70dlW.classList.toggle('danger', !!r70dlS.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -12241,6 +12248,17 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (c >= g) { cls = 'g-bad'; danger = true; } else if (pct >= 70) { cls = 'g-warn'; }
     return { pct: pct, txt: '金币 ' + c + '/' + g, cls: cls, danger: danger };
   }
+  // —— v0.11.55 每命伤害：本局总伤害相对剩余生命条数的平均输出（生存火力）——
+  function dmgPerLifeText(dmg, lives) {
+    const nd = Number(dmg), nl = Number(lives);
+    if (!isFinite(nd) || nd < 0 || !isFinite(nl) || nl <= 0) return { pct: 0, txt: '每命 —', cls: 'g-good', danger: false };
+    const d = Math.max(0, nd), l = Math.max(0, Math.floor(nl));
+    const per = d / l;
+    const pct = Math.max(0, Math.min(100, Math.round(per / 300 * 100)));
+    let cls = 'g-good', danger = false;
+    if (per < 100) { cls = 'g-bad'; danger = true; } else if (per < 200) { cls = 'g-warn'; }
+    return { pct: pct, txt: '每命 ' + Math.round(per), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -14082,7 +14100,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V11.54', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V11.55', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -15513,6 +15531,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       foeBulletShareStateNow: (f, t) => foeBulletShareText(f, t), foeBulletShareFoeNow: () => bullets.filter(function(b){ return b && b.owner && !b.owner.isPlayer; }).length, foeBulletShareTotNow: () => bullets.length, foeBulletShareFillNow: () => { const f = $('foeBulletShareFill'); return f ? f.style.width : ''; }, foeBulletShareDangerNow: () => { const w = $('foeBulletShareWrap'); return !!(w && w.classList.contains('danger')); },
       fireRhythmStateNow: (c, b) => fireRhythmText(c, b), fireRhythmCdNow: () => player ? player.cooldown : -1, fireRhythmBaseNow: () => 14, fireRhythmFillNow: () => { const f = $('fireRhythmFill'); return f ? f.style.width : ''; }, fireRhythmDangerNow: () => { const w = $('fireRhythmWrap'); return !!(w && w.classList.contains('danger')); },
       coinStockStateNow: (c, g) => coinStockText(c, g), coinStockNow: () => coins, coinStockFillNow: () => { const f = $('coinStockFill'); return f ? f.style.width : ''; }, coinStockDangerNow: () => { const w = $('coinStockWrap'); return !!(w && w.classList.contains('danger')); },
+      dmgPerLifeStateNow: (d, l) => dmgPerLifeText(d, l), dmgPerLifeDmgNow: () => runDmg, dmgPerLifeLivesNow: () => lives, dmgPerLifeFillNow: () => { const f = $('dmgPerLifeFill'); return f ? f.style.width : ''; }, dmgPerLifeDangerNow: () => { const w = $('dmgPerLifeWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
