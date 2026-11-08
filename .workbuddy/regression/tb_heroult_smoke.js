@@ -10499,6 +10499,22 @@ async function main() {
     t('U3650 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.c === 'number' && typeof o5.w === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3645;k<=3650;k++) t('U'+k+' 单局连击强度',false,e.message); }
 
+
+  // ===== U3651~U3656: 生涯阵亡健康(v0.12.14) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerDeathAvgWrap'),st:T.careerDeathAvgStateNow(1,5)});})()"));
+    t('U3651 生涯阵亡健康 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3652 正常 1死/5局→0.2/局 90%', o.st.pct === 90 && o.st.txt === '阵亡 0.2/局' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerDeathAvgStateNow(0,5).pct,b:T.careerDeathAvgStateNow(10,5).pct,c:T.careerDeathAvgStateNow(5,5).pct,d:T.careerDeathAvgStateNow(5,5).cls});})()"));
+    t('U3653 边界 0→100/10→0/5→50/偏险', o2.a === 100 && o2.b === 0 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerDeathAvgStateNow(-1,5).pct,b:T.careerDeathAvgStateNow(NaN,5).pct,c:T.careerDeathAvgStateNow(1,0).pct,d:T.careerDeathAvgStateNow(1,-1).pct});})()"));
+    t('U3654 非法/空值/零局/负局 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.careerDeathAvgStateNow('1','5').pct);})()"));
+    t('U3655 数字字符串转数', o4 === 90, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.careerDeathAvgFillNow()==='string',r:typeof T.careerDeathAvgDangerNow()==='boolean',d:T.careerDeathAvgDeathNow(),g:T.careerDeathAvgGameNow()});})()"));
+    t('U3656 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.r === true && typeof o5.d === 'number' && typeof o5.g === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3651;k<=3656;k++) t('U'+k+' 生涯阵亡健康',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
