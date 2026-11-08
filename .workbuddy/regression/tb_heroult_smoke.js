@@ -9811,6 +9811,22 @@ async function main() {
     t('U3392 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.w === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3387;k<=3392;k++) t('U'+k+' 每波BOSS',false,e.message); }
 
+
+  // ===== U3393~U3398: 每金币得分(v0.11.71) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('scorePerCoinWrap'),st:T.scorePerCoinStateNow(2500,100)});})()"));
+    t('U3393 每金币得分 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3394 正常 2500分/100金→25/金 50%', o.st.pct === 50 && o.st.txt === '每金币 25', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scorePerCoinStateNow(0,100).pct,b:T.scorePerCoinStateNow(10000,100).pct,c:T.scorePerCoinStateNow(100,100).pct,d:T.scorePerCoinStateNow(2500,200).pct});})()"));
+    t('U3395 边界 0→0/10000→100/100→2/2500→25', o2.a === 0 && o2.b === 100 && o2.c === 2 && o2.d === 25, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scorePerCoinStateNow(-1,100).pct,b:T.scorePerCoinStateNow(NaN,100).pct,c:T.scorePerCoinStateNow(2500,0).pct,d:T.scorePerCoinStateNow(2500,-2).pct});})()"));
+    t('U3396 非法输入/空值/零金/负金 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.scorePerCoinStateNow('2500','100').pct);})()"));
+    t('U3397 数字字符串转数', o4 === 50, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.scorePerCoinFillNow()==='string',d:typeof T.scorePerCoinDangerNow()==='boolean',v:T.scorePerCoinScoreNow(),l:T.scorePerCoinCoinsNow()});})()"));
+    t('U3398 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.l === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3393;k<=3398;k++) t('U'+k+' 每金币得分',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
