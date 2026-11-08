@@ -2837,6 +2837,11 @@
   #runKillScoreWrap.g-good .pfill { background:#2ecc71; }
   #runKillScoreWrap.g-warn .pfill { background:#f1c40f; }
   #runKillScoreWrap.g-bad .pfill { background:#e74c3c; }
+  #careerWinRateWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #careerWinRateWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #careerWinRateWrap.g-good .pfill { background:#2ecc71; }
+  #careerWinRateWrap.g-warn .pfill { background:#f1c40f; }
+  #careerWinRateWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -3345,6 +3350,7 @@
     <div class="pill m-hide" id="runOverallWrap"><span class="k">🎯</span><i class="pbar"><i class="pfill" id="runOverallFill"></i></i><span class="v" id="runOverallVal">—</span></div>
     <div class="pill m-hide" id="careerAvgKillWrap"><span class="k">💪</span><i class="pbar"><i class="pfill" id="careerAvgKillFill"></i></i><span class="v" id="careerAvgKillVal">—</span></div>
     <div class="pill m-hide" id="runKillScoreWrap"><span class="k">💰</span><i class="pbar"><i class="pfill" id="runKillScoreFill"></i></i><span class="v" id="runKillScoreVal">—</span></div>
+    <div class="pill m-hide" id="careerWinRateWrap"><span class="k">🏆</span><i class="pbar"><i class="pfill" id="careerWinRateFill"></i></i><span class="v" id="careerWinRateVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -3720,7 +3726,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V12.10</div>
+  <div id="mark">DESIGNED BY QIAN · V12.11</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -9030,6 +9036,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r77roS = runOverallText(stat.hits, stat.shots, stat.kills, playSecRun, wave); const r77roF = $('runOverallFill'); if (r77roF) r77roF.style.width = r77roS.pct + '%'; const r77roV = $('runOverallVal'); if (r77roV) r77roV.textContent = r77roS.txt; const r77roW = $('runOverallWrap'); if (r77roW) { r77roW.classList.remove('g-good','g-warn','g-bad'); if (r77roS.cls) r77roW.classList.add(r77roS.cls); r77roW.classList.toggle('danger', !!r77roS.danger); }
     const r78akS = careerAvgKillText(career.kills, career.games); const r78akF = $('careerAvgKillFill'); if (r78akF) r78akF.style.width = r78akS.pct + '%'; const r78akV = $('careerAvgKillVal'); if (r78akV) r78akV.textContent = r78akS.txt; const r78akW = $('careerAvgKillWrap'); if (r78akW) { r78akW.classList.remove('g-good','g-warn','g-bad'); if (r78akS.cls) r78akW.classList.add(r78akS.cls); r78akW.classList.toggle('danger', !!r78akS.danger); }
     const r78ksS = runKillScoreText(score, stat.kills); const r78ksF = $('runKillScoreFill'); if (r78ksF) r78ksF.style.width = r78ksS.pct + '%'; const r78ksV = $('runKillScoreVal'); if (r78ksV) r78ksV.textContent = r78ksS.txt; const r78ksW = $('runKillScoreWrap'); if (r78ksW) { r78ksW.classList.remove('g-good','g-warn','g-bad'); if (r78ksS.cls) r78ksW.classList.add(r78ksS.cls); r78ksW.classList.toggle('danger', !!r78ksS.danger); }
+    const r78wrS = careerWinRateText(career.wins, career.games); const r78wrF = $('careerWinRateFill'); if (r78wrF) r78wrF.style.width = r78wrS.pct + '%'; const r78wrV = $('careerWinRateVal'); if (r78wrV) r78wrV.textContent = r78wrS.txt; const r78wrW = $('careerWinRateWrap'); if (r78wrW) { r78wrW.classList.remove('g-good','g-warn','g-bad'); if (r78wrS.cls) r78wrW.classList.add(r78wrS.cls); r78wrW.classList.toggle('danger', !!r78wrS.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -13253,6 +13260,17 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 40) { cls = 'g-bad'; danger = true; } else if (val < 70) { cls = 'g-warn'; }
     return { pct: pct, txt: '收益 ' + (Math.round(val * 10) / 10) + '/个', cls: cls, danger: danger };
   }
+  // —— v0.12.11 生涯胜率：生涯胜场 / 生涯场次 的胜率（长期竞技反馈）——
+  function careerWinRateText(wins, games) {
+    const nw = Number(wins), ng = Number(games);
+    if (!isFinite(nw) || nw < 0 || !isFinite(ng) || ng < 0 || ng === 0) return { pct: 0, txt: '胜率 —', cls: 'g-good', danger: false };
+    const w = Math.max(0, nw), g = Math.max(0, ng);
+    const val = w / g;
+    const pct = Math.max(0, Math.min(100, Math.round(val / 0.4 * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 0.15) { cls = 'g-bad'; danger = true; } else if (val < 0.25) { cls = 'g-warn'; }
+    return { pct: pct, txt: '胜率 ' + Math.round(val * 100) + '%', cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -15094,7 +15112,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V12.10', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V12.11', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -16581,6 +16599,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       runOverallStateNow: (h, s, k, t, w) => runOverallText(h, s, k, t, w), runOverallHitsNow: () => stat.hits, runOverallShotsNow: () => stat.shots, runOverallKillsNow: () => stat.kills, runOverallSecsNow: () => playSecRun, runOverallWaveNow: () => wave, runOverallFillNow: () => { const f = $('runOverallFill'); return f ? f.style.width : ''; }, runOverallDangerNow: () => { const w = $('runOverallWrap'); return !!(w && w.classList.contains('danger')); },
       careerAvgKillStateNow: (k, g) => careerAvgKillText(k, g), careerAvgKillKillNow: () => career.kills, careerAvgKillGameNow: () => career.games, careerAvgKillFillNow: () => { const f = $('careerAvgKillFill'); return f ? f.style.width : ''; }, careerAvgKillDangerNow: () => { const w = $('careerAvgKillWrap'); return !!(w && w.classList.contains('danger')); },
       runKillScoreStateNow: (s, k) => runKillScoreText(s, k), runKillScoreScoreNow: () => score, runKillScoreKillNow: () => stat.kills, runKillScoreFillNow: () => { const f = $('runKillScoreFill'); return f ? f.style.width : ''; }, runKillScoreDangerNow: () => { const w = $('runKillScoreWrap'); return !!(w && w.classList.contains('danger')); },
+      careerWinRateStateNow: (w, g) => careerWinRateText(w, g), careerWinRateWinNow: () => career.wins, careerWinRateGameNow: () => career.games, careerWinRateFillNow: () => { const f = $('careerWinRateFill'); return f ? f.style.width : ''; }, careerWinRateDangerNow: () => { const w = $('careerWinRateWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
