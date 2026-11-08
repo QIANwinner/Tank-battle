@@ -3022,6 +3022,11 @@
   #runScorePerWaveWrap.g-good .pfill { background:#2ecc71; }
   #runScorePerWaveWrap.g-warn .pfill { background:#f1c40f; }
   #runScorePerWaveWrap.g-bad .pfill { background:#e74c3c; }
+  #runScorePerPuWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #runScorePerPuWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #runScorePerPuWrap.g-good .pfill { background:#2ecc71; }
+  #runScorePerPuWrap.g-warn .pfill { background:#f1c40f; }
+  #runScorePerPuWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -3567,6 +3572,7 @@
     <div class="pill m-hide" id="careerHitPerGameWrap"><span class="k">📊</span><i class="pbar"><i class="pfill" id="careerHitPerGameFill"></i></i><span class="v" id="careerHitPerGameVal">—</span></div>
     <div class="pill m-hide" id="careerShotPerGameWrap"><span class="k">🔫</span><i class="pbar"><i class="pfill" id="careerShotPerGameFill"></i></i><span class="v" id="careerShotPerGameVal">—</span></div>
     <div class="pill m-hide" id="runScorePerWaveWrap"><span class="k">🌊</span><i class="pbar"><i class="pfill" id="runScorePerWaveFill"></i></i><span class="v" id="runScorePerWaveVal">—</span></div>
+    <div class="pill m-hide" id="runScorePerPuWrap"><span class="k">🧰</span><i class="pbar"><i class="pfill" id="runScorePerPuFill"></i></i><span class="v" id="runScorePerPuVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -3942,7 +3948,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V12.47</div>
+  <div id="mark">DESIGNED BY QIAN · V12.48</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -9289,6 +9295,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r82hpgS = careerHitPerGameText(career.hits, career.games); const r82hpgF = $('careerHitPerGameFill'); if (r82hpgF) r82hpgF.style.width = r82hpgS.pct + '%'; const r82hpgV = $('careerHitPerGameVal'); if (r82hpgV) r82hpgV.textContent = r82hpgS.txt; const r82hpgW = $('careerHitPerGameWrap'); if (r82hpgW) { r82hpgW.classList.remove('g-good','g-warn','g-bad'); if (r82hpgS.cls) r82hpgW.classList.add(r82hpgS.cls); r82hpgW.classList.toggle('danger', !!r82hpgS.danger); }
     const r82spgS = careerShotPerGameText(career.shots, career.games); const r82spgF = $('careerShotPerGameFill'); if (r82spgF) r82spgF.style.width = r82spgS.pct + '%'; const r82spgV = $('careerShotPerGameVal'); if (r82spgV) r82spgV.textContent = r82spgS.txt; const r82spgW = $('careerShotPerGameWrap'); if (r82spgW) { r82spgW.classList.remove('g-good','g-warn','g-bad'); if (r82spgS.cls) r82spgW.classList.add(r82spgS.cls); r82spgW.classList.toggle('danger', !!r82spgS.danger); }
     const r82spwS = runScorePerWaveText(score, wave); const r82spwF = $('runScorePerWaveFill'); if (r82spwF) r82spwF.style.width = r82spwS.pct + '%'; const r82spwV = $('runScorePerWaveVal'); if (r82spwV) r82spwV.textContent = r82spwS.txt; const r82spwW = $('runScorePerWaveWrap'); if (r82spwW) { r82spwW.classList.remove('g-good','g-warn','g-bad'); if (r82spwS.cls) r82spwW.classList.add(r82spwS.cls); r82spwW.classList.toggle('danger', !!r82spwS.danger); }
+    const r82sppS = runScorePerPuText(score, runPowerups); const r82sppF = $('runScorePerPuFill'); if (r82sppF) r82sppF.style.width = r82sppS.pct + '%'; const r82sppV = $('runScorePerPuVal'); if (r82sppV) r82sppV.textContent = r82sppS.txt; const r82sppW = $('runScorePerPuWrap'); if (r82sppW) { r82sppW.classList.remove('g-good','g-warn','g-bad'); if (r82sppS.cls) r82sppW.classList.add(r82sppS.cls); r82sppW.classList.toggle('danger', !!r82sppS.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -13919,6 +13926,17 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 150) { cls = 'g-bad'; danger = true; } else if (val < 300) { cls = 'g-warn'; }
     return { pct: pct, txt: '得分 ' + Math.round(val) + '/波', cls: cls, danger: danger };
   }
+  // —— v0.12.48 本局每道具得分：本局得分 / 本局道具 的每道具得分（道具得分转化反馈，200/道具满分）——
+  function runScorePerPuText(score, pu) {
+    const ns = Number(score), np = Number(pu);
+    if (!isFinite(ns) || ns < 0 || !isFinite(np) || np < 0 || np === 0) return { pct: 0, txt: '得分 —', cls: 'g-good', danger: false };
+    const s = Math.max(0, ns), p = Math.max(0, np);
+    const val = s / p;
+    const pct = Math.max(0, Math.min(100, Math.round(val / 200 * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 60) { cls = 'g-bad'; danger = true; } else if (val < 120) { cls = 'g-warn'; }
+    return { pct: pct, txt: '得分 ' + Math.round(val) + '/道具', cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -15760,7 +15778,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V12.47', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V12.48', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -17284,6 +17302,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       careerHitPerGameStateNow: (h, g) => careerHitPerGameText(h, g), careerHitPerGameHitNow: () => career.hits, careerHitPerGameGameNow: () => career.games, careerHitPerGameFillNow: () => { const f = $('careerHitPerGameFill'); return f ? f.style.width : ''; }, careerHitPerGameDangerNow: () => { const w = $('careerHitPerGameWrap'); return !!(w && w.classList.contains('danger')); },
       careerShotPerGameStateNow: (sh, g) => careerShotPerGameText(sh, g), careerShotPerGameShotNow: () => career.shots, careerShotPerGameGameNow: () => career.games, careerShotPerGameFillNow: () => { const f = $('careerShotPerGameFill'); return f ? f.style.width : ''; }, careerShotPerGameDangerNow: () => { const w = $('careerShotPerGameWrap'); return !!(w && w.classList.contains('danger')); },
       runScorePerWaveStateNow: (s, w) => runScorePerWaveText(s, w), runScorePerWaveScoreNow: () => score, runScorePerWaveWaveNow: () => wave, runScorePerWaveFillNow: () => { const f = $('runScorePerWaveFill'); return f ? f.style.width : ''; }, runScorePerWaveDangerNow: () => { const w = $('runScorePerWaveWrap'); return !!(w && w.classList.contains('danger')); },
+      runScorePerPuStateNow: (s, p) => runScorePerPuText(s, p), runScorePerPuScoreNow: () => score, runScorePerPuPuNow: () => runPowerups, runScorePerPuFillNow: () => { const f = $('runScorePerPuFill'); return f ? f.style.width : ''; }, runScorePerPuDangerNow: () => { const w = $('runScorePerPuWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
