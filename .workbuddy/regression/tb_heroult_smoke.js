@@ -8947,6 +8947,22 @@ async function main() {
     t('U3068 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=3063;k<=3068;k++) t('U'+k+' 每杀得分',false,e.message); }
 
+
+  // ===== U3069~U3074: 象限威胁(v0.11.17) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('quadThreatWrap'),st:T.quadThreatStateNow(100,100,[{x:120,y:120},{x:110,y:110},{x:60,y:60}])});})()"));
+    t('U3069 象限威胁 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3070 右上2/右下1 → 右上66%', o.st.pct === 66 && o.st.txt === '威胁 右上 2', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.quadThreatStateNow(0,0,[]).pct,b:T.quadThreatStateNow(0,0,null).pct});})()"));
+    t('U3071 空敌人/非法 → 无威胁0', o2.a === 0 && o2.b === 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.quadThreatStateNow(0,0,[{x:1,y:1},{x:2,y:2},{x:3,y:3},{x:4,y:4},{x:-1,y:-1}]).pct});})()"));
+    t('U3072 单象限4/5=80%危险', o3.a === 80, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.quadThreatStateNow(0,0,[{x:1,y:1},{x:-1,y:1}]).txt);})()"));
+    t('U3073 平局取最小索引', typeof o4 === 'string', o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.quadThreatFillNow()==='string',d:typeof T.quadThreatDangerNow()==='boolean'});})()"));
+    t('U3074 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=3069;k<=3074;k++) t('U'+k+' 象限威胁',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
