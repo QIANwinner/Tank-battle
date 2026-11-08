@@ -9731,6 +9731,22 @@ async function main() {
     t('U3362 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.p === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3357;k<=3362;k++) t('U'+k+' 每道具击杀',false,e.message); }
 
+
+  // ===== U3363~U3368: 每杀受击(v0.11.66) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('hurtPerKillWrap'),st:T.hurtPerKillStateNow(2,2)});})()"));
+    t('U3363 每杀受击 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3364 正常 2受击/2杀→1/杀 50%', o.st.pct === 50 && o.st.txt === '每杀 1', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hurtPerKillStateNow(0,2).pct,b:T.hurtPerKillStateNow(4,2).pct,c:T.hurtPerKillStateNow(6,2).pct,d:T.hurtPerKillStateNow(1,2).pct});})()"));
+    t('U3365 边界 0→100/4→0/6→0/1→75', o2.a === 100 && o2.b === 0 && o2.c === 0 && o2.d === 75, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hurtPerKillStateNow(-1,2).pct,b:T.hurtPerKillStateNow(NaN,2).pct,c:T.hurtPerKillStateNow(2,0).pct,d:T.hurtPerKillStateNow(2,-2).pct});})()"));
+    t('U3366 非法输入/空值/零杀/负杀 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.hurtPerKillStateNow('2','2').pct);})()"));
+    t('U3367 数字字符串转数', o4 === 50, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.hurtPerKillFillNow()==='string',d:typeof T.hurtPerKillDangerNow()==='boolean',v:T.hurtPerKillHurtNow(),k:T.hurtPerKillKillsNow()});})()"));
+    t('U3368 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.k === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3363;k<=3368;k++) t('U'+k+' 每杀受击',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
