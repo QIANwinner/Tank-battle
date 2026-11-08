@@ -11427,6 +11427,22 @@ async function main() {
     t('U3998 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3993;k<=3998;k++) t('U'+k+' 本局每死升级',false,e.message); }
 
+
+  // ===== U3999~U4004: 本局每死连击(v0.12.72) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runComboPerDeathWrap'),st:T.runComboPerDeathStateNow(60,6)});})()"));
+    t('U3999 本局每死连击 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U4000 正常 60连击/6死→10/死 100%', o.st.pct === 100 && o.st.txt === '连击 10/死' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runComboPerDeathStateNow(0,6).pct,b:T.runComboPerDeathStateNow(60,6).pct,c:T.runComboPerDeathStateNow(30,6).pct,d:T.runComboPerDeathStateNow(30,6).cls});})()"));
+    t('U4001 边界 0→0/60→100/30→50/偏低', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runComboPerDeathStateNow(-1,6).pct,b:T.runComboPerDeathStateNow(NaN,6).pct,c:T.runComboPerDeathStateNow(60,0).pct,d:T.runComboPerDeathStateNow(60,-1).pct});})()"));
+    t('U4002 非法/空值/零死/负死 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runComboPerDeathStateNow('60','6').pct);})()"));
+    t('U4003 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.runComboPerDeathFillNow()==='string',d:typeof T.runComboPerDeathDangerNow()==='boolean',a:T.runComboPerDeathANow(),b:T.runComboPerDeathBNow()});})()"));
+    t('U4004 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3999;k<=4004;k++) t('U'+k+' 本局每死连击',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
