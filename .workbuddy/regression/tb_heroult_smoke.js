@@ -9971,6 +9971,22 @@ async function main() {
     t('U3452 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.l === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3447;k<=3452;k++) t('U'+k+' 每金币伤害',false,e.message); }
 
+
+  // ===== U3453~U3458: 每复活击杀(v0.11.81) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('killPerReviveWrap'),st:T.killPerReviveStateNow(50,4)});})()"));
+    t('U3453 每复活击杀 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3454 正常 50击杀/4复活→10/复活 50%', o.st.pct === 50 && o.st.txt === '每复活 10', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killPerReviveStateNow(0,4).pct,b:T.killPerReviveStateNow(100,4).pct,c:T.killPerReviveStateNow(5,4).pct,d:T.killPerReviveStateNow(50,9).pct});})()"));
+    t('U3455 边界 0→0/100→100/5→5/50→25', o2.a === 0 && o2.b === 100 && o2.c === 5 && o2.d === 25, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killPerReviveStateNow(-1,4).pct,b:T.killPerReviveStateNow(NaN,4).pct,c:T.killPerReviveStateNow(50,-1).pct,d:T.killPerReviveStateNow(50,NaN).pct});})()"));
+    t('U3456 非法输入/空值/负复活/空复活 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.killPerReviveStateNow('50','4').pct);})()"));
+    t('U3457 数字字符串转数', o4 === 50, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.killPerReviveFillNow()==='string',d:typeof T.killPerReviveDangerNow()==='boolean',v:T.killPerReviveKillNow(),l:T.killPerReviveReviveNow()});})()"));
+    t('U3458 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.l === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3453;k<=3458;k++) t('U'+k+' 每复活击杀',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
