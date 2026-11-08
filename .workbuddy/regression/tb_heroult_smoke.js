@@ -9379,6 +9379,22 @@ async function main() {
     t('U3230 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.w === 'number' && typeof o5.t === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3225;k<=3230;k++) t('U'+k+' 波次构成',false,e.message); }
 
+
+  // ===== U3231~U3236: 弹幕密度(v0.11.44) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('barrageLoadWrap'),st:T.barrageLoadStateNow(12)});})()"));
+    t('U3231 弹幕密度 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3232 正常 12/30→40%', o.st.pct === 40 && o.st.txt === '弹幕 12', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.barrageLoadStateNow(0).pct,b:T.barrageLoadStateNow(30).pct,c:T.barrageLoadStateNow(60).pct,d:T.barrageLoadStateNow(6).pct});})()"));
+    t('U3233 边界 0→0/30→100/60→100/6→20', o2.a === 0 && o2.b === 100 && o2.c === 100 && o2.d === 20, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.barrageLoadStateNow(-5).pct,b:T.barrageLoadStateNow(NaN).pct});})()"));
+    t('U3234 非法输入/空值 → 0', o3.a === 0 && o3.b === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.barrageLoadStateNow('12').pct);})()"));
+    t('U3235 数字字符串转数', o4 === 40, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.barrageLoadFillNow()==='string',d:typeof T.barrageLoadDangerNow()==='boolean',c:T.barrageCountNow()});})()"));
+    t('U3236 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.c === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3231;k<=3236;k++) t('U'+k+' 弹幕密度',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
