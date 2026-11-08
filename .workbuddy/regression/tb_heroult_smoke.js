@@ -10531,6 +10531,22 @@ async function main() {
     t('U3662 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.p === 'number' && typeof o5.s === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3657;k<=3662;k++) t('U'+k+' 单局道具速率',false,e.message); }
 
+
+  // ===== U3663~U3668: 生涯场均金币(v0.12.16) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerCoinPerGameWrap'),st:T.careerCoinPerGameStateNow(1000,5)});})()"));
+    t('U3663 生涯场均金币 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3664 正常 1000币/5局→200/局 100%', o.st.pct === 100 && o.st.txt === '金币 200/局' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerCoinPerGameStateNow(0,5).pct,b:T.careerCoinPerGameStateNow(2000,5).pct,c:T.careerCoinPerGameStateNow(500,5).pct,d:T.careerCoinPerGameStateNow(500,5).cls});})()"));
+    t('U3665 边界 0→0/2000→100/500→50/偏弱', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerCoinPerGameStateNow(-1,5).pct,b:T.careerCoinPerGameStateNow(NaN,5).pct,c:T.careerCoinPerGameStateNow(1000,0).pct,d:T.careerCoinPerGameStateNow(1000,-1).pct});})()"));
+    t('U3666 非法/空值/零局/负局 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.careerCoinPerGameStateNow('1000','5').pct);})()"));
+    t('U3667 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.careerCoinPerGameFillNow()==='string',d:typeof T.careerCoinPerGameDangerNow()==='boolean',c:T.careerCoinPerGameCoinNow(),g:T.careerCoinPerGameGameNow()});})()"));
+    t('U3668 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.c === 'number' && typeof o5.g === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3663;k<=3668;k++) t('U'+k+' 生涯场均金币',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
