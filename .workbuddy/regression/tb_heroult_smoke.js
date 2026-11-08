@@ -10195,6 +10195,22 @@ async function main() {
     t('U3536 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.m === 'number' && typeof o5.l === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3531;k<=3536;k++) t('U'+k+' 命效',false,e.message); }
 
+
+  // ===== U3537~U3542: 火力转化(v0.11.95) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('shotYieldWrap'),st:T.shotYieldStateNow(60,30)});})()"));
+    t('U3537 火力转化 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3538 正常 60射/30中→50% 警告', o.st.pct === 50 && o.st.txt === '命中 50%' && o.st.cls === 'g-warn', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shotYieldStateNow(0,30).pct,b:T.shotYieldStateNow(60,60).pct,c:T.shotYieldStateNow(60,42).pct,d:T.shotYieldStateNow(60,60).cls});})()"));
+    t('U3539 边界 0射→0/100%/70%/满好', o2.a === 0 && o2.b === 100 && o2.c === 70 && o2.d === 'g-good', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shotYieldStateNow(-1,30).pct,b:T.shotYieldStateNow(60,NaN).pct,c:T.shotYieldStateNow(60,-1).pct});})()"));
+    t('U3540 非法/空值/负命中 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.shotYieldStateNow('60','30').pct);})()"));
+    t('U3541 数字字符串转数', o4 === 50, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.shotYieldFillNow()==='string',d:typeof T.shotYieldDangerNow()==='boolean',m:T.shotYieldShotNow(),h:T.shotYieldHitNow()});})()"));
+    t('U3542 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.m === 'number' && typeof o5.h === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3537;k<=3542;k++) t('U'+k+' 火力转化',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
