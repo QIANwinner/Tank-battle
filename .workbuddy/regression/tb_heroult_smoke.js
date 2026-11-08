@@ -10851,6 +10851,22 @@ async function main() {
     t('U3782 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.c === 'number' && typeof o5.s === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3777;k<=3782;k++) t('U'+k+' 金币得分比',false,e.message); }
 
+
+  // ===== U3783~U3788: 生涯每命击杀(v0.12.36) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerKillPerLifeWrap'),st:T.careerKillPerLifeStateNow(60,6)});})()"));
+    t('U3783 生涯每命击杀 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3784 正常 60杀/6死→10/死 100%', o.st.pct === 100 && o.st.txt === '击杀 10/死' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerKillPerLifeStateNow(0,6).pct,b:T.careerKillPerLifeStateNow(120,6).pct,c:T.careerKillPerLifeStateNow(30,6).pct,d:T.careerKillPerLifeStateNow(30,6).cls});})()"));
+    t('U3785 边界 0→0/120→100/30→50/偏低', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerKillPerLifeStateNow(-1,6).pct,b:T.careerKillPerLifeStateNow(NaN,6).pct,c:T.careerKillPerLifeStateNow(60,0).pct,d:T.careerKillPerLifeStateNow(60,-1).pct});})()"));
+    t('U3786 非法/空值/零死/负死 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.careerKillPerLifeStateNow('60','6').pct);})()"));
+    t('U3787 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.careerKillPerLifeFillNow()==='string',d:typeof T.careerKillPerLifeDangerNow()==='boolean',k:T.careerKillPerLifeKillNow(),x:T.careerKillPerLifeDeathNow()});})()"));
+    t('U3788 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.k === 'number' && typeof o5.x === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3783;k<=3788;k++) t('U'+k+' 生涯每命击杀',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
