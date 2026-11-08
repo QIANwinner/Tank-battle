@@ -9331,6 +9331,22 @@ async function main() {
     t('U3212 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.k === 'number' && typeof o5.s === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3207;k<=3212;k++) t('U'+k+' 击杀节奏',false,e.message); }
 
+
+  // ===== U3213~U3218: 生存时钟(v0.11.41) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('surviveClockWrap'),st:T.surviveClockStateNow(150)});})()"));
+    t('U3213 生存时钟 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3214 正常 150秒→50%', o.st.pct === 50 && o.st.txt === '存活 02:30', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.surviveClockStateNow(0).pct,b:T.surviveClockStateNow(300).pct,c:T.surviveClockStateNow(600).pct,d:T.surviveClockStateNow(90).pct});})()"));
+    t('U3215 边界 0→0/300→100/600→100/90→30', o2.a === 0 && o2.b === 100 && o2.c === 100 && o2.d === 30, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.surviveClockStateNow(-5).pct,b:T.surviveClockStateNow(NaN).pct});})()"));
+    t('U3216 非法输入/空值 → 0', o3.a === 0 && o3.b === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.surviveClockStateNow('150').pct);})()"));
+    t('U3217 数字字符串转数', o4 === 50, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.surviveClockFillNow()==='string',d:typeof T.surviveClockDangerNow()==='boolean',s:T.surviveSecNow()});})()"));
+    t('U3218 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.s === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3213;k<=3218;k++) t('U'+k+' 生存时钟',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
