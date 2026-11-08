@@ -10339,6 +10339,22 @@ async function main() {
     t('U3590 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.c === 'number' && typeof o5.s === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3585;k<=3590;k++) t('U'+k+' 生涯金币速率',false,e.message); }
 
+
+  // ===== U3591~U3596: 本局BOSS节奏(v0.12.4) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runBossRateWrap'),st:T.runBossRateStateNow(1,4)});})()"));
+    t('U3591 本局BOSS节奏 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3592 正常 1BOSS/4波→0.25/波 50%', o.st.pct === 50 && o.st.txt === 'BOSS 0.3/波', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runBossRateStateNow(0,4).pct,b:T.runBossRateStateNow(2,4).pct,c:T.runBossRateStateNow(1,8).pct,d:T.runBossRateStateNow(1,4).cls});})()"));
+    t('U3593 边界 0→0/2波1个→100/8波1个→25/好', o2.a === 0 && o2.b === 100 && o2.c === 25 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runBossRateStateNow(-1,4).pct,b:T.runBossRateStateNow(NaN,4).pct,c:T.runBossRateStateNow(1,0).pct,d:T.runBossRateStateNow(1,-1).pct});})()"));
+    t('U3594 非法/空值/零波/负波 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runBossRateStateNow('2','4').pct);})()"));
+    t('U3595 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.runBossRateFillNow()==='string',d:typeof T.runBossRateDangerNow()==='boolean',c:T.runBossRateKillNow(),s:T.runBossRateWaveNow()});})()"));
+    t('U3596 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.c === 'number' && typeof o5.s === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3591;k<=3596;k++) t('U'+k+' 本局BOSS节奏',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
