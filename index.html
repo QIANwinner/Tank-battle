@@ -2437,6 +2437,11 @@
   #comboDensityWrap.g-good .pfill { background:#2ecc71; }
   #comboDensityWrap.g-warn .pfill { background:#f1c40f; }
   #comboDensityWrap.g-bad .pfill { background:#e74c3c; }
+  #foeBulletSpdWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #foeBulletSpdWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #foeBulletSpdWrap.g-good .pfill { background:#2ecc71; }
+  #foeBulletSpdWrap.g-warn .pfill { background:#f1c40f; }
+  #foeBulletSpdWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -2865,6 +2870,7 @@
     <div class="pill m-hide" id="bossFocusWrap"><span class="k">👹</span><i class="pbar"><i class="pfill" id="bossFocusFill"></i></i><span class="v" id="bossFocusVal">—</span></div>
     <div class="pill m-hide" id="upgBudgetWrap"><span class="k">💰</span><i class="pbar"><i class="pfill" id="upgBudgetFill"></i></i><span class="v" id="upgBudgetVal">—</span></div>
     <div class="pill m-hide" id="comboDensityWrap"><span class="k">🔥</span><i class="pbar"><i class="pfill" id="comboDensityFill"></i></i><span class="v" id="comboDensityVal">—</span></div>
+    <div class="pill m-hide" id="foeBulletSpdWrap"><span class="k">⚡</span><i class="pbar"><i class="pfill" id="foeBulletSpdFill"></i></i><span class="v" id="foeBulletSpdVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -3240,7 +3246,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V11.30</div>
+  <div id="mark">DESIGNED BY QIAN · V11.31</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -8470,6 +8476,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r66bfS = bossFocusText(bossHp, bossMaxHp); const r66bfF = $('bossFocusFill'); if (r66bfF) r66bfF.style.width = r66bfS.pct + '%'; const r66bfV = $('bossFocusVal'); if (r66bfV) r66bfV.textContent = r66bfS.txt; const r66bfW = $('bossFocusWrap'); if (r66bfW) { r66bfW.classList.remove('g-good','g-warn','g-bad'); if (r66bfS.cls) r66bfW.classList.add(r66bfS.cls); r66bfW.classList.toggle('danger', !!r66bfS.danger); }
     const r66ubS = upgBudgetText(coins, bonusSpent); const r66ubF = $('upgBudgetFill'); if (r66ubF) r66ubF.style.width = r66ubS.pct + '%'; const r66ubV = $('upgBudgetVal'); if (r66ubV) r66ubV.textContent = r66ubS.txt; const r66ubW = $('upgBudgetWrap'); if (r66ubW) { r66ubW.classList.remove('g-good','g-warn','g-bad'); if (r66ubS.cls) r66ubW.classList.add(r66ubS.cls); r66ubW.classList.toggle('danger', !!r66ubS.danger); }
     const r66cdS = comboDensityText(combo, stat.maxCombo); const r66cdF = $('comboDensityFill'); if (r66cdF) r66cdF.style.width = r66cdS.pct + '%'; const r66cdV = $('comboDensityVal'); if (r66cdV) r66cdV.textContent = r66cdS.txt; const r66cdW = $('comboDensityWrap'); if (r66cdW) { r66cdW.classList.remove('g-good','g-warn','g-bad'); if (r66cdS.cls) r66cdW.classList.add(r66cdS.cls); r66cdW.classList.toggle('danger', !!r66cdS.danger); }
+    const r67fsE = bullets.filter(function(b){ return b.owner && b.owner.isPlayer === false; }); const r67fsA = r67fsE.length ? r67fsE.reduce(function(a,b){ return a + (b.speed || 0); }, 0) / r67fsE.length : 0; const r67fsP = bullets.filter(function(b){ return b.owner && b.owner.isPlayer === true; }); const r67fsB = r67fsP.length ? r67fsP.reduce(function(a,b){ return a + (b.speed || 0); }, 0) / r67fsP.length : 6; const r67fsS = foeBulletSpdText(r67fsA, r67fsB); const r67fsF = $('foeBulletSpdFill'); if (r67fsF) r67fsF.style.width = r67fsS.pct + '%'; const r67fsV = $('foeBulletSpdVal'); if (r67fsV) r67fsV.textContent = r67fsS.txt; const r67fsW = $('foeBulletSpdWrap'); if (r67fsW) { r67fsW.classList.remove('g-good','g-warn','g-bad'); if (r67fsS.cls) r67fsW.classList.add(r67fsS.cls); r67fsW.classList.toggle('danger', !!r67fsS.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -11828,6 +11835,16 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (pct <= 25 && c > 0) { cls = 'g-bad'; danger = true; } else if (pct <= 50) { cls = 'g-warn'; }
     return { pct: pct, txt: '连击 ' + c + '/' + m, cls: cls, danger: danger };
   }
+  // —— v0.11.31 敌弹速度比：敌方子弹相对我方子弹的速度倍率（躲闪压力）——
+  function foeBulletSpdText(avgEnemySpd, avgPlayerSpd) {
+    const e = Number(avgEnemySpd), p = Number(avgPlayerSpd);
+    if (!isFinite(e) || e < 0 || !isFinite(p) || p <= 0) return { pct: 0, txt: '敌弹 —', cls: 'g-good', danger: false };
+    const ratio = e / p;
+    const pct = Math.max(0, Math.min(100, Math.round(ratio * 50)));
+    let cls = 'g-good', danger = false;
+    if (ratio > 1.6) { cls = 'g-bad'; danger = true; } else if (ratio > 1.2) { cls = 'g-warn'; }
+    return { pct: pct, txt: '敌弹 ' + ratio.toFixed(2) + 'x', cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -13669,7 +13686,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V11.30', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V11.31', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -15076,6 +15093,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       bossFocusStateNow: (h, m) => bossFocusText(h, m), bossFocusFillNow: () => { const f = $('bossFocusFill'); return f ? f.style.width : ''; }, bossFocusDangerNow: () => { const w = $('bossFocusWrap'); return !!(w && w.classList.contains('danger')); },
       upgBudgetStateNow: (c, s) => upgBudgetText(c, s), upgBudgetFillNow: () => { const f = $('upgBudgetFill'); return f ? f.style.width : ''; }, upgBudgetDangerNow: () => { const w = $('upgBudgetWrap'); return !!(w && w.classList.contains('danger')); },
       comboDensityStateNow: (c, m) => comboDensityText(c, m), comboDensityFillNow: () => { const f = $('comboDensityFill'); return f ? f.style.width : ''; }, comboDensityDangerNow: () => { const w = $('comboDensityWrap'); return !!(w && w.classList.contains('danger')); },
+      foeBulletSpdStateNow: (e, p) => foeBulletSpdText(e, p), foeBulletAvgNow: () => { const arr = bullets.filter(function(b){ return b.owner && b.owner.isPlayer === false; }); return arr.length ? arr.reduce(function(a,b){ return a + (b.speed || 0); }, 0) / arr.length : 0; }, ownBulletAvgNow: () => { const arr = bullets.filter(function(b){ return b.owner && b.owner.isPlayer === true; }); return arr.length ? arr.reduce(function(a,b){ return a + (b.speed || 0); }, 0) / arr.length : 6; }, foeBulletSpdFillNow: () => { const f = $('foeBulletSpdFill'); return f ? f.style.width : ''; }, foeBulletSpdDangerNow: () => { const w = $('foeBulletSpdWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

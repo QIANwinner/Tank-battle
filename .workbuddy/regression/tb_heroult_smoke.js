@@ -9171,6 +9171,22 @@ async function main() {
     t('U3152 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=3147;k<=3152;k++) t('U'+k+' 连击密度',false,e.message); }
 
+
+  // ===== U3153~U3158: 敌弹速度比(v0.11.31) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('foeBulletSpdWrap'),st:T.foeBulletSpdStateNow(9,6)});})()"));
+    t('U3153 敌弹速度比 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3154 正常 9/6→1.50x 75%', o.st.pct === 75 && o.st.txt === '敌弹 1.50x', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.foeBulletSpdStateNow(0,6).pct,b:T.foeBulletSpdStateNow(6,6).pct,c:T.foeBulletSpdStateNow(12,6).pct,d:T.foeBulletSpdStateNow(3,6).pct});})()"));
+    t('U3155 边界 0→0/6→50/12→100/3→25', o2.a === 0 && o2.b === 50 && o2.c === 100 && o2.d === 25, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.foeBulletSpdStateNow(-5,6).pct,b:T.foeBulletSpdStateNow(NaN,6).pct,c:T.foeBulletSpdStateNow(9,0).pct,d:T.foeBulletSpdStateNow(9,-3).pct});})()"));
+    t('U3156 非法输入/空值/零我方/负我方 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.foeBulletSpdStateNow('9','6').pct);})()"));
+    t('U3157 数字字符串转数', o4 === 75, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.foeBulletSpdFillNow()==='string',d:typeof T.foeBulletSpdDangerNow()==='boolean',e:T.foeBulletAvgNow(),o:T.ownBulletAvgNow()});})()"));
+    t('U3158 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.e === 'number' && typeof o5.o === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3153;k<=3158;k++) t('U'+k+' 敌弹速度比',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
