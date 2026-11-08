@@ -8739,6 +8739,22 @@ async function main() {
     t('U2990 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=2985;k<=2990;k++) t('U'+k+' 弹幕压力',false,e.message); }
 
+
+  // ===== U2991~U2996: 波次推进(v0.11.04) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('waveAdvanceBarWrap'),st:T.waveAdvanceStateNow(6,10)});})()"));
+    t('U2991 波次推进 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U2992 正常 6/10=60%', o.st.pct === 60 && o.st.txt === '波次 6/10', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveAdvanceStateNow(0,10).pct,b:T.waveAdvanceStateNow(5,10).pct,c:T.waveAdvanceStateNow(10,10).pct});})()"));
+    t('U2993 边界 0→0/5→50/10→100', o2.a === 0 && o2.b === 50 && o2.c === 100, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveAdvanceStateNow(-5,10).pct,b:T.waveAdvanceStateNow(NaN,10).pct});})()"));
+    t('U2994 非法输入/空值 → 0', o3.a === 0 && o3.b === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.waveAdvanceStateNow('6','10').pct);})()"));
+    t('U2995 数字字符串转数', o4 === 60, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.waveAdvanceFillNow()==='string',d:typeof T.waveAdvanceDangerNow()==='boolean'});})()"));
+    t('U2996 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=2991;k<=2996;k++) t('U'+k+' 波次推进',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
