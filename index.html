@@ -2372,6 +2372,11 @@
   #quadThreatWrap.g-good .pfill { background:#2ecc71; }
   #quadThreatWrap.g-warn .pfill { background:#f1c40f; }
   #quadThreatWrap.g-bad .pfill { background:#e74c3c; }
+  #safeWinWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #safeWinWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #safeWinWrap.g-good .pfill { background:#2ecc71; }
+  #safeWinWrap.g-warn .pfill { background:#f1c40f; }
+  #safeWinWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -2787,6 +2792,7 @@
     <div class="pill m-hide" id="reviveAffordBarWrap"><span class="k">💀</span><i class="pbar"><i class="pfill" id="reviveAffordBarFill"></i></i><span class="v" id="reviveAffordBarVal">—</span></div>
     <div class="pill m-hide" id="killScoreBarWrap"><span class="k">💰</span><i class="pbar"><i class="pfill" id="killScoreBarFill"></i></i><span class="v" id="killScoreBarVal">—</span></div>
     <div class="pill m-hide" id="quadThreatWrap"><span class="k">🧭</span><i class="pbar"><i class="pfill" id="quadThreatFill"></i></i><span class="v" id="quadThreatVal">—</span></div>
+    <div class="pill m-hide" id="safeWinWrap"><span class="k">🛟</span><i class="pbar"><i class="pfill" id="safeWinFill"></i></i><span class="v" id="safeWinVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -3162,7 +3168,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V11.17</div>
+  <div id="mark">DESIGNED BY QIAN · V11.18</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -8379,6 +8385,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r64raS = reviveAffordFillBar(coins, reviveCost()); const r64raF = $('reviveAffordBarFill'); if (r64raF) r64raF.style.width = r64raS.pct + '%'; const r64raV = $('reviveAffordBarVal'); if (r64raV) r64raV.textContent = r64raS.txt; const r64raW = $('reviveAffordBarWrap'); if (r64raW) { r64raW.classList.remove('g-good','g-warn','g-bad'); if (r64raS.cls) r64raW.classList.add(r64raS.cls); r64raW.classList.toggle('danger', !!r64raS.danger); }
     const r64ksS = killScoreFillBar(score, stat.kills); const r64ksF = $('killScoreBarFill'); if (r64ksF) r64ksF.style.width = r64ksS.pct + '%'; const r64ksV = $('killScoreBarVal'); if (r64ksV) r64ksV.textContent = r64ksS.txt; const r64ksW = $('killScoreBarWrap'); if (r64ksW) { r64ksW.classList.remove('g-good','g-warn','g-bad'); if (r64ksS.cls) r64ksW.classList.add(r64ksS.cls); r64ksW.classList.toggle('danger', !!r64ksS.danger); }
     const r65qtS = quadrantThreatText(player ? player.x : 0, player ? player.y : 0, enemies); const r65qtF = $('quadThreatFill'); if (r65qtF) r65qtF.style.width = r65qtS.pct + '%'; const r65qtV = $('quadThreatVal'); if (r65qtV) r65qtV.textContent = r65qtS.txt; const r65qtW = $('quadThreatWrap'); if (r65qtW) { r65qtW.classList.remove('g-good','g-warn','g-bad'); if (r65qtS.cls) r65qtW.classList.add(r65qtS.cls); r65qtW.classList.toggle('danger', !!r65qtS.danger); }
+    const r65swN = nearestEnemyTo(player ? player.x : -1, player ? player.y : -1); const r65swD = r65swN ? Math.hypot(r65swN.x - (player ? player.x : 0), r65swN.y - (player ? player.y : 0)) : 0; const r65swS = safeWindowText(r65swD, 8 * TILE); const r65swF = $('safeWinFill'); if (r65swF) r65swF.style.width = r65swS.pct + '%'; const r65swV = $('safeWinVal'); if (r65swV) r65swV.textContent = r65swS.txt; const r65swW = $('safeWinWrap'); if (r65swW) { r65swW.classList.remove('g-good','g-warn','g-bad'); if (r65swS.cls) r65swW.classList.add(r65swS.cls); r65swW.classList.toggle('danger', !!r65swS.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -11606,6 +11613,15 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (pct >= 60) { cls = 'g-bad'; danger = true; } else if (pct >= 35) { cls = 'g-warn'; }
     return { pct: pct, txt: '威胁 ' + dirs[mi] + ' ' + q[mi], cls: cls, danger: danger };
   }
+  // —— v0.11.18 安全窗口：最近敌人距离换算安全度 ——
+  function safeWindowText(dist, safeThresh) {
+    const d = Number(dist), s = Number(safeThresh);
+    if (!isFinite(d) || d < 0 || !isFinite(s) || s <= 0) return { pct: 0, txt: '安全 —', cls: 'g-bad', danger: true };
+    const pct = Math.max(0, Math.min(100, Math.floor(d / s * 100)));
+    let cls = 'g-good', danger = false;
+    if (pct < 25) { cls = 'g-bad'; danger = true; } else if (pct < 55) { cls = 'g-warn'; }
+    return { pct: pct, txt: '安全 ' + Math.floor(d) + 'px', cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -13447,7 +13463,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V11.17', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V11.18', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -14841,6 +14857,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       reviveAffordStateNow: (c, k) => reviveAffordFillBar(c, k), reviveAffordFillNow: () => { const f = $('reviveAffordBarFill'); return f ? f.style.width : ''; }, reviveAffordDangerNow: () => { const w = $('reviveAffordBarWrap'); return !!(w && w.classList.contains('danger')); },
       killScoreStateNow: (s, k) => killScoreFillBar(s, k), killScoreFillNow: () => { const f = $('killScoreBarFill'); return f ? f.style.width : ''; }, killScoreDangerNow: () => { const w = $('killScoreBarWrap'); return !!(w && w.classList.contains('danger')); },
       quadThreatStateNow: (px, py, l) => quadrantThreatText(px, py, l), quadThreatFillNow: () => { const f = $('quadThreatFill'); return f ? f.style.width : ''; }, quadThreatDangerNow: () => { const w = $('quadThreatWrap'); return !!(w && w.classList.contains('danger')); },
+      safeWinStateNow: (d, s) => safeWindowText(d, s), safeWinFillNow: () => { const f = $('safeWinFill'); return f ? f.style.width : ''; }, safeWinDangerNow: () => { const w = $('safeWinWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

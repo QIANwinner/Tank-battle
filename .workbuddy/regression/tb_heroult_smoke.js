@@ -8963,6 +8963,22 @@ async function main() {
     t('U3074 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=3069;k<=3074;k++) t('U'+k+' 象限威胁',false,e.message); }
 
+
+  // ===== U3075~U3080: 安全窗口(v0.11.18) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('safeWinWrap'),st:T.safeWinStateNow(400,800)});})()"));
+    t('U3075 安全窗口 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3076 正常 400/800=50%', o.st.pct === 50 && o.st.txt === '安全 400px', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.safeWinStateNow(0,800).pct,b:T.safeWinStateNow(400,800).pct,c:T.safeWinStateNow(800,800).pct,d:T.safeWinStateNow(1600,800).pct});})()"));
+    t('U3077 边界 0→0/400→50/800→100/1600→100', o2.a === 0 && o2.b === 50 && o2.c === 100 && o2.d === 100, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.safeWinStateNow(-5,800).pct,b:T.safeWinStateNow(NaN,800).pct,c:T.safeWinStateNow(400,0).pct});})()"));
+    t('U3078 非法输入/空值/零阈值 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.safeWinStateNow('400','800').pct);})()"));
+    t('U3079 数字字符串转数', o4 === 50, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.safeWinFillNow()==='string',d:typeof T.safeWinDangerNow()==='boolean'});})()"));
+    t('U3080 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=3075;k<=3080;k++) t('U'+k+' 安全窗口',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
