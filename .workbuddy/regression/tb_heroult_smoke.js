@@ -8995,6 +8995,22 @@ async function main() {
     t('U3086 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=3081;k<=3086;k++) t('U'+k+' 掉落期望',false,e.message); }
 
+
+  // ===== U3087~U3092: 强化性价比(v0.11.20) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('upgValWrap'),st:T.upgValStateNow(50,100)});})()"));
+    t('U3087 强化性价比 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3088 正常 50/100=50%', o.st.pct === 50 && o.st.txt === '强化 50/100', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.upgValStateNow(0,100).pct,b:T.upgValStateNow(50,100).pct,c:T.upgValStateNow(100,100).pct,d:T.upgValStateNow(200,100).pct});})()"));
+    t('U3089 边界 0→0/50→50/100→100/200→100', o2.a === 0 && o2.b === 50 && o2.c === 100 && o2.d === 100, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.upgValStateNow(-5,100).pct,b:T.upgValStateNow(NaN,100).pct,c:T.upgValStateNow(50,0).pct});})()"));
+    t('U3090 非法输入/空值/零价格 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.upgValStateNow('50','100').pct);})()"));
+    t('U3091 数字字符串转数', o4 === 50, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.upgValFillNow()==='string',d:typeof T.upgValDangerNow()==='boolean'});})()"));
+    t('U3092 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=3087;k<=3092;k++) t('U'+k+' 强化性价比',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
