@@ -9043,6 +9043,22 @@ async function main() {
     t('U3104 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=3099;k<=3104;k++) t('U'+k+' 生存综合',false,e.message); }
 
+
+  // ===== U3105~U3110: 空枪率(v0.11.23) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('fireMissWrap'),st:T.fireMissStateNow(100,40)});})()"));
+    t('U3105 空枪率 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3106 正常 100射40中→空枪60%', o.st.pct === 60 && o.st.txt === '空枪 60%', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.fireMissStateNow(50,50).pct,b:T.fireMissStateNow(10,0).pct,c:T.fireMissStateNow(100,80).pct});})()"));
+    t('U3107 边界 全中0/全空100/80中20', o2.a === 0 && o2.b === 100 && o2.c === 20, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.fireMissStateNow(-5,40).pct,b:T.fireMissStateNow(NaN,40).pct,c:T.fireMissStateNow(100,-1).pct});})()"));
+    t('U3108 非法输入/空值/负命中 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.fireMissStateNow('100','40').pct);})()"));
+    t('U3109 数字字符串转数', o4 === 60, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.fireMissFillNow()==='string',d:typeof T.fireMissDangerNow()==='boolean'});})()"));
+    t('U3110 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=3105;k<=3110;k++) t('U'+k+' 空枪率',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
