@@ -9667,6 +9667,22 @@ async function main() {
     t('U3338 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.w === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3333;k<=3338;k++) t('U'+k+' 每波受击',false,e.message); }
 
+
+  // ===== U3339~U3344: 连击峰值达成率(v0.11.62) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('comboPeakRateWrap'),st:T.comboPeakRateStateNow(30,50)});})()"));
+    t('U3339 连击峰值达成率 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3340 正常 30/50→60%', o.st.pct === 60 && o.st.txt === '峰值 60%', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboPeakRateStateNow(0,50).pct,b:T.comboPeakRateStateNow(50,50).pct,c:T.comboPeakRateStateNow(60,50).pct,d:T.comboPeakRateStateNow(25,50).pct});})()"));
+    t('U3341 边界 0→0/50→100/60→100/25→50', o2.a === 0 && o2.b === 100 && o2.c === 100 && o2.d === 50, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboPeakRateStateNow(-1,50).pct,b:T.comboPeakRateStateNow(NaN,50).pct,c:T.comboPeakRateStateNow(30,0).pct,d:T.comboPeakRateStateNow(30,-2).pct});})()"));
+    t('U3342 非法输入/空值/零峰/负峰 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.comboPeakRateStateNow('30','50').pct);})()"));
+    t('U3343 数字字符串转数', o4 === 60, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.comboPeakRateFillNow()==='string',d:typeof T.comboPeakRateDangerNow()==='boolean',v:T.comboPeakRateCurNow(),p:T.comboPeakRatePeakNow()});})()"));
+    t('U3344 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.p === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3339;k<=3344;k++) t('U'+k+' 连击峰值达成率',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
