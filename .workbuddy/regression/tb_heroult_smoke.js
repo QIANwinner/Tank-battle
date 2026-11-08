@@ -8835,6 +8835,22 @@ async function main() {
     t('U3026 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
   } catch(e){ for(let k=3021;k<=3026;k++) t('U'+k+' 清剿进度',false,e.message); }
 
+
+  // ===== U3027~U3032: 得分速率(v0.11.10) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('scoreRateBarWrap'),st:T.scoreRateStateNow(300,60)});})()"));
+    t('U3027 得分速率 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3028 正常 300分/60秒=300/分→50%', o.st.pct === 50 && o.st.txt === '得分 300/分', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scoreRateStateNow(0,60).pct,b:T.scoreRateStateNow(150,60).pct,c:T.scoreRateStateNow(600,60).pct,d:T.scoreRateStateNow(1200,60).pct});})()"));
+    t('U3029 边界 0→0/150→25/600→100/1200→100', o2.a === 0 && o2.b === 25 && o2.c === 100 && o2.d === 100, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scoreRateStateNow(-5,60).pct,b:T.scoreRateStateNow(NaN,60).pct,c:T.scoreRateStateNow(300,0).pct});})()"));
+    t('U3030 非法输入/空值/零秒 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.scoreRateStateNow('300','60').pct);})()"));
+    t('U3031 数字字符串转数', o4 === 50, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.scoreRateFillNow()==='string',d:typeof T.scoreRateDangerNow()==='boolean'});})()"));
+    t('U3032 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true, JSON.stringify(o5));
+  } catch(e){ for(let k=3027;k<=3032;k++) t('U'+k+' 得分速率',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
