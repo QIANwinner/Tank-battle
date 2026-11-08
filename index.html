@@ -2662,6 +2662,11 @@
   #scorePerBossWrap.g-good .pfill { background:#2ecc71; }
   #scorePerBossWrap.g-warn .pfill { background:#f1c40f; }
   #scorePerBossWrap.g-bad .pfill { background:#e74c3c; }
+  #cleanWaveRateWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #cleanWaveRateWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #cleanWaveRateWrap.g-good .pfill { background:#2ecc71; }
+  #cleanWaveRateWrap.g-warn .pfill { background:#f1c40f; }
+  #cleanWaveRateWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -3135,6 +3140,7 @@
     <div class="pill m-hide" id="scorePerHurtWrap"><span class="k">💔</span><i class="pbar"><i class="pfill" id="scorePerHurtFill"></i></i><span class="v" id="scorePerHurtVal">—</span></div>
     <div class="pill m-hide" id="scorePerReviveWrap"><span class="k">💫</span><i class="pbar"><i class="pfill" id="scorePerReviveFill"></i></i><span class="v" id="scorePerReviveVal">—</span></div>
     <div class="pill m-hide" id="scorePerBossWrap"><span class="k">👹</span><i class="pbar"><i class="pfill" id="scorePerBossFill"></i></i><span class="v" id="scorePerBossVal">—</span></div>
+    <div class="pill m-hide" id="cleanWaveRateWrap"><span class="k">🛡️</span><i class="pbar"><i class="pfill" id="cleanWaveRateFill"></i></i><span class="v" id="cleanWaveRateVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -3510,7 +3516,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V11.75</div>
+  <div id="mark">DESIGNED BY QIAN · V11.76</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -8785,6 +8791,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r72sphS = scorePerHurtText(score, hurtCount); const r72sphF = $('scorePerHurtFill'); if (r72sphF) r72sphF.style.width = r72sphS.pct + '%'; const r72sphV = $('scorePerHurtVal'); if (r72sphV) r72sphV.textContent = r72sphS.txt; const r72sphW = $('scorePerHurtWrap'); if (r72sphW) { r72sphW.classList.remove('g-good','g-warn','g-bad'); if (r72sphS.cls) r72sphW.classList.add(r72sphS.cls); r72sphW.classList.toggle('danger', !!r72sphS.danger); }
     const r72sprS = scorePerReviveText(score, reviveCount); const r72sprF = $('scorePerReviveFill'); if (r72sprF) r72sprF.style.width = r72sprS.pct + '%'; const r72sprV = $('scorePerReviveVal'); if (r72sprV) r72sprV.textContent = r72sprS.txt; const r72sprW = $('scorePerReviveWrap'); if (r72sprW) { r72sprW.classList.remove('g-good','g-warn','g-bad'); if (r72sprS.cls) r72sprW.classList.add(r72sprS.cls); r72sprW.classList.toggle('danger', !!r72sprS.danger); }
     const r72spbS = scorePerBossText(score, stat.bossKills); const r72spbF = $('scorePerBossFill'); if (r72spbF) r72spbF.style.width = r72spbS.pct + '%'; const r72spbV = $('scorePerBossVal'); if (r72spbV) r72spbV.textContent = r72spbS.txt; const r72spbW = $('scorePerBossWrap'); if (r72spbW) { r72spbW.classList.remove('g-good','g-warn','g-bad'); if (r72spbS.cls) r72spbW.classList.add(r72spbS.cls); r72spbW.classList.toggle('danger', !!r72spbS.danger); }
+    const r72cwrS = cleanWaveRateText(wave, hurtCount); const r72cwrF = $('cleanWaveRateFill'); if (r72cwrF) r72cwrF.style.width = r72cwrS.pct + '%'; const r72cwrV = $('cleanWaveRateVal'); if (r72cwrV) r72cwrV.textContent = r72cwrS.txt; const r72cwrW = $('cleanWaveRateWrap'); if (r72cwrW) { r72cwrW.classList.remove('g-good','g-warn','g-bad'); if (r72cwrS.cls) r72cwrW.classList.add(r72cwrS.cls); r72cwrW.classList.toggle('danger', !!r72cwrS.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -12616,6 +12623,17 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (per < 1200) { cls = 'g-bad'; danger = true; } else if (per < 2100) { cls = 'g-warn'; }
     return { pct: pct, txt: '每BOSS ' + Math.round(per), cls: cls, danger: danger };
   }
+  // —— v0.11.76 无伤节奏：本局未受击波次占比（生存干净度）——
+  function cleanWaveRateText(wave, hurt) {
+    const nw = Number(wave), nh = Number(hurt);
+    if (!isFinite(nw) || nw <= 0 || !isFinite(nh) || nh < 0) return { pct: 0, txt: '无伤率 —', cls: 'g-good', danger: false };
+    const w = Math.max(1, nw), h = Math.max(0, nh);
+    const per = 1 - h / w;
+    const pct = Math.max(0, Math.min(100, Math.round(per * 100)));
+    let cls = 'g-good', danger = false;
+    if (per < 0.5) { cls = 'g-bad'; danger = true; } else if (per < 0.7) { cls = 'g-warn'; }
+    return { pct: pct, txt: '无伤率 ' + Math.round(per * 100) + '%', cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -14457,7 +14475,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V11.75', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V11.76', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -15909,6 +15927,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       scorePerHurtStateNow: (s, h) => scorePerHurtText(s, h), scorePerHurtScoreNow: () => score, scorePerHurtHurtNow: () => hurtCount, scorePerHurtFillNow: () => { const f = $('scorePerHurtFill'); return f ? f.style.width : ''; }, scorePerHurtDangerNow: () => { const w = $('scorePerHurtWrap'); return !!(w && w.classList.contains('danger')); },
       scorePerReviveStateNow: (s, r) => scorePerReviveText(s, r), scorePerReviveScoreNow: () => score, scorePerReviveReviveNow: () => reviveCount, scorePerReviveFillNow: () => { const f = $('scorePerReviveFill'); return f ? f.style.width : ''; }, scorePerReviveDangerNow: () => { const w = $('scorePerReviveWrap'); return !!(w && w.classList.contains('danger')); },
       scorePerBossStateNow: (s, b) => scorePerBossText(s, b), scorePerBossScoreNow: () => score, scorePerBossBossNow: () => stat.bossKills, scorePerBossFillNow: () => { const f = $('scorePerBossFill'); return f ? f.style.width : ''; }, scorePerBossDangerNow: () => { const w = $('scorePerBossWrap'); return !!(w && w.classList.contains('danger')); },
+      cleanWaveRateStateNow: (w, h) => cleanWaveRateText(w, h), cleanWaveRateWaveNow: () => wave, cleanWaveRateHurtNow: () => hurtCount, cleanWaveRateFillNow: () => { const f = $('cleanWaveRateFill'); return f ? f.style.width : ''; }, cleanWaveRateDangerNow: () => { const w = $('cleanWaveRateWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
