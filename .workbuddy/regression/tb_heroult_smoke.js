@@ -10595,6 +10595,22 @@ async function main() {
     t('U3686 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.s === 'number' && typeof o5.g === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3681;k<=3686;k++) t('U'+k+' 生涯场均星数',false,e.message); }
 
+
+  // ===== U3687~U3692: 单局弹药转化(v0.12.20) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runAmmoEffWrap'),st:T.runAmmoEffStateNow(200,20)});})()"));
+    t('U3687 单局弹药转化 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3688 正常 200发/20杀→10发/杀 100%', o.st.pct === 100 && o.st.txt === '弹药 10发/杀' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runAmmoEffStateNow(0,20).pct,b:T.runAmmoEffStateNow(500,20).pct,c:T.runAmmoEffStateNow(350,20).pct,d:T.runAmmoEffStateNow(350,20).cls});})()"));
+    t('U3689 边界 0→100/500→0/350→50/偏费', o2.a === 100 && o2.b === 0 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runAmmoEffStateNow(-1,20).pct,b:T.runAmmoEffStateNow(NaN,20).pct,c:T.runAmmoEffStateNow(200,0).pct,d:T.runAmmoEffStateNow(200,-1).pct});})()"));
+    t('U3690 非法/空值/零杀/负杀 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runAmmoEffStateNow('200','20').pct);})()"));
+    t('U3691 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.runAmmoEffFillNow()==='string',d:typeof T.runAmmoEffDangerNow()==='boolean',s:T.runAmmoEffShotNow(),k:T.runAmmoEffKillNow()});})()"));
+    t('U3692 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.s === 'number' && typeof o5.k === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3687;k<=3692;k++) t('U'+k+' 单局弹药转化',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
