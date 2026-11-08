@@ -10995,6 +10995,22 @@ async function main() {
     t('U3836 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.c === 'number' && typeof o5.p === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3831;k<=3836;k++) t('U'+k+' 本局每道具金币',false,e.message); }
 
+
+  // ===== U3837~U3842: 生涯每局命中数(v0.12.45) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('careerHitPerGameWrap'),st:T.careerHitPerGameStateNow(600,6)});})()"));
+    t('U3837 生涯每局命中数 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3838 正常 600命中/6局→100/局 100%', o.st.pct === 100 && o.st.txt === '命中 100/局' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerHitPerGameStateNow(0,6).pct,b:T.careerHitPerGameStateNow(1200,6).pct,c:T.careerHitPerGameStateNow(300,6).pct,d:T.careerHitPerGameStateNow(300,6).cls});})()"));
+    t('U3839 边界 0→0/1200→100/300→50/偏低', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.careerHitPerGameStateNow(-1,6).pct,b:T.careerHitPerGameStateNow(NaN,6).pct,c:T.careerHitPerGameStateNow(600,0).pct,d:T.careerHitPerGameStateNow(600,-1).pct});})()"));
+    t('U3840 非法/空值/零局/负局 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.careerHitPerGameStateNow('600','6').pct);})()"));
+    t('U3841 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.careerHitPerGameFillNow()==='string',d:typeof T.careerHitPerGameDangerNow()==='boolean',h:T.careerHitPerGameHitNow(),g:T.careerHitPerGameGameNow()});})()"));
+    t('U3842 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.h === 'number' && typeof o5.g === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3837;k<=3842;k++) t('U'+k+' 生涯每局命中数',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
