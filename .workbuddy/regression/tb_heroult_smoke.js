@@ -9507,6 +9507,22 @@ async function main() {
     t('U3278 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.k === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=3273;k<=3278;k++) t('U'+k+' 每杀金币',false,e.message); }
 
+
+  // ===== U3279~U3284: 敌弹占比(v0.11.52) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('foeBulletShareWrap'),st:T.foeBulletShareStateNow(3,5)});})()"));
+    t('U3279 敌弹占比 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U3280 正常 3/5→60%', o.st.pct === 60 && o.st.txt === '敌弹 3/5', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.foeBulletShareStateNow(0,0).pct,b:T.foeBulletShareStateNow(5,5).pct,c:T.foeBulletShareStateNow(0,5).pct,d:T.foeBulletShareStateNow(2,5).pct,e:T.foeBulletShareStateNow(5,5).danger});})()"));
+    t('U3281 边界 0/0→0/5/5→100/0/5→0/2/5→40/满额danger', o2.a === 0 && o2.b === 100 && o2.c === 0 && o2.d === 40 && o2.e === true, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.foeBulletShareStateNow(-1,5).pct,b:T.foeBulletShareStateNow(NaN,5).pct,c:T.foeBulletShareStateNow(3,-1).pct,d:T.foeBulletShareStateNow(3,NaN).pct});})()"));
+    t('U3282 非法输入/空值/负总/空总 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.foeBulletShareStateNow('3','5').pct);})()"));
+    t('U3283 数字字符串转数', o4 === 60, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.foeBulletShareFillNow()==='string',d:typeof T.foeBulletShareDangerNow()==='boolean',v:T.foeBulletShareFoeNow(),t:T.foeBulletShareTotNow()});})()"));
+    t('U3284 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.v === 'number' && typeof o5.t === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=3279;k<=3284;k++) t('U'+k+' 敌弹占比',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
