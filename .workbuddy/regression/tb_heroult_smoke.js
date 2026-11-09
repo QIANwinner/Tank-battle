@@ -11555,6 +11555,22 @@ async function main() {
     t('U4046 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=4041;k<=4046;k++) t('U'+k+' 本局每死击杀',false,e.message); }
 
+
+  // ===== U4047~U4052: 本局每金币连击(v0.12.80) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runComboPerCoinWrap'),st:T.runComboPerCoinStateNow(6,6)});})()"));
+    t('U4047 本局每金币连击 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U4048 正常 6连击/6金币→1/金币 100%', o.st.pct === 100 && o.st.txt === '连击 1/金币' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runComboPerCoinStateNow(0,6).pct,b:T.runComboPerCoinStateNow(6,6).pct,c:T.runComboPerCoinStateNow(3,6).pct,d:T.runComboPerCoinStateNow(3,6).cls});})()"));
+    t('U4049 边界 0→0/6→100/3→50/偏低', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runComboPerCoinStateNow(-1,6).pct,b:T.runComboPerCoinStateNow(NaN,6).pct,c:T.runComboPerCoinStateNow(6,0).pct,d:T.runComboPerCoinStateNow(6,-1).pct});})()"));
+    t('U4050 非法/空值/零金币/负金币 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runComboPerCoinStateNow('6','6').pct);})()"));
+    t('U4051 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.runComboPerCoinFillNow()==='string',d:typeof T.runComboPerCoinDangerNow()==='boolean',a:T.runComboPerCoinANow(),b:T.runComboPerCoinBNow()});})()"));
+    t('U4052 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=4047;k<=4052;k++) t('U'+k+' 本局每金币连击',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
