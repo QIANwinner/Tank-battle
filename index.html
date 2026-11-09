@@ -3712,6 +3712,11 @@
   #mileCoinWrap.g-good .pfill { background:#2ecc71; }
   #mileCoinWrap.g-warn .pfill { background:#f1c40f; }
   #mileCoinWrap.g-bad .pfill { background:#e74c3c; }
+  #mileKillWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #mileKillWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #mileKillWrap.g-good .pfill { background:#2ecc71; }
+  #mileKillWrap.g-warn .pfill { background:#f1c40f; }
+  #mileKillWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -4395,6 +4400,7 @@
     <div class="pill m-hide" id="careerPeakPerCoinWrap"><span class="k">🏆</span><i class="pbar"><i class="pfill" id="careerPeakPerCoinFill"></i></i><span class="v" id="careerPeakPerCoinVal">—</span></div>
     <div class="pill m-hide" id="careerSecPerBossWrap"><span class="k">⏱️</span><i class="pbar"><i class="pfill" id="careerSecPerBossFill"></i></i><span class="v" id="careerSecPerBossVal">—</span></div>
     <div class="pill m-hide" id="mileCoinWrap"><span class="k">🪙</span><i class="pbar"><i class="pfill" id="mileCoinFill"></i></i><span class="v" id="mileCoinVal">—</span></div>
+    <div class="pill m-hide" id="mileKillWrap"><span class="k">💀</span><i class="pbar"><i class="pfill" id="mileKillFill"></i></i><span class="v" id="mileKillVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -4770,7 +4776,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V13.85</div>
+  <div id="mark">DESIGNED BY QIAN · V13.86</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -10255,6 +10261,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_careerPeakPerCoinText = careerPeakPerCoinText(career.bestScore / Math.max(1, career.totalCoins), 0.5); const f_careerPeakPerCoinText = $('careerPeakPerCoinFill'); if (f_careerPeakPerCoinText) f_careerPeakPerCoinText.style.width = r_careerPeakPerCoinText.pct + '%'; const v_careerPeakPerCoinText = $('careerPeakPerCoinVal'); if (v_careerPeakPerCoinText) v_careerPeakPerCoinText.textContent = r_careerPeakPerCoinText.txt; const w_careerPeakPerCoinText = $('careerPeakPerCoinWrap'); if (w_careerPeakPerCoinText) { w_careerPeakPerCoinText.classList.remove('g-good','g-warn','g-bad'); if (r_careerPeakPerCoinText.cls) w_careerPeakPerCoinText.classList.add(r_careerPeakPerCoinText.cls); w_careerPeakPerCoinText.classList.toggle('danger', !!r_careerPeakPerCoinText.danger); }
     const r_careerSecPerBossText = careerSecPerBossText(career.playSec / Math.max(1, career.bossKills), 300); const f_careerSecPerBossText = $('careerSecPerBossFill'); if (f_careerSecPerBossText) f_careerSecPerBossText.style.width = r_careerSecPerBossText.pct + '%'; const v_careerSecPerBossText = $('careerSecPerBossVal'); if (v_careerSecPerBossText) v_careerSecPerBossText.textContent = r_careerSecPerBossText.txt; const w_careerSecPerBossText = $('careerSecPerBossWrap'); if (w_careerSecPerBossText) { w_careerSecPerBossText.classList.remove('g-good','g-warn','g-bad'); if (r_careerSecPerBossText.cls) w_careerSecPerBossText.classList.add(r_careerSecPerBossText.cls); w_careerSecPerBossText.classList.toggle('danger', !!r_careerSecPerBossText.danger); }
     const r_mileCoin = mileCoin(career.totalCoins, 10000); const f_mileCoin = $('mileCoinFill'); if (f_mileCoin) f_mileCoin.style.width = r_mileCoin.pct + '%'; const v_mileCoin = $('mileCoinVal'); if (v_mileCoin) v_mileCoin.textContent = r_mileCoin.txt; const w_mileCoin = $('mileCoinWrap'); if (w_mileCoin) { w_mileCoin.classList.remove('g-good','g-warn','g-bad'); if (r_mileCoin.cls) w_mileCoin.classList.add(r_mileCoin.cls); w_mileCoin.classList.toggle('danger', !!r_mileCoin.danger); }
+    const r_mileKill = mileKill(career.kills, 1000); const f_mileKill = $('mileKillFill'); if (f_mileKill) f_mileKill.style.width = r_mileKill.pct + '%'; const v_mileKill = $('mileKillVal'); if (v_mileKill) v_mileKill.textContent = r_mileKill.txt; const w_mileKill = $('mileKillWrap'); if (w_mileKill) { w_mileKill.classList.remove('g-good','g-warn','g-bad'); if (r_mileKill.cls) w_mileKill.classList.add(r_mileKill.cls); w_mileKill.classList.toggle('danger', !!r_mileKill.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -16322,6 +16329,16 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 0.2) { cls = 'g-bad'; danger = true; } else if (val < 0.5) { cls = 'g-warn'; }
     return { pct: pct, txt: '金币里程碑 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— mileKill：击杀里程碑（固定里程碑完成度，越高越好）——
+  function mileKillText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0 || nb === 0) return { pct: 0, txt: '击杀里程碑 —', cls: 'g-good', danger: false };
+    const val = na / nb;
+    const pct = Math.max(0, Math.min(100, Math.round(val * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 0.2) { cls = 'g-bad'; danger = true; } else if (val < 0.5) { cls = 'g-warn'; }
+    return { pct: pct, txt: '击杀里程碑 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -18163,7 +18180,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V13.85', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V13.86', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -19825,6 +19842,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       careerPeakPerCoinStateNow: (a, b) => careerPeakPerCoinText(a, b), careerPeakPerCoinANow: () => career.bestScore / Math.max(1, career.totalCoins), careerPeakPerCoinBNow: () => 0.5, careerPeakPerCoinFillNow: () => { const f = $('careerPeakPerCoinFill'); return f ? f.style.width : ''; }, careerPeakPerCoinDangerNow: () => { const w = $('careerPeakPerCoinWrap'); return !!(w && w.classList.contains('danger')); },
       careerSecPerBossStateNow: (a, b) => careerSecPerBossText(a, b), careerSecPerBossANow: () => career.playSec / Math.max(1, career.bossKills), careerSecPerBossBNow: () => 300, careerSecPerBossFillNow: () => { const f = $('careerSecPerBossFill'); return f ? f.style.width : ''; }, careerSecPerBossDangerNow: () => { const w = $('careerSecPerBossWrap'); return !!(w && w.classList.contains('danger')); },
       mileCoinStateNow: (a, b) => mileCoinText(a, b), mileCoinANow: () => career.totalCoins, mileCoinBNow: () => 10000, mileCoinFillNow: () => { const f = $('mileCoinFill'); return f ? f.style.width : ''; }, mileCoinDangerNow: () => { const w = $('mileCoinWrap'); return !!(w && w.classList.contains('danger')); },
+      mileKillStateNow: (a, b) => mileKillText(a, b), mileKillANow: () => career.kills, mileKillBNow: () => 1000, mileKillFillNow: () => { const f = $('mileKillFill'); return f ? f.style.width : ''; }, mileKillDangerNow: () => { const w = $('mileKillWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
