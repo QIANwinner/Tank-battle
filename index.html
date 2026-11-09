@@ -3347,6 +3347,11 @@
   #powerIdxWrap.g-good .pfill { background:#2ecc71; }
   #powerIdxWrap.g-warn .pfill { background:#f1c40f; }
   #powerIdxWrap.g-bad .pfill { background:#e74c3c; }
+  #dpsLiveWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #dpsLiveWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #dpsLiveWrap.g-good .pfill { background:#2ecc71; }
+  #dpsLiveWrap.g-warn .pfill { background:#f1c40f; }
+  #dpsLiveWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -3957,6 +3962,7 @@
     <div class="pill m-hide" id="deathRateCmpWrap"><span class="k">☠️</span><i class="pbar"><i class="pfill" id="deathRateCmpFill"></i></i><span class="v" id="deathRateCmpVal">—</span></div>
     <div class="pill m-hide" id="comboRateCmpWrap"><span class="k">🔗</span><i class="pbar"><i class="pfill" id="comboRateCmpFill"></i></i><span class="v" id="comboRateCmpVal">—</span></div>
     <div class="pill m-hide" id="powerIdxWrap"><span class="k">🏆</span><i class="pbar"><i class="pfill" id="powerIdxFill"></i></i><span class="v" id="powerIdxVal">—</span></div>
+    <div class="pill m-hide" id="dpsLiveWrap"><span class="k">⚡</span><i class="pbar"><i class="pfill" id="dpsLiveFill"></i></i><span class="v" id="dpsLiveVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -4332,7 +4338,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V13.12</div>
+  <div id="mark">DESIGNED BY QIAN · V13.13</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -9744,6 +9750,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_deathRateCmpText = deathRateCmpText(stat.deaths, (career.deaths / Math.max(1, career.games))); const f_deathRateCmpText = $('deathRateCmpFill'); if (f_deathRateCmpText) f_deathRateCmpText.style.width = r_deathRateCmpText.pct + '%'; const v_deathRateCmpText = $('deathRateCmpVal'); if (v_deathRateCmpText) v_deathRateCmpText.textContent = r_deathRateCmpText.txt; const w_deathRateCmpText = $('deathRateCmpWrap'); if (w_deathRateCmpText) { w_deathRateCmpText.classList.remove('g-good','g-warn','g-bad'); if (r_deathRateCmpText.cls) w_deathRateCmpText.classList.add(r_deathRateCmpText.cls); w_deathRateCmpText.classList.toggle('danger', !!r_deathRateCmpText.danger); }
     const r_comboRateCmpText = comboRateCmpText(stat.maxCombo, (career.kills / Math.max(1, career.games))); const f_comboRateCmpText = $('comboRateCmpFill'); if (f_comboRateCmpText) f_comboRateCmpText.style.width = r_comboRateCmpText.pct + '%'; const v_comboRateCmpText = $('comboRateCmpVal'); if (v_comboRateCmpText) v_comboRateCmpText.textContent = r_comboRateCmpText.txt; const w_comboRateCmpText = $('comboRateCmpWrap'); if (w_comboRateCmpText) { w_comboRateCmpText.classList.remove('g-good','g-warn','g-bad'); if (r_comboRateCmpText.cls) w_comboRateCmpText.classList.add(r_comboRateCmpText.cls); w_comboRateCmpText.classList.toggle('danger', !!r_comboRateCmpText.danger); }
     const r_powerIdxText = powerIdxText(((stat.kills + runCoins / 5) / Math.max(1, playSecRun)), ((career.kills + career.totalCoins / 5) / Math.max(1, career.playSec))); const f_powerIdxText = $('powerIdxFill'); if (f_powerIdxText) f_powerIdxText.style.width = r_powerIdxText.pct + '%'; const v_powerIdxText = $('powerIdxVal'); if (v_powerIdxText) v_powerIdxText.textContent = r_powerIdxText.txt; const w_powerIdxText = $('powerIdxWrap'); if (w_powerIdxText) { w_powerIdxText.classList.remove('g-good','g-warn','g-bad'); if (r_powerIdxText.cls) w_powerIdxText.classList.add(r_powerIdxText.cls); w_powerIdxText.classList.toggle('danger', !!r_powerIdxText.danger); }
+    const r_dpsLiveText = dpsLiveText(runDmg, Math.max(1, playSecRun)); const f_dpsLiveText = $('dpsLiveFill'); if (f_dpsLiveText) f_dpsLiveText.style.width = r_dpsLiveText.pct + '%'; const v_dpsLiveText = $('dpsLiveVal'); if (v_dpsLiveText) v_dpsLiveText.textContent = r_dpsLiveText.txt; const w_dpsLiveText = $('dpsLiveWrap'); if (w_dpsLiveText) { w_dpsLiveText.classList.remove('g-good','g-warn','g-bad'); if (r_dpsLiveText.cls) w_dpsLiveText.classList.add(r_dpsLiveText.cls); w_dpsLiveText.classList.toggle('danger', !!r_dpsLiveText.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -15081,6 +15088,16 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 0.8) { cls = 'g-bad'; danger = true; } else if (val < 1.2) { cls = 'g-warn'; }
     return { pct: pct, txt: '战力 x' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— dpsLive：DPS（本局纵深，a/b 比值）——
+  function dpsLiveText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0 || nb === 0) return { pct: 0, txt: 'DPS —', cls: 'g-good', danger: false };
+    const val = na / nb;
+    const pct = Math.max(0, Math.min(100, Math.round(val / 2 * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 0.8) { cls = 'g-bad'; danger = true; } else if (val < 1.2) { cls = 'g-warn'; }
+    return { pct: pct, txt: 'DPS ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -16922,7 +16939,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V13.12', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V13.13', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -18511,6 +18528,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       deathRateCmpStateNow: (a, b) => deathRateCmpText(a, b), deathRateCmpANow: () => stat.deaths, deathRateCmpBNow: () => (career.deaths / Math.max(1, career.games)), deathRateCmpFillNow: () => { const f = $('deathRateCmpFill'); return f ? f.style.width : ''; }, deathRateCmpDangerNow: () => { const w = $('deathRateCmpWrap'); return !!(w && w.classList.contains('danger')); },
       comboRateCmpStateNow: (a, b) => comboRateCmpText(a, b), comboRateCmpANow: () => stat.maxCombo, comboRateCmpBNow: () => (career.kills / Math.max(1, career.games)), comboRateCmpFillNow: () => { const f = $('comboRateCmpFill'); return f ? f.style.width : ''; }, comboRateCmpDangerNow: () => { const w = $('comboRateCmpWrap'); return !!(w && w.classList.contains('danger')); },
       powerIdxStateNow: (a, b) => powerIdxText(a, b), powerIdxANow: () => ((stat.kills + runCoins / 5) / Math.max(1, playSecRun)), powerIdxBNow: () => ((career.kills + career.totalCoins / 5) / Math.max(1, career.playSec)), powerIdxFillNow: () => { const f = $('powerIdxFill'); return f ? f.style.width : ''; }, powerIdxDangerNow: () => { const w = $('powerIdxWrap'); return !!(w && w.classList.contains('danger')); },
+      dpsLiveStateNow: (a, b) => dpsLiveText(a, b), dpsLiveANow: () => runDmg, dpsLiveBNow: () => Math.max(1, playSecRun), dpsLiveFillNow: () => { const f = $('dpsLiveFill'); return f ? f.style.width : ''; }, dpsLiveDangerNow: () => { const w = $('dpsLiveWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

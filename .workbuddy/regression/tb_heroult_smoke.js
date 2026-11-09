@@ -12083,6 +12083,22 @@ async function main() {
     t('U4244 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=4239;k<=4244;k++) t('U'+k+' 综合战力 vs 生涯',false,e.message); }
 
+
+  // ===== U4245~U4250: 实时DPS 纵深(v0.13.13) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('dpsLiveWrap'),st:T.dpsLiveStateNow(3,2)});})()"));
+    t('U4245 实时DPS 纵深 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U4246 正常 3/2→DPS 1.5', o.st.pct === 75 && o.st.txt === 'DPS 1.5' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dpsLiveStateNow(0,2).pct,b:T.dpsLiveStateNow(4,2).pct,c:T.dpsLiveStateNow(2,2).pct,d:T.dpsLiveStateNow(2,2).cls});})()"));
+    t('U4247 边界 0/4/2→0/100/50', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dpsLiveStateNow(-1,2).pct,b:T.dpsLiveStateNow(NaN,2).pct,c:T.dpsLiveStateNow(3,0).pct,d:T.dpsLiveStateNow(3,-1).pct});})()"));
+    t('U4248 非法/空值/零分母/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.dpsLiveStateNow('3','2').pct);})()"));
+    t('U4249 数字字符串转数', o4 === 75, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.dpsLiveFillNow()==='string',d:typeof T.dpsLiveDangerNow()==='boolean',a:T.dpsLiveANow(),b:T.dpsLiveBNow()});})()"));
+    t('U4250 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=4245;k<=4250;k++) t('U'+k+' 实时DPS 纵深',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
