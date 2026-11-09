@@ -3887,6 +3887,11 @@
   #colWingWrap.g-good .pfill { background:#2ecc71; }
   #colWingWrap.g-warn .pfill { background:#f1c40f; }
   #colWingWrap.g-bad .pfill { background:#e74c3c; }
+  #colAchWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #colAchWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #colAchWrap.g-good .pfill { background:#2ecc71; }
+  #colAchWrap.g-warn .pfill { background:#f1c40f; }
+  #colAchWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -4605,6 +4610,7 @@
     <div class="pill m-hide" id="colPetWrap"><span class="k">🐾</span><i class="pbar"><i class="pfill" id="colPetFill"></i></i><span class="v" id="colPetVal">—</span></div>
     <div class="pill m-hide" id="colHeroWrap"><span class="k">⚔️</span><i class="pbar"><i class="pfill" id="colHeroFill"></i></i><span class="v" id="colHeroVal">—</span></div>
     <div class="pill m-hide" id="colWingWrap"><span class="k">🔷</span><i class="pbar"><i class="pfill" id="colWingFill"></i></i><span class="v" id="colWingVal">—</span></div>
+    <div class="pill m-hide" id="colAchWrap"><span class="k">🏅</span><i class="pbar"><i class="pfill" id="colAchFill"></i></i><span class="v" id="colAchVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -4980,7 +4986,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V14.20</div>
+  <div id="mark">DESIGNED BY QIAN · V14.21</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -10500,6 +10506,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_colPet = colPet(ownedPets.length, PET_DEF.length); const f_colPet = $('colPetFill'); if (f_colPet) f_colPet.style.width = r_colPet.pct + '%'; const v_colPet = $('colPetVal'); if (v_colPet) v_colPet.textContent = r_colPet.txt; const w_colPet = $('colPetWrap'); if (w_colPet) { w_colPet.classList.remove('g-good','g-warn','g-bad'); if (r_colPet.cls) w_colPet.classList.add(r_colPet.cls); w_colPet.classList.toggle('danger', !!r_colPet.danger); }
     const r_colHero = colHero(ownedHeroes.length, Object.keys(HEROES).length); const f_colHero = $('colHeroFill'); if (f_colHero) f_colHero.style.width = r_colHero.pct + '%'; const v_colHero = $('colHeroVal'); if (v_colHero) v_colHero.textContent = r_colHero.txt; const w_colHero = $('colHeroWrap'); if (w_colHero) { w_colHero.classList.remove('g-good','g-warn','g-bad'); if (r_colHero.cls) w_colHero.classList.add(r_colHero.cls); w_colHero.classList.toggle('danger', !!r_colHero.danger); }
     const r_colWing = colWing(ownedWSkins.length, WINGMAN_LIST.length); const f_colWing = $('colWingFill'); if (f_colWing) f_colWing.style.width = r_colWing.pct + '%'; const v_colWing = $('colWingVal'); if (v_colWing) v_colWing.textContent = r_colWing.txt; const w_colWing = $('colWingWrap'); if (w_colWing) { w_colWing.classList.remove('g-good','g-warn','g-bad'); if (r_colWing.cls) w_colWing.classList.add(r_colWing.cls); w_colWing.classList.toggle('danger', !!r_colWing.danger); }
+    const r_colAch = colAch(achUnlocked.size, ACHIEVE.length); const f_colAch = $('colAchFill'); if (f_colAch) f_colAch.style.width = r_colAch.pct + '%'; const v_colAch = $('colAchVal'); if (v_colAch) v_colAch.textContent = r_colAch.txt; const w_colAch = $('colAchWrap'); if (w_colAch) { w_colAch.classList.remove('g-good','g-warn','g-bad'); if (r_colAch.cls) w_colAch.classList.add(r_colAch.cls); w_colAch.classList.toggle('danger', !!r_colAch.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -16917,6 +16924,16 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 0.2) { cls = 'g-bad'; danger = true; } else if (val < 0.5) { cls = 'g-warn'; }
     return { pct: pct, txt: '僚机收藏度 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— colAch：成就解锁度（收藏/养成完成度 0~1，越高越好）——
+  function colAchText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0 || nb === 0) return { pct: 0, txt: '成就解锁度 —', cls: 'g-good', danger: false };
+    const val = na / nb;
+    const pct = Math.max(0, Math.min(100, Math.round(val * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 0.2) { cls = 'g-bad'; danger = true; } else if (val < 0.5) { cls = 'g-warn'; }
+    return { pct: pct, txt: '成就解锁度 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -18758,7 +18775,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V14.20', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V14.21', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -20455,6 +20472,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       colPetStateNow: (a, b) => colPetText(a, b), colPetANow: () => ownedPets.length, colPetBNow: () => PET_DEF.length, colPetFillNow: () => { const f = $('colPetFill'); return f ? f.style.width : ''; }, colPetDangerNow: () => { const w = $('colPetWrap'); return !!(w && w.classList.contains('danger')); },
       colHeroStateNow: (a, b) => colHeroText(a, b), colHeroANow: () => ownedHeroes.length, colHeroBNow: () => Object.keys(HEROES).length, colHeroFillNow: () => { const f = $('colHeroFill'); return f ? f.style.width : ''; }, colHeroDangerNow: () => { const w = $('colHeroWrap'); return !!(w && w.classList.contains('danger')); },
       colWingStateNow: (a, b) => colWingText(a, b), colWingANow: () => ownedWSkins.length, colWingBNow: () => WINGMAN_LIST.length, colWingFillNow: () => { const f = $('colWingFill'); return f ? f.style.width : ''; }, colWingDangerNow: () => { const w = $('colWingWrap'); return !!(w && w.classList.contains('danger')); },
+      colAchStateNow: (a, b) => colAchText(a, b), colAchANow: () => achUnlocked.size, colAchBNow: () => ACHIEVE.length, colAchFillNow: () => { const f = $('colAchFill'); return f ? f.style.width : ''; }, colAchDangerNow: () => { const w = $('colAchWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
