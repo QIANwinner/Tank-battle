@@ -14228,6 +14228,22 @@ async function main() {
     t('U5054 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=5049;k<=5054;k++) t('U'+k+' 生命冗余',false,e.message); }
 
+
+  // ===== U5055~U5060: P2生命(v0.14.48) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('gthP2Wrap'),st:T.gthP2StateNow(4,5)});})()"));
+    t('U5055 P2生命 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U5056 正常 4/5→P2生命 0.8', o.st.pct === 80 && o.st.txt === 'P2生命 0.8' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.gthP2StateNow(0,2).pct,b:T.gthP2StateNow(2,2).pct,c:T.gthP2StateNow(1,2).pct,d:T.gthP2StateNow(1,2).cls});})()"));
+    t('U5057 边界 0/2/1→0/100/50', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.gthP2StateNow(-1,2).pct,b:T.gthP2StateNow(NaN,2).pct,c:T.gthP2StateNow(3,0).pct,d:T.gthP2StateNow(3,-1).pct});})()"));
+    t('U5058 非法/空值/零分母/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.gthP2StateNow('4','5').pct);})()"));
+    t('U5059 数字字符串转数', o4 === 80, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.gthP2FillNow()==='string',d:typeof T.gthP2DangerNow()==='boolean',a:T.gthP2ANow(),b:T.gthP2BNow()});})()"));
+    t('U5060 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=5055;k<=5060;k++) t('U'+k+' P2生命',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
