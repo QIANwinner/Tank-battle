@@ -3372,6 +3372,11 @@
   #itemFlowWrap.g-good .pfill { background:#2ecc71; }
   #itemFlowWrap.g-warn .pfill { background:#f1c40f; }
   #itemFlowWrap.g-bad .pfill { background:#e74c3c; }
+  #lifeSpanWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #lifeSpanWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #lifeSpanWrap.g-good .pfill { background:#2ecc71; }
+  #lifeSpanWrap.g-warn .pfill { background:#f1c40f; }
+  #lifeSpanWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -3987,6 +3992,7 @@
     <div class="pill m-hide" id="reviveToughWrap"><span class="k">🛡️</span><i class="pbar"><i class="pfill" id="reviveToughFill"></i></i><span class="v" id="reviveToughVal">—</span></div>
     <div class="pill m-hide" id="kdDepthWrap"><span class="k">⚔️</span><i class="pbar"><i class="pfill" id="kdDepthFill"></i></i><span class="v" id="kdDepthVal">—</span></div>
     <div class="pill m-hide" id="itemFlowWrap"><span class="k">🎁</span><i class="pbar"><i class="pfill" id="itemFlowFill"></i></i><span class="v" id="itemFlowVal">—</span></div>
+    <div class="pill m-hide" id="lifeSpanWrap"><span class="k">⏳</span><i class="pbar"><i class="pfill" id="lifeSpanFill"></i></i><span class="v" id="lifeSpanVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -4362,7 +4368,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V13.17</div>
+  <div id="mark">DESIGNED BY QIAN · V13.18</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -9779,6 +9785,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_reviveToughText = reviveToughText(reviveCount, 1); const f_reviveToughText = $('reviveToughFill'); if (f_reviveToughText) f_reviveToughText.style.width = r_reviveToughText.pct + '%'; const v_reviveToughText = $('reviveToughVal'); if (v_reviveToughText) v_reviveToughText.textContent = r_reviveToughText.txt; const w_reviveToughText = $('reviveToughWrap'); if (w_reviveToughText) { w_reviveToughText.classList.remove('g-good','g-warn','g-bad'); if (r_reviveToughText.cls) w_reviveToughText.classList.add(r_reviveToughText.cls); w_reviveToughText.classList.toggle('danger', !!r_reviveToughText.danger); }
     const r_kdDepthText = kdDepthText(stat.kills, Math.max(1, stat.deaths)); const f_kdDepthText = $('kdDepthFill'); if (f_kdDepthText) f_kdDepthText.style.width = r_kdDepthText.pct + '%'; const v_kdDepthText = $('kdDepthVal'); if (v_kdDepthText) v_kdDepthText.textContent = r_kdDepthText.txt; const w_kdDepthText = $('kdDepthWrap'); if (w_kdDepthText) { w_kdDepthText.classList.remove('g-good','g-warn','g-bad'); if (r_kdDepthText.cls) w_kdDepthText.classList.add(r_kdDepthText.cls); w_kdDepthText.classList.toggle('danger', !!r_kdDepthText.danger); }
     const r_itemFlowText = itemFlowText(runPowerups, Math.max(1, playSecRun)); const f_itemFlowText = $('itemFlowFill'); if (f_itemFlowText) f_itemFlowText.style.width = r_itemFlowText.pct + '%'; const v_itemFlowText = $('itemFlowVal'); if (v_itemFlowText) v_itemFlowText.textContent = r_itemFlowText.txt; const w_itemFlowText = $('itemFlowWrap'); if (w_itemFlowText) { w_itemFlowText.classList.remove('g-good','g-warn','g-bad'); if (r_itemFlowText.cls) w_itemFlowText.classList.add(r_itemFlowText.cls); w_itemFlowText.classList.toggle('danger', !!r_itemFlowText.danger); }
+    const r_lifeSpanText = lifeSpanText(playSecRun, (stat.deaths + 1)); const f_lifeSpanText = $('lifeSpanFill'); if (f_lifeSpanText) f_lifeSpanText.style.width = r_lifeSpanText.pct + '%'; const v_lifeSpanText = $('lifeSpanVal'); if (v_lifeSpanText) v_lifeSpanText.textContent = r_lifeSpanText.txt; const w_lifeSpanText = $('lifeSpanWrap'); if (w_lifeSpanText) { w_lifeSpanText.classList.remove('g-good','g-warn','g-bad'); if (r_lifeSpanText.cls) w_lifeSpanText.classList.add(r_lifeSpanText.cls); w_lifeSpanText.classList.toggle('danger', !!r_lifeSpanText.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -15166,6 +15173,16 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 0.8) { cls = 'g-bad'; danger = true; } else if (val < 1.2) { cls = 'g-warn'; }
     return { pct: pct, txt: '道具 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— lifeSpan：每命（本局纵深，a/b 比值）——
+  function lifeSpanText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0 || nb === 0) return { pct: 0, txt: '每命 —', cls: 'g-good', danger: false };
+    const val = na / nb;
+    const pct = Math.max(0, Math.min(100, Math.round(val / 2 * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 0.8) { cls = 'g-bad'; danger = true; } else if (val < 1.2) { cls = 'g-warn'; }
+    return { pct: pct, txt: '每命 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -17007,7 +17024,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V13.17', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V13.18', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -18601,6 +18618,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       reviveToughStateNow: (a, b) => reviveToughText(a, b), reviveToughANow: () => reviveCount, reviveToughBNow: () => 1, reviveToughFillNow: () => { const f = $('reviveToughFill'); return f ? f.style.width : ''; }, reviveToughDangerNow: () => { const w = $('reviveToughWrap'); return !!(w && w.classList.contains('danger')); },
       kdDepthStateNow: (a, b) => kdDepthText(a, b), kdDepthANow: () => stat.kills, kdDepthBNow: () => Math.max(1, stat.deaths), kdDepthFillNow: () => { const f = $('kdDepthFill'); return f ? f.style.width : ''; }, kdDepthDangerNow: () => { const w = $('kdDepthWrap'); return !!(w && w.classList.contains('danger')); },
       itemFlowStateNow: (a, b) => itemFlowText(a, b), itemFlowANow: () => runPowerups, itemFlowBNow: () => Math.max(1, playSecRun), itemFlowFillNow: () => { const f = $('itemFlowFill'); return f ? f.style.width : ''; }, itemFlowDangerNow: () => { const w = $('itemFlowWrap'); return !!(w && w.classList.contains('danger')); },
+      lifeSpanStateNow: (a, b) => lifeSpanText(a, b), lifeSpanANow: () => playSecRun, lifeSpanBNow: () => (stat.deaths + 1), lifeSpanFillNow: () => { const f = $('lifeSpanFill'); return f ? f.style.width : ''; }, lifeSpanDangerNow: () => { const w = $('lifeSpanWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
