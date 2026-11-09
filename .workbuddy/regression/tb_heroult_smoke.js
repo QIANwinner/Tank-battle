@@ -11587,6 +11587,22 @@ async function main() {
     t('U4058 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=4053;k<=4058;k++) t('U'+k+' 本局每射击命中',false,e.message); }
 
+
+  // ===== U4059~U4064: 本局每射击金币(v0.12.82) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runCoinPerShotWrap'),st:T.runCoinPerShotStateNow(3000,100)});})()"));
+    t('U4059 本局每射击金币 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U4060 正常 3000/100→金币 30/射 100%', o.st.pct === 100 && o.st.txt === '金币 30/射' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runCoinPerShotStateNow(0,100).pct,b:T.runCoinPerShotStateNow(1500,100).pct,c:T.runCoinPerShotStateNow(3000,100).pct,d:T.runCoinPerShotStateNow(1500,100).cls});})()"));
+    t('U4061 边界 0→0/1500/100→50%/3000/100→100%', o2.a === 0 && o2.b === 50 && o2.c === 100 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runCoinPerShotStateNow(-1,100).pct,b:T.runCoinPerShotStateNow(NaN,100).pct,c:T.runCoinPerShotStateNow(3000,0).pct,d:T.runCoinPerShotStateNow(3000,-1).pct});})()"));
+    t('U4062 非法/空值/零分母/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runCoinPerShotStateNow('3000','100').pct);})()"));
+    t('U4063 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.runCoinPerShotFillNow()==='string',d:typeof T.runCoinPerShotDangerNow()==='boolean',a:T.runCoinPerShotANow(),b:T.runCoinPerShotBNow()});})()"));
+    t('U4064 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=4059;k<=4064;k++) t('U'+k+' 本局每射击金币',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
