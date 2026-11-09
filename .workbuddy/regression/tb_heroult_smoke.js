@@ -12516,6 +12516,22 @@ async function main() {
     t('U4412 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=4407;k<=4412;k++) t('U'+k+' 伤害效率',false,e.message); }
 
+
+  // ===== U4413~U4418: 复活负担(v0.13.41) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('revivePerKillWrap'),st:T.revivePerKillStateNow(3,2)});})()"));
+    t('U4413 复活负担 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U4414 正常 3/2→复活/杀 1.5', o.st.pct === 75 && o.st.txt === '复活/杀 1.5' && o.st.cls === 'g-bad', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.revivePerKillStateNow(0,2).pct,b:T.revivePerKillStateNow(4,2).pct,c:T.revivePerKillStateNow(2,2).pct,d:T.revivePerKillStateNow(2,2).cls});})()"));
+    t('U4415 边界 0/4/2→0/100/50', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.revivePerKillStateNow(-1,2).pct,b:T.revivePerKillStateNow(NaN,2).pct,c:T.revivePerKillStateNow(3,0).pct,d:T.revivePerKillStateNow(3,-1).pct});})()"));
+    t('U4416 非法/空值/零分母/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.revivePerKillStateNow('3','2').pct);})()"));
+    t('U4417 数字字符串转数', o4 === 75, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.revivePerKillFillNow()==='string',d:typeof T.revivePerKillDangerNow()==='boolean',a:T.revivePerKillANow(),b:T.revivePerKillBNow()});})()"));
+    t('U4418 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=4413;k<=4418;k++) t('U'+k+' 复活负担',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
