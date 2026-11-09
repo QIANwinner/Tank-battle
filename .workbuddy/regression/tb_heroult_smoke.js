@@ -13044,6 +13044,22 @@ async function main() {
     t('U4610 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=4605;k<=4610;k++) t('U'+k+' 连击韧性',false,e.message); }
 
+
+  // ===== U4611~U4616: 波次推进(v0.13.74) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('resWaveWrap'),st:T.resWaveStateNow(3,2)});})()"));
+    t('U4611 波次推进 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U4612 正常 3/2→波次推进 1.5', o.st.pct === 75 && o.st.txt === '波次推进 1.5' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.resWaveStateNow(0,2).pct,b:T.resWaveStateNow(4,2).pct,c:T.resWaveStateNow(2,2).pct,d:T.resWaveStateNow(2,2).cls});})()"));
+    t('U4613 边界 0/4/2→0/100/50', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.resWaveStateNow(-1,2).pct,b:T.resWaveStateNow(NaN,2).pct,c:T.resWaveStateNow(3,0).pct,d:T.resWaveStateNow(3,-1).pct});})()"));
+    t('U4614 非法/空值/零分母/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.resWaveStateNow('3','2').pct);})()"));
+    t('U4615 数字字符串转数', o4 === 75, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.resWaveFillNow()==='string',d:typeof T.resWaveDangerNow()==='boolean',a:T.resWaveANow(),b:T.resWaveBNow()});})()"));
+    t('U4616 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=4611;k<=4616;k++) t('U'+k+' 波次推进',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
