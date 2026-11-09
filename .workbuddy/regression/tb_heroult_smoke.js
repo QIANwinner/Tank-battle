@@ -13876,6 +13876,22 @@ async function main() {
     t('U4922 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=4917;k<=4922;k++) t('U'+k+' 轻甲占比',false,e.message); }
 
+
+  // ===== U4923~U4928: 重甲占比(v0.14.26) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('thrHeavyWrap'),st:T.thrHeavyStateNow(4,5)});})()"));
+    t('U4923 重甲占比 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U4924 正常 4/5→重甲占比 0.8', o.st.pct === 80 && o.st.txt === '重甲占比 0.8' && o.st.cls === 'g-bad', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.thrHeavyStateNow(0,2).pct,b:T.thrHeavyStateNow(2,2).pct,c:T.thrHeavyStateNow(1,2).pct,d:T.thrHeavyStateNow(1,2).cls});})()"));
+    t('U4925 边界 0/2/1→0/100/50', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.thrHeavyStateNow(-1,2).pct,b:T.thrHeavyStateNow(NaN,2).pct,c:T.thrHeavyStateNow(3,0).pct,d:T.thrHeavyStateNow(3,-1).pct});})()"));
+    t('U4926 非法/空值/零分母/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.thrHeavyStateNow('4','5').pct);})()"));
+    t('U4927 数字字符串转数', o4 === 80, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.thrHeavyFillNow()==='string',d:typeof T.thrHeavyDangerNow()==='boolean',a:T.thrHeavyANow(),b:T.thrHeavyBNow()});})()"));
+    t('U4928 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=4923;k<=4928;k++) t('U'+k+' 重甲占比',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
