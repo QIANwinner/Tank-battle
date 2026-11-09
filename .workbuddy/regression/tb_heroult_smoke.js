@@ -12179,6 +12179,22 @@ async function main() {
     t('U4280 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=4275;k<=4280;k++) t('U'+k+' 每命存活 纵深',false,e.message); }
 
+
+  // ===== U4281~U4286: 每杀火力 纵深(v0.13.19) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('killFireWrap'),st:T.killFireStateNow(3,2)});})()"));
+    t('U4281 每杀火力 纵深 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U4282 正常 3/2→每杀 1.5', o.st.pct === 75 && o.st.txt === '每杀 1.5' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killFireStateNow(0,2).pct,b:T.killFireStateNow(4,2).pct,c:T.killFireStateNow(2,2).pct,d:T.killFireStateNow(2,2).cls});})()"));
+    t('U4283 边界 0/4/2→0/100/50', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.killFireStateNow(-1,2).pct,b:T.killFireStateNow(NaN,2).pct,c:T.killFireStateNow(3,0).pct,d:T.killFireStateNow(3,-1).pct});})()"));
+    t('U4284 非法/空值/零分母/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.killFireStateNow('3','2').pct);})()"));
+    t('U4285 数字字符串转数', o4 === 75, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.killFireFillNow()==='string',d:typeof T.killFireDangerNow()==='boolean',a:T.killFireANow(),b:T.killFireBNow()});})()"));
+    t('U4286 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=4281;k<=4286;k++) t('U'+k+' 每杀火力 纵深',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
