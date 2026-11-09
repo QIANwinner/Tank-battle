@@ -14068,6 +14068,22 @@ async function main() {
     t('U4994 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=4989;k<=4994;k++) t('U'+k+' 磁吸风暴',false,e.message); }
 
+
+  // ===== U4995~U5000: Boss削血(v0.14.38) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bftBossWrap'),st:T.bftBossStateNow(4,5)});})()"));
+    t('U4995 Boss削血 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U4996 正常 4/5→Boss削血 0.8', o.st.pct === 80 && o.st.txt === 'Boss削血 0.8' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bftBossStateNow(0,2).pct,b:T.bftBossStateNow(2,2).pct,c:T.bftBossStateNow(1,2).pct,d:T.bftBossStateNow(1,2).cls});})()"));
+    t('U4997 边界 0/2/1→0/100/50', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bftBossStateNow(-1,2).pct,b:T.bftBossStateNow(NaN,2).pct,c:T.bftBossStateNow(3,0).pct,d:T.bftBossStateNow(3,-1).pct});})()"));
+    t('U4998 非法/空值/零分母/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bftBossStateNow('4','5').pct);})()"));
+    t('U4999 数字字符串转数', o4 === 80, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.bftBossFillNow()==='string',d:typeof T.bftBossDangerNow()==='boolean',a:T.bftBossANow(),b:T.bftBossBNow()});})()"));
+    t('U5000 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=4995;k<=5000;k++) t('U'+k+' Boss削血',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
