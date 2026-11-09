@@ -11763,6 +11763,22 @@ async function main() {
     t('U4124 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=4119;k<=4124;k++) t('U'+k+' 本局每命击杀',false,e.message); }
 
+
+  // ===== U4125~U4130: 本局每命道具(v0.12.93) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runPuPerLifeWrap'),st:T.runPuPerLifeStateNow(80,10)});})()"));
+    t('U4125 本局每命道具 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U4126 正常 80/10→道具 8/命 100%', o.st.pct === 100 && o.st.txt === '道具 8/命' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runPuPerLifeStateNow(0,10).pct,b:T.runPuPerLifeStateNow(40,10).pct,c:T.runPuPerLifeStateNow(80,10).pct,d:T.runPuPerLifeStateNow(40,10).cls});})()"));
+    t('U4127 边界 0→0/40/10→50%/80/10→100%', o2.a === 0 && o2.b === 50 && o2.c === 100 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runPuPerLifeStateNow(-1,10).pct,b:T.runPuPerLifeStateNow(NaN,10).pct,c:T.runPuPerLifeStateNow(80,0).pct,d:T.runPuPerLifeStateNow(80,-1).pct});})()"));
+    t('U4128 非法/空值/零分母/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runPuPerLifeStateNow('80','10').pct);})()"));
+    t('U4129 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.runPuPerLifeFillNow()==='string',d:typeof T.runPuPerLifeDangerNow()==='boolean',a:T.runPuPerLifeANow(),b:T.runPuPerLifeBNow()});})()"));
+    t('U4130 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=4125;k<=4130;k++) t('U'+k+' 本局每命道具',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
