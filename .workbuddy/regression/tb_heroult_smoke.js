@@ -13988,6 +13988,22 @@ async function main() {
     t('U4964 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=4959;k<=4964;k++) t('U'+k+' 战场压力综合',false,e.message); }
 
+
+  // ===== U4965~U4970: 火力投射(v0.14.33) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bftFireWrap'),st:T.bftFireStateNow(4,5)});})()"));
+    t('U4965 火力投射 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U4966 正常 4/5→火力投射 0.8', o.st.pct === 80 && o.st.txt === '火力投射 0.8' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bftFireStateNow(0,2).pct,b:T.bftFireStateNow(2,2).pct,c:T.bftFireStateNow(1,2).pct,d:T.bftFireStateNow(1,2).cls});})()"));
+    t('U4967 边界 0/2/1→0/100/50', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bftFireStateNow(-1,2).pct,b:T.bftFireStateNow(NaN,2).pct,c:T.bftFireStateNow(3,0).pct,d:T.bftFireStateNow(3,-1).pct});})()"));
+    t('U4968 非法/空值/零分母/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bftFireStateNow('4','5').pct);})()"));
+    t('U4969 数字字符串转数', o4 === 80, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.bftFireFillNow()==='string',d:typeof T.bftFireDangerNow()==='boolean',a:T.bftFireANow(),b:T.bftFireBNow()});})()"));
+    t('U4970 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=4965;k<=4970;k++) t('U'+k+' 火力投射',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
