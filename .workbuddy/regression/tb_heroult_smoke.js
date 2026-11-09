@@ -11811,6 +11811,22 @@ async function main() {
     t('U4142 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=4137;k<=4142;k++) t('U'+k+' 本局每币受击',false,e.message); }
 
+
+  // ===== U4143~U4148: 本局每命命中(v0.12.96) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runHitPerLifeWrap'),st:T.runHitPerLifeStateNow(600,10)});})()"));
+    t('U4143 本局每命命中 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U4144 正常 600/10→命中 60/命 100%', o.st.pct === 100 && o.st.txt === '命中 60/命' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runHitPerLifeStateNow(0,10).pct,b:T.runHitPerLifeStateNow(300,10).pct,c:T.runHitPerLifeStateNow(600,10).pct,d:T.runHitPerLifeStateNow(300,10).cls});})()"));
+    t('U4145 边界 0→0/300/10→50%/600/10→100%', o2.a === 0 && o2.b === 50 && o2.c === 100 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runHitPerLifeStateNow(-1,10).pct,b:T.runHitPerLifeStateNow(NaN,10).pct,c:T.runHitPerLifeStateNow(600,0).pct,d:T.runHitPerLifeStateNow(600,-1).pct});})()"));
+    t('U4146 非法/空值/零分母/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runHitPerLifeStateNow('600','10').pct);})()"));
+    t('U4147 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.runHitPerLifeFillNow()==='string',d:typeof T.runHitPerLifeDangerNow()==='boolean',a:T.runHitPerLifeANow(),b:T.runHitPerLifeBNow()});})()"));
+    t('U4148 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=4143;k<=4148;k++) t('U'+k+' 本局每命命中',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
