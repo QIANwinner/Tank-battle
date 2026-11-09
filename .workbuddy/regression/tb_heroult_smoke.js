@@ -9044,6 +9044,7 @@ async function main() {
   } catch(e){ for(let k=3099;k<=3104;k++) t('U'+k+' 生存综合',false,e.message); }
 
 
+  console.log("DIAG pre-U3105: " + await ev("(function(){const T=window.__tbTest;try{return JSON.stringify({fm:typeof T.fireMissStateNow,dm:!!document.getElementById('fireMissWrap'),keys:Object.keys(T).filter(k=>k.indexOf('Miss')>=0)});}catch(e){return 'THROW: '+e.message;}})()"));
   // ===== U3105~U3110: 空枪率(v0.11.23) =====
   try {
     const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('fireMissWrap'),st:T.fireMissStateNow(100,40)});})()"));
