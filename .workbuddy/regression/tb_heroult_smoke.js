@@ -11779,6 +11779,22 @@ async function main() {
     t('U4130 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=4125;k<=4130;k++) t('U'+k+' 本局每命道具',false,e.message); }
 
+
+  // ===== U4131~U4136: 本局每命连击(v0.12.94) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runComboPerLifeWrap'),st:T.runComboPerLifeStateNow(120,10)});})()"));
+    t('U4131 本局每命连击 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U4132 正常 120/10→连击 12/命 100%', o.st.pct === 100 && o.st.txt === '连击 12/命' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runComboPerLifeStateNow(0,10).pct,b:T.runComboPerLifeStateNow(60,10).pct,c:T.runComboPerLifeStateNow(120,10).pct,d:T.runComboPerLifeStateNow(60,10).cls});})()"));
+    t('U4133 边界 0→0/60/10→50%/120/10→100%', o2.a === 0 && o2.b === 50 && o2.c === 100 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runComboPerLifeStateNow(-1,10).pct,b:T.runComboPerLifeStateNow(NaN,10).pct,c:T.runComboPerLifeStateNow(120,0).pct,d:T.runComboPerLifeStateNow(120,-1).pct});})()"));
+    t('U4134 非法/空值/零分母/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runComboPerLifeStateNow('120','10').pct);})()"));
+    t('U4135 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.runComboPerLifeFillNow()==='string',d:typeof T.runComboPerLifeDangerNow()==='boolean',a:T.runComboPerLifeANow(),b:T.runComboPerLifeBNow()});})()"));
+    t('U4136 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=4131;k<=4136;k++) t('U'+k+' 本局每命连击',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
