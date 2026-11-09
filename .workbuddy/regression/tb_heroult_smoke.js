@@ -13940,6 +13940,22 @@ async function main() {
     t('U4946 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=4941;k<=4946;k++) t('U'+k+' 工兵占比',false,e.message); }
 
+
+  // ===== U4947~U4952: 精英占比(v0.14.30) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('thrEliteWrap'),st:T.thrEliteStateNow(4,5)});})()"));
+    t('U4947 精英占比 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U4948 正常 4/5→精英占比 0.8', o.st.pct === 80 && o.st.txt === '精英占比 0.8' && o.st.cls === 'g-bad', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.thrEliteStateNow(0,2).pct,b:T.thrEliteStateNow(2,2).pct,c:T.thrEliteStateNow(1,2).pct,d:T.thrEliteStateNow(1,2).cls});})()"));
+    t('U4949 边界 0/2/1→0/100/50', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.thrEliteStateNow(-1,2).pct,b:T.thrEliteStateNow(NaN,2).pct,c:T.thrEliteStateNow(3,0).pct,d:T.thrEliteStateNow(3,-1).pct});})()"));
+    t('U4950 非法/空值/零分母/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.thrEliteStateNow('4','5').pct);})()"));
+    t('U4951 数字字符串转数', o4 === 80, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.thrEliteFillNow()==='string',d:typeof T.thrEliteDangerNow()==='boolean',a:T.thrEliteANow(),b:T.thrEliteBNow()});})()"));
+    t('U4952 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=4947;k<=4952;k++) t('U'+k+' 精英占比',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
