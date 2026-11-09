@@ -13556,6 +13556,22 @@ async function main() {
     t('U4802 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=4797;k<=4802;k++) t('U'+k+' 无尽占比',false,e.message); }
 
+
+  // ===== U4803~U4808: 困难占比(v0.14.06) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('recHardWrap'),st:T.recHardStateNow(3,10)});})()"));
+    t('U4803 困难占比 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U4804 正常 3/10→困难占比 0.3', o.st.pct === 30 && o.st.txt === '困难占比 0.3' && o.st.cls === 'g-warn', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.recHardStateNow(0,2).pct,b:T.recHardStateNow(2,2).pct,c:T.recHardStateNow(1,2).pct,d:T.recHardStateNow(1,2).cls});})()"));
+    t('U4805 边界 0/2/1→0/100/50', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-good', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.recHardStateNow(-1,2).pct,b:T.recHardStateNow(NaN,2).pct,c:T.recHardStateNow(3,0).pct,d:T.recHardStateNow(3,-1).pct});})()"));
+    t('U4806 非法/空值/零分母/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.recHardStateNow('3','10').pct);})()"));
+    t('U4807 数字字符串转数', o4 === 30, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.recHardFillNow()==='string',d:typeof T.recHardDangerNow()==='boolean',a:T.recHardANow(),b:T.recHardBNow()});})()"));
+    t('U4808 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=4803;k<=4808;k++) t('U'+k+' 困难占比',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
