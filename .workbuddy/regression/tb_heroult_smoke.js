@@ -12596,6 +12596,22 @@ async function main() {
     t('U4442 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=4437;k<=4442;k++) t('U'+k+' 受击得分比',false,e.message); }
 
+
+  // ===== U4443~U4448: 波次强化比(v0.13.46) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('waveUpgWrap'),st:T.waveUpgStateNow(3,2)});})()"));
+    t('U4443 波次强化比 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U4444 正常 3/2→波次强化比 1.5', o.st.pct === 75 && o.st.txt === '波次强化比 1.5' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveUpgStateNow(0,2).pct,b:T.waveUpgStateNow(4,2).pct,c:T.waveUpgStateNow(2,2).pct,d:T.waveUpgStateNow(2,2).cls});})()"));
+    t('U4445 边界 0/4/2→0/100/50', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.waveUpgStateNow(-1,2).pct,b:T.waveUpgStateNow(NaN,2).pct,c:T.waveUpgStateNow(3,0).pct,d:T.waveUpgStateNow(3,-1).pct});})()"));
+    t('U4446 非法/空值/零分母/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.waveUpgStateNow('3','2').pct);})()"));
+    t('U4447 数字字符串转数', o4 === 75, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.waveUpgFillNow()==='string',d:typeof T.waveUpgDangerNow()==='boolean',a:T.waveUpgANow(),b:T.waveUpgBNow()});})()"));
+    t('U4448 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=4443;k<=4448;k++) t('U'+k+' 波次强化比',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
