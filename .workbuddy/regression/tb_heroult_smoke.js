@@ -14212,6 +14212,22 @@ async function main() {
     t('U5048 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=5043;k<=5048;k++) t('U'+k+' Boss讨伐',false,e.message); }
 
+
+  // ===== U5049~U5054: 生命冗余(v0.14.47) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('gthLifeWrap'),st:T.gthLifeStateNow(4,5)});})()"));
+    t('U5049 生命冗余 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U5050 正常 4/5→生命冗余 0.8', o.st.pct === 80 && o.st.txt === '生命冗余 0.8' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.gthLifeStateNow(0,2).pct,b:T.gthLifeStateNow(2,2).pct,c:T.gthLifeStateNow(1,2).pct,d:T.gthLifeStateNow(1,2).cls});})()"));
+    t('U5051 边界 0/2/1→0/100/50', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.gthLifeStateNow(-1,2).pct,b:T.gthLifeStateNow(NaN,2).pct,c:T.gthLifeStateNow(3,0).pct,d:T.gthLifeStateNow(3,-1).pct});})()"));
+    t('U5052 非法/空值/零分母/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.gthLifeStateNow('4','5').pct);})()"));
+    t('U5053 数字字符串转数', o4 === 80, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.gthLifeFillNow()==='string',d:typeof T.gthLifeDangerNow()==='boolean',a:T.gthLifeANow(),b:T.gthLifeBNow()});})()"));
+    t('U5054 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=5049;k<=5054;k++) t('U'+k+' 生命冗余',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
