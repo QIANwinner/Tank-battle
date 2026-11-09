@@ -11699,6 +11699,22 @@ async function main() {
     t('U4100 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=4095;k<=4100;k++) t('U'+k+' 本局每波击杀',false,e.message); }
 
+
+  // ===== U4101~U4106: 本局每射击受击(v0.12.89) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runHurtPerShotWrap'),st:T.runHurtPerShotStateNow(20,100)});})()"));
+    t('U4101 本局每射击受击 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U4102 正常 20/100→受击 0.2/射 100%', o.st.pct === 100 && o.st.txt === '受击 0.2/射' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runHurtPerShotStateNow(0,100).pct,b:T.runHurtPerShotStateNow(10,100).pct,c:T.runHurtPerShotStateNow(20,100).pct,d:T.runHurtPerShotStateNow(10,100).cls});})()"));
+    t('U4103 边界 0→0/10/100→50%/20/100→100%', o2.a === 0 && o2.b === 50 && o2.c === 100 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runHurtPerShotStateNow(-1,100).pct,b:T.runHurtPerShotStateNow(NaN,100).pct,c:T.runHurtPerShotStateNow(20,0).pct,d:T.runHurtPerShotStateNow(20,-1).pct});})()"));
+    t('U4104 非法/空值/零分母/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runHurtPerShotStateNow('20','100').pct);})()"));
+    t('U4105 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.runHurtPerShotFillNow()==='string',d:typeof T.runHurtPerShotDangerNow()==='boolean',a:T.runHurtPerShotANow(),b:T.runHurtPerShotBNow()});})()"));
+    t('U4106 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=4101;k<=4106;k++) t('U'+k+' 本局每射击受击',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
