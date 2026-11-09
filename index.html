@@ -3872,6 +3872,11 @@
   #colSkinWrap.g-good .pfill { background:#2ecc71; }
   #colSkinWrap.g-warn .pfill { background:#f1c40f; }
   #colSkinWrap.g-bad .pfill { background:#e74c3c; }
+  #colPetWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #colPetWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #colPetWrap.g-good .pfill { background:#2ecc71; }
+  #colPetWrap.g-warn .pfill { background:#f1c40f; }
+  #colPetWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -4587,6 +4592,7 @@
     <div class="pill m-hide" id="rptPerGameWrap"><span class="k">🎮</span><i class="pbar"><i class="pfill" id="rptPerGameFill"></i></i><span class="v" id="rptPerGameVal">—</span></div>
     <div class="pill m-hide" id="rptPerSecWrap"><span class="k">⏳</span><i class="pbar"><i class="pfill" id="rptPerSecFill"></i></i><span class="v" id="rptPerSecVal">—</span></div>
     <div class="pill m-hide" id="colSkinWrap"><span class="k">🎨</span><i class="pbar"><i class="pfill" id="colSkinFill"></i></i><span class="v" id="colSkinVal">—</span></div>
+    <div class="pill m-hide" id="colPetWrap"><span class="k">🐾</span><i class="pbar"><i class="pfill" id="colPetFill"></i></i><span class="v" id="colPetVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -4962,7 +4968,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V14.17</div>
+  <div id="mark">DESIGNED BY QIAN · V14.18</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -10479,6 +10485,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_rptPerGame = rptPerGame(career.bestScore, Math.max(1, career.games)); const f_rptPerGame = $('rptPerGameFill'); if (f_rptPerGame) f_rptPerGame.style.width = r_rptPerGame.pct + '%'; const v_rptPerGame = $('rptPerGameVal'); if (v_rptPerGame) v_rptPerGame.textContent = r_rptPerGame.txt; const w_rptPerGame = $('rptPerGameWrap'); if (w_rptPerGame) { w_rptPerGame.classList.remove('g-good','g-warn','g-bad'); if (r_rptPerGame.cls) w_rptPerGame.classList.add(r_rptPerGame.cls); w_rptPerGame.classList.toggle('danger', !!r_rptPerGame.danger); }
     const r_rptPerSec = rptPerSec(career.bestScore, Math.max(1, career.playSec)); const f_rptPerSec = $('rptPerSecFill'); if (f_rptPerSec) f_rptPerSec.style.width = r_rptPerSec.pct + '%'; const v_rptPerSec = $('rptPerSecVal'); if (v_rptPerSec) v_rptPerSec.textContent = r_rptPerSec.txt; const w_rptPerSec = $('rptPerSecWrap'); if (w_rptPerSec) { w_rptPerSec.classList.remove('g-good','g-warn','g-bad'); if (r_rptPerSec.cls) w_rptPerSec.classList.add(r_rptPerSec.cls); w_rptPerSec.classList.toggle('danger', !!r_rptPerSec.danger); }
     const r_colSkin = colSkin(ownedSkins.length, SKIN_LIST.length); const f_colSkin = $('colSkinFill'); if (f_colSkin) f_colSkin.style.width = r_colSkin.pct + '%'; const v_colSkin = $('colSkinVal'); if (v_colSkin) v_colSkin.textContent = r_colSkin.txt; const w_colSkin = $('colSkinWrap'); if (w_colSkin) { w_colSkin.classList.remove('g-good','g-warn','g-bad'); if (r_colSkin.cls) w_colSkin.classList.add(r_colSkin.cls); w_colSkin.classList.toggle('danger', !!r_colSkin.danger); }
+    const r_colPet = colPet(ownedPets.length, PET_DEF.length); const f_colPet = $('colPetFill'); if (f_colPet) f_colPet.style.width = r_colPet.pct + '%'; const v_colPet = $('colPetVal'); if (v_colPet) v_colPet.textContent = r_colPet.txt; const w_colPet = $('colPetWrap'); if (w_colPet) { w_colPet.classList.remove('g-good','g-warn','g-bad'); if (r_colPet.cls) w_colPet.classList.add(r_colPet.cls); w_colPet.classList.toggle('danger', !!r_colPet.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -16866,6 +16873,16 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 0.2) { cls = 'g-bad'; danger = true; } else if (val < 0.5) { cls = 'g-warn'; }
     return { pct: pct, txt: '皮肤收藏度 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— colPet：宠物收藏度（收藏/养成完成度 0~1，越高越好）——
+  function colPetText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0 || nb === 0) return { pct: 0, txt: '宠物收藏度 —', cls: 'g-good', danger: false };
+    const val = na / nb;
+    const pct = Math.max(0, Math.min(100, Math.round(val * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 0.2) { cls = 'g-bad'; danger = true; } else if (val < 0.5) { cls = 'g-warn'; }
+    return { pct: pct, txt: '宠物收藏度 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -18707,7 +18724,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V14.17', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V14.18', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -20401,6 +20418,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       rptPerGameStateNow: (a, b) => rptPerGameText(a, b), rptPerGameANow: () => career.bestScore, rptPerGameBNow: () => Math.max(1, career.games), rptPerGameFillNow: () => { const f = $('rptPerGameFill'); return f ? f.style.width : ''; }, rptPerGameDangerNow: () => { const w = $('rptPerGameWrap'); return !!(w && w.classList.contains('danger')); },
       rptPerSecStateNow: (a, b) => rptPerSecText(a, b), rptPerSecANow: () => career.bestScore, rptPerSecBNow: () => Math.max(1, career.playSec), rptPerSecFillNow: () => { const f = $('rptPerSecFill'); return f ? f.style.width : ''; }, rptPerSecDangerNow: () => { const w = $('rptPerSecWrap'); return !!(w && w.classList.contains('danger')); },
       colSkinStateNow: (a, b) => colSkinText(a, b), colSkinANow: () => ownedSkins.length, colSkinBNow: () => SKIN_LIST.length, colSkinFillNow: () => { const f = $('colSkinFill'); return f ? f.style.width : ''; }, colSkinDangerNow: () => { const w = $('colSkinWrap'); return !!(w && w.classList.contains('danger')); },
+      colPetStateNow: (a, b) => colPetText(a, b), colPetANow: () => ownedPets.length, colPetBNow: () => PET_DEF.length, colPetFillNow: () => { const f = $('colPetFill'); return f ? f.style.width : ''; }, colPetDangerNow: () => { const w = $('colPetWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
