@@ -3832,6 +3832,11 @@
   #rptDailyWrap.g-good .pfill { background:#2ecc71; }
   #rptDailyWrap.g-warn .pfill { background:#f1c40f; }
   #rptDailyWrap.g-bad .pfill { background:#e74c3c; }
+  #rptTimedWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #rptTimedWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #rptTimedWrap.g-good .pfill { background:#2ecc71; }
+  #rptTimedWrap.g-warn .pfill { background:#f1c40f; }
+  #rptTimedWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -4539,6 +4544,7 @@
     <div class="pill m-hide" id="recStarWrap"><span class="k">⭐</span><i class="pbar"><i class="pfill" id="recStarFill"></i></i><span class="v" id="recStarVal">—</span></div>
     <div class="pill m-hide" id="recKillWrap"><span class="k">💀</span><i class="pbar"><i class="pfill" id="recKillFill"></i></i><span class="v" id="recKillVal">—</span></div>
     <div class="pill m-hide" id="rptDailyWrap"><span class="k">📅</span><i class="pbar"><i class="pfill" id="rptDailyFill"></i></i><span class="v" id="rptDailyVal">—</span></div>
+    <div class="pill m-hide" id="rptTimedWrap"><span class="k">⏱️</span><i class="pbar"><i class="pfill" id="rptTimedFill"></i></i><span class="v" id="rptTimedVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -4914,7 +4920,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V14.09</div>
+  <div id="mark">DESIGNED BY QIAN · V14.10</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -10423,6 +10429,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_recStar = recStar(career.totalStars, Math.max(1, career.games) * 2); const f_recStar = $('recStarFill'); if (f_recStar) f_recStar.style.width = r_recStar.pct + '%'; const v_recStar = $('recStarVal'); if (v_recStar) v_recStar.textContent = r_recStar.txt; const w_recStar = $('recStarWrap'); if (w_recStar) { w_recStar.classList.remove('g-good','g-warn','g-bad'); if (r_recStar.cls) w_recStar.classList.add(r_recStar.cls); w_recStar.classList.toggle('danger', !!r_recStar.danger); }
     const r_recKill = recKill(career.kills, Math.max(1, career.games) * 8); const f_recKill = $('recKillFill'); if (f_recKill) f_recKill.style.width = r_recKill.pct + '%'; const v_recKill = $('recKillVal'); if (v_recKill) v_recKill.textContent = r_recKill.txt; const w_recKill = $('recKillWrap'); if (w_recKill) { w_recKill.classList.remove('g-good','g-warn','g-bad'); if (r_recKill.cls) w_recKill.classList.add(r_recKill.cls); w_recKill.classList.toggle('danger', !!r_recKill.danger); }
     const r_rptDaily = rptDaily(career.bestDaily, Math.max(1, career.bestScore)); const f_rptDaily = $('rptDailyFill'); if (f_rptDaily) f_rptDaily.style.width = r_rptDaily.pct + '%'; const v_rptDaily = $('rptDailyVal'); if (v_rptDaily) v_rptDaily.textContent = r_rptDaily.txt; const w_rptDaily = $('rptDailyWrap'); if (w_rptDaily) { w_rptDaily.classList.remove('g-good','g-warn','g-bad'); if (r_rptDaily.cls) w_rptDaily.classList.add(r_rptDaily.cls); w_rptDaily.classList.toggle('danger', !!r_rptDaily.danger); }
+    const r_rptTimed = rptTimed(career.bestTimed, Math.max(1, career.bestScore)); const f_rptTimed = $('rptTimedFill'); if (f_rptTimed) f_rptTimed.style.width = r_rptTimed.pct + '%'; const v_rptTimed = $('rptTimedVal'); if (v_rptTimed) v_rptTimed.textContent = r_rptTimed.txt; const w_rptTimed = $('rptTimedWrap'); if (w_rptTimed) { w_rptTimed.classList.remove('g-good','g-warn','g-bad'); if (r_rptTimed.cls) w_rptTimed.classList.add(r_rptTimed.cls); w_rptTimed.classList.toggle('danger', !!r_rptTimed.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -16730,6 +16737,16 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 0.8) { cls = 'g-bad'; danger = true; } else if (val < 1.2) { cls = 'g-warn'; }
     return { pct: pct, txt: '每日纪录强度 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— rptTimed：计时纪录强度（越高越好）——
+  function rptTimedText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0 || nb === 0) return { pct: 0, txt: '计时纪录强度 —', cls: 'g-good', danger: false };
+    const val = na / nb;
+    const pct = Math.max(0, Math.min(100, Math.round(val / 2 * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 0.8) { cls = 'g-bad'; danger = true; } else if (val < 1.2) { cls = 'g-warn'; }
+    return { pct: pct, txt: '计时纪录强度 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -18571,7 +18588,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V14.09', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V14.10', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -20257,6 +20274,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       recStarStateNow: (a, b) => recStarText(a, b), recStarANow: () => career.totalStars, recStarBNow: () => Math.max(1, career.games) * 2, recStarFillNow: () => { const f = $('recStarFill'); return f ? f.style.width : ''; }, recStarDangerNow: () => { const w = $('recStarWrap'); return !!(w && w.classList.contains('danger')); },
       recKillStateNow: (a, b) => recKillText(a, b), recKillANow: () => career.kills, recKillBNow: () => Math.max(1, career.games) * 8, recKillFillNow: () => { const f = $('recKillFill'); return f ? f.style.width : ''; }, recKillDangerNow: () => { const w = $('recKillWrap'); return !!(w && w.classList.contains('danger')); },
       rptDailyStateNow: (a, b) => rptDailyText(a, b), rptDailyANow: () => career.bestDaily, rptDailyBNow: () => Math.max(1, career.bestScore), rptDailyFillNow: () => { const f = $('rptDailyFill'); return f ? f.style.width : ''; }, rptDailyDangerNow: () => { const w = $('rptDailyWrap'); return !!(w && w.classList.contains('danger')); },
+      rptTimedStateNow: (a, b) => rptTimedText(a, b), rptTimedANow: () => career.bestTimed, rptTimedBNow: () => Math.max(1, career.bestScore), rptTimedFillNow: () => { const f = $('rptTimedFill'); return f ? f.style.width : ''; }, rptTimedDangerNow: () => { const w = $('rptTimedWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
