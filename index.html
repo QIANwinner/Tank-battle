@@ -3692,6 +3692,11 @@
   #careerCoinPerHitWrap.g-good .pfill { background:#2ecc71; }
   #careerCoinPerHitWrap.g-warn .pfill { background:#f1c40f; }
   #careerCoinPerHitWrap.g-bad .pfill { background:#e74c3c; }
+  #careerKillPerStarWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #careerKillPerStarWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #careerKillPerStarWrap.g-good .pfill { background:#2ecc71; }
+  #careerKillPerStarWrap.g-warn .pfill { background:#f1c40f; }
+  #careerKillPerStarWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -4371,6 +4376,7 @@
     <div class="pill m-hide" id="careerBossPerDeathWrap"><span class="k">👑</span><i class="pbar"><i class="pfill" id="careerBossPerDeathFill"></i></i><span class="v" id="careerBossPerDeathVal">—</span></div>
     <div class="pill m-hide" id="careerCoinPerShotWrap"><span class="k">🔫</span><i class="pbar"><i class="pfill" id="careerCoinPerShotFill"></i></i><span class="v" id="careerCoinPerShotVal">—</span></div>
     <div class="pill m-hide" id="careerCoinPerHitWrap"><span class="k">🎯</span><i class="pbar"><i class="pfill" id="careerCoinPerHitFill"></i></i><span class="v" id="careerCoinPerHitVal">—</span></div>
+    <div class="pill m-hide" id="careerKillPerStarWrap"><span class="k">📈</span><i class="pbar"><i class="pfill" id="careerKillPerStarFill"></i></i><span class="v" id="careerKillPerStarVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -4746,7 +4752,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V13.81</div>
+  <div id="mark">DESIGNED BY QIAN · V13.82</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -10227,6 +10233,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_careerBossPerDeathText = careerBossPerDeathText(career.bossKills / Math.max(1, career.deaths), 0.5); const f_careerBossPerDeathText = $('careerBossPerDeathFill'); if (f_careerBossPerDeathText) f_careerBossPerDeathText.style.width = r_careerBossPerDeathText.pct + '%'; const v_careerBossPerDeathText = $('careerBossPerDeathVal'); if (v_careerBossPerDeathText) v_careerBossPerDeathText.textContent = r_careerBossPerDeathText.txt; const w_careerBossPerDeathText = $('careerBossPerDeathWrap'); if (w_careerBossPerDeathText) { w_careerBossPerDeathText.classList.remove('g-good','g-warn','g-bad'); if (r_careerBossPerDeathText.cls) w_careerBossPerDeathText.classList.add(r_careerBossPerDeathText.cls); w_careerBossPerDeathText.classList.toggle('danger', !!r_careerBossPerDeathText.danger); }
     const r_careerCoinPerShotText = careerCoinPerShotText(career.totalCoins / Math.max(1, career.shots), 5); const f_careerCoinPerShotText = $('careerCoinPerShotFill'); if (f_careerCoinPerShotText) f_careerCoinPerShotText.style.width = r_careerCoinPerShotText.pct + '%'; const v_careerCoinPerShotText = $('careerCoinPerShotVal'); if (v_careerCoinPerShotText) v_careerCoinPerShotText.textContent = r_careerCoinPerShotText.txt; const w_careerCoinPerShotText = $('careerCoinPerShotWrap'); if (w_careerCoinPerShotText) { w_careerCoinPerShotText.classList.remove('g-good','g-warn','g-bad'); if (r_careerCoinPerShotText.cls) w_careerCoinPerShotText.classList.add(r_careerCoinPerShotText.cls); w_careerCoinPerShotText.classList.toggle('danger', !!r_careerCoinPerShotText.danger); }
     const r_careerCoinPerHitText = careerCoinPerHitText(career.totalCoins / Math.max(1, career.hits), 30); const f_careerCoinPerHitText = $('careerCoinPerHitFill'); if (f_careerCoinPerHitText) f_careerCoinPerHitText.style.width = r_careerCoinPerHitText.pct + '%'; const v_careerCoinPerHitText = $('careerCoinPerHitVal'); if (v_careerCoinPerHitText) v_careerCoinPerHitText.textContent = r_careerCoinPerHitText.txt; const w_careerCoinPerHitText = $('careerCoinPerHitWrap'); if (w_careerCoinPerHitText) { w_careerCoinPerHitText.classList.remove('g-good','g-warn','g-bad'); if (r_careerCoinPerHitText.cls) w_careerCoinPerHitText.classList.add(r_careerCoinPerHitText.cls); w_careerCoinPerHitText.classList.toggle('danger', !!r_careerCoinPerHitText.danger); }
+    const r_careerKillPerStarText = careerKillPerStarText(career.kills / Math.max(1, career.totalStars), 3); const f_careerKillPerStarText = $('careerKillPerStarFill'); if (f_careerKillPerStarText) f_careerKillPerStarText.style.width = r_careerKillPerStarText.pct + '%'; const v_careerKillPerStarText = $('careerKillPerStarVal'); if (v_careerKillPerStarText) v_careerKillPerStarText.textContent = r_careerKillPerStarText.txt; const w_careerKillPerStarText = $('careerKillPerStarWrap'); if (w_careerKillPerStarText) { w_careerKillPerStarText.classList.remove('g-good','g-warn','g-bad'); if (r_careerKillPerStarText.cls) w_careerKillPerStarText.classList.add(r_careerKillPerStarText.cls); w_careerKillPerStarText.classList.toggle('danger', !!r_careerKillPerStarText.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -16254,6 +16261,16 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 0.8) { cls = 'g-bad'; danger = true; } else if (val < 1.2) { cls = 'g-warn'; }
     return { pct: pct, txt: '生涯命中回报 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— careerKillPerStar：生涯星杀比（越高越好）——
+  function careerKillPerStarText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0 || nb === 0) return { pct: 0, txt: '生涯星杀比 —', cls: 'g-good', danger: false };
+    const val = na / nb;
+    const pct = Math.max(0, Math.min(100, Math.round(val / 2 * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 0.8) { cls = 'g-bad'; danger = true; } else if (val < 1.2) { cls = 'g-warn'; }
+    return { pct: pct, txt: '生涯星杀比 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -18095,7 +18112,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V13.81', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V13.82', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -19753,6 +19770,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       careerBossPerDeathStateNow: (a, b) => careerBossPerDeathText(a, b), careerBossPerDeathANow: () => career.bossKills / Math.max(1, career.deaths), careerBossPerDeathBNow: () => 0.5, careerBossPerDeathFillNow: () => { const f = $('careerBossPerDeathFill'); return f ? f.style.width : ''; }, careerBossPerDeathDangerNow: () => { const w = $('careerBossPerDeathWrap'); return !!(w && w.classList.contains('danger')); },
       careerCoinPerShotStateNow: (a, b) => careerCoinPerShotText(a, b), careerCoinPerShotANow: () => career.totalCoins / Math.max(1, career.shots), careerCoinPerShotBNow: () => 5, careerCoinPerShotFillNow: () => { const f = $('careerCoinPerShotFill'); return f ? f.style.width : ''; }, careerCoinPerShotDangerNow: () => { const w = $('careerCoinPerShotWrap'); return !!(w && w.classList.contains('danger')); },
       careerCoinPerHitStateNow: (a, b) => careerCoinPerHitText(a, b), careerCoinPerHitANow: () => career.totalCoins / Math.max(1, career.hits), careerCoinPerHitBNow: () => 30, careerCoinPerHitFillNow: () => { const f = $('careerCoinPerHitFill'); return f ? f.style.width : ''; }, careerCoinPerHitDangerNow: () => { const w = $('careerCoinPerHitWrap'); return !!(w && w.classList.contains('danger')); },
+      careerKillPerStarStateNow: (a, b) => careerKillPerStarText(a, b), careerKillPerStarANow: () => career.kills / Math.max(1, career.totalStars), careerKillPerStarBNow: () => 3, careerKillPerStarFillNow: () => { const f = $('careerKillPerStarFill'); return f ? f.style.width : ''; }, careerKillPerStarDangerNow: () => { const w = $('careerKillPerStarWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
