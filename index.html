@@ -3632,6 +3632,11 @@
   #resHurtWrap.g-good .pfill { background:#2ecc71; }
   #resHurtWrap.g-warn .pfill { background:#f1c40f; }
   #resHurtWrap.g-bad .pfill { background:#e74c3c; }
+  #resReviveWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #resReviveWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #resReviveWrap.g-good .pfill { background:#2ecc71; }
+  #resReviveWrap.g-warn .pfill { background:#f1c40f; }
+  #resReviveWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -4299,6 +4304,7 @@
     <div class="pill m-hide" id="benchWaveWrap"><span class="k">🌊</span><i class="pbar"><i class="pfill" id="benchWaveFill"></i></i><span class="v" id="benchWaveVal">—</span></div>
     <div class="pill m-hide" id="benchComboWrap"><span class="k">🔥</span><i class="pbar"><i class="pfill" id="benchComboFill"></i></i><span class="v" id="benchComboVal">—</span></div>
     <div class="pill m-hide" id="resHurtWrap"><span class="k">💢</span><i class="pbar"><i class="pfill" id="resHurtFill"></i></i><span class="v" id="resHurtVal">—</span></div>
+    <div class="pill m-hide" id="resReviveWrap"><span class="k">♻️</span><i class="pbar"><i class="pfill" id="resReviveFill"></i></i><span class="v" id="resReviveVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -4674,7 +4680,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V13.69</div>
+  <div id="mark">DESIGNED BY QIAN · V13.70</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -10143,6 +10149,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_benchWaveText = benchWaveText(wave / Math.max(1, playSecRun), 0.04); const f_benchWaveText = $('benchWaveFill'); if (f_benchWaveText) f_benchWaveText.style.width = r_benchWaveText.pct + '%'; const v_benchWaveText = $('benchWaveVal'); if (v_benchWaveText) v_benchWaveText.textContent = r_benchWaveText.txt; const w_benchWaveText = $('benchWaveWrap'); if (w_benchWaveText) { w_benchWaveText.classList.remove('g-good','g-warn','g-bad'); if (r_benchWaveText.cls) w_benchWaveText.classList.add(r_benchWaveText.cls); w_benchWaveText.classList.toggle('danger', !!r_benchWaveText.danger); }
     const r_benchComboText = benchComboText(stat.maxCombo / Math.max(1, wave), 6); const f_benchComboText = $('benchComboFill'); if (f_benchComboText) f_benchComboText.style.width = r_benchComboText.pct + '%'; const v_benchComboText = $('benchComboVal'); if (v_benchComboText) v_benchComboText.textContent = r_benchComboText.txt; const w_benchComboText = $('benchComboWrap'); if (w_benchComboText) { w_benchComboText.classList.remove('g-good','g-warn','g-bad'); if (r_benchComboText.cls) w_benchComboText.classList.add(r_benchComboText.cls); w_benchComboText.classList.toggle('danger', !!r_benchComboText.danger); }
     const r_resHurtText = resHurtText(hurtCount / Math.max(1, playSecRun), 0.5); const f_resHurtText = $('resHurtFill'); if (f_resHurtText) f_resHurtText.style.width = r_resHurtText.pct + '%'; const v_resHurtText = $('resHurtVal'); if (v_resHurtText) v_resHurtText.textContent = r_resHurtText.txt; const w_resHurtText = $('resHurtWrap'); if (w_resHurtText) { w_resHurtText.classList.remove('g-good','g-warn','g-bad'); if (r_resHurtText.cls) w_resHurtText.classList.add(r_resHurtText.cls); w_resHurtText.classList.toggle('danger', !!r_resHurtText.danger); }
+    const r_resReviveText = resReviveText(reviveCount / Math.max(1, wave), 0.2); const f_resReviveText = $('resReviveFill'); if (f_resReviveText) f_resReviveText.style.width = r_resReviveText.pct + '%'; const v_resReviveText = $('resReviveVal'); if (v_resReviveText) v_resReviveText.textContent = r_resReviveText.txt; const w_resReviveText = $('resReviveWrap'); if (w_resReviveText) { w_resReviveText.classList.remove('g-good','g-warn','g-bad'); if (r_resReviveText.cls) w_resReviveText.classList.add(r_resReviveText.cls); w_resReviveText.classList.toggle('danger', !!r_resReviveText.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -16050,6 +16057,16 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val > 1.2) { cls = 'g-bad'; danger = true; } else if (val > 0.8) { cls = 'g-warn'; }
     return { pct: pct, txt: '受击压力 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— resRevive：复活依赖（越高越差）——
+  function resReviveText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0 || nb === 0) return { pct: 0, txt: '复活依赖 —', cls: 'g-good', danger: false };
+    const val = na / nb;
+    const pct = Math.max(0, Math.min(100, Math.round(val / 2 * 100)));
+    let cls = 'g-good', danger = false;
+    if (val > 1.2) { cls = 'g-bad'; danger = true; } else if (val > 0.8) { cls = 'g-warn'; }
+    return { pct: pct, txt: '复活依赖 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -17891,7 +17908,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V13.69', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V13.70', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -19537,6 +19554,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       benchWaveStateNow: (a, b) => benchWaveText(a, b), benchWaveANow: () => wave / Math.max(1, playSecRun), benchWaveBNow: () => 0.04, benchWaveFillNow: () => { const f = $('benchWaveFill'); return f ? f.style.width : ''; }, benchWaveDangerNow: () => { const w = $('benchWaveWrap'); return !!(w && w.classList.contains('danger')); },
       benchComboStateNow: (a, b) => benchComboText(a, b), benchComboANow: () => stat.maxCombo / Math.max(1, wave), benchComboBNow: () => 6, benchComboFillNow: () => { const f = $('benchComboFill'); return f ? f.style.width : ''; }, benchComboDangerNow: () => { const w = $('benchComboWrap'); return !!(w && w.classList.contains('danger')); },
       resHurtStateNow: (a, b) => resHurtText(a, b), resHurtANow: () => hurtCount / Math.max(1, playSecRun), resHurtBNow: () => 0.5, resHurtFillNow: () => { const f = $('resHurtFill'); return f ? f.style.width : ''; }, resHurtDangerNow: () => { const w = $('resHurtWrap'); return !!(w && w.classList.contains('danger')); },
+      resReviveStateNow: (a, b) => resReviveText(a, b), resReviveANow: () => reviveCount / Math.max(1, wave), resReviveBNow: () => 0.2, resReviveFillNow: () => { const f = $('resReviveFill'); return f ? f.style.width : ''; }, resReviveDangerNow: () => { const w = $('resReviveWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
