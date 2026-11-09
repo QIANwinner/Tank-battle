@@ -3542,6 +3542,11 @@
   #hurtUpgWrap.g-good .pfill { background:#2ecc71; }
   #hurtUpgWrap.g-warn .pfill { background:#f1c40f; }
   #hurtUpgWrap.g-bad .pfill { background:#e74c3c; }
+  #upgHitWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #upgHitWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #upgHitWrap.g-good .pfill { background:#2ecc71; }
+  #upgHitWrap.g-warn .pfill { background:#f1c40f; }
+  #upgHitWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -4191,6 +4196,7 @@
     <div class="pill m-hide" id="shotScoreWrap"><span class="k">🎯</span><i class="pbar"><i class="pfill" id="shotScoreFill"></i></i><span class="v" id="shotScoreVal">—</span></div>
     <div class="pill m-hide" id="hitPuWrap"><span class="k">🧲</span><i class="pbar"><i class="pfill" id="hitPuFill"></i></i><span class="v" id="hitPuVal">—</span></div>
     <div class="pill m-hide" id="hurtUpgWrap"><span class="k">🛠️</span><i class="pbar"><i class="pfill" id="hurtUpgFill"></i></i><span class="v" id="hurtUpgVal">—</span></div>
+    <div class="pill m-hide" id="upgHitWrap"><span class="k">📈</span><i class="pbar"><i class="pfill" id="upgHitFill"></i></i><span class="v" id="upgHitVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -4566,7 +4572,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V13.51</div>
+  <div id="mark">DESIGNED BY QIAN · V13.52</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -10017,6 +10023,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_shotScoreText = shotScoreText(score, Math.max(1, stat.shots)); const f_shotScoreText = $('shotScoreFill'); if (f_shotScoreText) f_shotScoreText.style.width = r_shotScoreText.pct + '%'; const v_shotScoreText = $('shotScoreVal'); if (v_shotScoreText) v_shotScoreText.textContent = r_shotScoreText.txt; const w_shotScoreText = $('shotScoreWrap'); if (w_shotScoreText) { w_shotScoreText.classList.remove('g-good','g-warn','g-bad'); if (r_shotScoreText.cls) w_shotScoreText.classList.add(r_shotScoreText.cls); w_shotScoreText.classList.toggle('danger', !!r_shotScoreText.danger); }
     const r_hitPuText = hitPuText(runPowerups, Math.max(1, stat.hits)); const f_hitPuText = $('hitPuFill'); if (f_hitPuText) f_hitPuText.style.width = r_hitPuText.pct + '%'; const v_hitPuText = $('hitPuVal'); if (v_hitPuText) v_hitPuText.textContent = r_hitPuText.txt; const w_hitPuText = $('hitPuWrap'); if (w_hitPuText) { w_hitPuText.classList.remove('g-good','g-warn','g-bad'); if (r_hitPuText.cls) w_hitPuText.classList.add(r_hitPuText.cls); w_hitPuText.classList.toggle('danger', !!r_hitPuText.danger); }
     const r_hurtUpgText = hurtUpgText(upgTotal, Math.max(1, hurtCount)); const f_hurtUpgText = $('hurtUpgFill'); if (f_hurtUpgText) f_hurtUpgText.style.width = r_hurtUpgText.pct + '%'; const v_hurtUpgText = $('hurtUpgVal'); if (v_hurtUpgText) v_hurtUpgText.textContent = r_hurtUpgText.txt; const w_hurtUpgText = $('hurtUpgWrap'); if (w_hurtUpgText) { w_hurtUpgText.classList.remove('g-good','g-warn','g-bad'); if (r_hurtUpgText.cls) w_hurtUpgText.classList.add(r_hurtUpgText.cls); w_hurtUpgText.classList.toggle('danger', !!r_hurtUpgText.danger); }
+    const r_upgHitText = upgHitText(stat.hits, Math.max(1, upgTotal)); const f_upgHitText = $('upgHitFill'); if (f_upgHitText) f_upgHitText.style.width = r_upgHitText.pct + '%'; const v_upgHitText = $('upgHitVal'); if (v_upgHitText) v_upgHitText.textContent = r_upgHitText.txt; const w_upgHitText = $('upgHitWrap'); if (w_upgHitText) { w_upgHitText.classList.remove('g-good','g-warn','g-bad'); if (r_upgHitText.cls) w_upgHitText.classList.add(r_upgHitText.cls); w_upgHitText.classList.toggle('danger', !!r_upgHitText.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -15744,6 +15751,16 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 0.8) { cls = 'g-bad'; danger = true; } else if (val < 1.2) { cls = 'g-warn'; }
     return { pct: pct, txt: '受击强化比 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— upgHit：强化命中比（攻防转化与资源效率，a/b 比值）——
+  function upgHitText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0 || nb === 0) return { pct: 0, txt: '强化命中比 —', cls: 'g-good', danger: false };
+    const val = na / nb;
+    const pct = Math.max(0, Math.min(100, Math.round(val / 2 * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 0.8) { cls = 'g-bad'; danger = true; } else if (val < 1.2) { cls = 'g-warn'; }
+    return { pct: pct, txt: '强化命中比 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -17585,7 +17602,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V13.51', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V13.52', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -19213,6 +19230,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       shotScoreStateNow: (a, b) => shotScoreText(a, b), shotScoreANow: () => score, shotScoreBNow: () => Math.max(1, stat.shots), shotScoreFillNow: () => { const f = $('shotScoreFill'); return f ? f.style.width : ''; }, shotScoreDangerNow: () => { const w = $('shotScoreWrap'); return !!(w && w.classList.contains('danger')); },
       hitPuStateNow: (a, b) => hitPuText(a, b), hitPuANow: () => runPowerups, hitPuBNow: () => Math.max(1, stat.hits), hitPuFillNow: () => { const f = $('hitPuFill'); return f ? f.style.width : ''; }, hitPuDangerNow: () => { const w = $('hitPuWrap'); return !!(w && w.classList.contains('danger')); },
       hurtUpgStateNow: (a, b) => hurtUpgText(a, b), hurtUpgANow: () => upgTotal, hurtUpgBNow: () => Math.max(1, hurtCount), hurtUpgFillNow: () => { const f = $('hurtUpgFill'); return f ? f.style.width : ''; }, hurtUpgDangerNow: () => { const w = $('hurtUpgWrap'); return !!(w && w.classList.contains('danger')); },
+      upgHitStateNow: (a, b) => upgHitText(a, b), upgHitANow: () => stat.hits, upgHitBNow: () => Math.max(1, upgTotal), upgHitFillNow: () => { const f = $('upgHitFill'); return f ? f.style.width : ''; }, upgHitDangerNow: () => { const w = $('upgHitWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
