@@ -11731,6 +11731,22 @@ async function main() {
     t('U4112 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=4107;k<=4112;k++) t('U'+k+' 本局每射击得分',false,e.message); }
 
+
+  // ===== U4113~U4118: 本局每波升级(v0.12.91) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runUpgPerWaveWrap'),st:T.runUpgPerWaveStateNow(20,10)});})()"));
+    t('U4113 本局每波升级 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U4114 正常 20/10→升级 2/波 100%', o.st.pct === 100 && o.st.txt === '升级 2/波' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runUpgPerWaveStateNow(0,10).pct,b:T.runUpgPerWaveStateNow(10,10).pct,c:T.runUpgPerWaveStateNow(20,10).pct,d:T.runUpgPerWaveStateNow(10,10).cls});})()"));
+    t('U4115 边界 0→0/10/10→50%/20/10→100%', o2.a === 0 && o2.b === 50 && o2.c === 100 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runUpgPerWaveStateNow(-1,10).pct,b:T.runUpgPerWaveStateNow(NaN,10).pct,c:T.runUpgPerWaveStateNow(20,0).pct,d:T.runUpgPerWaveStateNow(20,-1).pct});})()"));
+    t('U4116 非法/空值/零分母/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runUpgPerWaveStateNow('20','10').pct);})()"));
+    t('U4117 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.runUpgPerWaveFillNow()==='string',d:typeof T.runUpgPerWaveDangerNow()==='boolean',a:T.runUpgPerWaveANow(),b:T.runUpgPerWaveBNow()});})()"));
+    t('U4118 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=4113;k<=4118;k++) t('U'+k+' 本局每波升级',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
