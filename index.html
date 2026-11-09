@@ -3577,6 +3577,11 @@
   #reviveHurtWrap.g-good .pfill { background:#2ecc71; }
   #reviveHurtWrap.g-warn .pfill { background:#f1c40f; }
   #reviveHurtWrap.g-bad .pfill { background:#e74c3c; }
+  #reviveShotWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #reviveShotWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #reviveShotWrap.g-good .pfill { background:#2ecc71; }
+  #reviveShotWrap.g-warn .pfill { background:#f1c40f; }
+  #reviveShotWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -4233,6 +4238,7 @@
     <div class="pill m-hide" id="lifeUpgWrap"><span class="k">🛠️</span><i class="pbar"><i class="pfill" id="lifeUpgFill"></i></i><span class="v" id="lifeUpgVal">—</span></div>
     <div class="pill m-hide" id="waveHurtWrap"><span class="k">🌊</span><i class="pbar"><i class="pfill" id="waveHurtFill"></i></i><span class="v" id="waveHurtVal">—</span></div>
     <div class="pill m-hide" id="reviveHurtWrap"><span class="k">♻️</span><i class="pbar"><i class="pfill" id="reviveHurtFill"></i></i><span class="v" id="reviveHurtVal">—</span></div>
+    <div class="pill m-hide" id="reviveShotWrap"><span class="k">🔄</span><i class="pbar"><i class="pfill" id="reviveShotFill"></i></i><span class="v" id="reviveShotVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -4608,7 +4614,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V13.58</div>
+  <div id="mark">DESIGNED BY QIAN · V13.59</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -10066,6 +10072,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_lifeUpgText = lifeUpgText(upgTotal, Math.max(1, lives)); const f_lifeUpgText = $('lifeUpgFill'); if (f_lifeUpgText) f_lifeUpgText.style.width = r_lifeUpgText.pct + '%'; const v_lifeUpgText = $('lifeUpgVal'); if (v_lifeUpgText) v_lifeUpgText.textContent = r_lifeUpgText.txt; const w_lifeUpgText = $('lifeUpgWrap'); if (w_lifeUpgText) { w_lifeUpgText.classList.remove('g-good','g-warn','g-bad'); if (r_lifeUpgText.cls) w_lifeUpgText.classList.add(r_lifeUpgText.cls); w_lifeUpgText.classList.toggle('danger', !!r_lifeUpgText.danger); }
     const r_waveHurtText = waveHurtText(hurtCount, Math.max(1, wave)); const f_waveHurtText = $('waveHurtFill'); if (f_waveHurtText) f_waveHurtText.style.width = r_waveHurtText.pct + '%'; const v_waveHurtText = $('waveHurtVal'); if (v_waveHurtText) v_waveHurtText.textContent = r_waveHurtText.txt; const w_waveHurtText = $('waveHurtWrap'); if (w_waveHurtText) { w_waveHurtText.classList.remove('g-good','g-warn','g-bad'); if (r_waveHurtText.cls) w_waveHurtText.classList.add(r_waveHurtText.cls); w_waveHurtText.classList.toggle('danger', !!r_waveHurtText.danger); }
     const r_reviveHurtText = reviveHurtText(hurtCount, Math.max(1, reviveCount)); const f_reviveHurtText = $('reviveHurtFill'); if (f_reviveHurtText) f_reviveHurtText.style.width = r_reviveHurtText.pct + '%'; const v_reviveHurtText = $('reviveHurtVal'); if (v_reviveHurtText) v_reviveHurtText.textContent = r_reviveHurtText.txt; const w_reviveHurtText = $('reviveHurtWrap'); if (w_reviveHurtText) { w_reviveHurtText.classList.remove('g-good','g-warn','g-bad'); if (r_reviveHurtText.cls) w_reviveHurtText.classList.add(r_reviveHurtText.cls); w_reviveHurtText.classList.toggle('danger', !!r_reviveHurtText.danger); }
+    const r_reviveShotText = reviveShotText(stat.shots, Math.max(1, reviveCount)); const f_reviveShotText = $('reviveShotFill'); if (f_reviveShotText) f_reviveShotText.style.width = r_reviveShotText.pct + '%'; const v_reviveShotText = $('reviveShotVal'); if (v_reviveShotText) v_reviveShotText.textContent = r_reviveShotText.txt; const w_reviveShotText = $('reviveShotWrap'); if (w_reviveShotText) { w_reviveShotText.classList.remove('g-good','g-warn','g-bad'); if (r_reviveShotText.cls) w_reviveShotText.classList.add(r_reviveShotText.cls); w_reviveShotText.classList.toggle('danger', !!r_reviveShotText.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -15863,6 +15870,16 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val > 1.2) { cls = 'g-bad'; danger = true; } else if (val > 0.8) { cls = 'g-warn'; }
     return { pct: pct, txt: '复活受击比 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— reviveShot：复活射击比（每单位投入产出，a/b 比值）——
+  function reviveShotText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0 || nb === 0) return { pct: 0, txt: '复活射击比 —', cls: 'g-good', danger: false };
+    const val = na / nb;
+    const pct = Math.max(0, Math.min(100, Math.round(val / 2 * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 0.8) { cls = 'g-bad'; danger = true; } else if (val < 1.2) { cls = 'g-warn'; }
+    return { pct: pct, txt: '复活射击比 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -17704,7 +17721,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V13.58', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V13.59', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -19339,6 +19356,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       lifeUpgStateNow: (a, b) => lifeUpgText(a, b), lifeUpgANow: () => upgTotal, lifeUpgBNow: () => Math.max(1, lives), lifeUpgFillNow: () => { const f = $('lifeUpgFill'); return f ? f.style.width : ''; }, lifeUpgDangerNow: () => { const w = $('lifeUpgWrap'); return !!(w && w.classList.contains('danger')); },
       waveHurtStateNow: (a, b) => waveHurtText(a, b), waveHurtANow: () => hurtCount, waveHurtBNow: () => Math.max(1, wave), waveHurtFillNow: () => { const f = $('waveHurtFill'); return f ? f.style.width : ''; }, waveHurtDangerNow: () => { const w = $('waveHurtWrap'); return !!(w && w.classList.contains('danger')); },
       reviveHurtStateNow: (a, b) => reviveHurtText(a, b), reviveHurtANow: () => hurtCount, reviveHurtBNow: () => Math.max(1, reviveCount), reviveHurtFillNow: () => { const f = $('reviveHurtFill'); return f ? f.style.width : ''; }, reviveHurtDangerNow: () => { const w = $('reviveHurtWrap'); return !!(w && w.classList.contains('danger')); },
+      reviveShotStateNow: (a, b) => reviveShotText(a, b), reviveShotANow: () => stat.shots, reviveShotBNow: () => Math.max(1, reviveCount), reviveShotFillNow: () => { const f = $('reviveShotFill'); return f ? f.style.width : ''; }, reviveShotDangerNow: () => { const w = $('reviveShotWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
