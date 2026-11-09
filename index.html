@@ -3982,6 +3982,11 @@
   #bftEnemyWrap.g-good .pfill { background:#2ecc71; }
   #bftEnemyWrap.g-warn .pfill { background:#f1c40f; }
   #bftEnemyWrap.g-bad .pfill { background:#e74c3c; }
+  #bftAccWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #bftAccWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #bftAccWrap.g-good .pfill { background:#2ecc71; }
+  #bftAccWrap.g-warn .pfill { background:#f1c40f; }
+  #bftAccWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -4719,6 +4724,7 @@
     <div class="pill m-hide" id="bftMagnetWrap"><span class="k">🧲</span><i class="pbar"><i class="pfill" id="bftMagnetFill"></i></i><span class="v" id="bftMagnetVal">—</span></div>
     <div class="pill m-hide" id="bftBossWrap"><span class="k">👑</span><i class="pbar"><i class="pfill" id="bftBossFill"></i></i><span class="v" id="bftBossVal">—</span></div>
     <div class="pill m-hide" id="bftEnemyWrap"><span class="k">👾</span><i class="pbar"><i class="pfill" id="bftEnemyFill"></i></i><span class="v" id="bftEnemyVal">—</span></div>
+    <div class="pill m-hide" id="bftAccWrap"><span class="k">🎯</span><i class="pbar"><i class="pfill" id="bftAccFill"></i></i><span class="v" id="bftAccVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -5094,7 +5100,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V14.39</div>
+  <div id="mark">DESIGNED BY QIAN · V14.40</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -10633,6 +10639,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_bftMagnet = bftMagnetText(magnetStorm, 3); const f_bftMagnet = $('bftMagnetFill'); if (f_bftMagnet) f_bftMagnet.style.width = r_bftMagnet.pct + '%'; const v_bftMagnet = $('bftMagnetVal'); if (v_bftMagnet) v_bftMagnet.textContent = r_bftMagnet.txt; const w_bftMagnet = $('bftMagnetWrap'); if (w_bftMagnet) { w_bftMagnet.classList.remove('g-good','g-warn','g-bad'); if (r_bftMagnet.cls) w_bftMagnet.classList.add(r_bftMagnet.cls); w_bftMagnet.classList.toggle('danger', !!r_bftMagnet.danger); }
     const r_bftBoss = bftBossText((function(){const b = enemies.find(e => e.isBoss && !e.dead); return b ? (b.maxHp - b.hp) : 0;})(), (function(){const b = enemies.find(e => e.isBoss && !e.dead); return b ? b.maxHp : 1;})()); const f_bftBoss = $('bftBossFill'); if (f_bftBoss) f_bftBoss.style.width = r_bftBoss.pct + '%'; const v_bftBoss = $('bftBossVal'); if (v_bftBoss) v_bftBoss.textContent = r_bftBoss.txt; const w_bftBoss = $('bftBossWrap'); if (w_bftBoss) { w_bftBoss.classList.remove('g-good','g-warn','g-bad'); if (r_bftBoss.cls) w_bftBoss.classList.add(r_bftBoss.cls); w_bftBoss.classList.toggle('danger', !!r_bftBoss.danger); }
     const r_bftEnemy = bftEnemyText(enemies.filter(e => !e.dead && !e.isBoss).length, 20); const f_bftEnemy = $('bftEnemyFill'); if (f_bftEnemy) f_bftEnemy.style.width = r_bftEnemy.pct + '%'; const v_bftEnemy = $('bftEnemyVal'); if (v_bftEnemy) v_bftEnemy.textContent = r_bftEnemy.txt; const w_bftEnemy = $('bftEnemyWrap'); if (w_bftEnemy) { w_bftEnemy.classList.remove('g-good','g-warn','g-bad'); if (r_bftEnemy.cls) w_bftEnemy.classList.add(r_bftEnemy.cls); w_bftEnemy.classList.toggle('danger', !!r_bftEnemy.danger); }
+    const r_bftAcc = bftAccText(stat.hits, Math.max(1, stat.shots)); const f_bftAcc = $('bftAccFill'); if (f_bftAcc) f_bftAcc.style.width = r_bftAcc.pct + '%'; const v_bftAcc = $('bftAccVal'); if (v_bftAcc) v_bftAcc.textContent = r_bftAcc.txt; const w_bftAcc = $('bftAccWrap'); if (w_bftAcc) { w_bftAcc.classList.remove('g-good','g-warn','g-bad'); if (r_bftAcc.cls) w_bftAcc.classList.add(r_bftAcc.cls); w_bftAcc.classList.toggle('danger', !!r_bftAcc.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -17240,6 +17247,16 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val > 0.6) { cls = 'g-bad'; danger = true; } else if (val > 0.4) { cls = 'g-warn'; }
     return { pct: pct, txt: '敌情密度 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— bftAcc：实时命中率（占比越高越安全）——
+  function bftAccText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0 || nb === 0) return { pct: 0, txt: '实时命中率 —', cls: 'g-good', danger: false };
+    const val = na / nb;
+    const pct = Math.max(0, Math.min(100, Math.round(val * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
+    return { pct: pct, txt: '实时命中率 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -19081,7 +19098,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V14.39', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V14.40', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -20797,6 +20814,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       bftMagnetStateNow: (a, b) => bftMagnetText(a, b), bftMagnetANow: () => magnetStorm, bftMagnetBNow: () => 3, bftMagnetFillNow: () => { const f = $('bftMagnetFill'); return f ? f.style.width : ''; }, bftMagnetDangerNow: () => { const w = $('bftMagnetWrap'); return !!(w && w.classList.contains('danger')); },
       bftBossStateNow: (a, b) => bftBossText(a, b), bftBossANow: () => (function(){const b = enemies.find(e => e.isBoss && !e.dead); return b ? (b.maxHp - b.hp) : 0;})(), bftBossBNow: () => (function(){const b = enemies.find(e => e.isBoss && !e.dead); return b ? b.maxHp : 1;})(), bftBossFillNow: () => { const f = $('bftBossFill'); return f ? f.style.width : ''; }, bftBossDangerNow: () => { const w = $('bftBossWrap'); return !!(w && w.classList.contains('danger')); },
       bftEnemyStateNow: (a, b) => bftEnemyText(a, b), bftEnemyANow: () => enemies.filter(e => !e.dead && !e.isBoss).length, bftEnemyBNow: () => 20, bftEnemyFillNow: () => { const f = $('bftEnemyFill'); return f ? f.style.width : ''; }, bftEnemyDangerNow: () => { const w = $('bftEnemyWrap'); return !!(w && w.classList.contains('danger')); },
+      bftAccStateNow: (a, b) => bftAccText(a, b), bftAccANow: () => stat.hits, bftAccBNow: () => Math.max(1, stat.shots), bftAccFillNow: () => { const f = $('bftAccFill'); return f ? f.style.width : ''; }, bftAccDangerNow: () => { const w = $('bftAccWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
