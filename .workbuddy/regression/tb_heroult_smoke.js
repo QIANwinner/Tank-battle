@@ -11859,6 +11859,22 @@ async function main() {
     t('U4160 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=4155;k<=4160;k++) t('U'+k+' 本局每命受击',false,e.message); }
 
+
+  // ===== U4161~U4166: 本局每命伤害(v0.12.99) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('runDmgPerLifeWrap'),st:T.runDmgPerLifeStateNow(6000,4)});})()"));
+    t('U4161 本局每命伤害 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U4162 正常 6000/4→伤害 1500/命', o.st.pct === 100 && o.st.txt === '伤害 1500/命' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runDmgPerLifeStateNow(0,4).pct,b:T.runDmgPerLifeStateNow(1500,1).pct,c:T.runDmgPerLifeStateNow(750,1).pct,d:T.runDmgPerLifeStateNow(750,1).cls});})()"));
+    t('U4163 边界 0/1500/750→0/100/50', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.runDmgPerLifeStateNow(-1,4).pct,b:T.runDmgPerLifeStateNow(NaN,4).pct,c:T.runDmgPerLifeStateNow(6000,0).pct,d:T.runDmgPerLifeStateNow(6000,-1).pct});})()"));
+    t('U4164 非法/空值/零分母/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.runDmgPerLifeStateNow('6000','4').pct);})()"));
+    t('U4165 数字字符串转数', o4 === 100, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.runDmgPerLifeFillNow()==='string',d:typeof T.runDmgPerLifeDangerNow()==='boolean',a:T.runDmgPerLifeANow(),b:T.runDmgPerLifeBNow()});})()"));
+    t('U4166 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=4161;k<=4166;k++) t('U'+k+' 本局每命伤害',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
