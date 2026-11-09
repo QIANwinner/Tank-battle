@@ -12644,6 +12644,22 @@ async function main() {
     t('U4460 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=4455;k<=4460;k++) t('U'+k+' 复活连击比',false,e.message); }
 
+
+  // ===== U4461~U4466: 射击得分比(v0.13.49) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('shotScoreWrap'),st:T.shotScoreStateNow(3,2)});})()"));
+    t('U4461 射击得分比 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U4462 正常 3/2→射击得分比 1.5', o.st.pct === 75 && o.st.txt === '射击得分比 1.5' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shotScoreStateNow(0,2).pct,b:T.shotScoreStateNow(4,2).pct,c:T.shotScoreStateNow(2,2).pct,d:T.shotScoreStateNow(2,2).cls});})()"));
+    t('U4463 边界 0/4/2→0/100/50', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.shotScoreStateNow(-1,2).pct,b:T.shotScoreStateNow(NaN,2).pct,c:T.shotScoreStateNow(3,0).pct,d:T.shotScoreStateNow(3,-1).pct});})()"));
+    t('U4464 非法/空值/零分母/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.shotScoreStateNow('3','2').pct);})()"));
+    t('U4465 数字字符串转数', o4 === 75, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.shotScoreFillNow()==='string',d:typeof T.shotScoreDangerNow()==='boolean',a:T.shotScoreANow(),b:T.shotScoreBNow()});})()"));
+    t('U4466 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=4461;k<=4466;k++) t('U'+k+' 射击得分比',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
