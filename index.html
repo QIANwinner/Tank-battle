@@ -4007,6 +4007,11 @@
   #gthWingWrap.g-good .pfill { background:#2ecc71; }
   #gthWingWrap.g-warn .pfill { background:#f1c40f; }
   #gthWingWrap.g-bad .pfill { background:#e74c3c; }
+  #gthWaveWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #gthWaveWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #gthWaveWrap.g-good .pfill { background:#2ecc71; }
+  #gthWaveWrap.g-warn .pfill { background:#f1c40f; }
+  #gthWaveWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -4749,6 +4754,7 @@
     <div class="pill m-hide" id="gthCoinWrap"><span class="k">💰</span><i class="pbar"><i class="pfill" id="gthCoinFill"></i></i><span class="v" id="gthCoinVal">—</span></div>
     <div class="pill m-hide" id="gthPuWrap"><span class="k">🎁</span><i class="pbar"><i class="pfill" id="gthPuFill"></i></i><span class="v" id="gthPuVal">—</span></div>
     <div class="pill m-hide" id="gthWingWrap"><span class="k">🛩️</span><i class="pbar"><i class="pfill" id="gthWingFill"></i></i><span class="v" id="gthWingVal">—</span></div>
+    <div class="pill m-hide" id="gthWaveWrap"><span class="k">🌊</span><i class="pbar"><i class="pfill" id="gthWaveFill"></i></i><span class="v" id="gthWaveVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -5124,7 +5130,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V14.44</div>
+  <div id="mark">DESIGNED BY QIAN · V14.45</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -10668,6 +10674,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_gthCoin = gthCoinText(coins, 500); const f_gthCoin = $('gthCoinFill'); if (f_gthCoin) f_gthCoin.style.width = r_gthCoin.pct + '%'; const v_gthCoin = $('gthCoinVal'); if (v_gthCoin) v_gthCoin.textContent = r_gthCoin.txt; const w_gthCoin = $('gthCoinWrap'); if (w_gthCoin) { w_gthCoin.classList.remove('g-good','g-warn','g-bad'); if (r_gthCoin.cls) w_gthCoin.classList.add(r_gthCoin.cls); w_gthCoin.classList.toggle('danger', !!r_gthCoin.danger); }
     const r_gthPu = gthPuText(runPowerups, 20); const f_gthPu = $('gthPuFill'); if (f_gthPu) f_gthPu.style.width = r_gthPu.pct + '%'; const v_gthPu = $('gthPuVal'); if (v_gthPu) v_gthPu.textContent = r_gthPu.txt; const w_gthPu = $('gthPuWrap'); if (w_gthPu) { w_gthPu.classList.remove('g-good','g-warn','g-bad'); if (r_gthPu.cls) w_gthPu.classList.add(r_gthPu.cls); w_gthPu.classList.toggle('danger', !!r_gthPu.danger); }
     const r_gthWing = gthWingText((wingman && !wingman.dead ? wingman.hp : 0), (wingman && !wingman.dead ? wingman.maxHp : 1)); const f_gthWing = $('gthWingFill'); if (f_gthWing) f_gthWing.style.width = r_gthWing.pct + '%'; const v_gthWing = $('gthWingVal'); if (v_gthWing) v_gthWing.textContent = r_gthWing.txt; const w_gthWing = $('gthWingWrap'); if (w_gthWing) { w_gthWing.classList.remove('g-good','g-warn','g-bad'); if (r_gthWing.cls) w_gthWing.classList.add(r_gthWing.cls); w_gthWing.classList.toggle('danger', !!r_gthWing.danger); }
+    const r_gthWave = gthWaveText(levelSpeedMul(), 1.6); const f_gthWave = $('gthWaveFill'); if (f_gthWave) f_gthWave.style.width = r_gthWave.pct + '%'; const v_gthWave = $('gthWaveVal'); if (v_gthWave) v_gthWave.textContent = r_gthWave.txt; const w_gthWave = $('gthWaveWrap'); if (w_gthWave) { w_gthWave.classList.remove('g-good','g-warn','g-bad'); if (r_gthWave.cls) w_gthWave.classList.add(r_gthWave.cls); w_gthWave.classList.toggle('danger', !!r_gthWave.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -17325,6 +17332,16 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
     return { pct: pct, txt: '僚机血量 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— gthWave：波次强度（占比越高越危险）——
+  function gthWaveText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0 || nb === 0) return { pct: 0, txt: '波次强度 —', cls: 'g-good', danger: false };
+    const val = na / nb;
+    const pct = Math.max(0, Math.min(100, Math.round(val * 100)));
+    let cls = 'g-good', danger = false;
+    if (val > 0.6) { cls = 'g-bad'; danger = true; } else if (val > 0.4) { cls = 'g-warn'; }
+    return { pct: pct, txt: '波次强度 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -19166,7 +19183,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V14.44', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V14.45', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -20887,6 +20904,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       gthCoinStateNow: (a, b) => gthCoinText(a, b), gthCoinANow: () => coins, gthCoinBNow: () => 500, gthCoinFillNow: () => { const f = $('gthCoinFill'); return f ? f.style.width : ''; }, gthCoinDangerNow: () => { const w = $('gthCoinWrap'); return !!(w && w.classList.contains('danger')); },
       gthPuStateNow: (a, b) => gthPuText(a, b), gthPuANow: () => runPowerups, gthPuBNow: () => 20, gthPuFillNow: () => { const f = $('gthPuFill'); return f ? f.style.width : ''; }, gthPuDangerNow: () => { const w = $('gthPuWrap'); return !!(w && w.classList.contains('danger')); },
       gthWingStateNow: (a, b) => gthWingText(a, b), gthWingANow: () => (wingman && !wingman.dead ? wingman.hp : 0), gthWingBNow: () => (wingman && !wingman.dead ? wingman.maxHp : 1), gthWingFillNow: () => { const f = $('gthWingFill'); return f ? f.style.width : ''; }, gthWingDangerNow: () => { const w = $('gthWingWrap'); return !!(w && w.classList.contains('danger')); },
+      gthWaveStateNow: (a, b) => gthWaveText(a, b), gthWaveANow: () => levelSpeedMul(), gthWaveBNow: () => 1.6, gthWaveFillNow: () => { const f = $('gthWaveFill'); return f ? f.style.width : ''; }, gthWaveDangerNow: () => { const w = $('gthWaveWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

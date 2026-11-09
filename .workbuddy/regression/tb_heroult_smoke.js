@@ -14180,6 +14180,22 @@ async function main() {
     t('U5036 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=5031;k<=5036;k++) t('U'+k+' 僚机血量',false,e.message); }
 
+
+  // ===== U5037~U5042: 波次强度(v0.14.45) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('gthWaveWrap'),st:T.gthWaveStateNow(4,5)});})()"));
+    t('U5037 波次强度 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U5038 正常 4/5→波次强度 0.8', o.st.pct === 80 && o.st.txt === '波次强度 0.8' && o.st.cls === 'g-bad', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.gthWaveStateNow(0,2).pct,b:T.gthWaveStateNow(2,2).pct,c:T.gthWaveStateNow(1,2).pct,d:T.gthWaveStateNow(1,2).cls});})()"));
+    t('U5039 边界 0/2/1→0/100/50', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.gthWaveStateNow(-1,2).pct,b:T.gthWaveStateNow(NaN,2).pct,c:T.gthWaveStateNow(3,0).pct,d:T.gthWaveStateNow(3,-1).pct});})()"));
+    t('U5040 非法/空值/零分母/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.gthWaveStateNow('4','5').pct);})()"));
+    t('U5041 数字字符串转数', o4 === 80, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.gthWaveFillNow()==='string',d:typeof T.gthWaveDangerNow()==='boolean',a:T.gthWaveANow(),b:T.gthWaveBNow()});})()"));
+    t('U5042 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=5037;k<=5042;k++) t('U'+k+' 波次强度',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
