@@ -3207,6 +3207,11 @@
   #runComboPerShotWrap.g-good .pfill { background:#2ecc71; }
   #runComboPerShotWrap.g-warn .pfill { background:#f1c40f; }
   #runComboPerShotWrap.g-bad .pfill { background:#e74c3c; }
+  #runPuPerShotWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #runPuPerShotWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #runPuPerShotWrap.g-good .pfill { background:#2ecc71; }
+  #runPuPerShotWrap.g-warn .pfill { background:#f1c40f; }
+  #runPuPerShotWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -3789,6 +3794,7 @@
     <div class="pill m-hide" id="runCoinPerShotWrap"><span class="k">💰</span><i class="pbar"><i class="pfill" id="runCoinPerShotFill"></i></i><span class="v" id="runCoinPerShotVal">—</span></div>
     <div class="pill m-hide" id="runKillPerShotWrap"><span class="k">💀</span><i class="pbar"><i class="pfill" id="runKillPerShotFill"></i></i><span class="v" id="runKillPerShotVal">—</span></div>
     <div class="pill m-hide" id="runComboPerShotWrap"><span class="k">🔥</span><i class="pbar"><i class="pfill" id="runComboPerShotFill"></i></i><span class="v" id="runComboPerShotVal">—</span></div>
+    <div class="pill m-hide" id="runPuPerShotWrap"><span class="k">📦</span><i class="pbar"><i class="pfill" id="runPuPerShotFill"></i></i><span class="v" id="runPuPerShotVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -4164,7 +4170,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V12.84</div>
+  <div id="mark">DESIGNED BY QIAN · V12.85</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -9548,6 +9554,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r87cps = runCoinPerShotText(runCoins, stat.shots); const r87cpsF = $('runCoinPerShotFill'); if (r87cpsF) r87cpsF.style.width = r87cps.pct + '%'; const r87cpsV = $('runCoinPerShotVal'); if (r87cpsV) r87cpsV.textContent = r87cps.txt; const r87cpsW = $('runCoinPerShotWrap'); if (r87cpsW) { r87cpsW.classList.remove('g-good','g-warn','g-bad'); if (r87cps.cls) r87cpsW.classList.add(r87cps.cls); r87cpsW.classList.toggle('danger', !!r87cps.danger); }
     const r87kps = runKillPerShotText(stat.kills, stat.shots); const r87kpsF = $('runKillPerShotFill'); if (r87kpsF) r87kpsF.style.width = r87kps.pct + '%'; const r87kpsV = $('runKillPerShotVal'); if (r87kpsV) r87kpsV.textContent = r87kps.txt; const r87kpsW = $('runKillPerShotWrap'); if (r87kpsW) { r87kpsW.classList.remove('g-good','g-warn','g-bad'); if (r87kps.cls) r87kpsW.classList.add(r87kps.cls); r87kpsW.classList.toggle('danger', !!r87kps.danger); }
     const r87cbs = runComboPerShotText(stat.maxCombo, stat.shots); const r87cbsF = $('runComboPerShotFill'); if (r87cbsF) r87cbsF.style.width = r87cbs.pct + '%'; const r87cbsV = $('runComboPerShotVal'); if (r87cbsV) r87cbsV.textContent = r87cbs.txt; const r87cbsW = $('runComboPerShotWrap'); if (r87cbsW) { r87cbsW.classList.remove('g-good','g-warn','g-bad'); if (r87cbs.cls) r87cbsW.classList.add(r87cbs.cls); r87cbsW.classList.toggle('danger', !!r87cbs.danger); }
+    const r87pus = runPuPerShotText(runPowerups, stat.shots); const r87pusF = $('runPuPerShotFill'); if (r87pusF) r87pusF.style.width = r87pus.pct + '%'; const r87pusV = $('runPuPerShotVal'); if (r87pusV) r87pusV.textContent = r87pus.txt; const r87pusW = $('runPuPerShotWrap'); if (r87pusW) { r87pusW.classList.remove('g-good','g-warn','g-bad'); if (r87pus.cls) r87pusW.classList.add(r87pus.cls); r87pusW.classList.toggle('danger', !!r87pus.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -14585,6 +14592,17 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 0.5) { cls = 'g-bad'; danger = true; } else if (val < 1) { cls = 'g-warn'; }
     return { pct: pct, txt: '连击 ' + (Math.round(val * 100) / 100) + '/射', cls: cls, danger: danger };
   }
+  // —— v0.12.85 本局每射击道具：runPowerups / stat.shots 的每单位洞察（每射击道具反馈，0.2/射满分）——
+  function runPuPerShotText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0 || nb === 0) return { pct: 0, txt: '道具 —', cls: 'g-good', danger: false };
+    const x = Math.max(0, na), y = Math.max(0, nb);
+    const val = x / y;
+    const pct = Math.max(0, Math.min(100, Math.round(val / 0.2 * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 0.06) { cls = 'g-bad'; danger = true; } else if (val < 0.12) { cls = 'g-warn'; }
+    return { pct: pct, txt: '道具 ' + (Math.round(val * 100) / 100) + '/射', cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -16426,7 +16444,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V12.84', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V12.85', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -17987,6 +18005,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       runCoinPerShotStateNow: (a, b) => runCoinPerShotText(a, b), runCoinPerShotANow: () => runCoins, runCoinPerShotBNow: () => stat.shots, runCoinPerShotFillNow: () => { const f = $('runCoinPerShotFill'); return f ? f.style.width : ''; }, runCoinPerShotDangerNow: () => { const w = $('runCoinPerShotWrap'); return !!(w && w.classList.contains('danger')); },
       runKillPerShotStateNow: (a, b) => runKillPerShotText(a, b), runKillPerShotANow: () => stat.kills, runKillPerShotBNow: () => stat.shots, runKillPerShotFillNow: () => { const f = $('runKillPerShotFill'); return f ? f.style.width : ''; }, runKillPerShotDangerNow: () => { const w = $('runKillPerShotWrap'); return !!(w && w.classList.contains('danger')); },
       runComboPerShotStateNow: (a, b) => runComboPerShotText(a, b), runComboPerShotANow: () => stat.maxCombo, runComboPerShotBNow: () => stat.shots, runComboPerShotFillNow: () => { const f = $('runComboPerShotFill'); return f ? f.style.width : ''; }, runComboPerShotDangerNow: () => { const w = $('runComboPerShotWrap'); return !!(w && w.classList.contains('danger')); },
+      runPuPerShotStateNow: (a, b) => runPuPerShotText(a, b), runPuPerShotANow: () => runPowerups, runPuPerShotBNow: () => stat.shots, runPuPerShotFillNow: () => { const f = $('runPuPerShotFill'); return f ? f.style.width : ''; }, runPuPerShotDangerNow: () => { const w = $('runPuPerShotWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
