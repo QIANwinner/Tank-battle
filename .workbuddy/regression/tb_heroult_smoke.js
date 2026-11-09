@@ -12403,6 +12403,22 @@ async function main() {
     t('U4364 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=4359;k<=4364;k++) t('U'+k+' 击杀流速',false,e.message); }
 
+
+  // ===== U4365~U4370: 复活频率(v0.13.33) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('reviveFluxWrap'),st:T.reviveFluxStateNow(3,2)});})()"));
+    t('U4365 复活频率 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U4366 正常 3/2→复活/分 1.5', o.st.pct === 75 && o.st.txt === '复活/分 1.5' && o.st.cls === 'g-bad', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reviveFluxStateNow(0,2).pct,b:T.reviveFluxStateNow(4,2).pct,c:T.reviveFluxStateNow(2,2).pct,d:T.reviveFluxStateNow(2,2).cls});})()"));
+    t('U4367 边界 0/4/2→0/100/50', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.reviveFluxStateNow(-1,2).pct,b:T.reviveFluxStateNow(NaN,2).pct,c:T.reviveFluxStateNow(3,0).pct,d:T.reviveFluxStateNow(3,-1).pct});})()"));
+    t('U4368 非法/空值/零分母/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.reviveFluxStateNow('3','2').pct);})()"));
+    t('U4369 数字字符串转数', o4 === 75, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.reviveFluxFillNow()==='string',d:typeof T.reviveFluxDangerNow()==='boolean',a:T.reviveFluxANow(),b:T.reviveFluxBNow()});})()"));
+    t('U4370 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=4365;k<=4370;k++) t('U'+k+' 复活频率',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
