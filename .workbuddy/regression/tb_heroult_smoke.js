@@ -12243,6 +12243,22 @@ async function main() {
     t('U4304 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=4299;k<=4304;k++) t('U'+k+' 连击热力',false,e.message); }
 
+
+  // ===== U4305~U4310: 受击间隔(v0.13.23) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('hurtGapWrap'),st:T.hurtGapStateNow(3,2)});})()"));
+    t('U4305 受击间隔 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U4306 正常 3/2→受击间隔 1.5', o.st.pct === 75 && o.st.txt === '受击间隔 1.5' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hurtGapStateNow(0,2).pct,b:T.hurtGapStateNow(4,2).pct,c:T.hurtGapStateNow(2,2).pct,d:T.hurtGapStateNow(2,2).cls});})()"));
+    t('U4307 边界 0/4/2→0/100/50', o2.a === 0 && o2.b === 100 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.hurtGapStateNow(-1,2).pct,b:T.hurtGapStateNow(NaN,2).pct,c:T.hurtGapStateNow(3,0).pct,d:T.hurtGapStateNow(3,-1).pct});})()"));
+    t('U4308 非法/空值/零分母/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.hurtGapStateNow('3','2').pct);})()"));
+    t('U4309 数字字符串转数', o4 === 75, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.hurtGapFillNow()==='string',d:typeof T.hurtGapDangerNow()==='boolean',a:T.hurtGapANow(),b:T.hurtGapBNow()});})()"));
+    t('U4310 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=4305;k<=4310;k++) t('U'+k+' 受击间隔',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
