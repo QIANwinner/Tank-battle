@@ -4852,6 +4852,11 @@
   #dmgScoreRatioWrap.g-good .pfill { background:#2ecc71; }
   #dmgScoreRatioWrap.g-warn .pfill { background:#f1c40f; }
   #dmgScoreRatioWrap.g-bad .pfill { background:#e74c3c; }
+  #puUpgRatioWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #puUpgRatioWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #puUpgRatioWrap.g-good .pfill { background:#2ecc71; }
+  #puUpgRatioWrap.g-warn .pfill { background:#f1c40f; }
+  #puUpgRatioWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -5763,6 +5768,7 @@
     <div class="pill m-hide" id="fpxWaveWrap"><span class="k">🚨</span><i class="pbar"><i class="pfill" id="fpxWaveFill"></i></i><span class="v" id="fpxWaveVal">—</span></div>
     <div class="pill m-hide" id="killHitRatioWrap"><span class="k">⚔️</span><i class="pbar"><i class="pfill" id="killHitRatioFill"></i></i><span class="v" id="killHitRatioVal">—</span></div>
     <div class="pill m-hide" id="dmgScoreRatioWrap"><span class="k">💥</span><i class="pbar"><i class="pfill" id="dmgScoreRatioFill"></i></i><span class="v" id="dmgScoreRatioVal">—</span></div>
+    <div class="pill m-hide" id="puUpgRatioWrap"><span class="k">🧰</span><i class="pbar"><i class="pfill" id="puUpgRatioFill"></i></i><span class="v" id="puUpgRatioVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -6138,7 +6144,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V16.13</div>
+  <div id="mark">DESIGNED BY QIAN · V16.14</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -11851,6 +11857,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_fpxWave = fpxWaveText(enemies.length, wave); const f_fpxWave = $('fpxWaveFill'); if (f_fpxWave) f_fpxWave.style.width = r_fpxWave.pct + '%'; const v_fpxWave = $('fpxWaveVal'); if (v_fpxWave) v_fpxWave.textContent = r_fpxWave.txt; const w_fpxWave = $('fpxWaveWrap'); if (w_fpxWave) { w_fpxWave.classList.remove('g-good','g-warn','g-bad'); if (r_fpxWave.cls) w_fpxWave.classList.add(r_fpxWave.cls); w_fpxWave.classList.toggle('danger', !!r_fpxWave.danger); }
     const r_killHitRatio = killHitRatioText(stat.kills, stat.hits); const f_killHitRatio = $('killHitRatioFill'); if (f_killHitRatio) f_killHitRatio.style.width = r_killHitRatio.pct + '%'; const v_killHitRatio = $('killHitRatioVal'); if (v_killHitRatio) v_killHitRatio.textContent = r_killHitRatio.txt; const w_killHitRatio = $('killHitRatioWrap'); if (w_killHitRatio) { w_killHitRatio.classList.remove('g-good','g-warn','g-bad'); if (r_killHitRatio.cls) w_killHitRatio.classList.add(r_killHitRatio.cls); w_killHitRatio.classList.toggle('danger', !!r_killHitRatio.danger); }
     const r_dmgScoreRatio = dmgScoreRatioText(runDmg, score); const f_dmgScoreRatio = $('dmgScoreRatioFill'); if (f_dmgScoreRatio) f_dmgScoreRatio.style.width = r_dmgScoreRatio.pct + '%'; const v_dmgScoreRatio = $('dmgScoreRatioVal'); if (v_dmgScoreRatio) v_dmgScoreRatio.textContent = r_dmgScoreRatio.txt; const w_dmgScoreRatio = $('dmgScoreRatioWrap'); if (w_dmgScoreRatio) { w_dmgScoreRatio.classList.remove('g-good','g-warn','g-bad'); if (r_dmgScoreRatio.cls) w_dmgScoreRatio.classList.add(r_dmgScoreRatio.cls); w_dmgScoreRatio.classList.toggle('danger', !!r_dmgScoreRatio.danger); }
+    const r_puUpgRatio = puUpgRatioText(runPowerups, upgTotal); const f_puUpgRatio = $('puUpgRatioFill'); if (f_puUpgRatio) f_puUpgRatio.style.width = r_puUpgRatio.pct + '%'; const v_puUpgRatio = $('puUpgRatioVal'); if (v_puUpgRatio) v_puUpgRatio.textContent = r_puUpgRatio.txt; const w_puUpgRatio = $('puUpgRatioWrap'); if (w_puUpgRatio) { w_puUpgRatio.classList.remove('g-good','g-warn','g-bad'); if (r_puUpgRatio.cls) w_puUpgRatio.classList.add(r_puUpgRatio.cls); w_puUpgRatio.classList.toggle('danger', !!r_puUpgRatio.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -20528,6 +20535,18 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
     return { pct: pct, txt: '伤害得分比 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— puUpgRatio：补给强化比（X 占比越高越安全）——
+  function puUpgRatioText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0) return { pct: 0, txt: '补给强化比 —', cls: 'g-good', danger: false };
+    const sum = na + nb;
+    if (sum <= 0) return { pct: 0, txt: '补给强化比 —', cls: 'g-good', danger: false };
+    const val = na / sum;
+    const pct = Math.max(0, Math.min(100, Math.round(val * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
+    return { pct: pct, txt: '补给强化比 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -22369,7 +22388,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V16.13', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V16.14', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -24259,6 +24278,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       fpxWaveStateNow: (a, b) => fpxWaveText(a, b), fpxWaveANow: () => enemies.length, fpxWaveBNow: () => wave, fpxWaveFillNow: () => { const f = $('fpxWaveFill'); return f ? f.style.width : ''; }, fpxWaveDangerNow: () => { const w = $('fpxWaveWrap'); return !!(w && w.classList.contains('danger')); },
       killHitRatioStateNow: (a, b) => killHitRatioText(a, b), killHitRatioANow: () => stat.kills, killHitRatioBNow: () => stat.hits, killHitRatioFillNow: () => { const f = $('killHitRatioFill'); return f ? f.style.width : ''; }, killHitRatioDangerNow: () => { const w = $('killHitRatioWrap'); return !!(w && w.classList.contains('danger')); },
       dmgScoreRatioStateNow: (a, b) => dmgScoreRatioText(a, b), dmgScoreRatioANow: () => runDmg, dmgScoreRatioBNow: () => score, dmgScoreRatioFillNow: () => { const f = $('dmgScoreRatioFill'); return f ? f.style.width : ''; }, dmgScoreRatioDangerNow: () => { const w = $('dmgScoreRatioWrap'); return !!(w && w.classList.contains('danger')); },
+      puUpgRatioStateNow: (a, b) => puUpgRatioText(a, b), puUpgRatioANow: () => runPowerups, puUpgRatioBNow: () => upgTotal, puUpgRatioFillNow: () => { const f = $('puUpgRatioFill'); return f ? f.style.width : ''; }, puUpgRatioDangerNow: () => { const w = $('puUpgRatioWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
