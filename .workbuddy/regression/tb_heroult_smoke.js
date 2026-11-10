@@ -14676,6 +14676,22 @@ async function main() {
     t('U5222 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=5217;k<=5222;k++) t('U'+k+' 道具命中',false,e.message); }
 
+
+  // ===== U5223~U5228: 金币伤害(v0.14.76) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('swapCoinDmgWrap'),st:T.swapCoinDmgStateNow(4,1)});})()"));
+    t('U5223 金币伤害 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U5224 正常 4/1→金币伤害 0.8', o.st.pct === 80 && o.st.txt === '金币伤害 0.8' && o.st.cls === 'g-bad', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.swapCoinDmgStateNow(1,0).pct,b:T.swapCoinDmgStateNow(0,3).pct,c:T.swapCoinDmgStateNow(1,1).pct,d:T.swapCoinDmgStateNow(1,1).cls});})()"));
+    t('U5225 边界 1/0、0/3、1/1→100/0/50', o2.a === 100 && o2.b === 0 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.swapCoinDmgStateNow(-1,2).pct,b:T.swapCoinDmgStateNow(NaN,2).pct,c:T.swapCoinDmgStateNow(0,0).pct,d:T.swapCoinDmgStateNow(3,-1).pct});})()"));
+    t('U5226 非法/空值/零和/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.swapCoinDmgStateNow('4','1').pct);})()"));
+    t('U5227 数字字符串转数', o4 === 80, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.swapCoinDmgFillNow()==='string',d:typeof T.swapCoinDmgDangerNow()==='boolean',a:T.swapCoinDmgANow(),b:T.swapCoinDmgBNow()});})()"));
+    t('U5228 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=5223;k<=5228;k++) t('U'+k+' 金币伤害',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
