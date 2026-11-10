@@ -4557,6 +4557,11 @@
   #enemyScoreWrap.g-good .pfill { background:#2ecc71; }
   #enemyScoreWrap.g-warn .pfill { background:#f1c40f; }
   #enemyScoreWrap.g-bad .pfill { background:#e74c3c; }
+  #hitShotWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #hitShotWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #hitShotWrap.g-good .pfill { background:#2ecc71; }
+  #hitShotWrap.g-warn .pfill { background:#f1c40f; }
+  #hitShotWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -5409,6 +5414,7 @@
     <div class="pill m-hide" id="comboCoinWrap"><span class="k">🪙</span><i class="pbar"><i class="pfill" id="comboCoinFill"></i></i><span class="v" id="comboCoinVal">—</span></div>
     <div class="pill m-hide" id="bulletScoreWrap"><span class="k">🎇</span><i class="pbar"><i class="pfill" id="bulletScoreFill"></i></i><span class="v" id="bulletScoreVal">—</span></div>
     <div class="pill m-hide" id="enemyScoreWrap"><span class="k">🌐</span><i class="pbar"><i class="pfill" id="enemyScoreFill"></i></i><span class="v" id="enemyScoreVal">—</span></div>
+    <div class="pill m-hide" id="hitShotWrap"><span class="k">🎯</span><i class="pbar"><i class="pfill" id="hitShotFill"></i></i><span class="v" id="hitShotVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -5784,7 +5790,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V15.54</div>
+  <div id="mark">DESIGNED BY QIAN · V15.55</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -11438,6 +11444,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_comboCoin = comboCoinText(combo, coins); const f_comboCoin = $('comboCoinFill'); if (f_comboCoin) f_comboCoin.style.width = r_comboCoin.pct + '%'; const v_comboCoin = $('comboCoinVal'); if (v_comboCoin) v_comboCoin.textContent = r_comboCoin.txt; const w_comboCoin = $('comboCoinWrap'); if (w_comboCoin) { w_comboCoin.classList.remove('g-good','g-warn','g-bad'); if (r_comboCoin.cls) w_comboCoin.classList.add(r_comboCoin.cls); w_comboCoin.classList.toggle('danger', !!r_comboCoin.danger); }
     const r_bulletScore = bulletScoreText(bullets.length, score); const f_bulletScore = $('bulletScoreFill'); if (f_bulletScore) f_bulletScore.style.width = r_bulletScore.pct + '%'; const v_bulletScore = $('bulletScoreVal'); if (v_bulletScore) v_bulletScore.textContent = r_bulletScore.txt; const w_bulletScore = $('bulletScoreWrap'); if (w_bulletScore) { w_bulletScore.classList.remove('g-good','g-warn','g-bad'); if (r_bulletScore.cls) w_bulletScore.classList.add(r_bulletScore.cls); w_bulletScore.classList.toggle('danger', !!r_bulletScore.danger); }
     const r_enemyScore = enemyScoreText(enemies.length, score); const f_enemyScore = $('enemyScoreFill'); if (f_enemyScore) f_enemyScore.style.width = r_enemyScore.pct + '%'; const v_enemyScore = $('enemyScoreVal'); if (v_enemyScore) v_enemyScore.textContent = r_enemyScore.txt; const w_enemyScore = $('enemyScoreWrap'); if (w_enemyScore) { w_enemyScore.classList.remove('g-good','g-warn','g-bad'); if (r_enemyScore.cls) w_enemyScore.classList.add(r_enemyScore.cls); w_enemyScore.classList.toggle('danger', !!r_enemyScore.danger); }
+    const r_hitShot = hitShotText(stat.hits, stat.shots); const f_hitShot = $('hitShotFill'); if (f_hitShot) f_hitShot.style.width = r_hitShot.pct + '%'; const v_hitShot = $('hitShotVal'); if (v_hitShot) v_hitShot.textContent = r_hitShot.txt; const w_hitShot = $('hitShotWrap'); if (w_hitShot) { w_hitShot.classList.remove('g-good','g-warn','g-bad'); if (r_hitShot.cls) w_hitShot.classList.add(r_hitShot.cls); w_hitShot.classList.toggle('danger', !!r_hitShot.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -19407,6 +19414,18 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
     return { pct: pct, txt: '敌群得分 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— hitShot：命中弹药（X 占比越高越安全）——
+  function hitShotText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0) return { pct: 0, txt: '命中弹药 —', cls: 'g-good', danger: false };
+    const sum = na + nb;
+    if (sum <= 0) return { pct: 0, txt: '命中弹药 —', cls: 'g-good', danger: false };
+    const val = na / sum;
+    const pct = Math.max(0, Math.min(100, Math.round(val * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
+    return { pct: pct, txt: '命中弹药 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -21248,7 +21267,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V15.54', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V15.55', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -23079,6 +23098,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       comboCoinStateNow: (a, b) => comboCoinText(a, b), comboCoinANow: () => combo, comboCoinBNow: () => coins, comboCoinFillNow: () => { const f = $('comboCoinFill'); return f ? f.style.width : ''; }, comboCoinDangerNow: () => { const w = $('comboCoinWrap'); return !!(w && w.classList.contains('danger')); },
       bulletScoreStateNow: (a, b) => bulletScoreText(a, b), bulletScoreANow: () => bullets.length, bulletScoreBNow: () => score, bulletScoreFillNow: () => { const f = $('bulletScoreFill'); return f ? f.style.width : ''; }, bulletScoreDangerNow: () => { const w = $('bulletScoreWrap'); return !!(w && w.classList.contains('danger')); },
       enemyScoreStateNow: (a, b) => enemyScoreText(a, b), enemyScoreANow: () => enemies.length, enemyScoreBNow: () => score, enemyScoreFillNow: () => { const f = $('enemyScoreFill'); return f ? f.style.width : ''; }, enemyScoreDangerNow: () => { const w = $('enemyScoreWrap'); return !!(w && w.classList.contains('danger')); },
+      hitShotStateNow: (a, b) => hitShotText(a, b), hitShotANow: () => stat.hits, hitShotBNow: () => stat.shots, hitShotFillNow: () => { const f = $('hitShotFill'); return f ? f.style.width : ''; }, hitShotDangerNow: () => { const w = $('hitShotWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
