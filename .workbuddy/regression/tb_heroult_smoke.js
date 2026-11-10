@@ -17252,6 +17252,22 @@ async function main() {
     t('U6182 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=6177;k<=6182;k++) t('U'+k+' 死亡波次比',false,e.message); }
 
+
+  // ===== U6183~U6188: 经济剪刀差(v0.16.36) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('coinScissorsWrap'),st:T.coinScissorsStateNow(4,1)});})()"));
+    t('U6183 经济剪刀差 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U6184 正常 4/1→+60', o.st.pct === 60 && o.st.txt === '经济剪刀差 +60' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinScissorsStateNow(1,0),b:T.coinScissorsStateNow(0,3),c:T.coinScissorsStateNow(1,1)});})()"));
+    t('U6185 边界 1/0、0/3、1/1→+100/-100/0', o2.a.pct === 100 && o2.a.cls === 'g-good' && o2.b.pct === 100 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.c.pct === 0 && o2.c.cls === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.coinScissorsStateNow(-1,2).pct,b:T.coinScissorsStateNow(NaN,2).pct,c:T.coinScissorsStateNow(0,0).pct,d:T.coinScissorsStateNow(3,-1).pct});})()"));
+    t('U6186 非法/空值/零和/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.coinScissorsStateNow('4','1').pct);})()"));
+    t('U6187 数字字符串转数', o4 === 60, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.coinScissorsFillNow()==='string',d:typeof T.coinScissorsDangerNow()==='boolean',a:T.coinScissorsANow(),b:T.coinScissorsBNow()});})()"));
+    t('U6188 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=6183;k<=6188;k++) t('U'+k+' 经济剪刀差',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
