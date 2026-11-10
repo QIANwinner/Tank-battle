@@ -16612,6 +16612,22 @@ async function main() {
     t('U5948 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=5943;k<=5948;k++) t('U'+k+' 得分波次',false,e.message); }
 
+
+  // ===== U5949~U5954: 击杀波次(v0.15.97) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('wvKillWrap'),st:T.wvKillStateNow(4,1)});})()"));
+    t('U5949 击杀波次 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U5950 正常 4/1→击杀波次 0.8', o.st.pct === 80 && o.st.txt === '击杀波次 0.8' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.wvKillStateNow(1,0).pct,b:T.wvKillStateNow(0,3).pct,c:T.wvKillStateNow(1,1).pct,d:T.wvKillStateNow(1,1).cls});})()"));
+    t('U5951 边界 1/0、0/3、1/1→100/0/50', o2.a === 100 && o2.b === 0 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.wvKillStateNow(-1,2).pct,b:T.wvKillStateNow(NaN,2).pct,c:T.wvKillStateNow(0,0).pct,d:T.wvKillStateNow(3,-1).pct});})()"));
+    t('U5952 非法/空值/零和/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.wvKillStateNow('4','1').pct);})()"));
+    t('U5953 数字字符串转数', o4 === 80, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.wvKillFillNow()==='string',d:typeof T.wvKillDangerNow()==='boolean',a:T.wvKillANow(),b:T.wvKillBNow()});})()"));
+    t('U5954 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=5949;k<=5954;k++) t('U'+k+' 击杀波次',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
