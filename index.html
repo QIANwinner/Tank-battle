@@ -4917,6 +4917,11 @@
   #upgLifeRatioWrap.g-good .pfill { background:#2ecc71; }
   #upgLifeRatioWrap.g-warn .pfill { background:#f1c40f; }
   #upgLifeRatioWrap.g-bad .pfill { background:#e74c3c; }
+  #coinLifeRatioWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #coinLifeRatioWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #coinLifeRatioWrap.g-good .pfill { background:#2ecc71; }
+  #coinLifeRatioWrap.g-warn .pfill { background:#f1c40f; }
+  #coinLifeRatioWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -5841,6 +5846,7 @@
     <div class="pill m-hide" id="comboHurtRatioWrap"><span class="k">🔥</span><i class="pbar"><i class="pfill" id="comboHurtRatioFill"></i></i><span class="v" id="comboHurtRatioVal">—</span></div>
     <div class="pill m-hide" id="puHitRatioWrap"><span class="k">🎁</span><i class="pbar"><i class="pfill" id="puHitRatioFill"></i></i><span class="v" id="puHitRatioVal">—</span></div>
     <div class="pill m-hide" id="upgLifeRatioWrap"><span class="k">🛠️</span><i class="pbar"><i class="pfill" id="upgLifeRatioFill"></i></i><span class="v" id="upgLifeRatioVal">—</span></div>
+    <div class="pill m-hide" id="coinLifeRatioWrap"><span class="k">💰</span><i class="pbar"><i class="pfill" id="coinLifeRatioFill"></i></i><span class="v" id="coinLifeRatioVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -6216,7 +6222,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V16.26</div>
+  <div id="mark">DESIGNED BY QIAN · V16.27</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -11942,6 +11948,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_comboHurtRatio = comboHurtRatioText(combo, hurtCount); const f_comboHurtRatio = $('comboHurtRatioFill'); if (f_comboHurtRatio) f_comboHurtRatio.style.width = r_comboHurtRatio.pct + '%'; const v_comboHurtRatio = $('comboHurtRatioVal'); if (v_comboHurtRatio) v_comboHurtRatio.textContent = r_comboHurtRatio.txt; const w_comboHurtRatio = $('comboHurtRatioWrap'); if (w_comboHurtRatio) { w_comboHurtRatio.classList.remove('g-good','g-warn','g-bad'); if (r_comboHurtRatio.cls) w_comboHurtRatio.classList.add(r_comboHurtRatio.cls); w_comboHurtRatio.classList.toggle('danger', !!r_comboHurtRatio.danger); }
     const r_puHitRatio = puHitRatioText(runPowerups, stat.hits); const f_puHitRatio = $('puHitRatioFill'); if (f_puHitRatio) f_puHitRatio.style.width = r_puHitRatio.pct + '%'; const v_puHitRatio = $('puHitRatioVal'); if (v_puHitRatio) v_puHitRatio.textContent = r_puHitRatio.txt; const w_puHitRatio = $('puHitRatioWrap'); if (w_puHitRatio) { w_puHitRatio.classList.remove('g-good','g-warn','g-bad'); if (r_puHitRatio.cls) w_puHitRatio.classList.add(r_puHitRatio.cls); w_puHitRatio.classList.toggle('danger', !!r_puHitRatio.danger); }
     const r_upgLifeRatio = upgLifeRatioText(upgTotal, lives); const f_upgLifeRatio = $('upgLifeRatioFill'); if (f_upgLifeRatio) f_upgLifeRatio.style.width = r_upgLifeRatio.pct + '%'; const v_upgLifeRatio = $('upgLifeRatioVal'); if (v_upgLifeRatio) v_upgLifeRatio.textContent = r_upgLifeRatio.txt; const w_upgLifeRatio = $('upgLifeRatioWrap'); if (w_upgLifeRatio) { w_upgLifeRatio.classList.remove('g-good','g-warn','g-bad'); if (r_upgLifeRatio.cls) w_upgLifeRatio.classList.add(r_upgLifeRatio.cls); w_upgLifeRatio.classList.toggle('danger', !!r_upgLifeRatio.danger); }
+    const r_coinLifeRatio = coinLifeRatioText(coins, lives); const f_coinLifeRatio = $('coinLifeRatioFill'); if (f_coinLifeRatio) f_coinLifeRatio.style.width = r_coinLifeRatio.pct + '%'; const v_coinLifeRatio = $('coinLifeRatioVal'); if (v_coinLifeRatio) v_coinLifeRatio.textContent = r_coinLifeRatio.txt; const w_coinLifeRatio = $('coinLifeRatioWrap'); if (w_coinLifeRatio) { w_coinLifeRatio.classList.remove('g-good','g-warn','g-bad'); if (r_coinLifeRatio.cls) w_coinLifeRatio.classList.add(r_coinLifeRatio.cls); w_coinLifeRatio.classList.toggle('danger', !!r_coinLifeRatio.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -20775,6 +20782,18 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
     return { pct: pct, txt: '强化生命比 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— coinLifeRatio：金币生命比（X 占比越高越安全）——
+  function coinLifeRatioText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0) return { pct: 0, txt: '金币生命比 —', cls: 'g-good', danger: false };
+    const sum = na + nb;
+    if (sum <= 0) return { pct: 0, txt: '金币生命比 —', cls: 'g-good', danger: false };
+    const val = na / sum;
+    const pct = Math.max(0, Math.min(100, Math.round(val * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
+    return { pct: pct, txt: '金币生命比 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -22616,7 +22635,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V16.26', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V16.27', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -24519,6 +24538,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       comboHurtRatioStateNow: (a, b) => comboHurtRatioText(a, b), comboHurtRatioANow: () => combo, comboHurtRatioBNow: () => hurtCount, comboHurtRatioFillNow: () => { const f = $('comboHurtRatioFill'); return f ? f.style.width : ''; }, comboHurtRatioDangerNow: () => { const w = $('comboHurtRatioWrap'); return !!(w && w.classList.contains('danger')); },
       puHitRatioStateNow: (a, b) => puHitRatioText(a, b), puHitRatioANow: () => runPowerups, puHitRatioBNow: () => stat.hits, puHitRatioFillNow: () => { const f = $('puHitRatioFill'); return f ? f.style.width : ''; }, puHitRatioDangerNow: () => { const w = $('puHitRatioWrap'); return !!(w && w.classList.contains('danger')); },
       upgLifeRatioStateNow: (a, b) => upgLifeRatioText(a, b), upgLifeRatioANow: () => upgTotal, upgLifeRatioBNow: () => lives, upgLifeRatioFillNow: () => { const f = $('upgLifeRatioFill'); return f ? f.style.width : ''; }, upgLifeRatioDangerNow: () => { const w = $('upgLifeRatioWrap'); return !!(w && w.classList.contains('danger')); },
+      coinLifeRatioStateNow: (a, b) => coinLifeRatioText(a, b), coinLifeRatioANow: () => coins, coinLifeRatioBNow: () => lives, coinLifeRatioFillNow: () => { const f = $('coinLifeRatioFill'); return f ? f.style.width : ''; }, coinLifeRatioDangerNow: () => { const w = $('coinLifeRatioWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
