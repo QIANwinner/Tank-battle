@@ -4467,6 +4467,11 @@
   #comboBulletWrap.g-good .pfill { background:#2ecc71; }
   #comboBulletWrap.g-warn .pfill { background:#f1c40f; }
   #comboBulletWrap.g-bad .pfill { background:#e74c3c; }
+  #waveBulletWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #waveBulletWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #waveBulletWrap.g-good .pfill { background:#2ecc71; }
+  #waveBulletWrap.g-warn .pfill { background:#f1c40f; }
+  #waveBulletWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -5301,6 +5306,7 @@
     <div class="pill m-hide" id="dmgEnemyWrap"><span class="k">💥</span><i class="pbar"><i class="pfill" id="dmgEnemyFill"></i></i><span class="v" id="dmgEnemyVal">—</span></div>
     <div class="pill m-hide" id="killBulletWrap"><span class="k">☠️</span><i class="pbar"><i class="pfill" id="killBulletFill"></i></i><span class="v" id="killBulletVal">—</span></div>
     <div class="pill m-hide" id="comboBulletWrap"><span class="k">⚡</span><i class="pbar"><i class="pfill" id="comboBulletFill"></i></i><span class="v" id="comboBulletVal">—</span></div>
+    <div class="pill m-hide" id="waveBulletWrap"><span class="k">🌊</span><i class="pbar"><i class="pfill" id="waveBulletFill"></i></i><span class="v" id="waveBulletVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -5676,7 +5682,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V15.36</div>
+  <div id="mark">DESIGNED BY QIAN · V15.37</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -11312,6 +11318,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_dmgEnemy = dmgEnemyText(runDmg, enemies.length); const f_dmgEnemy = $('dmgEnemyFill'); if (f_dmgEnemy) f_dmgEnemy.style.width = r_dmgEnemy.pct + '%'; const v_dmgEnemy = $('dmgEnemyVal'); if (v_dmgEnemy) v_dmgEnemy.textContent = r_dmgEnemy.txt; const w_dmgEnemy = $('dmgEnemyWrap'); if (w_dmgEnemy) { w_dmgEnemy.classList.remove('g-good','g-warn','g-bad'); if (r_dmgEnemy.cls) w_dmgEnemy.classList.add(r_dmgEnemy.cls); w_dmgEnemy.classList.toggle('danger', !!r_dmgEnemy.danger); }
     const r_killBullet = killBulletText(stat.kills, bullets.length); const f_killBullet = $('killBulletFill'); if (f_killBullet) f_killBullet.style.width = r_killBullet.pct + '%'; const v_killBullet = $('killBulletVal'); if (v_killBullet) v_killBullet.textContent = r_killBullet.txt; const w_killBullet = $('killBulletWrap'); if (w_killBullet) { w_killBullet.classList.remove('g-good','g-warn','g-bad'); if (r_killBullet.cls) w_killBullet.classList.add(r_killBullet.cls); w_killBullet.classList.toggle('danger', !!r_killBullet.danger); }
     const r_comboBullet = comboBulletText(combo, bullets.length); const f_comboBullet = $('comboBulletFill'); if (f_comboBullet) f_comboBullet.style.width = r_comboBullet.pct + '%'; const v_comboBullet = $('comboBulletVal'); if (v_comboBullet) v_comboBullet.textContent = r_comboBullet.txt; const w_comboBullet = $('comboBulletWrap'); if (w_comboBullet) { w_comboBullet.classList.remove('g-good','g-warn','g-bad'); if (r_comboBullet.cls) w_comboBullet.classList.add(r_comboBullet.cls); w_comboBullet.classList.toggle('danger', !!r_comboBullet.danger); }
+    const r_waveBullet = waveBulletText(wave, bullets.length); const f_waveBullet = $('waveBulletFill'); if (f_waveBullet) f_waveBullet.style.width = r_waveBullet.pct + '%'; const v_waveBullet = $('waveBulletVal'); if (v_waveBullet) v_waveBullet.textContent = r_waveBullet.txt; const w_waveBullet = $('waveBulletWrap'); if (w_waveBullet) { w_waveBullet.classList.remove('g-good','g-warn','g-bad'); if (r_waveBullet.cls) w_waveBullet.classList.add(r_waveBullet.cls); w_waveBullet.classList.toggle('danger', !!r_waveBullet.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -19065,6 +19072,18 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
     return { pct: pct, txt: '连击弹幕 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— waveBullet：波次弹幕（X 占比越高越安全）——
+  function waveBulletText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0) return { pct: 0, txt: '波次弹幕 —', cls: 'g-good', danger: false };
+    const sum = na + nb;
+    if (sum <= 0) return { pct: 0, txt: '波次弹幕 —', cls: 'g-good', danger: false };
+    const val = na / sum;
+    const pct = Math.max(0, Math.min(100, Math.round(val * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
+    return { pct: pct, txt: '波次弹幕 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -20906,7 +20925,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V15.36', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V15.37', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -22719,6 +22738,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       dmgEnemyStateNow: (a, b) => dmgEnemyText(a, b), dmgEnemyANow: () => runDmg, dmgEnemyBNow: () => enemies.length, dmgEnemyFillNow: () => { const f = $('dmgEnemyFill'); return f ? f.style.width : ''; }, dmgEnemyDangerNow: () => { const w = $('dmgEnemyWrap'); return !!(w && w.classList.contains('danger')); },
       killBulletStateNow: (a, b) => killBulletText(a, b), killBulletANow: () => stat.kills, killBulletBNow: () => bullets.length, killBulletFillNow: () => { const f = $('killBulletFill'); return f ? f.style.width : ''; }, killBulletDangerNow: () => { const w = $('killBulletWrap'); return !!(w && w.classList.contains('danger')); },
       comboBulletStateNow: (a, b) => comboBulletText(a, b), comboBulletANow: () => combo, comboBulletBNow: () => bullets.length, comboBulletFillNow: () => { const f = $('comboBulletFill'); return f ? f.style.width : ''; }, comboBulletDangerNow: () => { const w = $('comboBulletWrap'); return !!(w && w.classList.contains('danger')); },
+      waveBulletStateNow: (a, b) => waveBulletText(a, b), waveBulletANow: () => wave, waveBulletBNow: () => bullets.length, waveBulletFillNow: () => { const f = $('waveBulletFill'); return f ? f.style.width : ''; }, waveBulletDangerNow: () => { const w = $('waveBulletWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
