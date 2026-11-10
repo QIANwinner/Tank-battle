@@ -17668,6 +17668,22 @@ async function main() {
     t('U6338 DOM 与函数一致性', o5.ok === true && o5.p === true && o5.match === true && o5.dom === true, JSON.stringify(o5));
   } catch(e){ for(let k=6333;k<=6338;k++) t('U'+k+' 金币环',false,e.message); }
 
+
+  // ===== U6339~U6344: 击杀环(v0.16.62) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('gaugeKillWrap'),s:T.gaugeKillStateNow(0.75)});})()"));
+    t('U6339 击杀环 DOM 已加入 HUD', o.dom === true && o.s.txt === '75%', JSON.stringify(o));
+    t('U6340 正常 0.75→75% g-good', o.s.p === 75 && o.s.cls === 'g-good' && o.s.danger === false, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.gaugeKillStateNow(0),b:T.gaugeKillStateNow(1),c:T.gaugeKillStateNow(0.3),d:T.gaugeKillStateNow(0.31)});})()"));
+    t('U6341 边界 0/1/0.3/0.31→0g-bad/100g-good/30g-bad/31g-warn', o2.a.p === 0 && o2.a.cls === 'g-bad' && o2.a.danger === true && o2.b.p === 100 && o2.b.cls === 'g-good' && o2.c.p === 30 && o2.c.cls === 'g-bad' && o2.d.p === 31 && o2.d.cls === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.gaugeKillStateNow(-1),b:T.gaugeKillStateNow(NaN),c:T.gaugeKillStateNow(2)});})()"));
+    t('U6342 非法 -1/NaN/2→clamp 0/0/100', o3.a.p === 0 && o3.b.p === 0 && o3.c.p === 100, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.gaugeKillStateNow('0.75').p);})()"));
+    t('U6343 数字字符串转数', o4 === 75, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}const w=document.getElementById('gaugeKillWrap');const gp=w?w.querySelector('.gp'):null;const gv=w?w.querySelector('.gv'):null;const off=gp?parseFloat(gp.getAttribute('stroke-dashoffset')):NaN;const C=2*Math.PI*9;const p=Math.round((1-off/C)*100);const st=T.gaugeKillStateNow(T.gaugeKillPctNow());return JSON.stringify({ok:ok,p:typeof p==='number',match:Math.abs(p-st.p)<=1&&gv&&gv.textContent===st.txt,dom:!!w});})()"));
+    t('U6344 DOM 与函数一致性', o5.ok === true && o5.p === true && o5.match === true && o5.dom === true, JSON.stringify(o5));
+  } catch(e){ for(let k=6339;k<=6344;k++) t('U'+k+' 击杀环',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
