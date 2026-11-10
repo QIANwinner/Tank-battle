@@ -4928,6 +4928,17 @@
   #hitScissorsWrap.g-good .pfill { background:#2ecc71; }
   #hitScissorsWrap.g-warn .pfill { background:#f1c40f; }
   #hitScissorsWrap.g-bad .pfill { background:#e74c3c; }
+  #lifeScissorsWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; position:relative; }
+  #lifeScissorsWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #lifeScissorsWrap .ppivot { position:absolute; left:50%; top:0; width:1px; height:100%; background:rgba(255,255,255,.55); z-index:2; }
+  #lifeScissorsWrap.g-good .pfill { background:#2ecc71; }
+  #lifeScissorsWrap.g-warn .pfill { background:#f1c40f; }
+  #lifeScissorsWrap.g-bad .pfill { background:#e74c3c; }
+  #dmgKillRatioWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #dmgKillRatioWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #dmgKillRatioWrap.g-good .pfill { background:#2ecc71; }
+  #dmgKillRatioWrap.g-warn .pfill { background:#f1c40f; }
+  #dmgKillRatioWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -5854,6 +5865,8 @@
     <div class="pill m-hide" id="upgLifeRatioWrap"><span class="k">🛠️</span><i class="pbar"><i class="pfill" id="upgLifeRatioFill"></i></i><span class="v" id="upgLifeRatioVal">—</span></div>
     <div class="pill m-hide" id="coinLifeRatioWrap"><span class="k">💰</span><i class="pbar"><i class="pfill" id="coinLifeRatioFill"></i></i><span class="v" id="coinLifeRatioVal">—</span></div>
     <div class="pill m-hide" id="hitScissorsWrap"><span class="k">🎯</span><i class="pbar"><i class="ppivot"></i><i class="pfill" id="hitScissorsFill"></i></i><span class="v" id="hitScissorsVal">—</span></div>
+    <div class="pill m-hide" id="lifeScissorsWrap"><span class="k">❤️</span><i class="pbar"><i class="ppivot"></i><i class="pfill" id="lifeScissorsFill"></i></i><span class="v" id="lifeScissorsVal">—</span></div>
+    <div class="pill m-hide" id="dmgKillRatioWrap"><span class="k">💥</span><i class="pbar"><i class="pfill" id="dmgKillRatioFill"></i></i><span class="v" id="dmgKillRatioVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -6229,7 +6242,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V16.28</div>
+  <div id="mark">DESIGNED BY QIAN · V16.29</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -11957,6 +11970,8 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_upgLifeRatio = upgLifeRatioText(upgTotal, lives); const f_upgLifeRatio = $('upgLifeRatioFill'); if (f_upgLifeRatio) f_upgLifeRatio.style.width = r_upgLifeRatio.pct + '%'; const v_upgLifeRatio = $('upgLifeRatioVal'); if (v_upgLifeRatio) v_upgLifeRatio.textContent = r_upgLifeRatio.txt; const w_upgLifeRatio = $('upgLifeRatioWrap'); if (w_upgLifeRatio) { w_upgLifeRatio.classList.remove('g-good','g-warn','g-bad'); if (r_upgLifeRatio.cls) w_upgLifeRatio.classList.add(r_upgLifeRatio.cls); w_upgLifeRatio.classList.toggle('danger', !!r_upgLifeRatio.danger); }
     const r_coinLifeRatio = coinLifeRatioText(coins, lives); const f_coinLifeRatio = $('coinLifeRatioFill'); if (f_coinLifeRatio) f_coinLifeRatio.style.width = r_coinLifeRatio.pct + '%'; const v_coinLifeRatio = $('coinLifeRatioVal'); if (v_coinLifeRatio) v_coinLifeRatio.textContent = r_coinLifeRatio.txt; const w_coinLifeRatio = $('coinLifeRatioWrap'); if (w_coinLifeRatio) { w_coinLifeRatio.classList.remove('g-good','g-warn','g-bad'); if (r_coinLifeRatio.cls) w_coinLifeRatio.classList.add(r_coinLifeRatio.cls); w_coinLifeRatio.classList.toggle('danger', !!r_coinLifeRatio.danger); }
     const r_hitScissors = hitScissorsText(stat.hits, (stat.shots - stat.hits)); const f_hitScissors = $('hitScissorsFill'); if (f_hitScissors) f_hitScissors.style.width = r_hitScissors.pct + '%'; const v_hitScissors = $('hitScissorsVal'); if (v_hitScissors) v_hitScissors.textContent = r_hitScissors.txt; const w_hitScissors = $('hitScissorsWrap'); if (w_hitScissors) { w_hitScissors.classList.remove('g-good','g-warn','g-bad'); if (r_hitScissors.cls) w_hitScissors.classList.add(r_hitScissors.cls); w_hitScissors.classList.toggle('danger', !!r_hitScissors.danger); }
+    const r_lifeScissors = lifeScissorsText(lives, hurtCount); const f_lifeScissors = $('lifeScissorsFill'); if (f_lifeScissors) f_lifeScissors.style.width = r_lifeScissors.pct + '%'; const v_lifeScissors = $('lifeScissorsVal'); if (v_lifeScissors) v_lifeScissors.textContent = r_lifeScissors.txt; const w_lifeScissors = $('lifeScissorsWrap'); if (w_lifeScissors) { w_lifeScissors.classList.remove('g-good','g-warn','g-bad'); if (r_lifeScissors.cls) w_lifeScissors.classList.add(r_lifeScissors.cls); w_lifeScissors.classList.toggle('danger', !!r_lifeScissors.danger); }
+    const r_dmgKillRatio = dmgKillRatioText(runDmg, stat.kills); const f_dmgKillRatio = $('dmgKillRatioFill'); if (f_dmgKillRatio) f_dmgKillRatio.style.width = r_dmgKillRatio.pct + '%'; const v_dmgKillRatio = $('dmgKillRatioVal'); if (v_dmgKillRatio) v_dmgKillRatio.textContent = r_dmgKillRatio.txt; const w_dmgKillRatio = $('dmgKillRatioWrap'); if (w_dmgKillRatio) { w_dmgKillRatio.classList.remove('g-good','g-warn','g-bad'); if (r_dmgKillRatio.cls) w_dmgKillRatio.classList.add(r_dmgKillRatio.cls); w_dmgKillRatio.classList.toggle('danger', !!r_dmgKillRatio.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -20815,6 +20830,31 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     else if (lean > 0.4) { cls = 'g-good'; }
     return { pct: pct, txt: '命中剪刀差 ' + (lean > 0 ? '+' + pct : (lean < 0 ? '-' + pct : '0')), cls: cls, danger: danger };
   }
+  // —— lifeScissors：生存剪刀差（剪刀差：进攻量 vs 防守代价，带符号净胜）——
+  function lifeScissorsText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0) return { pct: 0, txt: '生存剪刀差 —', cls: 'g-good', danger: false };
+    const sum = na + nb;
+    if (sum <= 0) return { pct: 0, txt: '生存剪刀差 —', cls: 'g-good', danger: false };
+    const lean = (na - nb) / sum;
+    const pct = Math.max(0, Math.min(100, Math.round(Math.abs(lean) * 100)));
+    let cls = 'g-warn', danger = false;
+    if (lean < -0.4) { cls = 'g-bad'; danger = true; }
+    else if (lean > 0.4) { cls = 'g-good'; }
+    return { pct: pct, txt: '生存剪刀差 ' + (lean > 0 ? '+' + pct : (lean < 0 ? '-' + pct : '0')), cls: cls, danger: danger };
+  }
+  // —— dmgKillRatio：伤害击杀比（X 占比越高越安全）——
+  function dmgKillRatioText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0) return { pct: 0, txt: '伤害击杀比 —', cls: 'g-good', danger: false };
+    const sum = na + nb;
+    if (sum <= 0) return { pct: 0, txt: '伤害击杀比 —', cls: 'g-good', danger: false };
+    const val = na / sum;
+    const pct = Math.max(0, Math.min(100, Math.round(val * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
+    return { pct: pct, txt: '伤害击杀比 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -22656,7 +22696,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V16.28', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V16.29', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -24561,6 +24601,8 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       upgLifeRatioStateNow: (a, b) => upgLifeRatioText(a, b), upgLifeRatioANow: () => upgTotal, upgLifeRatioBNow: () => lives, upgLifeRatioFillNow: () => { const f = $('upgLifeRatioFill'); return f ? f.style.width : ''; }, upgLifeRatioDangerNow: () => { const w = $('upgLifeRatioWrap'); return !!(w && w.classList.contains('danger')); },
       coinLifeRatioStateNow: (a, b) => coinLifeRatioText(a, b), coinLifeRatioANow: () => coins, coinLifeRatioBNow: () => lives, coinLifeRatioFillNow: () => { const f = $('coinLifeRatioFill'); return f ? f.style.width : ''; }, coinLifeRatioDangerNow: () => { const w = $('coinLifeRatioWrap'); return !!(w && w.classList.contains('danger')); },
       hitScissorsStateNow: (a, b) => hitScissorsText(a, b), hitScissorsANow: () => stat.hits, hitScissorsBNow: () => (stat.shots - stat.hits), hitScissorsFillNow: () => { const f = $('hitScissorsFill'); return f ? f.style.width : ''; }, hitScissorsDangerNow: () => { const w = $('hitScissorsWrap'); return !!(w && w.classList.contains('danger')); },
+      lifeScissorsStateNow: (a, b) => lifeScissorsText(a, b), lifeScissorsANow: () => lives, lifeScissorsBNow: () => hurtCount, lifeScissorsFillNow: () => { const f = $('lifeScissorsFill'); return f ? f.style.width : ''; }, lifeScissorsDangerNow: () => { const w = $('lifeScissorsWrap'); return !!(w && w.classList.contains('danger')); },
+      dmgKillRatioStateNow: (a, b) => dmgKillRatioText(a, b), dmgKillRatioANow: () => runDmg, dmgKillRatioBNow: () => stat.kills, dmgKillRatioFillNow: () => { const f = $('dmgKillRatioFill'); return f ? f.style.width : ''; }, dmgKillRatioDangerNow: () => { const w = $('dmgKillRatioWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
