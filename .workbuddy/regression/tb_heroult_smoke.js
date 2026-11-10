@@ -15380,6 +15380,22 @@ async function main() {
     t('U5486 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=5481;k<=5486;k++) t('U'+k+' 击杀敌群',false,e.message); }
 
+
+  // ===== U5487~U5492: 道具弹幕(v0.15.20) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('puBulletWrap'),st:T.puBulletStateNow(4,1)});})()"));
+    t('U5487 道具弹幕 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U5488 正常 4/1→道具弹幕 0.8', o.st.pct === 80 && o.st.txt === '道具弹幕 0.8' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.puBulletStateNow(1,0).pct,b:T.puBulletStateNow(0,3).pct,c:T.puBulletStateNow(1,1).pct,d:T.puBulletStateNow(1,1).cls});})()"));
+    t('U5489 边界 1/0、0/3、1/1→100/0/50', o2.a === 100 && o2.b === 0 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.puBulletStateNow(-1,2).pct,b:T.puBulletStateNow(NaN,2).pct,c:T.puBulletStateNow(0,0).pct,d:T.puBulletStateNow(3,-1).pct});})()"));
+    t('U5490 非法/空值/零和/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.puBulletStateNow('4','1').pct);})()"));
+    t('U5491 数字字符串转数', o4 === 80, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.puBulletFillNow()==='string',d:typeof T.puBulletDangerNow()==='boolean',a:T.puBulletANow(),b:T.puBulletBNow()});})()"));
+    t('U5492 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=5487;k<=5492;k++) t('U'+k+' 道具弹幕',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
