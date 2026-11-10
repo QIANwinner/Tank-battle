@@ -4777,6 +4777,11 @@
   #wvDmgWrap.g-good .pfill { background:#2ecc71; }
   #wvDmgWrap.g-warn .pfill { background:#f1c40f; }
   #wvDmgWrap.g-bad .pfill { background:#e74c3c; }
+  #wvUpgWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #wvUpgWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #wvUpgWrap.g-good .pfill { background:#2ecc71; }
+  #wvUpgWrap.g-warn .pfill { background:#f1c40f; }
+  #wvUpgWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -5673,6 +5678,7 @@
     <div class="pill m-hide" id="wvScoreWrap"><span class="k">💯</span><i class="pbar"><i class="pfill" id="wvScoreFill"></i></i><span class="v" id="wvScoreVal">—</span></div>
     <div class="pill m-hide" id="wvKillWrap"><span class="k">⚔️</span><i class="pbar"><i class="pfill" id="wvKillFill"></i></i><span class="v" id="wvKillVal">—</span></div>
     <div class="pill m-hide" id="wvDmgWrap"><span class="k">💥</span><i class="pbar"><i class="pfill" id="wvDmgFill"></i></i><span class="v" id="wvDmgVal">—</span></div>
+    <div class="pill m-hide" id="wvUpgWrap"><span class="k">⬆️</span><i class="pbar"><i class="pfill" id="wvUpgFill"></i></i><span class="v" id="wvUpgVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -6048,7 +6054,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V15.98</div>
+  <div id="mark">DESIGNED BY QIAN · V15.99</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -11746,6 +11752,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_wvScore = wvScoreText(score, wave); const f_wvScore = $('wvScoreFill'); if (f_wvScore) f_wvScore.style.width = r_wvScore.pct + '%'; const v_wvScore = $('wvScoreVal'); if (v_wvScore) v_wvScore.textContent = r_wvScore.txt; const w_wvScore = $('wvScoreWrap'); if (w_wvScore) { w_wvScore.classList.remove('g-good','g-warn','g-bad'); if (r_wvScore.cls) w_wvScore.classList.add(r_wvScore.cls); w_wvScore.classList.toggle('danger', !!r_wvScore.danger); }
     const r_wvKill = wvKillText(stat.kills, wave); const f_wvKill = $('wvKillFill'); if (f_wvKill) f_wvKill.style.width = r_wvKill.pct + '%'; const v_wvKill = $('wvKillVal'); if (v_wvKill) v_wvKill.textContent = r_wvKill.txt; const w_wvKill = $('wvKillWrap'); if (w_wvKill) { w_wvKill.classList.remove('g-good','g-warn','g-bad'); if (r_wvKill.cls) w_wvKill.classList.add(r_wvKill.cls); w_wvKill.classList.toggle('danger', !!r_wvKill.danger); }
     const r_wvDmg = wvDmgText(runDmg, wave); const f_wvDmg = $('wvDmgFill'); if (f_wvDmg) f_wvDmg.style.width = r_wvDmg.pct + '%'; const v_wvDmg = $('wvDmgVal'); if (v_wvDmg) v_wvDmg.textContent = r_wvDmg.txt; const w_wvDmg = $('wvDmgWrap'); if (w_wvDmg) { w_wvDmg.classList.remove('g-good','g-warn','g-bad'); if (r_wvDmg.cls) w_wvDmg.classList.add(r_wvDmg.cls); w_wvDmg.classList.toggle('danger', !!r_wvDmg.danger); }
+    const r_wvUpg = wvUpgText(upgTotal, wave); const f_wvUpg = $('wvUpgFill'); if (f_wvUpg) f_wvUpg.style.width = r_wvUpg.pct + '%'; const v_wvUpg = $('wvUpgVal'); if (v_wvUpg) v_wvUpg.textContent = r_wvUpg.txt; const w_wvUpg = $('wvUpgWrap'); if (w_wvUpg) { w_wvUpg.classList.remove('g-good','g-warn','g-bad'); if (r_wvUpg.cls) w_wvUpg.classList.add(r_wvUpg.cls); w_wvUpg.classList.toggle('danger', !!r_wvUpg.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -20243,6 +20250,18 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
     return { pct: pct, txt: '伤害波次 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— wvUpg：强化波次（X 占比越高越安全）——
+  function wvUpgText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0) return { pct: 0, txt: '强化波次 —', cls: 'g-good', danger: false };
+    const sum = na + nb;
+    if (sum <= 0) return { pct: 0, txt: '强化波次 —', cls: 'g-good', danger: false };
+    const val = na / sum;
+    const pct = Math.max(0, Math.min(100, Math.round(val * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
+    return { pct: pct, txt: '强化波次 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -22084,7 +22103,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V15.98', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V15.99', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -23959,6 +23978,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       wvScoreStateNow: (a, b) => wvScoreText(a, b), wvScoreANow: () => score, wvScoreBNow: () => wave, wvScoreFillNow: () => { const f = $('wvScoreFill'); return f ? f.style.width : ''; }, wvScoreDangerNow: () => { const w = $('wvScoreWrap'); return !!(w && w.classList.contains('danger')); },
       wvKillStateNow: (a, b) => wvKillText(a, b), wvKillANow: () => stat.kills, wvKillBNow: () => wave, wvKillFillNow: () => { const f = $('wvKillFill'); return f ? f.style.width : ''; }, wvKillDangerNow: () => { const w = $('wvKillWrap'); return !!(w && w.classList.contains('danger')); },
       wvDmgStateNow: (a, b) => wvDmgText(a, b), wvDmgANow: () => runDmg, wvDmgBNow: () => wave, wvDmgFillNow: () => { const f = $('wvDmgFill'); return f ? f.style.width : ''; }, wvDmgDangerNow: () => { const w = $('wvDmgWrap'); return !!(w && w.classList.contains('danger')); },
+      wvUpgStateNow: (a, b) => wvUpgText(a, b), wvUpgANow: () => upgTotal, wvUpgBNow: () => wave, wvUpgFillNow: () => { const f = $('wvUpgFill'); return f ? f.style.width : ''; }, wvUpgDangerNow: () => { const w = $('wvUpgWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
