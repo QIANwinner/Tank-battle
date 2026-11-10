@@ -5177,6 +5177,13 @@
   #cmpCoinWrap.c-flat .arrow, #cmpCoinWrap.c-flat .val { color:#f1c40f; }
   #cmpCoinWrap.c-down { animation: tbCmpPulse .5s ease-in-out infinite alternate; }
   @keyframes tbCmpPulse { from { opacity:.6; } to { opacity:1; } }
+  #cmpComboWrap .arrow { font-weight:bold; font-size:13px; margin:0 2px; }
+  #cmpComboWrap .val { font-weight:bold; }
+  #cmpComboWrap.c-up .arrow, #cmpComboWrap.c-up .val { color:#2ecc71; }
+  #cmpComboWrap.c-down .arrow, #cmpComboWrap.c-down .val { color:#e74c3c; }
+  #cmpComboWrap.c-flat .arrow, #cmpComboWrap.c-flat .val { color:#f1c40f; }
+  #cmpComboWrap.c-down { animation: tbCmpPulse .5s ease-in-out infinite alternate; }
+  @keyframes tbCmpPulse { from { opacity:.6; } to { opacity:1; } }
 </style>
 </head>
 <body>
@@ -6145,6 +6152,7 @@
     <div class="pill m-hide" id="cmpHitWrap"><span class="k">🎯</span><span class="arrow">=</span><span class="v">命中 <b class="val">0</b></span></div>
     <div class="pill m-hide" id="cmpFireWrap"><span class="k">💥</span><span class="arrow">=</span><span class="v">火力 <b class="val">0</b></span></div>
     <div class="pill m-hide" id="cmpCoinWrap"><span class="k">💰</span><span class="arrow">=</span><span class="v">经济 <b class="val">0</b></span></div>
+    <div class="pill m-hide" id="cmpComboWrap"><span class="k">⚡</span><span class="arrow">=</span><span class="v">连击 <b class="val">0</b></span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -6520,7 +6528,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V16.69</div>
+  <div id="mark">DESIGNED BY QIAN · V16.70</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -12290,6 +12298,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const a_cmpHit = cmpHitArrow(stat.hits, stat.shots * 0.5); const w_cmpHit = $('cmpHitWrap'); if (w_cmpHit) { w_cmpHit.classList.remove('c-up','c-down','c-flat'); w_cmpHit.classList.add(a_cmpHit.cls); const ar = w_cmpHit.querySelector('.arrow'); if (ar) ar.textContent = a_cmpHit.dir === 'up' ? '▲' : (a_cmpHit.dir === 'down' ? '▼' : '='); const va = w_cmpHit.querySelector('.val'); if (va) va.textContent = a_cmpHit.txt; }
     const a_cmpFire = cmpFireArrow(bullets.length, enemies.length * 2); const w_cmpFire = $('cmpFireWrap'); if (w_cmpFire) { w_cmpFire.classList.remove('c-up','c-down','c-flat'); w_cmpFire.classList.add(a_cmpFire.cls); const ar = w_cmpFire.querySelector('.arrow'); if (ar) ar.textContent = a_cmpFire.dir === 'up' ? '▲' : (a_cmpFire.dir === 'down' ? '▼' : '='); const va = w_cmpFire.querySelector('.val'); if (va) va.textContent = a_cmpFire.txt; }
     const a_cmpCoin = cmpCoinArrow(runCoins, hurtCount * 10); const w_cmpCoin = $('cmpCoinWrap'); if (w_cmpCoin) { w_cmpCoin.classList.remove('c-up','c-down','c-flat'); w_cmpCoin.classList.add(a_cmpCoin.cls); const ar = w_cmpCoin.querySelector('.arrow'); if (ar) ar.textContent = a_cmpCoin.dir === 'up' ? '▲' : (a_cmpCoin.dir === 'down' ? '▼' : '='); const va = w_cmpCoin.querySelector('.val'); if (va) va.textContent = a_cmpCoin.txt; }
+    const a_cmpCombo = cmpComboArrow(combo, wave); const w_cmpCombo = $('cmpComboWrap'); if (w_cmpCombo) { w_cmpCombo.classList.remove('c-up','c-down','c-flat'); w_cmpCombo.classList.add(a_cmpCombo.cls); const ar = w_cmpCombo.querySelector('.arrow'); if (ar) ar.textContent = a_cmpCombo.dir === 'up' ? '▲' : (a_cmpCombo.dir === 'down' ? '▼' : '='); const va = w_cmpCombo.querySelector('.val'); if (va) va.textContent = a_cmpCombo.txt; }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -21587,6 +21596,16 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const txt = !ok ? '0' : (delta > 0 ? '+' + delta : (delta < 0 ? String(delta) : '0'));
     return { dir: dir, delta: delta, cls: cls, txt: txt };
   }
+  // —— cmpCombo：连击对照（对照箭头：cur vs ref，delta=round((cur-ref)*10)/10，>0 up / <0 down / =0 flat）——
+  function cmpComboArrow(cur, ref) {
+    const c = Number(cur), r = Number(ref);
+    const ok = isFinite(c) && isFinite(r);
+    const delta = ok ? Math.round((c - r) * 10) / 10 : 0;
+    const dir = !ok ? 'flat' : (delta > 0 ? 'up' : (delta < 0 ? 'down' : 'flat'));
+    const cls = dir === 'up' ? 'c-up' : (dir === 'down' ? 'c-down' : 'c-flat');
+    const txt = !ok ? '0' : (delta > 0 ? '+' + delta : (delta < 0 ? String(delta) : '0'));
+    return { dir: dir, delta: delta, cls: cls, txt: txt };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -23428,7 +23447,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V16.69', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V16.70', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -25375,6 +25394,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       cmpHitArrowState: (c, r) => cmpHitArrow(c, r), cmpHitArrowNow: () => cmpHitArrow(stat.hits, stat.shots * 0.5), cmpHitDirNow: () => { const w = $('cmpHitWrap'); return w ? (w.classList.contains('c-up') ? 1 : w.classList.contains('c-down') ? -1 : 0) : -9; },
       cmpFireArrowState: (c, r) => cmpFireArrow(c, r), cmpFireArrowNow: () => cmpFireArrow(bullets.length, enemies.length * 2), cmpFireDirNow: () => { const w = $('cmpFireWrap'); return w ? (w.classList.contains('c-up') ? 1 : w.classList.contains('c-down') ? -1 : 0) : -9; },
       cmpCoinArrowState: (c, r) => cmpCoinArrow(c, r), cmpCoinArrowNow: () => cmpCoinArrow(runCoins, hurtCount * 10), cmpCoinDirNow: () => { const w = $('cmpCoinWrap'); return w ? (w.classList.contains('c-up') ? 1 : w.classList.contains('c-down') ? -1 : 0) : -9; },
+      cmpComboArrowState: (c, r) => cmpComboArrow(c, r), cmpComboArrowNow: () => cmpComboArrow(combo, wave), cmpComboDirNow: () => { const w = $('cmpComboWrap'); return w ? (w.classList.contains('c-up') ? 1 : w.classList.contains('c-down') ? -1 : 0) : -9; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
