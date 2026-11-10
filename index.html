@@ -4447,6 +4447,11 @@
   #coinBulletWrap.g-good .pfill { background:#2ecc71; }
   #coinBulletWrap.g-warn .pfill { background:#f1c40f; }
   #coinBulletWrap.g-bad .pfill { background:#e74c3c; }
+  #scoreEnemyWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #scoreEnemyWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #scoreEnemyWrap.g-good .pfill { background:#2ecc71; }
+  #scoreEnemyWrap.g-warn .pfill { background:#f1c40f; }
+  #scoreEnemyWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -5277,6 +5282,7 @@
     <div class="pill m-hide" id="upgBulletWrap"><span class="k">⚙️</span><i class="pbar"><i class="pfill" id="upgBulletFill"></i></i><span class="v" id="upgBulletVal">—</span></div>
     <div class="pill m-hide" id="bossBulletWrap"><span class="k">🐲</span><i class="pbar"><i class="pfill" id="bossBulletFill"></i></i><span class="v" id="bossBulletVal">—</span></div>
     <div class="pill m-hide" id="coinBulletWrap"><span class="k">💰</span><i class="pbar"><i class="pfill" id="coinBulletFill"></i></i><span class="v" id="coinBulletVal">—</span></div>
+    <div class="pill m-hide" id="scoreEnemyWrap"><span class="k">🏆</span><i class="pbar"><i class="pfill" id="scoreEnemyFill"></i></i><span class="v" id="scoreEnemyVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -5652,7 +5658,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V15.32</div>
+  <div id="mark">DESIGNED BY QIAN · V15.33</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -11284,6 +11290,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_upgBullet = upgBulletText(upgTotal, bullets.length); const f_upgBullet = $('upgBulletFill'); if (f_upgBullet) f_upgBullet.style.width = r_upgBullet.pct + '%'; const v_upgBullet = $('upgBulletVal'); if (v_upgBullet) v_upgBullet.textContent = r_upgBullet.txt; const w_upgBullet = $('upgBulletWrap'); if (w_upgBullet) { w_upgBullet.classList.remove('g-good','g-warn','g-bad'); if (r_upgBullet.cls) w_upgBullet.classList.add(r_upgBullet.cls); w_upgBullet.classList.toggle('danger', !!r_upgBullet.danger); }
     const r_bossBullet = bossBulletText(stat.bossKills, bullets.length); const f_bossBullet = $('bossBulletFill'); if (f_bossBullet) f_bossBullet.style.width = r_bossBullet.pct + '%'; const v_bossBullet = $('bossBulletVal'); if (v_bossBullet) v_bossBullet.textContent = r_bossBullet.txt; const w_bossBullet = $('bossBulletWrap'); if (w_bossBullet) { w_bossBullet.classList.remove('g-good','g-warn','g-bad'); if (r_bossBullet.cls) w_bossBullet.classList.add(r_bossBullet.cls); w_bossBullet.classList.toggle('danger', !!r_bossBullet.danger); }
     const r_coinBullet = coinBulletText(coins, bullets.length); const f_coinBullet = $('coinBulletFill'); if (f_coinBullet) f_coinBullet.style.width = r_coinBullet.pct + '%'; const v_coinBullet = $('coinBulletVal'); if (v_coinBullet) v_coinBullet.textContent = r_coinBullet.txt; const w_coinBullet = $('coinBulletWrap'); if (w_coinBullet) { w_coinBullet.classList.remove('g-good','g-warn','g-bad'); if (r_coinBullet.cls) w_coinBullet.classList.add(r_coinBullet.cls); w_coinBullet.classList.toggle('danger', !!r_coinBullet.danger); }
+    const r_scoreEnemy = scoreEnemyText(score, enemies.length); const f_scoreEnemy = $('scoreEnemyFill'); if (f_scoreEnemy) f_scoreEnemy.style.width = r_scoreEnemy.pct + '%'; const v_scoreEnemy = $('scoreEnemyVal'); if (v_scoreEnemy) v_scoreEnemy.textContent = r_scoreEnemy.txt; const w_scoreEnemy = $('scoreEnemyWrap'); if (w_scoreEnemy) { w_scoreEnemy.classList.remove('g-good','g-warn','g-bad'); if (r_scoreEnemy.cls) w_scoreEnemy.classList.add(r_scoreEnemy.cls); w_scoreEnemy.classList.toggle('danger', !!r_scoreEnemy.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -18989,6 +18996,18 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
     return { pct: pct, txt: '金币弹幕 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— scoreEnemy：得分敌群（X 占比越高越安全）——
+  function scoreEnemyText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0) return { pct: 0, txt: '得分敌群 —', cls: 'g-good', danger: false };
+    const sum = na + nb;
+    if (sum <= 0) return { pct: 0, txt: '得分敌群 —', cls: 'g-good', danger: false };
+    const val = na / sum;
+    const pct = Math.max(0, Math.min(100, Math.round(val * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
+    return { pct: pct, txt: '得分敌群 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -20830,7 +20849,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V15.32', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V15.33', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -22639,6 +22658,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       upgBulletStateNow: (a, b) => upgBulletText(a, b), upgBulletANow: () => upgTotal, upgBulletBNow: () => bullets.length, upgBulletFillNow: () => { const f = $('upgBulletFill'); return f ? f.style.width : ''; }, upgBulletDangerNow: () => { const w = $('upgBulletWrap'); return !!(w && w.classList.contains('danger')); },
       bossBulletStateNow: (a, b) => bossBulletText(a, b), bossBulletANow: () => stat.bossKills, bossBulletBNow: () => bullets.length, bossBulletFillNow: () => { const f = $('bossBulletFill'); return f ? f.style.width : ''; }, bossBulletDangerNow: () => { const w = $('bossBulletWrap'); return !!(w && w.classList.contains('danger')); },
       coinBulletStateNow: (a, b) => coinBulletText(a, b), coinBulletANow: () => coins, coinBulletBNow: () => bullets.length, coinBulletFillNow: () => { const f = $('coinBulletFill'); return f ? f.style.width : ''; }, coinBulletDangerNow: () => { const w = $('coinBulletWrap'); return !!(w && w.classList.contains('danger')); },
+      scoreEnemyStateNow: (a, b) => scoreEnemyText(a, b), scoreEnemyANow: () => score, scoreEnemyBNow: () => enemies.length, scoreEnemyFillNow: () => { const f = $('scoreEnemyFill'); return f ? f.style.width : ''; }, scoreEnemyDangerNow: () => { const w = $('scoreEnemyWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
