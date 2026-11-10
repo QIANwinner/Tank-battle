@@ -4202,6 +4202,11 @@
   #bossTradeWrap.g-good .pfill { background:#2ecc71; }
   #bossTradeWrap.g-warn .pfill { background:#f1c40f; }
   #bossTradeWrap.g-bad .pfill { background:#e74c3c; }
+  #hurtLifeWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #hurtLifeWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #hurtLifeWrap.g-good .pfill { background:#2ecc71; }
+  #hurtLifeWrap.g-warn .pfill { background:#f1c40f; }
+  #hurtLifeWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -4983,6 +4988,7 @@
     <div class="pill m-hide" id="killHurtRateWrap"><span class="k">🎯</span><i class="pbar"><i class="pfill" id="killHurtRateFill"></i></i><span class="v" id="killHurtRateVal">—</span></div>
     <div class="pill m-hide" id="coinLifeWrap"><span class="k">💰</span><i class="pbar"><i class="pfill" id="coinLifeFill"></i></i><span class="v" id="coinLifeVal">—</span></div>
     <div class="pill m-hide" id="bossTradeWrap"><span class="k">👑</span><i class="pbar"><i class="pfill" id="bossTradeFill"></i></i><span class="v" id="bossTradeVal">—</span></div>
+    <div class="pill m-hide" id="hurtLifeWrap"><span class="k">🩸</span><i class="pbar"><i class="pfill" id="hurtLifeFill"></i></i><span class="v" id="hurtLifeVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -5358,7 +5364,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V14.83</div>
+  <div id="mark">DESIGNED BY QIAN · V14.84</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -10941,6 +10947,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_killHurtRate = killHurtRateText(stat.kills, hurtCount); const f_killHurtRate = $('killHurtRateFill'); if (f_killHurtRate) f_killHurtRate.style.width = r_killHurtRate.pct + '%'; const v_killHurtRate = $('killHurtRateVal'); if (v_killHurtRate) v_killHurtRate.textContent = r_killHurtRate.txt; const w_killHurtRate = $('killHurtRateWrap'); if (w_killHurtRate) { w_killHurtRate.classList.remove('g-good','g-warn','g-bad'); if (r_killHurtRate.cls) w_killHurtRate.classList.add(r_killHurtRate.cls); w_killHurtRate.classList.toggle('danger', !!r_killHurtRate.danger); }
     const r_coinLife = coinLifeText(coins, lives); const f_coinLife = $('coinLifeFill'); if (f_coinLife) f_coinLife.style.width = r_coinLife.pct + '%'; const v_coinLife = $('coinLifeVal'); if (v_coinLife) v_coinLife.textContent = r_coinLife.txt; const w_coinLife = $('coinLifeWrap'); if (w_coinLife) { w_coinLife.classList.remove('g-good','g-warn','g-bad'); if (r_coinLife.cls) w_coinLife.classList.add(r_coinLife.cls); w_coinLife.classList.toggle('danger', !!r_coinLife.danger); }
     const r_bossTrade = bossTradeText(stat.bossKills, stat.deaths); const f_bossTrade = $('bossTradeFill'); if (f_bossTrade) f_bossTrade.style.width = r_bossTrade.pct + '%'; const v_bossTrade = $('bossTradeVal'); if (v_bossTrade) v_bossTrade.textContent = r_bossTrade.txt; const w_bossTrade = $('bossTradeWrap'); if (w_bossTrade) { w_bossTrade.classList.remove('g-good','g-warn','g-bad'); if (r_bossTrade.cls) w_bossTrade.classList.add(r_bossTrade.cls); w_bossTrade.classList.toggle('danger', !!r_bossTrade.danger); }
+    const r_hurtLife = hurtLifeText(hurtCount, lives); const f_hurtLife = $('hurtLifeFill'); if (f_hurtLife) f_hurtLife.style.width = r_hurtLife.pct + '%'; const v_hurtLife = $('hurtLifeVal'); if (v_hurtLife) v_hurtLife.textContent = r_hurtLife.txt; const w_hurtLife = $('hurtLifeWrap'); if (w_hurtLife) { w_hurtLife.classList.remove('g-good','g-warn','g-bad'); if (r_hurtLife.cls) w_hurtLife.classList.add(r_hurtLife.cls); w_hurtLife.classList.toggle('danger', !!r_hurtLife.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -18058,6 +18065,18 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
     return { pct: pct, txt: 'BOSS讨伐 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— hurtLife：受伤生命（X 占比越高越危险）——
+  function hurtLifeText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0) return { pct: 0, txt: '受伤生命 —', cls: 'g-good', danger: false };
+    const sum = na + nb;
+    if (sum <= 0) return { pct: 0, txt: '受伤生命 —', cls: 'g-good', danger: false };
+    const val = na / sum;
+    const pct = Math.max(0, Math.min(100, Math.round(val * 100)));
+    let cls = 'g-good', danger = false;
+    if (val > 0.6) { cls = 'g-bad'; danger = true; } else if (val > 0.4) { cls = 'g-warn'; }
+    return { pct: pct, txt: '受伤生命 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -19899,7 +19918,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V14.83', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V14.84', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -21659,6 +21678,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       killHurtRateStateNow: (a, b) => killHurtRateText(a, b), killHurtRateANow: () => stat.kills, killHurtRateBNow: () => hurtCount, killHurtRateFillNow: () => { const f = $('killHurtRateFill'); return f ? f.style.width : ''; }, killHurtRateDangerNow: () => { const w = $('killHurtRateWrap'); return !!(w && w.classList.contains('danger')); },
       coinLifeStateNow: (a, b) => coinLifeText(a, b), coinLifeANow: () => coins, coinLifeBNow: () => lives, coinLifeFillNow: () => { const f = $('coinLifeFill'); return f ? f.style.width : ''; }, coinLifeDangerNow: () => { const w = $('coinLifeWrap'); return !!(w && w.classList.contains('danger')); },
       bossTradeStateNow: (a, b) => bossTradeText(a, b), bossTradeANow: () => stat.bossKills, bossTradeBNow: () => stat.deaths, bossTradeFillNow: () => { const f = $('bossTradeFill'); return f ? f.style.width : ''; }, bossTradeDangerNow: () => { const w = $('bossTradeWrap'); return !!(w && w.classList.contains('danger')); },
+      hurtLifeStateNow: (a, b) => hurtLifeText(a, b), hurtLifeANow: () => hurtCount, hurtLifeBNow: () => lives, hurtLifeFillNow: () => { const f = $('hurtLifeFill'); return f ? f.style.width : ''; }, hurtLifeDangerNow: () => { const w = $('hurtLifeWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
