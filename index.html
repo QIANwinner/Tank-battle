@@ -5107,6 +5107,13 @@
   #gaugeWaveWrap.g-bad .gp { stroke:#e74c3c; }
   #gaugeWaveWrap.g-bad { animation: tbGaugePulse .5s ease-in-out infinite alternate; }
   @keyframes tbGaugePulse { from { opacity:.6; } to { opacity:1; } }
+  #gaugeComboWrap .gauge { vertical-align:middle; margin:0 4px; display:inline-block; }
+  #gaugeComboWrap .gp { transition: stroke-dashoffset .25s, stroke .25s; }
+  #gaugeComboWrap.g-good .gp { stroke:#2ecc71; }
+  #gaugeComboWrap.g-warn .gp { stroke:#f1c40f; }
+  #gaugeComboWrap.g-bad .gp { stroke:#e74c3c; }
+  #gaugeComboWrap.g-bad { animation: tbGaugePulse .5s ease-in-out infinite alternate; }
+  @keyframes tbGaugePulse { from { opacity:.6; } to { opacity:1; } }
 </style>
 </head>
 <body>
@@ -6065,6 +6072,7 @@
     <div class="pill m-hide" id="lampHurtWrap"><span class="k">🩹</span><i class="lamp"></i><span class="v" id="lampHurtVal">—</span></div>
     <div class="pill m-hide" id="gaugeLifeWrap"><span class="k">❤️</span><svg class="gauge" width="24" height="24" viewBox="0 0 24 24"><circle class="gt" cx="12" cy="12" r="9" fill="none" stroke="#333" stroke-width="3"/><circle class="gp" cx="12" cy="12" r="9" fill="none" stroke="#2ecc71" stroke-width="3" stroke-linecap="round"/><text x="12" y="15" text-anchor="middle" font-size="8" fill="#fff" class="gv">0%</text></svg><span class="v">生命</span></div>
     <div class="pill m-hide" id="gaugeWaveWrap"><span class="k">🌊</span><svg class="gauge" width="24" height="24" viewBox="0 0 24 24"><circle class="gt" cx="12" cy="12" r="9" fill="none" stroke="#333" stroke-width="3"/><circle class="gp" cx="12" cy="12" r="9" fill="none" stroke="#2ecc71" stroke-width="3" stroke-linecap="round"/><text x="12" y="15" text-anchor="middle" font-size="8" fill="#fff" class="gv">0%</text></svg><span class="v">波次</span></div>
+    <div class="pill m-hide" id="gaugeComboWrap"><span class="k">⚡</span><svg class="gauge" width="24" height="24" viewBox="0 0 24 24"><circle class="gt" cx="12" cy="12" r="9" fill="none" stroke="#333" stroke-width="3"/><circle class="gp" cx="12" cy="12" r="9" fill="none" stroke="#2ecc71" stroke-width="3" stroke-linecap="round"/><text x="12" y="15" text-anchor="middle" font-size="8" fill="#fff" class="gv">0%</text></svg><span class="v">连击</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -6440,7 +6448,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V16.59</div>
+  <div id="mark">DESIGNED BY QIAN · V16.60</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -12200,6 +12208,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_lampHurt = lampHurtLamp((stat.kills + 1) > 0 ? 8 * hurtCount / (stat.kills + 1) : 0); const v_lampHurt = $('lampHurtVal'); if (v_lampHurt) v_lampHurt.textContent = r_lampHurt.txt; const w_lampHurt = $('lampHurtWrap'); if (w_lampHurt) { w_lampHurt.classList.remove('g-safe','g-caution','g-danger'); w_lampHurt.classList.add(r_lampHurt.cls); w_lampHurt.classList.toggle('danger', !!r_lampHurt.danger); }
     const r_gaugeLife = gaugeLifeGauge(lives / 3); const w_gaugeLife = $('gaugeLifeWrap'); if (w_gaugeLife) { w_gaugeLife.classList.remove('g-good','g-warn','g-bad'); w_gaugeLife.classList.add(r_gaugeLife.cls); w_gaugeLife.classList.toggle('danger', !!r_gaugeLife.danger); const gp = w_gaugeLife.querySelector('.gp'); if (gp) { const C = 2 * Math.PI * 9; gp.setAttribute('stroke-dasharray', C); gp.setAttribute('stroke-dashoffset', C * (1 - r_gaugeLife.p / 100)); } const gv = w_gaugeLife.querySelector('.gv'); if (gv) gv.textContent = r_gaugeLife.txt; }
     const r_gaugeWave = gaugeWaveGauge(wavesTotal > 0 ? wave / wavesTotal : 0); const w_gaugeWave = $('gaugeWaveWrap'); if (w_gaugeWave) { w_gaugeWave.classList.remove('g-good','g-warn','g-bad'); w_gaugeWave.classList.add(r_gaugeWave.cls); w_gaugeWave.classList.toggle('danger', !!r_gaugeWave.danger); const gp = w_gaugeWave.querySelector('.gp'); if (gp) { const C = 2 * Math.PI * 9; gp.setAttribute('stroke-dasharray', C); gp.setAttribute('stroke-dashoffset', C * (1 - r_gaugeWave.p / 100)); } const gv = w_gaugeWave.querySelector('.gv'); if (gv) gv.textContent = r_gaugeWave.txt; }
+    const r_gaugeCombo = gaugeComboGauge(combo / 20); const w_gaugeCombo = $('gaugeComboWrap'); if (w_gaugeCombo) { w_gaugeCombo.classList.remove('g-good','g-warn','g-bad'); w_gaugeCombo.classList.add(r_gaugeCombo.cls); w_gaugeCombo.classList.toggle('danger', !!r_gaugeCombo.danger); const gp = w_gaugeCombo.querySelector('.gp'); if (gp) { const C = 2 * Math.PI * 9; gp.setAttribute('stroke-dasharray', C); gp.setAttribute('stroke-dashoffset', C * (1 - r_gaugeCombo.p / 100)); } const gv = w_gaugeCombo.querySelector('.gv'); if (gv) gv.textContent = r_gaugeCombo.txt; }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -21415,6 +21424,13 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const cls = p >= 75 ? 'g-good' : (p <= 30 ? 'g-bad' : 'g-warn');
     return { p: p, cls: cls, danger: p <= 30, txt: p + '%' };
   }
+  // —— gaugeCombo：连击环（仪表环：完成比例 ratio，p=clamp(round(ratio*100),0,100)，>=75 高 / <=30 低 / 否则警戒）——
+  function gaugeComboGauge(ratio) {
+    const n = Number(ratio);
+    const p = isFinite(n) ? Math.max(0, Math.min(100, Math.round(n * 100))) : 0;
+    const cls = p >= 75 ? 'g-good' : (p <= 30 ? 'g-bad' : 'g-warn');
+    return { p: p, cls: cls, danger: p <= 30, txt: p + '%' };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -23256,7 +23272,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V16.59', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V16.60', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -25193,6 +25209,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       lampHurtStateNow: (r) => lampHurtLamp(r), lampHurtRiskNow: () => (stat.kills + 1) > 0 ? 8 * hurtCount / (stat.kills + 1) : 0, lampHurtLvlNow: () => { const w = $('lampHurtWrap'); if (!w) return -1; return w.classList.contains('g-danger') ? 2 : w.classList.contains('g-caution') ? 1 : 0; }, lampHurtDangerNow: () => { const w = $('lampHurtWrap'); return !!(w && w.classList.contains('g-danger')); },
       gaugeLifeStateNow: (r) => gaugeLifeGauge(r), gaugeLifePctNow: () => lives / 3, gaugeLifeLvlNow: () => { const w = $('gaugeLifeWrap'); if (!w) return -1; return w.classList.contains('g-bad') ? 2 : w.classList.contains('g-warn') ? 1 : 0; }, gaugeLifeDangerNow: () => { const w = $('gaugeLifeWrap'); return !!(w && w.classList.contains('g-bad')); },
       gaugeWaveStateNow: (r) => gaugeWaveGauge(r), gaugeWavePctNow: () => wavesTotal > 0 ? wave / wavesTotal : 0, gaugeWaveLvlNow: () => { const w = $('gaugeWaveWrap'); if (!w) return -1; return w.classList.contains('g-bad') ? 2 : w.classList.contains('g-warn') ? 1 : 0; }, gaugeWaveDangerNow: () => { const w = $('gaugeWaveWrap'); return !!(w && w.classList.contains('g-bad')); },
+      gaugeComboStateNow: (r) => gaugeComboGauge(r), gaugeComboPctNow: () => combo / 20, gaugeComboLvlNow: () => { const w = $('gaugeComboWrap'); if (!w) return -1; return w.classList.contains('g-bad') ? 2 : w.classList.contains('g-warn') ? 1 : 0; }, gaugeComboDangerNow: () => { const w = $('gaugeComboWrap'); return !!(w && w.classList.contains('g-bad')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
