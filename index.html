@@ -4872,6 +4872,11 @@
   #killBossRatioWrap.g-good .pfill { background:#2ecc71; }
   #killBossRatioWrap.g-warn .pfill { background:#f1c40f; }
   #killBossRatioWrap.g-bad .pfill { background:#e74c3c; }
+  #lifeKillRatioWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #lifeKillRatioWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #lifeKillRatioWrap.g-good .pfill { background:#2ecc71; }
+  #lifeKillRatioWrap.g-warn .pfill { background:#f1c40f; }
+  #lifeKillRatioWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -5787,6 +5792,7 @@
     <div class="pill m-hide" id="scoreCoinRatioWrap"><span class="k">💯</span><i class="pbar"><i class="pfill" id="scoreCoinRatioFill"></i></i><span class="v" id="scoreCoinRatioVal">—</span></div>
     <div class="pill m-hide" id="hitShotRatioWrap"><span class="k">🎯</span><i class="pbar"><i class="pfill" id="hitShotRatioFill"></i></i><span class="v" id="hitShotRatioVal">—</span></div>
     <div class="pill m-hide" id="killBossRatioWrap"><span class="k">👑</span><i class="pbar"><i class="pfill" id="killBossRatioFill"></i></i><span class="v" id="killBossRatioVal">—</span></div>
+    <div class="pill m-hide" id="lifeKillRatioWrap"><span class="k">❤️</span><i class="pbar"><i class="pfill" id="lifeKillRatioFill"></i></i><span class="v" id="lifeKillRatioVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -6162,7 +6168,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V16.17</div>
+  <div id="mark">DESIGNED BY QIAN · V16.18</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -11879,6 +11885,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_scoreCoinRatio = scoreCoinRatioText(score, coins); const f_scoreCoinRatio = $('scoreCoinRatioFill'); if (f_scoreCoinRatio) f_scoreCoinRatio.style.width = r_scoreCoinRatio.pct + '%'; const v_scoreCoinRatio = $('scoreCoinRatioVal'); if (v_scoreCoinRatio) v_scoreCoinRatio.textContent = r_scoreCoinRatio.txt; const w_scoreCoinRatio = $('scoreCoinRatioWrap'); if (w_scoreCoinRatio) { w_scoreCoinRatio.classList.remove('g-good','g-warn','g-bad'); if (r_scoreCoinRatio.cls) w_scoreCoinRatio.classList.add(r_scoreCoinRatio.cls); w_scoreCoinRatio.classList.toggle('danger', !!r_scoreCoinRatio.danger); }
     const r_hitShotRatio = hitShotRatioText(stat.hits, stat.shots); const f_hitShotRatio = $('hitShotRatioFill'); if (f_hitShotRatio) f_hitShotRatio.style.width = r_hitShotRatio.pct + '%'; const v_hitShotRatio = $('hitShotRatioVal'); if (v_hitShotRatio) v_hitShotRatio.textContent = r_hitShotRatio.txt; const w_hitShotRatio = $('hitShotRatioWrap'); if (w_hitShotRatio) { w_hitShotRatio.classList.remove('g-good','g-warn','g-bad'); if (r_hitShotRatio.cls) w_hitShotRatio.classList.add(r_hitShotRatio.cls); w_hitShotRatio.classList.toggle('danger', !!r_hitShotRatio.danger); }
     const r_killBossRatio = killBossRatioText(stat.bossKills, stat.kills); const f_killBossRatio = $('killBossRatioFill'); if (f_killBossRatio) f_killBossRatio.style.width = r_killBossRatio.pct + '%'; const v_killBossRatio = $('killBossRatioVal'); if (v_killBossRatio) v_killBossRatio.textContent = r_killBossRatio.txt; const w_killBossRatio = $('killBossRatioWrap'); if (w_killBossRatio) { w_killBossRatio.classList.remove('g-good','g-warn','g-bad'); if (r_killBossRatio.cls) w_killBossRatio.classList.add(r_killBossRatio.cls); w_killBossRatio.classList.toggle('danger', !!r_killBossRatio.danger); }
+    const r_lifeKillRatio = lifeKillRatioText(lives, stat.kills); const f_lifeKillRatio = $('lifeKillRatioFill'); if (f_lifeKillRatio) f_lifeKillRatio.style.width = r_lifeKillRatio.pct + '%'; const v_lifeKillRatio = $('lifeKillRatioVal'); if (v_lifeKillRatio) v_lifeKillRatio.textContent = r_lifeKillRatio.txt; const w_lifeKillRatio = $('lifeKillRatioWrap'); if (w_lifeKillRatio) { w_lifeKillRatio.classList.remove('g-good','g-warn','g-bad'); if (r_lifeKillRatio.cls) w_lifeKillRatio.classList.add(r_lifeKillRatio.cls); w_lifeKillRatio.classList.toggle('danger', !!r_lifeKillRatio.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -20604,6 +20611,18 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
     return { pct: pct, txt: 'BOSS击杀比 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— lifeKillRatio：生命击杀比（X 占比越高越安全）——
+  function lifeKillRatioText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0) return { pct: 0, txt: '生命击杀比 —', cls: 'g-good', danger: false };
+    const sum = na + nb;
+    if (sum <= 0) return { pct: 0, txt: '生命击杀比 —', cls: 'g-good', danger: false };
+    const val = na / sum;
+    const pct = Math.max(0, Math.min(100, Math.round(val * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
+    return { pct: pct, txt: '生命击杀比 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -22445,7 +22464,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V16.17', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V16.18', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -24339,6 +24358,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       scoreCoinRatioStateNow: (a, b) => scoreCoinRatioText(a, b), scoreCoinRatioANow: () => score, scoreCoinRatioBNow: () => coins, scoreCoinRatioFillNow: () => { const f = $('scoreCoinRatioFill'); return f ? f.style.width : ''; }, scoreCoinRatioDangerNow: () => { const w = $('scoreCoinRatioWrap'); return !!(w && w.classList.contains('danger')); },
       hitShotRatioStateNow: (a, b) => hitShotRatioText(a, b), hitShotRatioANow: () => stat.hits, hitShotRatioBNow: () => stat.shots, hitShotRatioFillNow: () => { const f = $('hitShotRatioFill'); return f ? f.style.width : ''; }, hitShotRatioDangerNow: () => { const w = $('hitShotRatioWrap'); return !!(w && w.classList.contains('danger')); },
       killBossRatioStateNow: (a, b) => killBossRatioText(a, b), killBossRatioANow: () => stat.bossKills, killBossRatioBNow: () => stat.kills, killBossRatioFillNow: () => { const f = $('killBossRatioFill'); return f ? f.style.width : ''; }, killBossRatioDangerNow: () => { const w = $('killBossRatioWrap'); return !!(w && w.classList.contains('danger')); },
+      lifeKillRatioStateNow: (a, b) => lifeKillRatioText(a, b), lifeKillRatioANow: () => lives, lifeKillRatioBNow: () => stat.kills, lifeKillRatioFillNow: () => { const f = $('lifeKillRatioFill'); return f ? f.style.width : ''; }, lifeKillRatioDangerNow: () => { const w = $('lifeKillRatioWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
