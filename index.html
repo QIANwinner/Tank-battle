@@ -4944,6 +4944,11 @@
   #bossLifeRatioWrap.g-good .pfill { background:#2ecc71; }
   #bossLifeRatioWrap.g-warn .pfill { background:#f1c40f; }
   #bossLifeRatioWrap.g-bad .pfill { background:#e74c3c; }
+  #comboShotRatioWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #comboShotRatioWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #comboShotRatioWrap.g-good .pfill { background:#2ecc71; }
+  #comboShotRatioWrap.g-warn .pfill { background:#f1c40f; }
+  #comboShotRatioWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -5873,6 +5878,7 @@
     <div class="pill m-hide" id="lifeScissorsWrap"><span class="k">❤️</span><i class="pbar"><i class="ppivot"></i><i class="pfill" id="lifeScissorsFill"></i></i><span class="v" id="lifeScissorsVal">—</span></div>
     <div class="pill m-hide" id="dmgKillRatioWrap"><span class="k">💥</span><i class="pbar"><i class="pfill" id="dmgKillRatioFill"></i></i><span class="v" id="dmgKillRatioVal">—</span></div>
     <div class="pill m-hide" id="bossLifeRatioWrap"><span class="k">👑</span><i class="pbar"><i class="pfill" id="bossLifeRatioFill"></i></i><span class="v" id="bossLifeRatioVal">—</span></div>
+    <div class="pill m-hide" id="comboShotRatioWrap"><span class="k">🔥</span><i class="pbar"><i class="pfill" id="comboShotRatioFill"></i></i><span class="v" id="comboShotRatioVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -6248,7 +6254,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V16.30</div>
+  <div id="mark">DESIGNED BY QIAN · V16.31</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -11979,6 +11985,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_lifeScissors = lifeScissorsText(lives, hurtCount); const f_lifeScissors = $('lifeScissorsFill'); if (f_lifeScissors) f_lifeScissors.style.width = r_lifeScissors.pct + '%'; const v_lifeScissors = $('lifeScissorsVal'); if (v_lifeScissors) v_lifeScissors.textContent = r_lifeScissors.txt; const w_lifeScissors = $('lifeScissorsWrap'); if (w_lifeScissors) { w_lifeScissors.classList.remove('g-good','g-warn','g-bad'); if (r_lifeScissors.cls) w_lifeScissors.classList.add(r_lifeScissors.cls); w_lifeScissors.classList.toggle('danger', !!r_lifeScissors.danger); }
     const r_dmgKillRatio = dmgKillRatioText(runDmg, stat.kills); const f_dmgKillRatio = $('dmgKillRatioFill'); if (f_dmgKillRatio) f_dmgKillRatio.style.width = r_dmgKillRatio.pct + '%'; const v_dmgKillRatio = $('dmgKillRatioVal'); if (v_dmgKillRatio) v_dmgKillRatio.textContent = r_dmgKillRatio.txt; const w_dmgKillRatio = $('dmgKillRatioWrap'); if (w_dmgKillRatio) { w_dmgKillRatio.classList.remove('g-good','g-warn','g-bad'); if (r_dmgKillRatio.cls) w_dmgKillRatio.classList.add(r_dmgKillRatio.cls); w_dmgKillRatio.classList.toggle('danger', !!r_dmgKillRatio.danger); }
     const r_bossLifeRatio = bossLifeRatioText(stat.bossKills, lives); const f_bossLifeRatio = $('bossLifeRatioFill'); if (f_bossLifeRatio) f_bossLifeRatio.style.width = r_bossLifeRatio.pct + '%'; const v_bossLifeRatio = $('bossLifeRatioVal'); if (v_bossLifeRatio) v_bossLifeRatio.textContent = r_bossLifeRatio.txt; const w_bossLifeRatio = $('bossLifeRatioWrap'); if (w_bossLifeRatio) { w_bossLifeRatio.classList.remove('g-good','g-warn','g-bad'); if (r_bossLifeRatio.cls) w_bossLifeRatio.classList.add(r_bossLifeRatio.cls); w_bossLifeRatio.classList.toggle('danger', !!r_bossLifeRatio.danger); }
+    const r_comboShotRatio = comboShotRatioText(combo, stat.shots); const f_comboShotRatio = $('comboShotRatioFill'); if (f_comboShotRatio) f_comboShotRatio.style.width = r_comboShotRatio.pct + '%'; const v_comboShotRatio = $('comboShotRatioVal'); if (v_comboShotRatio) v_comboShotRatio.textContent = r_comboShotRatio.txt; const w_comboShotRatio = $('comboShotRatioWrap'); if (w_comboShotRatio) { w_comboShotRatio.classList.remove('g-good','g-warn','g-bad'); if (r_comboShotRatio.cls) w_comboShotRatio.classList.add(r_comboShotRatio.cls); w_comboShotRatio.classList.toggle('danger', !!r_comboShotRatio.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -20874,6 +20881,18 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
     return { pct: pct, txt: 'BOSS生命比 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— comboShotRatio：连击射击比（X 占比越高越安全）——
+  function comboShotRatioText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0) return { pct: 0, txt: '连击射击比 —', cls: 'g-good', danger: false };
+    const sum = na + nb;
+    if (sum <= 0) return { pct: 0, txt: '连击射击比 —', cls: 'g-good', danger: false };
+    const val = na / sum;
+    const pct = Math.max(0, Math.min(100, Math.round(val * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
+    return { pct: pct, txt: '连击射击比 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -22715,7 +22734,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V16.30', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V16.31', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -24623,6 +24642,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       lifeScissorsStateNow: (a, b) => lifeScissorsText(a, b), lifeScissorsANow: () => lives, lifeScissorsBNow: () => hurtCount, lifeScissorsFillNow: () => { const f = $('lifeScissorsFill'); return f ? f.style.width : ''; }, lifeScissorsDangerNow: () => { const w = $('lifeScissorsWrap'); return !!(w && w.classList.contains('danger')); },
       dmgKillRatioStateNow: (a, b) => dmgKillRatioText(a, b), dmgKillRatioANow: () => runDmg, dmgKillRatioBNow: () => stat.kills, dmgKillRatioFillNow: () => { const f = $('dmgKillRatioFill'); return f ? f.style.width : ''; }, dmgKillRatioDangerNow: () => { const w = $('dmgKillRatioWrap'); return !!(w && w.classList.contains('danger')); },
       bossLifeRatioStateNow: (a, b) => bossLifeRatioText(a, b), bossLifeRatioANow: () => stat.bossKills, bossLifeRatioBNow: () => lives, bossLifeRatioFillNow: () => { const f = $('bossLifeRatioFill'); return f ? f.style.width : ''; }, bossLifeRatioDangerNow: () => { const w = $('bossLifeRatioWrap'); return !!(w && w.classList.contains('danger')); },
+      comboShotRatioStateNow: (a, b) => comboShotRatioText(a, b), comboShotRatioANow: () => combo, comboShotRatioBNow: () => stat.shots, comboShotRatioFillNow: () => { const f = $('comboShotRatioFill'); return f ? f.style.width : ''; }, comboShotRatioDangerNow: () => { const w = $('comboShotRatioWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
