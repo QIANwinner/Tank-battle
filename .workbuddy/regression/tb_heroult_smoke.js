@@ -17684,6 +17684,22 @@ async function main() {
     t('U6344 DOM 与函数一致性', o5.ok === true && o5.p === true && o5.match === true && o5.dom === true, JSON.stringify(o5));
   } catch(e){ for(let k=6339;k<=6344;k++) t('U'+k+' 击杀环',false,e.message); }
 
+
+  // ===== U6345~U6350: BOSS环(v0.16.63) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('gaugeBossWrap'),s:T.gaugeBossStateNow(0.75)});})()"));
+    t('U6345 BOSS环 DOM 已加入 HUD', o.dom === true && o.s.txt === '75%', JSON.stringify(o));
+    t('U6346 正常 0.75→75% g-good', o.s.p === 75 && o.s.cls === 'g-good' && o.s.danger === false, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.gaugeBossStateNow(0),b:T.gaugeBossStateNow(1),c:T.gaugeBossStateNow(0.3),d:T.gaugeBossStateNow(0.31)});})()"));
+    t('U6347 边界 0/1/0.3/0.31→0g-bad/100g-good/30g-bad/31g-warn', o2.a.p === 0 && o2.a.cls === 'g-bad' && o2.a.danger === true && o2.b.p === 100 && o2.b.cls === 'g-good' && o2.c.p === 30 && o2.c.cls === 'g-bad' && o2.d.p === 31 && o2.d.cls === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.gaugeBossStateNow(-1),b:T.gaugeBossStateNow(NaN),c:T.gaugeBossStateNow(2)});})()"));
+    t('U6348 非法 -1/NaN/2→clamp 0/0/100', o3.a.p === 0 && o3.b.p === 0 && o3.c.p === 100, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.gaugeBossStateNow('0.75').p);})()"));
+    t('U6349 数字字符串转数', o4 === 75, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}const w=document.getElementById('gaugeBossWrap');const gp=w?w.querySelector('.gp'):null;const gv=w?w.querySelector('.gv'):null;const off=gp?parseFloat(gp.getAttribute('stroke-dashoffset')):NaN;const C=2*Math.PI*9;const p=Math.round((1-off/C)*100);const st=T.gaugeBossStateNow(T.gaugeBossPctNow());return JSON.stringify({ok:ok,p:typeof p==='number',match:Math.abs(p-st.p)<=1&&gv&&gv.textContent===st.txt,dom:!!w});})()"));
+    t('U6350 DOM 与函数一致性', o5.ok === true && o5.p === true && o5.match === true && o5.dom === true, JSON.stringify(o5));
+  } catch(e){ for(let k=6345;k<=6350;k++) t('U'+k+' BOSS环',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
