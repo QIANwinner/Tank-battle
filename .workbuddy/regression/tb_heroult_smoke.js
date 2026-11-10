@@ -17556,6 +17556,22 @@ async function main() {
     t('U6296 DOM 与函数一致性', o5.ok === true && o5.risk === true && o5.match === true && o5.dom === true, JSON.stringify(o5));
   } catch(e){ for(let k=6291;k<=6296;k++) t('U'+k+' BOSS警戒',false,e.message); }
 
+
+  // ===== U6297~U6302: 经济警戒(v0.16.55) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('lampEcoWrap'),s:T.lampEcoStateNow(9)});})()"));
+    t('U6297 经济警戒 DOM 已加入 HUD', o.dom === true && o.s.lvl === 2 && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U6298 正常 9→危险', o.s.danger === true && o.s.cls === 'g-danger', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lampEcoStateNow(8),b:T.lampEcoStateNow(4),c:T.lampEcoStateNow(3.9)});})()"));
+    t('U6299 边界 8/4/3.9→危险/警戒/安全', o2.a.lvl === 2 && o2.a.danger === true && o2.b.lvl === 1 && o2.b.cls === 'g-caution' && o2.c.lvl === 0 && o2.c.cls === 'g-safe', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lampEcoStateNow(-1),b:T.lampEcoStateNow(NaN)});})()"));
+    t('U6300 非法/NaN → 安全', o3.a.lvl === 0 && o3.a.danger === false && o3.b.lvl === 0 && o3.b.danger === false, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.lampEcoStateNow('9').lvl);})()"));
+    t('U6301 数字字符串转数', o4 === 2, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}const w=document.getElementById('lampEcoWrap');const cls=w?w.className:'';const risk=T.lampEcoRiskNow();const st=T.lampEcoStateNow(risk);return JSON.stringify({ok:ok,risk:typeof risk==='number',match:cls.indexOf(st.cls)>=0,dom:!!w});})()"));
+    t('U6302 DOM 与函数一致性', o5.ok === true && o5.risk === true && o5.match === true && o5.dom === true, JSON.stringify(o5));
+  } catch(e){ for(let k=6297;k<=6302;k++) t('U'+k+' 经济警戒',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
