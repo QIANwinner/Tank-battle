@@ -17396,6 +17396,22 @@ async function main() {
     t('U6236 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=6231;k<=6236;k++) t('U'+k+' 生命分流',false,e.message); }
 
+
+  // ===== U6237~U6242: BOSS压制分流(v0.16.45) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('splitBossWrap'),st:T.splitBossStateNow(4,1)});})()"));
+    t('U6237 BOSS压制分流 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U6238 正常 4/1→80%', o.st.pct === 80 && o.st.txt === 'BOSS压制分流 80% / 20%' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.splitBossStateNow(1,0),b:T.splitBossStateNow(0,3),c:T.splitBossStateNow(1,1)});})()"));
+    t('U6239 边界 1/0、0/3、1/1→100/0/50', o2.a.pct === 100 && o2.a.cls === 'g-good' && o2.b.pct === 0 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.c.pct === 50 && o2.c.cls === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.splitBossStateNow(-1,2).pct,b:T.splitBossStateNow(NaN,2).pct,c:T.splitBossStateNow(0,0).pct,d:T.splitBossStateNow(3,-1).pct});})()"));
+    t('U6240 非法/空值/零和/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.splitBossStateNow('4','1').pct);})()"));
+    t('U6241 数字字符串转数', o4 === 80, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.splitBossSaNow()==='string',d:typeof T.splitBossDangerNow()==='boolean',a:T.splitBossANow(),b:T.splitBossBNow()});})()"));
+    t('U6242 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=6237;k<=6242;k++) t('U'+k+' BOSS压制分流',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
