@@ -5012,6 +5012,13 @@
   #splitAccWrap.g-good .sa { background:#2ecc71; }
   #splitAccWrap.g-warn .sa { background:#f1c40f; }
   #splitAccWrap.g-bad .sa { background:#e74c3c; }
+  #splitClearWrap .sbar { display:inline-block; width:56px; height:8px; background:rgba(255,255,255,.12); border-radius:4px; overflow:hidden; vertical-align:middle; margin:0 4px; position:relative; }
+  #splitClearWrap .sa { position:absolute; left:0; top:0; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #splitClearWrap .sb { position:absolute; right:0; top:0; height:100%; width:0%; background:rgba(255,255,255,.28); transition:width .12s linear; }
+  #splitClearWrap .spivot { position:absolute; left:50%; top:0; width:1px; height:100%; background:rgba(255,255,255,.6); z-index:2; }
+  #splitClearWrap.g-good .sa { background:#2ecc71; }
+  #splitClearWrap.g-warn .sa { background:#f1c40f; }
+  #splitClearWrap.g-bad .sa { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -5953,6 +5960,7 @@
     <div class="pill m-hide" id="comboScissorsWrap"><span class="k">⚡</span><i class="pbar"><i class="ppivot"></i><i class="pfill" id="comboScissorsFill"></i></i><span class="v" id="comboScissorsVal">—</span></div>
     <div class="pill m-hide" id="overallScissorsWrap"><span class="k">🏆</span><i class="pbar"><i class="ppivot"></i><i class="pfill" id="overallScissorsFill"></i></i><span class="v" id="overallScissorsVal">—</span></div>
     <div class="pill m-hide" id="splitAccWrap"><span class="k">🎯</span><i class="sbar"><i class="spivot"></i><i class="sa" id="splitAccSa"></i><i class="sb" id="splitAccSb"></i></i><span class="v" id="splitAccVal">—</span></div>
+    <div class="pill m-hide" id="splitClearWrap"><span class="k">🧹</span><i class="sbar"><i class="spivot"></i><i class="sa" id="splitClearSa"></i><i class="sb" id="splitClearSb"></i></i><span class="v" id="splitClearVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -6328,7 +6336,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V16.42</div>
+  <div id="mark">DESIGNED BY QIAN · V16.43</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -12071,6 +12079,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_comboScissors = comboScissorsText(stat.maxCombo, wave); const f_comboScissors = $('comboScissorsFill'); if (f_comboScissors) f_comboScissors.style.width = r_comboScissors.pct + '%'; const v_comboScissors = $('comboScissorsVal'); if (v_comboScissors) v_comboScissors.textContent = r_comboScissors.txt; const w_comboScissors = $('comboScissorsWrap'); if (w_comboScissors) { w_comboScissors.classList.remove('g-good','g-warn','g-bad'); if (r_comboScissors.cls) w_comboScissors.classList.add(r_comboScissors.cls); w_comboScissors.classList.toggle('danger', !!r_comboScissors.danger); }
     const r_overallScissors = overallScissorsText(score, (hurtCount * 100)); const f_overallScissors = $('overallScissorsFill'); if (f_overallScissors) f_overallScissors.style.width = r_overallScissors.pct + '%'; const v_overallScissors = $('overallScissorsVal'); if (v_overallScissors) v_overallScissors.textContent = r_overallScissors.txt; const w_overallScissors = $('overallScissorsWrap'); if (w_overallScissors) { w_overallScissors.classList.remove('g-good','g-warn','g-bad'); if (r_overallScissors.cls) w_overallScissors.classList.add(r_overallScissors.cls); w_overallScissors.classList.toggle('danger', !!r_overallScissors.danger); }
     const r_splitAcc = splitAccText(stat.hits, (stat.shots - stat.hits)); const f_splitAcc = $('splitAccSa'); if (f_splitAcc) f_splitAcc.style.width = r_splitAcc.pct + '%'; const g_splitAcc = $('splitAccSb'); if (g_splitAcc) g_splitAcc.style.width = (100 - r_splitAcc.pct) + '%'; const v_splitAcc = $('splitAccVal'); if (v_splitAcc) v_splitAcc.textContent = r_splitAcc.txt; const w_splitAcc = $('splitAccWrap'); if (w_splitAcc) { w_splitAcc.classList.remove('g-good','g-warn','g-bad'); if (r_splitAcc.cls) w_splitAcc.classList.add(r_splitAcc.cls); w_splitAcc.classList.toggle('danger', !!r_splitAcc.danger); }
+    const r_splitClear = splitClearText(stat.kills, enemies.length); const f_splitClear = $('splitClearSa'); if (f_splitClear) f_splitClear.style.width = r_splitClear.pct + '%'; const g_splitClear = $('splitClearSb'); if (g_splitClear) g_splitClear.style.width = (100 - r_splitClear.pct) + '%'; const v_splitClear = $('splitClearVal'); if (v_splitClear) v_splitClear.textContent = r_splitClear.txt; const w_splitClear = $('splitClearWrap'); if (w_splitClear) { w_splitClear.classList.remove('g-good','g-warn','g-bad'); if (r_splitClear.cls) w_splitClear.classList.add(r_splitClear.cls); w_splitClear.classList.toggle('danger', !!r_splitClear.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -21117,6 +21126,19 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     else if (pct <= 30) { cls = 'g-bad'; danger = true; }
     return { pct: pct, txt: '射击质量分流 ' + pct + '% / ' + share + '%', cls: cls, danger: danger };
   }
+  // —— splitClear：清剿分流（分流条：有利量 A vs 代价量 B，A 占 A+B 比例）——
+  function splitClearText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0) return { pct: 0, txt: '清剿分流 —', cls: 'g-warn', danger: false };
+    const sum = na + nb;
+    if (sum <= 0) return { pct: 0, txt: '清剿分流 —', cls: 'g-warn', danger: false };
+    const pct = Math.max(0, Math.min(100, Math.round(na / sum * 100)));
+    const share = 100 - pct;
+    let cls = 'g-warn', danger = false;
+    if (pct >= 70) { cls = 'g-good'; }
+    else if (pct <= 30) { cls = 'g-bad'; danger = true; }
+    return { pct: pct, txt: '清剿分流 ' + pct + '% / ' + share + '%', cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -22958,7 +22980,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V16.42', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V16.43', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -24878,6 +24900,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       comboScissorsStateNow: (a, b) => comboScissorsText(a, b), comboScissorsANow: () => stat.maxCombo, comboScissorsBNow: () => wave, comboScissorsFillNow: () => { const f = $('comboScissorsFill'); return f ? f.style.width : ''; }, comboScissorsDangerNow: () => { const w = $('comboScissorsWrap'); return !!(w && w.classList.contains('danger')); },
       overallScissorsStateNow: (a, b) => overallScissorsText(a, b), overallScissorsANow: () => score, overallScissorsBNow: () => (hurtCount * 100), overallScissorsFillNow: () => { const f = $('overallScissorsFill'); return f ? f.style.width : ''; }, overallScissorsDangerNow: () => { const w = $('overallScissorsWrap'); return !!(w && w.classList.contains('danger')); },
       splitAccStateNow: (a, b) => splitAccText(a, b), splitAccANow: () => stat.hits, splitAccBNow: () => (stat.shots - stat.hits), splitAccSaNow: () => { const f = $('splitAccSa'); return f ? f.style.width : ''; }, splitAccSbNow: () => { const f = $('splitAccSb'); return f ? f.style.width : ''; }, splitAccDangerNow: () => { const w = $('splitAccWrap'); return !!(w && w.classList.contains('danger')); },
+      splitClearStateNow: (a, b) => splitClearText(a, b), splitClearANow: () => stat.kills, splitClearBNow: () => enemies.length, splitClearSaNow: () => { const f = $('splitClearSa'); return f ? f.style.width : ''; }, splitClearSbNow: () => { const f = $('splitClearSb'); return f ? f.style.width : ''; }, splitClearDangerNow: () => { const w = $('splitClearWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
