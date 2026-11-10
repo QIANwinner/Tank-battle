@@ -14356,6 +14356,22 @@ async function main() {
     t('U5102 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=5097;k<=5102;k++) t('U'+k+' 火力优势',false,e.message); }
 
+
+  // ===== U5103~U5108: 伤害转化(v0.14.56) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('dmgPuSwapWrap'),st:T.dmgPuSwapStateNow(4,1)});})()"));
+    t('U5103 伤害转化 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U5104 正常 4/1→伤害转化 0.8', o.st.pct === 80 && o.st.txt === '伤害转化 0.8' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dmgPuSwapStateNow(1,0).pct,b:T.dmgPuSwapStateNow(0,3).pct,c:T.dmgPuSwapStateNow(1,1).pct,d:T.dmgPuSwapStateNow(1,1).cls});})()"));
+    t('U5105 边界 1/0、0/3、1/1→100/0/50', o2.a === 100 && o2.b === 0 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.dmgPuSwapStateNow(-1,2).pct,b:T.dmgPuSwapStateNow(NaN,2).pct,c:T.dmgPuSwapStateNow(0,0).pct,d:T.dmgPuSwapStateNow(3,-1).pct});})()"));
+    t('U5106 非法/空值/零和/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.dmgPuSwapStateNow('4','1').pct);})()"));
+    t('U5107 数字字符串转数', o4 === 80, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.dmgPuSwapFillNow()==='string',d:typeof T.dmgPuSwapDangerNow()==='boolean',a:T.dmgPuSwapANow(),b:T.dmgPuSwapBNow()});})()"));
+    t('U5108 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=5103;k<=5108;k++) t('U'+k+' 伤害转化',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
