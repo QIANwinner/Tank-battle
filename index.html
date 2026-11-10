@@ -4964,6 +4964,11 @@
   #shotKillRatioWrap.g-good .pfill { background:#2ecc71; }
   #shotKillRatioWrap.g-warn .pfill { background:#f1c40f; }
   #shotKillRatioWrap.g-bad .pfill { background:#e74c3c; }
+  #deathWaveRatioWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #deathWaveRatioWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #deathWaveRatioWrap.g-good .pfill { background:#2ecc71; }
+  #deathWaveRatioWrap.g-warn .pfill { background:#f1c40f; }
+  #deathWaveRatioWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -5897,6 +5902,7 @@
     <div class="pill m-hide" id="lifeComboRatioWrap"><span class="k">❤️</span><i class="pbar"><i class="pfill" id="lifeComboRatioFill"></i></i><span class="v" id="lifeComboRatioVal">—</span></div>
     <div class="pill m-hide" id="waveCoinRatioWrap"><span class="k">🪙</span><i class="pbar"><i class="pfill" id="waveCoinRatioFill"></i></i><span class="v" id="waveCoinRatioVal">—</span></div>
     <div class="pill m-hide" id="shotKillRatioWrap"><span class="k">🎯</span><i class="pbar"><i class="pfill" id="shotKillRatioFill"></i></i><span class="v" id="shotKillRatioVal">—</span></div>
+    <div class="pill m-hide" id="deathWaveRatioWrap"><span class="k">💀</span><i class="pbar"><i class="pfill" id="deathWaveRatioFill"></i></i><span class="v" id="deathWaveRatioVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -6272,7 +6278,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V16.34</div>
+  <div id="mark">DESIGNED BY QIAN · V16.35</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -12007,6 +12013,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_lifeComboRatio = lifeComboRatioText(lives, combo); const f_lifeComboRatio = $('lifeComboRatioFill'); if (f_lifeComboRatio) f_lifeComboRatio.style.width = r_lifeComboRatio.pct + '%'; const v_lifeComboRatio = $('lifeComboRatioVal'); if (v_lifeComboRatio) v_lifeComboRatio.textContent = r_lifeComboRatio.txt; const w_lifeComboRatio = $('lifeComboRatioWrap'); if (w_lifeComboRatio) { w_lifeComboRatio.classList.remove('g-good','g-warn','g-bad'); if (r_lifeComboRatio.cls) w_lifeComboRatio.classList.add(r_lifeComboRatio.cls); w_lifeComboRatio.classList.toggle('danger', !!r_lifeComboRatio.danger); }
     const r_waveCoinRatio = waveCoinRatioText(wave, coins); const f_waveCoinRatio = $('waveCoinRatioFill'); if (f_waveCoinRatio) f_waveCoinRatio.style.width = r_waveCoinRatio.pct + '%'; const v_waveCoinRatio = $('waveCoinRatioVal'); if (v_waveCoinRatio) v_waveCoinRatio.textContent = r_waveCoinRatio.txt; const w_waveCoinRatio = $('waveCoinRatioWrap'); if (w_waveCoinRatio) { w_waveCoinRatio.classList.remove('g-good','g-warn','g-bad'); if (r_waveCoinRatio.cls) w_waveCoinRatio.classList.add(r_waveCoinRatio.cls); w_waveCoinRatio.classList.toggle('danger', !!r_waveCoinRatio.danger); }
     const r_shotKillRatio = shotKillRatioText(stat.shots, stat.kills); const f_shotKillRatio = $('shotKillRatioFill'); if (f_shotKillRatio) f_shotKillRatio.style.width = r_shotKillRatio.pct + '%'; const v_shotKillRatio = $('shotKillRatioVal'); if (v_shotKillRatio) v_shotKillRatio.textContent = r_shotKillRatio.txt; const w_shotKillRatio = $('shotKillRatioWrap'); if (w_shotKillRatio) { w_shotKillRatio.classList.remove('g-good','g-warn','g-bad'); if (r_shotKillRatio.cls) w_shotKillRatio.classList.add(r_shotKillRatio.cls); w_shotKillRatio.classList.toggle('danger', !!r_shotKillRatio.danger); }
+    const r_deathWaveRatio = deathWaveRatioText(stat.deaths, wave); const f_deathWaveRatio = $('deathWaveRatioFill'); if (f_deathWaveRatio) f_deathWaveRatio.style.width = r_deathWaveRatio.pct + '%'; const v_deathWaveRatio = $('deathWaveRatioVal'); if (v_deathWaveRatio) v_deathWaveRatio.textContent = r_deathWaveRatio.txt; const w_deathWaveRatio = $('deathWaveRatioWrap'); if (w_deathWaveRatio) { w_deathWaveRatio.classList.remove('g-good','g-warn','g-bad'); if (r_deathWaveRatio.cls) w_deathWaveRatio.classList.add(r_deathWaveRatio.cls); w_deathWaveRatio.classList.toggle('danger', !!r_deathWaveRatio.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -20950,6 +20957,18 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val > 0.6) { cls = 'g-bad'; danger = true; } else if (val > 0.4) { cls = 'g-warn'; }
     return { pct: pct, txt: '射击击杀比 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— deathWaveRatio：死亡波次比（X 占比越高越危险）——
+  function deathWaveRatioText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0) return { pct: 0, txt: '死亡波次比 —', cls: 'g-good', danger: false };
+    const sum = na + nb;
+    if (sum <= 0) return { pct: 0, txt: '死亡波次比 —', cls: 'g-good', danger: false };
+    const val = na / sum;
+    const pct = Math.max(0, Math.min(100, Math.round(val * 100)));
+    let cls = 'g-good', danger = false;
+    if (val > 0.6) { cls = 'g-bad'; danger = true; } else if (val > 0.4) { cls = 'g-warn'; }
+    return { pct: pct, txt: '死亡波次比 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -22791,7 +22810,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V16.34', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V16.35', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -24703,6 +24722,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       lifeComboRatioStateNow: (a, b) => lifeComboRatioText(a, b), lifeComboRatioANow: () => lives, lifeComboRatioBNow: () => combo, lifeComboRatioFillNow: () => { const f = $('lifeComboRatioFill'); return f ? f.style.width : ''; }, lifeComboRatioDangerNow: () => { const w = $('lifeComboRatioWrap'); return !!(w && w.classList.contains('danger')); },
       waveCoinRatioStateNow: (a, b) => waveCoinRatioText(a, b), waveCoinRatioANow: () => wave, waveCoinRatioBNow: () => coins, waveCoinRatioFillNow: () => { const f = $('waveCoinRatioFill'); return f ? f.style.width : ''; }, waveCoinRatioDangerNow: () => { const w = $('waveCoinRatioWrap'); return !!(w && w.classList.contains('danger')); },
       shotKillRatioStateNow: (a, b) => shotKillRatioText(a, b), shotKillRatioANow: () => stat.shots, shotKillRatioBNow: () => stat.kills, shotKillRatioFillNow: () => { const f = $('shotKillRatioFill'); return f ? f.style.width : ''; }, shotKillRatioDangerNow: () => { const w = $('shotKillRatioWrap'); return !!(w && w.classList.contains('danger')); },
+      deathWaveRatioStateNow: (a, b) => deathWaveRatioText(a, b), deathWaveRatioANow: () => stat.deaths, deathWaveRatioBNow: () => wave, deathWaveRatioFillNow: () => { const f = $('deathWaveRatioFill'); return f ? f.style.width : ''; }, deathWaveRatioDangerNow: () => { const w = $('deathWaveRatioWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
