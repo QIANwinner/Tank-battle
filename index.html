@@ -4312,6 +4312,11 @@
   #bossShotWrap.g-good .pfill { background:#2ecc71; }
   #bossShotWrap.g-warn .pfill { background:#f1c40f; }
   #bossShotWrap.g-bad .pfill { background:#e74c3c; }
+  #dmgShotWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #dmgShotWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #dmgShotWrap.g-good .pfill { background:#2ecc71; }
+  #dmgShotWrap.g-warn .pfill { background:#f1c40f; }
+  #dmgShotWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -5115,6 +5120,7 @@
     <div class="pill m-hide" id="puCoinWrap"><span class="k">🍬</span><i class="pbar"><i class="pfill" id="puCoinFill"></i></i><span class="v" id="puCoinVal">—</span></div>
     <div class="pill m-hide" id="upgLifeWrap"><span class="k">🛡️</span><i class="pbar"><i class="pfill" id="upgLifeFill"></i></i><span class="v" id="upgLifeVal">—</span></div>
     <div class="pill m-hide" id="bossShotWrap"><span class="k">🐲</span><i class="pbar"><i class="pfill" id="bossShotFill"></i></i><span class="v" id="bossShotVal">—</span></div>
+    <div class="pill m-hide" id="dmgShotWrap"><span class="k">💢</span><i class="pbar"><i class="pfill" id="dmgShotFill"></i></i><span class="v" id="dmgShotVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -5490,7 +5496,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V15.5</div>
+  <div id="mark">DESIGNED BY QIAN · V15.6</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -11095,6 +11101,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_puCoin = puCoinText(runPowerups, coins); const f_puCoin = $('puCoinFill'); if (f_puCoin) f_puCoin.style.width = r_puCoin.pct + '%'; const v_puCoin = $('puCoinVal'); if (v_puCoin) v_puCoin.textContent = r_puCoin.txt; const w_puCoin = $('puCoinWrap'); if (w_puCoin) { w_puCoin.classList.remove('g-good','g-warn','g-bad'); if (r_puCoin.cls) w_puCoin.classList.add(r_puCoin.cls); w_puCoin.classList.toggle('danger', !!r_puCoin.danger); }
     const r_upgLife = upgLifeText(upgTotal, lives); const f_upgLife = $('upgLifeFill'); if (f_upgLife) f_upgLife.style.width = r_upgLife.pct + '%'; const v_upgLife = $('upgLifeVal'); if (v_upgLife) v_upgLife.textContent = r_upgLife.txt; const w_upgLife = $('upgLifeWrap'); if (w_upgLife) { w_upgLife.classList.remove('g-good','g-warn','g-bad'); if (r_upgLife.cls) w_upgLife.classList.add(r_upgLife.cls); w_upgLife.classList.toggle('danger', !!r_upgLife.danger); }
     const r_bossShot = bossShotText(stat.bossKills, stat.shots); const f_bossShot = $('bossShotFill'); if (f_bossShot) f_bossShot.style.width = r_bossShot.pct + '%'; const v_bossShot = $('bossShotVal'); if (v_bossShot) v_bossShot.textContent = r_bossShot.txt; const w_bossShot = $('bossShotWrap'); if (w_bossShot) { w_bossShot.classList.remove('g-good','g-warn','g-bad'); if (r_bossShot.cls) w_bossShot.classList.add(r_bossShot.cls); w_bossShot.classList.toggle('danger', !!r_bossShot.danger); }
+    const r_dmgShot = dmgShotText(runDmg, stat.shots); const f_dmgShot = $('dmgShotFill'); if (f_dmgShot) f_dmgShot.style.width = r_dmgShot.pct + '%'; const v_dmgShot = $('dmgShotVal'); if (v_dmgShot) v_dmgShot.textContent = r_dmgShot.txt; const w_dmgShot = $('dmgShotWrap'); if (w_dmgShot) { w_dmgShot.classList.remove('g-good','g-warn','g-bad'); if (r_dmgShot.cls) w_dmgShot.classList.add(r_dmgShot.cls); w_dmgShot.classList.toggle('danger', !!r_dmgShot.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -18476,6 +18483,18 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
     return { pct: pct, txt: 'BOSS弹药 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— dmgShot：伤害弹药（X 占比越高越安全）——
+  function dmgShotText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0) return { pct: 0, txt: '伤害弹药 —', cls: 'g-good', danger: false };
+    const sum = na + nb;
+    if (sum <= 0) return { pct: 0, txt: '伤害弹药 —', cls: 'g-good', danger: false };
+    const val = na / sum;
+    const pct = Math.max(0, Math.min(100, Math.round(val * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
+    return { pct: pct, txt: '伤害弹药 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -20317,7 +20336,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V15.5', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V15.6', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -22099,6 +22118,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       puCoinStateNow: (a, b) => puCoinText(a, b), puCoinANow: () => runPowerups, puCoinBNow: () => coins, puCoinFillNow: () => { const f = $('puCoinFill'); return f ? f.style.width : ''; }, puCoinDangerNow: () => { const w = $('puCoinWrap'); return !!(w && w.classList.contains('danger')); },
       upgLifeStateNow: (a, b) => upgLifeText(a, b), upgLifeANow: () => upgTotal, upgLifeBNow: () => lives, upgLifeFillNow: () => { const f = $('upgLifeFill'); return f ? f.style.width : ''; }, upgLifeDangerNow: () => { const w = $('upgLifeWrap'); return !!(w && w.classList.contains('danger')); },
       bossShotStateNow: (a, b) => bossShotText(a, b), bossShotANow: () => stat.bossKills, bossShotBNow: () => stat.shots, bossShotFillNow: () => { const f = $('bossShotFill'); return f ? f.style.width : ''; }, bossShotDangerNow: () => { const w = $('bossShotWrap'); return !!(w && w.classList.contains('danger')); },
+      dmgShotStateNow: (a, b) => dmgShotText(a, b), dmgShotANow: () => runDmg, dmgShotBNow: () => stat.shots, dmgShotFillNow: () => { const f = $('dmgShotFill'); return f ? f.style.width : ''; }, dmgShotDangerNow: () => { const w = $('dmgShotWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
