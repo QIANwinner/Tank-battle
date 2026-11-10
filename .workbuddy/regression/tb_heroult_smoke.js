@@ -17620,6 +17620,22 @@ async function main() {
     t('U6320 DOM 与函数一致性', o5.ok === true && o5.p === true && o5.match === true && o5.dom === true, JSON.stringify(o5));
   } catch(e){ for(let k=6315;k<=6320;k++) t('U'+k+' 生命环',false,e.message); }
 
+
+  // ===== U6321~U6326: 波次环(v0.16.59) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('gaugeWaveWrap'),s:T.gaugeWaveStateNow(0.75)});})()"));
+    t('U6321 波次环 DOM 已加入 HUD', o.dom === true && o.s.txt === '75%', JSON.stringify(o));
+    t('U6322 正常 0.75→75% g-good', o.s.p === 75 && o.s.cls === 'g-good' && o.s.danger === false, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.gaugeWaveStateNow(0),b:T.gaugeWaveStateNow(1),c:T.gaugeWaveStateNow(0.3),d:T.gaugeWaveStateNow(0.31)});})()"));
+    t('U6323 边界 0/1/0.3/0.31→0g-bad/100g-good/30g-bad/31g-warn', o2.a.p === 0 && o2.a.cls === 'g-bad' && o2.a.danger === true && o2.b.p === 100 && o2.b.cls === 'g-good' && o2.c.p === 30 && o2.c.cls === 'g-bad' && o2.d.p === 31 && o2.d.cls === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.gaugeWaveStateNow(-1),b:T.gaugeWaveStateNow(NaN),c:T.gaugeWaveStateNow(2)});})()"));
+    t('U6324 非法 -1/NaN/2→clamp 0/0/100', o3.a.p === 0 && o3.b.p === 0 && o3.c.p === 100, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.gaugeWaveStateNow('0.75').p);})()"));
+    t('U6325 数字字符串转数', o4 === 75, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}const w=document.getElementById('gaugeWaveWrap');const gp=w?w.querySelector('.gp'):null;const gv=w?w.querySelector('.gv'):null;const off=gp?parseFloat(gp.getAttribute('stroke-dashoffset')):NaN;const C=2*Math.PI*9;const p=Math.round((1-off/C)*100);const st=T.gaugeWaveStateNow(T.gaugeWavePctNow());return JSON.stringify({ok:ok,p:typeof p==='number',match:Math.abs(p-st.p)<=1&&gv&&gv.textContent===st.txt,dom:!!w});})()"));
+    t('U6326 DOM 与函数一致性', o5.ok === true && o5.p === true && o5.match === true && o5.dom === true, JSON.stringify(o5));
+  } catch(e){ for(let k=6321;k<=6326;k++) t('U'+k+' 波次环',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
