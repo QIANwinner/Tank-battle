@@ -16244,6 +16244,22 @@ async function main() {
     t('U5810 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=5805;k<=5810;k++) t('U'+k+' 弹幕连击',false,e.message); }
 
+
+  // ===== U5811~U5816: 连击击杀(v0.15.74) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('comboKillWrap'),st:T.comboKillStateNow(4,1)});})()"));
+    t('U5811 连击击杀 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U5812 正常 4/1→连击击杀 0.8', o.st.pct === 80 && o.st.txt === '连击击杀 0.8' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboKillStateNow(1,0).pct,b:T.comboKillStateNow(0,3).pct,c:T.comboKillStateNow(1,1).pct,d:T.comboKillStateNow(1,1).cls});})()"));
+    t('U5813 边界 1/0、0/3、1/1→100/0/50', o2.a === 100 && o2.b === 0 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.comboKillStateNow(-1,2).pct,b:T.comboKillStateNow(NaN,2).pct,c:T.comboKillStateNow(0,0).pct,d:T.comboKillStateNow(3,-1).pct});})()"));
+    t('U5814 非法/空值/零和/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.comboKillStateNow('4','1').pct);})()"));
+    t('U5815 数字字符串转数', o4 === 80, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.comboKillFillNow()==='string',d:typeof T.comboKillDangerNow()==='boolean',a:T.comboKillANow(),b:T.comboKillBNow()});})()"));
+    t('U5816 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=5811;k<=5816;k++) t('U'+k+' 连击击杀',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
