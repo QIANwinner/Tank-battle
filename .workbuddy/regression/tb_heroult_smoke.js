@@ -16564,6 +16564,22 @@ async function main() {
     t('U5930 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=5925;k<=5930;k++) t('U'+k+' 连击速率',false,e.message); }
 
+
+  // ===== U5931~U5936: 强化速率(v0.15.94) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('upgDurWrap'),st:T.upgDurStateNow(4,1)});})()"));
+    t('U5931 强化速率 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U5932 正常 4/1→强化速率 0.8', o.st.pct === 80 && o.st.txt === '强化速率 0.8' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.upgDurStateNow(1,0).pct,b:T.upgDurStateNow(0,3).pct,c:T.upgDurStateNow(1,1).pct,d:T.upgDurStateNow(1,1).cls});})()"));
+    t('U5933 边界 1/0、0/3、1/1→100/0/50', o2.a === 100 && o2.b === 0 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.upgDurStateNow(-1,2).pct,b:T.upgDurStateNow(NaN,2).pct,c:T.upgDurStateNow(0,0).pct,d:T.upgDurStateNow(3,-1).pct});})()"));
+    t('U5934 非法/空值/零和/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.upgDurStateNow('4','1').pct);})()"));
+    t('U5935 数字字符串转数', o4 === 80, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.upgDurFillNow()==='string',d:typeof T.upgDurDangerNow()==='boolean',a:T.upgDurANow(),b:T.upgDurBNow()});})()"));
+    t('U5936 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=5931;k<=5936;k++) t('U'+k+' 强化速率',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
