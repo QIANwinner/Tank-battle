@@ -5054,6 +5054,13 @@
   #splitComboWaveWrap.g-good .sa { background:#2ecc71; }
   #splitComboWaveWrap.g-warn .sa { background:#f1c40f; }
   #splitComboWaveWrap.g-bad .sa { background:#e74c3c; }
+  #splitSupplyWrap .sbar { display:inline-block; width:56px; height:8px; background:rgba(255,255,255,.12); border-radius:4px; overflow:hidden; vertical-align:middle; margin:0 4px; position:relative; }
+  #splitSupplyWrap .sa { position:absolute; left:0; top:0; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #splitSupplyWrap .sb { position:absolute; right:0; top:0; height:100%; width:0%; background:rgba(255,255,255,.28); transition:width .12s linear; }
+  #splitSupplyWrap .spivot { position:absolute; left:50%; top:0; width:1px; height:100%; background:rgba(255,255,255,.6); z-index:2; }
+  #splitSupplyWrap.g-good .sa { background:#2ecc71; }
+  #splitSupplyWrap.g-warn .sa { background:#f1c40f; }
+  #splitSupplyWrap.g-bad .sa { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -6001,6 +6008,7 @@
     <div class="pill m-hide" id="splitEcoWrap"><span class="k">💰</span><i class="sbar"><i class="spivot"></i><i class="sa" id="splitEcoSa"></i><i class="sb" id="splitEcoSb"></i></i><span class="v" id="splitEcoVal">—</span></div>
     <div class="pill m-hide" id="splitWaveWrap"><span class="k">🌊</span><i class="sbar"><i class="spivot"></i><i class="sa" id="splitWaveSa"></i><i class="sb" id="splitWaveSb"></i></i><span class="v" id="splitWaveVal">—</span></div>
     <div class="pill m-hide" id="splitComboWaveWrap"><span class="k">⚡</span><i class="sbar"><i class="spivot"></i><i class="sa" id="splitComboWaveSa"></i><i class="sb" id="splitComboWaveSb"></i></i><span class="v" id="splitComboWaveVal">—</span></div>
+    <div class="pill m-hide" id="splitSupplyWrap"><span class="k">🧰</span><i class="sbar"><i class="spivot"></i><i class="sa" id="splitSupplySa"></i><i class="sb" id="splitSupplySb"></i></i><span class="v" id="splitSupplyVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -6376,7 +6384,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V16.48</div>
+  <div id="mark">DESIGNED BY QIAN · V16.49</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -12125,6 +12133,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_splitEco = splitEcoText(runCoins, (reviveCount * reviveCost())); const f_splitEco = $('splitEcoSa'); if (f_splitEco) f_splitEco.style.width = r_splitEco.pct + '%'; const g_splitEco = $('splitEcoSb'); if (g_splitEco) g_splitEco.style.width = (100 - r_splitEco.pct) + '%'; const v_splitEco = $('splitEcoVal'); if (v_splitEco) v_splitEco.textContent = r_splitEco.txt; const w_splitEco = $('splitEcoWrap'); if (w_splitEco) { w_splitEco.classList.remove('g-good','g-warn','g-bad'); if (r_splitEco.cls) w_splitEco.classList.add(r_splitEco.cls); w_splitEco.classList.toggle('danger', !!r_splitEco.danger); }
     const r_splitWave = splitWaveText(wave, (wavesTotal - wave)); const f_splitWave = $('splitWaveSa'); if (f_splitWave) f_splitWave.style.width = r_splitWave.pct + '%'; const g_splitWave = $('splitWaveSb'); if (g_splitWave) g_splitWave.style.width = (100 - r_splitWave.pct) + '%'; const v_splitWave = $('splitWaveVal'); if (v_splitWave) v_splitWave.textContent = r_splitWave.txt; const w_splitWave = $('splitWaveWrap'); if (w_splitWave) { w_splitWave.classList.remove('g-good','g-warn','g-bad'); if (r_splitWave.cls) w_splitWave.classList.add(r_splitWave.cls); w_splitWave.classList.toggle('danger', !!r_splitWave.danger); }
     const r_splitComboWave = splitComboWaveText(combo, wave); const f_splitComboWave = $('splitComboWaveSa'); if (f_splitComboWave) f_splitComboWave.style.width = r_splitComboWave.pct + '%'; const g_splitComboWave = $('splitComboWaveSb'); if (g_splitComboWave) g_splitComboWave.style.width = (100 - r_splitComboWave.pct) + '%'; const v_splitComboWave = $('splitComboWaveVal'); if (v_splitComboWave) v_splitComboWave.textContent = r_splitComboWave.txt; const w_splitComboWave = $('splitComboWaveWrap'); if (w_splitComboWave) { w_splitComboWave.classList.remove('g-good','g-warn','g-bad'); if (r_splitComboWave.cls) w_splitComboWave.classList.add(r_splitComboWave.cls); w_splitComboWave.classList.toggle('danger', !!r_splitComboWave.danger); }
+    const r_splitSupply = splitSupplyText(runPowerups, hurtCount); const f_splitSupply = $('splitSupplySa'); if (f_splitSupply) f_splitSupply.style.width = r_splitSupply.pct + '%'; const g_splitSupply = $('splitSupplySb'); if (g_splitSupply) g_splitSupply.style.width = (100 - r_splitSupply.pct) + '%'; const v_splitSupply = $('splitSupplyVal'); if (v_splitSupply) v_splitSupply.textContent = r_splitSupply.txt; const w_splitSupply = $('splitSupplyWrap'); if (w_splitSupply) { w_splitSupply.classList.remove('g-good','g-warn','g-bad'); if (r_splitSupply.cls) w_splitSupply.classList.add(r_splitSupply.cls); w_splitSupply.classList.toggle('danger', !!r_splitSupply.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -21249,6 +21258,19 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     else if (pct <= 30) { cls = 'g-bad'; danger = true; }
     return { pct: pct, txt: '连击波次分流 ' + pct + '% / ' + share + '%', cls: cls, danger: danger };
   }
+  // —— splitSupply：补给分流（分流条：有利量 A vs 代价量 B，A 占 A+B 比例）——
+  function splitSupplyText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0) return { pct: 0, txt: '补给分流 —', cls: 'g-warn', danger: false };
+    const sum = na + nb;
+    if (sum <= 0) return { pct: 0, txt: '补给分流 —', cls: 'g-warn', danger: false };
+    const pct = Math.max(0, Math.min(100, Math.round(na / sum * 100)));
+    const share = 100 - pct;
+    let cls = 'g-warn', danger = false;
+    if (pct >= 70) { cls = 'g-good'; }
+    else if (pct <= 30) { cls = 'g-bad'; danger = true; }
+    return { pct: pct, txt: '补给分流 ' + pct + '% / ' + share + '%', cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -23090,7 +23112,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V16.48', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V16.49', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -25016,6 +25038,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       splitEcoStateNow: (a, b) => splitEcoText(a, b), splitEcoANow: () => runCoins, splitEcoBNow: () => (reviveCount * reviveCost()), splitEcoSaNow: () => { const f = $('splitEcoSa'); return f ? f.style.width : ''; }, splitEcoSbNow: () => { const f = $('splitEcoSb'); return f ? f.style.width : ''; }, splitEcoDangerNow: () => { const w = $('splitEcoWrap'); return !!(w && w.classList.contains('danger')); },
       splitWaveStateNow: (a, b) => splitWaveText(a, b), splitWaveANow: () => wave, splitWaveBNow: () => (wavesTotal - wave), splitWaveSaNow: () => { const f = $('splitWaveSa'); return f ? f.style.width : ''; }, splitWaveSbNow: () => { const f = $('splitWaveSb'); return f ? f.style.width : ''; }, splitWaveDangerNow: () => { const w = $('splitWaveWrap'); return !!(w && w.classList.contains('danger')); },
       splitComboWaveStateNow: (a, b) => splitComboWaveText(a, b), splitComboWaveANow: () => combo, splitComboWaveBNow: () => wave, splitComboWaveSaNow: () => { const f = $('splitComboWaveSa'); return f ? f.style.width : ''; }, splitComboWaveSbNow: () => { const f = $('splitComboWaveSb'); return f ? f.style.width : ''; }, splitComboWaveDangerNow: () => { const w = $('splitComboWaveWrap'); return !!(w && w.classList.contains('danger')); },
+      splitSupplyStateNow: (a, b) => splitSupplyText(a, b), splitSupplyANow: () => runPowerups, splitSupplyBNow: () => hurtCount, splitSupplySaNow: () => { const f = $('splitSupplySa'); return f ? f.style.width : ''; }, splitSupplySbNow: () => { const f = $('splitSupplySb'); return f ? f.style.width : ''; }, splitSupplyDangerNow: () => { const w = $('splitSupplyWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
