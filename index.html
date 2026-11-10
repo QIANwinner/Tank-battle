@@ -4412,6 +4412,11 @@
   #comboEnemyWrap.g-good .pfill { background:#2ecc71; }
   #comboEnemyWrap.g-warn .pfill { background:#f1c40f; }
   #comboEnemyWrap.g-bad .pfill { background:#e74c3c; }
+  #waveEnemyWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #waveEnemyWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #waveEnemyWrap.g-good .pfill { background:#2ecc71; }
+  #waveEnemyWrap.g-warn .pfill { background:#f1c40f; }
+  #waveEnemyWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -5235,6 +5240,7 @@
     <div class="pill m-hide" id="lifeEnemyWrap"><span class="k">💚</span><i class="pbar"><i class="pfill" id="lifeEnemyFill"></i></i><span class="v" id="lifeEnemyVal">—</span></div>
     <div class="pill m-hide" id="hitEnemyWrap"><span class="k">🎯</span><i class="pbar"><i class="pfill" id="hitEnemyFill"></i></i><span class="v" id="hitEnemyVal">—</span></div>
     <div class="pill m-hide" id="comboEnemyWrap"><span class="k">⚡</span><i class="pbar"><i class="pfill" id="comboEnemyFill"></i></i><span class="v" id="comboEnemyVal">—</span></div>
+    <div class="pill m-hide" id="waveEnemyWrap"><span class="k">🌊</span><i class="pbar"><i class="pfill" id="waveEnemyFill"></i></i><span class="v" id="waveEnemyVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -5610,7 +5616,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V15.25</div>
+  <div id="mark">DESIGNED BY QIAN · V15.26</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -11235,6 +11241,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_lifeEnemy = lifeEnemyText(lives, enemies.length); const f_lifeEnemy = $('lifeEnemyFill'); if (f_lifeEnemy) f_lifeEnemy.style.width = r_lifeEnemy.pct + '%'; const v_lifeEnemy = $('lifeEnemyVal'); if (v_lifeEnemy) v_lifeEnemy.textContent = r_lifeEnemy.txt; const w_lifeEnemy = $('lifeEnemyWrap'); if (w_lifeEnemy) { w_lifeEnemy.classList.remove('g-good','g-warn','g-bad'); if (r_lifeEnemy.cls) w_lifeEnemy.classList.add(r_lifeEnemy.cls); w_lifeEnemy.classList.toggle('danger', !!r_lifeEnemy.danger); }
     const r_hitEnemy = hitEnemyText(stat.hits, enemies.length); const f_hitEnemy = $('hitEnemyFill'); if (f_hitEnemy) f_hitEnemy.style.width = r_hitEnemy.pct + '%'; const v_hitEnemy = $('hitEnemyVal'); if (v_hitEnemy) v_hitEnemy.textContent = r_hitEnemy.txt; const w_hitEnemy = $('hitEnemyWrap'); if (w_hitEnemy) { w_hitEnemy.classList.remove('g-good','g-warn','g-bad'); if (r_hitEnemy.cls) w_hitEnemy.classList.add(r_hitEnemy.cls); w_hitEnemy.classList.toggle('danger', !!r_hitEnemy.danger); }
     const r_comboEnemy = comboEnemyText(combo, enemies.length); const f_comboEnemy = $('comboEnemyFill'); if (f_comboEnemy) f_comboEnemy.style.width = r_comboEnemy.pct + '%'; const v_comboEnemy = $('comboEnemyVal'); if (v_comboEnemy) v_comboEnemy.textContent = r_comboEnemy.txt; const w_comboEnemy = $('comboEnemyWrap'); if (w_comboEnemy) { w_comboEnemy.classList.remove('g-good','g-warn','g-bad'); if (r_comboEnemy.cls) w_comboEnemy.classList.add(r_comboEnemy.cls); w_comboEnemy.classList.toggle('danger', !!r_comboEnemy.danger); }
+    const r_waveEnemy = waveEnemyText(wave, enemies.length); const f_waveEnemy = $('waveEnemyFill'); if (f_waveEnemy) f_waveEnemy.style.width = r_waveEnemy.pct + '%'; const v_waveEnemy = $('waveEnemyVal'); if (v_waveEnemy) v_waveEnemy.textContent = r_waveEnemy.txt; const w_waveEnemy = $('waveEnemyWrap'); if (w_waveEnemy) { w_waveEnemy.classList.remove('g-good','g-warn','g-bad'); if (r_waveEnemy.cls) w_waveEnemy.classList.add(r_waveEnemy.cls); w_waveEnemy.classList.toggle('danger', !!r_waveEnemy.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -18856,6 +18863,18 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
     return { pct: pct, txt: '连击敌群 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— waveEnemy：波次敌群（X 占比越高越安全）——
+  function waveEnemyText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0) return { pct: 0, txt: '波次敌群 —', cls: 'g-good', danger: false };
+    const sum = na + nb;
+    if (sum <= 0) return { pct: 0, txt: '波次敌群 —', cls: 'g-good', danger: false };
+    const val = na / sum;
+    const pct = Math.max(0, Math.min(100, Math.round(val * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
+    return { pct: pct, txt: '波次敌群 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -20697,7 +20716,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V15.25', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V15.26', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -22499,6 +22518,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       lifeEnemyStateNow: (a, b) => lifeEnemyText(a, b), lifeEnemyANow: () => lives, lifeEnemyBNow: () => enemies.length, lifeEnemyFillNow: () => { const f = $('lifeEnemyFill'); return f ? f.style.width : ''; }, lifeEnemyDangerNow: () => { const w = $('lifeEnemyWrap'); return !!(w && w.classList.contains('danger')); },
       hitEnemyStateNow: (a, b) => hitEnemyText(a, b), hitEnemyANow: () => stat.hits, hitEnemyBNow: () => enemies.length, hitEnemyFillNow: () => { const f = $('hitEnemyFill'); return f ? f.style.width : ''; }, hitEnemyDangerNow: () => { const w = $('hitEnemyWrap'); return !!(w && w.classList.contains('danger')); },
       comboEnemyStateNow: (a, b) => comboEnemyText(a, b), comboEnemyANow: () => combo, comboEnemyBNow: () => enemies.length, comboEnemyFillNow: () => { const f = $('comboEnemyFill'); return f ? f.style.width : ''; }, comboEnemyDangerNow: () => { const w = $('comboEnemyWrap'); return !!(w && w.classList.contains('danger')); },
+      waveEnemyStateNow: (a, b) => waveEnemyText(a, b), waveEnemyANow: () => wave, waveEnemyBNow: () => enemies.length, waveEnemyFillNow: () => { const f = $('waveEnemyFill'); return f ? f.style.width : ''; }, waveEnemyDangerNow: () => { const w = $('waveEnemyWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
