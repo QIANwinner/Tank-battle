@@ -17572,6 +17572,22 @@ async function main() {
     t('U6302 DOM 与函数一致性', o5.ok === true && o5.risk === true && o5.match === true && o5.dom === true, JSON.stringify(o5));
   } catch(e){ for(let k=6297;k<=6302;k++) t('U'+k+' 经济警戒',false,e.message); }
 
+
+  // ===== U6303~U6308: 波次警戒(v0.16.56) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('lampWaveWrap'),s:T.lampWaveStateNow(9)});})()"));
+    t('U6303 波次警戒 DOM 已加入 HUD', o.dom === true && o.s.lvl === 2 && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U6304 正常 9→危险', o.s.danger === true && o.s.cls === 'g-danger', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lampWaveStateNow(8),b:T.lampWaveStateNow(4),c:T.lampWaveStateNow(3.9)});})()"));
+    t('U6305 边界 8/4/3.9→危险/警戒/安全', o2.a.lvl === 2 && o2.a.danger === true && o2.b.lvl === 1 && o2.b.cls === 'g-caution' && o2.c.lvl === 0 && o2.c.cls === 'g-safe', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lampWaveStateNow(-1),b:T.lampWaveStateNow(NaN)});})()"));
+    t('U6306 非法/NaN → 安全', o3.a.lvl === 0 && o3.a.danger === false && o3.b.lvl === 0 && o3.b.danger === false, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.lampWaveStateNow('9').lvl);})()"));
+    t('U6307 数字字符串转数', o4 === 2, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}const w=document.getElementById('lampWaveWrap');const cls=w?w.className:'';const risk=T.lampWaveRiskNow();const st=T.lampWaveStateNow(risk);return JSON.stringify({ok:ok,risk:typeof risk==='number',match:cls.indexOf(st.cls)>=0,dom:!!w});})()"));
+    t('U6308 DOM 与函数一致性', o5.ok === true && o5.risk === true && o5.match === true && o5.dom === true, JSON.stringify(o5));
+  } catch(e){ for(let k=6303;k<=6308;k++) t('U'+k+' 波次警戒',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
