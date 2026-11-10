@@ -14500,6 +14500,22 @@ async function main() {
     t('U5156 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=5151;k<=5156;k++) t('U'+k+' 补给共振',false,e.message); }
 
+
+  // ===== U5157~U5162: 得分节奏(v0.14.65) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('scorePaceWrap'),st:T.scorePaceStateNow(4,1)});})()"));
+    t('U5157 得分节奏 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U5158 正常 4/1→得分节奏 0.8', o.st.pct === 80 && o.st.txt === '得分节奏 0.8' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scorePaceStateNow(1,0).pct,b:T.scorePaceStateNow(0,3).pct,c:T.scorePaceStateNow(1,1).pct,d:T.scorePaceStateNow(1,1).cls});})()"));
+    t('U5159 边界 1/0、0/3、1/1→100/0/50', o2.a === 100 && o2.b === 0 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.scorePaceStateNow(-1,2).pct,b:T.scorePaceStateNow(NaN,2).pct,c:T.scorePaceStateNow(0,0).pct,d:T.scorePaceStateNow(3,-1).pct});})()"));
+    t('U5160 非法/空值/零和/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.scorePaceStateNow('4','1').pct);})()"));
+    t('U5161 数字字符串转数', o4 === 80, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.scorePaceFillNow()==='string',d:typeof T.scorePaceDangerNow()==='boolean',a:T.scorePaceANow(),b:T.scorePaceBNow()});})()"));
+    t('U5162 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=5157;k<=5162;k++) t('U'+k+' 得分节奏',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
