@@ -17524,6 +17524,22 @@ async function main() {
     t('U6284 DOM 与函数一致性', o5.ok === true && o5.risk === true && o5.match === true && o5.dom === true, JSON.stringify(o5));
   } catch(e){ for(let k=6279;k<=6284;k++) t('U'+k+' 弹幕警戒',false,e.message); }
 
+
+  // ===== U6285~U6290: 连击警戒(v0.16.53) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('lampComboWrap'),s:T.lampComboStateNow(9)});})()"));
+    t('U6285 连击警戒 DOM 已加入 HUD', o.dom === true && o.s.lvl === 2 && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U6286 正常 9→危险', o.s.danger === true && o.s.cls === 'g-danger', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lampComboStateNow(8),b:T.lampComboStateNow(4),c:T.lampComboStateNow(3.9)});})()"));
+    t('U6287 边界 8/4/3.9→危险/警戒/安全', o2.a.lvl === 2 && o2.a.danger === true && o2.b.lvl === 1 && o2.b.cls === 'g-caution' && o2.c.lvl === 0 && o2.c.cls === 'g-safe', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.lampComboStateNow(-1),b:T.lampComboStateNow(NaN)});})()"));
+    t('U6288 非法/NaN → 安全', o3.a.lvl === 0 && o3.a.danger === false && o3.b.lvl === 0 && o3.b.danger === false, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.lampComboStateNow('9').lvl);})()"));
+    t('U6289 数字字符串转数', o4 === 2, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}const w=document.getElementById('lampComboWrap');const cls=w?w.className:'';const risk=T.lampComboRiskNow();const st=T.lampComboStateNow(risk);return JSON.stringify({ok:ok,risk:typeof risk==='number',match:cls.indexOf(st.cls)>=0,dom:!!w});})()"));
+    t('U6290 DOM 与函数一致性', o5.ok === true && o5.risk === true && o5.match === true && o5.dom === true, JSON.stringify(o5));
+  } catch(e){ for(let k=6285;k<=6290;k++) t('U'+k+' 连击警戒',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
