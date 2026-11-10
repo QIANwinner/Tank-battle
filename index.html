@@ -4607,6 +4607,11 @@
   #upgReviveWrap.g-good .pfill { background:#2ecc71; }
   #upgReviveWrap.g-warn .pfill { background:#f1c40f; }
   #upgReviveWrap.g-bad .pfill { background:#e74c3c; }
+  #scoreReviveWrap .pbar { display:inline-block; width:44px; height:6px; background:rgba(255,255,255,.16); border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #scoreReviveWrap .pfill { display:block; height:100%; width:0%; background:#3498db; transition:width .12s linear; }
+  #scoreReviveWrap.g-good .pfill { background:#2ecc71; }
+  #scoreReviveWrap.g-warn .pfill { background:#f1c40f; }
+  #scoreReviveWrap.g-bad .pfill { background:#e74c3c; }
 </style>
 </head>
 <body>
@@ -5469,6 +5474,7 @@
     <div class="pill m-hide" id="waveComboWrap"><span class="k">🔗</span><i class="pbar"><i class="pfill" id="waveComboFill"></i></i><span class="v" id="waveComboVal">—</span></div>
     <div class="pill m-hide" id="puComboWrap"><span class="k">💠</span><i class="pbar"><i class="pfill" id="puComboFill"></i></i><span class="v" id="puComboVal">—</span></div>
     <div class="pill m-hide" id="upgReviveWrap"><span class="k">⬆️</span><i class="pbar"><i class="pfill" id="upgReviveFill"></i></i><span class="v" id="upgReviveVal">—</span></div>
+    <div class="pill m-hide" id="scoreReviveWrap"><span class="k">📈</span><i class="pbar"><i class="pfill" id="scoreReviveFill"></i></i><span class="v" id="scoreReviveVal">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -5844,7 +5850,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V15.64</div>
+  <div id="mark">DESIGNED BY QIAN · V15.65</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -11508,6 +11514,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_waveCombo = waveComboText(wave, combo); const f_waveCombo = $('waveComboFill'); if (f_waveCombo) f_waveCombo.style.width = r_waveCombo.pct + '%'; const v_waveCombo = $('waveComboVal'); if (v_waveCombo) v_waveCombo.textContent = r_waveCombo.txt; const w_waveCombo = $('waveComboWrap'); if (w_waveCombo) { w_waveCombo.classList.remove('g-good','g-warn','g-bad'); if (r_waveCombo.cls) w_waveCombo.classList.add(r_waveCombo.cls); w_waveCombo.classList.toggle('danger', !!r_waveCombo.danger); }
     const r_puCombo = puComboText(runPowerups, combo); const f_puCombo = $('puComboFill'); if (f_puCombo) f_puCombo.style.width = r_puCombo.pct + '%'; const v_puCombo = $('puComboVal'); if (v_puCombo) v_puCombo.textContent = r_puCombo.txt; const w_puCombo = $('puComboWrap'); if (w_puCombo) { w_puCombo.classList.remove('g-good','g-warn','g-bad'); if (r_puCombo.cls) w_puCombo.classList.add(r_puCombo.cls); w_puCombo.classList.toggle('danger', !!r_puCombo.danger); }
     const r_upgRevive = upgReviveText(upgTotal, reviveCount); const f_upgRevive = $('upgReviveFill'); if (f_upgRevive) f_upgRevive.style.width = r_upgRevive.pct + '%'; const v_upgRevive = $('upgReviveVal'); if (v_upgRevive) v_upgRevive.textContent = r_upgRevive.txt; const w_upgRevive = $('upgReviveWrap'); if (w_upgRevive) { w_upgRevive.classList.remove('g-good','g-warn','g-bad'); if (r_upgRevive.cls) w_upgRevive.classList.add(r_upgRevive.cls); w_upgRevive.classList.toggle('danger', !!r_upgRevive.danger); }
+    const r_scoreRevive = scoreReviveText(score, reviveCount); const f_scoreRevive = $('scoreReviveFill'); if (f_scoreRevive) f_scoreRevive.style.width = r_scoreRevive.pct + '%'; const v_scoreRevive = $('scoreReviveVal'); if (v_scoreRevive) v_scoreRevive.textContent = r_scoreRevive.txt; const w_scoreRevive = $('scoreReviveWrap'); if (w_scoreRevive) { w_scoreRevive.classList.remove('g-good','g-warn','g-bad'); if (r_scoreRevive.cls) w_scoreRevive.classList.add(r_scoreRevive.cls); w_scoreRevive.classList.toggle('danger', !!r_scoreRevive.danger); }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -19597,6 +19604,18 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
     return { pct: pct, txt: '强化复活 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
   }
+  // —— scoreRevive：得分复活（X 占比越高越安全）——
+  function scoreReviveText(a, b) {
+    const na = Number(a), nb = Number(b);
+    if (!isFinite(na) || na < 0 || !isFinite(nb) || nb < 0) return { pct: 0, txt: '得分复活 —', cls: 'g-good', danger: false };
+    const sum = na + nb;
+    if (sum <= 0) return { pct: 0, txt: '得分复活 —', cls: 'g-good', danger: false };
+    const val = na / sum;
+    const pct = Math.max(0, Math.min(100, Math.round(val * 100)));
+    let cls = 'g-good', danger = false;
+    if (val < 0.4) { cls = 'g-bad'; danger = true; } else if (val < 0.6) { cls = 'g-warn'; }
+    return { pct: pct, txt: '得分复活 ' + (Math.round(val * 100) / 100), cls: cls, danger: danger };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -21438,7 +21457,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V15.64', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V15.65', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -23279,6 +23298,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       waveComboStateNow: (a, b) => waveComboText(a, b), waveComboANow: () => wave, waveComboBNow: () => combo, waveComboFillNow: () => { const f = $('waveComboFill'); return f ? f.style.width : ''; }, waveComboDangerNow: () => { const w = $('waveComboWrap'); return !!(w && w.classList.contains('danger')); },
       puComboStateNow: (a, b) => puComboText(a, b), puComboANow: () => runPowerups, puComboBNow: () => combo, puComboFillNow: () => { const f = $('puComboFill'); return f ? f.style.width : ''; }, puComboDangerNow: () => { const w = $('puComboWrap'); return !!(w && w.classList.contains('danger')); },
       upgReviveStateNow: (a, b) => upgReviveText(a, b), upgReviveANow: () => upgTotal, upgReviveBNow: () => reviveCount, upgReviveFillNow: () => { const f = $('upgReviveFill'); return f ? f.style.width : ''; }, upgReviveDangerNow: () => { const w = $('upgReviveWrap'); return !!(w && w.classList.contains('danger')); },
+      scoreReviveStateNow: (a, b) => scoreReviveText(a, b), scoreReviveANow: () => score, scoreReviveBNow: () => reviveCount, scoreReviveFillNow: () => { const f = $('scoreReviveFill'); return f ? f.style.width : ''; }, scoreReviveDangerNow: () => { const w = $('scoreReviveWrap'); return !!(w && w.classList.contains('danger')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
