@@ -17844,6 +17844,22 @@ async function main() {
     t('U6404 DOM 与函数一致性', o5.ok === true && o5.match === true, JSON.stringify(o5));
   } catch (e) { t('U6399 强化对照 异常', false, String(e)); }
 
+
+  // ===== U6405~U6410: BOSS对照(v0.16.73) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('cmpBossWrap'),s:T.cmpBossArrowState(10,4)});})()"));
+    t('U6405 BOSS对照 DOM 已加入 HUD', o.dom === true && o.s.dir === 'up' && o.s.txt === '+6', JSON.stringify(o));
+    t('U6406 正常 10 vs 4→up/+6/c-up', o.s.dir === 'up' && o.s.delta === 6 && o.s.cls === 'c-up' && o.s.txt === '+6', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cmpBossArrowState(4,10),b:T.cmpBossArrowState(5,5)});})()"));
+    t('U6407 边界 4 vs 10→down/-6/c-down, 5 vs 5→flat/0/c-flat', o2.a.dir === 'down' && o2.a.delta === -6 && o2.a.cls === 'c-down' && o2.a.txt === '-6' && o2.b.dir === 'flat' && o2.b.delta === 0 && o2.b.cls === 'c-flat' && o2.b.txt === '0', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.cmpBossArrowState(NaN,NaN),b:T.cmpBossArrowState(Infinity,1),c:T.cmpBossArrowState(-1,3)});})()"));
+    t('U6408 非法 NaN/Infinity→flat/0, -1 vs 3→down', o3.a.dir === 'flat' && o3.a.delta === 0 && o3.b.dir === 'flat' && o3.b.delta === 0 && o3.c.dir === 'down', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({d:T.cmpBossArrowState('10','4')});})()"));
+    t('U6409 数字字符串转数', o4.d.dir === 'up' && o4.d.delta === 6, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}const w=document.getElementById('cmpBossWrap');const ar=w?w.querySelector('.arrow'):null;const va=w?w.querySelector('.val'):null;const now=T.cmpBossArrowNow();const sym=ar?ar.textContent:'';const exp=now.dir==='up'?'▲':(now.dir==='down'?'▼':'=');return JSON.stringify({ok:ok,sym:sym,exp:exp,match:sym===exp&&va&&va.textContent===now.txt,dom:!!w});})()"));
+    t('U6410 DOM 与函数一致性', o5.ok === true && o5.match === true, JSON.stringify(o5));
+  } catch (e) { t('U6405 BOSS对照 异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
