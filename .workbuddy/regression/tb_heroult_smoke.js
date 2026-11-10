@@ -15828,6 +15828,22 @@ async function main() {
     t('U5654 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
   } catch(e){ for(let k=5649;k<=5654;k++) t('U'+k+' 命中生命',false,e.message); }
 
+
+  // ===== U5655~U5660: 弹药生命(v0.15.48) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bulletLifeWrap'),st:T.bulletLifeStateNow(4,1)});})()"));
+    t('U5655 弹药生命 DOM 已加入 HUD', o.dom === true && typeof o.st.pct === 'number', JSON.stringify(o));
+    t('U5656 正常 4/1→弹药生命 0.8', o.st.pct === 80 && o.st.txt === '弹药生命 0.8' && o.st.cls === 'g-good', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletLifeStateNow(1,0).pct,b:T.bulletLifeStateNow(0,3).pct,c:T.bulletLifeStateNow(1,1).pct,d:T.bulletLifeStateNow(1,1).cls});})()"));
+    t('U5657 边界 1/0、0/3、1/1→100/0/50', o2.a === 100 && o2.b === 0 && o2.c === 50 && o2.d === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.bulletLifeStateNow(-1,2).pct,b:T.bulletLifeStateNow(NaN,2).pct,c:T.bulletLifeStateNow(0,0).pct,d:T.bulletLifeStateNow(3,-1).pct});})()"));
+    t('U5658 非法/空值/零和/负分母 → 0', o3.a === 0 && o3.b === 0 && o3.c === 0 && o3.d === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.bulletLifeStateNow('4','1').pct);})()"));
+    t('U5659 数字字符串转数', o4 === 80, o4);
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}return JSON.stringify({ok:ok,f:typeof T.bulletLifeFillNow()==='string',d:typeof T.bulletLifeDangerNow()==='boolean',a:T.bulletLifeANow(),b:T.bulletLifeBNow()});})()"));
+    t('U5660 DOM 与函数一致性', o5.ok === true && o5.f === true && o5.d === true && typeof o5.a === 'number' && typeof o5.b === 'number', JSON.stringify(o5));
+  } catch(e){ for(let k=5655;k<=5660;k++) t('U'+k+' 弹药生命',false,e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
