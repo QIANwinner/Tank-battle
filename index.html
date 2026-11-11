@@ -5827,6 +5827,16 @@
   #pulseEnemyWrap.g-bad .pval { color:#e74c3c; }
   #pulseEnemyWrap.g-bad { animation: tbPulsePulse .4s ease-in-out infinite alternate; }
   @keyframes tbPulsePulse { from { opacity:.55; } to { opacity:1; } }
+  #pulseLifeWrap .pline { display:inline-block; width:74px; height:28px; vertical-align:middle; margin:0 4px; }
+  #pulseLifeWrap .pline svg { width:100%; height:100%; display:block; }
+  #pulseLifeWrap .pline .ptrack { fill:none; stroke:#333; stroke-width:1; stroke-dasharray:2 2; }
+  #pulseLifeWrap .pline .ppulse { fill:none; stroke:#2ecc71; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+  #pulseLifeWrap .pval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #pulseLifeWrap.g-warn .pline .ppulse { stroke:#f1c40f; }
+  #pulseLifeWrap.g-bad .pline .ppulse { stroke:#e74c3c; }
+  #pulseLifeWrap.g-bad .pval { color:#e74c3c; }
+  #pulseLifeWrap.g-bad { animation: tbPulsePulse .4s ease-in-out infinite alternate; }
+  @keyframes tbPulsePulse { from { opacity:.55; } to { opacity:1; } }
 </style>
 </head>
 <body>
@@ -6862,6 +6872,7 @@
     <div class="pill m-hide" id="pulseComboWrap"><span class="k">🔥</span><span class="v">连击</span><span class="pline"><svg viewBox="0 0 100 28" preserveAspectRatio="none"><polyline class="ptrack" points="0,26 100,26"></polyline><polyline class="ppulse" points=""></polyline></svg></span><em class="pval">—</em></div>
     <div class="pill m-hide" id="pulseHitWrap"><span class="k">🎯</span><span class="v">命中</span><span class="pline"><svg viewBox="0 0 100 28" preserveAspectRatio="none"><polyline class="ptrack" points="0,26 100,26"></polyline><polyline class="ppulse" points=""></polyline></svg></span><em class="pval">—</em></div>
     <div class="pill m-hide" id="pulseEnemyWrap"><span class="k">👾</span><span class="v">敌情</span><span class="pline"><svg viewBox="0 0 100 28" preserveAspectRatio="none"><polyline class="ptrack" points="0,26 100,26"></polyline><polyline class="ppulse" points=""></polyline></svg></span><em class="pval">—</em></div>
+    <div class="pill m-hide" id="pulseLifeWrap"><span class="k">❤️</span><span class="v">生命</span><span class="pline"><svg viewBox="0 0 100 28" preserveAspectRatio="none"><polyline class="ptrack" points="0,26 100,26"></polyline><polyline class="ppulse" points=""></polyline></svg></span><em class="pval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -7237,7 +7248,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V17.36</div>
+  <div id="mark">DESIGNED BY QIAN · V17.37</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -13074,6 +13085,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     if (window.__tbPulseHist === undefined) window.__tbPulseHist = {}; if (window.__tbPulseHist['pulseCombo'] === undefined) window.__tbPulseHist['pulseCombo'] = []; const h_pulseCombo = window.__tbPulseHist['pulseCombo']; const t_pulseCombo = performance.now(); if (h_pulseCombo.length === 0 || t_pulseCombo - h_pulseCombo.__t > 600) { if (h_pulseCombo.length >= 12) h_pulseCombo.shift(); h_pulseCombo.push(Number(combo)); h_pulseCombo.__t = t_pulseCombo; } const l_pulseCombo = pulseCombo(h_pulseCombo, 30); const w_pulseCombo = $('pulseComboWrap'); if (w_pulseCombo) { w_pulseCombo.classList.remove('g-good','g-warn','g-bad'); w_pulseCombo.classList.add(l_pulseCombo.cls); w_pulseCombo.classList.toggle('danger', !!l_pulseCombo.danger); const pf = w_pulseCombo.querySelector('.ppulse'); if (pf) pf.setAttribute('points', l_pulseCombo.points || ''); const pv = w_pulseCombo.querySelector('.pval'); if (pv) pv.textContent = l_pulseCombo.txt; }
     if (window.__tbPulseHist === undefined) window.__tbPulseHist = {}; if (window.__tbPulseHist['pulseHit'] === undefined) window.__tbPulseHist['pulseHit'] = []; const h_pulseHit = window.__tbPulseHist['pulseHit']; const t_pulseHit = performance.now(); if (h_pulseHit.length === 0 || t_pulseHit - h_pulseHit.__t > 600) { if (h_pulseHit.length >= 12) h_pulseHit.shift(); h_pulseHit.push(Number(stat.hits)); h_pulseHit.__t = t_pulseHit; } const l_pulseHit = pulseHit(h_pulseHit, 300); const w_pulseHit = $('pulseHitWrap'); if (w_pulseHit) { w_pulseHit.classList.remove('g-good','g-warn','g-bad'); w_pulseHit.classList.add(l_pulseHit.cls); w_pulseHit.classList.toggle('danger', !!l_pulseHit.danger); const pf = w_pulseHit.querySelector('.ppulse'); if (pf) pf.setAttribute('points', l_pulseHit.points || ''); const pv = w_pulseHit.querySelector('.pval'); if (pv) pv.textContent = l_pulseHit.txt; }
     if (window.__tbPulseHist === undefined) window.__tbPulseHist = {}; if (window.__tbPulseHist['pulseEnemy'] === undefined) window.__tbPulseHist['pulseEnemy'] = []; const h_pulseEnemy = window.__tbPulseHist['pulseEnemy']; const t_pulseEnemy = performance.now(); if (h_pulseEnemy.length === 0 || t_pulseEnemy - h_pulseEnemy.__t > 600) { if (h_pulseEnemy.length >= 12) h_pulseEnemy.shift(); h_pulseEnemy.push(Number(enemies.length)); h_pulseEnemy.__t = t_pulseEnemy; } const l_pulseEnemy = pulseEnemy(h_pulseEnemy, 30); const w_pulseEnemy = $('pulseEnemyWrap'); if (w_pulseEnemy) { w_pulseEnemy.classList.remove('g-good','g-warn','g-bad'); w_pulseEnemy.classList.add(l_pulseEnemy.cls); w_pulseEnemy.classList.toggle('danger', !!l_pulseEnemy.danger); const pf = w_pulseEnemy.querySelector('.ppulse'); if (pf) pf.setAttribute('points', l_pulseEnemy.points || ''); const pv = w_pulseEnemy.querySelector('.pval'); if (pv) pv.textContent = l_pulseEnemy.txt; }
+    if (window.__tbPulseHist === undefined) window.__tbPulseHist = {}; if (window.__tbPulseHist['pulseLife'] === undefined) window.__tbPulseHist['pulseLife'] = []; const h_pulseLife = window.__tbPulseHist['pulseLife']; const t_pulseLife = performance.now(); if (h_pulseLife.length === 0 || t_pulseLife - h_pulseLife.__t > 600) { if (h_pulseLife.length >= 12) h_pulseLife.shift(); h_pulseLife.push(Number((lives + lives2))); h_pulseLife.__t = t_pulseLife; } const l_pulseLife = pulseLife(h_pulseLife, 8); const w_pulseLife = $('pulseLifeWrap'); if (w_pulseLife) { w_pulseLife.classList.remove('g-good','g-warn','g-bad'); w_pulseLife.classList.add(l_pulseLife.cls); w_pulseLife.classList.toggle('danger', !!l_pulseLife.danger); const pf = w_pulseLife.querySelector('.ppulse'); if (pf) pf.setAttribute('points', l_pulseLife.points || ''); const pv = w_pulseLife.querySelector('.pval'); if (pv) pv.textContent = l_pulseLife.txt; }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -23651,6 +23663,30 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const txt = arrow + ' · ' + Math.round(latest);
     return { latest: latest, pct: pct, points: points, n: h.length, trend: trend, cls: cls, danger: danger, txt: txt };
   }
+  // —— pulseLife：生命脉搏（脉搏曲线：趋势 sparkline，越高越热）——
+  function pulseLife(hist, cap) {
+    const c = Number(cap);
+    const ok = Array.isArray(hist) && hist.length > 0 && isFinite(c) && c > 0;
+    if (!ok) return { latest: 0, pct: 0, points: null, n: 0, trend: 'flat', cls: 'g-warn', danger: false, txt: '—' };
+    const h = hist.map(function (x) { return Number(x); });
+    const latest = h[h.length - 1];
+    const pct = Math.max(0, Math.min(100, Math.round(latest / c * 100)));
+    const danger = pct >= 75;
+    const cls = danger ? 'g-bad' : (pct >= 40 ? 'g-warn' : 'g-good');
+    const trend = h.length >= 2 ? (latest > h[0] ? 'up' : (latest < h[0] ? 'down' : 'flat')) : 'flat';
+    let points = null;
+    if (h.length >= 2) {
+      const n = h.length;
+      points = h.map(function (v, i) {
+        const x = Math.round(i / (n - 1) * 1000) / 10;
+        const y = Math.round((26 - Math.max(0, Math.min(1, v / c)) * 22) * 10) / 10;
+        return x + ',' + y;
+      }).join(' ');
+    }
+    const arrow = trend === 'up' ? '▲' : (trend === 'down' ? '▼' : '=');
+    const txt = arrow + ' · ' + Math.round(latest);
+    return { latest: latest, pct: pct, points: points, n: h.length, trend: trend, cls: cls, danger: danger, txt: txt };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -25492,7 +25528,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V17.36', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V17.37', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -27506,6 +27542,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       pulseComboStateNow: (hist, cap) => pulseCombo(hist, cap), pulseComboNow: () => pulseCombo(window.__tbPulseHist && window.__tbPulseHist['pulseCombo'] || [], 30), pulseComboHistNow: () => (window.__tbPulseHist && window.__tbPulseHist['pulseCombo'] || []).slice(), pulseComboPointsNow: () => { const r = pulseCombo(window.__tbPulseHist && window.__tbPulseHist['pulseCombo'] || [], 30); return r.points; },
       pulseHitStateNow: (hist, cap) => pulseHit(hist, cap), pulseHitNow: () => pulseHit(window.__tbPulseHist && window.__tbPulseHist['pulseHit'] || [], 300), pulseHitHistNow: () => (window.__tbPulseHist && window.__tbPulseHist['pulseHit'] || []).slice(), pulseHitPointsNow: () => { const r = pulseHit(window.__tbPulseHist && window.__tbPulseHist['pulseHit'] || [], 300); return r.points; },
       pulseEnemyStateNow: (hist, cap) => pulseEnemy(hist, cap), pulseEnemyNow: () => pulseEnemy(window.__tbPulseHist && window.__tbPulseHist['pulseEnemy'] || [], 30), pulseEnemyHistNow: () => (window.__tbPulseHist && window.__tbPulseHist['pulseEnemy'] || []).slice(), pulseEnemyPointsNow: () => { const r = pulseEnemy(window.__tbPulseHist && window.__tbPulseHist['pulseEnemy'] || [], 30); return r.points; },
+      pulseLifeStateNow: (hist, cap) => pulseLife(hist, cap), pulseLifeNow: () => pulseLife(window.__tbPulseHist && window.__tbPulseHist['pulseLife'] || [], 8), pulseLifeHistNow: () => (window.__tbPulseHist && window.__tbPulseHist['pulseLife'] || []).slice(), pulseLifePointsNow: () => { const r = pulseLife(window.__tbPulseHist && window.__tbPulseHist['pulseLife'] || [], 8); return r.points; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
