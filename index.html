@@ -5456,6 +5456,21 @@
   #pickWaveWrap.g-bad .chip { background:rgba(231,76,60,.18); color:#e74c3c; }
   #pickWaveWrap.g-bad { animation: tbPickPulse .5s ease-in-out infinite alternate; }
   @keyframes tbPickPulse { from { opacity:.6; } to { opacity:1; } }
+  #pickDmgWrap .pk { display:inline-flex; flex-direction:column; gap:1px; margin:0 4px; vertical-align:middle; min-width:150px; }
+  #pickDmgWrap .prow { display:flex; align-items:center; gap:4px; font-size:10px; line-height:1.2; }
+  #pickDmgWrap .plab { width:30px; color:#999; flex:none; }
+  #pickDmgWrap .dbar { flex:1; height:5px; background:#3a3a3a; border-radius:3px; overflow:hidden; }
+  #pickDmgWrap .dbar i { display:block; height:100%; border-radius:3px; background:#5a5a5a; }
+  #pickDmgWrap .pv { width:58px; text-align:right; color:#aaa; font-size:10px; flex:none; }
+  #pickDmgWrap .chip { font-style:normal; font-size:9px; padding:0 4px; border-radius:3px; background:#2a2a2a; color:#bbb; align-self:flex-start; }
+  #pickDmgWrap.g-good .dbar i { background:#2ecc71; }
+  #pickDmgWrap.g-good .chip { background:rgba(46,204,113,.18); color:#2ecc71; }
+  #pickDmgWrap.g-warn .dbar i { background:#f1c40f; }
+  #pickDmgWrap.g-warn .chip { background:rgba(241,196,15,.18); color:#f1c40f; }
+  #pickDmgWrap.g-bad .dbar i { background:#e74c3c; }
+  #pickDmgWrap.g-bad .chip { background:rgba(231,76,60,.18); color:#e74c3c; }
+  #pickDmgWrap.g-bad { animation: tbPickPulse .5s ease-in-out infinite alternate; }
+  @keyframes tbPickPulse { from { opacity:.6; } to { opacity:1; } }
 </style>
 </head>
 <body>
@@ -6457,6 +6472,7 @@
     <div class="pill m-hide" id="pickKillWrap"><span class="k">☠️</span><span class="pk"><span class="prow"><span class="plab">百杀</span><span class="dbar"><i></i></span><b class="pv">—</b></span><span class="prow"><span class="plab">二百</span><span class="dbar"><i></i></span><b class="pv">—</b></span><em class="chip">—</em></span><span class="v">击杀双目标</span></div>
     <div class="pill m-hide" id="pickComboWrap"><span class="k">⚡</span><span class="pk"><span class="prow"><span class="plab">十连</span><span class="dbar"><i></i></span><b class="pv">—</b></span><span class="prow"><span class="plab">二十</span><span class="dbar"><i></i></span><b class="pv">—</b></span><em class="chip">—</em></span><span class="v">连击双目标</span></div>
     <div class="pill m-hide" id="pickWaveWrap"><span class="k">🚩</span><span class="pk"><span class="prow"><span class="plab">十波</span><span class="dbar"><i></i></span><b class="pv">—</b></span><span class="prow"><span class="plab">二十</span><span class="dbar"><i></i></span><b class="pv">—</b></span><em class="chip">—</em></span><span class="v">波次双目标</span></div>
+    <div class="pill m-hide" id="pickDmgWrap"><span class="k">💥</span><span class="pk"><span class="prow"><span class="plab">万伤</span><span class="dbar"><i></i></span><b class="pv">—</b></span><span class="prow"><span class="plab">五万</span><span class="dbar"><i></i></span><b class="pv">—</b></span><em class="chip">—</em></span><span class="v">伤害双目标</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -6832,7 +6848,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V17.2</div>
+  <div id="mark">DESIGNED BY QIAN · V17.3</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -12635,6 +12651,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_pickKill = pickKill(stat.kills, 100, 200); const w_pickKill = $('pickKillWrap'); if (w_pickKill) { w_pickKill.classList.remove('g-good','g-warn','g-bad'); w_pickKill.classList.add(l_pickKill.cls); w_pickKill.classList.toggle('danger', !!l_pickKill.danger); const bars = w_pickKill.querySelectorAll('.dbar i'); const pvs = w_pickKill.querySelectorAll('.pv'); if (bars[0]) bars[0].style.width = l_pickKill.aPct + '%'; if (bars[1]) bars[1].style.width = l_pickKill.bPct + '%'; if (pvs[0]) pvs[0].textContent = l_pickKill.metA ? '✓' + l_pickKill.aPct + '%' : '还差 ' + l_pickKill.gapA; if (pvs[1]) pvs[1].textContent = l_pickKill.metB ? '✓' + l_pickKill.bPct + '%' : '还差 ' + l_pickKill.gapB; const chip = w_pickKill.querySelector('.chip'); if (chip) chip.textContent = l_pickKill.txt; }
     const l_pickCombo = pickCombo(combo, 10, 20); const w_pickCombo = $('pickComboWrap'); if (w_pickCombo) { w_pickCombo.classList.remove('g-good','g-warn','g-bad'); w_pickCombo.classList.add(l_pickCombo.cls); w_pickCombo.classList.toggle('danger', !!l_pickCombo.danger); const bars = w_pickCombo.querySelectorAll('.dbar i'); const pvs = w_pickCombo.querySelectorAll('.pv'); if (bars[0]) bars[0].style.width = l_pickCombo.aPct + '%'; if (bars[1]) bars[1].style.width = l_pickCombo.bPct + '%'; if (pvs[0]) pvs[0].textContent = l_pickCombo.metA ? '✓' + l_pickCombo.aPct + '%' : '还差 ' + l_pickCombo.gapA; if (pvs[1]) pvs[1].textContent = l_pickCombo.metB ? '✓' + l_pickCombo.bPct + '%' : '还差 ' + l_pickCombo.gapB; const chip = w_pickCombo.querySelector('.chip'); if (chip) chip.textContent = l_pickCombo.txt; }
     const l_pickWave = pickWave(wave, 10, 20); const w_pickWave = $('pickWaveWrap'); if (w_pickWave) { w_pickWave.classList.remove('g-good','g-warn','g-bad'); w_pickWave.classList.add(l_pickWave.cls); w_pickWave.classList.toggle('danger', !!l_pickWave.danger); const bars = w_pickWave.querySelectorAll('.dbar i'); const pvs = w_pickWave.querySelectorAll('.pv'); if (bars[0]) bars[0].style.width = l_pickWave.aPct + '%'; if (bars[1]) bars[1].style.width = l_pickWave.bPct + '%'; if (pvs[0]) pvs[0].textContent = l_pickWave.metA ? '✓' + l_pickWave.aPct + '%' : '还差 ' + l_pickWave.gapA; if (pvs[1]) pvs[1].textContent = l_pickWave.metB ? '✓' + l_pickWave.bPct + '%' : '还差 ' + l_pickWave.gapB; const chip = w_pickWave.querySelector('.chip'); if (chip) chip.textContent = l_pickWave.txt; }
+    const l_pickDmg = pickDmg(runDmg, 10000, 50000); const w_pickDmg = $('pickDmgWrap'); if (w_pickDmg) { w_pickDmg.classList.remove('g-good','g-warn','g-bad'); w_pickDmg.classList.add(l_pickDmg.cls); w_pickDmg.classList.toggle('danger', !!l_pickDmg.danger); const bars = w_pickDmg.querySelectorAll('.dbar i'); const pvs = w_pickDmg.querySelectorAll('.pv'); if (bars[0]) bars[0].style.width = l_pickDmg.aPct + '%'; if (bars[1]) bars[1].style.width = l_pickDmg.bPct + '%'; if (pvs[0]) pvs[0].textContent = l_pickDmg.metA ? '✓' + l_pickDmg.aPct + '%' : '还差 ' + l_pickDmg.gapA; if (pvs[1]) pvs[1].textContent = l_pickDmg.metB ? '✓' + l_pickDmg.bPct + '%' : '还差 ' + l_pickDmg.gapB; const chip = w_pickDmg.querySelector('.chip'); if (chip) chip.textContent = l_pickDmg.txt; }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -22576,6 +22593,34 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     else txt = '先冲 ' + (fav === 'a' ? 'A' : 'B') + ' · 还差 ' + Math.round(gap);
     return { aPct: aPct, bPct: bPct, fav: fav, gap: Math.round(gap), gapA: Math.round(gapA), gapB: Math.round(gapB), metA: metA, metB: metB, cls: cls, danger: danger, txt: txt };
   }
+  // —— pickDmg：伤害双目标（双目标冲刺：双条进度 + 优先达标建议 + 还差提示）——
+  function pickDmg(val, a, b) {
+    const v = Number(val), aN = Number(a), bN = Number(b);
+    const ok = isFinite(v) && isFinite(aN) && isFinite(bN) && aN > 0 && bN > 0 && aN !== bN;
+    if (!ok) return { aPct: 0, bPct: 0, fav: 'none', gap: 0, gapA: 0, gapB: 0, metA: false, metB: false, cls: 'g-warn', danger: false, txt: '—' };
+    const gapA = aN - v, gapB = bN - v;
+    const metA = v >= aN, metB = v >= bN;
+    const aPct = Math.max(0, Math.min(100, Math.round(v / aN * 100)));
+    const bPct = Math.max(0, Math.min(100, Math.round(v / bN * 100)));
+    let fav;
+    if (metA && metB) fav = 'both';
+    else if (metA) fav = 'a';
+    else if (metB) fav = 'b';
+    else fav = gapA <= gapB ? 'a' : 'b';
+    const gap = fav === 'a' ? gapA : (fav === 'b' ? gapB : 0);
+    const nearerPct = fav === 'a' ? aPct : (fav === 'b' ? bPct : 100);
+    let cls, danger;
+    if (metA && metB) { cls = 'g-good'; danger = false; }
+    else if (metA || metB) { cls = 'g-warn'; danger = false; }
+    else if (nearerPct < 40) { cls = 'g-bad'; danger = true; }
+    else { cls = 'g-warn'; danger = false; }
+    let txt;
+    if (metA && metB) txt = '双达成';
+    else if (metA) txt = 'A 已达成 · B 还差 ' + Math.round(gapB);
+    else if (metB) txt = 'B 已达成 · A 还差 ' + Math.round(gapA);
+    else txt = '先冲 ' + (fav === 'a' ? 'A' : 'B') + ' · 还差 ' + Math.round(gap);
+    return { aPct: aPct, bPct: bPct, fav: fav, gap: Math.round(gap), gapA: Math.round(gapA), gapB: Math.round(gapB), metA: metA, metB: metB, cls: cls, danger: danger, txt: txt };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -24417,7 +24462,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V17.2', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V17.3', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -26397,6 +26442,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       pickKillStateNow: (v, a, b) => pickKill(v, a, b), pickKillNow: () => pickKill(stat.kills, 100, 200), pickKillFavNow: () => pickKill(stat.kills, 100, 200).fav, pickKillDangerNow: () => { const w = $('pickKillWrap'); return !!(w && w.classList.contains('g-bad')); }, pickKillPctNow: () => { const w = $('pickKillWrap'); if (!w) return null; const b = w.querySelectorAll('.dbar i'); return b.length >= 2 ? [parseInt(b[0].style.width) || 0, parseInt(b[1].style.width) || 0] : null; },
       pickComboStateNow: (v, a, b) => pickCombo(v, a, b), pickComboNow: () => pickCombo(combo, 10, 20), pickComboFavNow: () => pickCombo(combo, 10, 20).fav, pickComboDangerNow: () => { const w = $('pickComboWrap'); return !!(w && w.classList.contains('g-bad')); }, pickComboPctNow: () => { const w = $('pickComboWrap'); if (!w) return null; const b = w.querySelectorAll('.dbar i'); return b.length >= 2 ? [parseInt(b[0].style.width) || 0, parseInt(b[1].style.width) || 0] : null; },
       pickWaveStateNow: (v, a, b) => pickWave(v, a, b), pickWaveNow: () => pickWave(wave, 10, 20), pickWaveFavNow: () => pickWave(wave, 10, 20).fav, pickWaveDangerNow: () => { const w = $('pickWaveWrap'); return !!(w && w.classList.contains('g-bad')); }, pickWavePctNow: () => { const w = $('pickWaveWrap'); if (!w) return null; const b = w.querySelectorAll('.dbar i'); return b.length >= 2 ? [parseInt(b[0].style.width) || 0, parseInt(b[1].style.width) || 0] : null; },
+      pickDmgStateNow: (v, a, b) => pickDmg(v, a, b), pickDmgNow: () => pickDmg(runDmg, 10000, 50000), pickDmgFavNow: () => pickDmg(runDmg, 10000, 50000).fav, pickDmgDangerNow: () => { const w = $('pickDmgWrap'); return !!(w && w.classList.contains('g-bad')); }, pickDmgPctNow: () => { const w = $('pickDmgWrap'); if (!w) return null; const b = w.querySelectorAll('.dbar i'); return b.length >= 2 ? [parseInt(b[0].style.width) || 0, parseInt(b[1].style.width) || 0] : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
