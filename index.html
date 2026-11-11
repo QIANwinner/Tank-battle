@@ -5941,6 +5941,10 @@
   #mobIdleWrap.g-bad .mval { color:#e74c3c; }
   #mobIdleWrap.g-bad { animation: tbMobPulse .4s ease-in-out infinite alternate; }
   @keyframes tbMobPulse { from { opacity:.55; } to { opacity:1; } }
+  #mobBurstWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #mobBurstWrap.g-bad .mval { color:#e74c3c; }
+  #mobBurstWrap.g-bad { animation: tbMobPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbMobPulse { from { opacity:.55; } to { opacity:1; } }
 </style>
 </head>
 <body>
@@ -6995,6 +6999,7 @@
     <div class="pill m-hide" id="radNoBossWrap"><span class="k">🔥</span><span class="v">杂扑</span><span class="rad"><svg viewBox="0 0 44 44" width="30" height="30"><circle cx="22" cy="22" r="20" fill="none" stroke="#2c2c2c"/><circle cx="22" cy="22" r="17" fill="none" stroke="#333"/><g class="rwg"><path class="rw" d="M22 22 L39.00 22.00 A17 17 0 0 1 34.02 34.02 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L34.02 34.02 A17 17 0 0 1 22.00 39.00 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L22.00 39.00 A17 17 0 0 1 9.98 34.02 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L9.98 34.02 A17 17 0 0 1 5.00 22.00 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L5.00 22.00 A17 17 0 0 1 9.98 9.98 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L9.98 9.98 A17 17 0 0 1 22.00 5.00 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L22.00 5.00 A17 17 0 0 1 34.02 9.98 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L34.02 9.98 A17 17 0 0 1 39.00 22.00 Z" fill="#333" opacity="0.35"/></g><polygon class="rneedle" points="22 22 36.5 20.2 36.5 23.8" fill="#fff"/><circle cx="22" cy="22" r="2.4" fill="#fff"/></svg></span><em class="rval">—</em></div>
     <div class="pill m-hide" id="mobSpeedWrap"><span class="k">🏃</span><span class="v">走速</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="mobIdleWrap"><span class="k">🧍</span><span class="v">站桩</span><em class="mval">—</em></div>
+    <div class="pill m-hide" id="mobBurstWrap"><span class="k">⚡</span><span class="v">爆发</span><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -7370,7 +7375,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V17.55</div>
+  <div id="mark">DESIGNED BY QIAN · V17.56</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -13226,6 +13231,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_radNoBoss = radNoBoss(radInc().filter(function(it){ return !it.boss; }), player ? player.x : 0, player ? player.y : 0); const w_radNoBoss = $('radNoBossWrap'); if (w_radNoBoss) { w_radNoBoss.classList.remove('g-good','g-warn','g-bad'); w_radNoBoss.classList.add(l_radNoBoss.cls); w_radNoBoss.classList.toggle('danger', !!l_radNoBoss.danger); const rsvg = w_radNoBoss.querySelector('svg'); if (rsvg) { const wds = rsvg.querySelectorAll('.rw'); const mx = Math.max.apply(null, l_radNoBoss.counts); for (let i = 0; i < wds.length; i++) { const c = l_radNoBoss.counts[i] || 0; const t = mx > 0 ? c / mx : 0; wds[i].style.fill = c <= 0 ? '#333' : (t >= 0.66 ? '#e74c3c' : (t >= 0.33 ? '#f39c12' : '#2ecc71')); wds[i].style.opacity = c <= 0 ? 0.35 : (0.3 + 0.7 * t); } } const nd = rsvg ? rsvg.querySelector('.rneedle') : null; if (nd) { if (l_radNoBoss.dom < 0) { nd.style.display = 'none'; } else { nd.style.display = ''; nd.setAttribute('transform', 'rotate(' + (l_radNoBoss.dom * 45 + 22.5) + ' 22 22)'); } } const rv = w_radNoBoss.querySelector('.rval'); if (rv) rv.textContent = l_radNoBoss.txt; }
     const l_mobSpeed = mobSpeedNow(); const w_mobSpeed = $('mobSpeedWrap'); if (w_mobSpeed) { w_mobSpeed.classList.remove('g-good','g-warn','g-bad'); w_mobSpeed.classList.add(l_mobSpeed.cls); w_mobSpeed.classList.toggle('danger', !!l_mobSpeed.danger); const mv = w_mobSpeed.querySelector('.mval'); if (mv) mv.textContent = l_mobSpeed.txt; }
     const l_mobIdle = mobIdleNow(); const w_mobIdle = $('mobIdleWrap'); if (w_mobIdle) { w_mobIdle.classList.remove('g-good','g-warn','g-bad'); w_mobIdle.classList.add(l_mobIdle.cls); w_mobIdle.classList.toggle('danger', !!l_mobIdle.danger); const mv = w_mobIdle.querySelector('.mval'); if (mv) mv.textContent = l_mobIdle.txt; }
+    const l_mobBurst = mobBurstNow(); const w_mobBurst = $('mobBurstWrap'); if (w_mobBurst) { w_mobBurst.classList.remove('g-good','g-warn','g-bad'); w_mobBurst.classList.add(l_mobBurst.cls); w_mobBurst.classList.toggle('danger', !!l_mobBurst.danger); const mv = w_mobBurst.querySelector('.mval'); if (mv) mv.textContent = l_mobBurst.txt; }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -24373,6 +24379,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   }
 
   // —— mobIdle：站桩时长（走位活跃度：见 helperBody mobBase + mobIdle 实现）——
+  // —— mobBurst：走位爆发（走位活跃度：见 helperBody mobBase + mobBurst 实现）——
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -26214,7 +26221,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V17.55', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V17.56', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -28247,6 +28254,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       radNoBossStateNow: (items, px, py) => radNoBoss(items, px, py), radNoBossNow: () => radNoBoss(radInc().filter(function(it){ return !it.boss; }), player ? player.x : 0, player ? player.y : 0), radNoBossCountsNow: () => { const r = radNoBoss(radInc().filter(function(it){ return !it.boss; }), player ? player.x : 0, player ? player.y : 0); return r.counts; }, radSectorNow: (x, y, px, py) => radSector(x, y, px, py),
       mobSpeedStateNow: (hist) => mobSpeed(hist), mobSpeedNow: () => mobSpeed(mobHist()), mobSpeedDomNow: () => { const e = document.querySelector('.mobSpeedWrap .mval'); return e ? e.textContent : null; },
       mobIdleStateNow: (hist) => mobIdle(hist), mobIdleNow: () => mobIdle(mobHist()), mobIdleDomNow: () => { const e = document.querySelector('.mobIdleWrap .mval'); return e ? e.textContent : null; },
+      mobBurstStateNow: (hist) => mobBurst(hist), mobBurstNow: () => mobBurst(mobHist()), mobBurstDomNow: () => { const e = document.querySelector('.mobBurstWrap .mval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

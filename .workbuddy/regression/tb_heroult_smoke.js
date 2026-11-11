@@ -19170,6 +19170,21 @@ async function main() {
     t('U6902 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { console.log('U6897..6902 站桩时长 异常: ' + e.message); }
 
+
+  // ===== U6903~U6908: 走位爆发(v0.17.56) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('mobBurstWrap'),mv:!!document.querySelector('#mobBurstWrap .mval'),s:T.mobBurstStateNow([{'x':200,'y':200,'t':0},{'x':300,'y':200,'t':0.1},{'x':300,'y':200,'t':1}])});})()"));
+    t('U6903 走位爆发 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U6904 正常 走位爆发 → v=41.7 g-good 41.7格/秒', o.s.v === 41.7 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '41.7格/秒', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.mobBurstStateNow([{'x':200,'y':200,'t':0},{'x':300,'y':200,'t':0.1},{'x':300,'y':200,'t':1}]),b:T.mobBurstStateNow([{'x':200,'y':200,'t':0},{'x':220,'y':200,'t':0.5},{'x':240,'y':200,'t':1}])});return JSON.stringify(r);})()"));
+    t('U6905 边界 走位爆发 → g-bad 1.7格/秒', o2.b.v === 1.7 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '1.7格/秒', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.mobBurstStateNow(null);const b=T.mobBurstStateNow([]);const c=T.mobBurstStateNow([{x:200,y:200,t:0}]);const d=T.mobBurstStateNow([{x:'n',y:'n',t:'x'},{x:'n',y:'n',t:'x'}]);return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U6906 非法 null/[]/单点/全非数→退化 g-warn —', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.c.txt === '—' && o3.d.txt === '—', JSON.stringify(o3));
+    t('U6907 单位结构 txt 以 unit 结尾或为—', (o.s.txt === '—') || (typeof o.s.unit === 'string' && o.s.unit.length > 0 && o.s.txt.endsWith(o.s.unit)), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.mobBurstStateNow([{'x':200,'y':200,'t':0},{'x':300,'y':200,'t':0.1},{'x':300,'y':200,'t':1}]);return JSON.stringify({mv:!!document.querySelector('#mobBurstWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U6908 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { console.log('U6903..6908 走位爆发 异常: ' + e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
