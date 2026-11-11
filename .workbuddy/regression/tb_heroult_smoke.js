@@ -19245,6 +19245,21 @@ async function main() {
     t('U6932 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { console.log('U6927..6932 走位抖动 异常: ' + e.message); }
 
+
+  // ===== U6933~U6938: 走位节奏(v0.17.61) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('mobStabWrap'),mv:!!document.querySelector('#mobStabWrap .mval'),s:T.mobStabStateNow([{'x':200,'y':200,'t':0},{'x':300,'y':200,'t':0.5},{'x':400,'y':200,'t':1}])});})()"));
+    t('U6933 走位节奏 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U6934 正常 走位节奏 → v=1 g-good 切1次', o.s.v === 1 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '切1次', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.mobStabStateNow([{'x':200,'y':200,'t':0},{'x':300,'y':200,'t':0.5},{'x':400,'y':200,'t':1}]),b:T.mobStabStateNow([{'x':200,'y':200,'t':0},{'x':300,'y':200,'t':0.25},{'x':300,'y':200,'t':0.5},{'x':400,'y':200,'t':0.75},{'x':400,'y':200,'t':1}])});return JSON.stringify(r);})()"));
+    t('U6935 边界 走位节奏 → g-bad 切4次', o2.b.v === 4 && o2.b.cls === 'g-bad' && o2.b.danger === false && o2.b.txt === '切4次', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.mobStabStateNow(null);const b=T.mobStabStateNow([]);const c=T.mobStabStateNow([{x:200,y:200,t:0}]);const d=T.mobStabStateNow([{x:'n',y:'n',t:'x'},{x:'n',y:'n',t:'x'}]);return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U6936 非法 null/[]/单点/全非数→退化 g-warn —', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.c.txt === '—' && o3.d.txt === '—', JSON.stringify(o3));
+    t('U6937 单位结构 txt 以 unit 结尾或为—', (o.s.txt === '—') || (typeof o.s.unit === 'string' && o.s.unit.length > 0 && o.s.txt.endsWith(o.s.unit)), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.mobStabStateNow([{'x':200,'y':200,'t':0},{'x':300,'y':200,'t':0.5},{'x':400,'y':200,'t':1}]);return JSON.stringify({mv:!!document.querySelector('#mobStabWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U6938 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { console.log('U6933..6938 走位节奏 异常: ' + e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
