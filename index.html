@@ -5645,6 +5645,18 @@
   #graceWingWrap.g-bad .gtxt { color:#e74c3c; }
   #graceWingWrap.g-bad { animation: tbGracePulse .4s ease-in-out infinite alternate; }
   @keyframes tbGracePulse { from { opacity:.55; } to { opacity:1; } }
+  #graceFreezeWrap .gring { display:inline-block; position:relative; width:22px; height:22px; margin:0 4px; vertical-align:middle; flex:none; }
+  #graceFreezeWrap .gring svg { display:block; width:22px; height:22px; transform:rotate(-90deg); }
+  #graceFreezeWrap .gback { fill:none; stroke:#333; stroke-width:2.4; }
+  #graceFreezeWrap .gbar { fill:none; stroke:#f1c40f; stroke-width:2.4; stroke-linecap:round; stroke-dasharray:50.27; stroke-dashoffset:50.27; transition:stroke-dashoffset .12s linear, stroke .12s linear; }
+  #graceFreezeWrap .gpct { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:7px; color:#ddd; font-style:normal; font-weight:bold; }
+  #graceFreezeWrap .gtxt { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #graceFreezeWrap.g-good .gbar { stroke:#2ecc71; }
+  #graceFreezeWrap.g-warn .gbar { stroke:#f1c40f; }
+  #graceFreezeWrap.g-bad .gbar { stroke:#e74c3c; }
+  #graceFreezeWrap.g-bad .gtxt { color:#e74c3c; }
+  #graceFreezeWrap.g-bad { animation: tbGracePulse .4s ease-in-out infinite alternate; }
+  @keyframes tbGracePulse { from { opacity:.55; } to { opacity:1; } }
 </style>
 </head>
 <body>
@@ -6661,6 +6673,7 @@
     <div class="pill m-hide" id="graceMagnetWrap"><span class="k">🧲</span><span class="gring"><svg viewBox="0 0 20 20"><circle class="gback" cx="10" cy="10" r="8"></circle><circle class="gbar" cx="10" cy="10" r="8"></circle></svg><b class="gpct">—</b></span><span class="v">磁暴</span><em class="gtxt">—</em></div>
     <div class="pill m-hide" id="graceShieldWrap"><span class="k">🛡️</span><span class="gring"><svg viewBox="0 0 20 20"><circle class="gback" cx="10" cy="10" r="8"></circle><circle class="gbar" cx="10" cy="10" r="8"></circle></svg><b class="gpct">—</b></span><span class="v">无敌</span><em class="gtxt">—</em></div>
     <div class="pill m-hide" id="graceWingWrap"><span class="k">🛩️</span><span class="gring"><svg viewBox="0 0 20 20"><circle class="gback" cx="10" cy="10" r="8"></circle><circle class="gbar" cx="10" cy="10" r="8"></circle></svg><b class="gpct">—</b></span><span class="v">僚机</span><em class="gtxt">—</em></div>
+    <div class="pill m-hide" id="graceFreezeWrap"><span class="k">❄️</span><span class="gring"><svg viewBox="0 0 20 20"><circle class="gback" cx="10" cy="10" r="8"></circle><circle class="gbar" cx="10" cy="10" r="8"></circle></svg><b class="gpct">—</b></span><span class="v">冻结</span><em class="gtxt">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -7036,7 +7049,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V17.17</div>
+  <div id="mark">DESIGNED BY QIAN · V17.18</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -12854,6 +12867,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_graceMagnet = graceMagnet(magnetStorm, 3); const w_graceMagnet = $('graceMagnetWrap'); if (w_graceMagnet) { w_graceMagnet.classList.remove('g-good','g-warn','g-bad'); w_graceMagnet.classList.add(l_graceMagnet.cls); w_graceMagnet.classList.toggle('danger', !!l_graceMagnet.danger); const gb = w_graceMagnet.querySelector('.gbar'); if (gb) { gb.style.strokeDashoffset = (50.27 * (1 - l_graceMagnet.pct / 100)).toFixed(2); } const gp = w_graceMagnet.querySelector('.gpct'); if (gp) gp.textContent = l_graceMagnet.active ? l_graceMagnet.pct + '%' : '—'; const gt = w_graceMagnet.querySelector('.gtxt'); if (gt) gt.textContent = l_graceMagnet.txt; }
     const l_graceShield = graceShield(player.spawnInv, 300); const w_graceShield = $('graceShieldWrap'); if (w_graceShield) { w_graceShield.classList.remove('g-good','g-warn','g-bad'); w_graceShield.classList.add(l_graceShield.cls); w_graceShield.classList.toggle('danger', !!l_graceShield.danger); const gb = w_graceShield.querySelector('.gbar'); if (gb) { gb.style.strokeDashoffset = (50.27 * (1 - l_graceShield.pct / 100)).toFixed(2); } const gp = w_graceShield.querySelector('.gpct'); if (gp) gp.textContent = l_graceShield.active ? l_graceShield.pct + '%' : '—'; const gt = w_graceShield.querySelector('.gtxt'); if (gt) gt.textContent = l_graceShield.txt; }
     const l_graceWing = graceWing(wingman ? wingman.spawnInv : 0, 300); const w_graceWing = $('graceWingWrap'); if (w_graceWing) { w_graceWing.classList.remove('g-good','g-warn','g-bad'); w_graceWing.classList.add(l_graceWing.cls); w_graceWing.classList.toggle('danger', !!l_graceWing.danger); const gb = w_graceWing.querySelector('.gbar'); if (gb) { gb.style.strokeDashoffset = (50.27 * (1 - l_graceWing.pct / 100)).toFixed(2); } const gp = w_graceWing.querySelector('.gpct'); if (gp) gp.textContent = l_graceWing.active ? l_graceWing.pct + '%' : '—'; const gt = w_graceWing.querySelector('.gtxt'); if (gt) gt.textContent = l_graceWing.txt; }
+    const l_graceFreeze = graceFreeze(fx.freeze, 5); const w_graceFreeze = $('graceFreezeWrap'); if (w_graceFreeze) { w_graceFreeze.classList.remove('g-good','g-warn','g-bad'); w_graceFreeze.classList.add(l_graceFreeze.cls); w_graceFreeze.classList.toggle('danger', !!l_graceFreeze.danger); const gb = w_graceFreeze.querySelector('.gbar'); if (gb) { gb.style.strokeDashoffset = (50.27 * (1 - l_graceFreeze.pct / 100)).toFixed(2); } const gp = w_graceFreeze.querySelector('.gpct'); if (gp) gp.textContent = l_graceFreeze.active ? l_graceFreeze.pct + '%' : '—'; const gt = w_graceFreeze.querySelector('.gtxt'); if (gt) gt.textContent = l_graceFreeze.txt; }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -23119,6 +23133,18 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const txt = danger ? '剩 ' + remain + 's · 即将耗尽' : '剩 ' + remain + 's';
     return { active: true, pct: pct, remain: remain, cls: cls, danger: danger, txt: txt };
   }
+  // —— graceFreeze：弹幕冻结（保命圈：剩余时间比例 + 即将耗尽预警）——
+  function graceFreeze(cur, max) {
+    const c = Number(cur), m = Number(max);
+    const ok = isFinite(c) && isFinite(m) && m > 0;
+    if (!ok || c <= 0) return { active: false, pct: 0, remain: 0, cls: 'g-warn', danger: false, txt: '—' };
+    const pct = Math.max(0, Math.min(100, Math.round(c / m * 100)));
+    const remain = Math.round(c * 10) / 10;
+    const danger = pct < 25;
+    const cls = danger ? 'g-bad' : (pct < 50 ? 'g-warn' : 'g-good');
+    const txt = danger ? '剩 ' + remain + 's · 即将耗尽' : '剩 ' + remain + 's';
+    return { active: true, pct: pct, remain: remain, cls: cls, danger: danger, txt: txt };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -24960,7 +24986,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V17.17', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V17.18', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -26955,6 +26981,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       graceMagnetStateNow: (cur, max) => graceMagnet(cur, max), graceMagnetNow: () => graceMagnet(magnetStorm, 3), graceMagnetActiveNow: () => graceMagnet(magnetStorm, 3).active, graceMagnetPctNow: () => { const r = graceMagnet(magnetStorm, 3); return r.active ? r.pct : -1; }, graceMagnetDangerNow: () => { const w = $('graceMagnetWrap'); return !!(w && w.classList.contains('g-bad')); },
       graceShieldStateNow: (cur, max) => graceShield(cur, max), graceShieldNow: () => graceShield(player.spawnInv, 300), graceShieldActiveNow: () => graceShield(player.spawnInv, 300).active, graceShieldPctNow: () => { const r = graceShield(player.spawnInv, 300); return r.active ? r.pct : -1; }, graceShieldDangerNow: () => { const w = $('graceShieldWrap'); return !!(w && w.classList.contains('g-bad')); },
       graceWingStateNow: (cur, max) => graceWing(cur, max), graceWingNow: () => graceWing(wingman ? wingman.spawnInv : 0, 300), graceWingActiveNow: () => graceWing(wingman ? wingman.spawnInv : 0, 300).active, graceWingPctNow: () => { const r = graceWing(wingman ? wingman.spawnInv : 0, 300); return r.active ? r.pct : -1; }, graceWingDangerNow: () => { const w = $('graceWingWrap'); return !!(w && w.classList.contains('g-bad')); },
+      graceFreezeStateNow: (cur, max) => graceFreeze(cur, max), graceFreezeNow: () => graceFreeze(fx.freeze, 5), graceFreezeActiveNow: () => graceFreeze(fx.freeze, 5).active, graceFreezePctNow: () => { const r = graceFreeze(fx.freeze, 5); return r.active ? r.pct : -1; }, graceFreezeDangerNow: () => { const w = $('graceFreezeWrap'); return !!(w && w.classList.contains('g-bad')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
