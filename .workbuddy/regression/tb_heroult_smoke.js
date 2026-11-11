@@ -19275,6 +19275,21 @@ async function main() {
     t('U6944 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U6939 受击频率 抛出异常', false, String(e)); }
 
+
+  // ===== U6945~U6950: 受击弹速(v0.17.63) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('stkSpdWrap'),mv:!!document.querySelector('#stkSpdWrap .mval'),s:T.stkSpdStateNow([{'t':0,'spd':5,'src':'enemy','dir':2},{'t':2,'spd':5,'src':'enemy','dir':2}])});})()"));
+    t('U6945 受击弹速 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U6946 正常 受击弹速 → v=5 g-warn 5.0格/秒', o.s.v === 5 && o.s.cls === 'g-warn' && o.s.danger === false && o.s.txt === '5.0格/秒', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.stkSpdStateNow([{'t':0,'spd':5,'src':'enemy','dir':2},{'t':2,'spd':5,'src':'enemy','dir':2}]),b:T.stkSpdStateNow([{'t':0,'spd':9,'src':'boss','dir':2},{'t':2,'spd':9,'src':'boss','dir':2}])});return r;})()"));
+    t('U6947 边界 受击弹速 → g-bad 9.0格/秒', o2.b.v === 9 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '9.0格/秒', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.stkSpdStateNow(null);const b=T.stkSpdStateNow([]);const c=T.stkSpdStateNow([{x:200,y:200,t:0,spd:5,src:'enemy',dir:2}]);const d=T.stkSpdStateNow([{t:'n',spd:'n',src:'x',dir:'n'},{t:'n',spd:'n',src:'x',dir:'n'}]);return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U6948 非法 null/[]/单点/全非数→退化 g-warn —', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.c.txt === '—' && o3.d.txt === '—', JSON.stringify(o3));
+    t('U6949 单位结构 txt 以 unit 结尾或为—', (o.s.txt === '—') || (typeof o.s.unit === 'string' && o.s.unit.length > 0 && o.s.txt.endsWith(o.s.unit)), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.stkSpdStateNow([{'t':0,'spd':5,'src':'enemy','dir':2},{'t':2,'spd':5,'src':'enemy','dir':2}]);return JSON.stringify({mv:!!document.querySelector('#stkSpdWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U6950 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U6945 受击弹速 抛出异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
