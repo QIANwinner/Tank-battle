@@ -19335,6 +19335,21 @@ async function main() {
     t('U6968 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U6963 受击连击 抛出异常', false, String(e)); }
 
+
+  // ===== U6969~U6974: 方向集中度(v0.17.67) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('stkTrendWrap'),mv:!!document.querySelector('#stkTrendWrap .mval'),s:T.stkTrendStateNow([{'t':0,'spd':5,'src':'enemy','dir':2},{'t':1,'spd':5,'src':'enemy','dir':2},{'t':2,'spd':5,'src':'enemy','dir':4},{'t':3,'spd':5,'src':'enemy','dir':6}])});})()"));
+    t('U6969 方向集中度 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U6970 正常 方向集中度 → v=50 g-warn 50%', o.s.v === 50 && o.s.cls === 'g-warn' && o.s.danger === false && o.s.txt === '50%', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.stkTrendStateNow([{'t':0,'spd':5,'src':'enemy','dir':2},{'t':1,'spd':5,'src':'enemy','dir':2},{'t':2,'spd':5,'src':'enemy','dir':4},{'t':3,'spd':5,'src':'enemy','dir':6}]),b:T.stkTrendStateNow([{'t':0,'spd':5,'src':'enemy','dir':2},{'t':1,'spd':5,'src':'enemy','dir':2},{'t':2,'spd':5,'src':'enemy','dir':2}])});return r;})()"));
+    t('U6971 边界 方向集中度 → g-bad 100%', o2.b.v === 100 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '100%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.stkTrendStateNow(null);const b=T.stkTrendStateNow([]);const c=T.stkTrendStateNow([{x:200,y:200,t:0,spd:5,src:'enemy',dir:2}]);const d=T.stkTrendStateNow([{t:'n',spd:'n',src:'x',dir:'n'},{t:'n',spd:'n',src:'x',dir:'n'}]);return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U6972 非法 null/[]/单点/全非数→退化 g-warn —', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.c.txt === '—' && o3.d.txt === '—', JSON.stringify(o3));
+    t('U6973 单位结构 txt 以 unit 结尾或为—', (o.s.txt === '—') || (typeof o.s.unit === 'string' && o.s.unit.length > 0 && o.s.txt.endsWith(o.s.unit)), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.stkTrendStateNow([{'t':0,'spd':5,'src':'enemy','dir':2},{'t':1,'spd':5,'src':'enemy','dir':2},{'t':2,'spd':5,'src':'enemy','dir':4},{'t':3,'spd':5,'src':'enemy','dir':6}]);return JSON.stringify({mv:!!document.querySelector('#stkTrendWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U6974 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U6969 方向集中度 抛出异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
