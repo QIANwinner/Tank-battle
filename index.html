@@ -5233,6 +5233,13 @@
   #sparkPuWrap.g-bad .spk i.on { background:#e74c3c; }
   #sparkPuWrap.g-bad { animation: tbSparkPulse .5s ease-in-out infinite alternate; }
   @keyframes tbSparkPulse { from { opacity:.6; } to { opacity:1; } }
+  #sparkUpgWrap .spk { display:inline-flex; gap:2px; margin:0 4px; vertical-align:middle; }
+  #sparkUpgWrap .spk i { width:7px; height:12px; border-radius:2px; background:#3a3a3a; display:inline-block; }
+  #sparkUpgWrap.g-good .spk i.on { background:#2ecc71; }
+  #sparkUpgWrap.g-warn .spk i.on { background:#f1c40f; }
+  #sparkUpgWrap.g-bad .spk i.on { background:#e74c3c; }
+  #sparkUpgWrap.g-bad { animation: tbSparkPulse .5s ease-in-out infinite alternate; }
+  @keyframes tbSparkPulse { from { opacity:.6; } to { opacity:1; } }
 </style>
 </head>
 <body>
@@ -6209,6 +6216,7 @@
     <div class="pill m-hide" id="sparkDmgWrap"><span class="k">💥</span><span class="spk"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="v">伤害 <b class="val">0</b></span></div>
     <div class="pill m-hide" id="sparkBulletWrap"><span class="k">🔫</span><span class="spk"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="v">弹幕 <b class="val">0</b></span></div>
     <div class="pill m-hide" id="sparkPuWrap"><span class="k">🎁</span><span class="spk"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="v">道具 <b class="val">0</b></span></div>
+    <div class="pill m-hide" id="sparkUpgWrap"><span class="k">🛠️</span><span class="spk"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="v">强化 <b class="val">0</b></span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -6584,7 +6592,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V16.77</div>
+  <div id="mark">DESIGNED BY QIAN · V16.78</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -12362,6 +12370,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_sparkDmg = sparkDmgSpark(runDmg, 10000); const w_sparkDmg = $('sparkDmgWrap'); if (w_sparkDmg) { w_sparkDmg.classList.remove('g-good','g-warn','g-bad'); w_sparkDmg.classList.add(r_sparkDmg.cls); w_sparkDmg.classList.toggle('danger', !!r_sparkDmg.danger); const ds = w_sparkDmg.querySelectorAll('.spk i'); ds.forEach((d, di) => { d.classList.toggle('on', di < r_sparkDmg.n); }); const va = w_sparkDmg.querySelector('.val'); if (va) va.textContent = r_sparkDmg.txt; }
     const r_sparkBullet = sparkBulletSpark(bullets.length, 30); const w_sparkBullet = $('sparkBulletWrap'); if (w_sparkBullet) { w_sparkBullet.classList.remove('g-good','g-warn','g-bad'); w_sparkBullet.classList.add(r_sparkBullet.cls); w_sparkBullet.classList.toggle('danger', !!r_sparkBullet.danger); const ds = w_sparkBullet.querySelectorAll('.spk i'); ds.forEach((d, di) => { d.classList.toggle('on', di < r_sparkBullet.n); }); const va = w_sparkBullet.querySelector('.val'); if (va) va.textContent = r_sparkBullet.txt; }
     const r_sparkPu = sparkPuSpark(runPowerups, 8); const w_sparkPu = $('sparkPuWrap'); if (w_sparkPu) { w_sparkPu.classList.remove('g-good','g-warn','g-bad'); w_sparkPu.classList.add(r_sparkPu.cls); w_sparkPu.classList.toggle('danger', !!r_sparkPu.danger); const ds = w_sparkPu.querySelectorAll('.spk i'); ds.forEach((d, di) => { d.classList.toggle('on', di < r_sparkPu.n); }); const va = w_sparkPu.querySelector('.val'); if (va) va.textContent = r_sparkPu.txt; }
+    const r_sparkUpg = sparkUpgSpark(upgTotal, 10); const w_sparkUpg = $('sparkUpgWrap'); if (w_sparkUpg) { w_sparkUpg.classList.remove('g-good','g-warn','g-bad'); w_sparkUpg.classList.add(r_sparkUpg.cls); w_sparkUpg.classList.toggle('danger', !!r_sparkUpg.danger); const ds = w_sparkUpg.querySelectorAll('.spk i'); ds.forEach((d, di) => { d.classList.toggle('on', di < r_sparkUpg.n); }); const va = w_sparkUpg.querySelector('.val'); if (va) va.textContent = r_sparkUpg.txt; }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -21747,6 +21756,18 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const txt = n + '/' + 10 + ' · ' + pct + '%';
     return { n: n, pct: pct, cls: cls, danger: danger, txt: txt };
   }
+  // —— sparkUpg：强化强度（火花条：val/cap → 0~10 亮格 + 百分比，cap<=0 或 NaN/Infinity → 0）——
+  function sparkUpgSpark(val, cap) {
+    const v = Number(val), c = Number(cap);
+    const ok = isFinite(v) && isFinite(c) && c > 0;
+    const ratio = ok ? Math.max(0, Math.min(1, v / c)) : 0;
+    const pct = Math.round(ratio * 100);
+    const n = Math.round(ratio * 10);
+    const cls = pct >= 75 ? 'g-good' : (pct <= 30 ? 'g-bad' : 'g-warn');
+    const danger = cls === 'g-bad';
+    const txt = n + '/' + 10 + ' · ' + pct + '%';
+    return { n: n, pct: pct, cls: cls, danger: danger, txt: txt };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -23588,7 +23609,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V16.77', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V16.78', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -25543,6 +25564,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       sparkDmgStateNow: (v, c) => sparkDmgSpark(v, c), sparkDmgNow: () => sparkDmgSpark(runDmg, 10000), sparkDmgNNow: () => { const w = $('sparkDmgWrap'); if (!w) return -1; return Array.from(w.querySelectorAll('.spk i')).filter(i => i.classList.contains('on')).length; }, sparkDmgDangerNow: () => { const w = $('sparkDmgWrap'); return !!(w && w.classList.contains('g-bad')); },
       sparkBulletStateNow: (v, c) => sparkBulletSpark(v, c), sparkBulletNow: () => sparkBulletSpark(bullets.length, 30), sparkBulletNNow: () => { const w = $('sparkBulletWrap'); if (!w) return -1; return Array.from(w.querySelectorAll('.spk i')).filter(i => i.classList.contains('on')).length; }, sparkBulletDangerNow: () => { const w = $('sparkBulletWrap'); return !!(w && w.classList.contains('g-bad')); },
       sparkPuStateNow: (v, c) => sparkPuSpark(v, c), sparkPuNow: () => sparkPuSpark(runPowerups, 8), sparkPuNNow: () => { const w = $('sparkPuWrap'); if (!w) return -1; return Array.from(w.querySelectorAll('.spk i')).filter(i => i.classList.contains('on')).length; }, sparkPuDangerNow: () => { const w = $('sparkPuWrap'); return !!(w && w.classList.contains('g-bad')); },
+      sparkUpgStateNow: (v, c) => sparkUpgSpark(v, c), sparkUpgNow: () => sparkUpgSpark(upgTotal, 10), sparkUpgNNow: () => { const w = $('sparkUpgWrap'); if (!w) return -1; return Array.from(w.querySelectorAll('.spk i')).filter(i => i.classList.contains('on')).length; }, sparkUpgDangerNow: () => { const w = $('sparkUpgWrap'); return !!(w && w.classList.contains('g-bad')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

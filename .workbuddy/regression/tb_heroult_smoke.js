@@ -17924,6 +17924,22 @@ async function main() {
     t('U6434 DOM 与函数一致性', o5.ok === true && o5.match === true && o5.on === o5.n, JSON.stringify(o5));
   } catch (e) { t('U6429 道具强度 异常', false, String(e)); }
 
+
+  // ===== U6435~U6440: 强化强度(v0.16.78) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('sparkUpgWrap'),s:T.sparkUpgStateNow(50,100)});})()"));
+    t('U6435 强化强度 DOM 已加入 HUD', o.dom === true && o.s.n === 5 && o.s.pct === 50, JSON.stringify(o));
+    t('U6436 正常 50 vs 100→n5/pct50/g-warn', o.s.n === 5 && o.s.pct === 50 && o.s.cls === 'g-warn' && o.s.danger === false, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.sparkUpgStateNow(10,100),b:T.sparkUpgStateNow(75,100)});})()"));
+    t('U6437 边界 10→n1/g-bad+danger, 75→n8/g-good', o2.a.n === 1 && o2.a.pct === 10 && o2.a.cls === 'g-bad' && o2.a.danger === true && o2.b.n === 8 && o2.b.pct === 75 && o2.b.cls === 'g-good' && o2.b.danger === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.sparkUpgStateNow(0,100),b:T.sparkUpgStateNow(100,100),c:T.sparkUpgStateNow(200,100),d:T.sparkUpgStateNow(-5,100)});})()"));
+    t('U6438 边界 0→n0/g-bad, 100→n10/g-good, 200→clamp n10, -5→clamp n0', o3.a.n === 0 && o3.a.cls === 'g-bad' && o3.a.danger === true && o3.b.n === 10 && o3.b.pct === 100 && o3.b.cls === 'g-good' && o3.c.n === 10 && o3.c.pct === 100 && o3.d.n === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.sparkUpgStateNow(NaN,100),b:T.sparkUpgStateNow(Infinity,1),c:T.sparkUpgStateNow(50,0),d:T.sparkUpgStateNow('50','100').n});})()"));
+    t('U6439 非法 NaN/Infinity/cap0→n0, 字符串转数→n5', o4.a.n === 0 && o4.b.n === 0 && o4.c.n === 0 && o4.d === 5, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}const w=document.getElementById('sparkUpgWrap');const on=w?Array.from(w.querySelectorAll('.spk i')).filter(i=>i.classList.contains('on')).length:-1;const now=T.sparkUpgNow();return JSON.stringify({ok:ok,on:on,n:now.n,match:on===now.n,dom:!!w});})()"));
+    t('U6440 DOM 与函数一致性', o5.ok === true && o5.match === true && o5.on === o5.n, JSON.stringify(o5));
+  } catch (e) { t('U6435 强化强度 异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
