@@ -17876,6 +17876,22 @@ async function main() {
     t('U6416 DOM 与函数一致性', o5.ok === true && o5.match === true && o5.on === o5.n, JSON.stringify(o5));
   } catch (e) { t('U6411 得分强度 异常', false, String(e)); }
 
+
+  // ===== U6417~U6422: 伤害强度(v0.16.75) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('sparkDmgWrap'),s:T.sparkDmgStateNow(50,100)});})()"));
+    t('U6417 伤害强度 DOM 已加入 HUD', o.dom === true && o.s.n === 5 && o.s.pct === 50, JSON.stringify(o));
+    t('U6418 正常 50 vs 100→n5/pct50/g-warn', o.s.n === 5 && o.s.pct === 50 && o.s.cls === 'g-warn' && o.s.danger === false, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.sparkDmgStateNow(10,100),b:T.sparkDmgStateNow(75,100)});})()"));
+    t('U6419 边界 10→n1/g-bad+danger, 75→n8/g-good', o2.a.n === 1 && o2.a.pct === 10 && o2.a.cls === 'g-bad' && o2.a.danger === true && o2.b.n === 8 && o2.b.pct === 75 && o2.b.cls === 'g-good' && o2.b.danger === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.sparkDmgStateNow(0,100),b:T.sparkDmgStateNow(100,100),c:T.sparkDmgStateNow(200,100),d:T.sparkDmgStateNow(-5,100)});})()"));
+    t('U6420 边界 0→n0/g-bad, 100→n10/g-good, 200→clamp n10, -5→clamp n0', o3.a.n === 0 && o3.a.cls === 'g-bad' && o3.a.danger === true && o3.b.n === 10 && o3.b.pct === 100 && o3.b.cls === 'g-good' && o3.c.n === 10 && o3.c.pct === 100 && o3.d.n === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.sparkDmgStateNow(NaN,100),b:T.sparkDmgStateNow(Infinity,1),c:T.sparkDmgStateNow(50,0),d:T.sparkDmgStateNow('50','100').n});})()"));
+    t('U6421 非法 NaN/Infinity/cap0→n0, 字符串转数→n5', o4.a.n === 0 && o4.b.n === 0 && o4.c.n === 0 && o4.d === 5, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}const w=document.getElementById('sparkDmgWrap');const on=w?Array.from(w.querySelectorAll('.spk i')).filter(i=>i.classList.contains('on')).length:-1;const now=T.sparkDmgNow();return JSON.stringify({ok:ok,on:on,n:now.n,match:on===now.n,dom:!!w});})()"));
+    t('U6422 DOM 与函数一致性', o5.ok === true && o5.match === true && o5.on === o5.n, JSON.stringify(o5));
+  } catch (e) { t('U6417 伤害强度 异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
