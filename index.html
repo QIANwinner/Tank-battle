@@ -5585,6 +5585,18 @@
   #compSupplyWrap.g-bad .ctxt { color:#e74c3c; }
   #compSupplyWrap.g-bad { animation: tbCompPulse .4s ease-in-out infinite alternate; }
   @keyframes tbCompPulse { from { opacity:.55; } to { opacity:1; } }
+  #compBossWrap .crose { display:inline-block; position:relative; width:26px; height:26px; margin:0 4px; vertical-align:middle; border-radius:50%; background:#1c1c1c; border:1px solid #444; overflow:hidden; flex:none; }
+  #compBossWrap .carrow { position:absolute; left:50%; top:50%; width:2px; height:11px; background:#f1c40f; transform-origin:1px 1px; margin:-1px 0 0 -1px; }
+  #compBossWrap .cdir { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:8px; color:#ccc; font-style:normal; font-weight:bold; }
+  #compBossWrap .ctxt { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #compBossWrap .crose::after { content:''; position:absolute; left:50%; top:3px; bottom:3px; width:1px; background:#333; transform:translateX(-0.5px); }
+  #compBossWrap .crose::before { content:''; position:absolute; top:50%; left:3px; right:3px; height:1px; background:#333; transform:translateY(-0.5px); }
+  #compBossWrap.g-good .carrow { background:#2ecc71; }
+  #compBossWrap.g-warn .carrow { background:#f1c40f; }
+  #compBossWrap.g-bad .carrow { background:#e74c3c; }
+  #compBossWrap.g-bad .ctxt { color:#e74c3c; }
+  #compBossWrap.g-bad { animation: tbCompPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbCompPulse { from { opacity:.55; } to { opacity:1; } }
 </style>
 </head>
 <body>
@@ -6596,6 +6608,7 @@
     <div class="pill m-hide" id="compBoomWrap"><span class="k">💣</span><span class="crose"><i class="carrow"></i><em class="cdir">—</em></span><span class="v">自爆</span><em class="ctxt">—</em></div>
     <div class="pill m-hide" id="compBulletWrap"><span class="k">🔫</span><span class="crose"><i class="carrow"></i><em class="cdir">—</em></span><span class="v">弹幕</span><em class="ctxt">—</em></div>
     <div class="pill m-hide" id="compSupplyWrap"><span class="k">📦</span><span class="crose"><i class="carrow"></i><em class="cdir">—</em></span><span class="v">补给</span><em class="ctxt">—</em></div>
+    <div class="pill m-hide" id="compBossWrap"><span class="k">👹</span><span class="crose"><i class="carrow"></i><em class="cdir">—</em></span><span class="v">BOSS</span><em class="ctxt">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -6971,7 +6984,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V17.12</div>
+  <div id="mark">DESIGNED BY QIAN · V17.13</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -12784,6 +12797,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_compBoom = compBoom(player.x, player.y, enemies.filter(e=>e.type==='suicide'), 300); const w_compBoom = $('compBoomWrap'); if (w_compBoom) { w_compBoom.classList.remove('g-good','g-warn','g-bad'); w_compBoom.classList.add(l_compBoom.cls); w_compBoom.classList.toggle('danger', !!l_compBoom.danger); const ar = w_compBoom.querySelector('.carrow'); if (ar) ar.style.transform = 'rotate(' + l_compBoom.bearing + 'deg)'; const cd = w_compBoom.querySelector('.cdir'); if (cd) cd.textContent = l_compBoom.dir8; const ct = w_compBoom.querySelector('.ctxt'); if (ct) ct.textContent = l_compBoom.txt; }
     const l_compBullet = compBullet(player.x, player.y, bullets.filter(b=>b.owner&&b.owner.isPlayer===false), 220); const w_compBullet = $('compBulletWrap'); if (w_compBullet) { w_compBullet.classList.remove('g-good','g-warn','g-bad'); w_compBullet.classList.add(l_compBullet.cls); w_compBullet.classList.toggle('danger', !!l_compBullet.danger); const ar = w_compBullet.querySelector('.carrow'); if (ar) ar.style.transform = 'rotate(' + l_compBullet.bearing + 'deg)'; const cd = w_compBullet.querySelector('.cdir'); if (cd) cd.textContent = l_compBullet.dir8; const ct = w_compBullet.querySelector('.ctxt'); if (ct) ct.textContent = l_compBullet.txt; }
     const l_compSupply = compSupply(player.x, player.y, powerups, 300); const w_compSupply = $('compSupplyWrap'); if (w_compSupply) { w_compSupply.classList.remove('g-good','g-warn','g-bad'); w_compSupply.classList.add(l_compSupply.cls); w_compSupply.classList.toggle('danger', !!l_compSupply.danger); const ar = w_compSupply.querySelector('.carrow'); if (ar) ar.style.transform = 'rotate(' + l_compSupply.bearing + 'deg)'; const cd = w_compSupply.querySelector('.cdir'); if (cd) cd.textContent = l_compSupply.dir8; const ct = w_compSupply.querySelector('.ctxt'); if (ct) ct.textContent = l_compSupply.txt; }
+    const l_compBoss = compBoss(player.x, player.y, enemies.filter(e=>e.isBoss), 520); const w_compBoss = $('compBossWrap'); if (w_compBoss) { w_compBoss.classList.remove('g-good','g-warn','g-bad'); w_compBoss.classList.add(l_compBoss.cls); w_compBoss.classList.toggle('danger', !!l_compBoss.danger); const ar = w_compBoss.querySelector('.carrow'); if (ar) ar.style.transform = 'rotate(' + l_compBoss.bearing + 'deg)'; const cd = w_compBoss.querySelector('.cdir'); if (cd) cd.textContent = l_compBoss.dir8; const ct = w_compBoss.querySelector('.ctxt'); if (ct) ct.textContent = l_compBoss.txt; }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -22977,6 +22991,30 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const txt = near ? '威胁逼近 ' + dir8 : '最近 ' + dir8 + ' · ' + dist;
     return { has: true, bearing: bearing, dist: dist, pct: pct, dir8: dir8, cls: cls, danger: danger, txt: txt };
   }
+  // —— compBoss：BOSS罗盘（威胁罗盘：最近威胁方位 + 距离 + 逼近预警）——
+  function compBoss(px, py, arr, maxDist) {
+    const P = Number(px), Q = Number(py), M = Number(maxDist);
+    const ok = isFinite(P) && isFinite(Q) && isFinite(M) && M > 0 && Array.isArray(arr) && arr.length > 0;
+    if (!ok) return { has: false, bearing: 0, dist: 0, pct: 0, dir8: '—', cls: 'g-warn', danger: false, txt: '—' };
+    let best = null, bd = Infinity;
+    for (const e of arr) {
+      const ex = Number(e && e.x), ey = Number(e && e.y);
+      if (!isFinite(ex) || !isFinite(ey)) continue;
+      const d = Math.hypot(ex - P, ey - Q);
+      if (d < bd) { bd = d; best = e; }
+    }
+    if (!best) return { has: false, bearing: 0, dist: 0, pct: 0, dir8: '—', cls: 'g-warn', danger: false, txt: '—' };
+    const dx = Number(best.x) - P, dy = Number(best.y) - Q;
+    const bearing = Math.round((Math.atan2(dx, -dy) * 180 / Math.PI) + 360) % 360;
+    const dist = Math.round(bd);
+    const pct = Math.max(0, Math.min(100, Math.round(bd / M * 100)));
+    const dir8 = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.round(bearing / 45) % 8];
+    const near = pct < 30;
+    const cls = near ? 'g-bad' : (pct < 60 ? 'g-warn' : 'g-good');
+    const danger = near;
+    const txt = near ? '威胁逼近 ' + dir8 : '最近 ' + dir8 + ' · ' + dist;
+    return { has: true, bearing: bearing, dist: dist, pct: pct, dir8: dir8, cls: cls, danger: danger, txt: txt };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -24818,7 +24856,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V17.12', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V17.13', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -26808,6 +26846,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       compBoomStateNow: (px, py, arr, m) => compBoom(px, py, arr, m), compBoomNow: () => compBoom(player.x, player.y, enemies.filter(e=>e.type==='suicide'), 300), compBoomDirNow: () => { const r = compBoom(player.x, player.y, enemies.filter(e=>e.type==='suicide'), 300); return r.has ? r.dir8 : '—'; }, compBoomBearingNow: () => { try { const r = compBoom(player.x, player.y, enemies.filter(e=>e.type==='suicide'), 300); return r.has ? r.bearing : -1; } catch (e) { return -1; } }, compBoomDangerNow: () => { const w = $('compBoomWrap'); return !!(w && w.classList.contains('g-bad')); },
       compBulletStateNow: (px, py, arr, m) => compBullet(px, py, arr, m), compBulletNow: () => compBullet(player.x, player.y, bullets.filter(b=>b.owner&&b.owner.isPlayer===false), 220), compBulletDirNow: () => { const r = compBullet(player.x, player.y, bullets.filter(b=>b.owner&&b.owner.isPlayer===false), 220); return r.has ? r.dir8 : '—'; }, compBulletBearingNow: () => { try { const r = compBullet(player.x, player.y, bullets.filter(b=>b.owner&&b.owner.isPlayer===false), 220); return r.has ? r.bearing : -1; } catch (e) { return -1; } }, compBulletDangerNow: () => { const w = $('compBulletWrap'); return !!(w && w.classList.contains('g-bad')); },
       compSupplyStateNow: (px, py, arr, m) => compSupply(px, py, arr, m), compSupplyNow: () => compSupply(player.x, player.y, powerups, 300), compSupplyDirNow: () => { const r = compSupply(player.x, player.y, powerups, 300); return r.has ? r.dir8 : '—'; }, compSupplyBearingNow: () => { try { const r = compSupply(player.x, player.y, powerups, 300); return r.has ? r.bearing : -1; } catch (e) { return -1; } }, compSupplyDangerNow: () => { const w = $('compSupplyWrap'); return !!(w && w.classList.contains('g-bad')); },
+      compBossStateNow: (px, py, arr, m) => compBoss(px, py, arr, m), compBossNow: () => compBoss(player.x, player.y, enemies.filter(e=>e.isBoss), 520), compBossDirNow: () => { const r = compBoss(player.x, player.y, enemies.filter(e=>e.isBoss), 520); return r.has ? r.dir8 : '—'; }, compBossBearingNow: () => { try { const r = compBoss(player.x, player.y, enemies.filter(e=>e.isBoss), 520); return r.has ? r.bearing : -1; } catch (e) { return -1; } }, compBossDangerNow: () => { const w = $('compBossWrap'); return !!(w && w.classList.contains('g-bad')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
