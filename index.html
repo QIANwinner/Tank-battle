@@ -5927,6 +5927,12 @@
   #radSnipWrap.g-bad .rval { color:#e74c3c; }
   #radSnipWrap.g-bad { animation: tbRadPulse .4s ease-in-out infinite alternate; }
   @keyframes tbRadPulse { from { opacity:.55; } to { opacity:1; } }
+  #radNoBossWrap .rad { display:inline-block; width:30px; height:30px; vertical-align:middle; margin:0 4px; }
+  #radNoBossWrap .rad svg { display:block; }
+  #radNoBossWrap .rval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #radNoBossWrap.g-bad .rval { color:#e74c3c; }
+  #radNoBossWrap.g-bad { animation: tbRadPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbRadPulse { from { opacity:.55; } to { opacity:1; } }
 </style>
 </head>
 <body>
@@ -6978,6 +6984,7 @@
     <div class="pill m-hide" id="radFastWrap"><span class="k">💨</span><span class="v">快扑</span><span class="rad"><svg viewBox="0 0 44 44" width="30" height="30"><circle cx="22" cy="22" r="20" fill="none" stroke="#2c2c2c"/><circle cx="22" cy="22" r="17" fill="none" stroke="#333"/><g class="rwg"><path class="rw" d="M22 22 L39.00 22.00 A17 17 0 0 1 34.02 34.02 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L34.02 34.02 A17 17 0 0 1 22.00 39.00 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L22.00 39.00 A17 17 0 0 1 9.98 34.02 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L9.98 34.02 A17 17 0 0 1 5.00 22.00 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L5.00 22.00 A17 17 0 0 1 9.98 9.98 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L9.98 9.98 A17 17 0 0 1 22.00 5.00 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L22.00 5.00 A17 17 0 0 1 34.02 9.98 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L34.02 9.98 A17 17 0 0 1 39.00 22.00 Z" fill="#333" opacity="0.35"/></g><polygon class="rneedle" points="22 22 36.5 20.2 36.5 23.8" fill="#fff"/><circle cx="22" cy="22" r="2.4" fill="#fff"/></svg></span><em class="rval">—</em></div>
     <div class="pill m-hide" id="radSlowWrap"><span class="k">🐢</span><span class="v">慢扑</span><span class="rad"><svg viewBox="0 0 44 44" width="30" height="30"><circle cx="22" cy="22" r="20" fill="none" stroke="#2c2c2c"/><circle cx="22" cy="22" r="17" fill="none" stroke="#333"/><g class="rwg"><path class="rw" d="M22 22 L39.00 22.00 A17 17 0 0 1 34.02 34.02 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L34.02 34.02 A17 17 0 0 1 22.00 39.00 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L22.00 39.00 A17 17 0 0 1 9.98 34.02 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L9.98 34.02 A17 17 0 0 1 5.00 22.00 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L5.00 22.00 A17 17 0 0 1 9.98 9.98 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L9.98 9.98 A17 17 0 0 1 22.00 5.00 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L22.00 5.00 A17 17 0 0 1 34.02 9.98 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L34.02 9.98 A17 17 0 0 1 39.00 22.00 Z" fill="#333" opacity="0.35"/></g><polygon class="rneedle" points="22 22 36.5 20.2 36.5 23.8" fill="#fff"/><circle cx="22" cy="22" r="2.4" fill="#fff"/></svg></span><em class="rval">—</em></div>
     <div class="pill m-hide" id="radSnipWrap"><span class="k">🔭</span><span class="v">狙扑</span><span class="rad"><svg viewBox="0 0 44 44" width="30" height="30"><circle cx="22" cy="22" r="20" fill="none" stroke="#2c2c2c"/><circle cx="22" cy="22" r="17" fill="none" stroke="#333"/><g class="rwg"><path class="rw" d="M22 22 L39.00 22.00 A17 17 0 0 1 34.02 34.02 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L34.02 34.02 A17 17 0 0 1 22.00 39.00 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L22.00 39.00 A17 17 0 0 1 9.98 34.02 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L9.98 34.02 A17 17 0 0 1 5.00 22.00 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L5.00 22.00 A17 17 0 0 1 9.98 9.98 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L9.98 9.98 A17 17 0 0 1 22.00 5.00 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L22.00 5.00 A17 17 0 0 1 34.02 9.98 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L34.02 9.98 A17 17 0 0 1 39.00 22.00 Z" fill="#333" opacity="0.35"/></g><polygon class="rneedle" points="22 22 36.5 20.2 36.5 23.8" fill="#fff"/><circle cx="22" cy="22" r="2.4" fill="#fff"/></svg></span><em class="rval">—</em></div>
+    <div class="pill m-hide" id="radNoBossWrap"><span class="k">🔥</span><span class="v">杂扑</span><span class="rad"><svg viewBox="0 0 44 44" width="30" height="30"><circle cx="22" cy="22" r="20" fill="none" stroke="#2c2c2c"/><circle cx="22" cy="22" r="17" fill="none" stroke="#333"/><g class="rwg"><path class="rw" d="M22 22 L39.00 22.00 A17 17 0 0 1 34.02 34.02 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L34.02 34.02 A17 17 0 0 1 22.00 39.00 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L22.00 39.00 A17 17 0 0 1 9.98 34.02 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L9.98 34.02 A17 17 0 0 1 5.00 22.00 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L5.00 22.00 A17 17 0 0 1 9.98 9.98 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L9.98 9.98 A17 17 0 0 1 22.00 5.00 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L22.00 5.00 A17 17 0 0 1 34.02 9.98 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L34.02 9.98 A17 17 0 0 1 39.00 22.00 Z" fill="#333" opacity="0.35"/></g><polygon class="rneedle" points="22 22 36.5 20.2 36.5 23.8" fill="#fff"/><circle cx="22" cy="22" r="2.4" fill="#fff"/></svg></span><em class="rval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -7353,7 +7360,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V17.52</div>
+  <div id="mark">DESIGNED BY QIAN · V17.53</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -13206,6 +13213,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_radFast = radFast(radInc().filter(function(it){ return it.spd >= 5.2 * 0.9; }), player ? player.x : 0, player ? player.y : 0); const w_radFast = $('radFastWrap'); if (w_radFast) { w_radFast.classList.remove('g-good','g-warn','g-bad'); w_radFast.classList.add(l_radFast.cls); w_radFast.classList.toggle('danger', !!l_radFast.danger); const rsvg = w_radFast.querySelector('svg'); if (rsvg) { const wds = rsvg.querySelectorAll('.rw'); const mx = Math.max.apply(null, l_radFast.counts); for (let i = 0; i < wds.length; i++) { const c = l_radFast.counts[i] || 0; const t = mx > 0 ? c / mx : 0; wds[i].style.fill = c <= 0 ? '#333' : (t >= 0.66 ? '#e74c3c' : (t >= 0.33 ? '#f39c12' : '#2ecc71')); wds[i].style.opacity = c <= 0 ? 0.35 : (0.3 + 0.7 * t); } } const nd = rsvg ? rsvg.querySelector('.rneedle') : null; if (nd) { if (l_radFast.dom < 0) { nd.style.display = 'none'; } else { nd.style.display = ''; nd.setAttribute('transform', 'rotate(' + (l_radFast.dom * 45 + 22.5) + ' 22 22)'); } } const rv = w_radFast.querySelector('.rval'); if (rv) rv.textContent = l_radFast.txt; }
     const l_radSlow = radSlow(radInc().filter(function(it){ return it.spd < 5.2 * 0.9; }), player ? player.x : 0, player ? player.y : 0); const w_radSlow = $('radSlowWrap'); if (w_radSlow) { w_radSlow.classList.remove('g-good','g-warn','g-bad'); w_radSlow.classList.add(l_radSlow.cls); w_radSlow.classList.toggle('danger', !!l_radSlow.danger); const rsvg = w_radSlow.querySelector('svg'); if (rsvg) { const wds = rsvg.querySelectorAll('.rw'); const mx = Math.max.apply(null, l_radSlow.counts); for (let i = 0; i < wds.length; i++) { const c = l_radSlow.counts[i] || 0; const t = mx > 0 ? c / mx : 0; wds[i].style.fill = c <= 0 ? '#333' : (t >= 0.66 ? '#e74c3c' : (t >= 0.33 ? '#f39c12' : '#2ecc71')); wds[i].style.opacity = c <= 0 ? 0.35 : (0.3 + 0.7 * t); } } const nd = rsvg ? rsvg.querySelector('.rneedle') : null; if (nd) { if (l_radSlow.dom < 0) { nd.style.display = 'none'; } else { nd.style.display = ''; nd.setAttribute('transform', 'rotate(' + (l_radSlow.dom * 45 + 22.5) + ' 22 22)'); } } const rv = w_radSlow.querySelector('.rval'); if (rv) rv.textContent = l_radSlow.txt; }
     const l_radSnip = radSnip(radInc().filter(function(it){ return it.snip; }), player ? player.x : 0, player ? player.y : 0); const w_radSnip = $('radSnipWrap'); if (w_radSnip) { w_radSnip.classList.remove('g-good','g-warn','g-bad'); w_radSnip.classList.add(l_radSnip.cls); w_radSnip.classList.toggle('danger', !!l_radSnip.danger); const rsvg = w_radSnip.querySelector('svg'); if (rsvg) { const wds = rsvg.querySelectorAll('.rw'); const mx = Math.max.apply(null, l_radSnip.counts); for (let i = 0; i < wds.length; i++) { const c = l_radSnip.counts[i] || 0; const t = mx > 0 ? c / mx : 0; wds[i].style.fill = c <= 0 ? '#333' : (t >= 0.66 ? '#e74c3c' : (t >= 0.33 ? '#f39c12' : '#2ecc71')); wds[i].style.opacity = c <= 0 ? 0.35 : (0.3 + 0.7 * t); } } const nd = rsvg ? rsvg.querySelector('.rneedle') : null; if (nd) { if (l_radSnip.dom < 0) { nd.style.display = 'none'; } else { nd.style.display = ''; nd.setAttribute('transform', 'rotate(' + (l_radSnip.dom * 45 + 22.5) + ' 22 22)'); } } const rv = w_radSnip.querySelector('.rval'); if (rv) rv.textContent = l_radSnip.txt; }
+    const l_radNoBoss = radNoBoss(radInc().filter(function(it){ return !it.boss; }), player ? player.x : 0, player ? player.y : 0); const w_radNoBoss = $('radNoBossWrap'); if (w_radNoBoss) { w_radNoBoss.classList.remove('g-good','g-warn','g-bad'); w_radNoBoss.classList.add(l_radNoBoss.cls); w_radNoBoss.classList.toggle('danger', !!l_radNoBoss.danger); const rsvg = w_radNoBoss.querySelector('svg'); if (rsvg) { const wds = rsvg.querySelectorAll('.rw'); const mx = Math.max.apply(null, l_radNoBoss.counts); for (let i = 0; i < wds.length; i++) { const c = l_radNoBoss.counts[i] || 0; const t = mx > 0 ? c / mx : 0; wds[i].style.fill = c <= 0 ? '#333' : (t >= 0.66 ? '#e74c3c' : (t >= 0.33 ? '#f39c12' : '#2ecc71')); wds[i].style.opacity = c <= 0 ? 0.35 : (0.3 + 0.7 * t); } } const nd = rsvg ? rsvg.querySelector('.rneedle') : null; if (nd) { if (l_radNoBoss.dom < 0) { nd.style.display = 'none'; } else { nd.style.display = ''; nd.setAttribute('transform', 'rotate(' + (l_radNoBoss.dom * 45 + 22.5) + ' 22 22)'); } } const rv = w_radNoBoss.querySelector('.rval'); if (rv) rv.textContent = l_radNoBoss.txt; }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -24210,6 +24218,43 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const txt = '共' + total + ' · ' + dirName + ' ' + domPct + '%';
     return { counts: counts.map(function (c) { return Math.round(c); }), total: total, dom: dom, domCount: domCount, domPct: domPct, cls: cls, danger: danger, txt: txt, needle: dom };
   }
+  // —— radNoBoss：非BOSS直扑（直扑弹幕罗盘：敌弹来袭方位分布 + 密度 + 指针）——
+  function radSector(bx, by, px, py) {
+    const vx = Number(bx) - Number(px), vy = Number(by) - Number(py);
+    if (!isFinite(vx) || !isFinite(vy)) return -1;
+    if (vx === 0 && vy === 0) return -1;
+    let a = Math.atan2(vy, vx);
+    if (a < 0) a += Math.PI * 2;
+    return Math.floor(a / (Math.PI / 4)) % 8;
+  }
+  function radNoBoss(items, px, py, opts) {
+    const ok = Array.isArray(items) && isFinite(Number(px)) && isFinite(Number(py)) && items.length > 0;
+    if (!ok) return { counts: [0, 0, 0, 0, 0, 0, 0, 0], total: 0, dom: -1, domCount: 0, domPct: 0, cls: 'g-warn', danger: false, txt: '—', needle: -1 };
+    const mode = (opts && opts.mode === 'press') ? 'press' : 'plain';
+    const PX = Number(px), PY = Number(py);
+    const counts = [0, 0, 0, 0, 0, 0, 0, 0];
+    let wsum = 0, wmax = -1, wdom = -1;
+    for (let i = 0; i < items.length; i++) {
+      const it = items[i];
+      if (!it || !isFinite(Number(it.x)) || !isFinite(Number(it.y))) continue;
+      const s = radSector(Number(it.x), Number(it.y), PX, PY);
+      if (s < 0) continue;
+      const w = (mode === 'press') ? (TILE / (TILE + Math.hypot(Number(it.x) - PX, Number(it.y) - PY))) : 1;
+      counts[s] += w;
+      wsum += w;
+      if (counts[s] > wmax) { wmax = counts[s]; wdom = s; }
+    }
+    const total = Math.round(wsum);
+    if (!(wsum > 0)) return { counts: counts, total: 0, dom: -1, domCount: 0, domPct: 0, cls: 'g-warn', danger: false, txt: '—', needle: -1 };
+    const dom = wdom;
+    const domCount = Math.round(counts[dom]);
+    const domPct = Math.round(counts[dom] / wsum * 100);
+    const danger = domPct >= 40;
+    const cls = danger ? 'g-bad' : (total >= 4 ? 'g-warn' : 'g-good');
+    const dirName = ['东', '东南', '南', '西南', '西', '西北', '北', '东北'][dom];
+    const txt = '共' + total + ' · ' + dirName + ' ' + domPct + '%';
+    return { counts: counts.map(function (c) { return Math.round(c); }), total: total, dom: dom, domCount: domCount, domPct: domPct, cls: cls, danger: danger, txt: txt, needle: dom };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -26051,7 +26096,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V17.52', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V17.53', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -28081,6 +28126,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       radFastStateNow: (items, px, py) => radFast(items, px, py), radFastNow: () => radFast(radInc().filter(function(it){ return it.spd >= 5.2 * 0.9; }), player ? player.x : 0, player ? player.y : 0), radFastCountsNow: () => { const r = radFast(radInc().filter(function(it){ return it.spd >= 5.2 * 0.9; }), player ? player.x : 0, player ? player.y : 0); return r.counts; }, radSectorNow: (x, y, px, py) => radSector(x, y, px, py),
       radSlowStateNow: (items, px, py) => radSlow(items, px, py), radSlowNow: () => radSlow(radInc().filter(function(it){ return it.spd < 5.2 * 0.9; }), player ? player.x : 0, player ? player.y : 0), radSlowCountsNow: () => { const r = radSlow(radInc().filter(function(it){ return it.spd < 5.2 * 0.9; }), player ? player.x : 0, player ? player.y : 0); return r.counts; }, radSectorNow: (x, y, px, py) => radSector(x, y, px, py),
       radSnipStateNow: (items, px, py) => radSnip(items, px, py), radSnipNow: () => radSnip(radInc().filter(function(it){ return it.snip; }), player ? player.x : 0, player ? player.y : 0), radSnipCountsNow: () => { const r = radSnip(radInc().filter(function(it){ return it.snip; }), player ? player.x : 0, player ? player.y : 0); return r.counts; }, radSectorNow: (x, y, px, py) => radSector(x, y, px, py),
+      radNoBossStateNow: (items, px, py) => radNoBoss(items, px, py), radNoBossNow: () => radNoBoss(radInc().filter(function(it){ return !it.boss; }), player ? player.x : 0, player ? player.y : 0), radNoBossCountsNow: () => { const r = radNoBoss(radInc().filter(function(it){ return !it.boss; }), player ? player.x : 0, player ? player.y : 0); return r.counts; }, radSectorNow: (x, y, px, py) => radSector(x, y, px, py),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
