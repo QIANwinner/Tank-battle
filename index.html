@@ -5411,6 +5411,21 @@
   #pickScoreWrap.g-bad .chip { background:rgba(231,76,60,.18); color:#e74c3c; }
   #pickScoreWrap.g-bad { animation: tbPickPulse .5s ease-in-out infinite alternate; }
   @keyframes tbPickPulse { from { opacity:.6; } to { opacity:1; } }
+  #pickKillWrap .pk { display:inline-flex; flex-direction:column; gap:1px; margin:0 4px; vertical-align:middle; min-width:150px; }
+  #pickKillWrap .prow { display:flex; align-items:center; gap:4px; font-size:10px; line-height:1.2; }
+  #pickKillWrap .plab { width:30px; color:#999; flex:none; }
+  #pickKillWrap .dbar { flex:1; height:5px; background:#3a3a3a; border-radius:3px; overflow:hidden; }
+  #pickKillWrap .dbar i { display:block; height:100%; border-radius:3px; background:#5a5a5a; }
+  #pickKillWrap .pv { width:58px; text-align:right; color:#aaa; font-size:10px; flex:none; }
+  #pickKillWrap .chip { font-style:normal; font-size:9px; padding:0 4px; border-radius:3px; background:#2a2a2a; color:#bbb; align-self:flex-start; }
+  #pickKillWrap.g-good .dbar i { background:#2ecc71; }
+  #pickKillWrap.g-good .chip { background:rgba(46,204,113,.18); color:#2ecc71; }
+  #pickKillWrap.g-warn .dbar i { background:#f1c40f; }
+  #pickKillWrap.g-warn .chip { background:rgba(241,196,15,.18); color:#f1c40f; }
+  #pickKillWrap.g-bad .dbar i { background:#e74c3c; }
+  #pickKillWrap.g-bad .chip { background:rgba(231,76,60,.18); color:#e74c3c; }
+  #pickKillWrap.g-bad { animation: tbPickPulse .5s ease-in-out infinite alternate; }
+  @keyframes tbPickPulse { from { opacity:.6; } to { opacity:1; } }
 </style>
 </head>
 <body>
@@ -6409,6 +6424,7 @@
     <div class="pill m-hide" id="ladderBossWrap"><span class="k">👹</span><span class="ld"><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="v">BOSS档 <b class="val">0</b></span></div>
     <div class="pill m-hide" id="pickCoinWrap"><span class="k">💰</span><span class="pk"><span class="prow"><span class="plab">复活</span><span class="dbar"><i></i></span><b class="pv">—</b></span><span class="prow"><span class="plab">强化</span><span class="dbar"><i></i></span><b class="pv">—</b></span><em class="chip">—</em></span><span class="v">金币双目标</span></div>
     <div class="pill m-hide" id="pickScoreWrap"><span class="k">🏆</span><span class="pk"><span class="prow"><span class="plab">万档</span><span class="dbar"><i></i></span><b class="pv">—</b></span><span class="prow"><span class="plab">五万</span><span class="dbar"><i></i></span><b class="pv">—</b></span><em class="chip">—</em></span><span class="v">得分双目标</span></div>
+    <div class="pill m-hide" id="pickKillWrap"><span class="k">☠️</span><span class="pk"><span class="prow"><span class="plab">百杀</span><span class="dbar"><i></i></span><b class="pv">—</b></span><span class="prow"><span class="plab">二百</span><span class="dbar"><i></i></span><b class="pv">—</b></span><em class="chip">—</em></span><span class="v">击杀双目标</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -6784,7 +6800,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V16.99</div>
+  <div id="mark">DESIGNED BY QIAN · V17.0</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -12584,6 +12600,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_ladderBoss = ladderBoss(stat.bossKills, [0,1,2,4,6,10]); const w_ladderBoss = $('ladderBossWrap'); if (w_ladderBoss) { w_ladderBoss.classList.remove('g-good','g-warn','g-bad'); w_ladderBoss.classList.add(l_ladderBoss.cls); w_ladderBoss.classList.toggle('danger', !!l_ladderBoss.danger); const ds = w_ladderBoss.querySelectorAll('.ld i'); ds.forEach((d, di) => { d.classList.toggle('on', di <= l_ladderBoss.idx); d.classList.toggle('cur', di === l_ladderBoss.idx); d.style.display = di < l_ladderBoss.n ? '' : 'none'; }); const va = w_ladderBoss.querySelector('.val'); if (va) va.textContent = l_ladderBoss.txt; }
     const l_pickCoin = pickCoin(coins, 500, 800); const w_pickCoin = $('pickCoinWrap'); if (w_pickCoin) { w_pickCoin.classList.remove('g-good','g-warn','g-bad'); w_pickCoin.classList.add(l_pickCoin.cls); w_pickCoin.classList.toggle('danger', !!l_pickCoin.danger); const bars = w_pickCoin.querySelectorAll('.dbar i'); const pvs = w_pickCoin.querySelectorAll('.pv'); if (bars[0]) bars[0].style.width = l_pickCoin.aPct + '%'; if (bars[1]) bars[1].style.width = l_pickCoin.bPct + '%'; if (pvs[0]) pvs[0].textContent = l_pickCoin.metA ? '✓' + l_pickCoin.aPct + '%' : '还差 ' + l_pickCoin.gapA; if (pvs[1]) pvs[1].textContent = l_pickCoin.metB ? '✓' + l_pickCoin.bPct + '%' : '还差 ' + l_pickCoin.gapB; const chip = w_pickCoin.querySelector('.chip'); if (chip) chip.textContent = l_pickCoin.txt; }
     const l_pickScore = pickScore(score, 10000, 50000); const w_pickScore = $('pickScoreWrap'); if (w_pickScore) { w_pickScore.classList.remove('g-good','g-warn','g-bad'); w_pickScore.classList.add(l_pickScore.cls); w_pickScore.classList.toggle('danger', !!l_pickScore.danger); const bars = w_pickScore.querySelectorAll('.dbar i'); const pvs = w_pickScore.querySelectorAll('.pv'); if (bars[0]) bars[0].style.width = l_pickScore.aPct + '%'; if (bars[1]) bars[1].style.width = l_pickScore.bPct + '%'; if (pvs[0]) pvs[0].textContent = l_pickScore.metA ? '✓' + l_pickScore.aPct + '%' : '还差 ' + l_pickScore.gapA; if (pvs[1]) pvs[1].textContent = l_pickScore.metB ? '✓' + l_pickScore.bPct + '%' : '还差 ' + l_pickScore.gapB; const chip = w_pickScore.querySelector('.chip'); if (chip) chip.textContent = l_pickScore.txt; }
+    const l_pickKill = pickKill(stat.kills, 100, 200); const w_pickKill = $('pickKillWrap'); if (w_pickKill) { w_pickKill.classList.remove('g-good','g-warn','g-bad'); w_pickKill.classList.add(l_pickKill.cls); w_pickKill.classList.toggle('danger', !!l_pickKill.danger); const bars = w_pickKill.querySelectorAll('.dbar i'); const pvs = w_pickKill.querySelectorAll('.pv'); if (bars[0]) bars[0].style.width = l_pickKill.aPct + '%'; if (bars[1]) bars[1].style.width = l_pickKill.bPct + '%'; if (pvs[0]) pvs[0].textContent = l_pickKill.metA ? '✓' + l_pickKill.aPct + '%' : '还差 ' + l_pickKill.gapA; if (pvs[1]) pvs[1].textContent = l_pickKill.metB ? '✓' + l_pickKill.bPct + '%' : '还差 ' + l_pickKill.gapB; const chip = w_pickKill.querySelector('.chip'); if (chip) chip.textContent = l_pickKill.txt; }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -22441,6 +22458,34 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     else txt = '先冲 ' + (fav === 'a' ? 'A' : 'B') + ' · 还差 ' + Math.round(gap);
     return { aPct: aPct, bPct: bPct, fav: fav, gap: Math.round(gap), gapA: Math.round(gapA), gapB: Math.round(gapB), metA: metA, metB: metB, cls: cls, danger: danger, txt: txt };
   }
+  // —— pickKill：击杀双目标（双目标冲刺：双条进度 + 优先达标建议 + 还差提示）——
+  function pickKill(val, a, b) {
+    const v = Number(val), aN = Number(a), bN = Number(b);
+    const ok = isFinite(v) && isFinite(aN) && isFinite(bN) && aN > 0 && bN > 0 && aN !== bN;
+    if (!ok) return { aPct: 0, bPct: 0, fav: 'none', gap: 0, gapA: 0, gapB: 0, metA: false, metB: false, cls: 'g-warn', danger: false, txt: '—' };
+    const gapA = aN - v, gapB = bN - v;
+    const metA = v >= aN, metB = v >= bN;
+    const aPct = Math.max(0, Math.min(100, Math.round(v / aN * 100)));
+    const bPct = Math.max(0, Math.min(100, Math.round(v / bN * 100)));
+    let fav;
+    if (metA && metB) fav = 'both';
+    else if (metA) fav = 'a';
+    else if (metB) fav = 'b';
+    else fav = gapA <= gapB ? 'a' : 'b';
+    const gap = fav === 'a' ? gapA : (fav === 'b' ? gapB : 0);
+    const nearerPct = fav === 'a' ? aPct : (fav === 'b' ? bPct : 100);
+    let cls, danger;
+    if (metA && metB) { cls = 'g-good'; danger = false; }
+    else if (metA || metB) { cls = 'g-warn'; danger = false; }
+    else if (nearerPct < 40) { cls = 'g-bad'; danger = true; }
+    else { cls = 'g-warn'; danger = false; }
+    let txt;
+    if (metA && metB) txt = '双达成';
+    else if (metA) txt = 'A 已达成 · B 还差 ' + Math.round(gapB);
+    else if (metB) txt = 'B 已达成 · A 还差 ' + Math.round(gapA);
+    else txt = '先冲 ' + (fav === 'a' ? 'A' : 'B') + ' · 还差 ' + Math.round(gap);
+    return { aPct: aPct, bPct: bPct, fav: fav, gap: Math.round(gap), gapA: Math.round(gapA), gapB: Math.round(gapB), metA: metA, metB: metB, cls: cls, danger: danger, txt: txt };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -24282,7 +24327,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V16.99', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V17.0', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -26259,6 +26304,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       ladderBossStateNow: (v, s) => ladderBoss(v, s), ladderBossNow: () => ladderBoss(stat.bossKills, [0,1,2,4,6,10]), ladderBossIdxNow: () => { const w = $('ladderBossWrap'); return w ? Array.from(w.querySelectorAll('.ld i')).filter(i => i.classList.contains('on')).length - 1 : -1; }, ladderBossTopNow: () => ladderBoss(stat.bossKills, [0,1,2,4,6,10]).top, ladderBossDangerNow: () => { const w = $('ladderBossWrap'); return !!(w && w.classList.contains('g-bad')); },
       pickCoinStateNow: (v, a, b) => pickCoin(v, a, b), pickCoinNow: () => pickCoin(coins, 500, 800), pickCoinFavNow: () => pickCoin(coins, 500, 800).fav, pickCoinDangerNow: () => { const w = $('pickCoinWrap'); return !!(w && w.classList.contains('g-bad')); }, pickCoinPctNow: () => { const w = $('pickCoinWrap'); if (!w) return null; const b = w.querySelectorAll('.dbar i'); return b.length >= 2 ? [parseInt(b[0].style.width) || 0, parseInt(b[1].style.width) || 0] : null; },
       pickScoreStateNow: (v, a, b) => pickScore(v, a, b), pickScoreNow: () => pickScore(score, 10000, 50000), pickScoreFavNow: () => pickScore(score, 10000, 50000).fav, pickScoreDangerNow: () => { const w = $('pickScoreWrap'); return !!(w && w.classList.contains('g-bad')); }, pickScorePctNow: () => { const w = $('pickScoreWrap'); if (!w) return null; const b = w.querySelectorAll('.dbar i'); return b.length >= 2 ? [parseInt(b[0].style.width) || 0, parseInt(b[1].style.width) || 0] : null; },
+      pickKillStateNow: (v, a, b) => pickKill(v, a, b), pickKillNow: () => pickKill(stat.kills, 100, 200), pickKillFavNow: () => pickKill(stat.kills, 100, 200).fav, pickKillDangerNow: () => { const w = $('pickKillWrap'); return !!(w && w.classList.contains('g-bad')); }, pickKillPctNow: () => { const w = $('pickKillWrap'); if (!w) return null; const b = w.querySelectorAll('.dbar i'); return b.length >= 2 ? [parseInt(b[0].style.width) || 0, parseInt(b[1].style.width) || 0] : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
