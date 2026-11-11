@@ -5525,6 +5525,18 @@
   #compEliteWrap.g-bad .ctxt { color:#e74c3c; }
   #compEliteWrap.g-bad { animation: tbCompPulse .4s ease-in-out infinite alternate; }
   @keyframes tbCompPulse { from { opacity:.55; } to { opacity:1; } }
+  #compFastWrap .crose { display:inline-block; position:relative; width:26px; height:26px; margin:0 4px; vertical-align:middle; border-radius:50%; background:#1c1c1c; border:1px solid #444; overflow:hidden; flex:none; }
+  #compFastWrap .carrow { position:absolute; left:50%; top:50%; width:2px; height:11px; background:#f1c40f; transform-origin:1px 1px; margin:-1px 0 0 -1px; }
+  #compFastWrap .cdir { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:8px; color:#ccc; font-style:normal; font-weight:bold; }
+  #compFastWrap .ctxt { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #compFastWrap .crose::after { content:''; position:absolute; left:50%; top:3px; bottom:3px; width:1px; background:#333; transform:translateX(-0.5px); }
+  #compFastWrap .crose::before { content:''; position:absolute; top:50%; left:3px; right:3px; height:1px; background:#333; transform:translateY(-0.5px); }
+  #compFastWrap.g-good .carrow { background:#2ecc71; }
+  #compFastWrap.g-warn .carrow { background:#f1c40f; }
+  #compFastWrap.g-bad .carrow { background:#e74c3c; }
+  #compFastWrap.g-bad .ctxt { color:#e74c3c; }
+  #compFastWrap.g-bad { animation: tbCompPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbCompPulse { from { opacity:.55; } to { opacity:1; } }
 </style>
 </head>
 <body>
@@ -6531,6 +6543,7 @@
     <div class="pill m-hide" id="pickUpgWrap"><span class="k">🧬</span><span class="pk"><span class="prow"><span class="plab">四级</span><span class="dbar"><i></i></span><b class="pv">—</b></span><span class="prow"><span class="plab">八级</span><span class="dbar"><i></i></span><b class="pv">—</b></span><em class="chip">—</em></span><span class="v">强化双目标</span></div>
     <div class="pill m-hide" id="compEnemyWrap"><span class="k">👾</span><span class="crose"><i class="carrow"></i><em class="cdir">—</em></span><span class="v">敌兵</span><em class="ctxt">—</em></div>
     <div class="pill m-hide" id="compEliteWrap"><span class="k">💀</span><span class="crose"><i class="carrow"></i><em class="cdir">—</em></span><span class="v">精英</span><em class="ctxt">—</em></div>
+    <div class="pill m-hide" id="compFastWrap"><span class="k">💨</span><span class="crose"><i class="carrow"></i><em class="cdir">—</em></span><span class="v">高速</span><em class="ctxt">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -6906,7 +6919,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V17.7</div>
+  <div id="mark">DESIGNED BY QIAN · V17.8</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -12714,6 +12727,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_pickUpg = pickUpg(upgTotal, 4, 8); const w_pickUpg = $('pickUpgWrap'); if (w_pickUpg) { w_pickUpg.classList.remove('g-good','g-warn','g-bad'); w_pickUpg.classList.add(l_pickUpg.cls); w_pickUpg.classList.toggle('danger', !!l_pickUpg.danger); const bars = w_pickUpg.querySelectorAll('.dbar i'); const pvs = w_pickUpg.querySelectorAll('.pv'); if (bars[0]) bars[0].style.width = l_pickUpg.aPct + '%'; if (bars[1]) bars[1].style.width = l_pickUpg.bPct + '%'; if (pvs[0]) pvs[0].textContent = l_pickUpg.metA ? '✓' + l_pickUpg.aPct + '%' : '还差 ' + l_pickUpg.gapA; if (pvs[1]) pvs[1].textContent = l_pickUpg.metB ? '✓' + l_pickUpg.bPct + '%' : '还差 ' + l_pickUpg.gapB; const chip = w_pickUpg.querySelector('.chip'); if (chip) chip.textContent = l_pickUpg.txt; }
     const l_compEnemy = compEnemy(player.x, player.y, enemies, 400); const w_compEnemy = $('compEnemyWrap'); if (w_compEnemy) { w_compEnemy.classList.remove('g-good','g-warn','g-bad'); w_compEnemy.classList.add(l_compEnemy.cls); w_compEnemy.classList.toggle('danger', !!l_compEnemy.danger); const ar = w_compEnemy.querySelector('.carrow'); if (ar) ar.style.transform = 'rotate(' + l_compEnemy.bearing + 'deg)'; const cd = w_compEnemy.querySelector('.cdir'); if (cd) cd.textContent = l_compEnemy.dir8; const ct = w_compEnemy.querySelector('.ctxt'); if (ct) ct.textContent = l_compEnemy.txt; }
     const l_compElite = compElite(player.x, player.y, enemies.filter(e=>e.isBoss||e.type==='elite'||e.type==='armored'), 400); const w_compElite = $('compEliteWrap'); if (w_compElite) { w_compElite.classList.remove('g-good','g-warn','g-bad'); w_compElite.classList.add(l_compElite.cls); w_compElite.classList.toggle('danger', !!l_compElite.danger); const ar = w_compElite.querySelector('.carrow'); if (ar) ar.style.transform = 'rotate(' + l_compElite.bearing + 'deg)'; const cd = w_compElite.querySelector('.cdir'); if (cd) cd.textContent = l_compElite.dir8; const ct = w_compElite.querySelector('.ctxt'); if (ct) ct.textContent = l_compElite.txt; }
+    const l_compFast = compFast(player.x, player.y, enemies.filter(e=>e.type==='fast'||e.type==='suicide'), 400); const w_compFast = $('compFastWrap'); if (w_compFast) { w_compFast.classList.remove('g-good','g-warn','g-bad'); w_compFast.classList.add(l_compFast.cls); w_compFast.classList.toggle('danger', !!l_compFast.danger); const ar = w_compFast.querySelector('.carrow'); if (ar) ar.style.transform = 'rotate(' + l_compFast.bearing + 'deg)'; const cd = w_compFast.querySelector('.cdir'); if (cd) cd.textContent = l_compFast.dir8; const ct = w_compFast.querySelector('.ctxt'); if (ct) ct.textContent = l_compFast.txt; }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -22787,6 +22801,30 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const txt = near ? '威胁逼近 ' + dir8 : '最近 ' + dir8 + ' · ' + dist;
     return { has: true, bearing: bearing, dist: dist, pct: pct, dir8: dir8, cls: cls, danger: danger, txt: txt };
   }
+  // —— compFast：高速罗盘（威胁罗盘：最近威胁方位 + 距离 + 逼近预警）——
+  function compFast(px, py, arr, maxDist) {
+    const P = Number(px), Q = Number(py), M = Number(maxDist);
+    const ok = isFinite(P) && isFinite(Q) && isFinite(M) && M > 0 && Array.isArray(arr) && arr.length > 0;
+    if (!ok) return { has: false, bearing: 0, dist: 0, pct: 0, dir8: '—', cls: 'g-warn', danger: false, txt: '—' };
+    let best = null, bd = Infinity;
+    for (const e of arr) {
+      const ex = Number(e && e.x), ey = Number(e && e.y);
+      if (!isFinite(ex) || !isFinite(ey)) continue;
+      const d = Math.hypot(ex - P, ey - Q);
+      if (d < bd) { bd = d; best = e; }
+    }
+    if (!best) return { has: false, bearing: 0, dist: 0, pct: 0, dir8: '—', cls: 'g-warn', danger: false, txt: '—' };
+    const dx = Number(best.x) - P, dy = Number(best.y) - Q;
+    const bearing = Math.round((Math.atan2(dx, -dy) * 180 / Math.PI) + 360) % 360;
+    const dist = Math.round(bd);
+    const pct = Math.max(0, Math.min(100, Math.round(bd / M * 100)));
+    const dir8 = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'][Math.round(bearing / 45) % 8];
+    const near = pct < 30;
+    const cls = near ? 'g-bad' : (pct < 60 ? 'g-warn' : 'g-good');
+    const danger = near;
+    const txt = near ? '威胁逼近 ' + dir8 : '最近 ' + dir8 + ' · ' + dist;
+    return { has: true, bearing: bearing, dist: dist, pct: pct, dir8: dir8, cls: cls, danger: danger, txt: txt };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -24628,7 +24666,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V17.7', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V17.8', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -26613,6 +26651,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       pickUpgStateNow: (v, a, b) => pickUpg(v, a, b), pickUpgNow: () => pickUpg(upgTotal, 4, 8), pickUpgFavNow: () => pickUpg(upgTotal, 4, 8).fav, pickUpgDangerNow: () => { const w = $('pickUpgWrap'); return !!(w && w.classList.contains('g-bad')); }, pickUpgPctNow: () => { const w = $('pickUpgWrap'); if (!w) return null; const b = w.querySelectorAll('.dbar i'); return b.length >= 2 ? [parseInt(b[0].style.width) || 0, parseInt(b[1].style.width) || 0] : null; },
       compEnemyStateNow: (px, py, arr, m) => compEnemy(px, py, arr, m), compEnemyNow: () => compEnemy(player.x, player.y, enemies, 400), compEnemyDirNow: () => { const r = compEnemy(player.x, player.y, enemies, 400); return r.has ? r.dir8 : '—'; }, compEnemyBearingNow: () => { try { const r = compEnemy(player.x, player.y, enemies, 400); return r.has ? r.bearing : -1; } catch (e) { return -1; } }, compEnemyDangerNow: () => { const w = $('compEnemyWrap'); return !!(w && w.classList.contains('g-bad')); },
       compEliteStateNow: (px, py, arr, m) => compElite(px, py, arr, m), compEliteNow: () => compElite(player.x, player.y, enemies.filter(e=>e.isBoss||e.type==='elite'||e.type==='armored'), 400), compEliteDirNow: () => { const r = compElite(player.x, player.y, enemies.filter(e=>e.isBoss||e.type==='elite'||e.type==='armored'), 400); return r.has ? r.dir8 : '—'; }, compEliteBearingNow: () => { try { const r = compElite(player.x, player.y, enemies.filter(e=>e.isBoss||e.type==='elite'||e.type==='armored'), 400); return r.has ? r.bearing : -1; } catch (e) { return -1; } }, compEliteDangerNow: () => { const w = $('compEliteWrap'); return !!(w && w.classList.contains('g-bad')); },
+      compFastStateNow: (px, py, arr, m) => compFast(px, py, arr, m), compFastNow: () => compFast(player.x, player.y, enemies.filter(e=>e.type==='fast'||e.type==='suicide'), 400), compFastDirNow: () => { const r = compFast(player.x, player.y, enemies.filter(e=>e.type==='fast'||e.type==='suicide'), 400); return r.has ? r.dir8 : '—'; }, compFastBearingNow: () => { try { const r = compFast(player.x, player.y, enemies.filter(e=>e.type==='fast'||e.type==='suicide'), 400); return r.has ? r.bearing : -1; } catch (e) { return -1; } }, compFastDangerNow: () => { const w = $('compFastWrap'); return !!(w && w.classList.contains('g-bad')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
