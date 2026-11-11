@@ -18228,6 +18228,22 @@ async function main() {
     t('U6548 DOM 与函数一致（亮格=idx+1）', o5.ok === true && o5.lit === o5.exp && o5.exp >= 1, JSON.stringify(o5));
   } catch (e) { t('U6543 强化档位 断言块执行异常', false, String(e)); }
 
+
+  // ===== U6549~U6554: BOSS档位(v0.16.97) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('ladderBossWrap'),s:T.ladderBossStateNow(13,[0,5,10,15,20,25])});})()"));
+    t('U6549 BOSS档位 DOM 已加入 HUD', o.dom === true && o.s.idx === 2 && o.s.pct === 60, JSON.stringify(o));
+    t('U6550 正常 13→idx2/n6/pct60/next2/g-warn', o.s.idx === 2 && o.s.n === 6 && o.s.pct === 60 && o.s.next === 2 && o.s.cls === 'g-warn' && o.s.danger === false && o.s.top === false && o.s.txt === '3/6 · 距下档 +2', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.ladderBossStateNow(2,[0,5,10,15,20,25]),b:T.ladderBossStateNow(30,[0,5,10,15,20,25])});})()"));
+    t('U6551 边界 2→idx0/pct40/g-bad+danger, 30→顶档/idx5/pct100/满档/g-good', o2.a.idx === 0 && o2.a.pct === 40 && o2.a.cls === 'g-bad' && o2.a.danger === true && o2.b.top === true && o2.b.idx === 5 && o2.b.pct === 100 && o2.b.next === 0 && o2.b.cls === 'g-good' && o2.b.txt === '6/6 · 满档', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.ladderBossStateNow(NaN,[0,5,10]),b:T.ladderBossStateNow(10,[]),c:T.ladderBossStateNow(10,[5]),d:T.ladderBossStateNow('x',[0,5])});})()"));
+    t('U6552 非法 NaN/空/单档/非数→退化单档 g-warn 平', o3.a.idx === 0 && o3.a.n === 1 && o3.a.pct === 0 && o3.a.cls === 'g-warn' && o3.a.txt === '—' && o3.b.idx === 0 && o3.b.n === 1 && o3.c.idx === 0 && o3.c.n === 1 && o3.d.idx === 0 && o3.d.n === 1 && o3.d.cls === 'g-warn', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({e:T.ladderBossStateNow('13',[0,10,5,20])});})()"));
+    t('U6553 数字字符串+乱序 13→idx2/n4/pct30/距下档+7', o4.e.idx === 2 && o4.e.n === 4 && o4.e.pct === 30 && o4.e.next === 7 && o4.e.cls === 'g-warn' && o4.e.txt === '3/4 · 距下档 +7', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}const w=document.getElementById('ladderBossWrap');const ds=w?w.querySelectorAll('.ld i'):[];const lit=Array.from(ds).filter(i=>i.classList.contains('on')).length;const now=T.ladderBossNow();return JSON.stringify({ok:ok,lit:lit,exp:now.idx+1});})()"));
+    t('U6554 DOM 与函数一致（亮格=idx+1）', o5.ok === true && o5.lit === o5.exp && o5.exp >= 1, JSON.stringify(o5));
+  } catch (e) { t('U6549 BOSS档位 断言块执行异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
