@@ -18916,6 +18916,22 @@ async function main() {
     t('U6806 DOM 与函数一致: 构成条存在+分段+txt 合法', o5.has && o5.bar && o5.n >= 1 && o5.total && o5.txtOk, JSON.stringify(o5));
   } catch (e) { t('U6801~U6806 重甲构成 抛出异常', false, String(e)); }
 
+
+  // ===== U6807~U6812: 远程构成(v0.17.40) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;const p=[{key:'A',n:3,c:'#f00'},{key:'B',n:1,c:'#0f0'}];return JSON.stringify({dom:!!document.getElementById('mkRangeWrap'),s:T.mkRangeStateNow(p)});})()"));
+    t('U6807 远程构成 DOM 已加入 HUD + 函数可用', o.dom === true && o.s.total === 4 && o.s.segs[0].pct === 75 && o.s.segs[0].key === 'A' && o.s.cls === 'g-bad' && o.s.danger === true, JSON.stringify(o));
+    t('U6808 正常 3:1→total4/75%/g-bad+danger/leader A', o.s.segs[0].pct === 75 && o.s.segs[1].pct === 25 && o.s.leader === 'A' && o.s.txt === '总4 · A 75%', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.mkRangeStateNow([{key:'A',n:3,c:'#f00'},{key:'B',n:7,c:'#0f0'}]);const b=T.mkRangeStateNow([{key:'A',n:1,c:'#f00'},{key:'B',n:9,c:'#0f0'}]);return JSON.stringify({a:a,b:b});})()"));
+    t('U6809 边界 3:7→30%/g-warn, 1:9→10%/g-good', o2.a.segs[0].pct === 30 && o2.a.cls === 'g-warn' && o2.a.danger === false && o2.b.segs[0].pct === 10 && o2.b.cls === 'g-good' && o2.b.txt === '总10 · B 90%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.mkRangeStateNow(null);const b=T.mkRangeStateNow([]);const c=T.mkRangeStateNow([{key:'A',n:0,c:'#f00'},{key:'B',n:0,c:'#0f0'}]);const d=T.mkRangeStateNow([{key:'A',n:'x',c:'#f00'},{key:'B',n:1,c:'#0f0'}]);return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U6810 非法 null/[]/全0/非数→退化 g-warn', o3.a.total === 0 && o3.a.txt === '—' && o3.b.total === 0 && o3.b.txt === '—' && o3.c.total === 0 && o3.c.txt === '—' && o3.d.total === 0 && o3.d.txt === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify(T.mkRangeStateNow([{key:'A',n:'2',c:'#f00'},{key:'B',n:'2',c:'#0f0'}]));})()"));
+    t('U6811 数字字符串 2/2→50/50', o4.total === 4 && o4.segs[0].pct === 50 && o4.segs[1].pct === 50 && o4.txt === '总4 · A 50%', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.mkRangeNow();const w=document.getElementById('mkRangeWrap');const bar=w?w.querySelector('.cbar'):null;const segs=bar?bar.querySelectorAll('.cseg'):null;return JSON.stringify({has:!!w, bar:!!bar, n:(segs?segs.length:0), total:(typeof r.total==='number'&&r.total>=0), txtOk:(typeof r.txt==='string')});})()"));
+    t('U6812 DOM 与函数一致: 构成条存在+分段+txt 合法', o5.has && o5.bar && o5.n >= 1 && o5.total && o5.txtOk, JSON.stringify(o5));
+  } catch (e) { t('U6807~U6812 远程构成 抛出异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
