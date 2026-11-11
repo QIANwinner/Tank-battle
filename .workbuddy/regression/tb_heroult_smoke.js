@@ -19365,6 +19365,21 @@ async function main() {
     t('U6980 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U6975 方向变化率 抛出异常', false, String(e)); }
 
+
+  // ===== U6981~U6986: 来袭方位(v0.17.69) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('stkDirWrap'),mv:!!document.querySelector('#stkDirWrap .mval'),s:T.stkDirStateNow([{'t':0,'spd':5,'src':'enemy','dir':2},{'t':2,'spd':5,'src':'enemy','dir':2}])});})()"));
+    t('U6981 来袭方位 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U6982 正常 来袭方位 → v=90 g-warn 90°', o.s.v === 90 && o.s.cls === 'g-warn' && o.s.danger === false && o.s.txt === '90°', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.stkDirStateNow([{'t':0,'spd':5,'src':'enemy','dir':2},{'t':2,'spd':5,'src':'enemy','dir':2}]),b:T.stkDirStateNow([{'t':0,'spd':5,'src':'enemy','dir':0},{'t':1,'spd':5,'src':'enemy','dir':7}])});return r;})()"));
+    t('U6983 边界 来袭方位 → g-warn 315°', o2.b.v === 315 && o2.b.cls === 'g-warn' && o2.b.danger === false && o2.b.txt === '315°', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.stkDirStateNow(null);const b=T.stkDirStateNow([]);const c=T.stkDirStateNow([{x:200,y:200,t:0,spd:5,src:'enemy',dir:2}]);const d=T.stkDirStateNow([{t:'n',spd:'n',src:'x',dir:'n'},{t:'n',spd:'n',src:'x',dir:'n'}]);return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U6984 非法 null/[]/单点/全非数→退化 g-warn —', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.c.txt === '—' && o3.d.txt === '—', JSON.stringify(o3));
+    t('U6985 单位结构 txt 以 unit 结尾或为—', (o.s.txt === '—') || (typeof o.s.unit === 'string' && o.s.unit.length > 0 && o.s.txt.endsWith(o.s.unit)), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.stkDirStateNow([{'t':0,'spd':5,'src':'enemy','dir':2},{'t':2,'spd':5,'src':'enemy','dir':2}]);return JSON.stringify({mv:!!document.querySelector('#stkDirWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U6986 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U6981 来袭方位 抛出异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
