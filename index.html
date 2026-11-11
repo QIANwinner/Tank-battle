@@ -5757,6 +5757,16 @@
   #pressCoinWrap.g-bad .pval { color:#e74c3c; }
   #pressCoinWrap.g-bad { animation: tbPressPulse .4s ease-in-out infinite alternate; }
   @keyframes tbPressPulse { from { opacity:.55; } to { opacity:1; } }
+  #pulseKillWrap .pline { display:inline-block; width:74px; height:28px; vertical-align:middle; margin:0 4px; }
+  #pulseKillWrap .pline svg { width:100%; height:100%; display:block; }
+  #pulseKillWrap .pline .ptrack { fill:none; stroke:#333; stroke-width:1; stroke-dasharray:2 2; }
+  #pulseKillWrap .pline .ppulse { fill:none; stroke:#2ecc71; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; }
+  #pulseKillWrap .pval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #pulseKillWrap.g-warn .pline .ppulse { stroke:#f1c40f; }
+  #pulseKillWrap.g-bad .pline .ppulse { stroke:#e74c3c; }
+  #pulseKillWrap.g-bad .pval { color:#e74c3c; }
+  #pulseKillWrap.g-bad { animation: tbPulsePulse .4s ease-in-out infinite alternate; }
+  @keyframes tbPulsePulse { from { opacity:.55; } to { opacity:1; } }
 </style>
 </head>
 <body>
@@ -6785,6 +6795,7 @@
     <div class="pill m-hide" id="pressWaveWrap"><span class="k">🚩</span><span class="v">波次</span><span class="pbar"><i></i></span><em class="pval">—</em></div>
     <div class="pill m-hide" id="pressUpgWrap"><span class="k">🧬</span><span class="v">强化</span><span class="pbar"><i></i></span><em class="pval">—</em></div>
     <div class="pill m-hide" id="pressCoinWrap"><span class="k">💰</span><span class="v">金币</span><span class="pbar"><i></i></span><em class="pval">—</em></div>
+    <div class="pill m-hide" id="pulseKillWrap"><span class="k">💀</span><span class="v">击杀</span><span class="pline"><svg viewBox="0 0 100 28" preserveAspectRatio="none"><polyline class="ptrack" points="0,26 100,26"></polyline><polyline class="ppulse" points=""></polyline></svg></span><em class="pval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -7160,7 +7171,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V17.29</div>
+  <div id="mark">DESIGNED BY QIAN · V17.30</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -12990,6 +13001,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_pressWave = pressWave(wave, Math.max(1, wavesTotal)); const w_pressWave = $('pressWaveWrap'); if (w_pressWave) { w_pressWave.classList.remove('g-good','g-warn','g-bad'); w_pressWave.classList.add(l_pressWave.cls); w_pressWave.classList.toggle('danger', !!l_pressWave.danger); const pf = w_pressWave.querySelector('.pbar i'); if (pf) pf.style.width = l_pressWave.pct + '%'; const pv = w_pressWave.querySelector('.pval'); if (pv) pv.textContent = l_pressWave.txt; }
     const l_pressUpg = pressUpg(upgTotal, 10); const w_pressUpg = $('pressUpgWrap'); if (w_pressUpg) { w_pressUpg.classList.remove('g-good','g-warn','g-bad'); w_pressUpg.classList.add(l_pressUpg.cls); w_pressUpg.classList.toggle('danger', !!l_pressUpg.danger); const pf = w_pressUpg.querySelector('.pbar i'); if (pf) pf.style.width = l_pressUpg.pct + '%'; const pv = w_pressUpg.querySelector('.pval'); if (pv) pv.textContent = l_pressUpg.txt; }
     const l_pressCoin = pressCoin(coins, 2000); const w_pressCoin = $('pressCoinWrap'); if (w_pressCoin) { w_pressCoin.classList.remove('g-good','g-warn','g-bad'); w_pressCoin.classList.add(l_pressCoin.cls); w_pressCoin.classList.toggle('danger', !!l_pressCoin.danger); const pf = w_pressCoin.querySelector('.pbar i'); if (pf) pf.style.width = l_pressCoin.pct + '%'; const pv = w_pressCoin.querySelector('.pval'); if (pv) pv.textContent = l_pressCoin.txt; }
+    if (window.__tbPulseHist === undefined) window.__tbPulseHist = {}; if (window.__tbPulseHist['pulseKill'] === undefined) window.__tbPulseHist['pulseKill'] = []; const h_pulseKill = window.__tbPulseHist['pulseKill']; const t_pulseKill = performance.now(); if (h_pulseKill.length === 0 || t_pulseKill - h_pulseKill.__t > 600) { if (h_pulseKill.length >= 12) h_pulseKill.shift(); h_pulseKill.push(Number(stat.kills)); h_pulseKill.__t = t_pulseKill; } const l_pulseKill = pulseKill(h_pulseKill, 50); const w_pulseKill = $('pulseKillWrap'); if (w_pulseKill) { w_pulseKill.classList.remove('g-good','g-warn','g-bad'); w_pulseKill.classList.add(l_pulseKill.cls); w_pulseKill.classList.toggle('danger', !!l_pulseKill.danger); const pf = w_pulseKill.querySelector('.ppulse'); if (pf) pf.setAttribute('points', l_pulseKill.points || ''); const pv = w_pulseKill.querySelector('.pval'); if (pv) pv.textContent = l_pulseKill.txt; }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -23399,6 +23411,30 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const txt = lvl + ' · ' + Math.round(v);
     return { pct: pct, cls: cls, danger: danger, txt: txt };
   }
+  // —— pulseKill：击杀脉搏（脉搏曲线：趋势 sparkline，越高越热）——
+  function pulseKill(hist, cap) {
+    const c = Number(cap);
+    const ok = Array.isArray(hist) && hist.length > 0 && isFinite(c) && c > 0;
+    if (!ok) return { latest: 0, pct: 0, points: null, n: 0, trend: 'flat', cls: 'g-warn', danger: false, txt: '—' };
+    const h = hist.map(function (x) { return Number(x); });
+    const latest = h[h.length - 1];
+    const pct = Math.max(0, Math.min(100, Math.round(latest / c * 100)));
+    const danger = pct >= 75;
+    const cls = danger ? 'g-bad' : (pct >= 40 ? 'g-warn' : 'g-good');
+    const trend = h.length >= 2 ? (latest > h[0] ? 'up' : (latest < h[0] ? 'down' : 'flat')) : 'flat';
+    let points = null;
+    if (h.length >= 2) {
+      const n = h.length;
+      points = h.map(function (v, i) {
+        const x = Math.round(i / (n - 1) * 1000) / 10;
+        const y = Math.round((26 - Math.max(0, Math.min(1, v / c)) * 22) * 10) / 10;
+        return x + ',' + y;
+      }).join(' ');
+    }
+    const arrow = trend === 'up' ? '▲' : (trend === 'down' ? '▼' : '=');
+    const txt = arrow + ' · ' + Math.round(latest);
+    return { latest: latest, pct: pct, points: points, n: h.length, trend: trend, cls: cls, danger: danger, txt: txt };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -25240,7 +25276,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V17.29', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V17.30', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -27247,6 +27283,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       pressWaveStateNow: (val, cap) => pressWave(val, cap), pressWaveNow: () => pressWave(wave, Math.max(1, wavesTotal)), pressWavePctNow: () => { const r = pressWave(wave, Math.max(1, wavesTotal)); return r.pct; }, pressWaveDangerNow: () => { const w = $('pressWaveWrap'); return !!(w && w.classList.contains('g-bad')); },
       pressUpgStateNow: (val, cap) => pressUpg(val, cap), pressUpgNow: () => pressUpg(upgTotal, 10), pressUpgPctNow: () => { const r = pressUpg(upgTotal, 10); return r.pct; }, pressUpgDangerNow: () => { const w = $('pressUpgWrap'); return !!(w && w.classList.contains('g-bad')); },
       pressCoinStateNow: (val, cap) => pressCoin(val, cap), pressCoinNow: () => pressCoin(coins, 2000), pressCoinPctNow: () => { const r = pressCoin(coins, 2000); return r.pct; }, pressCoinDangerNow: () => { const w = $('pressCoinWrap'); return !!(w && w.classList.contains('g-bad')); },
+      pulseKillStateNow: (hist, cap) => pulseKill(hist, cap), pulseKillNow: () => pulseKill(window.__tbPulseHist && window.__tbPulseHist['pulseKill'] || [], 50), pulseKillHistNow: () => (window.__tbPulseHist && window.__tbPulseHist['pulseKill'] || []).slice(), pulseKillPointsNow: () => { const r = pulseKill(window.__tbPulseHist && window.__tbPulseHist['pulseKill'] || [], 50); return r.points; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
