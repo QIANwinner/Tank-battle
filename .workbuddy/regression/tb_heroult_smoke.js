@@ -18788,6 +18788,22 @@ async function main() {
     t('U6758 DOM 与函数一致: 曲线存在+points 合法', o5.has && o5.pl && o5.valid && o5.ptsOk, JSON.stringify(o5));
   } catch (e) { t('U6753~U6758 伤害脉搏 抛出异常', false, String(e)); }
 
+
+  // ===== U6759~U6764: 金币脉搏(v0.17.32) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('pulseCoinWrap'),s:T.pulseCoinStateNow([10,20,30,40],100)});})()"));
+    t('U6759 金币脉搏 DOM 已加入 HUD + 函数可用', o.dom === true && o.s.latest === 40 && o.s.pct === 40 && o.s.trend === 'up' && o.s.cls === 'g-warn' && o.s.n === 4, JSON.stringify(o));
+    t('U6760 正常 [10,20,30,40]/100→40%/up/points 合法', o.s.pct === 40 && o.s.trend === 'up' && o.s.danger === false && o.s.txt === '▲ · 40' && typeof o.s.points === 'string' && o.s.points.indexOf(',') > 0, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pulseCoinStateNow([80,90,95],100),b:T.pulseCoinStateNow([10,10,10],100)});})()"));
+    t('U6761 边界 up→95%/g-bad+danger, flat-low→10%/g-good/flat', o2.a.pct === 95 && o2.a.cls === 'g-bad' && o2.a.danger === true && o2.a.trend === 'up' && o2.b.pct === 10 && o2.b.cls === 'g-good' && o2.b.danger === false && o2.b.trend === 'flat' && o2.b.txt === '= · 10', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pulseCoinStateNow(null,100),b:T.pulseCoinStateNow([],100),c:T.pulseCoinStateNow([10,20],0),d:T.pulseCoinStateNow([10,20],'x')});})()"));
+    t('U6762 非法 null/[]/cap0/非数→退化 g-warn', o3.a.pct === 0 && o3.a.txt === '—' && o3.b.pct === 0 && o3.b.txt === '—' && o3.c.pct === 0 && o3.c.cls === 'g-warn' && o3.d.pct === 0 && o3.d.txt === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({d:T.pulseCoinStateNow(['10','20','30'],'100'),e:T.pulseCoinStateNow([150],100)});})()"));
+    t('U6763 数字字符串 30/100→30%, 超上限 150/100→100% 钳制', o4.d.pct === 30 && o4.d.latest === 30 && o4.e.pct === 100 && o4.e.cls === 'g-bad', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.pulseCoinNow();const w=document.getElementById('pulseCoinWrap');const pl=w?w.querySelector('.ppulse'):null;const pts=pl?pl.getAttribute('points'):null;return JSON.stringify({has:!!w, pl:!!pl, valid:(r.points===null || (typeof r.points==='string' && r.points.indexOf(',')>0 && !/[a-zA-Z]/.test(r.points))), ptsOk:(pts===null || pts==='' || (typeof pts==='string' && pts.indexOf(',')>0))});})()"));
+    t('U6764 DOM 与函数一致: 曲线存在+points 合法', o5.has && o5.pl && o5.valid && o5.ptsOk, JSON.stringify(o5));
+  } catch (e) { t('U6759~U6764 金币脉搏 抛出异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
