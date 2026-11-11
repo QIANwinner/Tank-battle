@@ -19155,6 +19155,21 @@ async function main() {
     t('U6896 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { console.log('U6891..6896 走位速率 异常: ' + e.message); }
 
+
+  // ===== U6897~U6902: 站桩时长(v0.17.55) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('mobIdleWrap'),mv:!!document.querySelector('#mobIdleWrap .mval'),s:T.mobIdleStateNow([{'x':200,'y':200,'t':0},{'x':300,'y':200,'t':0.2},{'x':300,'y':200,'t':1}])});})()"));
+    t('U6897 站桩时长 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U6898 正常 站桩时长 → v=0.8 g-good 0.8秒', o.s.v === 0.8 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '0.8秒', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.mobIdleStateNow([{'x':200,'y':200,'t':0},{'x':300,'y':200,'t':0.2},{'x':300,'y':200,'t':1}]),b:T.mobIdleStateNow([{'x':200,'y':200,'t':0},{'x':200,'y':200,'t':0.5},{'x':200,'y':200,'t':1},{'x':200,'y':200,'t':2}])});return JSON.stringify(r);})()"));
+    t('U6899 边界 站桩时长 → g-warn 2.0秒', o2.b.v === 2 && o2.b.cls === 'g-warn' && o2.b.danger === false && o2.b.txt === '2.0秒', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.mobIdleStateNow(null);const b=T.mobIdleStateNow([]);const c=T.mobIdleStateNow([{x:200,y:200,t:0}]);const d=T.mobIdleStateNow([{x:'n',y:'n',t:'x'},{x:'n',y:'n',t:'x'}]);return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U6900 非法 null/[]/单点/全非数→退化 g-warn —', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.c.txt === '—' && o3.d.txt === '—', JSON.stringify(o3));
+    t('U6901 单位结构 txt 以 unit 结尾或为—', (o.s.txt === '—') || (typeof o.s.unit === 'string' && o.s.unit.length > 0 && o.s.txt.endsWith(o.s.unit)), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.mobIdleStateNow([{'x':200,'y':200,'t':0},{'x':300,'y':200,'t':0.2},{'x':300,'y':200,'t':1}]);return JSON.stringify({mv:!!document.querySelector('#mobIdleWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U6902 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { console.log('U6897..6902 站桩时长 异常: ' + e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
