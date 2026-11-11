@@ -5268,6 +5268,13 @@
   #trendScoreWrap.g-bad .tm i.on { background:#e74c3c; }
   #trendScoreWrap.g-bad { animation: tbSparkPulse .5s ease-in-out infinite alternate; }
   @keyframes tbSparkPulse { from { opacity:.6; } to { opacity:1; } }
+  #trendCoinWrap .tm { display:inline-flex; gap:1px; margin:0 4px; vertical-align:middle; }
+  #trendCoinWrap .tm i { width:5px; height:12px; border-radius:1px; background:#3a3a3a; display:inline-block; }
+  #trendCoinWrap.g-good .tm i.on { background:#2ecc71; }
+  #trendCoinWrap.g-warn .tm i.on { background:#f1c40f; }
+  #trendCoinWrap.g-bad .tm i.on { background:#e74c3c; }
+  #trendCoinWrap.g-bad { animation: tbSparkPulse .5s ease-in-out infinite alternate; }
+  @keyframes tbSparkPulse { from { opacity:.6; } to { opacity:1; } }
 </style>
 </head>
 <body>
@@ -6249,6 +6256,7 @@
     <div class="pill m-hide" id="sparkLifeWrap"><span class="k">❤️</span><span class="spk"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="v">生存 <b class="val">0</b></span></div>
     <div class="pill m-hide" id="sparkComboWrap"><span class="k">⚡</span><span class="spk"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="v">连击 <b class="val">0</b></span></div>
     <div class="pill m-hide" id="trendScoreWrap"><span class="k">🏆</span><span class="tm"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="v">得分趋势 <b class="val">0</b></span></div>
+    <div class="pill m-hide" id="trendCoinWrap"><span class="k">💰</span><span class="tm"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="v">金币趋势 <b class="val">0</b></span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -6624,7 +6632,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V16.82</div>
+  <div id="mark">DESIGNED BY QIAN · V16.83</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -12407,6 +12415,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_sparkLife = sparkLifeSpark(lives, 5); const w_sparkLife = $('sparkLifeWrap'); if (w_sparkLife) { w_sparkLife.classList.remove('g-good','g-warn','g-bad'); w_sparkLife.classList.add(r_sparkLife.cls); w_sparkLife.classList.toggle('danger', !!r_sparkLife.danger); const ds = w_sparkLife.querySelectorAll('.spk i'); ds.forEach((d, di) => { d.classList.toggle('on', di < r_sparkLife.n); }); const va = w_sparkLife.querySelector('.val'); if (va) va.textContent = r_sparkLife.txt; }
     const r_sparkCombo = sparkComboSpark(combo, 50); const w_sparkCombo = $('sparkComboWrap'); if (w_sparkCombo) { w_sparkCombo.classList.remove('g-good','g-warn','g-bad'); w_sparkCombo.classList.add(r_sparkCombo.cls); w_sparkCombo.classList.toggle('danger', !!r_sparkCombo.danger); const ds = w_sparkCombo.querySelectorAll('.spk i'); ds.forEach((d, di) => { d.classList.toggle('on', di < r_sparkCombo.n); }); const va = w_sparkCombo.querySelector('.val'); if (va) va.textContent = r_sparkCombo.txt; }
     trendScorePush(score); const r_trendScore = trendScore(__trendScoreBuf, score); const w_trendScore = $('trendScoreWrap'); if (w_trendScore) { w_trendScore.classList.remove('g-good','g-warn','g-bad'); w_trendScore.classList.add(r_trendScore.cls); w_trendScore.classList.toggle('danger', !!r_trendScore.danger); const ds = w_trendScore.querySelectorAll('.tm i'); ds.forEach((d, di) => { d.classList.toggle('on', di < r_trendScore.n); }); const va = w_trendScore.querySelector('.val'); if (va) va.textContent = r_trendScore.txt; }
+    trendCoinPush(coins); const r_trendCoin = trendCoin(__trendCoinBuf, coins); const w_trendCoin = $('trendCoinWrap'); if (w_trendCoin) { w_trendCoin.classList.remove('g-good','g-warn','g-bad'); w_trendCoin.classList.add(r_trendCoin.cls); w_trendCoin.classList.toggle('danger', !!r_trendCoin.danger); const ds = w_trendCoin.querySelectorAll('.tm i'); ds.forEach((d, di) => { d.classList.toggle('on', di < r_trendCoin.n); }); const va = w_trendCoin.querySelector('.val'); if (va) va.textContent = r_trendCoin.txt; }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -21866,6 +21875,32 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const txt = arrow + ' ' + Math.round(last);
     return { dir: dir, pct: pct, cls: cls, danger: danger, txt: txt, n: n };
   }
+  // —— trendCoin：金币趋势（迷你趋势条：最近 12 采样窗口，净变化 → 方向/色阶/强度格，当前值）——
+  const __trendCoinBuf = [];
+  let __trendCoinAt = 0;
+  function trendCoinPush(v) {
+    const now = Date.now();
+    if (now - __trendCoinAt >= 600) { __trendCoinBuf.push(Number(v)); if (__trendCoinBuf.length > 12) __trendCoinBuf.shift(); __trendCoinAt = now; }
+  }
+  function trendCoin(samples, cur) {
+    const arr = Array.isArray(samples) ? samples.map(Number) : [];
+    const vals = arr.filter(x => isFinite(x));
+    const c = Number(cur);
+    const curOk = isFinite(c);
+    const last = curOk ? c : (vals.length ? vals[vals.length - 1] : 0);
+    const first = vals.length ? vals[0] : (curOk ? c : 0);
+    const has = curOk || vals.length > 0;
+    const delta = has ? (last - first) : 0;
+    const base = Math.max(1, Math.abs(first));
+    const pct = has ? Math.round((delta / base) * 100) : 0;
+    const dir = !has ? 'flat' : (Math.abs(delta) < 1e-9 ? 'flat' : (delta > 0 ? 'up' : 'down'));
+    const n = Math.max(0, Math.min(12, Math.round(Math.abs(pct) / 100 * 12)));
+    const cls = dir === 'up' ? 'g-good' : (dir === 'down' ? 'g-bad' : 'g-warn');
+    const danger = cls === 'g-bad';
+    const arrow = dir === 'up' ? '▲' : (dir === 'down' ? '▼' : '—');
+    const txt = arrow + ' ' + Math.round(last);
+    return { dir: dir, pct: pct, cls: cls, danger: danger, txt: txt, n: n };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -23707,7 +23742,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V16.82', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V16.83', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -25667,6 +25702,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       sparkLifeStateNow: (v, c) => sparkLifeSpark(v, c), sparkLifeNow: () => sparkLifeSpark(lives, 5), sparkLifeNNow: () => { const w = $('sparkLifeWrap'); if (!w) return -1; return Array.from(w.querySelectorAll('.spk i')).filter(i => i.classList.contains('on')).length; }, sparkLifeDangerNow: () => { const w = $('sparkLifeWrap'); return !!(w && w.classList.contains('g-bad')); },
       sparkComboStateNow: (v, c) => sparkComboSpark(v, c), sparkComboNow: () => sparkComboSpark(combo, 50), sparkComboNNow: () => { const w = $('sparkComboWrap'); if (!w) return -1; return Array.from(w.querySelectorAll('.spk i')).filter(i => i.classList.contains('on')).length; }, sparkComboDangerNow: () => { const w = $('sparkComboWrap'); return !!(w && w.classList.contains('g-bad')); },
       trendScoreStateNow: (s, c) => trendScore(s, c), trendScoreNow: () => { trendScorePush(score); return trendScore(__trendScoreBuf, score); }, trendScoreNNow: () => { const w = $('trendScoreWrap'); return w ? Array.from(w.querySelectorAll('.tm i')).filter(i => i.classList.contains('on')).length : -1; }, trendScoreDangerNow: () => { const w = $('trendScoreWrap'); return !!(w && w.classList.contains('g-bad')); },
+      trendCoinStateNow: (s, c) => trendCoin(s, c), trendCoinNow: () => { trendCoinPush(coins); return trendCoin(__trendCoinBuf, coins); }, trendCoinNNow: () => { const w = $('trendCoinWrap'); return w ? Array.from(w.querySelectorAll('.tm i')).filter(i => i.classList.contains('on')).length : -1; }, trendCoinDangerNow: () => { const w = $('trendCoinWrap'); return !!(w && w.classList.contains('g-bad')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
