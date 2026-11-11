@@ -19076,6 +19076,22 @@ async function main() {
     t('U6866 DOM 与函数一致 8扇/needle/dom 合法', o5.c === 8 && o5.nd === o5.dm && o5.rv === true, JSON.stringify(o5));
   } catch (e) { console.log('U6861..6866 BOSS直扑 异常: ' + e.message); }
 
+
+  // ===== U6867~U6872: 高速直扑(v0.17.50) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;const it=[{x:300,y:200},{x:300,y:200},{x:300,y:200}];return JSON.stringify({dom:!!document.getElementById('radFastWrap'),svg:!!document.querySelector('#radFastWrap svg'),wed:document.querySelectorAll('#radFastWrap svg .rw').length,nd:!!document.querySelector('#radFastWrap svg .rneedle'),rv:!!document.querySelector('#radFastWrap .rval'),s:T.radFastStateNow(it,200,200)});})()"));
+    t('U6867 高速直扑 DOM 已加入 HUD + 函数可用', o.dom === true && o.svg === true && o.wed === 8 && o.nd === true && o.rv === true && o.s.total === 3 && o.s.dom === 0 && o.s.cls === 'g-bad' && o.s.danger === true, JSON.stringify(o));
+    t('U6868 正常 3东→total3/dom0/100%/g-bad+tXT 共3·东100%', o.s.domPct === 100 && o.s.counts[0] === 3 && o.s.needle === 0 && o.s.txt === '共3 · 东 100%', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.radFastStateNow([{x:300,y:200},{x:100,y:200},{x:100,y:200},{x:100,y:200},{x:100,y:200},{x:100,y:200},{x:100,y:200},{x:100,y:200},{x:100,y:200},{x:100,y:200}],200,200);const b=T.radFastStateNow([{x:300,y:200},{x:200,y:300},{x:100,y:200},{x:200,y:100}],200,200);const c=T.radFastStateNow([{x:300,y:200},{x:200,y:300},{x:100,y:200}],200,200);return JSON.stringify({a:a,b:b,c:c});})()"));
+    t('U6869 边界 1东9西→90% g-bad, 4向→g-warn total4, 3向→g-good', o2.a.domPct === 90 && o2.a.cls === 'g-bad' && o2.a.danger === true && o2.a.txt === '共10 · 西 90%' && o2.b.total === 4 && o2.b.cls === 'g-warn' && o2.b.domPct === 25 && o2.c.total === 3 && o2.c.cls === 'g-good', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.radFastStateNow(null,200,200);const b=T.radFastStateNow([],200,200);const c=T.radFastStateNow([{x:300,y:200}],'x',200);const d=T.radFastStateNow([{x:'n',y:'n'}],200,200);return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U6870 非法 null/[]/非数px/非数弹→退化', o3.a.total === 0 && o3.a.txt === '—' && o3.a.dom === -1 && o3.b.total === 0 && o3.b.txt === '—' && o3.c.total === 0 && o3.c.txt === '—' && o3.d.total === 0 && o3.d.txt === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({e:T.radSectorNow(300,200,200,200),s:T.radSectorNow(200,300,200,200),w:T.radSectorNow(100,200,200,200),n:T.radSectorNow(200,100,200,200),dg:T.radSectorNow(200,200,200,200)});})()"));
+    t('U6871 radSector 方位 0/2/4/6 正确 + 退化 -1', o4.e === 0 && o4.s === 2 && o4.w === 4 && o4.n === 6 && o4.dg === -1, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.radFastStateNow([{x:300,y:200},{x:200,y:300}],200,200);return JSON.stringify({c:r.counts.length,nd:r.needle,dm:r.dom,rv:!!document.querySelector('#radFastWrap .rval')});})()"));
+    t('U6872 DOM 与函数一致 8扇/needle/dom 合法', o5.c === 8 && o5.nd === o5.dm && o5.rv === true, JSON.stringify(o5));
+  } catch (e) { console.log('U6867..6872 高速直扑 异常: ' + e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
