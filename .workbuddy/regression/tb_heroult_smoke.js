@@ -18292,6 +18292,22 @@ async function main() {
     t('U6572 DOM 与函数一致（双条宽=进度、chip=提示）', o5.ok === true && o5.pcts[0] === o5.aPct && o5.pcts[1] === o5.bPct && o5.chip === o5.txt, JSON.stringify(o5));
   } catch (e) { t('U6567 击杀双目标 断言块执行异常', false, String(e)); }
 
+
+  // ===== U6573~U6578: 连击双目标(v0.17.1) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('pickComboWrap'),s:T.pickComboStateNow(13,10,25)});})()"));
+    t('U6573 连击双目标 DOM 已加入 HUD', o.dom === true && o.s.metA === true && o.s.fav === 'a' && o.s.aPct === 100 && o.s.bPct === 52, JSON.stringify(o));
+    t('U6574 正常 13→metA/fav a/100%/52%/还差12/g-warn', o.s.metA === true && o.s.metB === false && o.s.fav === 'a' && o.s.aPct === 100 && o.s.bPct === 52 && o.s.gapB === 12 && o.s.cls === 'g-warn' && o.s.danger === false && o.s.txt === 'A 已达成 · B 还差 12', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pickComboStateNow(30,10,25),b:T.pickComboStateNow(2,10,25)});})()"));
+    t('U6575 边界 30→双达成/g-good/100/100, 2→fav a/20%/8%/g-bad+danger/先冲A', o2.a.fav === 'both' && o2.a.metA === true && o2.a.metB === true && o2.a.aPct === 100 && o2.a.bPct === 100 && o2.a.cls === 'g-good' && o2.a.txt === '双达成' && o2.b.fav === 'a' && o2.b.aPct === 20 && o2.b.bPct === 8 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '先冲 A · 还差 8', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pickComboStateNow(NaN,10,25),b:T.pickComboStateNow(10,0,25),c:T.pickComboStateNow(10,25,25),d:T.pickComboStateNow('x',10,25)});})()"));
+    t('U6576 非法 NaN/0/相等/非数→退化双条 g-warn 平', o3.a.fav === 'none' && o3.a.aPct === 0 && o3.a.bPct === 0 && o3.a.cls === 'g-warn' && o3.a.txt === '—' && o3.b.fav === 'none' && o3.c.fav === 'none' && o3.d.fav === 'none' && o3.d.cls === 'g-warn', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({e:T.pickComboStateNow('13',25,10)});})()"));
+    t('U6577 数字字符串+乱序 13/25/10→metB/fav b/52%/100%/还差12', o4.e.metA === false && o4.e.metB === true && o4.e.fav === 'b' && o4.e.aPct === 52 && o4.e.bPct === 100 && o4.e.gapA === 12 && o4.e.cls === 'g-warn' && o4.e.txt === 'B 已达成 · A 还差 12', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}const w=document.getElementById('pickComboWrap');const bars=w?w.querySelectorAll('.dbar i'):[];const pcts=w?(function(){const b=w.querySelectorAll('.dbar i');return b.length>=2?[parseInt(b[0].style.width)||0,parseInt(b[1].style.width)||0]:[0,0];})():[0,0];const chip=w?w.querySelector('.chip'):null;const now=T.pickComboNow();return JSON.stringify({ok:ok,pcts:pcts,chip:chip?chip.textContent:null,aPct:now.aPct,bPct:now.bPct,txt:now.txt});})()"));
+    t('U6578 DOM 与函数一致（双条宽=进度、chip=提示）', o5.ok === true && o5.pcts[0] === o5.aPct && o5.pcts[1] === o5.bPct && o5.chip === o5.txt, JSON.stringify(o5));
+  } catch (e) { t('U6573 连击双目标 断言块执行异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
