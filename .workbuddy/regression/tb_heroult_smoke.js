@@ -18532,6 +18532,22 @@ async function main() {
     t('U6662 DOM 与函数一致 圆环存在+Now 返回合法 pct', o5.has === true && o5.ring === true && o5.pct === true, JSON.stringify(o5));
   } catch (e) { console.error('U6657~6662 断言异常', e); throw e; }
 
+
+  // ===== U6663~U6668: 无敌窗口(v0.17.16) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('graceShieldWrap'),s:T.graceShieldStateNow(2,5)});})()"));
+    t('U6663 无敌窗口 DOM 已加入 HUD', o.dom === true && o.s.active === true && o.s.pct === 40 && o.s.txt === '剩 2s', JSON.stringify(o));
+    t('U6664 正常 2/5→active/40%/g-warn/剩2s', o.s.active === true && o.s.pct === 40 && o.s.cls === 'g-warn' && o.s.danger === false && o.s.txt === '剩 2s', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.graceShieldStateNow(1,5),b:T.graceShieldStateNow(5,5),c:T.graceShieldStateNow(0,5)});})()"));
+    t('U6665 边界 1/5→pct20/g-bad+danger/即将耗尽, 5/5→pct100/g-good, 0/5→不活跃', o2.a.pct === 20 && o2.a.cls === 'g-bad' && o2.a.danger === true && o2.a.txt === '剩 1s · 即将耗尽' && o2.b.pct === 100 && o2.b.cls === 'g-good' && o2.c.active === false && o2.c.pct === 0 && o2.c.txt === '—', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.graceShieldStateNow(NaN,5),b:T.graceShieldStateNow(2,-1),c:T.graceShieldStateNow('x',5)});})()"));
+    t('U6666 非法 NaN/负max/非数→不活跃 g-warn', o3.a.active === false && o3.a.txt === '—' && o3.b.active === false && o3.b.txt === '—' && o3.c.active === false && o3.c.cls === 'g-warn' && o3.c.txt === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({d:T.graceShieldStateNow('2',5),e:T.graceShieldStateNow(8,5)});})()"));
+    t('U6667 数字字符串 2/5→40%, 超上限 8/5→100% 钳制', o4.d.active === true && o4.d.pct === 40 && o4.e.pct === 100 && o4.e.cls === 'g-good', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.graceShieldNow();const w=document.getElementById('graceShieldWrap');const g=w?w.querySelector('.gring'):null;return JSON.stringify({has:!!w, ring:!!g, pct:(typeof r.pct==='number'&&r.pct>=0&&r.pct<=100)});})()"));
+    t('U6668 DOM 与函数一致 圆环存在+Now 返回合法 pct', o5.has === true && o5.ring === true && o5.pct === true, JSON.stringify(o5));
+  } catch (e) { console.error('U6663~6668 断言异常', e); throw e; }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
