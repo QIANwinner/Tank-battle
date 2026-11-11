@@ -5953,6 +5953,10 @@
   #mobTurnWrap.g-bad .mval { color:#e74c3c; }
   #mobTurnWrap.g-bad { animation: tbMobPulse .4s ease-in-out infinite alternate; }
   @keyframes tbMobPulse { from { opacity:.55; } to { opacity:1; } }
+  #mobDistWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #mobDistWrap.g-bad .mval { color:#e74c3c; }
+  #mobDistWrap.g-bad { animation: tbMobPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbMobPulse { from { opacity:.55; } to { opacity:1; } }
 </style>
 </head>
 <body>
@@ -7010,6 +7014,7 @@
     <div class="pill m-hide" id="mobBurstWrap"><span class="k">⚡</span><span class="v">爆发</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="mobRatioWrap"><span class="k">📊</span><span class="v">动占比</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="mobTurnWrap"><span class="k">🧭</span><span class="v">转向</span><em class="mval">—</em></div>
+    <div class="pill m-hide" id="mobDistWrap"><span class="k">📏</span><span class="v">走距</span><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -7385,7 +7390,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V17.58</div>
+  <div id="mark">DESIGNED BY QIAN · V17.59</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -13244,6 +13249,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_mobBurst = mobBurstNow(); const w_mobBurst = $('mobBurstWrap'); if (w_mobBurst) { w_mobBurst.classList.remove('g-good','g-warn','g-bad'); w_mobBurst.classList.add(l_mobBurst.cls); w_mobBurst.classList.toggle('danger', !!l_mobBurst.danger); const mv = w_mobBurst.querySelector('.mval'); if (mv) mv.textContent = l_mobBurst.txt; }
     const l_mobRatio = mobRatioNow(); const w_mobRatio = $('mobRatioWrap'); if (w_mobRatio) { w_mobRatio.classList.remove('g-good','g-warn','g-bad'); w_mobRatio.classList.add(l_mobRatio.cls); w_mobRatio.classList.toggle('danger', !!l_mobRatio.danger); const mv = w_mobRatio.querySelector('.mval'); if (mv) mv.textContent = l_mobRatio.txt; }
     const l_mobTurn = mobTurnNow(); const w_mobTurn = $('mobTurnWrap'); if (w_mobTurn) { w_mobTurn.classList.remove('g-good','g-warn','g-bad'); w_mobTurn.classList.add(l_mobTurn.cls); w_mobTurn.classList.toggle('danger', !!l_mobTurn.danger); const mv = w_mobTurn.querySelector('.mval'); if (mv) mv.textContent = l_mobTurn.txt; }
+    const l_mobDist = mobDistNow(); const w_mobDist = $('mobDistWrap'); if (w_mobDist) { w_mobDist.classList.remove('g-good','g-warn','g-bad'); w_mobDist.classList.add(l_mobDist.cls); w_mobDist.classList.toggle('danger', !!l_mobDist.danger); const mv = w_mobDist.querySelector('.mval'); if (mv) mv.textContent = l_mobDist.txt; }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -24394,6 +24400,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // —— mobBurst：走位爆发（走位活跃度：见 helperBody mobBase + mobBurst 实现）——
   // —— mobRatio：移动占比（走位活跃度：见 helperBody mobBase + mobRatio 实现）——
   // —— mobTurn：方向变化率（走位活跃度：见 helperBody mobBase + mobTurn 实现）——
+  // —— mobDist：走位距离（走位活跃度：见 helperBody mobBase + mobDist 实现）——
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -26235,7 +26242,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V17.58', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V17.59', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -28271,6 +28278,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       mobBurstStateNow: (hist) => mobBurst(hist), mobBurstNow: () => mobBurst(mobHist()), mobBurstDomNow: () => { const e = document.querySelector('.mobBurstWrap .mval'); return e ? e.textContent : null; },
       mobRatioStateNow: (hist) => mobRatio(hist), mobRatioNow: () => mobRatio(mobHist()), mobRatioDomNow: () => { const e = document.querySelector('.mobRatioWrap .mval'); return e ? e.textContent : null; },
       mobTurnStateNow: (hist) => mobTurn(hist), mobTurnNow: () => mobTurn(mobHist()), mobTurnDomNow: () => { const e = document.querySelector('.mobTurnWrap .mval'); return e ? e.textContent : null; },
+      mobDistStateNow: (hist) => mobDist(hist), mobDistNow: () => mobDist(mobHist()), mobDistDomNow: () => { const e = document.querySelector('.mobDistWrap .mval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
