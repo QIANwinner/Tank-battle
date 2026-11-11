@@ -19140,6 +19140,21 @@ async function main() {
     t('U6890 DOM 与函数一致 8扇/needle/dom 合法', o5.c === 8 && o5.nd === o5.dm && o5.rv === true, JSON.stringify(o5));
   } catch (e) { console.log('U6885..6890 非BOSS直扑 异常: ' + e.message); }
 
+
+  // ===== U6891~U6896: 走位速率(v0.17.54) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('mobSpeedWrap'),mv:!!document.querySelector('#mobSpeedWrap .mval'),s:T.mobSpeedStateNow([{'x':200,'y':200,'t':0},{'x':300,'y':200,'t':0.5},{'x':400,'y':200,'t':1}])});})()"));
+    t('U6891 走位速率 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U6892 正常 走位速率 → v=8.3 g-good 8.3格/秒', o.s.v === 8.3 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '8.3格/秒', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.mobSpeedStateNow([{'x':200,'y':200,'t':0},{'x':300,'y':200,'t':0.5},{'x':400,'y':200,'t':1}]),b:T.mobSpeedStateNow([{'x':200,'y':200,'t':0},{'x':200,'y':200,'t':0.5},{'x':200,'y':200,'t':1}])});return JSON.stringify(r);})()"));
+    t('U6893 边界 走位速率 → g-bad 0.0格/秒', o2.b.v === 0 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '0.0格/秒', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.mobSpeedStateNow(null);const b=T.mobSpeedStateNow([]);const c=T.mobSpeedStateNow([{x:200,y:200,t:0}]);const d=T.mobSpeedStateNow([{x:'n',y:'n',t:'x'},{x:'n',y:'n',t:'x'}]);return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U6894 非法 null/[]/单点/全非数→退化 g-warn —', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.c.txt === '—' && o3.d.txt === '—', JSON.stringify(o3));
+    t('U6895 单位结构 txt 以 unit 结尾或为—', (o.s.txt === '—') || (typeof o.s.unit === 'string' && o.s.unit.length > 0 && o.s.txt.endsWith(o.s.unit)), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.mobSpeedStateNow([{'x':200,'y':200,'t':0},{'x':300,'y':200,'t':0.5},{'x':400,'y':200,'t':1}]);return JSON.stringify({mv:!!document.querySelector('#mobSpeedWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U6896 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { console.log('U6891..6896 走位速率 异常: ' + e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
