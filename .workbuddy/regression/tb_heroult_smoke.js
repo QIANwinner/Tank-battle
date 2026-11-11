@@ -18628,6 +18628,22 @@ async function main() {
     t('U6698 DOM 与函数一致 圆环存在+Now 返回合法 pct', o5.has === true && o5.ring === true && o5.pct === true, JSON.stringify(o5));
   } catch (e) { console.error('U6693~6698 断言异常', e); throw e; }
 
+
+  // ===== U6699~U6704: 弹幕压强(v0.17.22) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('pressBulletWrap'),s:T.pressBulletStateNow(30,100)});})()"));
+    t('U6699 弹幕压强 DOM 已加入 HUD', o.dom === true && o.s.pct === 30 && o.s.cls === 'g-good' && o.s.txt === '低 · 30', JSON.stringify(o));
+    t('U6700 正常 30/100→30%/g-good/低', o.s.pct === 30 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '低 · 30', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pressBulletStateNow(80,100),b:T.pressBulletStateNow(45,100)});})()"));
+    t('U6701 边界 80/100→80%/g-bad+danger/高, 45/100→g-warn/中', o2.a.pct === 80 && o2.a.cls === 'g-bad' && o2.a.danger === true && o2.a.txt === '高 · 80' && o2.b.pct === 45 && o2.b.cls === 'g-warn' && o2.b.danger === false && o2.b.txt === '中 · 45', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pressBulletStateNow(NaN,100),b:T.pressBulletStateNow(30,-5),c:T.pressBulletStateNow('x',100)});})()"));
+    t('U6702 非法 NaN/负cap/非数→退化 g-warn', o3.a.pct === 0 && o3.a.txt === '—' && o3.b.pct === 0 && o3.b.txt === '—' && o3.c.pct === 0 && o3.c.cls === 'g-warn' && o3.c.txt === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({d:T.pressBulletStateNow('50',100),e:T.pressBulletStateNow(120,100)});})()"));
+    t('U6703 数字字符串 50/100→50%, 超上限 120/100→100% 钳制', o4.d.pct === 50 && o4.e.pct === 100 && o4.e.cls === 'g-bad', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.pressBulletNow();const w=document.getElementById('pressBulletWrap');const f=w?w.querySelector('.pbar i'):null;return JSON.stringify({has:!!w, fill:!!f, pct:(typeof r.pct==='number'&&r.pct>=0&&r.pct<=100)});})()"));
+    t('U6704 DOM 与函数一致 条存在+Now 返回合法 pct', o5.has === true && o5.fill === true && o5.pct === true, JSON.stringify(o5));
+  } catch (e) { console.error('U6699~6704 断言异常', e); throw e; }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
