@@ -18724,6 +18724,22 @@ async function main() {
     t('U6734 DOM 与函数一致 条存在+Now 返回合法 pct', o5.has === true && o5.fill === true && o5.pct === true, JSON.stringify(o5));
   } catch (e) { console.error('U6729~6734 断言异常', e); throw e; }
 
+
+  // ===== U6735~U6740: 强化压强(v0.17.28) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('pressUpgWrap'),s:T.pressUpgStateNow(30,100)});})()"));
+    t('U6735 强化压强 DOM 已加入 HUD', o.dom === true && o.s.pct === 30 && o.s.cls === 'g-good' && o.s.txt === '低 · 30', JSON.stringify(o));
+    t('U6736 正常 30/100→30%/g-good/低', o.s.pct === 30 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '低 · 30', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pressUpgStateNow(80,100),b:T.pressUpgStateNow(45,100)});})()"));
+    t('U6737 边界 80/100→80%/g-bad+danger/高, 45/100→g-warn/中', o2.a.pct === 80 && o2.a.cls === 'g-bad' && o2.a.danger === true && o2.a.txt === '高 · 80' && o2.b.pct === 45 && o2.b.cls === 'g-warn' && o2.b.danger === false && o2.b.txt === '中 · 45', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.pressUpgStateNow(NaN,100),b:T.pressUpgStateNow(30,-5),c:T.pressUpgStateNow('x',100)});})()"));
+    t('U6738 非法 NaN/负cap/非数→退化 g-warn', o3.a.pct === 0 && o3.a.txt === '—' && o3.b.pct === 0 && o3.b.txt === '—' && o3.c.pct === 0 && o3.c.cls === 'g-warn' && o3.c.txt === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({d:T.pressUpgStateNow('50',100),e:T.pressUpgStateNow(120,100)});})()"));
+    t('U6739 数字字符串 50/100→50%, 超上限 120/100→100% 钳制', o4.d.pct === 50 && o4.e.pct === 100 && o4.e.cls === 'g-bad', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.pressUpgNow();const w=document.getElementById('pressUpgWrap');const f=w?w.querySelector('.pbar i'):null;return JSON.stringify({has:!!w, fill:!!f, pct:(typeof r.pct==='number'&&r.pct>=0&&r.pct<=100)});})()"));
+    t('U6740 DOM 与函数一致 条存在+Now 返回合法 pct', o5.has === true && o5.fill === true && o5.pct === true, JSON.stringify(o5));
+  } catch (e) { console.error('U6735~6740 断言异常', e); throw e; }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
