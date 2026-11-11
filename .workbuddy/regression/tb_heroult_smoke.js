@@ -18084,6 +18084,22 @@ async function main() {
     t('U6494 DOM 与函数一致性', o5.ok === true && o5.match === true && o5.on === o5.n, JSON.stringify(o5));
   } catch (e) { t('U6489 波次趋势 异常', false, String(e)); }
 
+
+  // ===== U6495~U6500: 命中趋势(v0.16.88) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('trendHitWrap'),s:T.trendHitStateNow([100,120,140],160)});})()"));
+    t('U6495 命中趋势 DOM 已加入 HUD', o.dom === true && o.s.dir === 'up' && o.s.pct === 60, JSON.stringify(o));
+    t('U6496 正常 100→160 上升→dir=up/pct60/n7/g-good', o.s.dir === 'up' && o.s.pct === 60 && o.s.n === 7 && o.s.cls === 'g-good' && o.s.danger === false, JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.trendHitStateNow([200,180,160],140),b:T.trendHitStateNow([100,100,100],100)});})()"));
+    t('U6497 边界 200→140 下降→dir=down/pct-30/n4/g-bad+danger, 平→g-warn', o2.a.dir === 'down' && o2.a.pct === -30 && o2.a.n === 4 && o2.a.cls === 'g-bad' && o2.a.danger === true && o2.b.dir === 'flat' && o2.b.pct === 0 && o2.b.cls === 'g-warn' && o2.b.danger === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.trendHitStateNow([],50),b:T.trendHitStateNow([NaN,Infinity],30),c:T.trendHitStateNow('nope',10),d:T.trendHitStateNow([],NaN)});})()"));
+    t('U6498 非法 空/NaN/Infinity/非数组→flat/pct0/n0', o3.a.dir === 'flat' && o3.a.pct === 0 && o3.a.n === 0 && o3.b.dir === 'flat' && o3.b.pct === 0 && o3.c.dir === 'flat' && o3.d.dir === 'flat' && o3.d.pct === 0 && o3.d.n === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.trendHitStateNow([0,0,0],0),b:T.trendHitStateNow([50,50],50)});})()"));
+    t('U6499 边界 全零→flat/pct0/n0, 平台→flat', o4.a.dir === 'flat' && o4.a.pct === 0 && o4.a.n === 0 && o4.b.dir === 'flat' && o4.b.pct === 0 && o4.b.n === 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.skipIntro();let ok=true;try{T.extraHudRefreshNow();}catch(e){ok=false;}const w=document.getElementById('trendHitWrap');const on=w?Array.from(w.querySelectorAll('.tm i')).filter(i=>i.classList.contains('on')).length:-1;const now=T.trendHitNow();return JSON.stringify({ok:ok,on:on,n:now.n,match:on===now.n,dom:!!w});})()"));
+    t('U6500 DOM 与函数一致性', o5.ok === true && o5.match === true && o5.on === o5.n, JSON.stringify(o5));
+  } catch (e) { t('U6495 命中趋势 异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
