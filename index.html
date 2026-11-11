@@ -5885,6 +5885,12 @@
   #mkLightWrap.g-bad .cval { color:#e74c3c; }
   #mkLightWrap.g-bad { animation: tbMkPulse .4s ease-in-out infinite alternate; }
   @keyframes tbMkPulse { from { opacity:.55; } to { opacity:1; } }
+  #radAllWrap .rad { display:inline-block; width:30px; height:30px; vertical-align:middle; margin:0 4px; }
+  #radAllWrap .rad svg { display:block; }
+  #radAllWrap .rval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #radAllWrap.g-bad .rval { color:#e74c3c; }
+  #radAllWrap.g-bad { animation: tbRadPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbRadPulse { from { opacity:.55; } to { opacity:1; } }
 </style>
 </head>
 <body>
@@ -6929,6 +6935,7 @@
     <div class="pill m-hide" id="mkBossWrap"><span class="k">👹</span><span class="v">BOSS</span><span class="cbar"><i class="cseg"></i><i class="cseg"></i></span><em class="cval">—</em></div>
     <div class="pill m-hide" id="mkThreatWrap"><span class="k">☠️</span><span class="v">高危</span><span class="cbar"><i class="cseg"></i><i class="cseg"></i></span><em class="cval">—</em></div>
     <div class="pill m-hide" id="mkLightWrap"><span class="k">🛡️</span><span class="v">轻甲</span><span class="cbar"><i class="cseg"></i><i class="cseg"></i></span><em class="cval">—</em></div>
+    <div class="pill m-hide" id="radAllWrap"><span class="k">🎯</span><span class="v">直扑</span><span class="rad"><svg viewBox="0 0 44 44" width="30" height="30"><circle cx="22" cy="22" r="20" fill="none" stroke="#2c2c2c"/><circle cx="22" cy="22" r="17" fill="none" stroke="#333"/><g class="rwg"><path class="rw" d="M22 22 L39.00 22.00 A17 17 0 0 1 34.02 34.02 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L34.02 34.02 A17 17 0 0 1 22.00 39.00 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L22.00 39.00 A17 17 0 0 1 9.98 34.02 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L9.98 34.02 A17 17 0 0 1 5.00 22.00 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L5.00 22.00 A17 17 0 0 1 9.98 9.98 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L9.98 9.98 A17 17 0 0 1 22.00 5.00 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L22.00 5.00 A17 17 0 0 1 34.02 9.98 Z" fill="#333" opacity="0.35"/><path class="rw" d="M22 22 L34.02 9.98 A17 17 0 0 1 39.00 22.00 Z" fill="#333" opacity="0.35"/></g><polygon class="rneedle" points="22 22 36.5 20.2 36.5 23.8" fill="#fff"/><circle cx="22" cy="22" r="2.4" fill="#fff"/></svg></span><em class="rval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -7304,7 +7311,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V17.45</div>
+  <div id="mark">DESIGNED BY QIAN · V17.46</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -13150,6 +13157,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_mkBoss = mkBoss([{key:'BOSS',n:enemies.filter(e=>!e.dead&&e.isBoss).length,c:'#8e44ad'},{key:'其它',n:enemies.filter(e=>!e.dead&&!e.isBoss).length,c:'#34495e'}]); const w_mkBoss = $('mkBossWrap'); if (w_mkBoss) { w_mkBoss.classList.remove('g-good','g-warn','g-bad'); w_mkBoss.classList.add(l_mkBoss.cls); w_mkBoss.classList.toggle('danger', !!l_mkBoss.danger); const bar = w_mkBoss.querySelector('.cbar'); if (bar) { const sels = bar.querySelectorAll('.cseg'); for (let i = 0; i < sels.length; i++) { const s = l_mkBoss.segs[i]; if (s) { sels[i].style.width = s.pct + '%'; sels[i].style.background = s.c || '#888'; sels[i].style.display = 'block'; } else { sels[i].style.display = 'none'; } } } const cv = w_mkBoss.querySelector('.cval'); if (cv) cv.textContent = l_mkBoss.txt; }
     const l_mkThreat = mkThreat([{key:'高危',n:enemies.filter(e=>!e.dead&&(e.isBoss||e.type==='armored'||e.type==='elite'||e.type==='sniper'||e.type==='engineer')).length,c:'#e74c3c'},{key:'低危',n:enemies.filter(e=>!e.dead&&!e.isBoss&&(e.type==='normal'||e.type==='fast'||e.type==='suicide')).length,c:'#2ecc71'}]); const w_mkThreat = $('mkThreatWrap'); if (w_mkThreat) { w_mkThreat.classList.remove('g-good','g-warn','g-bad'); w_mkThreat.classList.add(l_mkThreat.cls); w_mkThreat.classList.toggle('danger', !!l_mkThreat.danger); const bar = w_mkThreat.querySelector('.cbar'); if (bar) { const sels = bar.querySelectorAll('.cseg'); for (let i = 0; i < sels.length; i++) { const s = l_mkThreat.segs[i]; if (s) { sels[i].style.width = s.pct + '%'; sels[i].style.background = s.c || '#888'; sels[i].style.display = 'block'; } else { sels[i].style.display = 'none'; } } } const cv = w_mkThreat.querySelector('.cval'); if (cv) cv.textContent = l_mkThreat.txt; }
     const l_mkLight = mkLight([{key:'轻甲',n:enemies.filter(e=>!e.dead&&!e.isBoss&&e.type==='normal').length,c:'#3498db'},{key:'其它',n:enemies.filter(e=>!e.dead&&!e.isBoss&&e.type!=='normal').length,c:'#34495e'}]); const w_mkLight = $('mkLightWrap'); if (w_mkLight) { w_mkLight.classList.remove('g-good','g-warn','g-bad'); w_mkLight.classList.add(l_mkLight.cls); w_mkLight.classList.toggle('danger', !!l_mkLight.danger); const bar = w_mkLight.querySelector('.cbar'); if (bar) { const sels = bar.querySelectorAll('.cseg'); for (let i = 0; i < sels.length; i++) { const s = l_mkLight.segs[i]; if (s) { sels[i].style.width = s.pct + '%'; sels[i].style.background = s.c || '#888'; sels[i].style.display = 'block'; } else { sels[i].style.display = 'none'; } } } const cv = w_mkLight.querySelector('.cval'); if (cv) cv.textContent = l_mkLight.txt; }
+    const l_radAll = radAll(radInc(), player ? player.x : 0, player ? player.y : 0); const w_radAll = $('radAllWrap'); if (w_radAll) { w_radAll.classList.remove('g-good','g-warn','g-bad'); w_radAll.classList.add(l_radAll.cls); w_radAll.classList.toggle('danger', !!l_radAll.danger); const rsvg = w_radAll.querySelector('svg'); if (rsvg) { const wds = rsvg.querySelectorAll('.rw'); const mx = Math.max.apply(null, l_radAll.counts); for (let i = 0; i < wds.length; i++) { const c = l_radAll.counts[i] || 0; const t = mx > 0 ? c / mx : 0; wds[i].style.fill = c <= 0 ? '#333' : (t >= 0.66 ? '#e74c3c' : (t >= 0.33 ? '#f39c12' : '#2ecc71')); wds[i].style.opacity = c <= 0 ? 0.35 : (0.3 + 0.7 * t); } } const nd = rsvg ? rsvg.querySelector('.rneedle') : null; if (nd) { if (l_radAll.dom < 0) { nd.style.display = 'none'; } else { nd.style.display = ''; nd.setAttribute('transform', 'rotate(' + (l_radAll.dom * 45 + 22.5) + ' 22 22)'); } } const rv = w_radAll.querySelector('.rval'); if (rv) rv.textContent = l_radAll.txt; }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -23879,6 +23887,59 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const txt = '总' + Math.round(total) + ' · ' + leader.key + ' ' + leader.pct + '%';
     return { total: Math.round(total), segs: segs, leader: leader.key, cls: cls, danger: danger, txt: txt };
   }
+  // —— radInc：直扑弹幕罗盘辅助——收集正朝玩家飞来的敌弹——
+  function radInc() {
+    if (!player) return [];
+    const out = [];
+    for (let i = 0; i < bullets.length; i++) {
+      const b = bullets[i];
+      if (b.dead || b.owner === player || b.owner === player2 || b.owner === wingman) continue;
+      const vx = player.x - b.x, vy = player.y - b.y;
+      const l = Math.hypot(vx, vy);
+      if (!(l > 0)) continue;
+      if ((DX[b.dir] * vx + DY[b.dir] * vy) / l > 0) {
+        out.push({ x: b.x, y: b.y, dir: b.dir, spd: b.speed, boss: !!(b.owner && b.owner.isBoss), snip: !!(b.owner && b.owner.type === 'sniper') });
+      }
+    }
+    return out;
+  }
+  // —— radAll：全部直扑（直扑弹幕罗盘：敌弹来袭方位分布 + 密度 + 指针）——
+  function radSector(bx, by, px, py) {
+    const vx = Number(bx) - Number(px), vy = Number(by) - Number(py);
+    if (!isFinite(vx) || !isFinite(vy)) return -1;
+    if (vx === 0 && vy === 0) return -1;
+    let a = Math.atan2(vy, vx);
+    if (a < 0) a += Math.PI * 2;
+    return Math.floor(a / (Math.PI / 4)) % 8;
+  }
+  function radAll(items, px, py, opts) {
+    const ok = Array.isArray(items) && isFinite(Number(px)) && isFinite(Number(py)) && items.length > 0;
+    if (!ok) return { counts: [0, 0, 0, 0, 0, 0, 0, 0], total: 0, dom: -1, domCount: 0, domPct: 0, cls: 'g-warn', danger: false, txt: '—', needle: -1 };
+    const mode = (opts && opts.mode === 'press') ? 'press' : 'plain';
+    const PX = Number(px), PY = Number(py);
+    const counts = [0, 0, 0, 0, 0, 0, 0, 0];
+    let wsum = 0, wmax = -1, wdom = -1;
+    for (let i = 0; i < items.length; i++) {
+      const it = items[i];
+      if (!it || !isFinite(Number(it.x)) || !isFinite(Number(it.y))) continue;
+      const s = radSector(Number(it.x), Number(it.y), PX, PY);
+      if (s < 0) continue;
+      const w = (mode === 'press') ? (TILE / (TILE + Math.hypot(Number(it.x) - PX, Number(it.y) - PY))) : 1;
+      counts[s] += w;
+      wsum += w;
+      if (counts[s] > wmax) { wmax = counts[s]; wdom = s; }
+    }
+    const total = Math.round(wsum);
+    if (!(wsum > 0)) return { counts: counts, total: 0, dom: -1, domCount: 0, domPct: 0, cls: 'g-warn', danger: false, txt: '—', needle: -1 };
+    const dom = wdom;
+    const domCount = Math.round(counts[dom]);
+    const domPct = Math.round(counts[dom] / wsum * 100);
+    const danger = domPct >= 40;
+    const cls = danger ? 'g-bad' : (total >= 4 ? 'g-warn' : 'g-good');
+    const dirName = ['东', '东南', '南', '西南', '西', '西北', '北', '东北'][dom];
+    const txt = '共' + total + ' · ' + dirName + ' ' + domPct + '%';
+    return { counts: counts.map(function (c) { return Math.round(c); }), total: total, dom: dom, domCount: domCount, domPct: domPct, cls: cls, danger: danger, txt: txt, needle: dom };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -25720,7 +25781,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V17.45', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V17.46', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -27743,6 +27804,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       mkBossStateNow: (parts) => mkBoss(parts), mkBossNow: () => mkBoss([{key:'BOSS',n:enemies.filter(e=>!e.dead&&e.isBoss).length,c:'#8e44ad'},{key:'其它',n:enemies.filter(e=>!e.dead&&!e.isBoss).length,c:'#34495e'}]), mkBossSegsNow: () => { const r = mkBoss([{key:'BOSS',n:enemies.filter(e=>!e.dead&&e.isBoss).length,c:'#8e44ad'},{key:'其它',n:enemies.filter(e=>!e.dead&&!e.isBoss).length,c:'#34495e'}]); return r.segs.map(function(s){ return s.pct; }); },
       mkThreatStateNow: (parts) => mkThreat(parts), mkThreatNow: () => mkThreat([{key:'高危',n:enemies.filter(e=>!e.dead&&(e.isBoss||e.type==='armored'||e.type==='elite'||e.type==='sniper'||e.type==='engineer')).length,c:'#e74c3c'},{key:'低危',n:enemies.filter(e=>!e.dead&&!e.isBoss&&(e.type==='normal'||e.type==='fast'||e.type==='suicide')).length,c:'#2ecc71'}]), mkThreatSegsNow: () => { const r = mkThreat([{key:'高危',n:enemies.filter(e=>!e.dead&&(e.isBoss||e.type==='armored'||e.type==='elite'||e.type==='sniper'||e.type==='engineer')).length,c:'#e74c3c'},{key:'低危',n:enemies.filter(e=>!e.dead&&!e.isBoss&&(e.type==='normal'||e.type==='fast'||e.type==='suicide')).length,c:'#2ecc71'}]); return r.segs.map(function(s){ return s.pct; }); },
       mkLightStateNow: (parts) => mkLight(parts), mkLightNow: () => mkLight([{key:'轻甲',n:enemies.filter(e=>!e.dead&&!e.isBoss&&e.type==='normal').length,c:'#3498db'},{key:'其它',n:enemies.filter(e=>!e.dead&&!e.isBoss&&e.type!=='normal').length,c:'#34495e'}]), mkLightSegsNow: () => { const r = mkLight([{key:'轻甲',n:enemies.filter(e=>!e.dead&&!e.isBoss&&e.type==='normal').length,c:'#3498db'},{key:'其它',n:enemies.filter(e=>!e.dead&&!e.isBoss&&e.type!=='normal').length,c:'#34495e'}]); return r.segs.map(function(s){ return s.pct; }); },
+      radAllStateNow: (items, px, py) => radAll(items, px, py), radAllNow: () => radAll(radInc(), player ? player.x : 0, player ? player.y : 0), radAllCountsNow: () => { const r = radAll(radInc(), player ? player.x : 0, player ? player.y : 0); return r.counts; }, radSectorNow: (x, y, px, py) => radSector(x, y, px, py),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
