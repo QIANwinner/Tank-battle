@@ -5597,6 +5597,18 @@
   #compBossWrap.g-bad .ctxt { color:#e74c3c; }
   #compBossWrap.g-bad { animation: tbCompPulse .4s ease-in-out infinite alternate; }
   @keyframes tbCompPulse { from { opacity:.55; } to { opacity:1; } }
+  #graceComboWrap .gring { display:inline-block; position:relative; width:22px; height:22px; margin:0 4px; vertical-align:middle; flex:none; }
+  #graceComboWrap .gring svg { display:block; width:22px; height:22px; transform:rotate(-90deg); }
+  #graceComboWrap .gback { fill:none; stroke:#333; stroke-width:2.4; }
+  #graceComboWrap .gbar { fill:none; stroke:#f1c40f; stroke-width:2.4; stroke-linecap:round; stroke-dasharray:50.27; stroke-dashoffset:50.27; transition:stroke-dashoffset .12s linear, stroke .12s linear; }
+  #graceComboWrap .gpct { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:7px; color:#ddd; font-style:normal; font-weight:bold; }
+  #graceComboWrap .gtxt { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #graceComboWrap.g-good .gbar { stroke:#2ecc71; }
+  #graceComboWrap.g-warn .gbar { stroke:#f1c40f; }
+  #graceComboWrap.g-bad .gbar { stroke:#e74c3c; }
+  #graceComboWrap.g-bad .gtxt { color:#e74c3c; }
+  #graceComboWrap.g-bad { animation: tbGracePulse .4s ease-in-out infinite alternate; }
+  @keyframes tbGracePulse { from { opacity:.55; } to { opacity:1; } }
 </style>
 </head>
 <body>
@@ -6609,6 +6621,7 @@
     <div class="pill m-hide" id="compBulletWrap"><span class="k">🔫</span><span class="crose"><i class="carrow"></i><em class="cdir">—</em></span><span class="v">弹幕</span><em class="ctxt">—</em></div>
     <div class="pill m-hide" id="compSupplyWrap"><span class="k">📦</span><span class="crose"><i class="carrow"></i><em class="cdir">—</em></span><span class="v">补给</span><em class="ctxt">—</em></div>
     <div class="pill m-hide" id="compBossWrap"><span class="k">👹</span><span class="crose"><i class="carrow"></i><em class="cdir">—</em></span><span class="v">BOSS</span><em class="ctxt">—</em></div>
+    <div class="pill m-hide" id="graceComboWrap"><span class="k">⚡</span><span class="gring"><svg viewBox="0 0 20 20"><circle class="gback" cx="10" cy="10" r="8"></circle><circle class="gbar" cx="10" cy="10" r="8"></circle></svg><b class="gpct">—</b></span><span class="v">连击</span><em class="gtxt">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -6984,7 +6997,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V17.13</div>
+  <div id="mark">DESIGNED BY QIAN · V17.14</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -12798,6 +12811,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_compBullet = compBullet(player.x, player.y, bullets.filter(b=>b.owner&&b.owner.isPlayer===false), 220); const w_compBullet = $('compBulletWrap'); if (w_compBullet) { w_compBullet.classList.remove('g-good','g-warn','g-bad'); w_compBullet.classList.add(l_compBullet.cls); w_compBullet.classList.toggle('danger', !!l_compBullet.danger); const ar = w_compBullet.querySelector('.carrow'); if (ar) ar.style.transform = 'rotate(' + l_compBullet.bearing + 'deg)'; const cd = w_compBullet.querySelector('.cdir'); if (cd) cd.textContent = l_compBullet.dir8; const ct = w_compBullet.querySelector('.ctxt'); if (ct) ct.textContent = l_compBullet.txt; }
     const l_compSupply = compSupply(player.x, player.y, powerups, 300); const w_compSupply = $('compSupplyWrap'); if (w_compSupply) { w_compSupply.classList.remove('g-good','g-warn','g-bad'); w_compSupply.classList.add(l_compSupply.cls); w_compSupply.classList.toggle('danger', !!l_compSupply.danger); const ar = w_compSupply.querySelector('.carrow'); if (ar) ar.style.transform = 'rotate(' + l_compSupply.bearing + 'deg)'; const cd = w_compSupply.querySelector('.cdir'); if (cd) cd.textContent = l_compSupply.dir8; const ct = w_compSupply.querySelector('.ctxt'); if (ct) ct.textContent = l_compSupply.txt; }
     const l_compBoss = compBoss(player.x, player.y, enemies.filter(e=>e.isBoss), 520); const w_compBoss = $('compBossWrap'); if (w_compBoss) { w_compBoss.classList.remove('g-good','g-warn','g-bad'); w_compBoss.classList.add(l_compBoss.cls); w_compBoss.classList.toggle('danger', !!l_compBoss.danger); const ar = w_compBoss.querySelector('.carrow'); if (ar) ar.style.transform = 'rotate(' + l_compBoss.bearing + 'deg)'; const cd = w_compBoss.querySelector('.cdir'); if (cd) cd.textContent = l_compBoss.dir8; const ct = w_compBoss.querySelector('.ctxt'); if (ct) ct.textContent = l_compBoss.txt; }
+    const l_graceCombo = graceCombo(comboTimer, comboWindowMax); const w_graceCombo = $('graceComboWrap'); if (w_graceCombo) { w_graceCombo.classList.remove('g-good','g-warn','g-bad'); w_graceCombo.classList.add(l_graceCombo.cls); w_graceCombo.classList.toggle('danger', !!l_graceCombo.danger); const gb = w_graceCombo.querySelector('.gbar'); if (gb) { gb.style.strokeDashoffset = (50.27 * (1 - l_graceCombo.pct / 100)).toFixed(2); } const gp = w_graceCombo.querySelector('.gpct'); if (gp) gp.textContent = l_graceCombo.active ? l_graceCombo.pct + '%' : '—'; const gt = w_graceCombo.querySelector('.gtxt'); if (gt) gt.textContent = l_graceCombo.txt; }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -23015,6 +23029,18 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const txt = near ? '威胁逼近 ' + dir8 : '最近 ' + dir8 + ' · ' + dist;
     return { has: true, bearing: bearing, dist: dist, pct: pct, dir8: dir8, cls: cls, danger: danger, txt: txt };
   }
+  // —— graceCombo：连击保命（保命圈：剩余时间比例 + 即将耗尽预警）——
+  function graceCombo(cur, max) {
+    const c = Number(cur), m = Number(max);
+    const ok = isFinite(c) && isFinite(m) && m > 0;
+    if (!ok || c <= 0) return { active: false, pct: 0, remain: 0, cls: 'g-warn', danger: false, txt: '—' };
+    const pct = Math.max(0, Math.min(100, Math.round(c / m * 100)));
+    const remain = Math.round(c * 10) / 10;
+    const danger = pct < 25;
+    const cls = danger ? 'g-bad' : (pct < 50 ? 'g-warn' : 'g-good');
+    const txt = danger ? '剩 ' + remain + 's · 即将耗尽' : '剩 ' + remain + 's';
+    return { active: true, pct: pct, remain: remain, cls: cls, danger: danger, txt: txt };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -24856,7 +24882,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V17.13', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V17.14', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -26847,6 +26873,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       compBulletStateNow: (px, py, arr, m) => compBullet(px, py, arr, m), compBulletNow: () => compBullet(player.x, player.y, bullets.filter(b=>b.owner&&b.owner.isPlayer===false), 220), compBulletDirNow: () => { const r = compBullet(player.x, player.y, bullets.filter(b=>b.owner&&b.owner.isPlayer===false), 220); return r.has ? r.dir8 : '—'; }, compBulletBearingNow: () => { try { const r = compBullet(player.x, player.y, bullets.filter(b=>b.owner&&b.owner.isPlayer===false), 220); return r.has ? r.bearing : -1; } catch (e) { return -1; } }, compBulletDangerNow: () => { const w = $('compBulletWrap'); return !!(w && w.classList.contains('g-bad')); },
       compSupplyStateNow: (px, py, arr, m) => compSupply(px, py, arr, m), compSupplyNow: () => compSupply(player.x, player.y, powerups, 300), compSupplyDirNow: () => { const r = compSupply(player.x, player.y, powerups, 300); return r.has ? r.dir8 : '—'; }, compSupplyBearingNow: () => { try { const r = compSupply(player.x, player.y, powerups, 300); return r.has ? r.bearing : -1; } catch (e) { return -1; } }, compSupplyDangerNow: () => { const w = $('compSupplyWrap'); return !!(w && w.classList.contains('g-bad')); },
       compBossStateNow: (px, py, arr, m) => compBoss(px, py, arr, m), compBossNow: () => compBoss(player.x, player.y, enemies.filter(e=>e.isBoss), 520), compBossDirNow: () => { const r = compBoss(player.x, player.y, enemies.filter(e=>e.isBoss), 520); return r.has ? r.dir8 : '—'; }, compBossBearingNow: () => { try { const r = compBoss(player.x, player.y, enemies.filter(e=>e.isBoss), 520); return r.has ? r.bearing : -1; } catch (e) { return -1; } }, compBossDangerNow: () => { const w = $('compBossWrap'); return !!(w && w.classList.contains('g-bad')); },
+      graceComboStateNow: (cur, max) => graceCombo(cur, max), graceComboNow: () => graceCombo(comboTimer, comboWindowMax), graceComboActiveNow: () => graceCombo(comboTimer, comboWindowMax).active, graceComboPctNow: () => { const r = graceCombo(comboTimer, comboWindowMax); return r.active ? r.pct : -1; }, graceComboDangerNow: () => { const w = $('graceComboWrap'); return !!(w && w.classList.contains('g-bad')); },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
