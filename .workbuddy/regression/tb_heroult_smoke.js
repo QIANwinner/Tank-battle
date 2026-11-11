@@ -18372,6 +18372,22 @@ async function main() {
     t('U6602 DOM 与函数一致（双条宽=进度、chip=提示）', o5.ok === true && o5.pcts[0] === o5.aPct && o5.pcts[1] === o5.bPct && o5.chip === o5.txt, JSON.stringify(o5));
   } catch (e) { t('U6597 强化双目标 断言块执行异常', false, String(e)); }
 
+
+  // ===== U6603~U6608: 敌兵罗盘(v0.17.6) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('compEnemyWrap'),s:T.compEnemyStateNow(0,0,[{x:0,y:-100}],200)});})()"));
+    t('U6603 敌兵罗盘 DOM 已加入 HUD', o.dom === true && o.s.has === true && o.s.dir8 === 'N' && o.s.bearing === 0 && o.s.dist === 100 && o.s.pct === 50, JSON.stringify(o));
+    t('U6604 正常 正上→N/0°/100/50%/g-warn/最近N·100', o.s.has === true && o.s.dir8 === 'N' && o.s.bearing === 0 && o.s.dist === 100 && o.s.pct === 50 && o.s.cls === 'g-warn' && o.s.danger === false && o.s.txt === '最近 N · 100', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({l:T.compEnemyStateNow(0,0,[{x:-50,y:0}],200),n:T.compEnemyStateNow(0,0,[{x:20,y:0}],200),e:T.compEnemyStateNow(0,0,[],200)});})()"));
+    t('U6605 边界 左→W/270°, 近距20→g-bad+danger, 空数组→退化', o2.l.dir8 === 'W' && o2.l.bearing === 270 && o2.n.pct === 10 && o2.n.cls === 'g-bad' && o2.n.danger === true && o2.e.has === false && o2.e.txt === '—' && o2.e.cls === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.compEnemyStateNow(NaN,0,[{x:0,y:-100}],200),b:T.compEnemyStateNow(0,0,'xx',200),c:T.compEnemyStateNow(0,0,[{x:'a',y:'b'}],200)});})()"));
+    t('U6606 非法 NaN/非数组/全非数点→退化 g-warn 平', o3.a.has === false && o3.a.txt === '—' && o3.b.has === false && o3.b.txt === '—' && o3.c.has === false && o3.c.cls === 'g-warn' && o3.c.txt === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({ne:T.compEnemyStateNow(0,0,[{x:100,y:-100}],200),s:T.compEnemyStateNow(0,0,[{x:0,y:100}],200)});})()"));
+    t('U6607 斜向 NE→45°/NE, 下方→S/180°', o4.ne.bearing === 45 && o4.ne.dir8 === 'NE' && o4.s.bearing === 180 && o4.s.dir8 === 'S', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.compEnemyBearingNow();const w=document.getElementById('compEnemyWrap');const ar=w?w.querySelector('.carrow'):null;return JSON.stringify({has:!!w, arrow:!!ar, b:(typeof r==='number'&&r>=0&&r<360)||r===-1});})()"));
+    t('U6608 DOM 与函数一致 罗盘存在+箭头存在+BearingNow 合法', o5.has === true && o5.arrow === true && o5.b === true, JSON.stringify(o5));
+  } catch (e) { console.error('U6603~6608 断言异常', e); throw e; }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
