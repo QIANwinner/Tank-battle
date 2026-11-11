@@ -19350,6 +19350,21 @@ async function main() {
     t('U6974 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U6969 方向集中度 抛出异常', false, String(e)); }
 
+
+  // ===== U6975~U6980: 方向变化率(v0.17.68) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('stkTurnWrap'),mv:!!document.querySelector('#stkTurnWrap .mval'),s:T.stkTurnStateNow([{'t':0,'spd':5,'src':'enemy','dir':2},{'t':1,'spd':5,'src':'enemy','dir':4},{'t':2,'spd':5,'src':'enemy','dir':2}])});})()"));
+    t('U6975 方向变化率 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U6976 正常 方向变化率 → v=1 g-warn 1.0次/秒', o.s.v === 1 && o.s.cls === 'g-warn' && o.s.danger === false && o.s.txt === '1.0次/秒', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.stkTurnStateNow([{'t':0,'spd':5,'src':'enemy','dir':2},{'t':1,'spd':5,'src':'enemy','dir':4},{'t':2,'spd':5,'src':'enemy','dir':2}]),b:T.stkTurnStateNow([{'t':0,'spd':5,'src':'enemy','dir':2},{'t':0.33,'spd':5,'src':'enemy','dir':4},{'t':0.66,'spd':5,'src':'enemy','dir':2},{'t':1,'spd':5,'src':'enemy','dir':4}])});return r;})()"));
+    t('U6977 边界 方向变化率 → g-bad 3.0次/秒', o2.b.v === 3 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '3.0次/秒', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.stkTurnStateNow(null);const b=T.stkTurnStateNow([]);const c=T.stkTurnStateNow([{x:200,y:200,t:0,spd:5,src:'enemy',dir:2}]);const d=T.stkTurnStateNow([{t:'n',spd:'n',src:'x',dir:'n'},{t:'n',spd:'n',src:'x',dir:'n'}]);return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U6978 非法 null/[]/单点/全非数→退化 g-warn —', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.c.txt === '—' && o3.d.txt === '—', JSON.stringify(o3));
+    t('U6979 单位结构 txt 以 unit 结尾或为—', (o.s.txt === '—') || (typeof o.s.unit === 'string' && o.s.unit.length > 0 && o.s.txt.endsWith(o.s.unit)), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.stkTurnStateNow([{'t':0,'spd':5,'src':'enemy','dir':2},{'t':1,'spd':5,'src':'enemy','dir':4},{'t':2,'spd':5,'src':'enemy','dir':2}]);return JSON.stringify({mv:!!document.querySelector('#stkTurnWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U6980 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U6975 方向变化率 抛出异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
