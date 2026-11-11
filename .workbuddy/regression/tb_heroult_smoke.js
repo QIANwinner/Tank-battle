@@ -18388,6 +18388,22 @@ async function main() {
     t('U6608 DOM 与函数一致 罗盘存在+箭头存在+BearingNow 合法', o5.has === true && o5.arrow === true && o5.b === true, JSON.stringify(o5));
   } catch (e) { console.error('U6603~6608 断言异常', e); throw e; }
 
+
+  // ===== U6609~U6614: 精英罗盘(v0.17.7) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('compEliteWrap'),s:T.compEliteStateNow(0,0,[{x:0,y:-100}],200)});})()"));
+    t('U6609 精英罗盘 DOM 已加入 HUD', o.dom === true && o.s.has === true && o.s.dir8 === 'N' && o.s.bearing === 0 && o.s.dist === 100 && o.s.pct === 50, JSON.stringify(o));
+    t('U6610 正常 正上→N/0°/100/50%/g-warn/最近N·100', o.s.has === true && o.s.dir8 === 'N' && o.s.bearing === 0 && o.s.dist === 100 && o.s.pct === 50 && o.s.cls === 'g-warn' && o.s.danger === false && o.s.txt === '最近 N · 100', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({l:T.compEliteStateNow(0,0,[{x:-50,y:0}],200),n:T.compEliteStateNow(0,0,[{x:20,y:0}],200),e:T.compEliteStateNow(0,0,[],200)});})()"));
+    t('U6611 边界 左→W/270°, 近距20→g-bad+danger, 空数组→退化', o2.l.dir8 === 'W' && o2.l.bearing === 270 && o2.n.pct === 10 && o2.n.cls === 'g-bad' && o2.n.danger === true && o2.e.has === false && o2.e.txt === '—' && o2.e.cls === 'g-warn', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.compEliteStateNow(NaN,0,[{x:0,y:-100}],200),b:T.compEliteStateNow(0,0,'xx',200),c:T.compEliteStateNow(0,0,[{x:'a',y:'b'}],200)});})()"));
+    t('U6612 非法 NaN/非数组/全非数点→退化 g-warn 平', o3.a.has === false && o3.a.txt === '—' && o3.b.has === false && o3.b.txt === '—' && o3.c.has === false && o3.c.cls === 'g-warn' && o3.c.txt === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({ne:T.compEliteStateNow(0,0,[{x:100,y:-100}],200),s:T.compEliteStateNow(0,0,[{x:0,y:100}],200)});})()"));
+    t('U6613 斜向 NE→45°/NE, 下方→S/180°', o4.ne.bearing === 45 && o4.ne.dir8 === 'NE' && o4.s.bearing === 180 && o4.s.dir8 === 'S', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.compEliteBearingNow();const w=document.getElementById('compEliteWrap');const ar=w?w.querySelector('.carrow'):null;return JSON.stringify({has:!!w, arrow:!!ar, b:(typeof r==='number'&&r>=0&&r<360)||r===-1});})()"));
+    t('U6614 DOM 与函数一致 罗盘存在+箭头存在+BearingNow 合法', o5.has === true && o5.arrow === true && o5.b === true, JSON.stringify(o5));
+  } catch (e) { console.error('U6609~6614 断言异常', e); throw e; }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
