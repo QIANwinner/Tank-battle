@@ -19485,6 +19485,21 @@ async function main() {
     t('U7028 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { console.log('U7023..7028 最危险格 异常: ' + e.message); }
 
+
+  // ===== U7029~U7034: 危机指数(v0.17.77) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('czIdxWrap'),mv:!!document.querySelector('#czIdxWrap .mval'),s:T.czIdxStateNow({'cx':100,'cy':100,'th':[{'x':148,'y':100,'kind':'b','spd':5},{'x':148,'y':104,'kind':'b','spd':5}]})});})()"));
+    t('U7029 危机指数 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7030 正常 危机指数 → v=43 g-warn 43%', o.s.v === 43 && o.s.cls === 'g-warn' && o.s.danger === false && o.s.txt === '43%', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.czIdxStateNow({'cx':100,'cy':100,'th':[{'x':148,'y':100,'kind':'b','spd':5},{'x':148,'y':104,'kind':'b','spd':5}]}),b:T.czIdxStateNow({'cx':100,'cy':100,'th':[{'x':140,'y':100,'kind':'b','spd':9},{'x':140,'y':140,'kind':'b','spd':9},{'x':100,'y':140,'kind':'b','spd':9},{'x':60,'y':140,'kind':'b','spd':9},{'x':60,'y':100,'kind':'b','spd':9},{'x':60,'y':60,'kind':'b','spd':9},{'x':100,'y':60,'kind':'b','spd':9},{'x':140,'y':60,'kind':'b','spd':9}]})});return r;})()"));
+    t('U7031 边界 危机指数 → g-bad 89%', o2.b.v === 89 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '89%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.czIdxStateNow(null);const b=T.czIdxStateNow([]);const c=T.czIdxStateNow({cx:200,cy:200,th:[{x:200,y:200,kind:'b',spd:5}]});const d=T.czIdxStateNow({cx:200,cy:200,th:[{x:'n',y:'n',kind:'b'},{x:'n',y:'n',kind:'b'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7032 非法 null/[]/全非数→退化 —，中心威胁(距离0)为合法最危险', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7033 单位结构 txt 以 unit 结尾或为—', (o.s.txt === '—') || (typeof o.s.unit === 'string' && o.s.unit.length > 0 && o.s.txt.endsWith(o.s.unit)), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.czIdxStateNow({'cx':100,'cy':100,'th':[{'x':148,'y':100,'kind':'b','spd':5},{'x':148,'y':104,'kind':'b','spd':5}]});return JSON.stringify({mv:!!document.querySelector('#czIdxWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7034 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { console.log('U7029..7034 危机指数 异常: ' + e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

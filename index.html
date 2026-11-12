@@ -6029,6 +6029,10 @@
   #czGridWrap .czg-c { width:6px; height:6px; background:#333; border-radius:1px; }
   #czGridWrap .czg-c.warm { background:#e67e22; }
   #czGridWrap .czg-c.hot { background:#e74c3c; }
+  #czIdxWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #czIdxWrap.g-bad .mval { color:#e74c3c; }
+  #czIdxWrap.g-bad { animation: tbCzPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbCzPulse { from { opacity:.55; } to { opacity:1; } }
 </style>
 </head>
 <body>
@@ -7104,6 +7108,7 @@
     <div class="pill m-hide" id="czEncircleWrap"><span class="k">⭕</span><span class="v">包围度</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="czSpdWrap"><span class="k">💨</span><span class="v">弹速</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="czGridWrap"><span class="k">🕳️</span><span class="v">危险格</span><span class="czg"><i class="czg-c"></i><i class="czg-c"></i><i class="czg-c"></i><i class="czg-c"></i><i class="czg-c"></i><i class="czg-c"></i><i class="czg-c"></i><i class="czg-c"></i><i class="czg-c"></i></span><em class="mval">—</em></div>
+    <div class="pill m-hide" id="czIdxWrap"><span class="k">🚨</span><span class="v">危机</span><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -7479,7 +7484,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V17.76</div>
+  <div id="mark">DESIGNED BY QIAN · V17.77</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -13357,6 +13362,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_czEncircle = czEncircleNow(); const w_czEncircle = $('czEncircleWrap'); if (w_czEncircle) { const pv = w_czEncircle.dataset.cz || ''; const nv = l_czEncircle.cls + '|' + l_czEncircle.txt + '|' + (l_czEncircle.danger ? '1' : '0'); if (pv !== nv) { w_czEncircle.dataset.cz = nv; w_czEncircle.classList.remove('g-good','g-warn','g-bad'); w_czEncircle.classList.add(l_czEncircle.cls); w_czEncircle.classList.toggle('danger', !!l_czEncircle.danger); const mv = w_czEncircle.querySelector('.mval'); if (mv) mv.textContent = l_czEncircle.txt; } }
     const l_czSpd = czSpdNow(); const w_czSpd = $('czSpdWrap'); if (w_czSpd) { const pv = w_czSpd.dataset.cz || ''; const nv = l_czSpd.cls + '|' + l_czSpd.txt + '|' + (l_czSpd.danger ? '1' : '0'); if (pv !== nv) { w_czSpd.dataset.cz = nv; w_czSpd.classList.remove('g-good','g-warn','g-bad'); w_czSpd.classList.add(l_czSpd.cls); w_czSpd.classList.toggle('danger', !!l_czSpd.danger); const mv = w_czSpd.querySelector('.mval'); if (mv) mv.textContent = l_czSpd.txt; } }
     const l_czGrid = czGridNow(); const w_czGrid = $('czGridWrap'); if (w_czGrid) { const cc = l_czGrid.cells || []; const pv = w_czGrid.dataset.cz || ''; const nv = l_czGrid.cls + '|' + l_czGrid.txt + '|' + (l_czGrid.danger ? '1' : '0') + '|' + cc.join(','); if (pv !== nv) { w_czGrid.dataset.cz = nv; w_czGrid.classList.remove('g-good','g-warn','g-bad'); w_czGrid.classList.add(l_czGrid.cls); w_czGrid.classList.toggle('danger', !!l_czGrid.danger); const mv = w_czGrid.querySelector('.mval'); if (mv) mv.textContent = l_czGrid.txt; const cels = w_czGrid.querySelectorAll('.czg-c'); for (let i = 0; i < cels.length && i < 9; i++) { const n = cc[i] || 0; cels[i].classList.toggle('hot', n >= 3); cels[i].classList.toggle('warm', n >= 1 && n < 3); } } }
+    const l_czIdx = czIdxNow(); const w_czIdx = $('czIdxWrap'); if (w_czIdx) { const pv = w_czIdx.dataset.cz || ''; const nv = l_czIdx.cls + '|' + l_czIdx.txt + '|' + (l_czIdx.danger ? '1' : '0'); if (pv !== nv) { w_czIdx.dataset.cz = nv; w_czIdx.classList.remove('g-good','g-warn','g-bad'); w_czIdx.classList.add(l_czIdx.cls); w_czIdx.classList.toggle('danger', !!l_czIdx.danger); const mv = w_czIdx.querySelector('.mval'); if (mv) mv.textContent = l_czIdx.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -24730,6 +24736,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // —— czEncircle：包围度（危险格：见 helperBody czCore + czEncircle 实现）——
   // —— czSpd：来袭弹速（危险格：见 helperBody czCore + czSpd 实现）——
   // —— czGrid：最危险格（危险格：见 helperBody czCore + czGrid 实现）——
+  // —— czIdx：危机指数（危险格：见 helperBody czCore + czIdx 实现）——
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -26571,7 +26578,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V17.76', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V17.77', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -28625,6 +28632,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       czEncircleStateNow: (frame) => czEncircle(frame), czEncircleNow: () => czEncircle(czLive()), czEncircleDomNow: () => { const e = document.querySelector('.czEncircleWrap .mval'); return e ? e.textContent : null; },
       czSpdStateNow: (frame) => czSpd(frame), czSpdNow: () => czSpd(czLive()), czSpdDomNow: () => { const e = document.querySelector('.czSpdWrap .mval'); return e ? e.textContent : null; },
       czGridStateNow: (frame) => czGrid(frame), czGridNow: () => czGrid(czLive()), czGridDomNow: () => { const e = document.querySelector('.czGridWrap .mval'); return e ? e.textContent : null; },
+      czIdxStateNow: (frame) => czIdx(frame), czIdxNow: () => czIdx(czLive()), czIdxDomNow: () => { const e = document.querySelector('.czIdxWrap .mval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
