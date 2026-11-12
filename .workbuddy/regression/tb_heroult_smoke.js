@@ -19560,6 +19560,21 @@ async function main() {
     t('U7058 DOM 与函数一致（.mval 存在 + fn txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7053~U7058 开火节奏 异常', false, 'ERR ' + (e && e.message ? e.message : String(e))); }
 
+
+  // ===== U7059~U7064: 静默窗口(v0.17.82) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('fpSilenceWrap'),mv:!!document.querySelector('#fpSilenceWrap .mval'),s:T.fpSilenceStateNow({'e':[{'t':60,'kind':'normal'},{'t':180,'kind':'armored'}]})});})()"));
+    t('U7059 静默窗口 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7060 正常 静默窗口 → v=3 g-good 3.0秒', o.s.v === 3 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '3.0秒', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.fpSilenceStateNow({'e':[{'t':60,'kind':'normal'},{'t':180,'kind':'armored'}]}),b:T.fpSilenceStateNow({'e':[{'t':10,'kind':'sniper'},{'t':20,'kind':'normal'}]})});return r;})()"));
+    t('U7061 边界 静默窗口 → g-bad 0.3秒', o2.b.v === 0.3 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '0.3秒', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.fpSilenceStateNow(null);const b=T.fpSilenceStateNow([]);const c=T.fpSilenceStateNow({'e':[{'t':0,'kind':'sniper'}]});const d=T.fpSilenceStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7062 非法 null/[]/全非数→退化 —，合法帧(含 t=0 马上开火)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7063 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.fpSilenceStateNow({'e':[{'t':60,'kind':'normal'},{'t':180,'kind':'armored'}]});return JSON.stringify({mv:!!document.querySelector('#fpSilenceWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7064 DOM 与函数一致（.mval 存在 + fn txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7059~U7064 静默窗口 异常', false, 'ERR ' + (e && e.message ? e.message : String(e))); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

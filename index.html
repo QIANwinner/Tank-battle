@@ -6049,6 +6049,10 @@
   #fpRhythmWrap.g-bad .mval { color:#e74c3c; }
   #fpRhythmWrap.g-bad { animation: tbFpPulse .4s ease-in-out infinite alternate; }
   @keyframes tbFpPulse { from { opacity:.55; } to { opacity:1; } }
+  #fpSilenceWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #fpSilenceWrap.g-bad .mval { color:#e74c3c; }
+  #fpSilenceWrap.g-bad { animation: tbFpPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbFpPulse { from { opacity:.55; } to { opacity:1; } }
 </style>
 </head>
 <body>
@@ -7129,6 +7133,7 @@
     <div class="pill m-hide" id="fpSoonWrap"><span class="k">💥</span><span class="v">临火数</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="fpVolleyWrap"><span class="k">🌊</span><span class="v">弹幕蓄</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="fpRhythmWrap"><span class="k">⏱️</span><span class="v">开火节</span><em class="mval">—</em></div>
+    <div class="pill m-hide" id="fpSilenceWrap"><span class="k">🤫</span><span class="v">静默窗</span><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -7504,7 +7509,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V17.81</div>
+  <div id="mark">DESIGNED BY QIAN · V17.82</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -13387,6 +13392,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_fpSoon = fpSoonNow(); const w_fpSoon = $('fpSoonWrap'); if (w_fpSoon) { const pv = w_fpSoon.dataset.fp || ''; const nv = l_fpSoon.cls + '|' + l_fpSoon.txt + '|' + (l_fpSoon.danger ? '1' : '0'); if (pv !== nv) { w_fpSoon.dataset.fp = nv; w_fpSoon.classList.remove('g-good','g-warn','g-bad'); w_fpSoon.classList.add(l_fpSoon.cls); w_fpSoon.classList.toggle('danger', !!l_fpSoon.danger); const mv = w_fpSoon.querySelector('.mval'); if (mv) mv.textContent = l_fpSoon.txt; } }
     const l_fpVolley = fpVolleyNow(); const w_fpVolley = $('fpVolleyWrap'); if (w_fpVolley) { const pv = w_fpVolley.dataset.fp || ''; const nv = l_fpVolley.cls + '|' + l_fpVolley.txt + '|' + (l_fpVolley.danger ? '1' : '0'); if (pv !== nv) { w_fpVolley.dataset.fp = nv; w_fpVolley.classList.remove('g-good','g-warn','g-bad'); w_fpVolley.classList.add(l_fpVolley.cls); w_fpVolley.classList.toggle('danger', !!l_fpVolley.danger); const mv = w_fpVolley.querySelector('.mval'); if (mv) mv.textContent = l_fpVolley.txt; } }
     const l_fpRhythm = fpRhythmNow(); const w_fpRhythm = $('fpRhythmWrap'); if (w_fpRhythm) { const pv = w_fpRhythm.dataset.fp || ''; const nv = l_fpRhythm.cls + '|' + l_fpRhythm.txt + '|' + (l_fpRhythm.danger ? '1' : '0'); if (pv !== nv) { w_fpRhythm.dataset.fp = nv; w_fpRhythm.classList.remove('g-good','g-warn','g-bad'); w_fpRhythm.classList.add(l_fpRhythm.cls); w_fpRhythm.classList.toggle('danger', !!l_fpRhythm.danger); const mv = w_fpRhythm.querySelector('.mval'); if (mv) mv.textContent = l_fpRhythm.txt; } }
+    const l_fpSilence = fpSilenceNow(); const w_fpSilence = $('fpSilenceWrap'); if (w_fpSilence) { const pv = w_fpSilence.dataset.fp || ''; const nv = l_fpSilence.cls + '|' + l_fpSilence.txt + '|' + (l_fpSilence.danger ? '1' : '0'); if (pv !== nv) { w_fpSilence.dataset.fp = nv; w_fpSilence.classList.remove('g-good','g-warn','g-bad'); w_fpSilence.classList.add(l_fpSilence.cls); w_fpSilence.classList.toggle('danger', !!l_fpSilence.danger); const mv = w_fpSilence.querySelector('.mval'); if (mv) mv.textContent = l_fpSilence.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -24866,6 +24872,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // —— fpSoon：临火敌数（开火预判：见 helperBody fpCore + fpSoon 实现）——
   // —— fpVolley：弹幕蓄积（开火预判：见 helperBody fpCore + fpVolley 实现）——
   // —— fpRhythm：开火节奏（开火预判：见 helperBody fpCore + fpRhythm 实现）——
+  // —— fpSilence：静默窗口（开火预判：见 helperBody fpCore + fpSilence 实现）——
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -26707,7 +26714,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V17.81', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V17.82', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -28766,6 +28773,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       fpSoonStateNow: (frame) => fpSoon(frame), fpSoonNow: () => fpSoon(fpLive()), fpSoonDomNow: () => { const e = document.querySelector('.fpSoonWrap .mval'); return e ? e.textContent : null; },
       fpVolleyStateNow: (frame) => fpVolley(frame), fpVolleyNow: () => fpVolley(fpLive()), fpVolleyDomNow: () => { const e = document.querySelector('.fpVolleyWrap .mval'); return e ? e.textContent : null; },
       fpRhythmStateNow: (frame) => fpRhythm(frame), fpRhythmNow: () => fpRhythm(fpLive()), fpRhythmDomNow: () => { const e = document.querySelector('.fpRhythmWrap .mval'); return e ? e.textContent : null; },
+      fpSilenceStateNow: (frame) => fpSilence(frame), fpSilenceNow: () => fpSilence(fpLive()), fpSilenceDomNow: () => { const e = document.querySelector('.fpSilenceWrap .mval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
