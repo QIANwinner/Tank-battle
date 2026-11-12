@@ -19860,6 +19860,21 @@ async function main() {
     t('U7178 DOM 与函数一致（.mval 存在 + txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7173~U7178 净压制 异常', false, String(e && e.stack || e)); }
 
+
+  // ===== U7179~U7184: 命中窗口(v0.18.02) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('hwIncWrap'),mv:!!document.querySelector('#hwIncWrap .mval'),s:T.hwIncStateNow({'inc':[80,120,100]})});})()"));
+    t('U7179 命中窗口 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7180 正常 命中窗口 → v=3 g-warn 3发', o.s.v === 3 && o.s.cls === 'g-warn' && o.s.danger === false && o.s.txt === '3发', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.hwIncStateNow({'inc':[80,120,100]}),b:T.hwIncStateNow({'inc':[10,20,30,40,50,60,70,80,90]})});return r;})()"));
+    t('U7181 边界 命中窗口 → g-bad 9发', o2.b.v === 9 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '9发', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.hwIncStateNow(null);const b=T.hwIncStateNow([]);const c=T.hwIncStateNow({'inc':[30,45,60]});const d=T.hwIncStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7182 非法 null/[]/无 inc→退化 —，合法帧(有弹)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7183 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.hwIncStateNow({'inc':[80,120,100]});return JSON.stringify({mv:!!document.querySelector('#hwIncWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7184 DOM 与函数一致（.mval 存在 + txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7179~U7184 命中窗口 异常', false, String(e && e.stack || e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
