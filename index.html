@@ -6033,6 +6033,10 @@
   #czIdxWrap.g-bad .mval { color:#e74c3c; }
   #czIdxWrap.g-bad { animation: tbCzPulse .4s ease-in-out infinite alternate; }
   @keyframes tbCzPulse { from { opacity:.55; } to { opacity:1; } }
+  #fpNearWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #fpNearWrap.g-bad .mval { color:#e74c3c; }
+  #fpNearWrap.g-bad { animation: tbFpPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbFpPulse { from { opacity:.55; } to { opacity:1; } }
 </style>
 </head>
 <body>
@@ -7109,6 +7113,7 @@
     <div class="pill m-hide" id="czSpdWrap"><span class="k">💨</span><span class="v">弹速</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="czGridWrap"><span class="k">🕳️</span><span class="v">危险格</span><span class="czg"><i class="czg-c"></i><i class="czg-c"></i><i class="czg-c"></i><i class="czg-c"></i><i class="czg-c"></i><i class="czg-c"></i><i class="czg-c"></i><i class="czg-c"></i><i class="czg-c"></i></span><em class="mval">—</em></div>
     <div class="pill m-hide" id="czIdxWrap"><span class="k">🚨</span><span class="v">危机</span><em class="mval">—</em></div>
+    <div class="pill m-hide" id="fpNearWrap"><span class="k">🎯</span><span class="v">最近火</span><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -7484,7 +7489,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V17.77</div>
+  <div id="mark">DESIGNED BY QIAN · V17.78</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -13363,6 +13368,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_czSpd = czSpdNow(); const w_czSpd = $('czSpdWrap'); if (w_czSpd) { const pv = w_czSpd.dataset.cz || ''; const nv = l_czSpd.cls + '|' + l_czSpd.txt + '|' + (l_czSpd.danger ? '1' : '0'); if (pv !== nv) { w_czSpd.dataset.cz = nv; w_czSpd.classList.remove('g-good','g-warn','g-bad'); w_czSpd.classList.add(l_czSpd.cls); w_czSpd.classList.toggle('danger', !!l_czSpd.danger); const mv = w_czSpd.querySelector('.mval'); if (mv) mv.textContent = l_czSpd.txt; } }
     const l_czGrid = czGridNow(); const w_czGrid = $('czGridWrap'); if (w_czGrid) { const cc = l_czGrid.cells || []; const pv = w_czGrid.dataset.cz || ''; const nv = l_czGrid.cls + '|' + l_czGrid.txt + '|' + (l_czGrid.danger ? '1' : '0') + '|' + cc.join(','); if (pv !== nv) { w_czGrid.dataset.cz = nv; w_czGrid.classList.remove('g-good','g-warn','g-bad'); w_czGrid.classList.add(l_czGrid.cls); w_czGrid.classList.toggle('danger', !!l_czGrid.danger); const mv = w_czGrid.querySelector('.mval'); if (mv) mv.textContent = l_czGrid.txt; const cels = w_czGrid.querySelectorAll('.czg-c'); for (let i = 0; i < cels.length && i < 9; i++) { const n = cc[i] || 0; cels[i].classList.toggle('hot', n >= 3); cels[i].classList.toggle('warm', n >= 1 && n < 3); } } }
     const l_czIdx = czIdxNow(); const w_czIdx = $('czIdxWrap'); if (w_czIdx) { const pv = w_czIdx.dataset.cz || ''; const nv = l_czIdx.cls + '|' + l_czIdx.txt + '|' + (l_czIdx.danger ? '1' : '0'); if (pv !== nv) { w_czIdx.dataset.cz = nv; w_czIdx.classList.remove('g-good','g-warn','g-bad'); w_czIdx.classList.add(l_czIdx.cls); w_czIdx.classList.toggle('danger', !!l_czIdx.danger); const mv = w_czIdx.querySelector('.mval'); if (mv) mv.textContent = l_czIdx.txt; } }
+    const l_fpNear = fpNearNow(); const w_fpNear = $('fpNearWrap'); if (w_fpNear) { const pv = w_fpNear.dataset.fp || ''; const nv = l_fpNear.cls + '|' + l_fpNear.txt + '|' + (l_fpNear.danger ? '1' : '0'); if (pv !== nv) { w_fpNear.dataset.fp = nv; w_fpNear.classList.remove('g-good','g-warn','g-bad'); w_fpNear.classList.add(l_fpNear.cls); w_fpNear.classList.toggle('danger', !!l_fpNear.danger); const mv = w_fpNear.querySelector('.mval'); if (mv) mv.textContent = l_fpNear.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -24737,6 +24743,108 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // —— czSpd：来袭弹速（危险格：见 helperBody czCore + czSpd 实现）——
   // —— czGrid：最危险格（危险格：见 helperBody czCore + czGrid 实现）——
   // —— czIdx：危机指数（危险格：见 helperBody czCore + czIdx 实现）——
+  // —— 开火预判辅助：fpCore 公共解析 + fpLive 读战场活状态 + 8 个指标 ——
+  function fpDeg() { return { v: 0, unit: '', cls: 'g-warn', danger: false, txt: '—' }; }
+  function fpCore(frame) {
+    if (!frame || !Array.isArray(frame.e)) return { ok: false };
+    const list = [];
+    let bossT = -1;
+    for (let i = 0; i < frame.e.length; i++) {
+      const p = frame.e[i];
+      if (!p || !isFinite(Number(p.t))) continue;
+      list.push({ t: Number(p.t), kind: String(p.kind || 'normal'), boss: !!p.boss });
+    }
+    if (frame.bossT !== undefined && frame.bossT !== null && isFinite(Number(frame.bossT))) bossT = Number(frame.bossT);
+    if (!list.length) return { ok: false };
+    let minT = Infinity, maxT = -1, sum = 0, soonN = 0, volleyN = 0, minIdx = 0;
+    for (let i = 0; i < list.length; i++) {
+      const t = list[i].t;
+      if (t < minT) { minT = t; minIdx = i; }
+      if (t > maxT) maxT = t;
+      sum += t;
+      if (t <= 30) soonN++;
+      if (t <= 90) volleyN++;
+    }
+    return { ok: true, list: list, minT: minT, maxT: maxT, avg: sum / list.length, soonN: soonN, volleyN: volleyN, minIdx: minIdx, bossT: bossT };
+  }
+  // 读战场活状态（anchor A 作用域）：射击型敌人（排除 dead/自爆）取 shootTimer，BOSS 另取 skillTimer。
+  // 帧内缓存：8 个指标在同一 updateExtraHud 调用里同步读活状态，5ms 窗口内复用同一帧，
+  // 避免每帧 8 次全量遍历 enemies（60fps 下累计开销大，会拖慢长时 smoke 测试）。
+  let __fpLast = -1, __fpCache = null;
+  function fpLive() {
+    const now = Date.now();
+    if (__fpCache && now - __fpLast < 5) return __fpCache;
+    const e = [];
+    let bossT = -1;
+    for (let j = 0; j < enemies.length; j++) {
+      const en = enemies[j];
+      if (en.dead) continue;
+      if (en.type === 'suicide') continue;   // 自爆不开火（贴脸引爆），不参与开火预判
+      if (en.isBoss) {
+        e.push({ t: Number(en.shootTimer) || 0, kind: 'boss', boss: true });
+        bossT = Number(en.skillTimer) || 0;
+      } else {
+        e.push({ t: Number(en.shootTimer) || 0, kind: String(en.type || 'normal'), boss: false });
+      }
+    }
+    const frame = { e: e, bossT: bossT };
+    __fpLast = now; __fpCache = frame;
+    return frame;
+  }
+  function fpNear(frame) {
+    const c = fpCore(frame); if (!c.ok) return fpDeg();
+    const v = Math.round(c.minT / 60 * 10) / 10;
+    const cls = v < 0.5 ? 'g-bad' : (v < 1.5 ? 'g-warn' : 'g-good');
+    return { v: v, unit: '秒', cls: cls, danger: v < 0.25, txt: v.toFixed(1) + '秒' };
+  }
+  function fpSoon(frame) {
+    const c = fpCore(frame); if (!c.ok) return fpDeg();
+    const v = c.soonN;
+    const cls = v >= 4 ? 'g-bad' : (v >= 2 ? 'g-warn' : 'g-good');
+    return { v: v, unit: '个', cls: cls, danger: v >= 6, txt: v + '个' };
+  }
+  function fpVolley(frame) {
+    const c = fpCore(frame); if (!c.ok) return fpDeg();
+    const v = c.volleyN;
+    const cls = v >= 6 ? 'g-bad' : (v >= 3 ? 'g-warn' : 'g-good');
+    return { v: v, unit: '股', cls: cls, danger: v >= 6, txt: v + '股' };
+  }
+  function fpRhythm(frame) {
+    const c = fpCore(frame); if (!c.ok) return fpDeg();
+    const v = Math.round(c.avg / 60 * 10) / 10;
+    const cls = v < 0.8 ? 'g-bad' : (v < 2 ? 'g-warn' : 'g-good');
+    return { v: v, unit: '秒', cls: cls, danger: v < 0.5, txt: v.toFixed(1) + '秒' };
+  }
+  function fpSilence(frame) {
+    const c = fpCore(frame); if (!c.ok) return fpDeg();
+    const v = Math.round(c.maxT / 60 * 10) / 10;
+    const cls = v >= 3 ? 'g-good' : (v >= 1.5 ? 'g-warn' : 'g-bad');
+    return { v: v, unit: '秒', cls: cls, danger: v < 0.5, txt: v.toFixed(1) + '秒' };
+  }
+  function fpBoss(frame) {
+    const c = fpCore(frame); if (!c.ok || c.bossT < 0) return fpDeg();
+    const v = Math.round(c.bossT / 60 * 10) / 10;
+    const cls = v < 1 ? 'g-bad' : (v < 3 ? 'g-warn' : 'g-good');
+    return { v: v, unit: '秒', cls: cls, danger: v < 0.5, txt: v.toFixed(1) + '秒' };
+  }
+  function fpType(frame) {
+    const c = fpCore(frame); if (!c.ok) return fpDeg();
+    const k = c.list[c.minIdx].kind;
+    const code = k === 'boss' ? 3 : (k === 'sniper' ? 1 : (k === 'engineer' ? 2 : 0));
+    const name = k === 'boss' ? 'BOSS' : (k === 'sniper' ? '狙击' : (k === 'engineer' ? '工兵' : '普通'));
+    const cls = code === 3 ? 'g-bad' : (code >= 1 ? 'g-warn' : 'g-good');
+    return { v: code, unit: '', cls: cls, danger: code === 3, txt: name };
+  }
+  function fpAlarm(frame) {
+    const c = fpCore(frame); if (!c.ok) return fpDeg();
+    const f1 = Math.max(0, Math.min(1, 1 - c.minT / 90)) * 45;
+    const f2 = Math.max(0, Math.min(1, c.soonN / 4)) * 30;
+    const f3 = Math.max(0, Math.min(1, c.volleyN / 8)) * 25;
+    const v = Math.round(f1 + f2 + f3);
+    const cls = v >= 60 ? 'g-bad' : (v >= 30 ? 'g-warn' : 'g-good');
+    return { v: v, unit: '%', cls: cls, danger: v >= 75, txt: v + '%' };
+  }
+
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -26578,7 +26686,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V17.77', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V17.78', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -28633,6 +28741,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       czSpdStateNow: (frame) => czSpd(frame), czSpdNow: () => czSpd(czLive()), czSpdDomNow: () => { const e = document.querySelector('.czSpdWrap .mval'); return e ? e.textContent : null; },
       czGridStateNow: (frame) => czGrid(frame), czGridNow: () => czGrid(czLive()), czGridDomNow: () => { const e = document.querySelector('.czGridWrap .mval'); return e ? e.textContent : null; },
       czIdxStateNow: (frame) => czIdx(frame), czIdxNow: () => czIdx(czLive()), czIdxDomNow: () => { const e = document.querySelector('.czIdxWrap .mval'); return e ? e.textContent : null; },
+      fpNearStateNow: (frame) => fpNear(frame), fpNearNow: () => fpNear(fpLive()), fpNearDomNow: () => { const e = document.querySelector('.fpNearWrap .mval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
