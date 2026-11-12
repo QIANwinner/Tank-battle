@@ -19845,6 +19845,21 @@ async function main() {
     t('U7172 DOM 与函数一致（.mval 存在 + txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7167~U7172 BOSS 弹占比 异常', false, String(e && e.stack || e)); }
 
+
+  // ===== U7173~U7178: 净压制(v0.18.01) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('duelNetWrap'),mv:!!document.querySelector('#duelNetWrap .mval'),s:T.duelNetStateNow({'pN':16,'eN':4,'thN':1,'bN':0})});})()"));
+    t('U7173 净压制 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7174 正常 净压制 → v=15 g-good +15', o.s.v === 15 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '+15', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.duelNetStateNow({'pN':16,'eN':4,'thN':1,'bN':0}),b:T.duelNetStateNow({'pN':3,'eN':20,'thN':18,'bN':0})});return r;})()"));
+    t('U7175 边界 净压制 → g-bad -15', o2.b.v === -15 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '-15', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.duelNetStateNow(null);const b=T.duelNetStateNow([]);const c=T.duelNetStateNow({'pN':8,'eN':2,'thN':1,'bN':0});const d=T.duelNetStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7176 非法 null/[]/无 pN·eN→退化 —，合法帧(有弹)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7177 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.duelNetStateNow({'pN':16,'eN':4,'thN':1,'bN':0});return JSON.stringify({mv:!!document.querySelector('#duelNetWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7178 DOM 与函数一致（.mval 存在 + txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7173~U7178 净压制 异常', false, String(e && e.stack || e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
