@@ -19455,6 +19455,21 @@ async function main() {
     t('U7016 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { console.log('U7011..7016 包围度 异常: ' + e.message); }
 
+
+  // ===== U7017~U7022: 来袭弹速(v0.17.75) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('czSpdWrap'),mv:!!document.querySelector('#czSpdWrap .mval'),s:T.czSpdStateNow({'cx':100,'cy':100,'th':[{'x':148,'y':100,'kind':'b','spd':5},{'x':148,'y':104,'kind':'b','spd':5}]})});})()"));
+    t('U7017 来袭弹速 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7018 正常 来袭弹速 → v=5 g-warn 5.0格/秒', o.s.v === 5 && o.s.cls === 'g-warn' && o.s.danger === false && o.s.txt === '5.0格/秒', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.czSpdStateNow({'cx':100,'cy':100,'th':[{'x':148,'y':100,'kind':'b','spd':5},{'x':148,'y':104,'kind':'b','spd':5}]}),b:T.czSpdStateNow({'cx':100,'cy':100,'th':[{'x':148,'y':100,'kind':'b','spd':9},{'x':148,'y':104,'kind':'b','spd':9}]})});return r;})()"));
+    t('U7019 边界 来袭弹速 → g-bad 9.0格/秒', o2.b.v === 9 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '9.0格/秒', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.czSpdStateNow(null);const b=T.czSpdStateNow([]);const c=T.czSpdStateNow({cx:200,cy:200,th:[{x:200,y:200,kind:'b',spd:5}]});const d=T.czSpdStateNow({cx:200,cy:200,th:[{x:'n',y:'n',kind:'b'},{x:'n',y:'n',kind:'b'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7020 非法 null/[]/全非数→退化 —，中心威胁(距离0)为合法最危险', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7021 单位结构 txt 以 unit 结尾或为—', (o.s.txt === '—') || (typeof o.s.unit === 'string' && o.s.unit.length > 0 && o.s.txt.endsWith(o.s.unit)), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.czSpdStateNow({'cx':100,'cy':100,'th':[{'x':148,'y':100,'kind':'b','spd':5},{'x':148,'y':104,'kind':'b','spd':5}]});return JSON.stringify({mv:!!document.querySelector('#czSpdWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7022 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { console.log('U7017..7022 来袭弹速 异常: ' + e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
