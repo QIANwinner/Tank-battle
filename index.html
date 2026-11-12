@@ -6065,6 +6065,10 @@
   #fpAlarmWrap.g-bad .mval { color:#e74c3c; }
   #fpAlarmWrap.g-bad { animation: tbFpPulse .4s ease-in-out infinite alternate; }
   @keyframes tbFpPulse { from { opacity:.55; } to { opacity:1; } }
+  #gpReloadWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #gpReloadWrap.g-bad .mval { color:#e74c3c; }
+  #gpReloadWrap.g-bad { animation: tbGpPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbGpPulse { from { opacity:.55; } to { opacity:1; } }
 </style>
 </head>
 <body>
@@ -7149,6 +7153,7 @@
     <div class="pill m-hide" id="fpBossWrap"><span class="k">👾</span><span class="v">BOSS技</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="fpTypeWrap"><span class="k">🚨</span><span class="v">首火者</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="fpAlarmWrap"><span class="k">📢</span><span class="v">火警</span><em class="mval">—</em></div>
+    <div class="pill m-hide" id="gpReloadWrap"><span class="k">🔋</span><span class="v">装填</span><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -7524,7 +7529,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V17.85</div>
+  <div id="mark">DESIGNED BY QIAN · V17.86</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -13411,6 +13416,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_fpBoss = fpBossNow(); const w_fpBoss = $('fpBossWrap'); if (w_fpBoss) { const pv = w_fpBoss.dataset.fp || ''; const nv = l_fpBoss.cls + '|' + l_fpBoss.txt + '|' + (l_fpBoss.danger ? '1' : '0'); if (pv !== nv) { w_fpBoss.dataset.fp = nv; w_fpBoss.classList.remove('g-good','g-warn','g-bad'); w_fpBoss.classList.add(l_fpBoss.cls); w_fpBoss.classList.toggle('danger', !!l_fpBoss.danger); const mv = w_fpBoss.querySelector('.mval'); if (mv) mv.textContent = l_fpBoss.txt; } }
     const l_fpType = fpTypeNow(); const w_fpType = $('fpTypeWrap'); if (w_fpType) { const pv = w_fpType.dataset.fp || ''; const nv = l_fpType.cls + '|' + l_fpType.txt + '|' + (l_fpType.danger ? '1' : '0'); if (pv !== nv) { w_fpType.dataset.fp = nv; w_fpType.classList.remove('g-good','g-warn','g-bad'); w_fpType.classList.add(l_fpType.cls); w_fpType.classList.toggle('danger', !!l_fpType.danger); const mv = w_fpType.querySelector('.mval'); if (mv) mv.textContent = l_fpType.txt; } }
     const l_fpAlarm = fpAlarmNow(); const w_fpAlarm = $('fpAlarmWrap'); if (w_fpAlarm) { const pv = w_fpAlarm.dataset.fp || ''; const nv = l_fpAlarm.cls + '|' + l_fpAlarm.txt + '|' + (l_fpAlarm.danger ? '1' : '0'); if (pv !== nv) { w_fpAlarm.dataset.fp = nv; w_fpAlarm.classList.remove('g-good','g-warn','g-bad'); w_fpAlarm.classList.add(l_fpAlarm.cls); w_fpAlarm.classList.toggle('danger', !!l_fpAlarm.danger); const mv = w_fpAlarm.querySelector('.mval'); if (mv) mv.textContent = l_fpAlarm.txt; } }
+    const l_gpReload = gpReloadNow(); const w_gpReload = $('gpReloadWrap'); if (w_gpReload) { const pv = w_gpReload.dataset.fp || ''; const nv = l_gpReload.cls + '|' + l_gpReload.txt + '|' + (l_gpReload.danger ? '1' : '0'); if (pv !== nv) { w_gpReload.dataset.fp = nv; w_gpReload.classList.remove('g-good','g-warn','g-bad'); w_gpReload.classList.add(l_gpReload.cls); w_gpReload.classList.toggle('danger', !!l_gpReload.danger); const mv = w_gpReload.querySelector('.mval'); if (mv) mv.textContent = l_gpReload.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -24894,6 +24900,101 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // —— fpBoss：BOSS蓄力（开火预判：见 helperBody fpCore + fpBoss 实现）——
   // —— fpType：首火敌型（开火预判：见 helperBody fpCore + fpType 实现）——
   // —— fpAlarm：开火警报（开火预判：见 helperBody fpCore + fpAlarm 实现）——
+  // —— 我方弹幕态势辅助：gpCore 公共解析 + gpLive 读战场活状态 + 8 个指标 ——
+  function gpDeg() { return { v: 0, unit: '', cls: 'g-warn', danger: false, txt: '—' }; }
+  function gpCore(frame) {
+    if (!frame || typeof frame !== 'object') return { ok: false };
+    const cdMax = Number(frame.cdMax);
+    if (!isFinite(cdMax) || cdMax <= 0) return { ok: false };
+    const cd = Math.max(0, Number(frame.cd) || 0);
+    const fxR = !!frame.fxR, dbl = !!frame.dbl, bomb = !!frame.bomb;
+    const sp = Math.max(0, Math.floor(Number(frame.sp) || 0));
+    const big = Math.max(0, Math.floor(Number(frame.big) || 0));
+    const pierce = Math.max(0, Number(frame.pierce) || 0);
+    const pdir = ((Math.floor(Number(frame.pdir) || 0) % 8) + 8) % 8;
+    const reload = cd <= 0 ? 1 : Math.max(0, Math.min(1, 1 - cd / cdMax));
+    const cdSec = cd / 60;
+    const effRate = 60 / (cdMax * (fxR ? 0.5 : 1));
+    const volley = (dbl ? 2 : 1) + 2 * sp;
+    const spd = Number(frame.spd);
+    return { ok: true, cd: cd, cdMax: cdMax, reload: reload, cdSec: cdSec, effRate: effRate, volley: volley, sp: sp, big: big, bomb: bomb, pierce: pierce, pdir: pdir, spd: isFinite(spd) ? spd : NaN };
+  }
+  // 读战场活状态（anchor A 作用域）：玩家炮口实时姿态，用 fire() 真实公式算 cdMax 与弹速。
+  // 帧内缓存：8 个指标在同一 updateExtraHud 调用里同步读活状态，5ms 窗口内复用同一帧，避免每帧 8 次全量计算。
+  let __gpLast = -1, __gpCache = null;
+  function gpLive() {
+    const now = Date.now();
+    if (__gpCache && now - __gpLast < 5) return __gpCache;
+    const u = upgrades || {}, b = bonus || {}, p = player || {}, fx2 = fx || {};
+    const rap = Math.max(0, u.rapid || 0);
+    const fullCd = Math.max(3, 14 * Math.pow(0.8, rap) * (1 - 0.05 * (b.cd || 0)) * (1 - 0.15 * heroPassive('blade')));
+    const spd = BULLET_SPEED * (1 + 0.2 * (u.bulletspd || 0)) * (1 + 0.05 * (b.bulletspd || 0)) * (1 + 0.25 * heroPassive('sniper'));
+    const frame = {
+      cd: Math.max(0, Number(p.cooldown) || 0),
+      cdMax: fullCd,
+      fxR: !!(fx2.rapid > 0),
+      dbl: !!(fx2.double > 0),
+      sp: u.spread || 0,
+      big: u.bigbullet || 0,
+      bomb: !!(u.bomb || 0),
+      pierce: (u.pierce || 0) + (b.pierce || 0),
+      spd: spd,
+      pdir: Number(p.dir) || 0
+    };
+    __gpLast = now; __gpCache = frame;
+    return frame;
+  }
+  function gpReload(frame) {
+    const c = gpCore(frame); if (!c.ok) return gpDeg();
+    const v = Math.round(c.reload * 100);
+    const cls = v >= 80 ? 'g-good' : (v >= 40 ? 'g-warn' : 'g-bad');
+    return { v: v, unit: '%', cls: cls, danger: v < 20, txt: v + '%' };
+  }
+  function gpFire(frame) {
+    const c = gpCore(frame); if (!c.ok) return gpDeg();
+    if (c.cd <= 0) return { v: 0, unit: '', cls: 'g-good', danger: false, txt: '就绪' };
+    const v = Math.round(c.cdSec * 10) / 10;
+    const cls = v <= 0.5 ? 'g-warn' : 'g-bad';
+    return { v: v, unit: '秒', cls: cls, danger: v > 1.5, txt: '装填' + v.toFixed(1) + '秒' };
+  }
+  function gpRate(frame) {
+    const c = gpCore(frame); if (!c.ok) return gpDeg();
+    const v = Math.round(c.effRate * 10) / 10;
+    const cls = v >= 6 ? 'g-good' : (v >= 3 ? 'g-warn' : 'g-bad');
+    return { v: v, unit: '发/秒', cls: cls, danger: v < 2, txt: v.toFixed(1) + '发/秒' };
+  }
+  function gpVolley(frame) {
+    const c = gpCore(frame); if (!c.ok) return gpDeg();
+    const v = c.volley;
+    const cls = v <= 1 ? 'g-good' : (v <= 4 ? 'g-warn' : 'g-bad');
+    return { v: v, unit: '发/次', cls: cls, danger: v >= 7, txt: v + '发/次' };
+  }
+  function gpShell(frame) {
+    const c = gpCore(frame); if (!c.ok) return gpDeg();
+    const strong = (c.big > 0 || c.bomb) && c.pierce > 0;
+    const code = strong ? 4 : (c.bomb ? 3 : (c.big > 0 ? 2 : (c.pierce > 0 ? 1 : 0)));
+    const name = ['轻', '穿', '重', '爆', '复合'][code];
+    const cls = code >= 2 ? 'g-good' : (code >= 1 ? 'g-warn' : 'g-bad');
+    return { v: code, unit: '', cls: cls, danger: code === 0, txt: name };
+  }
+  function gpSpeed(frame) {
+    const c = gpCore(frame); if (!c.ok || !isFinite(c.spd) || c.spd <= 0) return gpDeg();
+    const v = Math.round(c.spd * 60 / 24 * 10) / 10;
+    const cls = v >= 8 ? 'g-good' : (v >= 4 ? 'g-warn' : 'g-bad');
+    return { v: v, unit: '格/秒', cls: cls, danger: v < 3, txt: v.toFixed(1) + '格/秒' };
+  }
+  function gpThroughput(frame) {
+    const c = gpCore(frame); if (!c.ok) return gpDeg();
+    const v = Math.round(c.effRate * c.volley * 10) / 10;
+    const cls = v >= 10 ? 'g-good' : (v >= 5 ? 'g-warn' : 'g-bad');
+    return { v: v, unit: '弹/秒', cls: cls, danger: v < 3, txt: v.toFixed(1) + '弹/秒' };
+  }
+  function gpAim(frame) {
+    const c = gpCore(frame); if (!c.ok) return gpDeg();
+    const names = ['上', '右上', '右', '右下', '下', '左下', '左', '左上'];
+    return { v: c.pdir, unit: '', cls: 'g-good', danger: false, txt: names[c.pdir] };
+  }
+
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -26735,7 +26836,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V17.85', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V17.86', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -28798,6 +28899,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       fpBossStateNow: (frame) => fpBoss(frame), fpBossNow: () => fpBoss(fpLive()), fpBossDomNow: () => { const e = document.querySelector('.fpBossWrap .mval'); return e ? e.textContent : null; },
       fpTypeStateNow: (frame) => fpType(frame), fpTypeNow: () => fpType(fpLive()), fpTypeDomNow: () => { const e = document.querySelector('.fpTypeWrap .mval'); return e ? e.textContent : null; },
       fpAlarmStateNow: (frame) => fpAlarm(frame), fpAlarmNow: () => fpAlarm(fpLive()), fpAlarmDomNow: () => { const e = document.querySelector('.fpAlarmWrap .mval'); return e ? e.textContent : null; },
+      gpReloadStateNow: (frame) => gpReload(frame), gpReloadNow: () => gpReload(gpLive()), gpReloadDomNow: () => { const e = document.querySelector('.gpReloadWrap .mval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
