@@ -6101,6 +6101,10 @@
   #duelDiffWrap.g-bad .mval { color:#e74c3c; }
   #duelDiffWrap.g-bad { animation: tbGpPulse .4s ease-in-out infinite alternate; }
   @keyframes tbGpPulse { from { opacity:.55; } to { opacity:1; } }
+  #duelRatioWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #duelRatioWrap.g-bad .mval { color:#e74c3c; }
+  #duelRatioWrap.g-bad { animation: tbGpPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbGpPulse { from { opacity:.55; } to { opacity:1; } }
 </style>
 </head>
 <body>
@@ -7194,6 +7198,7 @@
     <div class="pill m-hide" id="gpThroughputWrap"><span class="k">💥</span><span class="v">投送</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="gpAimWrap"><span class="k">🧭</span><span class="v">炮口</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="duelDiffWrap"><span class="k">⚖️</span><span class="v">火力差</span><em class="mval">—</em></div>
+    <div class="pill m-hide" id="duelRatioWrap"><span class="k">🌐</span><span class="v">制空</span><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -7569,7 +7574,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V17.94</div>
+  <div id="mark">DESIGNED BY QIAN · V17.95</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -13465,6 +13470,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_gpThroughput = gpThroughputNow(); const w_gpThroughput = $('gpThroughputWrap'); if (w_gpThroughput) { const pv = w_gpThroughput.dataset.fp || ''; const nv = l_gpThroughput.cls + '|' + l_gpThroughput.txt + '|' + (l_gpThroughput.danger ? '1' : '0'); if (pv !== nv) { w_gpThroughput.dataset.fp = nv; w_gpThroughput.classList.remove('g-good','g-warn','g-bad'); w_gpThroughput.classList.add(l_gpThroughput.cls); w_gpThroughput.classList.toggle('danger', !!l_gpThroughput.danger); const mv = w_gpThroughput.querySelector('.mval'); if (mv) mv.textContent = l_gpThroughput.txt; } }
     const l_gpAim = gpAimNow(); const w_gpAim = $('gpAimWrap'); if (w_gpAim) { const pv = w_gpAim.dataset.fp || ''; const nv = l_gpAim.cls + '|' + l_gpAim.txt + '|' + (l_gpAim.danger ? '1' : '0'); if (pv !== nv) { w_gpAim.dataset.fp = nv; w_gpAim.classList.remove('g-good','g-warn','g-bad'); w_gpAim.classList.add(l_gpAim.cls); w_gpAim.classList.toggle('danger', !!l_gpAim.danger); const mv = w_gpAim.querySelector('.mval'); if (mv) mv.textContent = l_gpAim.txt; } }
     const l_duelDiff = duelDiffNow(); const w_duelDiff = $('duelDiffWrap'); if (w_duelDiff) { const pv = w_duelDiff.dataset.fp || ''; const nv = l_duelDiff.cls + '|' + l_duelDiff.txt + '|' + (l_duelDiff.danger ? '1' : '0'); if (pv !== nv) { w_duelDiff.dataset.fp = nv; w_duelDiff.classList.remove('g-good','g-warn','g-bad'); w_duelDiff.classList.add(l_duelDiff.cls); w_duelDiff.classList.toggle('danger', !!l_duelDiff.danger); const mv = w_duelDiff.querySelector('.mval'); if (mv) mv.textContent = l_duelDiff.txt; } }
+    const l_duelRatio = duelRatioNow(); const w_duelRatio = $('duelRatioWrap'); if (w_duelRatio) { const pv = w_duelRatio.dataset.fp || ''; const nv = l_duelRatio.cls + '|' + l_duelRatio.txt + '|' + (l_duelRatio.danger ? '1' : '0'); if (pv !== nv) { w_duelRatio.dataset.fp = nv; w_duelRatio.classList.remove('g-good','g-warn','g-bad'); w_duelRatio.classList.add(l_duelRatio.cls); w_duelRatio.classList.toggle('danger', !!l_duelRatio.danger); const mv = w_duelRatio.querySelector('.mval'); if (mv) mv.textContent = l_duelRatio.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -25133,6 +25139,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     return { v: v, unit: '', cls: cls, danger: v < -6, txt: v > 0 ? '+' + v : (v < 0 ? String(v) : '均势') };
   }
 
+  // —— duelRatio：制空占比（空中火力对冲：见 helperBody duelCore + duelelRatio 实现）——
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -26974,7 +26981,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V17.94', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V17.95', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -29046,6 +29053,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       gpThroughputStateNow: (frame) => gpThroughput(frame), gpThroughputNow: () => gpThroughput(gpLive()), gpThroughputDomNow: () => { const e = document.querySelector('.gpThroughputWrap .mval'); return e ? e.textContent : null; },
       gpAimStateNow: (frame) => gpAim(frame), gpAimNow: () => gpAim(gpLive()), gpAimDomNow: () => { const e = document.querySelector('.gpAimWrap .mval'); return e ? e.textContent : null; },
       duelDiffStateNow: (frame) => duelDiff(frame), duelDiffNow: () => duelDiff(duelLive()), duelDiffDomNow: () => { const e = document.querySelector('.duelDiffWrap .mval'); return e ? e.textContent : null; },
+      duelRatioStateNow: (frame) => duelRatio(frame), duelRatioNow: () => duelRatio(duelLive()), duelRatioDomNow: () => { const e = document.querySelector('.duelRatioWrap .mval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
