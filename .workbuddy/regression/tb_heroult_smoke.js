@@ -19470,6 +19470,21 @@ async function main() {
     t('U7022 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { console.log('U7017..7022 来袭弹速 异常: ' + e.message); }
 
+
+  // ===== U7023~U7028: 最危险格(v0.17.76) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('czGridWrap'),mv:!!document.querySelector('#czGridWrap .mval'),s:T.czGridStateNow({'cx':100,'cy':100,'th':[{'x':148,'y':100,'kind':'b'},{'x':148,'y':110,'kind':'b'},{'x':148,'y':120,'kind':'b'}]})});})()"));
+    t('U7023 最危险格 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7024 正常 最危险格 → v=5 g-bad 中右3格', o.s.v === 5 && o.s.cls === 'g-bad' && o.s.danger === false && o.s.txt === '中右3格', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.czGridStateNow({'cx':100,'cy':100,'th':[{'x':148,'y':100,'kind':'b'},{'x':148,'y':110,'kind':'b'},{'x':148,'y':120,'kind':'b'}]}),b:T.czGridStateNow({'cx':100,'cy':100,'th':[{'x':52,'y':52,'kind':'b'},{'x':50,'y':50,'kind':'b'},{'x':54,'y':54,'kind':'b'},{'x':48,'y':48,'kind':'b'}]})});return r;})()"));
+    t('U7025 边界 最危险格 → g-bad 左上4格', o2.b.v === 0 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '左上4格', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.czGridStateNow(null);const b=T.czGridStateNow([]);const c=T.czGridStateNow({cx:200,cy:200,th:[{x:200,y:200,kind:'b',spd:5}]});const d=T.czGridStateNow({cx:200,cy:200,th:[{x:'n',y:'n',kind:'b'},{x:'n',y:'n',kind:'b'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7026 非法 null/[]/全非数→退化 —，中心威胁(距离0)为合法最危险', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7027 单位结构 txt 以 unit 结尾或为—', (o.s.txt === '—') || (typeof o.s.unit === 'string' && o.s.unit.length > 0 && o.s.txt.endsWith(o.s.unit)), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.czGridStateNow({'cx':100,'cy':100,'th':[{'x':148,'y':100,'kind':'b'},{'x':148,'y':110,'kind':'b'},{'x':148,'y':120,'kind':'b'}]});return JSON.stringify({mv:!!document.querySelector('#czGridWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7028 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { console.log('U7023..7028 最危险格 异常: ' + e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
