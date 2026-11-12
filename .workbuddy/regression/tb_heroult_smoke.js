@@ -19635,6 +19635,21 @@ async function main() {
     t('U7088 DOM 与函数一致（.mval 存在 + fn txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7083~U7088 装填进度 异常', false, 'ERR ' + (e && e.message ? e.message : String(e))); }
 
+
+  // ===== U7089~U7094: 击发状态(v0.17.87) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('gpFireWrap'),mv:!!document.querySelector('#gpFireWrap .mval'),s:T.gpFireStateNow({'cd':120,'cdMax':24,'spd':5.2})});})()"));
+    t('U7089 击发状态 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7090 正常 击发状态 → v=2 g-bad 装填2.0秒', o.s.v === 2 && o.s.cls === 'g-bad' && o.s.danger === true && o.s.txt === '装填2.0秒', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.gpFireStateNow({'cd':120,'cdMax':24,'spd':5.2}),b:T.gpFireStateNow({'cd':30,'cdMax':24,'spd':5.2})});return r;})()"));
+    t('U7091 边界 击发状态 → g-warn 装填0.5秒', o2.b.v === 0.5 && o2.b.cls === 'g-warn' && o2.b.danger === false && o2.b.txt === '装填0.5秒', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.gpFireStateNow(null);const b=T.gpFireStateNow([]);const c=T.gpFireStateNow({'cdMax':15,'spd':5.2});const d=T.gpFireStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7092 非法 null/[]/无 cdMax→退化 —，合法帧(含 cd=0 就绪)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7093 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.gpFireStateNow({'cd':120,'cdMax':24,'spd':5.2});return JSON.stringify({mv:!!document.querySelector('#gpFireWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7094 DOM 与函数一致（.mval 存在 + fn txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7089~U7094 击发状态 异常', false, 'ERR ' + (e && e.message ? e.message : String(e))); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
