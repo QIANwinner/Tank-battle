@@ -19800,6 +19800,21 @@ async function main() {
     t('U7154 DOM 与函数一致（.mval 存在 + txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7149~U7154 敌弹密度 异常', false, String(e && e.stack || e)); }
 
+
+  // ===== U7155~U7160: 我方弹密度(v0.17.98) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('duelPlayerWrap'),mv:!!document.querySelector('#duelPlayerWrap .mval'),s:T.duelPlayerStateNow({'pN':16,'eN':4,'thN':1,'bN':0})});})()"));
+    t('U7155 我方弹密度 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7156 正常 我方弹密度 → v=1 g-good 1.0×', o.s.v === 1 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '1.0×', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.duelPlayerStateNow({'pN':16,'eN':4,'thN':1,'bN':0}),b:T.duelPlayerStateNow({'pN':2,'eN':48,'thN':30,'bN':10})});return r;})()"));
+    t('U7157 边界 我方弹密度 → g-bad 0.1×', o2.b.v === 0.1 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '0.1×', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.duelPlayerStateNow(null);const b=T.duelPlayerStateNow([]);const c=T.duelPlayerStateNow({'pN':8,'eN':2,'thN':1,'bN':0});const d=T.duelPlayerStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7158 非法 null/[]/无 pN·eN→退化 —，合法帧(有弹)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7159 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.duelPlayerStateNow({'pN':16,'eN':4,'thN':1,'bN':0});return JSON.stringify({mv:!!document.querySelector('#duelPlayerWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7160 DOM 与函数一致（.mval 存在 + txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7155~U7160 我方弹密度 异常', false, String(e && e.stack || e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
