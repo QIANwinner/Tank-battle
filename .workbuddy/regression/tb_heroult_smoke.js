@@ -19395,6 +19395,21 @@ async function main() {
     t('U6992 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { console.log('U6987..6992 最近威胁 异常: ' + e.message); }
 
+
+  // ===== U6993~U6998: 威胁密度(v0.17.71) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('czDenWrap'),mv:!!document.querySelector('#czDenWrap .mval'),s:T.czDenStateNow({'cx':100,'cy':100,'th':[{'x':148,'y':100,'kind':'b'},{'x':100,'y':148,'kind':'b'},{'x':100,'y':160,'kind':'b'},{'x':300,'y':100,'kind':'b'}]})});})()"));
+    t('U6993 威胁密度 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U6994 正常 威胁密度 → v=3 g-warn 3个', o.s.v === 3 && o.s.cls === 'g-warn' && o.s.danger === false && o.s.txt === '3个', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.czDenStateNow({'cx':100,'cy':100,'th':[{'x':148,'y':100,'kind':'b'},{'x':100,'y':148,'kind':'b'},{'x':100,'y':160,'kind':'b'},{'x':300,'y':100,'kind':'b'}]}),b:T.czDenStateNow({'cx':100,'cy':100,'th':[{'x':100,'y':148,'kind':'b'},{'x':100,'y':52,'kind':'b'},{'x':148,'y':100,'kind':'b'},{'x':52,'y':100,'kind':'b'},{'x':140,'y':140,'kind':'b'},{'x':60,'y':140,'kind':'b'},{'x':140,'y':60,'kind':'b'},{'x':60,'y':60,'kind':'b'}]})});return r;})()"));
+    t('U6995 边界 威胁密度 → g-bad 8个', o2.b.v === 8 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '8个', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.czDenStateNow(null);const b=T.czDenStateNow([]);const c=T.czDenStateNow({cx:200,cy:200,th:[{x:200,y:200,kind:'b',spd:5}]});const d=T.czDenStateNow({cx:200,cy:200,th:[{x:'n',y:'n',kind:'b'},{x:'n',y:'n',kind:'b'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U6996 非法 null/[]/全非数→退化 —，中心威胁(距离0)为合法最危险', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U6997 单位结构 txt 以 unit 结尾或为—', (o.s.txt === '—') || (typeof o.s.unit === 'string' && o.s.unit.length > 0 && o.s.txt.endsWith(o.s.unit)), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.czDenStateNow({'cx':100,'cy':100,'th':[{'x':148,'y':100,'kind':'b'},{'x':100,'y':148,'kind':'b'},{'x':100,'y':160,'kind':'b'},{'x':300,'y':100,'kind':'b'}]});return JSON.stringify({mv:!!document.querySelector('#czDenWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U6998 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { console.log('U6993..6998 威胁密度 异常: ' + e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
