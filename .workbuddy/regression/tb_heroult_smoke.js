@@ -19515,6 +19515,21 @@ async function main() {
     t('U7040 DOM 与函数一致（.mval 存在 + fn txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7035~U7040 最近开火 异常', false, 'ERR ' + (e && e.message ? e.message : String(e))); }
 
+
+  // ===== U7041~U7046: 临火敌数(v0.17.79) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('fpSoonWrap'),mv:!!document.querySelector('#fpSoonWrap .mval'),s:T.fpSoonStateNow({'e':[{'t':20,'kind':'normal'},{'t':50,'kind':'normal'},{'t':10,'kind':'sniper'},{'t':200,'kind':'armored'}]})});})()"));
+    t('U7041 临火敌数 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7042 正常 临火敌数 → v=2 g-warn 2个', o.s.v === 2 && o.s.cls === 'g-warn' && o.s.danger === false && o.s.txt === '2个', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.fpSoonStateNow({'e':[{'t':20,'kind':'normal'},{'t':50,'kind':'normal'},{'t':10,'kind':'sniper'},{'t':200,'kind':'armored'}]}),b:T.fpSoonStateNow({'e':[{'t':1,'kind':'normal'},{'t':5,'kind':'sniper'},{'t':10,'kind':'engineer'},{'t':15,'kind':'normal'},{'t':20,'kind':'fast'},{'t':25,'kind':'normal'},{'t':100,'kind':'armored'}]})});return r;})()"));
+    t('U7043 边界 临火敌数 → g-bad 6个', o2.b.v === 6 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '6个', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.fpSoonStateNow(null);const b=T.fpSoonStateNow([]);const c=T.fpSoonStateNow({'e':[{'t':0,'kind':'sniper'}]});const d=T.fpSoonStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7044 非法 null/[]/全非数→退化 —，合法帧(含 t=0 马上开火)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7045 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.fpSoonStateNow({'e':[{'t':20,'kind':'normal'},{'t':50,'kind':'normal'},{'t':10,'kind':'sniper'},{'t':200,'kind':'armored'}]});return JSON.stringify({mv:!!document.querySelector('#fpSoonWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7046 DOM 与函数一致（.mval 存在 + fn txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7041~U7046 临火敌数 异常', false, 'ERR ' + (e && e.message ? e.message : String(e))); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
