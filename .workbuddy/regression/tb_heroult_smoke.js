@@ -19425,6 +19425,21 @@ async function main() {
     t('U7004 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { console.log('U6999..7004 逃生方向 异常: ' + e.message); }
 
+
+  // ===== U7005~U7010: 安全格数(v0.17.73) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('czSafeWrap'),mv:!!document.querySelector('#czSafeWrap .mval'),s:T.czSafeStateNow({'cx':100,'cy':100,'th':[{'x':148,'y':100,'kind':'b'},{'x':100,'y':148,'kind':'b'},{'x':52,'y':52,'kind':'b'}]})});})()"));
+    t('U7005 安全格数 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7006 正常 安全格数 → v=6 g-good 6格', o.s.v === 6 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '6格', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.czSafeStateNow({'cx':100,'cy':100,'th':[{'x':148,'y':100,'kind':'b'},{'x':100,'y':148,'kind':'b'},{'x':52,'y':52,'kind':'b'}]}),b:T.czSafeStateNow({'cx':100,'cy':100,'th':[{'x':52,'y':52,'kind':'b'},{'x':100,'y':52,'kind':'b'},{'x':148,'y':52,'kind':'b'},{'x':52,'y':100,'kind':'b'},{'x':104,'y':100,'kind':'b'},{'x':148,'y':100,'kind':'b'},{'x':52,'y':148,'kind':'b'},{'x':100,'y':148,'kind':'b'}]})});return r;})()"));
+    t('U7007 边界 安全格数 → g-bad 1格', o2.b.v === 1 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '1格', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.czSafeStateNow(null);const b=T.czSafeStateNow([]);const c=T.czSafeStateNow({cx:200,cy:200,th:[{x:200,y:200,kind:'b',spd:5}]});const d=T.czSafeStateNow({cx:200,cy:200,th:[{x:'n',y:'n',kind:'b'},{x:'n',y:'n',kind:'b'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7008 非法 null/[]/全非数→退化 —，中心威胁(距离0)为合法最危险', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7009 单位结构 txt 以 unit 结尾或为—', (o.s.txt === '—') || (typeof o.s.unit === 'string' && o.s.unit.length > 0 && o.s.txt.endsWith(o.s.unit)), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.czSafeStateNow({'cx':100,'cy':100,'th':[{'x':148,'y':100,'kind':'b'},{'x':100,'y':148,'kind':'b'},{'x':52,'y':52,'kind':'b'}]});return JSON.stringify({mv:!!document.querySelector('#czSafeWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7010 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { console.log('U7005..7010 安全格数 异常: ' + e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

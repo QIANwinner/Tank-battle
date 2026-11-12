@@ -6009,6 +6009,10 @@
   #czEscWrap.g-bad .mval { color:#e74c3c; }
   #czEscWrap.g-bad { animation: tbCzPulse .4s ease-in-out infinite alternate; }
   @keyframes tbCzPulse { from { opacity:.55; } to { opacity:1; } }
+  #czSafeWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #czSafeWrap.g-bad .mval { color:#e74c3c; }
+  #czSafeWrap.g-bad { animation: tbCzPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbCzPulse { from { opacity:.55; } to { opacity:1; } }
 </style>
 </head>
 <body>
@@ -7080,6 +7084,7 @@
     <div class="pill m-hide" id="czNearWrap"><span class="k">⏳</span><span class="v">最近威</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="czDenWrap"><span class="k">🕸️</span><span class="v">威胁密</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="czEscWrap"><span class="k">🚪</span><span class="v">逃生向</span><em class="mval">—</em></div>
+    <div class="pill m-hide" id="czSafeWrap"><span class="k">🛡️</span><span class="v">安全格</span><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -7455,7 +7460,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V17.72</div>
+  <div id="mark">DESIGNED BY QIAN · V17.73</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -13329,6 +13334,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_czNear = czNearNow(); const w_czNear = $('czNearWrap'); if (w_czNear) { const pv = w_czNear.dataset.cz || ''; const nv = l_czNear.cls + '|' + l_czNear.txt + '|' + (l_czNear.danger ? '1' : '0'); if (pv !== nv) { w_czNear.dataset.cz = nv; w_czNear.classList.remove('g-good','g-warn','g-bad'); w_czNear.classList.add(l_czNear.cls); w_czNear.classList.toggle('danger', !!l_czNear.danger); const mv = w_czNear.querySelector('.mval'); if (mv) mv.textContent = l_czNear.txt; } }
     const l_czDen = czDenNow(); const w_czDen = $('czDenWrap'); if (w_czDen) { const pv = w_czDen.dataset.cz || ''; const nv = l_czDen.cls + '|' + l_czDen.txt + '|' + (l_czDen.danger ? '1' : '0'); if (pv !== nv) { w_czDen.dataset.cz = nv; w_czDen.classList.remove('g-good','g-warn','g-bad'); w_czDen.classList.add(l_czDen.cls); w_czDen.classList.toggle('danger', !!l_czDen.danger); const mv = w_czDen.querySelector('.mval'); if (mv) mv.textContent = l_czDen.txt; } }
     const l_czEsc = czEscNow(); const w_czEsc = $('czEscWrap'); if (w_czEsc) { const pv = w_czEsc.dataset.cz || ''; const nv = l_czEsc.cls + '|' + l_czEsc.txt + '|' + (l_czEsc.danger ? '1' : '0'); if (pv !== nv) { w_czEsc.dataset.cz = nv; w_czEsc.classList.remove('g-good','g-warn','g-bad'); w_czEsc.classList.add(l_czEsc.cls); w_czEsc.classList.toggle('danger', !!l_czEsc.danger); const mv = w_czEsc.querySelector('.mval'); if (mv) mv.textContent = l_czEsc.txt; } }
+    const l_czSafe = czSafeNow(); const w_czSafe = $('czSafeWrap'); if (w_czSafe) { const pv = w_czSafe.dataset.cz || ''; const nv = l_czSafe.cls + '|' + l_czSafe.txt + '|' + (l_czSafe.danger ? '1' : '0'); if (pv !== nv) { w_czSafe.dataset.cz = nv; w_czSafe.classList.remove('g-good','g-warn','g-bad'); w_czSafe.classList.add(l_czSafe.cls); w_czSafe.classList.toggle('danger', !!l_czSafe.danger); const mv = w_czSafe.querySelector('.mval'); if (mv) mv.textContent = l_czSafe.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -24698,6 +24704,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
 
   // —— czDen：威胁密度（危险格：见 helperBody czCore + czDen 实现）——
   // —— czEsc：逃生方向（危险格：见 helperBody czCore + czEsc 实现）——
+  // —— czSafe：安全格数（危险格：见 helperBody czCore + czSafe 实现）——
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -26539,7 +26546,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V17.72', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V17.73', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -28589,6 +28596,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       czNearStateNow: (frame) => czNear(frame), czNearNow: () => czNear(czLive()), czNearDomNow: () => { const e = document.querySelector('.czNearWrap .mval'); return e ? e.textContent : null; },
       czDenStateNow: (frame) => czDen(frame), czDenNow: () => czDen(czLive()), czDenDomNow: () => { const e = document.querySelector('.czDenWrap .mval'); return e ? e.textContent : null; },
       czEscStateNow: (frame) => czEsc(frame), czEscNow: () => czEsc(czLive()), czEscDomNow: () => { const e = document.querySelector('.czEscWrap .mval'); return e ? e.textContent : null; },
+      czSafeStateNow: (frame) => czSafe(frame), czSafeNow: () => czSafe(czLive()), czSafeDomNow: () => { const e = document.querySelector('.czSafeWrap .mval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
