@@ -19740,6 +19740,21 @@ async function main() {
     t('U7130 DOM 与函数一致（.mval 存在 + fn txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7125~U7130 炮口指向 异常', false, 'ERR ' + (e && e.message ? e.message : String(e))); }
 
+
+  // ===== U7131~U7136: 空中火力差(v0.17.94) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('duelDiffWrap'),mv:!!document.querySelector('#duelDiffWrap .mval'),s:T.duelDiffStateNow({'pN':16,'eN':4,'thN':1,'bN':0})});})()"));
+    t('U7131 空中火力差 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7132 正常 空中火力差 → v=12 g-good +12', o.s.v === 12 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '+12', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.duelDiffStateNow({'pN':16,'eN':4,'thN':1,'bN':0}),b:T.duelDiffStateNow({'pN':3,'eN':20,'thN':18,'bN':0})});return r;})()"));
+    t('U7133 边界 空中火力差 → g-bad -17', o2.b.v === -17 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '-17', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.duelDiffStateNow(null);const b=T.duelDiffStateNow([]);const c=T.duelDiffStateNow({'pN':8,'eN':2,'thN':1,'bN':0});const d=T.duelDiffStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7134 非法 null/[]/无 pN·eN→退化 —，合法帧(有弹)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7135 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.duelDiffStateNow({'pN':16,'eN':4,'thN':1,'bN':0});return JSON.stringify({mv:!!document.querySelector('#duelDiffWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7136 DOM 与函数一致（.mval 存在 + txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7131~U7136 空中火力差 异常', false, String(e && e.stack || e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
