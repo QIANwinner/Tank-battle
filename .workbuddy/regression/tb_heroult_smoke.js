@@ -19650,6 +19650,21 @@ async function main() {
     t('U7094 DOM 与函数一致（.mval 存在 + fn txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7089~U7094 击发状态 异常', false, 'ERR ' + (e && e.message ? e.message : String(e))); }
 
+
+  // ===== U7095~U7100: 有效射速(v0.17.88) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('gpRateWrap'),mv:!!document.querySelector('#gpRateWrap .mval'),s:T.gpRateStateNow({'cdMax':15,'spd':5.2})});})()"));
+    t('U7095 有效射速 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7096 正常 有效射速 → v=4 g-warn 4.0发/秒', o.s.v === 4 && o.s.cls === 'g-warn' && o.s.danger === false && o.s.txt === '4.0发/秒', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.gpRateStateNow({'cdMax':15,'spd':5.2}),b:T.gpRateStateNow({'cdMax':10,'fxR':true,'spd':5.2})});return r;})()"));
+    t('U7097 边界 有效射速 → g-good 12.0发/秒', o2.b.v === 12 && o2.b.cls === 'g-good' && o2.b.danger === false && o2.b.txt === '12.0发/秒', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.gpRateStateNow(null);const b=T.gpRateStateNow([]);const c=T.gpRateStateNow({'cdMax':15,'spd':5.2});const d=T.gpRateStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7098 非法 null/[]/无 cdMax→退化 —，合法帧(含 cd=0 就绪)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7099 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.gpRateStateNow({'cdMax':15,'spd':5.2});return JSON.stringify({mv:!!document.querySelector('#gpRateWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7100 DOM 与函数一致（.mval 存在 + fn txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7095~U7100 有效射速 异常', false, 'ERR ' + (e && e.message ? e.message : String(e))); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
