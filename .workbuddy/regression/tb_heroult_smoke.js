@@ -19530,6 +19530,21 @@ async function main() {
     t('U7046 DOM 与函数一致（.mval 存在 + fn txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7041~U7046 临火敌数 异常', false, 'ERR ' + (e && e.message ? e.message : String(e))); }
 
+
+  // ===== U7047~U7052: 弹幕蓄积(v0.17.80) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('fpVolleyWrap'),mv:!!document.querySelector('#fpVolleyWrap .mval'),s:T.fpVolleyStateNow({'e':[{'t':20,'kind':'normal'},{'t':50,'kind':'sniper'},{'t':100,'kind':'armored'}]})});})()"));
+    t('U7047 弹幕蓄积 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7048 正常 弹幕蓄积 → v=2 g-good 2股', o.s.v === 2 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '2股', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.fpVolleyStateNow({'e':[{'t':20,'kind':'normal'},{'t':50,'kind':'sniper'},{'t':100,'kind':'armored'}]}),b:T.fpVolleyStateNow({'e':[{'t':10,'kind':'normal'},{'t':20,'kind':'sniper'},{'t':40,'kind':'engineer'},{'t':60,'kind':'normal'},{'t':80,'kind':'fast'},{'t':89,'kind':'normal'},{'t':91,'kind':'armored'}]})});return r;})()"));
+    t('U7049 边界 弹幕蓄积 → g-bad 6股', o2.b.v === 6 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '6股', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.fpVolleyStateNow(null);const b=T.fpVolleyStateNow([]);const c=T.fpVolleyStateNow({'e':[{'t':0,'kind':'sniper'}]});const d=T.fpVolleyStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7050 非法 null/[]/全非数→退化 —，合法帧(含 t=0 马上开火)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7051 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.fpVolleyStateNow({'e':[{'t':20,'kind':'normal'},{'t':50,'kind':'sniper'},{'t':100,'kind':'armored'}]});return JSON.stringify({mv:!!document.querySelector('#fpVolleyWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7052 DOM 与函数一致（.mval 存在 + fn txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7047~U7052 弹幕蓄积 异常', false, 'ERR ' + (e && e.message ? e.message : String(e))); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
