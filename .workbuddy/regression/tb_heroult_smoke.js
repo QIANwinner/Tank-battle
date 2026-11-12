@@ -19380,6 +19380,21 @@ async function main() {
     t('U6986 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U6981 来袭方位 抛出异常', false, String(e)); }
 
+
+  // ===== U6987~U6992: 最近威胁(v0.17.70) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('czNearWrap'),mv:!!document.querySelector('#czNearWrap .mval'),s:T.czNearStateNow({'cx':100,'cy':100,'th':[{'x':148,'y':100,'kind':'b','spd':5},{'x':52,'y':100,'kind':'b','spd':5},{'x':100,'y':160,'kind':'b','spd':5}]})});})()"));
+    t('U6987 最近威胁 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U6988 正常 最近威胁 → v=2 g-warn 2.0格', o.s.v === 2 && o.s.cls === 'g-warn' && o.s.danger === false && o.s.txt === '2.0格', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.czNearStateNow({'cx':100,'cy':100,'th':[{'x':148,'y':100,'kind':'b','spd':5},{'x':52,'y':100,'kind':'b','spd':5},{'x':100,'y':160,'kind':'b','spd':5}]}),b:T.czNearStateNow({'cx':100,'cy':100,'th':[{'x':104,'y':100,'kind':'b','spd':5}]})});return r;})()"));
+    t('U6989 边界 最近威胁 → g-bad 0.2格', o2.b.v === 0.2 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '0.2格', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.czNearStateNow(null);const b=T.czNearStateNow([]);const c=T.czNearStateNow({cx:200,cy:200,th:[{x:200,y:200,kind:'b',spd:5}]});const d=T.czNearStateNow({cx:200,cy:200,th:[{x:'n',y:'n',kind:'b'},{x:'n',y:'n',kind:'b'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U6990 非法 null/[]/全非数→退化 —，中心威胁(距离0)为合法最危险', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U6991 单位结构 txt 以 unit 结尾或为—', (o.s.txt === '—') || (typeof o.s.unit === 'string' && o.s.unit.length > 0 && o.s.txt.endsWith(o.s.unit)), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.czNearStateNow({'cx':100,'cy':100,'th':[{'x':148,'y':100,'kind':'b','spd':5},{'x':52,'y':100,'kind':'b','spd':5},{'x':100,'y':160,'kind':'b','spd':5}]});return JSON.stringify({mv:!!document.querySelector('#czNearWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U6992 DOM 与函数一致 mval 存在 + fn txt 非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { console.log('U6987..6992 最近威胁 异常: ' + e.message); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
