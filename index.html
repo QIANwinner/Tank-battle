@@ -1162,6 +1162,7 @@
     <div class="pill m-hide" id="snsSurvivalWrap"><span class="k">🫀</span><span class="v">生存</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="snsWindowWrap"><span class="k">⏱️</span><span class="v">窗口</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="snsPickupWrap"><span class="k">🎒</span><span class="v">拾取</span><em class="mval">—</em></div>
+    <div class="pill m-hide" id="snsComboWrap"><span class="k">🔗</span><span class="v">连击</span><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1538,7 +1539,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.0.31</div>
+  <div id="mark">DESIGNED BY QIAN · V1.0.32</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7503,6 +7504,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_snsSurvival = snsSurvivalNow(); const w_snsSurvival = $('snsSurvivalWrap'); if (w_snsSurvival) { const pv = w_snsSurvival.dataset.fp || ''; const nv = l_snsSurvival.cls + '|' + l_snsSurvival.txt + '|' + (l_snsSurvival.danger ? '1' : '0'); if (pv !== nv) { w_snsSurvival.dataset.fp = nv; w_snsSurvival.classList.remove('g-good','g-warn','g-bad'); w_snsSurvival.classList.add(l_snsSurvival.cls); w_snsSurvival.classList.toggle('danger', !!l_snsSurvival.danger); const mv = w_snsSurvival.querySelector('.mval'); if (mv) mv.textContent = l_snsSurvival.txt; } }
     const l_snsWindow = snsWindowNow(); const w_snsWindow = $('snsWindowWrap'); if (w_snsWindow) { const pv = w_snsWindow.dataset.fp || ''; const nv = l_snsWindow.cls + '|' + l_snsWindow.txt + '|' + (l_snsWindow.danger ? '1' : '0'); if (pv !== nv) { w_snsWindow.dataset.fp = nv; w_snsWindow.classList.remove('g-good','g-warn','g-bad'); w_snsWindow.classList.add(l_snsWindow.cls); w_snsWindow.classList.toggle('danger', !!l_snsWindow.danger); const mv = w_snsWindow.querySelector('.mval'); if (mv) mv.textContent = l_snsWindow.txt; } }
     const l_snsPickup = snsPickupNow(); const w_snsPickup = $('snsPickupWrap'); if (w_snsPickup) { const pv = w_snsPickup.dataset.fp || ''; const nv = l_snsPickup.cls + '|' + l_snsPickup.txt + '|' + (l_snsPickup.danger ? '1' : '0'); if (pv !== nv) { w_snsPickup.dataset.fp = nv; w_snsPickup.classList.remove('g-good','g-warn','g-bad'); w_snsPickup.classList.add(l_snsPickup.cls); w_snsPickup.classList.toggle('danger', !!l_snsPickup.danger); const mv = w_snsPickup.querySelector('.mval'); if (mv) mv.textContent = l_snsPickup.txt; } }
+    const l_snsCombo = snsComboNow(); const w_snsCombo = $('snsComboWrap'); if (w_snsCombo) { const pv = w_snsCombo.dataset.fp || ''; const nv = l_snsCombo.cls + '|' + l_snsCombo.txt + '|' + (l_snsCombo.danger ? '1' : '0'); if (pv !== nv) { w_snsCombo.dataset.fp = nv; w_snsCombo.classList.remove('g-good','g-warn','g-bad'); w_snsCombo.classList.add(l_snsCombo.cls); w_snsCombo.classList.toggle('danger', !!l_snsCombo.danger); const mv = w_snsCombo.querySelector('.mval'); if (mv) mv.textContent = l_snsCombo.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -19841,6 +19843,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // —— snsSurvival：生存压力（战局研判·决策辅助：见 helperBody snsSurvival 实现 + snsSurvivalNow 数据源）——
   // —— snsWindow：输出窗口（战局研判·决策辅助：见 helperBody snsWindow 实现 + snsWindowNow 数据源）——
   // —— snsPickup：拾取节奏（战局研判·决策辅助：见 helperBody snsPickup 实现 + snsPickupNow 数据源）——
+  // —— snsCombo：连击势能（战局研判·决策辅助：见 helperBody snsCombo 实现 + snsComboNow 数据源）——
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -21701,7 +21704,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.0.31', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.0.32', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -23826,6 +23829,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       snsSurvivalStateNow: (frame) => snsSurvival(frame), snsSurvivalNow: () => snsSurvival(snsSurvivalNow()), snsSurvivalDomNow: () => { const e = document.querySelector('.snsSurvivalWrap .mval'); return e ? e.textContent : null; },
       snsWindowStateNow: (frame) => snsWindow(frame), snsWindowNow: () => snsWindow(snsWindowNow()), snsWindowDomNow: () => { const e = document.querySelector('.snsWindowWrap .mval'); return e ? e.textContent : null; },
       snsPickupStateNow: (frame) => snsPickup(frame), snsPickupNow: () => snsPickup(snsPickupNow()), snsPickupDomNow: () => { const e = document.querySelector('.snsPickupWrap .mval'); return e ? e.textContent : null; },
+      snsComboStateNow: (frame) => snsCombo(frame), snsComboNow: () => snsCombo(snsComboNow()), snsComboDomNow: () => { const e = document.querySelector('.snsComboWrap .mval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
