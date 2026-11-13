@@ -20670,6 +20670,21 @@ async function main() {
     t('U7502 DOM 与函数一致（.mval 存在 + txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7497 粒子合批 异常: ' + e.message, false, String(e)); }
 
+
+  // ===== U7503~U7508: 帧率(v1.0.40) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('snsFpsPressWrap'),mv:!!document.querySelector('#snsFpsPressWrap .mval'),s:T.snsFpsPressStateNow({'f':58})});})()"));
+    t('U7503 帧率 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7504 正常 帧率 → v=58 g-good 58fps', o.s.v === 58 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '58fps', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.snsFpsPressStateNow({'f':58}),b:T.snsFpsPressStateNow({'f':22})});return r;})()"));
+    t('U7505 边界 帧率 → g-bad 22fps', o2.b.v === 22 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '22fps', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.snsFpsPressStateNow(null);const b=T.snsFpsPressStateNow([]);const c=T.snsFpsPressStateNow({'f':45});const d=T.snsFpsPressStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7506 非法 null/[]/无字段→退化 —，合法帧(有数据)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7507 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.snsFpsPressStateNow({'f':58});return JSON.stringify({mv:!!document.querySelector('#snsFpsPressWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7508 DOM 与函数一致（.mval 存在 + txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7503 帧率 异常: ' + e.message, false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
