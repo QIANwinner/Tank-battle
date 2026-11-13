@@ -6185,6 +6185,10 @@
   #snsRushWrap.g-bad .mval { color:#e74c3c; }
   #snsRushWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
   @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+  #snsBurstWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsBurstWrap.g-bad .mval { color:#e74c3c; }
+  #snsBurstWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
 </style>
 </head>
 <body>
@@ -7299,6 +7303,7 @@
     <div class="pill m-hide" id="snsGapWrap"><span class="k">📏</span><span class="v">间距</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="snsCoolWrap"><span class="k">🔫</span><span class="v">冷却</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="snsRushWrap"><span class="k">🌊</span><span class="v">冲势</span><em class="mval">—</em></div>
+    <div class="pill m-hide" id="snsBurstWrap"><span class="k">💥</span><span class="v">爆发</span><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -7674,7 +7679,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V18.15</div>
+  <div id="mark">DESIGNED BY QIAN · V18.16</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -13591,6 +13596,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_snsGap = snsGapNow(); const w_snsGap = $('snsGapWrap'); if (w_snsGap) { const pv = w_snsGap.dataset.fp || ''; const nv = l_snsGap.cls + '|' + l_snsGap.txt + '|' + (l_snsGap.danger ? '1' : '0'); if (pv !== nv) { w_snsGap.dataset.fp = nv; w_snsGap.classList.remove('g-good','g-warn','g-bad'); w_snsGap.classList.add(l_snsGap.cls); w_snsGap.classList.toggle('danger', !!l_snsGap.danger); const mv = w_snsGap.querySelector('.mval'); if (mv) mv.textContent = l_snsGap.txt; } }
     const l_snsCool = snsCoolNow(); const w_snsCool = $('snsCoolWrap'); if (w_snsCool) { const pv = w_snsCool.dataset.fp || ''; const nv = l_snsCool.cls + '|' + l_snsCool.txt + '|' + (l_snsCool.danger ? '1' : '0'); if (pv !== nv) { w_snsCool.dataset.fp = nv; w_snsCool.classList.remove('g-good','g-warn','g-bad'); w_snsCool.classList.add(l_snsCool.cls); w_snsCool.classList.toggle('danger', !!l_snsCool.danger); const mv = w_snsCool.querySelector('.mval'); if (mv) mv.textContent = l_snsCool.txt; } }
     const l_snsRush = snsRushNow(); const w_snsRush = $('snsRushWrap'); if (w_snsRush) { const pv = w_snsRush.dataset.fp || ''; const nv = l_snsRush.cls + '|' + l_snsRush.txt + '|' + (l_snsRush.danger ? '1' : '0'); if (pv !== nv) { w_snsRush.dataset.fp = nv; w_snsRush.classList.remove('g-good','g-warn','g-bad'); w_snsRush.classList.add(l_snsRush.cls); w_snsRush.classList.toggle('danger', !!l_snsRush.danger); const mv = w_snsRush.querySelector('.mval'); if (mv) mv.textContent = l_snsRush.txt; } }
+    const l_snsBurst = snsBurstNow(); const w_snsBurst = $('snsBurstWrap'); if (w_snsBurst) { const pv = w_snsBurst.dataset.fp || ''; const nv = l_snsBurst.cls + '|' + l_snsBurst.txt + '|' + (l_snsBurst.danger ? '1' : '0'); if (pv !== nv) { w_snsBurst.dataset.fp = nv; w_snsBurst.classList.remove('g-good','g-warn','g-bad'); w_snsBurst.classList.add(l_snsBurst.cls); w_snsBurst.classList.toggle('danger', !!l_snsBurst.danger); const mv = w_snsBurst.querySelector('.mval'); if (mv) mv.textContent = l_snsBurst.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -25451,6 +25457,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // —— snsGap：敌我间距（态势感知：见 helperBody snsGap 实现 + snsGapNow 数据源）——
   // —— snsCool：火力冷却（态势感知：见 helperBody snsCool 实现 + snsCoolNow 数据源）——
   // —— snsRush：敌方冲势（态势感知：见 helperBody snsRush 实现 + snsRushNow 数据源）——
+  // —— snsBurst：弹幕爆发（态势感知：见 helperBody snsBurst 实现 + snsBurstNow 数据源）——
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -27292,7 +27299,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V18.15', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V18.16', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -29385,6 +29392,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       snsGapStateNow: (frame) => snsGap(frame), snsGapNow: () => snsGap(snsGapNow()), snsGapDomNow: () => { const e = document.querySelector('.snsGapWrap .mval'); return e ? e.textContent : null; },
       snsCoolStateNow: (frame) => snsCool(frame), snsCoolNow: () => snsCool(snsCoolNow()), snsCoolDomNow: () => { const e = document.querySelector('.snsCoolWrap .mval'); return e ? e.textContent : null; },
       snsRushStateNow: (frame) => snsRush(frame), snsRushNow: () => snsRush(snsRushNow()), snsRushDomNow: () => { const e = document.querySelector('.snsRushWrap .mval'); return e ? e.textContent : null; },
+      snsBurstStateNow: (frame) => snsBurst(frame), snsBurstNow: () => snsBurst(snsBurstNow()), snsBurstDomNow: () => { const e = document.querySelector('.snsBurstWrap .mval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
