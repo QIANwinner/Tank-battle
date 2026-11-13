@@ -20640,6 +20640,21 @@ async function main() {
     t('U7490 DOM 与函数一致（.mval 存在 + txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7485 强化总数 异常: ' + e.message, false, String(e)); }
 
+
+  // ===== U7491~U7496: 每日模组(v1.0.38) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('snsModSurgeWrap'),mv:!!document.querySelector('#snsModSurgeWrap .mval'),s:T.snsModSurgeStateNow({'n':1})});})()"));
+    t('U7491 每日模组 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7492 正常 每日模组 → v=1 g-warn 1个', o.s.v === 1 && o.s.cls === 'g-warn' && o.s.danger === false && o.s.txt === '1个', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.snsModSurgeStateNow({'n':1}),b:T.snsModSurgeStateNow({'n':4})});return r;})()"));
+    t('U7493 边界 每日模组 → g-bad 4个', o2.b.v === 4 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '4个', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.snsModSurgeStateNow(null);const b=T.snsModSurgeStateNow([]);const c=T.snsModSurgeStateNow({'n':2});const d=T.snsModSurgeStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7494 非法 null/[]/无字段→退化 —，合法帧(有数据)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7495 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.snsModSurgeStateNow({'n':1});return JSON.stringify({mv:!!document.querySelector('#snsModSurgeWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7496 DOM 与函数一致（.mval 存在 + txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7491 每日模组 异常: ' + e.message, false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
