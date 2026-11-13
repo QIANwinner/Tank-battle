@@ -19980,6 +19980,21 @@ async function main() {
     t('U7226 DOM 与函数一致（.mval 存在 + txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7221~U7226 危险度 异常', false, String(e && e.stack || e)); }
 
+
+  // ===== U7227~U7232: 速度态势(v0.18.10) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('snsSpeedWrap'),mv:!!document.querySelector('#snsSpeedWrap .mval'),s:T.snsSpeedStateNow({'spds':[1,1.15,1.3,1.7,2.05]})});})()"));
+    t('U7227 速度态势 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7228 正常 速度态势 → v=40 g-warn 40%', o.s.v === 40 && o.s.cls === 'g-warn' && o.s.danger === false && o.s.txt === '40%', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.snsSpeedStateNow({'spds':[1,1.15,1.3,1.7,2.05]}),b:T.snsSpeedStateNow({'spds':[1.7,1.7,1.7,2.05]})});return r;})()"));
+    t('U7229 边界 速度态势 → g-bad 100%', o2.b.v === 100 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '100%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.snsSpeedStateNow(null);const b=T.snsSpeedStateNow([]);const c=T.snsSpeedStateNow({'spds':[1,1.15,1.3]});const d=T.snsSpeedStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7230 非法 null/[]/无字段→退化 —，合法帧(有数据)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7231 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.snsSpeedStateNow({'spds':[1,1.15,1.3,1.7,2.05]});return JSON.stringify({mv:!!document.querySelector('#snsSpeedWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7232 DOM 与函数一致（.mval 存在 + fn txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7227 速度态势 断言块异常', false, String(e && e.message || e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
