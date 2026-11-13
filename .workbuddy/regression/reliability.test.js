@@ -26,7 +26,7 @@ function worker(fetch) {
   const context = { URL, Response, AbortController, setTimeout, clearTimeout,
     fetch, self: { location: { origin: 'https://game.test' }, clients: { claim() {} },
       skipWaiting() {}, addEventListener(k,v) { handlers[k] = v; } },
-    caches: { async keys() { return ['other-app', 'tank-battle-old', 'tank-battle-v100']; },
+    caches: { async keys() { return ['other-app', 'tank-battle-old', 'tank-battle-v101']; },
       async delete(k) { removed.push(k); }, async open() { return {
         async addAll() {}, async match(k) { return cached.get(typeof k === 'string' ? k : k.url); }
       }; } }

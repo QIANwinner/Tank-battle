@@ -97,6 +97,22 @@ async function main() {
 
   const assert = require('node:assert/strict');
   try {
+    const tour = await ev(`(() => {
+      const T=window.__tbTest, box=document.getElementById('tourBox');
+      const initial=getComputedStyle(box).display;
+      T.showTourNow(0);
+      const opened=getComputedStyle(box).display !== 'none' && !!document.getElementById('tourTitle').textContent;
+      document.getElementById('tourClose').click();
+      const skipped=box.hidden && getComputedStyle(box).display === 'none';
+      T.showTourNow(0);
+      const next=document.getElementById('tourNext'); next.click(); next.click();
+      const last=next.textContent;
+      next.click();
+      return {initial,opened,skipped,last,finished:box.hidden && getComputedStyle(box).display === 'none',seen:localStorage.getItem('tb-tour-seen')};
+    })()`);
+    assert.equal(tour.initial,'none'); assert.equal(tour.opened,true); assert.equal(tour.skipped,true);
+    assert.equal(tour.last,'开始游戏'); assert.equal(tour.finished,true); assert.equal(tour.seen,'1');
+    console.log('PASS tour initially hidden, skip closes it, three steps finish and persist');
     const result = await ev(`(() => {
       const T = window.__tbTest;
       T.saveImport('QTB1.' + btoa(JSON.stringify({t:'QTB',v:1,petcoins:77,pets:['cat'],petlevels:{cat:3},pet:'cat',heroes:['sniper'],hero:'sniper',gacha:4,bonusspent:100,wskins:['wing-teal'],wskin:'wing-teal'})));
