@@ -1190,6 +1190,7 @@
     <div class="pill m-hide" id="snsLvNextWrap"><span class="k">⏭️</span><span class="v">新关</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="snsPhaseWrap"><span class="k">🚩</span><span class="v">阶段</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="snsStormMulWrap"><span class="k">🧲</span><span class="v">磁暴</span><em class="mval">—</em></div>
+    <div class="pill m-hide" id="snsMagnetRWrap"><span class="k">📡</span><span class="v">磁距</span><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1566,7 +1567,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.0.59</div>
+  <div id="mark">DESIGNED BY QIAN · V1.0.60</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7559,6 +7560,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_snsLvNext = snsLvNextNow(); const w_snsLvNext = $('snsLvNextWrap'); if (w_snsLvNext) { const pv = w_snsLvNext.dataset.fp || ''; const nv = l_snsLvNext.cls + '|' + l_snsLvNext.txt + '|' + (l_snsLvNext.danger ? '1' : '0'); if (pv !== nv) { w_snsLvNext.dataset.fp = nv; w_snsLvNext.classList.remove('g-good','g-warn','g-bad'); w_snsLvNext.classList.add(l_snsLvNext.cls); w_snsLvNext.classList.toggle('danger', !!l_snsLvNext.danger); const mv = w_snsLvNext.querySelector('.mval'); if (mv) mv.textContent = l_snsLvNext.txt; } }
     const l_snsPhase = snsPhaseNow(); const w_snsPhase = $('snsPhaseWrap'); if (w_snsPhase) { const pv = w_snsPhase.dataset.fp || ''; const nv = l_snsPhase.cls + '|' + l_snsPhase.txt + '|' + (l_snsPhase.danger ? '1' : '0'); if (pv !== nv) { w_snsPhase.dataset.fp = nv; w_snsPhase.classList.remove('g-good','g-warn','g-bad'); w_snsPhase.classList.add(l_snsPhase.cls); w_snsPhase.classList.toggle('danger', !!l_snsPhase.danger); const mv = w_snsPhase.querySelector('.mval'); if (mv) mv.textContent = l_snsPhase.txt; } }
     const l_snsStormMul = snsStormMulNow(); const w_snsStormMul = $('snsStormMulWrap'); if (w_snsStormMul) { const pv = w_snsStormMul.dataset.fp || ''; const nv = l_snsStormMul.cls + '|' + l_snsStormMul.txt + '|' + (l_snsStormMul.danger ? '1' : '0'); if (pv !== nv) { w_snsStormMul.dataset.fp = nv; w_snsStormMul.classList.remove('g-good','g-warn','g-bad'); w_snsStormMul.classList.add(l_snsStormMul.cls); w_snsStormMul.classList.toggle('danger', !!l_snsStormMul.danger); const mv = w_snsStormMul.querySelector('.mval'); if (mv) mv.textContent = l_snsStormMul.txt; } }
+    const l_snsMagnetR = snsMagnetRNow(); const w_snsMagnetR = $('snsMagnetRWrap'); if (w_snsMagnetR) { const pv = w_snsMagnetR.dataset.fp || ''; const nv = l_snsMagnetR.cls + '|' + l_snsMagnetR.txt + '|' + (l_snsMagnetR.danger ? '1' : '0'); if (pv !== nv) { w_snsMagnetR.dataset.fp = nv; w_snsMagnetR.classList.remove('g-good','g-warn','g-bad'); w_snsMagnetR.classList.add(l_snsMagnetR.cls); w_snsMagnetR.classList.toggle('danger', !!l_snsMagnetR.danger); const mv = w_snsMagnetR.querySelector('.mval'); if (mv) mv.textContent = l_snsMagnetR.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -20259,6 +20261,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // —— snsLvNext：关卡过渡（战备读秒·临场状态：见 helperBody snsLvNext 实现 + snsLvNextNow 数据源）——
   // —— snsPhase：游戏阶段（战备读秒·临场状态：见 helperBody snsPhase 实现 + snsPhaseNow 数据源）——
   // —— snsStormMul：磁暴倍率（战备读秒·临场状态：见 helperBody snsStormMul 实现 + snsStormMulNow 数据源）——
+  // —— snsMagnetR：磁力半径（战备读秒·临场状态：见 helperBody snsMagnetR 实现 + snsMagnetRNow 数据源）——
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -22119,7 +22122,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.0.59', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.0.60', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -24272,6 +24275,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       snsLvNextStateNow: (frame) => snsLvNext(frame), snsLvNextNow: () => snsLvNext(snsLvNextNow()), snsLvNextDomNow: () => { const e = document.querySelector('.snsLvNextWrap .mval'); return e ? e.textContent : null; },
       snsPhaseStateNow: (frame) => snsPhase(frame), snsPhaseNow: () => snsPhase(snsPhaseNow()), snsPhaseDomNow: () => { const e = document.querySelector('.snsPhaseWrap .mval'); return e ? e.textContent : null; },
       snsStormMulStateNow: (frame) => snsStormMul(frame), snsStormMulNow: () => snsStormMul(snsStormMulNow()), snsStormMulDomNow: () => { const e = document.querySelector('.snsStormMulWrap .mval'); return e ? e.textContent : null; },
+      snsMagnetRStateNow: (frame) => snsMagnetR(frame), snsMagnetRNow: () => snsMagnetR(snsMagnetRNow()), snsMagnetRDomNow: () => { const e = document.querySelector('.snsMagnetRWrap .mval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
