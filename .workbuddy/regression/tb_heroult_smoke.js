@@ -20850,6 +20850,21 @@ async function main() {
     t('U7574 音乐音量 DOM 与函数一致（DOM 值 = 函数 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7569~U7574 音乐音量 无异常', false, String(e)); }
 
+
+  // ===== U7575~U7580: 音效音量(v1.0.52) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('snsSfxWrap'),mv:!!document.querySelector('#snsSfxWrap .mval'),s:T.snsSfxStateNow({'f':1})});})()"));
+    t('U7575 音效音量 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7576 正常 音效音量 → v=100 g-good 100%', o.s.v === 100 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '100%', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.snsSfxStateNow({'f':1}),b:T.snsSfxStateNow({'f':0})});return r;})()"));
+    t('U7577 边界 音效音量 → g-bad 0%', o2.b.v === 0 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '0%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.snsSfxStateNow(null);const b=T.snsSfxStateNow([]);const c=T.snsSfxStateNow({'f':0.3});const d=T.snsSfxStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7578 非法 null/[]/无字段→退化 —，合法帧(有数据)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7579 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.snsSfxStateNow({'f':1});return JSON.stringify({mv:!!document.querySelector('#snsSfxWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7580 音效音量 DOM 与函数一致（DOM 值 = 函数 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7575~U7580 音效音量 无异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
