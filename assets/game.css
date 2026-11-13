@@ -6477,3 +6477,8 @@ html.compact-hud #hud .m-hide { display:none !important; }
   #snsMagnetRWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
   @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
 @CSS@
+  #snsBaseSafeWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsBaseSafeWrap.g-bad .mval { color:#e74c3c; }
+  #snsBaseSafeWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
