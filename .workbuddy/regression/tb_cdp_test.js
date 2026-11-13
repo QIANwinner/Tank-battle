@@ -11,6 +11,11 @@ const PORT = Number(process.env.TB_CDP_PORT || 9333);
 const SHOT = process.argv[3] || 'shot.png';
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+// 终止整个 Chrome 进程树(Windows: taskkill /T /F;否则 chrome.kill() 只杀父进程,子进程残留占端口造成跨轮污染)
+function killTree(pid) {
+  try { require('child_process').execSync('taskkill /PID ' + pid + ' /T /F', { stdio: 'ignore' }); } catch (e) {}
+  try { process.kill(pid); } catch (e) {}
+}
 
 // --- HTTP 小工具 ---
 function httpJson(path, method = 'GET') {
@@ -60,7 +65,8 @@ function cdp(wsUrl) {
 
 async function main() {
   // 1) 启动无头 Chrome
-  const profile = process.env.TB_PROFILE || 'C:/tmp/tbchrome-profile';
+  // 默认 profile 用独立测试目录 tbchrome-run,彻底避开 WorkBuddy 浏览器占用的 tbchrome-profile(不可杀,会锁死主回归)
+  const profile = process.env.TB_PROFILE || 'C:/tmp/tbchrome-run';
   try { fs.rmSync(profile, { recursive: true, force: true }); } catch (e) {}
   const chrome = spawn(CHROME, [
     '--headless=new', '--disable-gpu', '--no-sandbox', '--disable-dev-shm-usage',
@@ -104,7 +110,7 @@ async function main() {
     });
     ready = r.result && r.result.result && r.result.result.value === true;
   }
-  if (!ready) { console.log('FAIL: game test hook never appeared'); chrome.kill(); process.exit(2); }
+  if (!ready) { console.log('FAIL: game test hook never appeared'); killTree(chrome.pid); process.exit(2); }
   console.log('game test hook ready');
 
   // 5) 运行测试套件（单个异步表达式）
@@ -1330,7 +1336,7 @@ async function main() {
   const results = testRes.result && testRes.result.result ? testRes.result.result.value : null;
   if (!results) {
     console.log('TEST EVAL ERROR:', JSON.stringify(testRes).slice(0, 600));
-    chrome.kill(); process.exit(2);
+    killTree(chrome.pid); process.exit(2);
   }
 
   // 统计
@@ -1356,7 +1362,7 @@ async function main() {
     }
   } catch (e) { console.log('screenshot skipped:', e.message); }
 
-  chrome.kill();
+  chrome.kill(); killTree(chrome.pid);
   process.exit(fail > 0 ? 1 : 0);
 }
 

@@ -56,6 +56,24 @@ jobs:
           echo "===== SAVE MIGRATE SMOKE ====="
           TB_PROFILE=/tmp/tb-save node .workbuddy/regression/tb_save_migrate.js
           R4=$?
+          TB_PROFILE=/tmp/tb-mobile node .workbuddy/regression/tb_mobile_smoke.js
+          R5=$?
+          TB_PROFILE=/tmp/tb-hero node .workbuddy/regression/tb_hero_smoke.js
+          R6=$?
+          TB_PROFILE=/tmp/tb-tutorial node .workbuddy/regression/tb_tutorial_smoke.js
+          R7=$?
+          node --test .workbuddy/regression/reliability.test.js
+          R8=$?
+          TB_PROFILE=/tmp/tb-release TB_SHOT=/tmp/tb-release.png node .workbuddy/regression/tb_release_smoke.js
+          R9=$?
           kill $SERVER_PID 2>/dev/null
           echo "RESULT: main=$R1 pet=$R2 wingman=$R3 save=$R4"
-          [ $R1 -eq 0 ] && [ $R2 -eq 0 ] && [ $R3 -eq 0 ] && [ $R4 -eq 0 ]
+          [ $R1 -eq 0 ] && [ $R2 -eq 0 ] && [ $R3 -eq 0 ] && [ $R4 -eq 0 ] && [ $R5 -eq 0 ] && [ $R6 -eq 0 ] && [ $R7 -eq 0 ] && [ $R8 -eq 0 ] && [ $R9 -eq 0 ]
+
+      - name: Upload test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-evidence
+          path: /tmp/tb-*.png
+          if-no-files-found: ignore
