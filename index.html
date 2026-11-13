@@ -1184,6 +1184,7 @@
     <div class="pill m-hide" id="snsBgmWrap"><span class="k">🎵</span><span class="v">音乐</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="snsSfxWrap"><span class="k">🔊</span><span class="v">音效</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="snsModeWrap"><span class="k">🎮</span><span class="v">对战</span><em class="mval">—</em></div>
+    <div class="pill m-hide" id="snsP2AliveWrap"><span class="k">🤝</span><span class="v">双人</span><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1560,7 +1561,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.0.53</div>
+  <div id="mark">DESIGNED BY QIAN · V1.0.54</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7547,6 +7548,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_snsBgm = snsBgmNow(); const w_snsBgm = $('snsBgmWrap'); if (w_snsBgm) { const pv = w_snsBgm.dataset.fp || ''; const nv = l_snsBgm.cls + '|' + l_snsBgm.txt + '|' + (l_snsBgm.danger ? '1' : '0'); if (pv !== nv) { w_snsBgm.dataset.fp = nv; w_snsBgm.classList.remove('g-good','g-warn','g-bad'); w_snsBgm.classList.add(l_snsBgm.cls); w_snsBgm.classList.toggle('danger', !!l_snsBgm.danger); const mv = w_snsBgm.querySelector('.mval'); if (mv) mv.textContent = l_snsBgm.txt; } }
     const l_snsSfx = snsSfxNow(); const w_snsSfx = $('snsSfxWrap'); if (w_snsSfx) { const pv = w_snsSfx.dataset.fp || ''; const nv = l_snsSfx.cls + '|' + l_snsSfx.txt + '|' + (l_snsSfx.danger ? '1' : '0'); if (pv !== nv) { w_snsSfx.dataset.fp = nv; w_snsSfx.classList.remove('g-good','g-warn','g-bad'); w_snsSfx.classList.add(l_snsSfx.cls); w_snsSfx.classList.toggle('danger', !!l_snsSfx.danger); const mv = w_snsSfx.querySelector('.mval'); if (mv) mv.textContent = l_snsSfx.txt; } }
     const l_snsMode = snsModeNow(); const w_snsMode = $('snsModeWrap'); if (w_snsMode) { const pv = w_snsMode.dataset.fp || ''; const nv = l_snsMode.cls + '|' + l_snsMode.txt + '|' + (l_snsMode.danger ? '1' : '0'); if (pv !== nv) { w_snsMode.dataset.fp = nv; w_snsMode.classList.remove('g-good','g-warn','g-bad'); w_snsMode.classList.add(l_snsMode.cls); w_snsMode.classList.toggle('danger', !!l_snsMode.danger); const mv = w_snsMode.querySelector('.mval'); if (mv) mv.textContent = l_snsMode.txt; } }
+    const l_snsP2Alive = snsP2AliveNow(); const w_snsP2Alive = $('snsP2AliveWrap'); if (w_snsP2Alive) { const pv = w_snsP2Alive.dataset.fp || ''; const nv = l_snsP2Alive.cls + '|' + l_snsP2Alive.txt + '|' + (l_snsP2Alive.danger ? '1' : '0'); if (pv !== nv) { w_snsP2Alive.dataset.fp = nv; w_snsP2Alive.classList.remove('g-good','g-warn','g-bad'); w_snsP2Alive.classList.add(l_snsP2Alive.cls); w_snsP2Alive.classList.toggle('danger', !!l_snsP2Alive.danger); const mv = w_snsP2Alive.querySelector('.mval'); if (mv) mv.textContent = l_snsP2Alive.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -20241,6 +20243,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   function snsStormMulNow() { return { s: (isFinite(magnetStorm) && magnetStorm > 0) ? magnetStorm : 0, b: bondActive('bondmagnetstorm') === true }; }
   function snsMagnetRNow() { return { r: magnetRadius() }; }
 
+  // —— snsP2Alive：双人P2在场（战备读秒·临场状态：见 helperBody snsP2Alive 实现 + snsP2AliveNow 数据源）——
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -22101,7 +22104,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.0.53', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.0.54', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -24248,6 +24251,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       snsBgmStateNow: (frame) => snsBgm(frame), snsBgmNow: () => snsBgm(snsBgmNow()), snsBgmDomNow: () => { const e = document.querySelector('.snsBgmWrap .mval'); return e ? e.textContent : null; },
       snsSfxStateNow: (frame) => snsSfx(frame), snsSfxNow: () => snsSfx(snsSfxNow()), snsSfxDomNow: () => { const e = document.querySelector('.snsSfxWrap .mval'); return e ? e.textContent : null; },
       snsModeStateNow: (frame) => snsMode(frame), snsModeNow: () => snsMode(snsModeNow()), snsModeDomNow: () => { const e = document.querySelector('.snsModeWrap .mval'); return e ? e.textContent : null; },
+      snsP2AliveStateNow: (frame) => snsP2Alive(frame), snsP2AliveNow: () => snsP2Alive(snsP2AliveNow()), snsP2AliveDomNow: () => { const e = document.querySelector('.snsP2AliveWrap .mval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
