@@ -1174,6 +1174,7 @@
     <div class="pill m-hide" id="snsBossBurstWrap"><span class="k">💥</span><span class="v">演出</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="snsStreakWrap"><span class="k">⚔️</span><span class="v">连杀峰</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="snsTimeLeftWrap"><span class="k">⏱️</span><span class="v">限时</span><em class="mval">—</em></div>
+    <div class="pill m-hide" id="snsRenderWrap"><span class="k">🖼️</span><span class="v">缩放</span><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -7527,6 +7528,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_snsBossBurst = snsBossBurstNow(); const w_snsBossBurst = $('snsBossBurstWrap'); if (w_snsBossBurst) { const pv = w_snsBossBurst.dataset.fp || ''; const nv = l_snsBossBurst.cls + '|' + l_snsBossBurst.txt + '|' + (l_snsBossBurst.danger ? '1' : '0'); if (pv !== nv) { w_snsBossBurst.dataset.fp = nv; w_snsBossBurst.classList.remove('g-good','g-warn','g-bad'); w_snsBossBurst.classList.add(l_snsBossBurst.cls); w_snsBossBurst.classList.toggle('danger', !!l_snsBossBurst.danger); const mv = w_snsBossBurst.querySelector('.mval'); if (mv) mv.textContent = l_snsBossBurst.txt; } }
     const l_snsStreak = snsStreakNow(); const w_snsStreak = $('snsStreakWrap'); if (w_snsStreak) { const pv = w_snsStreak.dataset.fp || ''; const nv = l_snsStreak.cls + '|' + l_snsStreak.txt + '|' + (l_snsStreak.danger ? '1' : '0'); if (pv !== nv) { w_snsStreak.dataset.fp = nv; w_snsStreak.classList.remove('g-good','g-warn','g-bad'); w_snsStreak.classList.add(l_snsStreak.cls); w_snsStreak.classList.toggle('danger', !!l_snsStreak.danger); const mv = w_snsStreak.querySelector('.mval'); if (mv) mv.textContent = l_snsStreak.txt; } }
     const l_snsTimeLeft = snsTimeLeftNow(); const w_snsTimeLeft = $('snsTimeLeftWrap'); if (w_snsTimeLeft) { const pv = w_snsTimeLeft.dataset.fp || ''; const nv = l_snsTimeLeft.cls + '|' + l_snsTimeLeft.txt + '|' + (l_snsTimeLeft.danger ? '1' : '0'); if (pv !== nv) { w_snsTimeLeft.dataset.fp = nv; w_snsTimeLeft.classList.remove('g-good','g-warn','g-bad'); w_snsTimeLeft.classList.add(l_snsTimeLeft.cls); w_snsTimeLeft.classList.toggle('danger', !!l_snsTimeLeft.danger); const mv = w_snsTimeLeft.querySelector('.mval'); if (mv) mv.textContent = l_snsTimeLeft.txt; } }
+    const l_snsRender = snsRenderNow(); const w_snsRender = $('snsRenderWrap'); if (w_snsRender) { const pv = w_snsRender.dataset.fp || ''; const nv = l_snsRender.cls + '|' + l_snsRender.txt + '|' + (l_snsRender.danger ? '1' : '0'); if (pv !== nv) { w_snsRender.dataset.fp = nv; w_snsRender.classList.remove('g-good','g-warn','g-bad'); w_snsRender.classList.add(l_snsRender.cls); w_snsRender.classList.toggle('danger', !!l_snsRender.danger); const mv = w_snsRender.querySelector('.mval'); if (mv) mv.textContent = l_snsRender.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -19987,7 +19989,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const r = Number(frame.r); if (!isFinite(r) || r <= 0) return snsDeg();
     const pct = Math.round(Math.min(r, 1) * 100);
     const cls = pct >= 95 ? 'g-good' : (pct >= 60 ? 'g-warn' : 'g-bad');
-    return { v: pct, unit: '%', cls: cls, danger: pct < 50, txt: pct + '%' };
+    return { v: pct, unit: '%', cls: cls, danger: pct < 60, txt: pct + '%' };
   }
   // 4) 设备像素比：当前 DPR（1=基础 2=高清，越高画面越精细）。
   function snsDpr(frame) {
@@ -20045,6 +20047,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   function snsGamesNow() { const g = (career && typeof career === 'object' && isFinite(career.games)) ? Math.max(0, Math.floor(career.games)) : 0; return { g: g }; }
 
   // —— snsTimeLeft：限时剩余（环境与生涯·渲染与里程碑：见 helperBody snsTimeLeft 实现 + snsTimeLeftNow 数据源）——
+  // —— snsRender：渲染缩放（环境与生涯·渲染与里程碑：见 helperBody snsRender 实现 + snsRenderNow 数据源）——
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -24042,6 +24045,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       snsBossBurstStateNow: (frame) => snsBossBurst(frame), snsBossBurstNow: () => snsBossBurst(snsBossBurstNow()), snsBossBurstDomNow: () => { const e = document.querySelector('.snsBossBurstWrap .mval'); return e ? e.textContent : null; },
       snsStreakStateNow: (frame) => snsStreak(frame), snsStreakNow: () => snsStreak(snsStreakNow()), snsStreakDomNow: () => { const e = document.querySelector('.snsStreakWrap .mval'); return e ? e.textContent : null; },
       snsTimeLeftStateNow: (frame) => snsTimeLeft(frame), snsTimeLeftNow: () => snsTimeLeft(snsTimeLeftNow()), snsTimeLeftDomNow: () => { const e = document.querySelector('.snsTimeLeftWrap .mval'); return e ? e.textContent : null; },
+      snsRenderStateNow: (frame) => snsRender(frame), snsRenderNow: () => snsRender(snsRenderNow()), snsRenderDomNow: () => { const e = document.querySelector('#snsRenderWrap .mval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
