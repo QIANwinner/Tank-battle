@@ -1159,6 +1159,7 @@
     <div class="pill m-hide" id="snsTacticWrap"><span class="k">🧭</span><span class="v">战术</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="snsEscapeWrap"><span class="k">🚪</span><span class="v">逃生</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="snsEconomyWrap"><span class="k">💰</span><span class="v">经济</span><em class="mval">—</em></div>
+    <div class="pill m-hide" id="snsSurvivalWrap"><span class="k">🫀</span><span class="v">生存</span><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1535,7 +1536,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.0.28</div>
+  <div id="mark">DESIGNED BY QIAN · V1.0.29</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7497,6 +7498,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_snsTactic = snsTacticNow(); const w_snsTactic = $('snsTacticWrap'); if (w_snsTactic) { const pv = w_snsTactic.dataset.fp || ''; const nv = l_snsTactic.cls + '|' + l_snsTactic.txt + '|' + (l_snsTactic.danger ? '1' : '0'); if (pv !== nv) { w_snsTactic.dataset.fp = nv; w_snsTactic.classList.remove('g-good','g-warn','g-bad'); w_snsTactic.classList.add(l_snsTactic.cls); w_snsTactic.classList.toggle('danger', !!l_snsTactic.danger); const mv = w_snsTactic.querySelector('.mval'); if (mv) mv.textContent = l_snsTactic.txt; } }
     const l_snsEscape = snsEscapeNow(); const w_snsEscape = $('snsEscapeWrap'); if (w_snsEscape) { const pv = w_snsEscape.dataset.fp || ''; const nv = l_snsEscape.cls + '|' + l_snsEscape.txt + '|' + (l_snsEscape.danger ? '1' : '0'); if (pv !== nv) { w_snsEscape.dataset.fp = nv; w_snsEscape.classList.remove('g-good','g-warn','g-bad'); w_snsEscape.classList.add(l_snsEscape.cls); w_snsEscape.classList.toggle('danger', !!l_snsEscape.danger); const mv = w_snsEscape.querySelector('.mval'); if (mv) mv.textContent = l_snsEscape.txt; } }
     const l_snsEconomy = snsEconomyNow(); const w_snsEconomy = $('snsEconomyWrap'); if (w_snsEconomy) { const pv = w_snsEconomy.dataset.fp || ''; const nv = l_snsEconomy.cls + '|' + l_snsEconomy.txt + '|' + (l_snsEconomy.danger ? '1' : '0'); if (pv !== nv) { w_snsEconomy.dataset.fp = nv; w_snsEconomy.classList.remove('g-good','g-warn','g-bad'); w_snsEconomy.classList.add(l_snsEconomy.cls); w_snsEconomy.classList.toggle('danger', !!l_snsEconomy.danger); const mv = w_snsEconomy.querySelector('.mval'); if (mv) mv.textContent = l_snsEconomy.txt; } }
+    const l_snsSurvival = snsSurvivalNow(); const w_snsSurvival = $('snsSurvivalWrap'); if (w_snsSurvival) { const pv = w_snsSurvival.dataset.fp || ''; const nv = l_snsSurvival.cls + '|' + l_snsSurvival.txt + '|' + (l_snsSurvival.danger ? '1' : '0'); if (pv !== nv) { w_snsSurvival.dataset.fp = nv; w_snsSurvival.classList.remove('g-good','g-warn','g-bad'); w_snsSurvival.classList.add(l_snsSurvival.cls); w_snsSurvival.classList.toggle('danger', !!l_snsSurvival.danger); const mv = w_snsSurvival.querySelector('.mval'); if (mv) mv.textContent = l_snsSurvival.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -19832,6 +19834,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
 
   // —— snsEscape：逃生窗口（战局研判·决策辅助：见 helperBody snsEscape 实现 + snsEscapeNow 数据源）——
   // —— snsEconomy：经济续航（战局研判·决策辅助：见 helperBody snsEconomy 实现 + snsEconomyNow 数据源）——
+  // —— snsSurvival：生存压力（战局研判·决策辅助：见 helperBody snsSurvival 实现 + snsSurvivalNow 数据源）——
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -21692,7 +21695,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.0.28', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.0.29', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -23814,6 +23817,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       snsTacticStateNow: (frame) => snsTactic(frame), snsTacticNow: () => snsTactic(snsTacticNow()), snsTacticDomNow: () => { const e = document.querySelector('.snsTacticWrap .mval'); return e ? e.textContent : null; },
       snsEscapeStateNow: (frame) => snsEscape(frame), snsEscapeNow: () => snsEscape(snsEscapeNow()), snsEscapeDomNow: () => { const e = document.querySelector('.snsEscapeWrap .mval'); return e ? e.textContent : null; },
       snsEconomyStateNow: (frame) => snsEconomy(frame), snsEconomyNow: () => snsEconomy(snsEconomyNow()), snsEconomyDomNow: () => { const e = document.querySelector('.snsEconomyWrap .mval'); return e ? e.textContent : null; },
+      snsSurvivalStateNow: (frame) => snsSurvival(frame), snsSurvivalNow: () => snsSurvival(snsSurvivalNow()), snsSurvivalDomNow: () => { const e = document.querySelector('.snsSurvivalWrap .mval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
