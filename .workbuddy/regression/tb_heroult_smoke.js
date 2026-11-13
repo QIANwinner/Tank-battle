@@ -20940,6 +20940,21 @@ async function main() {
     t('U7610 关卡过渡 DOM 与函数一致（DOM 值 = 函数 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7605~U7610 关卡过渡 无异常', false, String(e)); }
 
+
+  // ===== U7611~U7616: 游戏阶段(v1.0.58) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('snsPhaseWrap'),mv:!!document.querySelector('#snsPhaseWrap .mval'),s:T.snsPhaseStateNow({'r':true,'p':false,'g':false})});})()"));
+    t('U7611 游戏阶段 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7612 正常 游戏阶段 → v=3 g-good 战斗中', o.s.v === 3 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '战斗中', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.snsPhaseStateNow({'r':true,'p':false,'g':false}),b:T.snsPhaseStateNow({'r':false,'p':false,'g':true})});return r;})()"));
+    t('U7613 边界 游戏阶段 → g-bad 结算', o2.b.v === 0 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '结算', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.snsPhaseStateNow(null);const b=T.snsPhaseStateNow([]);const c=T.snsPhaseStateNow({'r':false,'p':true,'g':false});const d=T.snsPhaseStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7614 非法 null/[]/无字段→退化 —，合法帧(有数据)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7615 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.snsPhaseStateNow({'r':true,'p':false,'g':false});return JSON.stringify({mv:!!document.querySelector('#snsPhaseWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7616 游戏阶段 DOM 与函数一致（DOM 值 = 函数 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7611~U7616 游戏阶段 无异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
