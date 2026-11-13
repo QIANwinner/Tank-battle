@@ -58,6 +58,10 @@
 
 设置中提供音量、画质和减弱动效选项，可按设备性能与个人偏好调整。全屏、震动、剪贴板和安装能力因浏览器而异。
 
+## v1.0.0 更新
+
+新增保存失败提示与重试、完整养成备份、精简战斗信息设置，并完善离线缓存和自动回归。详细内容见 [发布记录](RELEASE_NOTES.md)。
+
 ## 本地运行
 
 游戏使用原生 **HTML / CSS / JavaScript + Canvas 2D**，运行时无需安装第三方依赖，也无需构建。
@@ -75,6 +79,7 @@ python -m http.server 8080
 ```text
 Tank-battle/
 ├── index.html              # 游戏界面、样式与核心逻辑
+├── assets/                 # 独立样式与存档可靠性模块
 ├── sw.js                   # 离线缓存与资源更新
 ├── manifest.webmanifest    # PWA 应用清单
 ├── icon-*.png              # 应用图标
@@ -85,7 +90,7 @@ Tank-battle/
 └── LICENSE                 # MIT 许可证
 ```
 
-渲染使用 Canvas 2D，音效使用 Web Audio，存档使用 localStorage。核心实现集中在 `index.html`，适合直接阅读和修改；回归脚本的运行环境与游戏本身的零依赖运行方式分开管理。
+渲染使用 Canvas 2D，音效使用 Web Audio，存档使用 localStorage。战斗核心集中在 `index.html`，样式和保存重试逻辑位于 `assets/`，适合直接阅读和修改；回归脚本的运行环境与游戏本身的零依赖运行方式分开管理。
 
 ## 反馈与贡献
 
@@ -98,3 +103,5 @@ Tank-battle/
 ## 开源许可
 
 本项目采用 [MIT License](LICENSE)，版权归 QIANwinner 所有。
+
+开发验证方法见 [DEVELOPMENT.md](DEVELOPMENT.md)。
