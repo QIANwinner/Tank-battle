@@ -1181,6 +1181,7 @@
     <div class="pill m-hide" id="snsWinsWrap"><span class="k">🏅</span><span class="v">胜场</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="snsGamesWrap"><span class="k">📈</span><span class="v">局数</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="snsQualityWrap"><span class="k">⚙️</span><span class="v">画质</span><em class="mval">—</em></div>
+    <div class="pill m-hide" id="snsBgmWrap"><span class="k">🎵</span><span class="v">音乐</span><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1557,7 +1558,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.0.50</div>
+  <div id="mark">DESIGNED BY QIAN · V1.0.51</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7541,6 +7542,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_snsWins = snsWinsNow(); const w_snsWins = $('snsWinsWrap'); if (w_snsWins) { const pv = w_snsWins.dataset.fp || ''; const nv = l_snsWins.cls + '|' + l_snsWins.txt + '|' + (l_snsWins.danger ? '1' : '0'); if (pv !== nv) { w_snsWins.dataset.fp = nv; w_snsWins.classList.remove('g-good','g-warn','g-bad'); w_snsWins.classList.add(l_snsWins.cls); w_snsWins.classList.toggle('danger', !!l_snsWins.danger); const mv = w_snsWins.querySelector('.mval'); if (mv) mv.textContent = l_snsWins.txt; } }
     const l_snsGames = snsGamesNow(); const w_snsGames = $('snsGamesWrap'); if (w_snsGames) { const pv = w_snsGames.dataset.fp || ''; const nv = l_snsGames.cls + '|' + l_snsGames.txt + '|' + (l_snsGames.danger ? '1' : '0'); if (pv !== nv) { w_snsGames.dataset.fp = nv; w_snsGames.classList.remove('g-good','g-warn','g-bad'); w_snsGames.classList.add(l_snsGames.cls); w_snsGames.classList.toggle('danger', !!l_snsGames.danger); const mv = w_snsGames.querySelector('.mval'); if (mv) mv.textContent = l_snsGames.txt; } }
     const l_snsQuality = snsQualityNow(); const w_snsQuality = $('snsQualityWrap'); if (w_snsQuality) { const pv = w_snsQuality.dataset.fp || ''; const nv = l_snsQuality.cls + '|' + l_snsQuality.txt + '|' + (l_snsQuality.danger ? '1' : '0'); if (pv !== nv) { w_snsQuality.dataset.fp = nv; w_snsQuality.classList.remove('g-good','g-warn','g-bad'); w_snsQuality.classList.add(l_snsQuality.cls); w_snsQuality.classList.toggle('danger', !!l_snsQuality.danger); const mv = w_snsQuality.querySelector('.mval'); if (mv) mv.textContent = l_snsQuality.txt; } }
+    const l_snsBgm = snsBgmNow(); const w_snsBgm = $('snsBgmWrap'); if (w_snsBgm) { const pv = w_snsBgm.dataset.fp || ''; const nv = l_snsBgm.cls + '|' + l_snsBgm.txt + '|' + (l_snsBgm.danger ? '1' : '0'); if (pv !== nv) { w_snsBgm.dataset.fp = nv; w_snsBgm.classList.remove('g-good','g-warn','g-bad'); w_snsBgm.classList.add(l_snsBgm.cls); w_snsBgm.classList.toggle('danger', !!l_snsBgm.danger); const mv = w_snsBgm.querySelector('.mval'); if (mv) mv.textContent = l_snsBgm.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -20149,6 +20151,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   function snsWingmanNow() { return { w: wingmanEnabled === true, a: !!(wingman && typeof wingman === 'object' && !wingman.dead) }; }
   function snsPetNow() { return { i: (pet && typeof pet === 'object' && pet.id) ? pet.id : '', k: (pet && isFinite(pet.level) && pet.level > 0) ? Math.floor(pet.level) : 0 }; }
 
+  // —— snsBgm：音乐音量（环境与生涯·设置与僚机：见 helperBody snsBgm 实现 + snsBgmNow 数据源）——
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -22009,7 +22012,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.0.50', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.0.51', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -24153,6 +24156,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       snsWinsStateNow: (frame) => snsWins(frame), snsWinsNow: () => snsWins(snsWinsNow()), snsWinsDomNow: () => { const e = document.querySelector('.snsWinsWrap .mval'); return e ? e.textContent : null; },
       snsGamesStateNow: (frame) => snsGames(frame), snsGamesNow: () => snsGames(snsGamesNow()), snsGamesDomNow: () => { const e = document.querySelector('.snsGamesWrap .mval'); return e ? e.textContent : null; },
       snsQualityStateNow: (frame) => snsQuality(frame), snsQualityNow: () => snsQuality(snsQualityNow()), snsQualityDomNow: () => { const e = document.querySelector('.snsQualityWrap .mval'); return e ? e.textContent : null; },
+      snsBgmStateNow: (frame) => snsBgm(frame), snsBgmNow: () => snsBgm(snsBgmNow()), snsBgmDomNow: () => { const e = document.querySelector('.snsBgmWrap .mval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
