@@ -20565,6 +20565,21 @@ async function main() {
     t('U7460 DOM 与函数一致：.mval 存在 + snsCombo 正常值文本非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7455 连击势能 抛异常', false, String(e)); }
 
+
+  // ===== U7461~U7466: 综合研判(v1.0.33) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('snsSummaryWrap'),mv:!!document.querySelector('#snsSummaryWrap .mval'),s:T.snsSummaryStateNow({'hits':30,'shots':40,'kills':12,'sec':60,'wave':5,'wavesTotal':10})});})()"));
+    t('U7461 综合研判 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7462 正常 综合研判 → v=75 g-good 75分', o.s.v === 75 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '75分', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.snsSummaryStateNow({'hits':30,'shots':40,'kills':12,'sec':60,'wave':5,'wavesTotal':10}),b:T.snsSummaryStateNow({'hits':0,'shots':10,'kills':0,'sec':60,'wave':1,'wavesTotal':10})});return r;})()"));
+    t('U7463 边界 综合研判 → g-bad 3分', o2.b.v === 3 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '3分', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.snsSummaryStateNow(null);const b=T.snsSummaryStateNow([]);const c=T.snsSummaryStateNow({'hits':4,'shots':10,'kills':3,'sec':30,'wave':2,'wavesTotal':10});const d=T.snsSummaryStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7464 非法 null/[]/无字段→退化 —，合法帧(有数据)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7465 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.snsSummaryStateNow({'hits':30,'shots':40,'kills':12,'sec':60,'wave':5,'wavesTotal':10});return JSON.stringify({mv:!!document.querySelector('#snsSummaryWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7466 DOM 与函数一致：.mval 存在 + snsSummary 正常值文本非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7461 综合研判 抛异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
