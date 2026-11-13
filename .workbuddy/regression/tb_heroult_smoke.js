@@ -20625,6 +20625,21 @@ async function main() {
     t('U7484 DOM 与函数一致（.mval 存在 + txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7479 生涯BOSS 异常: ' + e.message, false, String(e)); }
 
+
+  // ===== U7485~U7490: 强化总数(v1.0.37) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('snsUpgSpentWrap'),mv:!!document.querySelector('#snsUpgSpentWrap .mval'),s:T.snsUpgSpentStateNow({'u':12})});})()"));
+    t('U7485 强化总数 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7486 正常 强化总数 → v=12 g-good 12项', o.s.v === 12 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '12项', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.snsUpgSpentStateNow({'u':12}),b:T.snsUpgSpentStateNow({'u':0})});return r;})()"));
+    t('U7487 边界 强化总数 → g-bad 0项', o2.b.v === 0 && o2.b.cls === 'g-bad' && o2.b.danger === false && o2.b.txt === '0项', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.snsUpgSpentStateNow(null);const b=T.snsUpgSpentStateNow([]);const c=T.snsUpgSpentStateNow({'u':5});const d=T.snsUpgSpentStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7488 非法 null/[]/无字段→退化 —，合法帧(有数据)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7489 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.snsUpgSpentStateNow({'u':12});return JSON.stringify({mv:!!document.querySelector('#snsUpgSpentWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7490 DOM 与函数一致（.mval 存在 + txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7485 强化总数 异常: ' + e.message, false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
