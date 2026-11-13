@@ -20520,6 +20520,21 @@ async function main() {
     t('U7442 DOM 与函数一致：.mval 存在 + snsSurvival 正常值文本非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7437 生存压力 抛异常', false, String(e)); }
 
+
+  // ===== U7443~U7448: 输出窗口(v1.0.30) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('snsWindowWrap'),mv:!!document.querySelector('#snsWindowWrap .mval'),s:T.snsWindowStateNow({'t':18})});})()"));
+    t('U7443 输出窗口 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7444 正常 输出窗口 → v=18 g-good 18s', o.s.v === 18 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '18s', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.snsWindowStateNow({'t':18}),b:T.snsWindowStateNow({'t':2})});return r;})()"));
+    t('U7445 边界 输出窗口 → g-bad 2s', o2.b.v === 2 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '2s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.snsWindowStateNow(null);const b=T.snsWindowStateNow([]);const c=T.snsWindowStateNow({'t':8});const d=T.snsWindowStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7446 非法 null/[]/无字段→退化 —，合法帧(有数据)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7447 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.snsWindowStateNow({'t':18});return JSON.stringify({mv:!!document.querySelector('#snsWindowWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7448 DOM 与函数一致：.mval 存在 + snsWindow 正常值文本非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7443 输出窗口 抛异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
