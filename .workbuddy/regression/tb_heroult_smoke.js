@@ -20445,6 +20445,21 @@ async function main() {
     t('U7412 DOM 与函数一致：.mval 存在 + snsHits 正常值文本非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7407 命中总数 抛异常', false, String(e)); }
 
+
+  // ===== U7413~U7418: 阵亡累计(v1.0.25) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('snsDeathsWrap'),mv:!!document.querySelector('#snsDeathsWrap .mval'),s:T.snsDeathsStateNow({'d':1})});})()"));
+    t('U7413 阵亡累计 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7414 正常 阵亡累计 → v=1 g-warn 1亡', o.s.v === 1 && o.s.cls === 'g-warn' && o.s.danger === false && o.s.txt === '1亡', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.snsDeathsStateNow({'d':1}),b:T.snsDeathsStateNow({'d':4})});return r;})()"));
+    t('U7415 边界 阵亡累计 → g-bad 4亡', o2.b.v === 4 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '4亡', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.snsDeathsStateNow(null);const b=T.snsDeathsStateNow([]);const c=T.snsDeathsStateNow({'d':1});const d=T.snsDeathsStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7416 非法 null/[]/无字段→退化 —，合法帧(有数据)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7417 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.snsDeathsStateNow({'d':1});return JSON.stringify({mv:!!document.querySelector('#snsDeathsWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7418 DOM 与函数一致：.mval 存在 + snsDeaths 正常值文本非空', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7413 阵亡累计 抛异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

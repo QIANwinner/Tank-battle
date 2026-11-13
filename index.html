@@ -1155,6 +1155,7 @@
     <div class="pill m-hide" id="snsUpCostWrap"><span class="k">🛠️</span><span class="v">升级差</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="snsBiggestWrap"><span class="k">💪</span><span class="v">最强</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="snsHitsWrap"><span class="k">⚡</span><span class="v">命中数</span><em class="mval">—</em></div>
+    <div class="pill m-hide" id="snsDeathsWrap"><span class="k">💀</span><span class="v">阵亡</span><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1531,7 +1532,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.0.24</div>
+  <div id="mark">DESIGNED BY QIAN · V1.0.25</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7489,6 +7490,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_snsUpCost = snsUpCostNow(); const w_snsUpCost = $('snsUpCostWrap'); if (w_snsUpCost) { const pv = w_snsUpCost.dataset.fp || ''; const nv = l_snsUpCost.cls + '|' + l_snsUpCost.txt + '|' + (l_snsUpCost.danger ? '1' : '0'); if (pv !== nv) { w_snsUpCost.dataset.fp = nv; w_snsUpCost.classList.remove('g-good','g-warn','g-bad'); w_snsUpCost.classList.add(l_snsUpCost.cls); w_snsUpCost.classList.toggle('danger', !!l_snsUpCost.danger); const mv = w_snsUpCost.querySelector('.mval'); if (mv) mv.textContent = l_snsUpCost.txt; } }
     const l_snsBiggest = snsBiggestNow(); const w_snsBiggest = $('snsBiggestWrap'); if (w_snsBiggest) { const pv = w_snsBiggest.dataset.fp || ''; const nv = l_snsBiggest.cls + '|' + l_snsBiggest.txt + '|' + (l_snsBiggest.danger ? '1' : '0'); if (pv !== nv) { w_snsBiggest.dataset.fp = nv; w_snsBiggest.classList.remove('g-good','g-warn','g-bad'); w_snsBiggest.classList.add(l_snsBiggest.cls); w_snsBiggest.classList.toggle('danger', !!l_snsBiggest.danger); const mv = w_snsBiggest.querySelector('.mval'); if (mv) mv.textContent = l_snsBiggest.txt; } }
     const l_snsHits = snsHitsNow(); const w_snsHits = $('snsHitsWrap'); if (w_snsHits) { const pv = w_snsHits.dataset.fp || ''; const nv = l_snsHits.cls + '|' + l_snsHits.txt + '|' + (l_snsHits.danger ? '1' : '0'); if (pv !== nv) { w_snsHits.dataset.fp = nv; w_snsHits.classList.remove('g-good','g-warn','g-bad'); w_snsHits.classList.add(l_snsHits.cls); w_snsHits.classList.toggle('danger', !!l_snsHits.danger); const mv = w_snsHits.querySelector('.mval'); if (mv) mv.textContent = l_snsHits.txt; } }
+    const l_snsDeaths = snsDeathsNow(); const w_snsDeaths = $('snsDeathsWrap'); if (w_snsDeaths) { const pv = w_snsDeaths.dataset.fp || ''; const nv = l_snsDeaths.cls + '|' + l_snsDeaths.txt + '|' + (l_snsDeaths.danger ? '1' : '0'); if (pv !== nv) { w_snsDeaths.dataset.fp = nv; w_snsDeaths.classList.remove('g-good','g-warn','g-bad'); w_snsDeaths.classList.add(l_snsDeaths.cls); w_snsDeaths.classList.toggle('danger', !!l_snsDeaths.danger); const mv = w_snsDeaths.querySelector('.mval'); if (mv) mv.textContent = l_snsDeaths.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -19655,6 +19657,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // —— snsUpCost：基地升级差（战局进度·关卡与火力积累：见 helperBody snsUpCost 实现 + snsUpCostNow 数据源）——
   // —— snsBiggest：敌方最强血（战局进度·关卡与火力积累：见 helperBody snsBiggest 实现 + snsBiggestNow 数据源）——
   // —— snsHits：命中总数（战局进度·关卡与火力积累：见 helperBody snsHits 实现 + snsHitsNow 数据源）——
+  // —— snsDeaths：阵亡累计（战局进度·关卡与火力积累：见 helperBody snsDeaths 实现 + snsDeathsNow 数据源）——
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -21515,7 +21518,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.0.24', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.0.25', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -23633,6 +23636,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       snsUpCostStateNow: (frame) => snsUpCost(frame), snsUpCostNow: () => snsUpCost(snsUpCostNow()), snsUpCostDomNow: () => { const e = document.querySelector('.snsUpCostWrap .mval'); return e ? e.textContent : null; },
       snsBiggestStateNow: (frame) => snsBiggest(frame), snsBiggestNow: () => snsBiggest(snsBiggestNow()), snsBiggestDomNow: () => { const e = document.querySelector('.snsBiggestWrap .mval'); return e ? e.textContent : null; },
       snsHitsStateNow: (frame) => snsHits(frame), snsHitsNow: () => snsHits(snsHitsNow()), snsHitsDomNow: () => { const e = document.querySelector('.snsHitsWrap .mval'); return e ? e.textContent : null; },
+      snsDeathsStateNow: (frame) => snsDeaths(frame), snsDeathsNow: () => snsDeaths(snsDeathsNow()), snsDeathsDomNow: () => { const e = document.querySelector('.snsDeathsWrap .mval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
