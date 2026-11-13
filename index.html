@@ -1183,6 +1183,7 @@
     <div class="pill m-hide" id="snsQualityWrap"><span class="k">⚙️</span><span class="v">画质</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="snsBgmWrap"><span class="k">🎵</span><span class="v">音乐</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="snsSfxWrap"><span class="k">🔊</span><span class="v">音效</span><em class="mval">—</em></div>
+    <div class="pill m-hide" id="snsModeWrap"><span class="k">🎮</span><span class="v">对战</span><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1559,7 +1560,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.0.52</div>
+  <div id="mark">DESIGNED BY QIAN · V1.0.53</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7545,6 +7546,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_snsQuality = snsQualityNow(); const w_snsQuality = $('snsQualityWrap'); if (w_snsQuality) { const pv = w_snsQuality.dataset.fp || ''; const nv = l_snsQuality.cls + '|' + l_snsQuality.txt + '|' + (l_snsQuality.danger ? '1' : '0'); if (pv !== nv) { w_snsQuality.dataset.fp = nv; w_snsQuality.classList.remove('g-good','g-warn','g-bad'); w_snsQuality.classList.add(l_snsQuality.cls); w_snsQuality.classList.toggle('danger', !!l_snsQuality.danger); const mv = w_snsQuality.querySelector('.mval'); if (mv) mv.textContent = l_snsQuality.txt; } }
     const l_snsBgm = snsBgmNow(); const w_snsBgm = $('snsBgmWrap'); if (w_snsBgm) { const pv = w_snsBgm.dataset.fp || ''; const nv = l_snsBgm.cls + '|' + l_snsBgm.txt + '|' + (l_snsBgm.danger ? '1' : '0'); if (pv !== nv) { w_snsBgm.dataset.fp = nv; w_snsBgm.classList.remove('g-good','g-warn','g-bad'); w_snsBgm.classList.add(l_snsBgm.cls); w_snsBgm.classList.toggle('danger', !!l_snsBgm.danger); const mv = w_snsBgm.querySelector('.mval'); if (mv) mv.textContent = l_snsBgm.txt; } }
     const l_snsSfx = snsSfxNow(); const w_snsSfx = $('snsSfxWrap'); if (w_snsSfx) { const pv = w_snsSfx.dataset.fp || ''; const nv = l_snsSfx.cls + '|' + l_snsSfx.txt + '|' + (l_snsSfx.danger ? '1' : '0'); if (pv !== nv) { w_snsSfx.dataset.fp = nv; w_snsSfx.classList.remove('g-good','g-warn','g-bad'); w_snsSfx.classList.add(l_snsSfx.cls); w_snsSfx.classList.toggle('danger', !!l_snsSfx.danger); const mv = w_snsSfx.querySelector('.mval'); if (mv) mv.textContent = l_snsSfx.txt; } }
+    const l_snsMode = snsModeNow(); const w_snsMode = $('snsModeWrap'); if (w_snsMode) { const pv = w_snsMode.dataset.fp || ''; const nv = l_snsMode.cls + '|' + l_snsMode.txt + '|' + (l_snsMode.danger ? '1' : '0'); if (pv !== nv) { w_snsMode.dataset.fp = nv; w_snsMode.classList.remove('g-good','g-warn','g-bad'); w_snsMode.classList.add(l_snsMode.cls); w_snsMode.classList.toggle('danger', !!l_snsMode.danger); const mv = w_snsMode.querySelector('.mval'); if (mv) mv.textContent = l_snsMode.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -20155,6 +20157,90 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
 
   // —— snsBgm：音乐音量（环境与生涯·设置与僚机：见 helperBody snsBgm 实现 + snsBgmNow 数据源）——
   // —— snsSfx：音效音量（环境与生涯·设置与僚机：见 helperBody snsSfx 实现 + snsSfxNow 数据源）——
+  // —— 战备读秒·临场状态：sns 新指标 + 数据源（anchor A 作用域读全局；复用已有 snsDeg 清洗）——
+  // 1) 对战模式：multiMode 0 单人 / 1 合作 / 2 对抗。
+  function snsMode(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('m' in frame)) return snsDeg();
+    const m = frame.m;
+    if (m === 0) return { v: 0, unit: '', cls: 'g-good', danger: false, txt: '单人' };
+    if (m === 1) return { v: 1, unit: '', cls: 'g-warn', danger: false, txt: '合作' };
+    if (m === 2) return { v: 2, unit: '', cls: 'g-bad', danger: true, txt: '对抗' };
+    return snsDeg();
+  }
+  // 2) 双人 P2 在场：player2 实体存在且未阵亡（无双人 → 告警）。
+  function snsP2Alive(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('p' in frame) || !('d' in frame)) return snsDeg();
+    if (typeof frame.p !== 'boolean' || typeof frame.d !== 'boolean') return snsDeg();
+    if (frame.p && !frame.d) return { v: 2, unit: '', cls: 'g-good', danger: false, txt: '双人在' };
+    if (frame.p) return { v: 1, unit: '', cls: 'g-warn', danger: false, txt: 'P2倒' };
+    return { v: 0, unit: '', cls: 'g-bad', danger: true, txt: '无双人' };
+  }
+  // 3) P2 生命：lives2 剩余命数（0 命 → 告警）。
+  function snsP2Life(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('l' in frame)) return snsDeg();
+    const l = Number(frame.l); if (!isFinite(l) || l < 0 || l > 99) return snsDeg();
+    const lv = Math.floor(l);
+    const cls = lv >= 2 ? 'g-good' : (lv === 1 ? 'g-warn' : 'g-bad');
+    return { v: lv, unit: '命', cls: cls, danger: lv <= 0, txt: lv + '命' };
+  }
+  // 4) 强化面板：upgradeOpen 是否弹出（开=面板在场，中性不告警）。
+  function snsUpgOpen(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('o' in frame)) return snsDeg();
+    if (typeof frame.o !== 'boolean') return snsDeg();
+    if (frame.o) return { v: 1, unit: '', cls: 'g-warn', danger: false, txt: '强化中' };
+    return { v: 0, unit: '', cls: 'g-good', danger: false, txt: '无面板' };
+  }
+  // 5) 关卡过渡：lvIntroNext 是否待启新关（开=即将开新关，中性提示）。
+  function snsLvNext(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('n' in frame)) return snsDeg();
+    if (typeof frame.n !== 'boolean') return snsDeg();
+    if (frame.n) return { v: 1, unit: '', cls: 'g-warn', danger: false, txt: '新关待启' };
+    return { v: 0, unit: '', cls: 'g-good', danger: false, txt: '关卡中' };
+  }
+  // 6) 游戏阶段：running/paused/gameOver 组合（结算→告警，暂停→提示）。
+  function snsPhase(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('r' in frame) || !('p' in frame) || !('g' in frame)) return snsDeg();
+    if (typeof frame.r !== 'boolean' || typeof frame.p !== 'boolean' || typeof frame.g !== 'boolean') return snsDeg();
+    if (frame.g) return { v: 0, unit: '', cls: 'g-bad', danger: true, txt: '结算' };
+    if (frame.p) return { v: 2, unit: '', cls: 'g-warn', danger: false, txt: '暂停中' };
+    if (frame.r) return { v: 3, unit: '', cls: 'g-good', danger: false, txt: '战斗中' };
+    return { v: 1, unit: '', cls: 'g-warn', danger: false, txt: '待开局' };
+  }
+  // 7) 磁暴倍率：magnetStorm>0 时 ×3（羁绊磁暴×4），否则 ×1。
+  function snsStormMul(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('s' in frame) || !('b' in frame)) return snsDeg();
+    const s = Number(frame.s); if (!isFinite(s) || s < 0) return snsDeg();
+    if (typeof frame.b !== 'boolean') return snsDeg();
+    if (s > 0 && frame.b) return { v: 4, unit: '', cls: 'g-good', danger: false, txt: '×4' };
+    if (s > 0) return { v: 3, unit: '', cls: 'g-good', danger: false, txt: '×3' };
+    return { v: 1, unit: '', cls: 'g-warn', danger: false, txt: '×1' };
+  }
+  // 8) 磁力半径：magnetRadius() 像素 → 格（TILE=24；0 格=未强化，告警）。
+  function snsMagnetR(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('r' in frame)) return snsDeg();
+    const r = Number(frame.r); if (!isFinite(r) || r < 0 || r > 800) return snsDeg();
+    const g = Math.round(r / 24);
+    const cls = g >= 2 ? 'g-good' : (g === 1 ? 'g-warn' : 'g-bad');
+    return { v: g, unit: '格', cls: cls, danger: g <= 0, txt: g + '格' };
+  }
+  // —— 数据源（anchor A 作用域读全局，构造纯 frame）——
+  function snsModeNow() { return { m: (multiMode === 1 || multiMode === 2) ? multiMode : 0 }; }
+  function snsP2AliveNow() { return { p: !!player2, d: player2 ? !!player2.dead : true }; }
+  function snsP2LifeNow() { return { l: (isFinite(lives2) && lives2 >= 0) ? lives2 : 0 }; }
+  function snsUpgOpenNow() { return { o: upgradeOpen === true }; }
+  function snsLvNextNow() { return { n: lvIntroNext === true }; }
+  function snsPhaseNow() { return { r: running === true, p: paused === true, g: gameOver === true }; }
+  function snsStormMulNow() { return { s: (isFinite(magnetStorm) && magnetStorm > 0) ? magnetStorm : 0, b: bondActive('bondmagnetstorm') === true }; }
+  function snsMagnetRNow() { return { r: magnetRadius() }; }
+
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -22015,7 +22101,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.0.52', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.0.53', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -24161,6 +24247,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       snsQualityStateNow: (frame) => snsQuality(frame), snsQualityNow: () => snsQuality(snsQualityNow()), snsQualityDomNow: () => { const e = document.querySelector('.snsQualityWrap .mval'); return e ? e.textContent : null; },
       snsBgmStateNow: (frame) => snsBgm(frame), snsBgmNow: () => snsBgm(snsBgmNow()), snsBgmDomNow: () => { const e = document.querySelector('.snsBgmWrap .mval'); return e ? e.textContent : null; },
       snsSfxStateNow: (frame) => snsSfx(frame), snsSfxNow: () => snsSfx(snsSfxNow()), snsSfxDomNow: () => { const e = document.querySelector('.snsSfxWrap .mval'); return e ? e.textContent : null; },
+      snsModeStateNow: (frame) => snsMode(frame), snsModeNow: () => snsMode(snsModeNow()), snsModeDomNow: () => { const e = document.querySelector('.snsModeWrap .mval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
