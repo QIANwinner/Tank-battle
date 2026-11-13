@@ -20655,6 +20655,21 @@ async function main() {
     t('U7496 DOM 与函数一致（.mval 存在 + txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7491 每日模组 异常: ' + e.message, false, String(e)); }
 
+
+  // ===== U7497~U7502: 粒子合批(v1.0.39) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('snsBatchWrap'),mv:!!document.querySelector('#snsBatchWrap .mval'),s:T.snsBatchStateNow({'p':100,'b':40})});})()"));
+    t('U7497 粒子合批 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7498 正常 粒子合批 → v=60 g-good 60%', o.s.v === 60 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '60%', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.snsBatchStateNow({'p':100,'b':40}),b:T.snsBatchStateNow({'p':100,'b':100})});return r;})()"));
+    t('U7499 边界 粒子合批 → g-bad 0%', o2.b.v === 0 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '0%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.snsBatchStateNow(null);const b=T.snsBatchStateNow([]);const c=T.snsBatchStateNow({'p':50,'b':20});const d=T.snsBatchStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7500 非法 null/[]/无字段→退化 —，合法帧(有数据)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7501 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.snsBatchStateNow({'p':100,'b':40});return JSON.stringify({mv:!!document.querySelector('#snsBatchWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7502 DOM 与函数一致（.mval 存在 + txt 非空）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7497 粒子合批 异常: ' + e.message, false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
