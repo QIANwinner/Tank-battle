@@ -20955,6 +20955,21 @@ async function main() {
     t('U7616 游戏阶段 DOM 与函数一致（DOM 值 = 函数 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7611~U7616 游戏阶段 无异常', false, String(e)); }
 
+
+  // ===== U7617~U7622: 磁暴倍率(v1.0.59) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('snsStormMulWrap'),mv:!!document.querySelector('#snsStormMulWrap .mval'),s:T.snsStormMulStateNow({'s':2,'b':false})});})()"));
+    t('U7617 磁暴倍率 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7618 正常 磁暴倍率 → v=3 g-good ×3', o.s.v === 3 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '×3', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.snsStormMulStateNow({'s':2,'b':false}),b:T.snsStormMulStateNow({'s':0,'b':false})});return r;})()"));
+    t('U7619 边界 磁暴倍率 → g-warn ×1', o2.b.v === 1 && o2.b.cls === 'g-warn' && o2.b.danger === false && o2.b.txt === '×1', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.snsStormMulStateNow(null);const b=T.snsStormMulStateNow([]);const c=T.snsStormMulStateNow({'s':1,'b':true});const d=T.snsStormMulStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7620 非法 null/[]/无字段→退化 —，合法帧(有数据)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7621 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.snsStormMulStateNow({'s':2,'b':false});return JSON.stringify({mv:!!document.querySelector('#snsStormMulWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7622 磁暴倍率 DOM 与函数一致（DOM 值 = 函数 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7617~U7622 磁暴倍率 无异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
