@@ -1132,6 +1132,7 @@
     <div class="pill m-hide" id="snsRushWrap"><span class="k">🌊</span><span class="v">冲势</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="snsBurstWrap"><span class="k">💥</span><span class="v">爆发</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="snsBuyWrap"><span class="k">🪙</span><span class="v">购买力</span><em class="mval">—</em></div>
+    <div class="pill m-hide" id="snsLivesWrap"><span class="k">❤️</span><span class="v">生命</span><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1508,7 +1509,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.0.1</div>
+  <div id="mark">DESIGNED BY QIAN · V1.0.2</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7443,6 +7444,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_snsRush = snsRushNow(); const w_snsRush = $('snsRushWrap'); if (w_snsRush) { const pv = w_snsRush.dataset.fp || ''; const nv = l_snsRush.cls + '|' + l_snsRush.txt + '|' + (l_snsRush.danger ? '1' : '0'); if (pv !== nv) { w_snsRush.dataset.fp = nv; w_snsRush.classList.remove('g-good','g-warn','g-bad'); w_snsRush.classList.add(l_snsRush.cls); w_snsRush.classList.toggle('danger', !!l_snsRush.danger); const mv = w_snsRush.querySelector('.mval'); if (mv) mv.textContent = l_snsRush.txt; } }
     const l_snsBurst = snsBurstNow(); const w_snsBurst = $('snsBurstWrap'); if (w_snsBurst) { const pv = w_snsBurst.dataset.fp || ''; const nv = l_snsBurst.cls + '|' + l_snsBurst.txt + '|' + (l_snsBurst.danger ? '1' : '0'); if (pv !== nv) { w_snsBurst.dataset.fp = nv; w_snsBurst.classList.remove('g-good','g-warn','g-bad'); w_snsBurst.classList.add(l_snsBurst.cls); w_snsBurst.classList.toggle('danger', !!l_snsBurst.danger); const mv = w_snsBurst.querySelector('.mval'); if (mv) mv.textContent = l_snsBurst.txt; } }
     const l_snsBuy = snsBuyNow(); const w_snsBuy = $('snsBuyWrap'); if (w_snsBuy) { const pv = w_snsBuy.dataset.fp || ''; const nv = l_snsBuy.cls + '|' + l_snsBuy.txt + '|' + (l_snsBuy.danger ? '1' : '0'); if (pv !== nv) { w_snsBuy.dataset.fp = nv; w_snsBuy.classList.remove('g-good','g-warn','g-bad'); w_snsBuy.classList.add(l_snsBuy.cls); w_snsBuy.classList.toggle('danger', !!l_snsBuy.danger); const mv = w_snsBuy.querySelector('.mval'); if (mv) mv.textContent = l_snsBuy.txt; } }
+    const l_snsLives = snsLivesNow(); const w_snsLives = $('snsLivesWrap'); if (w_snsLives) { const pv = w_snsLives.dataset.fp || ''; const nv = l_snsLives.cls + '|' + l_snsLives.txt + '|' + (l_snsLives.danger ? '1' : '0'); if (pv !== nv) { w_snsLives.dataset.fp = nv; w_snsLives.classList.remove('g-good','g-warn','g-bad'); w_snsLives.classList.add(l_snsLives.cls); w_snsLives.classList.toggle('danger', !!l_snsLives.danger); const mv = w_snsLives.querySelector('.mval'); if (mv) mv.textContent = l_snsLives.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -19307,6 +19309,93 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // —— snsRush：敌方冲势（态势感知：见 helperBody snsRush 实现 + snsRushNow 数据源）——
   // —— snsBurst：弹幕爆发（态势感知：见 helperBody snsBurst 实现 + snsBurstNow 数据源）——
   // —— snsBuy：金币购买力（态势感知：见 helperBody snsBuy 实现 + snsBuyNow 数据源）——
+  // —— 战局健康度·资源与威胁：sns 新指标 + 数据源（anchor A 作用域读全局；复用已有 snsDeg/snsNumArr 清洗）——
+  // 1) 我方生命余量：当前剩余命数（0/1/2/3…）。
+  function snsLives(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('lives' in frame)) return snsDeg();
+    const lv = Number(frame.lives); if (!isFinite(lv) || lv < 0) return snsDeg();
+    const v = Math.floor(lv);
+    const cls = v >= 3 ? 'g-good' : (v === 2 ? 'g-warn' : 'g-bad');
+    return { v: v, unit: '命', cls: cls, danger: v <= 1, txt: v + '命' };
+  }
+  // 2) 基地等级：当前护墙阵法等级（0哨所~5龙巢）。
+  function snsFort(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('lvl' in frame)) return snsDeg();
+    const lv = Number(frame.lvl); if (!isFinite(lv) || lv < 0) return snsDeg();
+    const v = Math.min(5, Math.floor(lv));
+    const cls = v >= 3 ? 'g-good' : (v >= 1 ? 'g-warn' : 'g-bad');
+    return { v: v, unit: '级', cls: cls, danger: v === 0, txt: v + '级' };
+  }
+  // 3) 波次进度：当前波 / 总波数 百分比（1/1=100% 合法，不清零）。
+  function snsWave(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('wave' in frame) || !('total' in frame)) return snsDeg();
+    const w = Number(frame.wave), t = Number(frame.total);
+    if (!isFinite(w) || !isFinite(t) || w < 1 || t < 1 || w > t) return snsDeg();
+    const v = Math.round(w / t * 100);
+    const cls = v >= 80 ? 'g-good' : (v >= 40 ? 'g-warn' : 'g-bad');
+    return { v: v, unit: '%', cls: cls, danger: v < 20, txt: v + '%' };
+  }
+  // 4) 弹幕密度：场上敌方弹数（0 发合法，非退化）。
+  function snsDensity(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('n' in frame)) return snsDeg();
+    const n = Number(frame.n); if (!isFinite(n) || n < 0) return snsDeg();
+    const v = Math.floor(n);
+    const cls = v <= 5 ? 'g-good' : (v <= 15 ? 'g-warn' : 'g-bad');
+    return { v: v, unit: '发', cls: cls, danger: v >= 20, txt: v + '发' };
+  }
+  // 5) 敌方精英威胁：场上精英/首领敌数（0 合法，非退化）。
+  function snsElite(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('n' in frame)) return snsDeg();
+    const n = Number(frame.n); if (!isFinite(n) || n < 0) return snsDeg();
+    const v = Math.floor(n);
+    const cls = v === 0 ? 'g-good' : (v <= 2 ? 'g-warn' : 'g-bad');
+    return { v: v, unit: '精', cls: cls, danger: v >= 3, txt: v + '精' };
+  }
+  // 6) 敌方自爆威胁：场上自爆敌数（0 合法，非退化）。
+  function snsSuicide(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('n' in frame)) return snsDeg();
+    const n = Number(frame.n); if (!isFinite(n) || n < 0) return snsDeg();
+    const v = Math.floor(n);
+    const cls = v === 0 ? 'g-good' : (v === 1 ? 'g-warn' : 'g-bad');
+    return { v: v, unit: '爆', cls: cls, danger: v >= 2, txt: v + '爆' };
+  }
+  // 7) 敌方残血收割：一枪可收（hp<=1）的敌占比。
+  function snsWeak(frame) {
+    const a = snsNumArr(frame && frame.hps); if (!a || !a.length) return snsDeg();
+    let one = 0; for (let i = 0; i < a.length; i++) if (a[i] <= 1) one++;
+    const v = Math.round(one / a.length * 100);
+    const cls = v < 25 ? 'g-good' : (v <= 50 ? 'g-warn' : 'g-bad');
+    return { v: v, unit: '%', cls: cls, danger: v >= 60, txt: v + '%' };
+  }
+  // 8) 资源续航：当前金币还能升几级基地（当前级之后的未来档，价格阶梯与 BASE_LEVELS 一致）。
+  function snsReserve(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('coins' in frame) || !('lvl' in frame)) return snsDeg();
+    const c = Number(frame.coins), lv = Number(frame.lvl);
+    if (!isFinite(c) || !isFinite(lv) || c < 0 || lv < 0) return snsDeg();
+    const PR = [0, 250, 650, 1400, 3000, 6000];   // BASE_LEVELS price 阶梯（哨所/壁垒/要塞/堡垒/王城/龙巢）
+    const cur = Math.min(PR.length - 1, Math.floor(lv));
+    let n = 0; for (let i = cur + 1; i < PR.length; i++) if (PR[i] <= c) n++;
+    const v = n;
+    const cls = v >= 2 ? 'g-good' : (v === 1 ? 'g-warn' : 'g-bad');
+    return { v: v, unit: '阶', cls: cls, danger: v === 0, txt: v + '阶' };
+  }
+  // —— 数据源（anchor A 作用域读全局，构造纯 frame）——
+  function snsLivesNow() { return { lives: isFinite(lives) ? Math.max(0, Math.floor(lives)) : 0 }; }
+  function snsFortNow() { return { lvl: isFinite(baseLevel) ? Math.max(0, Math.floor(baseLevel)) : 0 }; }
+  function snsWaveNow() { return { wave: Math.max(1, Math.floor(Number(wave) || 1)), total: Math.max(1, Math.floor(Number(wavesTotal) || 1)) }; }
+  function snsDensityNow() { let n = 0; if (bullets) for (let i = 0; i < bullets.length; i++) { const b = bullets[i]; if (b && !b.dead && b.owner && b.owner.isPlayer !== true) n++; } return { n: n }; }
+  function snsEliteNow() { let n = 0; if (enemies) for (let i = 0; i < enemies.length; i++) { const e = enemies[i]; if (e && !e.dead && (e.isBoss || e.type === 'elite')) n++; } return { n: n }; }
+  function snsSuicideNow() { let n = 0; if (enemies) for (let i = 0; i < enemies.length; i++) { const e = enemies[i]; if (e && !e.dead && e.type === 'suicide') n++; } return { n: n }; }
+  function snsWeakNow() { const a = []; if (enemies) for (let i = 0; i < enemies.length; i++) { const e = enemies[i]; if (e && !e.dead && isFinite(e.hp)) a.push(Number(e.hp)); } return { hps: a }; }
+  function snsReserveNow() { return { coins: isFinite(coins) ? Math.max(0, Math.floor(coins)) : 0, lvl: isFinite(baseLevel) ? Math.max(0, Math.floor(baseLevel)) : 0 }; }
+
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -21167,7 +21256,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.0.1', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.0.2', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -23262,6 +23351,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       snsRushStateNow: (frame) => snsRush(frame), snsRushNow: () => snsRush(snsRushNow()), snsRushDomNow: () => { const e = document.querySelector('.snsRushWrap .mval'); return e ? e.textContent : null; },
       snsBurstStateNow: (frame) => snsBurst(frame), snsBurstNow: () => snsBurst(snsBurstNow()), snsBurstDomNow: () => { const e = document.querySelector('.snsBurstWrap .mval'); return e ? e.textContent : null; },
       snsBuyStateNow: (frame) => snsBuy(frame), snsBuyNow: () => snsBuy(snsBuyNow()), snsBuyDomNow: () => { const e = document.querySelector('.snsBuyWrap .mval'); return e ? e.textContent : null; },
+      snsLivesStateNow: (frame) => snsLives(frame), snsLivesNow: () => snsLives(snsLivesNow()), snsLivesDomNow: () => { const e = document.querySelector('.snsLivesWrap .mval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
