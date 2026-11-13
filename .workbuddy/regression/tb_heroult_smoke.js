@@ -20775,6 +20775,21 @@ async function main() {
     t('U7544 动效档位 DOM 与函数一致（DOM 值 = 函数 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7539~U7544 动效档位 无异常', false, String(e)); }
 
+
+  // ===== U7545~U7550: 高对比(v1.0.47) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('snsContrastWrap'),mv:!!document.querySelector('#snsContrastWrap .mval'),s:T.snsContrastStateNow({'c':false})});})()"));
+    t('U7545 高对比 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7546 正常 高对比 → v=0 g-warn 标准', o.s.v === 0 && o.s.cls === 'g-warn' && o.s.danger === false && o.s.txt === '标准', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.snsContrastStateNow({'c':false}),b:T.snsContrastStateNow({'c':true})});return r;})()"));
+    t('U7547 边界 高对比 → g-good 高对比', o2.b.v === 1 && o2.b.cls === 'g-good' && o2.b.danger === false && o2.b.txt === '高对比', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.snsContrastStateNow(null);const b=T.snsContrastStateNow([]);const c=T.snsContrastStateNow({'c':true});const d=T.snsContrastStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7548 非法 null/[]/无字段→退化 —，合法帧(有数据)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7549 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.snsContrastStateNow({'c':false});return JSON.stringify({mv:!!document.querySelector('#snsContrastWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7550 高对比 DOM 与函数一致（DOM 值 = 函数 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7545~U7550 高对比 无异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
