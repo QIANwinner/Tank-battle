@@ -6133,6 +6133,10 @@
   #hwIncWrap.g-bad .mval { color:#e74c3c; }
   #hwIncWrap.g-bad { animation: tbHwPulse .4s ease-in-out infinite alternate; }
   @keyframes tbHwPulse { from { opacity:.55; } to { opacity:1; } }
+  #hwFastWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #hwFastWrap.g-bad .mval { color:#e74c3c; }
+  #hwFastWrap.g-bad { animation: tbHwPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbHwPulse { from { opacity:.55; } to { opacity:1; } }
 </style>
 </head>
 <body>
@@ -7234,6 +7238,7 @@
     <div class="pill m-hide" id="duelBossWrap"><span class="k">👑</span><span class="v">BOSS</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="duelNetWrap"><span class="k">⚔️</span><span class="v">净压</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="hwIncWrap"><span class="k">⚔️</span><span class="v">命中窗</span><em class="mval">—</em></div>
+    <div class="pill m-hide" id="hwFastWrap"><span class="k">⏱️</span><span class="v">最快</span><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -7609,7 +7614,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V18.02</div>
+  <div id="mark">DESIGNED BY QIAN · V18.03</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -13513,6 +13518,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_duelBoss = duelBossNow(); const w_duelBoss = $('duelBossWrap'); if (w_duelBoss) { const pv = w_duelBoss.dataset.fp || ''; const nv = l_duelBoss.cls + '|' + l_duelBoss.txt + '|' + (l_duelBoss.danger ? '1' : '0'); if (pv !== nv) { w_duelBoss.dataset.fp = nv; w_duelBoss.classList.remove('g-good','g-warn','g-bad'); w_duelBoss.classList.add(l_duelBoss.cls); w_duelBoss.classList.toggle('danger', !!l_duelBoss.danger); const mv = w_duelBoss.querySelector('.mval'); if (mv) mv.textContent = l_duelBoss.txt; } }
     const l_duelNet = duelNetNow(); const w_duelNet = $('duelNetWrap'); if (w_duelNet) { const pv = w_duelNet.dataset.fp || ''; const nv = l_duelNet.cls + '|' + l_duelNet.txt + '|' + (l_duelNet.danger ? '1' : '0'); if (pv !== nv) { w_duelNet.dataset.fp = nv; w_duelNet.classList.remove('g-good','g-warn','g-bad'); w_duelNet.classList.add(l_duelNet.cls); w_duelNet.classList.toggle('danger', !!l_duelNet.danger); const mv = w_duelNet.querySelector('.mval'); if (mv) mv.textContent = l_duelNet.txt; } }
     const l_hwInc = hwIncNow(); const w_hwInc = $('hwIncWrap'); if (w_hwInc) { const pv = w_hwInc.dataset.fp || ''; const nv = l_hwInc.cls + '|' + l_hwInc.txt + '|' + (l_hwInc.danger ? '1' : '0'); if (pv !== nv) { w_hwInc.dataset.fp = nv; w_hwInc.classList.remove('g-good','g-warn','g-bad'); w_hwInc.classList.add(l_hwInc.cls); w_hwInc.classList.toggle('danger', !!l_hwInc.danger); const mv = w_hwInc.querySelector('.mval'); if (mv) mv.textContent = l_hwInc.txt; } }
+    const l_hwFast = hwFastNow(); const w_hwFast = $('hwFastWrap'); if (w_hwFast) { const pv = w_hwFast.dataset.fp || ''; const nv = l_hwFast.cls + '|' + l_hwFast.txt + '|' + (l_hwFast.danger ? '1' : '0'); if (pv !== nv) { w_hwFast.dataset.fp = nv; w_hwFast.classList.remove('g-good','g-warn','g-bad'); w_hwFast.classList.add(l_hwFast.cls); w_hwFast.classList.toggle('danger', !!l_hwFast.danger); const mv = w_hwFast.querySelector('.mval'); if (mv) mv.textContent = l_hwFast.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -25276,6 +25282,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     return { v: v, unit: '', cls: cls, danger: v >= 60, txt: String(v) };
   }
 
+  // —— hwFast：最快命中（弹道命中窗口：见 helperBody hwCore + hwFast 实现）——
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -27117,7 +27124,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V18.02', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V18.03', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -29197,6 +29204,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       duelBossStateNow: (frame) => duelBoss(frame), duelBossNow: () => duelBoss(duelLive()), duelBossDomNow: () => { const e = document.querySelector('.duelBossWrap .mval'); return e ? e.textContent : null; },
       duelNetStateNow: (frame) => duelNet(frame), duelNetNow: () => duelNet(duelLive()), duelNetDomNow: () => { const e = document.querySelector('.duelNetWrap .mval'); return e ? e.textContent : null; },
       hwIncStateNow: (frame) => hwInc(frame), hwIncNow: () => hwInc(hwLive()), hwIncDomNow: () => { const e = document.querySelector('.hwIncWrap .mval'); return e ? e.textContent : null; },
+      hwFastStateNow: (frame) => hwFast(frame), hwFastNow: () => hwFast(hwLive()), hwFastDomNow: () => { const e = document.querySelector('.hwFastWrap .mval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
