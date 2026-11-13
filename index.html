@@ -1156,6 +1156,7 @@
     <div class="pill m-hide" id="snsBiggestWrap"><span class="k">💪</span><span class="v">最强</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="snsHitsWrap"><span class="k">⚡</span><span class="v">命中数</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="snsDeathsWrap"><span class="k">💀</span><span class="v">阵亡</span><em class="mval">—</em></div>
+    <div class="pill m-hide" id="snsTacticWrap"><span class="k">🧭</span><span class="v">战术</span><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1532,7 +1533,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.0.25</div>
+  <div id="mark">DESIGNED BY QIAN · V1.0.26</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7491,6 +7492,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_snsBiggest = snsBiggestNow(); const w_snsBiggest = $('snsBiggestWrap'); if (w_snsBiggest) { const pv = w_snsBiggest.dataset.fp || ''; const nv = l_snsBiggest.cls + '|' + l_snsBiggest.txt + '|' + (l_snsBiggest.danger ? '1' : '0'); if (pv !== nv) { w_snsBiggest.dataset.fp = nv; w_snsBiggest.classList.remove('g-good','g-warn','g-bad'); w_snsBiggest.classList.add(l_snsBiggest.cls); w_snsBiggest.classList.toggle('danger', !!l_snsBiggest.danger); const mv = w_snsBiggest.querySelector('.mval'); if (mv) mv.textContent = l_snsBiggest.txt; } }
     const l_snsHits = snsHitsNow(); const w_snsHits = $('snsHitsWrap'); if (w_snsHits) { const pv = w_snsHits.dataset.fp || ''; const nv = l_snsHits.cls + '|' + l_snsHits.txt + '|' + (l_snsHits.danger ? '1' : '0'); if (pv !== nv) { w_snsHits.dataset.fp = nv; w_snsHits.classList.remove('g-good','g-warn','g-bad'); w_snsHits.classList.add(l_snsHits.cls); w_snsHits.classList.toggle('danger', !!l_snsHits.danger); const mv = w_snsHits.querySelector('.mval'); if (mv) mv.textContent = l_snsHits.txt; } }
     const l_snsDeaths = snsDeathsNow(); const w_snsDeaths = $('snsDeathsWrap'); if (w_snsDeaths) { const pv = w_snsDeaths.dataset.fp || ''; const nv = l_snsDeaths.cls + '|' + l_snsDeaths.txt + '|' + (l_snsDeaths.danger ? '1' : '0'); if (pv !== nv) { w_snsDeaths.dataset.fp = nv; w_snsDeaths.classList.remove('g-good','g-warn','g-bad'); w_snsDeaths.classList.add(l_snsDeaths.cls); w_snsDeaths.classList.toggle('danger', !!l_snsDeaths.danger); const mv = w_snsDeaths.querySelector('.mval'); if (mv) mv.textContent = l_snsDeaths.txt; } }
+    const l_snsTactic = snsTacticNow(); const w_snsTactic = $('snsTacticWrap'); if (w_snsTactic) { const pv = w_snsTactic.dataset.fp || ''; const nv = l_snsTactic.cls + '|' + l_snsTactic.txt + '|' + (l_snsTactic.danger ? '1' : '0'); if (pv !== nv) { w_snsTactic.dataset.fp = nv; w_snsTactic.classList.remove('g-good','g-warn','g-bad'); w_snsTactic.classList.add(l_snsTactic.cls); w_snsTactic.classList.toggle('danger', !!l_snsTactic.danger); const mv = w_snsTactic.querySelector('.mval'); if (mv) mv.textContent = l_snsTactic.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -19658,6 +19660,172 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // —— snsBiggest：敌方最强血（战局进度·关卡与火力积累：见 helperBody snsBiggest 实现 + snsBiggestNow 数据源）——
   // —— snsHits：命中总数（战局进度·关卡与火力积累：见 helperBody snsHits 实现 + snsHitsNow 数据源）——
   // —— snsDeaths：阵亡累计（战局进度·关卡与火力积累：见 helperBody snsDeaths 实现 + snsDeathsNow 数据源）——
+  // —— 战局研判·决策辅助：sns 新指标 + 数据源（anchor A 作用域读全局；复用已有 snsDeg/snsNumArr 清洗）——
+  // 1) 战术意图：存活敌数 foes + 近身敌数 near（距玩家<3*TILE）→ 攻/守/消耗/清剿/死守 决策标签。
+  //    近敌>=3 死守；>=1 周旋；无敌 清剿；敌多未贴身 消耗；否则 进攻。
+  function snsTactic(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('foes' in frame) || !('near' in frame)) return snsDeg();
+    const f = Number(frame.foes), n = Number(frame.near);
+    if (!isFinite(f) || !isFinite(n) || f < 0 || n < 0) return snsDeg();
+    const v = Math.floor(f);
+    let cls, danger, txt;
+    if (n >= 3) { cls = 'g-bad'; danger = true; txt = '死守'; }
+    else if (n >= 1) { cls = 'g-warn'; danger = false; txt = '周旋'; }
+    else if (f === 0) { cls = 'g-good'; danger = false; txt = '清剿'; }
+    else if (f >= 6) { cls = 'g-warn'; danger = false; txt = '消耗'; }
+    else { cls = 'g-good'; danger = false; txt = '进攻'; }
+    return { v: v, unit: '', cls: cls, danger: danger, txt: txt };
+  }
+  // 2) 逃生窗口：最近存活敌人到玩家的距离 d（格=TILE 单位；d=-1 表示场上无敌）→ 安全/宽阔/紧张/危急 标签。
+  function snsEscape(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('d' in frame)) return snsDeg();
+    const d = Number(frame.d);
+    if (!isFinite(d)) return snsDeg();
+    if (d === -1) return { v: 0, unit: '', cls: 'g-good', danger: false, txt: '安全' };
+    if (d < 0) return snsDeg();
+    const v = Math.round(d);
+    const cls = v >= 6 ? 'g-good' : (v >= 3 ? 'g-warn' : 'g-bad');
+    const danger = v < 3;
+    const txt = v >= 6 ? '宽阔' : (v >= 3 ? '紧张' : '危急');
+    return { v: v, unit: '', cls: cls, danger: danger, txt: txt };
+  }
+    // 3) 经济续航：本局金币累计 runCoins 与已玩秒数 sec → 金币获取速率（枚/秒，保留 2 位；0 合法非退化）。
+  function snsEconomy(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('coins' in frame) || !('sec' in frame)) return snsDeg();
+    const c = Number(frame.coins), s = Number(frame.sec);
+    if (!isFinite(c) || !isFinite(s) || c < 0 || s < 0) return snsDeg();
+    const v = Math.round(c / Math.max(1, s) * 100) / 100;
+    const cls = v >= 0.5 ? 'g-good' : (v >= 0.15 ? 'g-warn' : 'g-bad');
+    const danger = s > 0 && v === 0;
+    return { v: v, unit: '/s', cls: cls, danger: danger, txt: v + '/s' };
+  }
+  // 4) 生存压力：玩家生命比 hp/maxHp + 存活敌数 foes → 0-100 压力分（0 安全 ~ 100 濒危）。
+  function snsSurvival(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('hp' in frame) || !('maxHp' in frame) || !('foes' in frame)) return snsDeg();
+    const hp = Number(frame.hp), mx = Number(frame.maxHp), f = Number(frame.foes);
+    if (!isFinite(hp) || !isFinite(mx) || !isFinite(f)) return snsDeg();
+    if (hp < 0 || mx <= 0 || f < 0) return snsDeg();
+    const ratio = Math.min(1, hp / mx);
+    const v = Math.round((1 - ratio) * 60 + Math.min(f / 6, 1) * 40);
+    const cls = v >= 60 ? 'g-bad' : (v >= 30 ? 'g-warn' : 'g-good');
+    const danger = v >= 80;
+    return { v: v, unit: '分', cls: cls, danger: danger, txt: v + '分' };
+  }
+    // 5) 输出窗口：距下一敌/波刷新的剩余秒 t（enemySpawnTimer）→ 安全输出时间（0 即将刷新）。
+  function snsWindow(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('t' in frame)) return snsDeg();
+    const t = Number(frame.t);
+    if (!isFinite(t) || t < 0) return snsDeg();
+    const v = Math.round(t);
+    const cls = v >= 10 ? 'g-good' : (v >= 3 ? 'g-warn' : 'g-bad');
+    const danger = v < 3;
+    return { v: v, unit: 's', cls: cls, danger: danger, txt: v + 's' };
+  }
+  // 6) 拾取节奏：场上可拾取道具数 n（powerups 存活数；0=当前无补给合法非退化）。
+  function snsPickup(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('n' in frame)) return snsDeg();
+    const n = Number(frame.n);
+    if (!isFinite(n) || n < 0) return snsDeg();
+    const v = Math.round(n);
+    const cls = v >= 3 ? 'g-good' : (v >= 1 ? 'g-warn' : 'g-bad');
+    return { v: v, unit: '个', cls: cls, danger: false, txt: v + '个' };
+  }
+    // 7) 连击势能：当前连击 combo + 剩余连击窗口 timer → 连击数（0=无连击合法非退化）。
+  function snsCombo(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('combo' in frame) || !('timer' in frame)) return snsDeg();
+    const c = Number(frame.combo), tm = Number(frame.timer);
+    if (!isFinite(c) || !isFinite(tm) || c < 0 || tm < 0) return snsDeg();
+    const v = Math.round(c);
+    const cls = v >= 5 ? 'g-good' : (v >= 1 ? 'g-warn' : 'g-bad');
+    const danger = v >= 8;
+    return { v: v, unit: '连', cls: cls, danger: danger, txt: v + '连' };
+  }
+  // 8) 综合研判：命中率 acc + 每分钟击杀 krate + 波次进度 waveF → 0-100 综合分（命中>射击=非法退化）。
+  function snsSummary(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    const keys = ['hits', 'shots', 'kills', 'sec', 'wave', 'wavesTotal'];
+    for (let i = 0; i < keys.length; i++) if (!(keys[i] in frame)) return snsDeg();
+    const h = Number(frame.hits), s = Number(frame.shots), k = Number(frame.kills);
+    const sec = Number(frame.sec), w = Number(frame.wave), wt = Number(frame.wavesTotal);
+    if (!isFinite(h) || !isFinite(s) || !isFinite(k) || !isFinite(sec) || !isFinite(w) || !isFinite(wt)) return snsDeg();
+    if (h < 0 || s < 0 || k < 0 || sec < 0 || w < 0 || wt <= 0) return snsDeg();
+    if (h > s) return snsDeg();
+    const acc = s > 0 ? h / s : 0;
+    const krate = k / Math.max(1, sec);
+    const waveF = w / wt;
+    const v = Math.max(0, Math.min(100, Math.round(acc * 40 + Math.min(krate * 60, 1) * 30 + Math.min(waveF, 1) * 30)));
+    const cls = v >= 70 ? 'g-good' : (v >= 40 ? 'g-warn' : 'g-bad');
+    const danger = v < 25;
+    return { v: v, unit: '分', cls: cls, danger: danger, txt: v + '分' };
+  }
+    // —— 数据源（anchor A 作用域读全局，构造纯 frame）——
+  function snsTacticNow() {
+    let foes = 0, near = 0;
+    const px = (player && !player.dead && isFinite(player.x)) ? player.x : null;
+    const py = (player && !player.dead && isFinite(player.y)) ? player.y : null;
+    if (enemies) for (let i = 0; i < enemies.length; i++) {
+      const e = enemies[i];
+      if (!e || e.dead) continue;
+      foes++;
+      if (px !== null && isFinite(e.x) && isFinite(e.y)) {
+        const dx = e.x - px, dy = e.y - py;
+        if (Math.sqrt(dx * dx + dy * dy) < 3 * TILE) near++;
+      }
+    }
+    return { foes: foes, near: near };
+  }
+  function snsEscapeNow() {
+    if (!player || player.dead || !isFinite(player.x) || !isFinite(player.y)) return { d: -1 };
+    let best = -1;
+    if (enemies) for (let i = 0; i < enemies.length; i++) {
+      const e = enemies[i];
+      if (!e || e.dead || !isFinite(e.x) || !isFinite(e.y)) continue;
+      const dx = e.x - player.x, dy = e.y - player.y;
+      const d = Math.sqrt(dx * dx + dy * dy) / TILE;
+      if (best < 0 || d < best) best = d;
+    }
+    return { d: Math.round(best * 10) / 10 };
+  }
+  function snsEconomyNow() {
+    return { coins: Math.max(0, Math.floor(Number(runCoins) || 0)), sec: Math.max(0, Math.floor(Number(playSecRun) || 0)) };
+  }
+  function snsSurvivalNow() {
+    const hp = player ? Math.max(0, Math.floor(Number(player.hp) || 0)) : 0;
+    const mx = player ? Math.max(1, Math.floor(Number(player.maxHp) || 1)) : 1;
+    let foes = 0;
+    if (enemies) for (let i = 0; i < enemies.length; i++) { const e = enemies[i]; if (e && !e.dead) foes++; }
+    return { hp: hp, maxHp: mx, foes: foes };
+  }
+  function snsWindowNow() {
+    return { t: Math.max(0, Number(enemySpawnTimer) || 0) };
+  }
+  function snsPickupNow() {
+    let n = 0;
+    if (powerups) for (let i = 0; i < powerups.length; i++) { const p = powerups[i]; if (p && !p.dead) n++; }
+    return { n: n };
+  }
+  function snsComboNow() {
+    return { combo: Math.max(0, Math.floor(Number(combo) || 0)), timer: Math.max(0, Number(comboTimer) || 0) };
+  }
+  function snsSummaryNow() {
+    const st = (stat && typeof stat === 'object') ? stat : {};
+    return {
+      hits: Math.max(0, Math.floor(Number(st.hits) || 0)),
+      shots: Math.max(0, Math.floor(Number(st.shots) || 0)),
+      kills: Math.max(0, Math.floor(Number(st.kills) || 0)),
+      sec: Math.max(0, Math.floor(Number(playSecRun) || 0)),
+      wave: Math.max(1, Math.floor(Number(wave) || 1)),
+      wavesTotal: Math.max(1, Math.floor(Number(wavesTotal) || 1))
+    };
+  }
+
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -21518,7 +21686,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.0.25', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.0.26', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -23637,6 +23805,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       snsBiggestStateNow: (frame) => snsBiggest(frame), snsBiggestNow: () => snsBiggest(snsBiggestNow()), snsBiggestDomNow: () => { const e = document.querySelector('.snsBiggestWrap .mval'); return e ? e.textContent : null; },
       snsHitsStateNow: (frame) => snsHits(frame), snsHitsNow: () => snsHits(snsHitsNow()), snsHitsDomNow: () => { const e = document.querySelector('.snsHitsWrap .mval'); return e ? e.textContent : null; },
       snsDeathsStateNow: (frame) => snsDeaths(frame), snsDeathsNow: () => snsDeaths(snsDeathsNow()), snsDeathsDomNow: () => { const e = document.querySelector('.snsDeathsWrap .mval'); return e ? e.textContent : null; },
+      snsTacticStateNow: (frame) => snsTactic(frame), snsTacticNow: () => snsTactic(snsTacticNow()), snsTacticDomNow: () => { const e = document.querySelector('.snsTacticWrap .mval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
