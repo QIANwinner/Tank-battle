@@ -6182,3 +6182,218 @@ html.compact-hud #hud .m-hide { display:none !important; }
 
 /* Explicit visibility overrides the tour flex layout, including touch screens. */
 #tourBox[hidden] { display: none !important; }
+  #snsLivesWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsLivesWrap.g-bad .mval { color:#e74c3c; }
+  #snsLivesWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsFortWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsFortWrap.g-bad .mval { color:#e74c3c; }
+  #snsFortWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsWaveWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsWaveWrap.g-bad .mval { color:#e74c3c; }
+  #snsWaveWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsDensityWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsDensityWrap.g-bad .mval { color:#e74c3c; }
+  #snsDensityWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsEliteWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsEliteWrap.g-bad .mval { color:#e74c3c; }
+  #snsEliteWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsSuicideWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsSuicideWrap.g-bad .mval { color:#e74c3c; }
+  #snsSuicideWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsWeakWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsWeakWrap.g-bad .mval { color:#e74c3c; }
+  #snsWeakWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsReserveWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsReserveWrap.g-bad .mval { color:#e74c3c; }
+  #snsReserveWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsHpLineWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsHpLineWrap.g-bad .mval { color:#e74c3c; }
+  #snsHpLineWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsAllyWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsAllyWrap.g-bad .mval { color:#e74c3c; }
+  #snsAllyWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsRatioWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsRatioWrap.g-bad .mval { color:#e74c3c; }
+  #snsRatioWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsKillsWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsKillsWrap.g-bad .mval { color:#e74c3c; }
+  #snsKillsWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsHostileWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsHostileWrap.g-bad .mval { color:#e74c3c; }
+  #snsHostileWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsBloodPoolWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsBloodPoolWrap.g-bad .mval { color:#e74c3c; }
+  #snsBloodPoolWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsAccWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsAccWrap.g-bad .mval { color:#e74c3c; }
+  #snsAccWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsBossWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsBossWrap.g-bad .mval { color:#e74c3c; }
+  #snsBossWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsLevelWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsLevelWrap.g-bad .mval { color:#e74c3c; }
+  #snsLevelWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsScoreWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsScoreWrap.g-bad .mval { color:#e74c3c; }
+  #snsScoreWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsRemainWaveWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsRemainWaveWrap.g-bad .mval { color:#e74c3c; }
+  #snsRemainWaveWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsBossHpWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsBossHpWrap.g-bad .mval { color:#e74c3c; }
+  #snsBossHpWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsUpCostWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsUpCostWrap.g-bad .mval { color:#e74c3c; }
+  #snsUpCostWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsBiggestWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsBiggestWrap.g-bad .mval { color:#e74c3c; }
+  #snsBiggestWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsHitsWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsHitsWrap.g-bad .mval { color:#e74c3c; }
+  #snsHitsWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsDeathsWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsDeathsWrap.g-bad .mval { color:#e74c3c; }
+  #snsDeathsWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsTacticWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsTacticWrap.g-bad .mval { color:#e74c3c; }
+  #snsTacticWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsEscapeWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsEscapeWrap.g-bad .mval { color:#e74c3c; }
+  #snsEscapeWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsEconomyWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsEconomyWrap.g-bad .mval { color:#e74c3c; }
+  #snsEconomyWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsSurvivalWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsSurvivalWrap.g-bad .mval { color:#e74c3c; }
+  #snsSurvivalWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsWindowWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsWindowWrap.g-bad .mval { color:#e74c3c; }
+  #snsWindowWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsPickupWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsPickupWrap.g-bad .mval { color:#e74c3c; }
+  #snsPickupWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsComboWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsComboWrap.g-bad .mval { color:#e74c3c; }
+  #snsComboWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsSummaryWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsSummaryWrap.g-bad .mval { color:#e74c3c; }
+  #snsSummaryWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsAutoTierWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsAutoTierWrap.g-bad .mval { color:#e74c3c; }
+  #snsAutoTierWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsCareerKillsWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsCareerKillsWrap.g-bad .mval { color:#e74c3c; }
+  #snsCareerKillsWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsCareerBossWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsCareerBossWrap.g-bad .mval { color:#e74c3c; }
+  #snsCareerBossWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsUpgSpentWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsUpgSpentWrap.g-bad .mval { color:#e74c3c; }
+  #snsUpgSpentWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsModSurgeWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsModSurgeWrap.g-bad .mval { color:#e74c3c; }
+  #snsModSurgeWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsBatchWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsBatchWrap.g-bad .mval { color:#e74c3c; }
+  #snsBatchWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsFpsPressWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsFpsPressWrap.g-bad .mval { color:#e74c3c; }
+  #snsFpsPressWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsBossBurstWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsBossBurstWrap.g-bad .mval { color:#e74c3c; }
+  #snsBossBurstWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsStreakWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsStreakWrap.g-bad .mval { color:#e74c3c; }
+  #snsStreakWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsTimeLeftWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsTimeLeftWrap.g-bad .mval { color:#e74c3c; }
+  #snsTimeLeftWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
+  #snsRenderWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #snsRenderWrap.g-bad .mval { color:#e74c3c; }
+  #snsRenderWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@
