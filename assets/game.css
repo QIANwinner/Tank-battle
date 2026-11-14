@@ -6803,3 +6803,15 @@ html.compact-hud #hud .m-hide { display:none !important; }
   #mtrAccWrap.danger .mval { color:#e74c3c; }
   #mtrAccWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
 @CSS@
+  #mtrPuWrap .mcv { display:inline-block; width:40px; height:10px; margin:0 4px; vertical-align:middle; }
+  #mtrPuWrap .mcv i { display:inline-block; width:7px; height:10px; margin-right:1px; background:rgba(255,255,255,.14); border-radius:1px; }
+  #mtrPuWrap .mcv i:last-child { margin-right:0; }
+  #mtrPuWrap[data-lv="1"] .mcv i:nth-child(1) { background:#e74c3c; }
+  #mtrPuWrap[data-lv="2"] .mcv i:nth-child(-n+2) { background:#e67e22; }
+  #mtrPuWrap[data-lv="3"] .mcv i:nth-child(-n+3) { background:#f1c40f; }
+  #mtrPuWrap[data-lv="4"] .mcv i:nth-child(-n+4) { background:#a3e635; }
+  #mtrPuWrap[data-lv="5"] .mcv i { background:#2ecc71; box-shadow:0 0 3px #2ecc7188; }
+  #mtrPuWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #mtrPuWrap.danger .mval { color:#e74c3c; }
+  #mtrPuWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
+@CSS@
