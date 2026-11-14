@@ -21750,6 +21750,21 @@ async function main() {
     t("U7934 DOM 与函数一致（.mval 可写 + data-lv 已落 DOM）", o5.mv === true && o5.dv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
   } catch (e) { t("U7929 节奏评级 抛异常", false, String(e)); t("U7930 节奏评级 抛异常", false, String(e)); t("U7931 节奏评级 抛异常", false, String(e)); t("U7932 节奏评级 抛异常", false, String(e)); t("U7933 节奏评级 抛异常", false, String(e)); t("U7934 节奏评级 抛异常", false, String(e)); }
 
+
+  // ===== U7935~U7940: 收益评级(v1.1.12) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('mtrYldWrap'),mv:!!document.querySelector('#mtrYldWrap .mval'),cf:!!document.querySelector('#mtrYldWrap .mcv i'),s:T.mtrYldStateNow({'v':3})};return JSON.stringify(r);})()"));
+    t("U7935 收益评级 DOM 已加入 HUD + 函数可用", o.dom === true && o.mv === true && o.cf === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t("U7936 正常 收益评级 → v=3 lv=2 g-bad 3/波", o.s.v === 3 && o.s.lv === 2 && o.s.cls === "g-bad" && o.s.danger === false && o.s.txt === "3/波", JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={b:T.mtrYldStateNow({'v':30})};return JSON.stringify(r);})()"));
+    t("U7937 边界 收益评级 → lv=5 g-good 30/波", o2.b.v === 30 && o2.b.lv === 5 && o2.b.cls === "g-good" && o2.b.danger === false && o2.b.txt === "30/波", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mtrYldStateNow(null),b:T.mtrYldStateNow([]),c:T.mtrYldStateNow({'v':3}),d:T.mtrYldStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]})};return JSON.stringify(r);})()"));
+    t("U7938 非法 null/[]/缺字段 → 退化，合法帧(有数据)非退化", o3.a.txt === "—" && o3.a.cls === "g-warn" && o3.a.v === 0 && o3.b.txt === "—" && o3.d.txt === "—" && isFinite(o3.c.v) && o3.c.txt !== "—", JSON.stringify(o3));
+    t("U7939 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签", o.s.txt === "—" || (typeof o.s.unit === "string" && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === "string" && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={mv:!!document.querySelector('#mtrYldWrap .mval'),dv:!!document.getElementById('mtrYldWrap').dataset.lv,s:T.mtrYldStateNow({'v':3})};return JSON.stringify(r);})()"));
+    t("U7940 DOM 与函数一致（.mval 可写 + data-lv 已落 DOM）", o5.mv === true && o5.dv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
+  } catch (e) { t("U7935 收益评级 抛异常", false, String(e)); t("U7936 收益评级 抛异常", false, String(e)); t("U7937 收益评级 抛异常", false, String(e)); t("U7938 收益评级 抛异常", false, String(e)); t("U7939 收益评级 抛异常", false, String(e)); t("U7940 收益评级 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
