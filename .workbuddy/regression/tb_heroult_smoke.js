@@ -21450,6 +21450,21 @@ async function main() {
     t('U7814 DOM 与函数一致（.mval 可写 + 正常帧有 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7809 基地防御墙 抛异常', false, String(e)); t('U7810 基地防御墙 抛异常', false, String(e)); t('U7811 基地防御墙 抛异常', false, String(e)); t('U7812 基地防御墙 抛异常', false, String(e)); t('U7813 基地防御墙 抛异常', false, String(e)); t('U7814 基地防御墙 抛异常', false, String(e)); }
 
+
+  // ===== U7815~U7820: 近战大招(v1.0.92) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bttUltWrap'),mv:!!document.querySelector('#bttUltWrap .mval'),s:T.bttUltStateNow({'cd':0,'dead':false})});})()"));
+    t('U7815 近战大招 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7816 正常 近战大招 → v=0 g-good 就绪', o.s.v === 0 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '就绪', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.bttUltStateNow({'cd':0,'dead':false}),b:T.bttUltStateNow({'cd':3,'dead':false})});return r;})()"));
+    t('U7817 边界 近战大招 → g-warn 蓄力3秒', o2.b.v === 3 && o2.b.cls === 'g-warn' && o2.b.danger === false && o2.b.txt === '蓄力3秒', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.bttUltStateNow(null);const b=T.bttUltStateNow([]);const c=T.bttUltStateNow({'cd':0,'dead':true});const d=T.bttUltStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7818 非法 null/[]/无字段→退化 —，合法帧(有数据)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7819 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.bttUltStateNow({'cd':0,'dead':false});return JSON.stringify({mv:!!document.querySelector('#bttUltWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7820 DOM 与函数一致（.mval 可写 + 正常帧有 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7815 近战大招 抛异常', false, String(e)); t('U7816 近战大招 抛异常', false, String(e)); t('U7817 近战大招 抛异常', false, String(e)); t('U7818 近战大招 抛异常', false, String(e)); t('U7819 近战大招 抛异常', false, String(e)); t('U7820 近战大招 抛异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
