@@ -21540,6 +21540,21 @@ async function main() {
     t("U7850 DOM 与函数一致（.mval 可写 + 正常帧有 txt）", o5.mv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
   } catch (e) { t("U7845 生命余量 抛异常", false, String(e)); t("U7846 生命余量 抛异常", false, String(e)); t("U7847 生命余量 抛异常", false, String(e)); t("U7848 生命余量 抛异常", false, String(e)); t("U7849 生命余量 抛异常", false, String(e)); t("U7850 生命余量 抛异常", false, String(e)); }
 
+
+  // ===== U7851~U7856: 本波击杀(v1.0.98) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('nrtWaveWrap'),mv:!!document.querySelector('#nrtWaveWrap .mval'),s:T.nrtWaveStateNow({'k':9,'w':3})};return JSON.stringify(r);})()"));
+    t("U7851 本波击杀 DOM 已加入 HUD + 函数可用", o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t("U7852 正常 本波击杀 → v=3 g-good 3只/波", o.s.v === 3 && o.s.cls === "g-good" && o.s.danger === false && o.s.txt === "3只/波", JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={b:T.nrtWaveStateNow({'k':66,'w':11})};return JSON.stringify(r);})()"));
+    t("U7853 边界 本波击杀 → g-bad 6只/波", o2.b.v === 6 && o2.b.cls === "g-bad" && o2.b.danger === true && o2.b.txt === "6只/波", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.nrtWaveStateNow(null),b:T.nrtWaveStateNow([]),c:T.nrtWaveStateNow({'k':1,'w':2}),d:T.nrtWaveStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]})};return JSON.stringify(r);})()"));
+    t("U7854 非法 null/[]/缺字段 → 退化，合法帧(有数据)非退化", o3.a.txt === "—" && o3.a.cls === "g-warn" && o3.a.v === 0 && o3.b.txt === "—" && o3.d.txt === "—" && isFinite(o3.c.v) && o3.c.txt !== "—", JSON.stringify(o3));
+    t("U7855 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签", o.s.txt === "—" || (typeof o.s.unit === "string" && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === "string" && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={mv:!!document.querySelector('#nrtWaveWrap .mval'),s:T.nrtWaveStateNow({'k':9,'w':3})};return JSON.stringify(r);})()"));
+    t("U7856 DOM 与函数一致（.mval 可写 + 正常帧有 txt）", o5.mv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
+  } catch (e) { t("U7851 本波击杀 抛异常", false, String(e)); t("U7852 本波击杀 抛异常", false, String(e)); t("U7853 本波击杀 抛异常", false, String(e)); t("U7854 本波击杀 抛异常", false, String(e)); t("U7855 本波击杀 抛异常", false, String(e)); t("U7856 本波击杀 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
