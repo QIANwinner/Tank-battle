@@ -1246,6 +1246,7 @@
     <div class="pill m-hide" id="mtrAccWrap" data-lv="0"><span class="k">⚔️</span><span class="v">命中</span><i class="mcv"><i></i><i></i><i></i><i></i><i></i></i><em class="mval">—</em></div>
     <div class="pill m-hide" id="mtrPuWrap" data-lv="0"><span class="k">🎁</span><span class="v">补给</span><i class="mcv"><i></i><i></i><i></i><i></i><i></i></i><em class="mval">—</em></div>
     <div class="pill m-hide" id="mtrBssWrap" data-lv="0"><span class="k">💀</span><span class="v">讨伐</span><i class="mcv"><i></i><i></i><i></i><i></i><i></i></i><em class="mval">—</em></div>
+    <div class="pill m-hide" id="mtrMntWrap" data-lv="0"><span class="k">⏳</span><span class="v">续航</span><i class="mcv"><i></i><i></i><i></i><i></i><i></i></i><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1622,7 +1623,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.15</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.16</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7671,6 +7672,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_mtrAcc = mtrAccNow(); const w_mtrAcc = $('mtrAccWrap'); if (w_mtrAcc) { const pv = w_mtrAcc.dataset.fp || ''; const lv = l_mtrAcc.lv || 0; const nv = lv + '|' + l_mtrAcc.txt; if (pv !== nv) { w_mtrAcc.dataset.fp = nv; w_mtrAcc.dataset.lv = lv; w_mtrAcc.classList.toggle('danger', !!l_mtrAcc.danger); const mv = w_mtrAcc.querySelector('.mval'); if (mv) mv.textContent = l_mtrAcc.txt; } }
     const l_mtrPu = mtrPuNow(); const w_mtrPu = $('mtrPuWrap'); if (w_mtrPu) { const pv = w_mtrPu.dataset.fp || ''; const lv = l_mtrPu.lv || 0; const nv = lv + '|' + l_mtrPu.txt; if (pv !== nv) { w_mtrPu.dataset.fp = nv; w_mtrPu.dataset.lv = lv; w_mtrPu.classList.toggle('danger', !!l_mtrPu.danger); const mv = w_mtrPu.querySelector('.mval'); if (mv) mv.textContent = l_mtrPu.txt; } }
     const l_mtrBss = mtrBssNow(); const w_mtrBss = $('mtrBssWrap'); if (w_mtrBss) { const pv = w_mtrBss.dataset.fp || ''; const lv = l_mtrBss.lv || 0; const nv = lv + '|' + l_mtrBss.txt; if (pv !== nv) { w_mtrBss.dataset.fp = nv; w_mtrBss.dataset.lv = lv; w_mtrBss.classList.toggle('danger', !!l_mtrBss.danger); const mv = w_mtrBss.querySelector('.mval'); if (mv) mv.textContent = l_mtrBss.txt; } }
+    const l_mtrMnt = mtrMntNow(); const w_mtrMnt = $('mtrMntWrap'); if (w_mtrMnt) { const pv = w_mtrMnt.dataset.fp || ''; const lv = l_mtrMnt.lv || 0; const nv = lv + '|' + l_mtrMnt.txt; if (pv !== nv) { w_mtrMnt.dataset.fp = nv; w_mtrMnt.dataset.lv = lv; w_mtrMnt.classList.toggle('danger', !!l_mtrMnt.danger); const mv = w_mtrMnt.querySelector('.mval'); if (mv) mv.textContent = l_mtrMnt.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -21068,6 +21070,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // 命中评级（v1.1.13 第八十三辑：mtr 系列已在 v1.1.9 引入）
   // 补给评级（v1.1.14 第八十三辑：mtr 系列已在 v1.1.9 引入）
   // 讨伐评级（v1.1.15 第八十三辑：mtr 系列已在 v1.1.9 引入）
+  // 续航评级（v1.1.16 第八十三辑：mtr 系列已在 v1.1.9 引入）
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -22928,7 +22931,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.15', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.16', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -25137,6 +25140,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       mtrAccStateNow: (frame) => mtrAcc(frame), mtrAccNow: () => mtrAcc(mtrAccNow()), mtrAccDomNow: () => { const e = document.querySelector('.mtrAccWrap .mval'); return e ? e.textContent : null; }, mtrAccLvDomNow: () => { const e = document.querySelector('#mtrAccWrap'); return e ? e.dataset.lv : null; }, mtrAccCellNow: () => { const c = document.querySelector('#mtrAccWrap .mcv i:nth-child(5)'); return c ? getComputedStyle(c).backgroundColor : null; },
       mtrPuStateNow: (frame) => mtrPu(frame), mtrPuNow: () => mtrPu(mtrPuNow()), mtrPuDomNow: () => { const e = document.querySelector('.mtrPuWrap .mval'); return e ? e.textContent : null; }, mtrPuLvDomNow: () => { const e = document.querySelector('#mtrPuWrap'); return e ? e.dataset.lv : null; }, mtrPuCellNow: () => { const c = document.querySelector('#mtrPuWrap .mcv i:nth-child(5)'); return c ? getComputedStyle(c).backgroundColor : null; },
       mtrBssStateNow: (frame) => mtrBss(frame), mtrBssNow: () => mtrBss(mtrBssNow()), mtrBssDomNow: () => { const e = document.querySelector('.mtrBssWrap .mval'); return e ? e.textContent : null; }, mtrBssLvDomNow: () => { const e = document.querySelector('#mtrBssWrap'); return e ? e.dataset.lv : null; }, mtrBssCellNow: () => { const c = document.querySelector('#mtrBssWrap .mcv i:nth-child(5)'); return c ? getComputedStyle(c).backgroundColor : null; },
+      mtrMntStateNow: (frame) => mtrMnt(frame), mtrMntNow: () => mtrMnt(mtrMntNow()), mtrMntDomNow: () => { const e = document.querySelector('.mtrMntWrap .mval'); return e ? e.textContent : null; }, mtrMntLvDomNow: () => { const e = document.querySelector('#mtrMntWrap'); return e ? e.dataset.lv : null; }, mtrMntCellNow: () => { const c = document.querySelector('#mtrMntWrap .mcv i:nth-child(5)'); return c ? getComputedStyle(c).backgroundColor : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
