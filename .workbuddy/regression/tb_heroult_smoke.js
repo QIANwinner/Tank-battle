@@ -21030,6 +21030,21 @@ async function main() {
     t('U7646 波次推进 DOM 与函数一致（DOM 值 = 函数 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7641~U7646 波次推进 无异常', false, String(e)); }
 
+
+  // ===== U7647~U7652: 增益剩余(v1.0.64) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('snsBuffTWrap'),mv:!!document.querySelector('#snsBuffTWrap .mval'),s:T.snsBuffTStateNow({'r':0,'d':6,'f':0})});})()"));
+    t('U7647 增益剩余 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7648 正常 增益剩余 → v=6 g-good 6s', o.s.v === 6 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '6s', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.snsBuffTStateNow({'r':0,'d':6,'f':0}),b:T.snsBuffTStateNow({'r':0,'d':0,'f':0})});return r;})()"));
+    t('U7649 边界 增益剩余 → g-good 无增益', o2.b.v === 0 && o2.b.cls === 'g-good' && o2.b.danger === false && o2.b.txt === '无增益', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.snsBuffTStateNow(null);const b=T.snsBuffTStateNow([]);const c=T.snsBuffTStateNow({'r':3,'d':2,'f':1});const d=T.snsBuffTStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7650 非法 null/[]/无字段→退化 —，合法帧(有数据)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7651 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.snsBuffTStateNow({'r':0,'d':6,'f':0});return JSON.stringify({mv:!!document.querySelector('#snsBuffTWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7652 增益剩余 DOM 与函数一致（DOM 值 = 函数 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7647~U7652 增益剩余 无异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
