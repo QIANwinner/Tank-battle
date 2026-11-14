@@ -1215,6 +1215,7 @@
     <div class="pill m-hide" id="wmgHpWrap"><span class="k">❤️</span><span class="v">血量</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="wmgPctWrap"><span class="k">📊</span><span class="v">血%</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="wmgDutyWrap"><span class="k">⚔️</span><span class="v">输出</span><em class="mval">—</em></div>
+    <div class="pill m-hide" id="bttSpawnWrap"><span class="k">⏳</span><span class="v">刷敌</span><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1591,7 +1592,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.0.84</div>
+  <div id="mark">DESIGNED BY QIAN · V1.0.85</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7609,6 +7610,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_wmgHp = wmgHpNow(); const w_wmgHp = $('wmgHpWrap'); if (w_wmgHp) { const pv = w_wmgHp.dataset.fp || ''; const nv = l_wmgHp.cls + '|' + l_wmgHp.txt + '|' + (l_wmgHp.danger ? '1' : '0'); if (pv !== nv) { w_wmgHp.dataset.fp = nv; w_wmgHp.classList.remove('g-good','g-warn','g-bad'); w_wmgHp.classList.add(l_wmgHp.cls); w_wmgHp.classList.toggle('danger', !!l_wmgHp.danger); const mv = w_wmgHp.querySelector('.mval'); if (mv) mv.textContent = l_wmgHp.txt; } }
     const l_wmgPct = wmgPctNow(); const w_wmgPct = $('wmgPctWrap'); if (w_wmgPct) { const pv = w_wmgPct.dataset.fp || ''; const nv = l_wmgPct.cls + '|' + l_wmgPct.txt + '|' + (l_wmgPct.danger ? '1' : '0'); if (pv !== nv) { w_wmgPct.dataset.fp = nv; w_wmgPct.classList.remove('g-good','g-warn','g-bad'); w_wmgPct.classList.add(l_wmgPct.cls); w_wmgPct.classList.toggle('danger', !!l_wmgPct.danger); const mv = w_wmgPct.querySelector('.mval'); if (mv) mv.textContent = l_wmgPct.txt; } }
     const l_wmgDuty = wmgDutyNow(); const w_wmgDuty = $('wmgDutyWrap'); if (w_wmgDuty) { const pv = w_wmgDuty.dataset.fp || ''; const nv = l_wmgDuty.cls + '|' + l_wmgDuty.txt + '|' + (l_wmgDuty.danger ? '1' : '0'); if (pv !== nv) { w_wmgDuty.dataset.fp = nv; w_wmgDuty.classList.remove('g-good','g-warn','g-bad'); w_wmgDuty.classList.add(l_wmgDuty.cls); w_wmgDuty.classList.toggle('danger', !!l_wmgDuty.danger); const mv = w_wmgDuty.querySelector('.mval'); if (mv) mv.textContent = l_wmgDuty.txt; } }
+    const l_bttSpawn = bttSpawnNow(); const w_bttSpawn = $('bttSpawnWrap'); if (w_bttSpawn) { const pv = w_bttSpawn.dataset.fp || ''; const nv = l_bttSpawn.cls + '|' + l_bttSpawn.txt + '|' + (l_bttSpawn.danger ? '1' : '0'); if (pv !== nv) { w_bttSpawn.dataset.fp = nv; w_bttSpawn.classList.remove('g-good','g-warn','g-bad'); w_bttSpawn.classList.add(l_bttSpawn.cls); w_bttSpawn.classList.toggle('danger', !!l_bttSpawn.danger); const mv = w_bttSpawn.querySelector('.mval'); if (mv) mv.textContent = l_bttSpawn.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -20644,6 +20646,121 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // —— wmgHp：血量格（战局脉搏·僚机战备：见 helperBody wmgHp 实现 + wmgHpNow 数据源）——
   // —— wmgPct：血量百分比（战局脉搏·僚机战备：见 helperBody wmgPct 实现 + wmgPctNow 数据源）——
   // —— wmgDuty：参战输出（战局脉搏·僚机战备：见 helperBody wmgDuty 实现 + wmgDutyNow 数据源）——
+  // —— 战局脉搏·战斗节律：btt 新指标 + 数据源（anchor A 作用域读全局；复用已有 snsDeg 清洗）——
+  // 1) 刷敌倒计时：下一只敌人刷出剩余秒（60fps）。t<=0=临界将刷；越接近 0 越危险。
+  function bttSpawn(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('t' in frame)) return snsDeg();
+    const t = Number(frame.t);
+    if (!isFinite(t) || t < 0 || t > 9999) return snsDeg();
+    if (t <= 0) return { v: 0, unit: '', cls: 'g-warn', danger: false, txt: '将刷' };
+    const s = Math.ceil(t / 60);
+    if (s <= 1) return { v: 1, unit: '秒', cls: 'g-bad', danger: true, txt: '1秒' };
+    if (s <= 3) return { v: s, unit: '秒', cls: 'g-warn', danger: false, txt: s + '秒' };
+    return { v: s, unit: '秒', cls: 'g-good', danger: false, txt: s + '秒' };
+  }
+  // 2) 场上道具总数：powerups.length。0=暂无资源；>=6=过载难管理。
+  function bttPu(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('n' in frame)) return snsDeg();
+    const n = Math.floor(Number(frame.n));
+    if (!isFinite(n) || n < 0 || n > 99) return snsDeg();
+    if (n <= 0) return { v: 0, unit: '个', cls: 'g-warn', danger: false, txt: '0个' };
+    if (n <= 3) return { v: n, unit: '个', cls: 'g-good', danger: false, txt: n + '个' };
+    if (n <= 5) return { v: n, unit: '个', cls: 'g-warn', danger: false, txt: n + '个' };
+    return { v: n, unit: '个', cls: 'g-bad', danger: true, txt: n + '个' };
+  }
+  // 3) 特效粒子负载：活跃粒子数（particles.length）。>160=性能压力。
+  function bttFx(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('a' in frame)) return snsDeg();
+    const a = Math.floor(Number(frame.a));
+    if (!isFinite(a) || a < 0 || a > 9999) return snsDeg();
+    if (a <= 0) return { v: 0, unit: '粒', cls: 'g-good', danger: false, txt: '0粒' };
+    if (a <= 80) return { v: a, unit: '粒', cls: 'g-good', danger: false, txt: a + '粒' };
+    if (a <= 160) return { v: a, unit: '粒', cls: 'g-warn', danger: false, txt: a + '粒' };
+    return { v: a, unit: '粒', cls: 'g-bad', danger: true, txt: a + '粒' };
+  }
+  // 4) 近战冲击波：ultWaves.length。>=2=多波扩散中。
+  function bttWave(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('n' in frame)) return snsDeg();
+    const n = Math.floor(Number(frame.n));
+    if (!isFinite(n) || n < 0 || n > 99) return snsDeg();
+    if (n <= 0) return { v: 0, unit: '道', cls: 'g-good', danger: false, txt: '0道' };
+    if (n === 1) return { v: 1, unit: '道', cls: 'g-good', danger: false, txt: '1道' };
+    return { v: n, unit: '道', cls: 'g-warn', danger: false, txt: n + '道' };
+  }
+  // 5) 飘字提示：texts.length。>12=反馈密集。
+  function bttText(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('n' in frame)) return snsDeg();
+    const n = Math.floor(Number(frame.n));
+    if (!isFinite(n) || n < 0 || n > 99) return snsDeg();
+    if (n <= 0) return { v: 0, unit: '条', cls: 'g-good', danger: false, txt: '0条' };
+    if (n <= 6) return { v: n, unit: '条', cls: 'g-good', danger: false, txt: n + '条' };
+    if (n <= 12) return { v: n, unit: '条', cls: 'g-warn', danger: false, txt: n + '条' };
+    return { v: n, unit: '条', cls: 'g-bad', danger: true, txt: n + '条' };
+  }
+  // 6) 敌方弹幕计数：场上敌方子弹（排除 player/player2/wingman）。>12=弹幕压力。
+  function bttFoe(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('n' in frame)) return snsDeg();
+    const n = Math.floor(Number(frame.n));
+    if (!isFinite(n) || n < 0 || n > 999) return snsDeg();
+    if (n <= 0) return { v: 0, unit: '发', cls: 'g-good', danger: false, txt: '0发' };
+    if (n <= 6) return { v: n, unit: '发', cls: 'g-good', danger: false, txt: n + '发' };
+    if (n <= 12) return { v: n, unit: '发', cls: 'g-warn', danger: false, txt: n + '发' };
+    return { v: n, unit: '发', cls: 'g-bad', danger: true, txt: n + '发' };
+  }
+  // 7) 基地防御墙：BASE_LEVELS[baseLevel].walls.length。0=基地裸奔。
+  function bttBase(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('w' in frame)) return snsDeg();
+    const w = Math.floor(Number(frame.w));
+    if (!isFinite(w) || w < 0 || w > 99) return snsDeg();
+    if (w <= 0) return { v: 0, unit: '面', cls: 'g-bad', danger: true, txt: '0面' };
+    if (w <= 3) return { v: w, unit: '面', cls: 'g-warn', danger: false, txt: w + '面' };
+    return { v: w, unit: '面', cls: 'g-good', danger: false, txt: w + '面' };
+  }
+  // 8) 近战大招状态：E 大招。dead=无法施放；cd<=0=就绪；cd>0=蓄力X秒。
+  function bttUlt(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('cd' in frame) || !('dead' in frame)) return snsDeg();
+    if (typeof frame.dead !== 'boolean') return snsDeg();
+    const cd = Number(frame.cd);
+    if (!isFinite(cd) || cd < 0 || cd > 99) return snsDeg();
+    if (frame.dead) return { v: 0, unit: '', cls: 'g-bad', danger: true, txt: '无法施放' };
+    if (cd <= 0) return { v: 0, unit: '', cls: 'g-good', danger: false, txt: '就绪' };
+    const s = Math.ceil(cd);
+    return { v: s, unit: '秒', cls: 'g-warn', danger: false, txt: '蓄力' + s + '秒' };
+  }
+  // —— 数据源（anchor A 作用域读全局，构造纯 frame）——
+  function bttSpawnNow() { return { t: Math.max(0, Math.min(Math.floor(Number(enemySpawnTimer) || 0), 9999)) }; }
+  function bttPuNow() { return { n: Math.max(0, Math.min(Math.floor(Number(powerups.length) || 0), 99)) }; }
+  function bttFxNow() { return { a: Math.max(0, Math.min(Math.floor(Number(particles.length) || 0), 9999)) }; }
+  function bttWaveNow() { return { n: Math.max(0, Math.min(Math.floor(Number(ultWaves.length) || 0), 99)) }; }
+  function bttTextNow() { return { n: Math.max(0, Math.min(Math.floor(Number(texts.length) || 0), 99)) }; }
+  function bttFoeNow() {
+    let n = 0;
+    if (Array.isArray(bullets)) {
+      for (const b of bullets) {
+        if (!b) continue;
+        const o = b.owner;
+        if (o && (o === player || o === player2 || o === wingman)) continue;
+        n++;
+      }
+    }
+    return { n: Math.max(0, Math.min(n, 999)) };
+  }
+  function bttBaseNow() {
+    const lv = (typeof BASE_LEVELS !== 'undefined' && BASE_LEVELS[baseLevel]) ? BASE_LEVELS[baseLevel] : null;
+    return { w: Math.max(0, Math.min(Math.floor(Number(lv ? lv.walls.length : 0) || 0), 99)) };
+  }
+  function bttUltNow() {
+    return { cd: player ? Math.max(0, Math.min(Number(player.ultCd) || 0, 99)) : 0, dead: player ? !!player.dead : true };
+  }
+
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -22504,7 +22621,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.0.84', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.0.85', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -24682,6 +24799,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       wmgHpStateNow: (frame) => wmgHp(frame), wmgHpNow: () => wmgHp(wmgHpNow()), wmgHpDomNow: () => { const e = document.querySelector('.wmgHpWrap .mval'); return e ? e.textContent : null; },
       wmgPctStateNow: (frame) => wmgPct(frame), wmgPctNow: () => wmgPct(wmgPctNow()), wmgPctDomNow: () => { const e = document.querySelector('.wmgPctWrap .mval'); return e ? e.textContent : null; },
       wmgDutyStateNow: (frame) => wmgDuty(frame), wmgDutyNow: () => wmgDuty(wmgDutyNow()), wmgDutyDomNow: () => { const e = document.querySelector('.wmgDutyWrap .mval'); return e ? e.textContent : null; },
+      bttSpawnStateNow: (frame) => bttSpawn(frame), bttSpawnNow: () => bttSpawn(bttSpawnNow()), bttSpawnDomNow: () => { const e = document.querySelector('.bttSpawnWrap .mval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
