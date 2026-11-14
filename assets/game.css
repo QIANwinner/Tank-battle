@@ -6637,3 +6637,8 @@ html.compact-hud #hud .m-hide { display:none !important; }
   #bttUltWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
   @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
 @CSS@
+  #nrtNearWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #nrtNearWrap .g-bad .mval { color:#e74c3c; }
+  #nrtNearWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+  @keyframes tbSnsPulse { from { opacity:.55; } to { opacity:1; } }
+@CSS@

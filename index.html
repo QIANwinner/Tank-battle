@@ -1223,6 +1223,7 @@
     <div class="pill m-hide" id="bttFoeWrap"><span class="k">🔴</span><span class="v">敌弹</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="bttBaseWrap"><span class="k">🧱</span><span class="v">基地墙</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="bttUltWrap"><span class="k">⚡</span><span class="v">大招</span><em class="mval">—</em></div>
+    <div class="pill m-hide" id="nrtNearWrap"><span class="k">🎯</span><span class="v">贴脸</span><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1599,7 +1600,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.0.92</div>
+  <div id="mark">DESIGNED BY QIAN · V1.0.93</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7625,6 +7626,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_bttFoe = bttFoeNow(); const w_bttFoe = $('bttFoeWrap'); if (w_bttFoe) { const pv = w_bttFoe.dataset.fp || ''; const nv = l_bttFoe.cls + '|' + l_bttFoe.txt + '|' + (l_bttFoe.danger ? '1' : '0'); if (pv !== nv) { w_bttFoe.dataset.fp = nv; w_bttFoe.classList.remove('g-good','g-warn','g-bad'); w_bttFoe.classList.add(l_bttFoe.cls); w_bttFoe.classList.toggle('danger', !!l_bttFoe.danger); const mv = w_bttFoe.querySelector('.mval'); if (mv) mv.textContent = l_bttFoe.txt; } }
     const l_bttBase = bttBaseNow(); const w_bttBase = $('bttBaseWrap'); if (w_bttBase) { const pv = w_bttBase.dataset.fp || ''; const nv = l_bttBase.cls + '|' + l_bttBase.txt + '|' + (l_bttBase.danger ? '1' : '0'); if (pv !== nv) { w_bttBase.dataset.fp = nv; w_bttBase.classList.remove('g-good','g-warn','g-bad'); w_bttBase.classList.add(l_bttBase.cls); w_bttBase.classList.toggle('danger', !!l_bttBase.danger); const mv = w_bttBase.querySelector('.mval'); if (mv) mv.textContent = l_bttBase.txt; } }
     const l_bttUlt = bttUltNow(); const w_bttUlt = $('bttUltWrap'); if (w_bttUlt) { const pv = w_bttUlt.dataset.fp || ''; const nv = l_bttUlt.cls + '|' + l_bttUlt.txt + '|' + (l_bttUlt.danger ? '1' : '0'); if (pv !== nv) { w_bttUlt.dataset.fp = nv; w_bttUlt.classList.remove('g-good','g-warn','g-bad'); w_bttUlt.classList.add(l_bttUlt.cls); w_bttUlt.classList.toggle('danger', !!l_bttUlt.danger); const mv = w_bttUlt.querySelector('.mval'); if (mv) mv.textContent = l_bttUlt.txt; } }
+    const l_nrtNear = nrtNearNow(); const w_nrtNear = $('nrtNearWrap'); if (w_nrtNear) { const pv = w_nrtNear.dataset.fp || ''; const nv = l_nrtNear.cls + '|' + l_nrtNear.txt + '|' + (l_nrtNear.danger ? '1' : '0'); if (pv !== nv) { w_nrtNear.dataset.fp = nv; w_nrtNear.classList.remove('g-good','g-warn','g-bad'); w_nrtNear.classList.add(l_nrtNear.cls); w_nrtNear.classList.toggle('danger', !!l_nrtNear.danger); const mv = w_nrtNear.querySelector('.mval'); if (mv) mv.textContent = l_nrtNear.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -20782,6 +20784,128 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // —— bttFoe：敌方弹幕（战局脉搏·战斗节律：见 helperBody bttFoe 实现 + bttFoeNow 数据源）——
   // —— bttBase：基地防御墙（战局脉搏·战斗节律：见 helperBody bttBase 实现 + bttBaseNow 数据源）——
   // —— bttUlt：近战大招（战局脉搏·战斗节律：见 helperBody bttUlt 实现 + bttUltNow 数据源）——
+  // —— 近场威胁与火力密度：nrt 系列纯函数（v1.0.93 第八十一辑；复用已有 snsDeg）——
+  function nrtAlive(e) { return !!e && e.x != null && e.y != null && !e.dead && !(e.enterT > 0); }
+  function nrtList(es) {
+    if (!es || typeof es.length !== 'number') return [];
+    const out = [];
+    for (let i = 0; i < es.length; i++) { const e = es[i]; if (nrtAlive(e)) out.push(e); }
+    return out;
+  }
+  function nrtMid(e) { const s = isFinite(Number(e.size)) ? Number(e.size) : 0; return { x: e.x + s / 2, y: e.y + s / 2 }; }
+  function nrtCenter() { return (typeof W === 'number' && typeof H === 'number') ? { x: W / 2, y: H / 2 } : { x: 312, y: 312 }; }
+  function nrtBaseC() { return (typeof BASE === 'object' && BASE && typeof TILE === 'number') ? { x: BASE.x * TILE, y: BASE.y * TILE } : { x: 288, y: 552 }; }
+  function nrtWeight(e) { return e.isBoss ? 2 : (e.isMini ? 1.5 : 1); }
+  // 1) 近场敌压：r 半径内敌军数（注入 es 时以屏幕中心为参考，未注入时用真实 player 心口）
+  function nrtNear(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    const r = Math.floor(Number(frame.r));
+    if (!('r' in frame) || !isFinite(r) || r < 0 || r > 999) return snsDeg();
+    const es = nrtList(frame.es);
+    const c = es.length ? nrtCenter() : (typeof nrtPlayerC === 'function' ? nrtPlayerC() : nrtCenter());
+    let n = 0;
+    for (const e of es) { const m = nrtMid(e); const dx = m.x - c.x, dy = m.y - c.y; if (dx * dx + dy * dy <= r * r) n++; }
+    if (n === 0) return { v: 0, unit: '', cls: 'g-good', danger: false, txt: '无威胁' };
+    if (n <= 2) return { v: n, unit: '只', cls: 'g-warn', danger: false, txt: n + '只' };
+    return { v: n, unit: '只', cls: 'g-bad', danger: true, txt: n + '只' };
+  }
+  // 2) 近场火力：cooldown ≤ c 的敌军数（即将开火的密度）
+  function nrtPower(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    const c = Math.floor(Number(frame.c));
+    if (!('c' in frame) || !isFinite(c) || c < 0 || c > 9999) return snsDeg();
+    const es = nrtList(frame.es);
+    let n = 0;
+    for (const e of es) { const cd = Number(e.cooldown); if (isFinite(cd) && cd <= c) n++; }
+    if (n === 0) return { v: 0, unit: '', cls: 'g-good', danger: false, txt: '无威胁' };
+    if (n <= 2) return { v: n, unit: '只', cls: 'g-warn', danger: false, txt: n + '只' };
+    return { v: n, unit: '只', cls: 'g-bad', danger: true, txt: n + '只' };
+  }
+  // 3) Boss 贴脸：最近 boss/mini 与参考点距离（像素）；<=r/2 爆红
+  function nrtBoss(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    const r = Math.floor(Number(frame.r));
+    if (!('r' in frame) || !isFinite(r) || r < 0 || r > 1999) return snsDeg();
+    const es = nrtList(frame.es);
+    const c = nrtCenter();
+    let best = -1;
+    for (const e of es) {
+      if (!e.isBoss && !e.isMini) continue;
+      const m = nrtMid(e); const d = Math.round(Math.hypot(m.x - c.x, m.y - c.y));
+      if (best < 0 || d < best) best = d;
+    }
+    if (best < 0) return { v: 0, unit: '', cls: 'g-good', danger: false, txt: '无威胁' };
+    if (best <= r / 2) return { v: best, unit: 'px', cls: 'g-bad', danger: true, txt: best + 'px' };
+    return { v: best, unit: 'px', cls: 'g-warn', danger: false, txt: best + 'px' };
+  }
+  // 4) 基地受胁：|dx|,|dy| ≤ 64 的敌军加权数（boss 2 / mini 1.5）
+  function nrtBase(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    if (!('es' in frame)) return snsDeg();
+    const es = nrtList(frame.es);
+    const c = nrtBaseC();
+    let n = 0;
+    for (const e of es) { const m = nrtMid(e); const dx = Math.abs(m.x - c.x), dy = Math.abs(m.y - c.y); if (dx <= 64 && dy <= 64) n += nrtWeight(e); }
+    const v = Math.round(n);
+    if (v === 0) return { v: 0, unit: '', cls: 'g-good', danger: false, txt: '安全' };
+    if (v <= 4) return { v: v, unit: '只', cls: 'g-warn', danger: false, txt: v + '只' };
+    return { v: v, unit: '只', cls: 'g-bad', danger: true, txt: v + '只' };
+  }
+  // 5) 生命余量：p∈[0,1] → 百分比；<=25 爆红
+  function nrtLife(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    const p = Number(frame.p);
+    if (!('p' in frame) || !isFinite(p) || p < 0 || p > 1) return snsDeg();
+    const v = Math.round(p * 100);
+    if (v <= 25) return { v: v, unit: '%', cls: 'g-bad', danger: true, txt: v + '%' };
+    if (v <= 60) return { v: v, unit: '%', cls: 'g-warn', danger: false, txt: v + '%' };
+    return { v: v, unit: '%', cls: 'g-good', danger: false, txt: v + '%' };
+  }
+  // 6) 本波击杀：k/w 只/波；>=6 爆红，<1 偏弱
+  function nrtWave(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    const k = Math.floor(Number(frame.k)), w = Math.floor(Number(frame.w));
+    if (!('k' in frame) || !('w' in frame) || !isFinite(k) || !isFinite(w) || k < 0 || w <= 0) return snsDeg();
+    const v = Math.round(k / w * 10) / 10;
+    if (v < 1) return { v: v, unit: '只/波', cls: 'g-warn', danger: false, txt: v + '只/波' };
+    if (v < 6) return { v: v, unit: '只/波', cls: 'g-good', danger: false, txt: v + '只/波' };
+    return { v: v, unit: '只/波', cls: 'g-bad', danger: true, txt: v + '只/波' };
+  }
+  // 7) 受击换伤：d/h 点（h=0 → 无伤）；>=80 爆红
+  function nrtDps(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    const d = Math.floor(Number(frame.d)), h = Math.floor(Number(frame.h));
+    if (!('d' in frame) || !('h' in frame) || !isFinite(d) || !isFinite(h) || d < 0 || h < 0) return snsDeg();
+    if (h === 0) return { v: 0, unit: '', cls: 'g-good', danger: false, txt: '无伤' };
+    const v = Math.round(d / h);
+    if (v < 40) return { v: v, unit: '点', cls: 'g-good', danger: false, txt: v + '点' };
+    if (v < 80) return { v: v, unit: '点', cls: 'g-warn', danger: false, txt: v + '点' };
+    return { v: v, unit: '点', cls: 'g-bad', danger: true, txt: v + '点' };
+  }
+  // 8) 弹幕密度：n/e 发/只；>=4 爆红
+  function nrtFoe(frame) {
+    if (!frame || typeof frame !== 'object') return snsDeg();
+    const n = Math.floor(Number(frame.n)), e = Math.floor(Number(frame.e));
+    if (!('n' in frame) || !('e' in frame) || !isFinite(n) || !isFinite(e) || n < 0 || e <= 0) return snsDeg();
+    const v = Math.round(n / e * 10) / 10;
+    if (v < 1) return { v: v, unit: '发/只', cls: 'g-good', danger: false, txt: v + '发/只' };
+    if (v < 4) return { v: v, unit: '发/只', cls: 'g-warn', danger: false, txt: v + '发/只' };
+    return { v: v, unit: '发/只', cls: 'g-bad', danger: true, txt: v + '发/只' };
+  }
+  function nrtPlayerC() {
+    const p = (typeof player !== 'undefined' && player && !player.dead) ? player : null;
+    if (!p || p.x == null) return nrtCenter();
+    return { x: p.x + (p.size || 0) / 2, y: p.y + (p.size || 0) / 2 };
+  }
+  // —— 近场威胁与火力密度：数据源（读全局构造 frame）——
+  function nrtNearNow() { return { r: 96, es: enemies }; }
+  function nrtPowerNow() { return { c: 1, es: enemies }; }
+  function nrtBossNow() { return { r: 224, es: enemies }; }
+  function nrtBaseNow() { return { es: enemies }; }
+  function nrtLifeNow() { const p = typeof player !== 'undefined' ? player : null; const mx = (p && p.maxHp) ? p.maxHp : 1; return { p: (p && isFinite(Number(p.hp))) ? Number(p.hp) / mx : 1 }; }
+  function nrtWaveNow() { const k = Math.max(0, Math.floor(Number((stat && stat.kills) || 0))); const w = Math.max(1, Math.min(Math.floor(Number(wave) || 1), 99)); return { k: k, w: w }; }
+  function nrtDpsNow() { return { d: Math.max(0, Math.floor(Number(runDmg) || 0)), h: Math.max(0, Math.floor(Number(hurtCount) || 0)) }; }
+  function nrtFoeNow() { let n = 0; const bs = bullets || []; for (const b of bs) { if (!b) continue; const o = b.owner; if (o && (o === player || o === player2 || o === wingman)) continue; n++; } const ls = enemies || []; let e = 0; for (const q of ls) { if (q && !q.dead) e++; } return { n: n, e: Math.max(1, e) }; }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -22642,7 +22766,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.0.92', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.0.93', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -24828,6 +24952,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       bttFoeStateNow: (frame) => bttFoe(frame), bttFoeNow: () => bttFoe(bttFoeNow()), bttFoeDomNow: () => { const e = document.querySelector('.bttFoeWrap .mval'); return e ? e.textContent : null; },
       bttBaseStateNow: (frame) => bttBase(frame), bttBaseNow: () => bttBase(bttBaseNow()), bttBaseDomNow: () => { const e = document.querySelector('.bttBaseWrap .mval'); return e ? e.textContent : null; },
       bttUltStateNow: (frame) => bttUlt(frame), bttUltNow: () => bttUlt(bttUltNow()), bttUltDomNow: () => { const e = document.querySelector('.bttUltWrap .mval'); return e ? e.textContent : null; },
+      nrtNearStateNow: (frame) => nrtNear(frame), nrtNearNow: () => nrtNear(nrtNearNow()), nrtNearDomNow: () => { const e = document.querySelector('.nrtNearWrap .mval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
