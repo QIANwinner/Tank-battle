@@ -21900,6 +21900,21 @@ async function main() {
     t("U7994 DOM 与函数一致（.sval 可写 + data-n 已落 DOM）", o5.sv === true && o5.dv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
   } catch (e) { t("U7989 命中率分段 抛异常", false, String(e)); t("U7990 命中率分段 抛异常", false, String(e)); t("U7991 命中率分段 抛异常", false, String(e)); t("U7992 命中率分段 抛异常", false, String(e)); t("U7993 命中率分段 抛异常", false, String(e)); t("U7994 命中率分段 抛异常", false, String(e)); }
 
+
+  // ===== U7995~U8000: 弹幕压制分段(v1.1.22) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('sgBulletWrap'),sv:!!document.querySelector('#sgBulletWrap .sval'),cf:!!document.querySelector('#sgBulletWrap .sg i'),s:T.sgBulletStateNow({'x':1,'y':4})};return JSON.stringify(r);})()"));
+    t("U7995 弹幕压制分段 DOM 已加入 HUD + 函数可用", o.dom === true && o.sv === true && o.cf === true && isFinite(o.s.v) && o.s.n >= 0 && o.s.n <= 10 && typeof o.s.txt === 'string', JSON.stringify(o));
+    t("U7996 正常 弹幕压制分段 → v=0.25 n=3 g-good 1/4", o.s.v === 0.25 && o.s.n === 3 && o.s.cls === "g-good" && o.s.danger === false && o.s.txt === "1/4", JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={b:T.sgBulletStateNow({'x':4,'y':4})};return JSON.stringify(r);})()"));
+    t("U7997 边界 弹幕压制分段 → v=1 n=10 g-bad 4/4", o2.b.v === 1 && o2.b.n === 10 && o2.b.cls === "g-bad" && o2.b.danger === true && o2.b.txt === "4/4", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.sgBulletStateNow(null),b:T.sgBulletStateNow([]),c:T.sgBulletStateNow({'x':2,'y':5}),d:T.sgBulletStateNow({x:1})};return JSON.stringify(r);})()"));
+    t("U7998 非法 null/[]/缺 y → 退化，合法帧(有 x,y)非退化", o3.a.txt === "—" && o3.a.cls === "g-warn" && o3.a.v === 0 && o3.b.txt === "—" && o3.d.txt === "—" && isFinite(o3.c.v) && o3.c.txt !== "—", JSON.stringify(o3));
+    t("U7999 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签", o.s.txt === "—" || (typeof o.s.unit === "string" && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === "string" && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={sv:!!document.querySelector('#sgBulletWrap .sval'),dv:!!document.getElementById('sgBulletWrap').dataset.n,s:T.sgBulletStateNow({'x':1,'y':4})};return JSON.stringify(r);})()"));
+    t("U8000 DOM 与函数一致（.sval 可写 + data-n 已落 DOM）", o5.sv === true && o5.dv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
+  } catch (e) { t("U7995 弹幕压制分段 抛异常", false, String(e)); t("U7996 弹幕压制分段 抛异常", false, String(e)); t("U7997 弹幕压制分段 抛异常", false, String(e)); t("U7998 弹幕压制分段 抛异常", false, String(e)); t("U7999 弹幕压制分段 抛异常", false, String(e)); t("U8000 弹幕压制分段 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
