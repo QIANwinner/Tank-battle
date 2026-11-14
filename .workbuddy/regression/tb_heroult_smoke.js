@@ -21885,6 +21885,21 @@ async function main() {
     t("U7988 DOM 与函数一致（.sval 可写 + data-n 已落 DOM）", o5.sv === true && o5.dv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
   } catch (e) { t("U7983 击杀阵亡分段 抛异常", false, String(e)); t("U7984 击杀阵亡分段 抛异常", false, String(e)); t("U7985 击杀阵亡分段 抛异常", false, String(e)); t("U7986 击杀阵亡分段 抛异常", false, String(e)); t("U7987 击杀阵亡分段 抛异常", false, String(e)); t("U7988 击杀阵亡分段 抛异常", false, String(e)); }
 
+
+  // ===== U7989~U7994: 命中率分段(v1.1.21) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('sgHitWrap'),sv:!!document.querySelector('#sgHitWrap .sval'),cf:!!document.querySelector('#sgHitWrap .sg i'),s:T.sgHitStateNow({'x':3,'y':4})};return JSON.stringify(r);})()"));
+    t("U7989 命中率分段 DOM 已加入 HUD + 函数可用", o.dom === true && o.sv === true && o.cf === true && isFinite(o.s.v) && o.s.n >= 0 && o.s.n <= 10 && typeof o.s.txt === 'string', JSON.stringify(o));
+    t("U7990 正常 命中率分段 → v=0.75 n=8 g-good 3/4", o.s.v === 0.75 && o.s.n === 8 && o.s.cls === "g-good" && o.s.danger === false && o.s.txt === "3/4", JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={b:T.sgHitStateNow({'x':0,'y':4})};return JSON.stringify(r);})()"));
+    t("U7991 边界 命中率分段 → v=0 n=0 g-bad 0/4", o2.b.v === 0 && o2.b.n === 0 && o2.b.cls === "g-bad" && o2.b.danger === true && o2.b.txt === "0/4", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.sgHitStateNow(null),b:T.sgHitStateNow([]),c:T.sgHitStateNow({'x':2,'y':5}),d:T.sgHitStateNow({x:1})};return JSON.stringify(r);})()"));
+    t("U7992 非法 null/[]/缺 y → 退化，合法帧(有 x,y)非退化", o3.a.txt === "—" && o3.a.cls === "g-warn" && o3.a.v === 0 && o3.b.txt === "—" && o3.d.txt === "—" && isFinite(o3.c.v) && o3.c.txt !== "—", JSON.stringify(o3));
+    t("U7993 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签", o.s.txt === "—" || (typeof o.s.unit === "string" && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === "string" && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={sv:!!document.querySelector('#sgHitWrap .sval'),dv:!!document.getElementById('sgHitWrap').dataset.n,s:T.sgHitStateNow({'x':3,'y':4})};return JSON.stringify(r);})()"));
+    t("U7994 DOM 与函数一致（.sval 可写 + data-n 已落 DOM）", o5.sv === true && o5.dv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
+  } catch (e) { t("U7989 命中率分段 抛异常", false, String(e)); t("U7990 命中率分段 抛异常", false, String(e)); t("U7991 命中率分段 抛异常", false, String(e)); t("U7992 命中率分段 抛异常", false, String(e)); t("U7993 命中率分段 抛异常", false, String(e)); t("U7994 命中率分段 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
