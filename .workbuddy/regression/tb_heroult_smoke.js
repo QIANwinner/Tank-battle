@@ -21495,6 +21495,21 @@ async function main() {
     t("U7832 DOM 与函数一致（.mval 可写 + 正常帧有 txt）", o5.mv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
   } catch (e) { t("U7827 近场火力 抛异常", false, String(e)); t("U7828 近场火力 抛异常", false, String(e)); t("U7829 近场火力 抛异常", false, String(e)); t("U7830 近场火力 抛异常", false, String(e)); t("U7831 近场火力 抛异常", false, String(e)); t("U7832 近场火力 抛异常", false, String(e)); }
 
+
+  // ===== U7833~U7838: Boss贴脸(v1.0.95) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('nrtBossWrap'),mv:!!document.querySelector('#nrtBossWrap .mval'),s:T.nrtBossStateNow({'r':224,'es':[{'x':108,'y':138,'cooldown':0,'isBoss':true},{'x':-60,'y':-40,'cooldown':0,'isBoss':true}]})};return JSON.stringify(r);})()"));
+    t("U7833 Boss贴脸 DOM 已加入 HUD + 函数可用", o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t("U7834 正常 Boss贴脸 → v=268 g-warn 268px", o.s.v === 268 && o.s.cls === "g-warn" && o.s.danger === false && o.s.txt === "268px", JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={b:T.nrtBossStateNow({'r':1,'es':[{'x':300,'y':170,'cooldown':0}]})};return JSON.stringify(r);})()"));
+    t("U7835 边界 Boss贴脸 → g-good 无威胁", o2.b.v === 0 && o2.b.cls === "g-good" && o2.b.danger === false && o2.b.txt === "无威胁", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.nrtBossStateNow(null),b:T.nrtBossStateNow([]),c:T.nrtBossStateNow({'r':224,'es':[{'x':356,'y':160,'cooldown':0,'isBoss':true}]}),d:T.nrtBossStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]})};return JSON.stringify(r);})()"));
+    t("U7836 非法 null/[]/缺字段 → 退化，合法帧(有数据)非退化", o3.a.txt === "—" && o3.a.cls === "g-warn" && o3.a.v === 0 && o3.b.txt === "—" && o3.d.txt === "—" && isFinite(o3.c.v) && o3.c.txt !== "—", JSON.stringify(o3));
+    t("U7837 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签", o.s.txt === "—" || (typeof o.s.unit === "string" && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === "string" && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={mv:!!document.querySelector('#nrtBossWrap .mval'),s:T.nrtBossStateNow({'r':224,'es':[{'x':108,'y':138,'cooldown':0,'isBoss':true},{'x':-60,'y':-40,'cooldown':0,'isBoss':true}]})};return JSON.stringify(r);})()"));
+    t("U7838 DOM 与函数一致（.mval 可写 + 正常帧有 txt）", o5.mv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
+  } catch (e) { t("U7833 Boss贴脸 抛异常", false, String(e)); t("U7834 Boss贴脸 抛异常", false, String(e)); t("U7835 Boss贴脸 抛异常", false, String(e)); t("U7836 Boss贴脸 抛异常", false, String(e)); t("U7837 Boss贴脸 抛异常", false, String(e)); t("U7838 Boss贴脸 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
