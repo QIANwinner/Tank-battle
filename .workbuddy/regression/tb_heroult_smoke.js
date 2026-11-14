@@ -21120,6 +21120,21 @@ async function main() {
     t('U7682 DOM 与函数一致（.mval 可写 + 正常帧有 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7677 Boss血量 抛异常', false, String(e)); t('U7678 Boss血量 抛异常', false, String(e)); t('U7679 Boss血量 抛异常', false, String(e)); t('U7680 Boss血量 抛异常', false, String(e)); t('U7681 Boss血量 抛异常', false, String(e)); t('U7682 Boss血量 抛异常', false, String(e)); }
 
+
+  // ===== U7683~U7688: 弹幕密度(v1.0.70) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('arsBulletWrap'),mv:!!document.querySelector('#arsBulletWrap .mval'),s:T.arsBulletStateNow({'n':6})});})()"));
+    t('U7683 弹幕密度 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7684 正常 弹幕密度 → v=6 g-good 6发', o.s.v === 6 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '6发', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.arsBulletStateNow({'n':6}),b:T.arsBulletStateNow({'n':0})});return r;})()"));
+    t('U7685 边界 弹幕密度 → g-bad 空窗', o2.b.v === 0 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '空窗', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.arsBulletStateNow(null);const b=T.arsBulletStateNow([]);const c=T.arsBulletStateNow({'n':5});const d=T.arsBulletStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7686 非法 null/[]/无字段→退化 —，合法帧(有数据)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7687 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.arsBulletStateNow({'n':6});return JSON.stringify({mv:!!document.querySelector('#arsBulletWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7688 DOM 与函数一致（.mval 可写 + 正常帧有 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7683 弹幕密度 抛异常', false, String(e)); t('U7684 弹幕密度 抛异常', false, String(e)); t('U7685 弹幕密度 抛异常', false, String(e)); t('U7686 弹幕密度 抛异常', false, String(e)); t('U7687 弹幕密度 抛异常', false, String(e)); t('U7688 弹幕密度 抛异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
