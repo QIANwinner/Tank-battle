@@ -21435,6 +21435,21 @@ async function main() {
     t('U7808 DOM 与函数一致（.mval 可写 + 正常帧有 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7803 敌方弹幕 抛异常', false, String(e)); t('U7804 敌方弹幕 抛异常', false, String(e)); t('U7805 敌方弹幕 抛异常', false, String(e)); t('U7806 敌方弹幕 抛异常', false, String(e)); t('U7807 敌方弹幕 抛异常', false, String(e)); t('U7808 敌方弹幕 抛异常', false, String(e)); }
 
+
+  // ===== U7809~U7814: 基地防御墙(v1.0.91) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bttBaseWrap'),mv:!!document.querySelector('#bttBaseWrap .mval'),s:T.bttBaseStateNow({'w':5})});})()"));
+    t('U7809 基地防御墙 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7810 正常 基地防御墙 → v=5 g-good 5面', o.s.v === 5 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '5面', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.bttBaseStateNow({'w':5}),b:T.bttBaseStateNow({'w':0})});return r;})()"));
+    t('U7811 边界 基地防御墙 → g-bad 0面', o2.b.v === 0 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '0面', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.bttBaseStateNow(null);const b=T.bttBaseStateNow([]);const c=T.bttBaseStateNow({'w':2});const d=T.bttBaseStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7812 非法 null/[]/无字段→退化 —，合法帧(有数据)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7813 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.bttBaseStateNow({'w':5});return JSON.stringify({mv:!!document.querySelector('#bttBaseWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7814 DOM 与函数一致（.mval 可写 + 正常帧有 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7809 基地防御墙 抛异常', false, String(e)); t('U7810 基地防御墙 抛异常', false, String(e)); t('U7811 基地防御墙 抛异常', false, String(e)); t('U7812 基地防御墙 抛异常', false, String(e)); t('U7813 基地防御墙 抛异常', false, String(e)); t('U7814 基地防御墙 抛异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
