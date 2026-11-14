@@ -1230,6 +1230,7 @@
     <div class="pill m-hide" id="nrtLifeWrap"><span class="k">❤️</span><span class="v">血量</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="nrtWaveWrap"><span class="k">⚔️</span><span class="v">效率</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="nrtDpsWrap"><span class="k">🩹</span><span class="v">换伤</span><em class="mval">—</em></div>
+    <div class="pill m-hide" id="nrtFoeWrap"><span class="k">💥</span><span class="v">弹密</span><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1606,7 +1607,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.0.99</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.0</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7639,6 +7640,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_nrtLife = nrtLifeNow(); const w_nrtLife = $('nrtLifeWrap'); if (w_nrtLife) { const pv = w_nrtLife.dataset.fp || ''; const nv = l_nrtLife.cls + '|' + l_nrtLife.txt + '|' + (l_nrtLife.danger ? '1' : '0'); if (pv !== nv) { w_nrtLife.dataset.fp = nv; w_nrtLife.classList.remove('g-good','g-warn','g-bad'); w_nrtLife.classList.add(l_nrtLife.cls); w_nrtLife.classList.toggle('danger', !!l_nrtLife.danger); const mv = w_nrtLife.querySelector('.mval'); if (mv) mv.textContent = l_nrtLife.txt; } }
     const l_nrtWave = nrtWaveNow(); const w_nrtWave = $('nrtWaveWrap'); if (w_nrtWave) { const pv = w_nrtWave.dataset.fp || ''; const nv = l_nrtWave.cls + '|' + l_nrtWave.txt + '|' + (l_nrtWave.danger ? '1' : '0'); if (pv !== nv) { w_nrtWave.dataset.fp = nv; w_nrtWave.classList.remove('g-good','g-warn','g-bad'); w_nrtWave.classList.add(l_nrtWave.cls); w_nrtWave.classList.toggle('danger', !!l_nrtWave.danger); const mv = w_nrtWave.querySelector('.mval'); if (mv) mv.textContent = l_nrtWave.txt; } }
     const l_nrtDps = nrtDpsNow(); const w_nrtDps = $('nrtDpsWrap'); if (w_nrtDps) { const pv = w_nrtDps.dataset.fp || ''; const nv = l_nrtDps.cls + '|' + l_nrtDps.txt + '|' + (l_nrtDps.danger ? '1' : '0'); if (pv !== nv) { w_nrtDps.dataset.fp = nv; w_nrtDps.classList.remove('g-good','g-warn','g-bad'); w_nrtDps.classList.add(l_nrtDps.cls); w_nrtDps.classList.toggle('danger', !!l_nrtDps.danger); const mv = w_nrtDps.querySelector('.mval'); if (mv) mv.textContent = l_nrtDps.txt; } }
+    const l_nrtFoe = nrtFoeNow(); const w_nrtFoe = $('nrtFoeWrap'); if (w_nrtFoe) { const pv = w_nrtFoe.dataset.fp || ''; const nv = l_nrtFoe.cls + '|' + l_nrtFoe.txt + '|' + (l_nrtFoe.danger ? '1' : '0'); if (pv !== nv) { w_nrtFoe.dataset.fp = nv; w_nrtFoe.classList.remove('g-good','g-warn','g-bad'); w_nrtFoe.classList.add(l_nrtFoe.cls); w_nrtFoe.classList.toggle('danger', !!l_nrtFoe.danger); const mv = w_nrtFoe.querySelector('.mval'); if (mv) mv.textContent = l_nrtFoe.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -20924,6 +20926,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // 生命余量（v1.0.97 第八十一辑：nrt 系列已在 v1.0.93 引入）
   // 本波击杀（v1.0.98 第八十一辑：nrt 系列已在 v1.0.93 引入）
   // 受击换伤（v1.0.99 第八十一辑：nrt 系列已在 v1.0.93 引入）
+  // 弹幕密度（v1.1.0 第八十一辑：nrt 系列已在 v1.0.93 引入）
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -22784,7 +22787,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.0.99', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.0', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -24977,6 +24980,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       nrtLifeStateNow: (frame) => nrtLife(frame), nrtLifeNow: () => nrtLife(nrtLifeNow()), nrtLifeDomNow: () => { const e = document.querySelector('.nrtLifeWrap .mval'); return e ? e.textContent : null; },
       nrtWaveStateNow: (frame) => nrtWave(frame), nrtWaveNow: () => nrtWave(nrtWaveNow()), nrtWaveDomNow: () => { const e = document.querySelector('.nrtWaveWrap .mval'); return e ? e.textContent : null; },
       nrtDpsStateNow: (frame) => nrtDps(frame), nrtDpsNow: () => nrtDps(nrtDpsNow()), nrtDpsDomNow: () => { const e = document.querySelector('.nrtDpsWrap .mval'); return e ? e.textContent : null; },
+      nrtFoeStateNow: (frame) => nrtFoe(frame), nrtFoeNow: () => nrtFoe(nrtFoeNow()), nrtFoeDomNow: () => { const e = document.querySelector('.nrtFoeWrap .mval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
