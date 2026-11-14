@@ -1232,6 +1232,7 @@
     <div class="pill m-hide" id="nrtDpsWrap"><span class="k">🩹</span><span class="v">换伤</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="nrtFoeWrap"><span class="k">💥</span><span class="v">弹密</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="mlsScoreWrap"><span class="k">🏆</span><span class="v">得分</span><i class="pbar"><i class="pfill"></i></i><em class="mval">—</em></div>
+    <div class="pill m-hide" id="mlsKillWrap"><span class="k">⚔️</span><span class="v">击杀</span><i class="pbar"><i class="pfill"></i></i><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1608,7 +1609,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.1</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.2</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7643,6 +7644,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_nrtDps = nrtDpsNow(); const w_nrtDps = $('nrtDpsWrap'); if (w_nrtDps) { const pv = w_nrtDps.dataset.fp || ''; const nv = l_nrtDps.cls + '|' + l_nrtDps.txt + '|' + (l_nrtDps.danger ? '1' : '0'); if (pv !== nv) { w_nrtDps.dataset.fp = nv; w_nrtDps.classList.remove('g-good','g-warn','g-bad'); w_nrtDps.classList.add(l_nrtDps.cls); w_nrtDps.classList.toggle('danger', !!l_nrtDps.danger); const mv = w_nrtDps.querySelector('.mval'); if (mv) mv.textContent = l_nrtDps.txt; } }
     const l_nrtFoe = nrtFoeNow(); const w_nrtFoe = $('nrtFoeWrap'); if (w_nrtFoe) { const pv = w_nrtFoe.dataset.fp || ''; const nv = l_nrtFoe.cls + '|' + l_nrtFoe.txt + '|' + (l_nrtFoe.danger ? '1' : '0'); if (pv !== nv) { w_nrtFoe.dataset.fp = nv; w_nrtFoe.classList.remove('g-good','g-warn','g-bad'); w_nrtFoe.classList.add(l_nrtFoe.cls); w_nrtFoe.classList.toggle('danger', !!l_nrtFoe.danger); const mv = w_nrtFoe.querySelector('.mval'); if (mv) mv.textContent = l_nrtFoe.txt; } }
     const l_mlsScore = mlsScoreNow(); const w_mlsScore = $('mlsScoreWrap'); if (w_mlsScore) { const pv = w_mlsScore.dataset.fp || ''; const nv = l_mlsScore.cls + '|' + l_mlsScore.txt + '|' + (l_mlsScore.danger ? '1' : '0') + '|' + (l_mlsScore.pct || 0); if (pv !== nv) { w_mlsScore.dataset.fp = nv; w_mlsScore.classList.remove('g-good','g-warn','g-bad'); w_mlsScore.classList.add(l_mlsScore.cls); w_mlsScore.classList.toggle('danger', !!l_mlsScore.danger); const pf = w_mlsScore.querySelector('.pfill'); if (pf) pf.style.width = (l_mlsScore.pct || 0) + '%'; const mv = w_mlsScore.querySelector('.mval'); if (mv) mv.textContent = l_mlsScore.txt; } }
+    const l_mlsKill = mlsKillNow(); const w_mlsKill = $('mlsKillWrap'); if (w_mlsKill) { const pv = w_mlsKill.dataset.fp || ''; const nv = l_mlsKill.cls + '|' + l_mlsKill.txt + '|' + (l_mlsKill.danger ? '1' : '0') + '|' + (l_mlsKill.pct || 0); if (pv !== nv) { w_mlsKill.dataset.fp = nv; w_mlsKill.classList.remove('g-good','g-warn','g-bad'); w_mlsKill.classList.add(l_mlsKill.cls); w_mlsKill.classList.toggle('danger', !!l_mlsKill.danger); const pf = w_mlsKill.querySelector('.pfill'); if (pf) pf.style.width = (l_mlsKill.pct || 0) + '%'; const mv = w_mlsKill.querySelector('.mval'); if (mv) mv.textContent = l_mlsKill.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -20981,6 +20983,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   function mlsBossNow() { return { v: Math.max(0, Math.floor(Number((stat && stat.bossKills) || 0))) }; }
   function mlsPuNow() { return { v: Math.max(0, Math.floor(Number(runPowerups) || 0)) }; }
   function mlsTimeNow() { return { v: Math.max(0, Math.floor(Number(playSecRun) || 0)) }; }
+  // 击杀里程碑（v1.1.2 第八十二辑：mls 系列已在 v1.1.1 引入）
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -22841,7 +22844,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.1', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.2', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -25036,6 +25039,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       nrtDpsStateNow: (frame) => nrtDps(frame), nrtDpsNow: () => nrtDps(nrtDpsNow()), nrtDpsDomNow: () => { const e = document.querySelector('.nrtDpsWrap .mval'); return e ? e.textContent : null; },
       nrtFoeStateNow: (frame) => nrtFoe(frame), nrtFoeNow: () => nrtFoe(nrtFoeNow()), nrtFoeDomNow: () => { const e = document.querySelector('.nrtFoeWrap .mval'); return e ? e.textContent : null; },
       mlsScoreStateNow: (frame) => mlsScore(frame), mlsScoreNow: () => mlsScore(mlsScoreNow()), mlsScoreDomNow: () => { const e = document.querySelector('.mlsScoreWrap .mval'); return e ? e.textContent : null; }, mlsScorePctNow: () => { const f = document.querySelector('#mlsScoreWrap .pfill'); return f ? f.style.width : null; },
+      mlsKillStateNow: (frame) => mlsKill(frame), mlsKillNow: () => mlsKill(mlsKillNow()), mlsKillDomNow: () => { const e = document.querySelector('.mlsKillWrap .mval'); return e ? e.textContent : null; }, mlsKillPctNow: () => { const f = document.querySelector('#mlsKillWrap .pfill'); return f ? f.style.width : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
