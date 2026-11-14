@@ -21150,6 +21150,21 @@ async function main() {
     t('U7694 DOM 与函数一致（.mval 可写 + 正常帧有 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7689 道具场存 抛异常', false, String(e)); t('U7690 道具场存 抛异常', false, String(e)); t('U7691 道具场存 抛异常', false, String(e)); t('U7692 道具场存 抛异常', false, String(e)); t('U7693 道具场存 抛异常', false, String(e)); t('U7694 道具场存 抛异常', false, String(e)); }
 
+
+  // ===== U7695~U7700: 强化等级(v1.0.72) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('arsBonusWrap'),mv:!!document.querySelector('#arsBonusWrap .mval'),s:T.arsBonusStateNow({'t':5})});})()"));
+    t('U7695 强化等级 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7696 正常 强化等级 → v=5 g-good 5级', o.s.v === 5 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '5级', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.arsBonusStateNow({'t':5}),b:T.arsBonusStateNow({'t':0})});return r;})()"));
+    t('U7697 边界 强化等级 → g-warn 未强化', o2.b.v === 0 && o2.b.cls === 'g-warn' && o2.b.danger === false && o2.b.txt === '未强化', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.arsBonusStateNow(null);const b=T.arsBonusStateNow([]);const c=T.arsBonusStateNow({'t':3});const d=T.arsBonusStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7698 非法 null/[]/无字段→退化 —，合法帧(有数据)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7699 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.arsBonusStateNow({'t':5});return JSON.stringify({mv:!!document.querySelector('#arsBonusWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7700 DOM 与函数一致（.mval 可写 + 正常帧有 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7695 强化等级 抛异常', false, String(e)); t('U7696 强化等级 抛异常', false, String(e)); t('U7697 强化等级 抛异常', false, String(e)); t('U7698 强化等级 抛异常', false, String(e)); t('U7699 强化等级 抛异常', false, String(e)); t('U7700 强化等级 抛异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
