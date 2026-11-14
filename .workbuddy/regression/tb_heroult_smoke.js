@@ -21690,6 +21690,21 @@ async function main() {
     t("U7910 DOM 与函数一致（.mval 可写 + 正常帧有 txt）", o5.mv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
   } catch (e) { t("U7905 拾取里程碑 抛异常", false, String(e)); t("U7906 拾取里程碑 抛异常", false, String(e)); t("U7907 拾取里程碑 抛异常", false, String(e)); t("U7908 拾取里程碑 抛异常", false, String(e)); t("U7909 拾取里程碑 抛异常", false, String(e)); t("U7910 拾取里程碑 抛异常", false, String(e)); }
 
+
+  // ===== U7911~U7916: 存活时长(v1.1.8) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('mlsTimeWrap'),mv:!!document.querySelector('#mlsTimeWrap .mval'),pf:!!document.querySelector('#mlsTimeWrap .pfill'),s:T.mlsTimeStateNow({'v':200})};return JSON.stringify(r);})()"));
+    t("U7911 存活时长 DOM 已加入 HUD + 函数可用", o.dom === true && o.mv === true && o.pf === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t("U7912 正常 存活时长 → v=180 g-bad 180/240", o.s.v === 180 && o.s.cls === "g-bad" && o.s.danger === false && o.s.txt === "180/240", JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={b:T.mlsTimeStateNow({'v':235})};return JSON.stringify(r);})()"));
+    t("U7913 边界 存活时长 → g-good 180/240", o2.b.v === 180 && o2.b.cls === "g-good" && o2.b.danger === true && o2.b.txt === "180/240", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mlsTimeStateNow(null),b:T.mlsTimeStateNow([]),c:T.mlsTimeStateNow({'v':90}),d:T.mlsTimeStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]})};return JSON.stringify(r);})()"));
+    t("U7914 非法 null/[]/缺字段 → 退化，合法帧(有数据)非退化", o3.a.txt === "—" && o3.a.cls === "g-warn" && o3.a.v === 0 && o3.b.txt === "—" && o3.d.txt === "—" && isFinite(o3.c.v) && o3.c.txt !== "—", JSON.stringify(o3));
+    t("U7915 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签", o.s.txt === "—" || (typeof o.s.unit === "string" && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === "string" && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={mv:!!document.querySelector('#mlsTimeWrap .mval'),s:T.mlsTimeStateNow({'v':200})};return JSON.stringify(r);})()"));
+    t("U7916 DOM 与函数一致（.mval 可写 + 正常帧有 txt）", o5.mv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
+  } catch (e) { t("U7911 存活时长 抛异常", false, String(e)); t("U7912 存活时长 抛异常", false, String(e)); t("U7913 存活时长 抛异常", false, String(e)); t("U7914 存活时长 抛异常", false, String(e)); t("U7915 存活时长 抛异常", false, String(e)); t("U7916 存活时长 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
