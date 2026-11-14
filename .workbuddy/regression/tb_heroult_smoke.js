@@ -21210,6 +21210,21 @@ async function main() {
     t('U7718 DOM 与函数一致（.mval 可写 + 正常帧有 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7713 僚机编制 抛异常', false, String(e)); t('U7714 僚机编制 抛异常', false, String(e)); t('U7715 僚机编制 抛异常', false, String(e)); t('U7716 僚机编制 抛异常', false, String(e)); t('U7717 僚机编制 抛异常', false, String(e)); t('U7718 僚机编制 抛异常', false, String(e)); }
 
+
+  // ===== U7719~U7724: 宠物等级(v1.0.76) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('arsPetWrap'),mv:!!document.querySelector('#arsPetWrap .mval'),s:T.arsPetStateNow({'has':true,'l':3})});})()"));
+    t('U7719 宠物等级 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7720 正常 宠物等级 → v=3 g-good 3级', o.s.v === 3 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '3级', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.arsPetStateNow({'has':true,'l':3}),b:T.arsPetStateNow({'has':false,'l':0})});return r;})()"));
+    t('U7721 边界 宠物等级 → g-warn 无宠物', o2.b.v === 0 && o2.b.cls === 'g-warn' && o2.b.danger === false && o2.b.txt === '无宠物', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.arsPetStateNow(null);const b=T.arsPetStateNow([]);const c=T.arsPetStateNow({'has':true,'l':2});const d=T.arsPetStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7722 非法 null/[]/无字段→退化 —，合法帧(有数据)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7723 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.arsPetStateNow({'has':true,'l':3});return JSON.stringify({mv:!!document.querySelector('#arsPetWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7724 DOM 与函数一致（.mval 可写 + 正常帧有 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7719 宠物等级 抛异常', false, String(e)); t('U7720 宠物等级 抛异常', false, String(e)); t('U7721 宠物等级 抛异常', false, String(e)); t('U7722 宠物等级 抛异常', false, String(e)); t('U7723 宠物等级 抛异常', false, String(e)); t('U7724 宠物等级 抛异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
