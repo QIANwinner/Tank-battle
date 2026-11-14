@@ -21825,6 +21825,21 @@ async function main() {
     t("U7964 DOM 与函数一致（.mval 可写 + data-lv 已落 DOM）", o5.mv === true && o5.dv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
   } catch (e) { t("U7959 续航评级 抛异常", false, String(e)); t("U7960 续航评级 抛异常", false, String(e)); t("U7961 续航评级 抛异常", false, String(e)); t("U7962 续航评级 抛异常", false, String(e)); t("U7963 续航评级 抛异常", false, String(e)); t("U7964 续航评级 抛异常", false, String(e)); }
 
+
+  // ===== U7965~U7970: 生命分段(v1.1.17) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('sgLifeWrap'),sv:!!document.querySelector('#sgLifeWrap .sval'),cf:!!document.querySelector('#sgLifeWrap .sg i'),s:T.sgLifeStateNow({'x':3,'y':4})};return JSON.stringify(r);})()"));
+    t("U7965 生命分段 DOM 已加入 HUD + 函数可用", o.dom === true && o.sv === true && o.cf === true && isFinite(o.s.v) && o.s.n >= 0 && o.s.n <= 10 && typeof o.s.txt === 'string', JSON.stringify(o));
+    t("U7966 正常 生命分段 → v=0.75 n=8 g-good 3/4", o.s.v === 0.75 && o.s.n === 8 && o.s.cls === "g-good" && o.s.danger === false && o.s.txt === "3/4", JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={b:T.sgLifeStateNow({'x':0,'y':4})};return JSON.stringify(r);})()"));
+    t("U7967 边界 生命分段 → v=0 n=0 g-bad 0/4", o2.b.v === 0 && o2.b.n === 0 && o2.b.cls === "g-bad" && o2.b.danger === true && o2.b.txt === "0/4", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.sgLifeStateNow(null),b:T.sgLifeStateNow([]),c:T.sgLifeStateNow({'x':2,'y':5}),d:T.sgLifeStateNow({x:1})};return JSON.stringify(r);})()"));
+    t("U7968 非法 null/[]/缺 y → 退化，合法帧(有 x,y)非退化", o3.a.txt === "—" && o3.a.cls === "g-warn" && o3.a.v === 0 && o3.b.txt === "—" && o3.d.txt === "—" && isFinite(o3.c.v) && o3.c.txt !== "—", JSON.stringify(o3));
+    t("U7969 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签", o.s.txt === "—" || (typeof o.s.unit === "string" && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === "string" && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={sv:!!document.querySelector('#sgLifeWrap .sval'),dv:!!document.getElementById('sgLifeWrap').dataset.n,s:T.sgLifeStateNow({'x':3,'y':4})};return JSON.stringify(r);})()"));
+    t("U7970 DOM 与函数一致（.sval 可写 + data-n 已落 DOM）", o5.sv === true && o5.dv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
+  } catch (e) { t("U7965 生命分段 抛异常", false, String(e)); t("U7966 生命分段 抛异常", false, String(e)); t("U7967 生命分段 抛异常", false, String(e)); t("U7968 生命分段 抛异常", false, String(e)); t("U7969 生命分段 抛异常", false, String(e)); t("U7970 生命分段 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
