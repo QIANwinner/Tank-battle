@@ -21105,6 +21105,21 @@ async function main() {
     t('U7676 Boss警报 DOM 与函数一致（DOM 值 = 函数 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7671~U7676 Boss警报 无异常', false, String(e)); }
 
+
+  // ===== U7677~U7682: Boss血量(v1.0.69) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('arsBossHpWrap'),mv:!!document.querySelector('#arsBossHpWrap .mval'),s:T.arsBossHpStateNow({'h':24,'m':40})});})()"));
+    t('U7677 Boss血量 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7678 正常 Boss血量 → v=60 g-warn 60%', o.s.v === 60 && o.s.cls === 'g-warn' && o.s.danger === false && o.s.txt === '60%', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.arsBossHpStateNow({'h':24,'m':40}),b:T.arsBossHpStateNow({'h':40,'m':40})});return r;})()"));
+    t('U7679 边界 Boss血量 → g-bad 100%', o2.b.v === 100 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '100%', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.arsBossHpStateNow(null);const b=T.arsBossHpStateNow([]);const c=T.arsBossHpStateNow({'h':10,'m':40});const d=T.arsBossHpStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7680 非法 null/[]/无字段→退化 —，合法帧(有数据)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7681 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.arsBossHpStateNow({'h':24,'m':40});return JSON.stringify({mv:!!document.querySelector('#arsBossHpWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7682 DOM 与函数一致（.mval 可写 + 正常帧有 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7677 Boss血量 抛异常', false, String(e)); t('U7678 Boss血量 抛异常', false, String(e)); t('U7679 Boss血量 抛异常', false, String(e)); t('U7680 Boss血量 抛异常', false, String(e)); t('U7681 Boss血量 抛异常', false, String(e)); t('U7682 Boss血量 抛异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

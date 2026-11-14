@@ -1,3 +1,16 @@
+# v1.0.69 · Boss血量
+
+> HUD 新增 Boss血量进度 pill：arsBossHp 纯函数（h/m → {v,pct,cls,danger,txt}）+ arsBossHpNow 数据源 + __tbTest 钩子 + 6 条专项断言（U7677~U7682） 回归：主套件 169/169 + 反馈专项 7682/7682。
+
+## 🅰 改进
+
+- HUD 新增 Boss血量进度 pill：arsBossHp 纯函数（h/m → {v,pct,cls,danger,txt}）+ arsBossHpNow 数据源 + __tbTest 钩子 + 6 条专项断言（U7677~U7682）
+
+## 🅱 验证
+
+- 主套件 169/169 + 反馈专项 7682/7682；内联脚本语法 SYNTAX OK
+- SW 缓存 v1069，游戏内版本 V1.0.69；远程树与本地树一致（sync_push）
+
 # v1.0.68 · Boss警报
 
 > Boss警报（新增 DOM/CSS/状态逻辑 + 6 条专项断言） 回归：主套件 169/169 + 反馈专项 7676/7676。
