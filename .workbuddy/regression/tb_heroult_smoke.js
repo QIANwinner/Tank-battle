@@ -21075,6 +21075,21 @@ async function main() {
     t('U7664 复活次数 DOM 与函数一致（DOM 值 = 函数 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7659~U7664 复活次数 无异常', false, String(e)); }
 
+
+  // ===== U7665~U7670: 本关星级(v1.0.67) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('snsLvStarsWrap'),mv:!!document.querySelector('#snsLvStarsWrap .mval'),s:T.snsLvStarsStateNow({'s':3})});})()"));
+    t('U7665 本关星级 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7666 正常 本关星级 → v=3 g-good 3星', o.s.v === 3 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '3星', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.snsLvStarsStateNow({'s':3}),b:T.snsLvStarsStateNow({'s':1})});return r;})()"));
+    t('U7667 边界 本关星级 → g-bad 1星', o2.b.v === 1 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '1星', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.snsLvStarsStateNow(null);const b=T.snsLvStarsStateNow([]);const c=T.snsLvStarsStateNow({'s':2});const d=T.snsLvStarsStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7668 非法 null/[]/无字段→退化 —，合法帧(有数据)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7669 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.snsLvStarsStateNow({'s':3});return JSON.stringify({mv:!!document.querySelector('#snsLvStarsWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7670 本关星级 DOM 与函数一致（DOM 值 = 函数 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7665~U7670 本关星级 无异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
