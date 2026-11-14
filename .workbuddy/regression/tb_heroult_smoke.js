@@ -21405,6 +21405,21 @@ async function main() {
     t('U7796 DOM 与函数一致（.mval 可写 + 正常帧有 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7791 近战冲击波 抛异常', false, String(e)); t('U7792 近战冲击波 抛异常', false, String(e)); t('U7793 近战冲击波 抛异常', false, String(e)); t('U7794 近战冲击波 抛异常', false, String(e)); t('U7795 近战冲击波 抛异常', false, String(e)); t('U7796 近战冲击波 抛异常', false, String(e)); }
 
+
+  // ===== U7797~U7802: 飘字提示(v1.0.89) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('bttTextWrap'),mv:!!document.querySelector('#bttTextWrap .mval'),s:T.bttTextStateNow({'n':5})});})()"));
+    t('U7797 飘字提示 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7798 正常 飘字提示 → v=5 g-good 5条', o.s.v === 5 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '5条', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.bttTextStateNow({'n':5}),b:T.bttTextStateNow({'n':0})});return r;})()"));
+    t('U7799 边界 飘字提示 → g-good 0条', o2.b.v === 0 && o2.b.cls === 'g-good' && o2.b.danger === false && o2.b.txt === '0条', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.bttTextStateNow(null);const b=T.bttTextStateNow([]);const c=T.bttTextStateNow({'n':16});const d=T.bttTextStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7800 非法 null/[]/无字段→退化 —，合法帧(有数据)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7801 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.bttTextStateNow({'n':5});return JSON.stringify({mv:!!document.querySelector('#bttTextWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7802 DOM 与函数一致（.mval 可写 + 正常帧有 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7797 飘字提示 抛异常', false, String(e)); t('U7798 飘字提示 抛异常', false, String(e)); t('U7799 飘字提示 抛异常', false, String(e)); t('U7800 飘字提示 抛异常', false, String(e)); t('U7801 飘字提示 抛异常', false, String(e)); t('U7802 飘字提示 抛异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
