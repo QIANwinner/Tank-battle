@@ -1224,6 +1224,7 @@
     <div class="pill m-hide" id="bttBaseWrap"><span class="k">🧱</span><span class="v">基地墙</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="bttUltWrap"><span class="k">⚡</span><span class="v">大招</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="nrtNearWrap"><span class="k">🎯</span><span class="v">贴脸</span><em class="mval">—</em></div>
+    <div class="pill m-hide" id="nrtPowerWrap"><span class="k">🔥</span><span class="v">即射</span><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1600,7 +1601,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.0.93</div>
+  <div id="mark">DESIGNED BY QIAN · V1.0.94</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7627,6 +7628,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_bttBase = bttBaseNow(); const w_bttBase = $('bttBaseWrap'); if (w_bttBase) { const pv = w_bttBase.dataset.fp || ''; const nv = l_bttBase.cls + '|' + l_bttBase.txt + '|' + (l_bttBase.danger ? '1' : '0'); if (pv !== nv) { w_bttBase.dataset.fp = nv; w_bttBase.classList.remove('g-good','g-warn','g-bad'); w_bttBase.classList.add(l_bttBase.cls); w_bttBase.classList.toggle('danger', !!l_bttBase.danger); const mv = w_bttBase.querySelector('.mval'); if (mv) mv.textContent = l_bttBase.txt; } }
     const l_bttUlt = bttUltNow(); const w_bttUlt = $('bttUltWrap'); if (w_bttUlt) { const pv = w_bttUlt.dataset.fp || ''; const nv = l_bttUlt.cls + '|' + l_bttUlt.txt + '|' + (l_bttUlt.danger ? '1' : '0'); if (pv !== nv) { w_bttUlt.dataset.fp = nv; w_bttUlt.classList.remove('g-good','g-warn','g-bad'); w_bttUlt.classList.add(l_bttUlt.cls); w_bttUlt.classList.toggle('danger', !!l_bttUlt.danger); const mv = w_bttUlt.querySelector('.mval'); if (mv) mv.textContent = l_bttUlt.txt; } }
     const l_nrtNear = nrtNearNow(); const w_nrtNear = $('nrtNearWrap'); if (w_nrtNear) { const pv = w_nrtNear.dataset.fp || ''; const nv = l_nrtNear.cls + '|' + l_nrtNear.txt + '|' + (l_nrtNear.danger ? '1' : '0'); if (pv !== nv) { w_nrtNear.dataset.fp = nv; w_nrtNear.classList.remove('g-good','g-warn','g-bad'); w_nrtNear.classList.add(l_nrtNear.cls); w_nrtNear.classList.toggle('danger', !!l_nrtNear.danger); const mv = w_nrtNear.querySelector('.mval'); if (mv) mv.textContent = l_nrtNear.txt; } }
+    const l_nrtPower = nrtPowerNow(); const w_nrtPower = $('nrtPowerWrap'); if (w_nrtPower) { const pv = w_nrtPower.dataset.fp || ''; const nv = l_nrtPower.cls + '|' + l_nrtPower.txt + '|' + (l_nrtPower.danger ? '1' : '0'); if (pv !== nv) { w_nrtPower.dataset.fp = nv; w_nrtPower.classList.remove('g-good','g-warn','g-bad'); w_nrtPower.classList.add(l_nrtPower.cls); w_nrtPower.classList.toggle('danger', !!l_nrtPower.danger); const mv = w_nrtPower.querySelector('.mval'); if (mv) mv.textContent = l_nrtPower.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -20906,6 +20908,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   function nrtWaveNow() { const k = Math.max(0, Math.floor(Number((stat && stat.kills) || 0))); const w = Math.max(1, Math.min(Math.floor(Number(wave) || 1), 99)); return { k: k, w: w }; }
   function nrtDpsNow() { return { d: Math.max(0, Math.floor(Number(runDmg) || 0)), h: Math.max(0, Math.floor(Number(hurtCount) || 0)) }; }
   function nrtFoeNow() { let n = 0; const bs = bullets || []; for (const b of bs) { if (!b) continue; const o = b.owner; if (o && (o === player || o === player2 || o === wingman)) continue; n++; } const ls = enemies || []; let e = 0; for (const q of ls) { if (q && !q.dead) e++; } return { n: n, e: Math.max(1, e) }; }
+  // 近场火力（v1.0.94 第八十一辑：nrt 系列已在 v1.0.93 引入）
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -22766,7 +22769,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.0.93', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.0.94', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -24953,6 +24956,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       bttBaseStateNow: (frame) => bttBase(frame), bttBaseNow: () => bttBase(bttBaseNow()), bttBaseDomNow: () => { const e = document.querySelector('.bttBaseWrap .mval'); return e ? e.textContent : null; },
       bttUltStateNow: (frame) => bttUlt(frame), bttUltNow: () => bttUlt(bttUltNow()), bttUltDomNow: () => { const e = document.querySelector('.bttUltWrap .mval'); return e ? e.textContent : null; },
       nrtNearStateNow: (frame) => nrtNear(frame), nrtNearNow: () => nrtNear(nrtNearNow()), nrtNearDomNow: () => { const e = document.querySelector('.nrtNearWrap .mval'); return e ? e.textContent : null; },
+      nrtPowerStateNow: (frame) => nrtPower(frame), nrtPowerNow: () => nrtPower(nrtPowerNow()), nrtPowerDomNow: () => { const e = document.querySelector('.nrtPowerWrap .mval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

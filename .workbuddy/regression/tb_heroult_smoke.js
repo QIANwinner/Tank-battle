@@ -21480,6 +21480,21 @@ async function main() {
     t("U7826 DOM 与函数一致（.mval 可写 + 正常帧有 txt）", o5.mv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
   } catch (e) { t("U7821 近场敌压 抛异常", false, String(e)); t("U7822 近场敌压 抛异常", false, String(e)); t("U7823 近场敌压 抛异常", false, String(e)); t("U7824 近场敌压 抛异常", false, String(e)); t("U7825 近场敌压 抛异常", false, String(e)); t("U7826 近场敌压 抛异常", false, String(e)); }
 
+
+  // ===== U7827~U7832: 近场火力(v1.0.94) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('nrtPowerWrap'),mv:!!document.querySelector('#nrtPowerWrap .mval'),s:T.nrtPowerStateNow({'c':1,'es':[{'x':0,'y':0,'cooldown':0},{'x':1,'y':0,'cooldown':1},{'x':2,'y':0,'cooldown':50},{'x':3,'y':0,'cooldown':200},{'x':4,'y':0,'cooldown':300},{'x':5,'y':0,'cooldown':400}]})};return JSON.stringify(r);})()"));
+    t("U7827 近场火力 DOM 已加入 HUD + 函数可用", o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t("U7828 正常 近场火力 → v=2 g-warn 2只", o.s.v === 2 && o.s.cls === "g-warn" && o.s.danger === false && o.s.txt === "2只", JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={b:T.nrtPowerStateNow({'c':99,'es':[{'x':0,'y':0,'cooldown':0},{'x':1,'y':0,'cooldown':5},{'x':2,'y':0,'cooldown':9},{'x':3,'y':0,'cooldown':99},{'x':4,'y':0,'cooldown':50},{'x':5,'y':0,'cooldown':200}]})};return JSON.stringify(r);})()"));
+    t("U7829 边界 近场火力 → g-bad 5只", o2.b.v === 5 && o2.b.cls === "g-bad" && o2.b.danger === true && o2.b.txt === "5只", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.nrtPowerStateNow(null),b:T.nrtPowerStateNow([]),c:T.nrtPowerStateNow({'c':1,'es':[{'x':0,'y':0,'cooldown':0}]}),d:T.nrtPowerStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]})};return JSON.stringify(r);})()"));
+    t("U7830 非法 null/[]/缺字段 → 退化，合法帧(有数据)非退化", o3.a.txt === "—" && o3.a.cls === "g-warn" && o3.a.v === 0 && o3.b.txt === "—" && o3.d.txt === "—" && isFinite(o3.c.v) && o3.c.txt !== "—", JSON.stringify(o3));
+    t("U7831 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签", o.s.txt === "—" || (typeof o.s.unit === "string" && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === "string" && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={mv:!!document.querySelector('#nrtPowerWrap .mval'),s:T.nrtPowerStateNow({'c':1,'es':[{'x':0,'y':0,'cooldown':0},{'x':1,'y':0,'cooldown':1},{'x':2,'y':0,'cooldown':50},{'x':3,'y':0,'cooldown':200},{'x':4,'y':0,'cooldown':300},{'x':5,'y':0,'cooldown':400}]})};return JSON.stringify(r);})()"));
+    t("U7832 DOM 与函数一致（.mval 可写 + 正常帧有 txt）", o5.mv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
+  } catch (e) { t("U7827 近场火力 抛异常", false, String(e)); t("U7828 近场火力 抛异常", false, String(e)); t("U7829 近场火力 抛异常", false, String(e)); t("U7830 近场火力 抛异常", false, String(e)); t("U7831 近场火力 抛异常", false, String(e)); t("U7832 近场火力 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
