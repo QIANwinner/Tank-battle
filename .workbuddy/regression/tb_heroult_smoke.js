@@ -21855,6 +21855,21 @@ async function main() {
     t("U7976 DOM 与函数一致（.sval 可写 + data-n 已落 DOM）", o5.sv === true && o5.dv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
   } catch (e) { t("U7971 连击分段 抛异常", false, String(e)); t("U7972 连击分段 抛异常", false, String(e)); t("U7973 连击分段 抛异常", false, String(e)); t("U7974 连击分段 抛异常", false, String(e)); t("U7975 连击分段 抛异常", false, String(e)); t("U7976 连击分段 抛异常", false, String(e)); }
 
+
+  // ===== U7977~U7982: 关卡进度分段(v1.1.19) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('sgWaveWrap'),sv:!!document.querySelector('#sgWaveWrap .sval'),cf:!!document.querySelector('#sgWaveWrap .sg i'),s:T.sgWaveStateNow({'x':3,'y':4})};return JSON.stringify(r);})()"));
+    t("U7977 关卡进度分段 DOM 已加入 HUD + 函数可用", o.dom === true && o.sv === true && o.cf === true && isFinite(o.s.v) && o.s.n >= 0 && o.s.n <= 10 && typeof o.s.txt === 'string', JSON.stringify(o));
+    t("U7978 正常 关卡进度分段 → v=0.75 n=8 g-good 3/4", o.s.v === 0.75 && o.s.n === 8 && o.s.cls === "g-good" && o.s.danger === false && o.s.txt === "3/4", JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={b:T.sgWaveStateNow({'x':0,'y':4})};return JSON.stringify(r);})()"));
+    t("U7979 边界 关卡进度分段 → v=0 n=0 g-bad 0/4", o2.b.v === 0 && o2.b.n === 0 && o2.b.cls === "g-bad" && o2.b.danger === true && o2.b.txt === "0/4", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.sgWaveStateNow(null),b:T.sgWaveStateNow([]),c:T.sgWaveStateNow({'x':2,'y':5}),d:T.sgWaveStateNow({x:1})};return JSON.stringify(r);})()"));
+    t("U7980 非法 null/[]/缺 y → 退化，合法帧(有 x,y)非退化", o3.a.txt === "—" && o3.a.cls === "g-warn" && o3.a.v === 0 && o3.b.txt === "—" && o3.d.txt === "—" && isFinite(o3.c.v) && o3.c.txt !== "—", JSON.stringify(o3));
+    t("U7981 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签", o.s.txt === "—" || (typeof o.s.unit === "string" && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === "string" && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={sv:!!document.querySelector('#sgWaveWrap .sval'),dv:!!document.getElementById('sgWaveWrap').dataset.n,s:T.sgWaveStateNow({'x':3,'y':4})};return JSON.stringify(r);})()"));
+    t("U7982 DOM 与函数一致（.sval 可写 + data-n 已落 DOM）", o5.sv === true && o5.dv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
+  } catch (e) { t("U7977 关卡进度分段 抛异常", false, String(e)); t("U7978 关卡进度分段 抛异常", false, String(e)); t("U7979 关卡进度分段 抛异常", false, String(e)); t("U7980 关卡进度分段 抛异常", false, String(e)); t("U7981 关卡进度分段 抛异常", false, String(e)); t("U7982 关卡进度分段 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
