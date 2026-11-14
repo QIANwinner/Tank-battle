@@ -21720,6 +21720,21 @@ async function main() {
     t("U7922 DOM 与函数一致（.mval 可写 + data-lv 已落 DOM）", o5.mv === true && o5.dv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
   } catch (e) { t("U7917 战绩评级 抛异常", false, String(e)); t("U7918 战绩评级 抛异常", false, String(e)); t("U7919 战绩评级 抛异常", false, String(e)); t("U7920 战绩评级 抛异常", false, String(e)); t("U7921 战绩评级 抛异常", false, String(e)); t("U7922 战绩评级 抛异常", false, String(e)); }
 
+
+  // ===== U7923~U7928: 射效评级(v1.1.10) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('mtrSpcWrap'),mv:!!document.querySelector('#mtrSpcWrap .mval'),cf:!!document.querySelector('#mtrSpcWrap .mcv i'),s:T.mtrSpcStateNow({'v':0.1})};return JSON.stringify(r);})()"));
+    t("U7923 射效评级 DOM 已加入 HUD + 函数可用", o.dom === true && o.mv === true && o.cf === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t("U7924 正常 射效评级 → v=0.1 lv=2 g-bad 0.1/杀", o.s.v === 0.1 && o.s.lv === 2 && o.s.cls === "g-bad" && o.s.danger === false && o.s.txt === "0.1/杀", JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={b:T.mtrSpcStateNow({'v':0.9})};return JSON.stringify(r);})()"));
+    t("U7925 边界 射效评级 → lv=4 g-good 0.9/杀", o2.b.v === 0.9 && o2.b.lv === 4 && o2.b.cls === "g-good" && o2.b.danger === false && o2.b.txt === "0.9/杀", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mtrSpcStateNow(null),b:T.mtrSpcStateNow([]),c:T.mtrSpcStateNow({'v':0.1}),d:T.mtrSpcStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]})};return JSON.stringify(r);})()"));
+    t("U7926 非法 null/[]/缺字段 → 退化，合法帧(有数据)非退化", o3.a.txt === "—" && o3.a.cls === "g-warn" && o3.a.v === 0 && o3.b.txt === "—" && o3.d.txt === "—" && isFinite(o3.c.v) && o3.c.txt !== "—", JSON.stringify(o3));
+    t("U7927 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签", o.s.txt === "—" || (typeof o.s.unit === "string" && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === "string" && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={mv:!!document.querySelector('#mtrSpcWrap .mval'),dv:!!document.getElementById('mtrSpcWrap').dataset.lv,s:T.mtrSpcStateNow({'v':0.1})};return JSON.stringify(r);})()"));
+    t("U7928 DOM 与函数一致（.mval 可写 + data-lv 已落 DOM）", o5.mv === true && o5.dv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
+  } catch (e) { t("U7923 射效评级 抛异常", false, String(e)); t("U7924 射效评级 抛异常", false, String(e)); t("U7925 射效评级 抛异常", false, String(e)); t("U7926 射效评级 抛异常", false, String(e)); t("U7927 射效评级 抛异常", false, String(e)); t("U7928 射效评级 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
