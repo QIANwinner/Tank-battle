@@ -21090,6 +21090,21 @@ async function main() {
     t('U7670 本关星级 DOM 与函数一致（DOM 值 = 函数 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
   } catch (e) { t('U7665~U7670 本关星级 无异常', false, String(e)); }
 
+
+  // ===== U7671~U7676: Boss警报(v1.0.68) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('snsBossWarnWrap'),mv:!!document.querySelector('#snsBossWarnWrap .mval'),s:T.snsBossWarnStateNow({'w':0})});})()"));
+    t('U7671 Boss警报 DOM 已加入 HUD + 函数可用', o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t('U7672 正常 Boss警报 → v=0 g-good 无警报', o.s.v === 0 && o.s.cls === 'g-good' && o.s.danger === false && o.s.txt === '无警报', JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=JSON.stringify({a:T.snsBossWarnStateNow({'w':0}),b:T.snsBossWarnStateNow({'w':2})});return r;})()"));
+    t('U7673 边界 Boss警报 → g-bad 警报2s', o2.b.v === 2 && o2.b.cls === 'g-bad' && o2.b.danger === true && o2.b.txt === '警报2s', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;const a=T.snsBossWarnStateNow(null);const b=T.snsBossWarnStateNow([]);const c=T.snsBossWarnStateNow({'w':1});const d=T.snsBossWarnStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]});return JSON.stringify({a:a,b:b,c:c,d:d});})()"));
+    t('U7674 非法 null/[]/无字段→退化 —，合法帧(有数据)非退化', o3.a.txt === '—' && o3.a.cls === 'g-warn' && o3.a.v === 0 && o3.b.txt === '—' && o3.d.txt === '—' && isFinite(o3.c.v) && o3.c.txt !== '—', JSON.stringify(o3));
+    t('U7675 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签', (o.s.txt === '—') || (typeof o.s.unit === 'string' && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === 'string' && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;const r=T.snsBossWarnStateNow({'w':0});return JSON.stringify({mv:!!document.querySelector('#snsBossWarnWrap .mval'),txtOk:typeof r.txt === 'string' && r.txt.length > 0});})()"));
+    t('U7676 Boss警报 DOM 与函数一致（DOM 值 = 函数 txt）', o5.mv === true && o5.txtOk === true, JSON.stringify(o5));
+  } catch (e) { t('U7671~U7676 Boss警报 无异常', false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
