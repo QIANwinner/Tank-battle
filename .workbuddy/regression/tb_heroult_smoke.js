@@ -21525,6 +21525,21 @@ async function main() {
     t("U7844 DOM 与函数一致（.mval 可写 + 正常帧有 txt）", o5.mv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
   } catch (e) { t("U7839 基地受胁 抛异常", false, String(e)); t("U7840 基地受胁 抛异常", false, String(e)); t("U7841 基地受胁 抛异常", false, String(e)); t("U7842 基地受胁 抛异常", false, String(e)); t("U7843 基地受胁 抛异常", false, String(e)); t("U7844 基地受胁 抛异常", false, String(e)); }
 
+
+  // ===== U7845~U7850: 生命余量(v1.0.97) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('nrtLifeWrap'),mv:!!document.querySelector('#nrtLifeWrap .mval'),s:T.nrtLifeStateNow({'p':0.62})};return JSON.stringify(r);})()"));
+    t("U7845 生命余量 DOM 已加入 HUD + 函数可用", o.dom === true && o.mv === true && isFinite(o.s.v) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t("U7846 正常 生命余量 → v=62 g-good 62%", o.s.v === 62 && o.s.cls === "g-good" && o.s.danger === false && o.s.txt === "62%", JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={b:T.nrtLifeStateNow({'p':0.18})};return JSON.stringify(r);})()"));
+    t("U7847 边界 生命余量 → g-bad 18%", o2.b.v === 18 && o2.b.cls === "g-bad" && o2.b.danger === true && o2.b.txt === "18%", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.nrtLifeStateNow(null),b:T.nrtLifeStateNow([]),c:T.nrtLifeStateNow({'p':0.9}),d:T.nrtLifeStateNow({e:[{t:'x',kind:'n'},{t:'y',kind:'n'}]})};return JSON.stringify(r);})()"));
+    t("U7848 非法 null/[]/缺字段 → 退化，合法帧(有数据)非退化", o3.a.txt === "—" && o3.a.cls === "g-warn" && o3.a.v === 0 && o3.b.txt === "—" && o3.d.txt === "—" && isFinite(o3.c.v) && o3.c.txt !== "—", JSON.stringify(o3));
+    t("U7849 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签", o.s.txt === "—" || (typeof o.s.unit === "string" && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === "string" && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={mv:!!document.querySelector('#nrtLifeWrap .mval'),s:T.nrtLifeStateNow({'p':0.62})};return JSON.stringify(r);})()"));
+    t("U7850 DOM 与函数一致（.mval 可写 + 正常帧有 txt）", o5.mv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
+  } catch (e) { t("U7845 生命余量 抛异常", false, String(e)); t("U7846 生命余量 抛异常", false, String(e)); t("U7847 生命余量 抛异常", false, String(e)); t("U7848 生命余量 抛异常", false, String(e)); t("U7849 生命余量 抛异常", false, String(e)); t("U7850 生命余量 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

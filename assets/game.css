@@ -6654,3 +6654,7 @@ html.compact-hud #hud .m-hide { display:none !important; }
   #nrtBaseWrap .g-bad .mval { color:#e74c3c; }
   #nrtBaseWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
 @CSS@
+  #nrtLifeWrap .mval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #nrtLifeWrap .g-bad .mval { color:#e74c3c; }
+  #nrtLifeWrap.g-bad { animation: tbSnsPulse .4s ease-in-out infinite alternate; }
+@CSS@
