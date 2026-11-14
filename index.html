@@ -1205,6 +1205,7 @@
     <div class="pill m-hide" id="arsBonusWrap"><span class="k">💪</span><span class="v">强化</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="arsBaseWrap"><span class="k">🏯</span><span class="v">基地</span><em class="mval">—</em></div>
     <div class="pill m-hide" id="arsRecordWrap"><span class="k">🏁</span><span class="v">纪录</span><em class="mval">—</em></div>
+    <div class="pill m-hide" id="arsWingWrap"><span class="k">🛩️</span><span class="v">僚机</span><em class="mval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1581,7 +1582,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.0.74</div>
+  <div id="mark">DESIGNED BY QIAN · V1.0.75</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7589,6 +7590,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_arsBonus = arsBonusNow(); const w_arsBonus = $('arsBonusWrap'); if (w_arsBonus) { const pv = w_arsBonus.dataset.fp || ''; const nv = l_arsBonus.cls + '|' + l_arsBonus.txt + '|' + (l_arsBonus.danger ? '1' : '0'); if (pv !== nv) { w_arsBonus.dataset.fp = nv; w_arsBonus.classList.remove('g-good','g-warn','g-bad'); w_arsBonus.classList.add(l_arsBonus.cls); w_arsBonus.classList.toggle('danger', !!l_arsBonus.danger); const mv = w_arsBonus.querySelector('.mval'); if (mv) mv.textContent = l_arsBonus.txt; } }
     const l_arsBase = arsBaseNow(); const w_arsBase = $('arsBaseWrap'); if (w_arsBase) { const pv = w_arsBase.dataset.fp || ''; const nv = l_arsBase.cls + '|' + l_arsBase.txt + '|' + (l_arsBase.danger ? '1' : '0'); if (pv !== nv) { w_arsBase.dataset.fp = nv; w_arsBase.classList.remove('g-good','g-warn','g-bad'); w_arsBase.classList.add(l_arsBase.cls); w_arsBase.classList.toggle('danger', !!l_arsBase.danger); const mv = w_arsBase.querySelector('.mval'); if (mv) mv.textContent = l_arsBase.txt; } }
     const l_arsRecord = arsRecordNow(); const w_arsRecord = $('arsRecordWrap'); if (w_arsRecord) { const pv = w_arsRecord.dataset.fp || ''; const nv = l_arsRecord.cls + '|' + l_arsRecord.txt + '|' + (l_arsRecord.danger ? '1' : '0'); if (pv !== nv) { w_arsRecord.dataset.fp = nv; w_arsRecord.classList.remove('g-good','g-warn','g-bad'); w_arsRecord.classList.add(l_arsRecord.cls); w_arsRecord.classList.toggle('danger', !!l_arsRecord.danger); const mv = w_arsRecord.querySelector('.mval'); if (mv) mv.textContent = l_arsRecord.txt; } }
+    const l_arsWing = arsWingNow(); const w_arsWing = $('arsWingWrap'); if (w_arsWing) { const pv = w_arsWing.dataset.fp || ''; const nv = l_arsWing.cls + '|' + l_arsWing.txt + '|' + (l_arsWing.danger ? '1' : '0'); if (pv !== nv) { w_arsWing.dataset.fp = nv; w_arsWing.classList.remove('g-good','g-warn','g-bad'); w_arsWing.classList.add(l_arsWing.cls); w_arsWing.classList.toggle('danger', !!l_arsWing.danger); const mv = w_arsWing.querySelector('.mval'); if (mv) mv.textContent = l_arsWing.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -20498,6 +20500,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // —— arsBonus：强化等级（战局脉搏·武装状态：见 helperBody arsBonus 实现 + arsBonusNow 数据源）——
   // —— arsBase：基地护墙（战局脉搏·武装状态：见 helperBody arsBase 实现 + arsBaseNow 数据源）——
   // —— arsRecord：无尽纪录（战局脉搏·武装状态：见 helperBody arsRecord 实现 + arsRecordNow 数据源）——
+  // —— arsWing：僚机编制（战局脉搏·武装状态：见 helperBody arsWing 实现 + arsWingNow 数据源）——
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -22358,7 +22361,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.0.74', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.0.75', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -24526,6 +24529,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       arsBonusStateNow: (frame) => arsBonus(frame), arsBonusNow: () => arsBonus(arsBonusNow()), arsBonusDomNow: () => { const e = document.querySelector('.arsBonusWrap .mval'); return e ? e.textContent : null; },
       arsBaseStateNow: (frame) => arsBase(frame), arsBaseNow: () => arsBase(arsBaseNow()), arsBaseDomNow: () => { const e = document.querySelector('.arsBaseWrap .mval'); return e ? e.textContent : null; },
       arsRecordStateNow: (frame) => arsRecord(frame), arsRecordNow: () => arsRecord(arsRecordNow()), arsRecordDomNow: () => { const e = document.querySelector('.arsRecordWrap .mval'); return e ? e.textContent : null; },
+      arsWingStateNow: (frame) => arsWing(frame), arsWingNow: () => arsWing(arsWingNow()), arsWingDomNow: () => { const e = document.querySelector('.arsWingWrap .mval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
