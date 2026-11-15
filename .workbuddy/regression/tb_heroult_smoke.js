@@ -22525,6 +22525,23 @@ async function main() {
     t("U8234 DOM 与函数一致（节拍灯 opacity/transform 已渲染 + dataset.n 已落 DOM + .sval 可写）", typeof o5.op === "string" && o5.op.length > 0 && Number(o5.op) >= 0.25 && typeof o5.tf === "string" && o5.tf.indexOf("scale") === 0 && typeof o5.dn === "string" && isFinite(Number(o5.dn)) && Number(o5.dn) >= 0 && typeof o5.sv === "string" && o5.sv.length > 0 && o5.s.ok === true && o5.s.bpm === 60, JSON.stringify(o5));
   } catch (e) { t("U8229 波次节拍 抛异常", false, String(e)); t("U8230 波次节拍 抛异常", false, String(e)); t("U8231 波次节拍 抛异常", false, String(e)); t("U8232 波次节拍 抛异常", false, String(e)); t("U8233 波次节拍 抛异常", false, String(e)); t("U8234 波次节拍 抛异常", false, String(e)); }
 
+
+  // ===== U8235~U8240: 强化节拍(v1.1.62) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('mtUpgWrap'),dt:!!document.querySelector('#mtUpgWrap .mtdot'),sv:!!document.querySelector('#mtUpgWrap .sval'),s:T.mtUpgStateNow([5000,6000],7000)};return JSON.stringify(r);})()"));
+    t("U8235 强化节拍 DOM 已加入 HUD + 节拍灯/读数双元素 + 函数可用", o.dom === true && o.dt === true && o.sv === true && o.s.ok === true && o.s.bpm === 60, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mtUpgStateNow([0,1000,2000,3000],4000)};return JSON.stringify(r);})()"));
+    t("U8236 正常 强化节拍（4 拍等距 1s）→ bpm=60 g-good", o1.s.ok === true && o1.s.bpm === 60 && o1.s.sinceSec === 1 && o1.s.cls === "g-good" && o1.s.danger === false && o1.s.txt === "60/分", JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mtUpgStateNow([0,1000,2000,3000],20000)};return JSON.stringify(r);})()"));
+    t("U8237 边界 强化节拍（停拍 17s 衰减）→ bpm=0 g-warn", o2.s.ok === true && o2.s.bpm === 0 && o2.s.sinceSec === 17 && o2.s.cls === "g-warn" && o2.s.danger === false && o2.s.txt === "0/分", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mtUpgStateNow(null,5000),b:T.mtUpgStateNow([],5000),c:T.mtUpgStateNow(['a'],5000),d:T.mtUpgStateNow({bad:1},5000),l:T.mtUpgStateNow([4000],5000)};return JSON.stringify(r);})()"));
+    t("U8238 非法 null/[]/['a']/{bad} → 退化 '—'，单拍 [4000] 合法但 bpm=0 非退化", o3.a.txt === "—" && o3.a.ok === false && o3.b.txt === "—" && o3.b.ok === false && o3.c.txt === "—" && o3.d.txt === "—" && o3.l.ok === true && o3.l.bpm === 0 && o3.l.txt === "0/分", JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mtUpgStateNow([0,1000,2000,3000],4000),x:T.mtUpgStateNow(null,5000)};return JSON.stringify(r);})()"));
+    t("U8239 结构：合法 txt = 数字 + '/分'；非法 txt = '—'", o4.s.ok === true && o4.s.txt.split('/').length === 2 && o4.s.txt.split('/')[1] === "分" && isFinite(Number(o4.s.txt.split('/')[0])) && o4.x.txt === "—" && o4.x.ok === false, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={op:(function(){const e=document.querySelector('#mtUpgWrap .mtdot');return e?e.style.opacity:null})(),tf:(function(){const e=document.querySelector('#mtUpgWrap .mtdot');return e?e.style.transform:null})(),dn:(function(){const e=document.querySelector('#mtUpgWrap');return e?e.dataset.n:null})(),sv:(function(){const e=document.querySelector('#mtUpgWrap .sval');return e?e.textContent:null})(),s:T.mtUpgStateNow([0,1000,2000,3000],4000)};return JSON.stringify(r);})()"));
+    t("U8240 DOM 与函数一致（节拍灯 opacity/transform 已渲染 + dataset.n 已落 DOM + .sval 可写）", typeof o5.op === "string" && o5.op.length > 0 && Number(o5.op) >= 0.25 && typeof o5.tf === "string" && o5.tf.indexOf("scale") === 0 && typeof o5.dn === "string" && isFinite(Number(o5.dn)) && Number(o5.dn) >= 0 && typeof o5.sv === "string" && o5.sv.length > 0 && o5.s.ok === true && o5.s.bpm === 60, JSON.stringify(o5));
+  } catch (e) { t("U8235 强化节拍 抛异常", false, String(e)); t("U8236 强化节拍 抛异常", false, String(e)); t("U8237 强化节拍 抛异常", false, String(e)); t("U8238 强化节拍 抛异常", false, String(e)); t("U8239 强化节拍 抛异常", false, String(e)); t("U8240 强化节拍 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
