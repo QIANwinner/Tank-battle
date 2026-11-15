@@ -22440,6 +22440,23 @@ async function main() {
     t("U8204 DOM 与函数一致（.tdar 已渲染箭头 + dataset.n 已落 DOM 在 [-2,2] + .sval 可写 + 净变化读数）", typeof o5.ar === "string" && ['▲▲','▲','▬','▼','▼▼','—'].indexOf(o5.ar) >= 0 && typeof o5.dn === "string" && isFinite(Number(o5.dn)) && Number(o5.dn) >= -2 && Number(o5.dn) <= 2 && typeof o5.sv === "string" && o5.sv.length > 0 && o5.s.ok === true && o5.s.dir === 2, JSON.stringify(o5));
   } catch (e) { t("U8199 威胁风向 抛异常", false, String(e)); t("U8200 威胁风向 抛异常", false, String(e)); t("U8201 威胁风向 抛异常", false, String(e)); t("U8202 威胁风向 抛异常", false, String(e)); t("U8203 威胁风向 抛异常", false, String(e)); t("U8204 威胁风向 抛异常", false, String(e)); }
 
+
+  // ===== U8205~U8210: 击杀节拍(v1.1.57) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('mtKillWrap'),dt:!!document.querySelector('#mtKillWrap .mtdot'),sv:!!document.querySelector('#mtKillWrap .sval'),s:T.mtKillStateNow([5000,6000],7000)};return JSON.stringify(r);})()"));
+    t("U8205 击杀节拍 DOM 已加入 HUD + 节拍灯/读数双元素 + 函数可用", o.dom === true && o.dt === true && o.sv === true && o.s.ok === true && o.s.bpm === 60, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mtKillStateNow([0,1000,2000,3000],4000)};return JSON.stringify(r);})()"));
+    t("U8206 正常 击杀节拍（4 拍等距 1s）→ bpm=60 g-good", o1.s.ok === true && o1.s.bpm === 60 && o1.s.sinceSec === 1 && o1.s.cls === "g-good" && o1.s.danger === false && o1.s.txt === "60/分", JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mtKillStateNow([0,1000,2000,3000],20000)};return JSON.stringify(r);})()"));
+    t("U8207 边界 击杀节拍（停拍 17s 衰减）→ bpm=0 g-warn", o2.s.ok === true && o2.s.bpm === 0 && o2.s.sinceSec === 17 && o2.s.cls === "g-warn" && o2.s.danger === false && o2.s.txt === "0/分", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mtKillStateNow(null,5000),b:T.mtKillStateNow([],5000),c:T.mtKillStateNow(['a'],5000),d:T.mtKillStateNow({bad:1},5000),l:T.mtKillStateNow([4000],5000)};return JSON.stringify(r);})()"));
+    t("U8208 非法 null/[]/['a']/{bad} → 退化 '—'，单拍 [4000] 合法但 bpm=0 非退化", o3.a.txt === "—" && o3.a.ok === false && o3.b.txt === "—" && o3.b.ok === false && o3.c.txt === "—" && o3.d.txt === "—" && o3.l.ok === true && o3.l.bpm === 0 && o3.l.txt === "0/分", JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mtKillStateNow([0,1000,2000,3000],4000),x:T.mtKillStateNow(null,5000)};return JSON.stringify(r);})()"));
+    t("U8209 结构：合法 txt = 数字 + '/分'；非法 txt = '—'", o4.s.ok === true && o4.s.txt.split('/').length === 2 && o4.s.txt.split('/')[1] === "分" && isFinite(Number(o4.s.txt.split('/')[0])) && o4.x.txt === "—" && o4.x.ok === false, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={op:(function(){const e=document.querySelector('#mtKillWrap .mtdot');return e?e.style.opacity:null})(),tf:(function(){const e=document.querySelector('#mtKillWrap .mtdot');return e?e.style.transform:null})(),dn:(function(){const e=document.querySelector('#mtKillWrap');return e?e.dataset.n:null})(),sv:(function(){const e=document.querySelector('#mtKillWrap .sval');return e?e.textContent:null})(),s:T.mtKillStateNow([0,1000,2000,3000],4000)};return JSON.stringify(r);})()"));
+    t("U8210 DOM 与函数一致（节拍灯 opacity/transform 已渲染 + dataset.n 已落 DOM + .sval 可写）", typeof o5.op === "string" && o5.op.length > 0 && Number(o5.op) >= 0.25 && typeof o5.tf === "string" && o5.tf.indexOf("scale") === 0 && typeof o5.dn === "string" && isFinite(Number(o5.dn)) && Number(o5.dn) >= 0 && typeof o5.sv === "string" && o5.sv.length > 0 && o5.s.ok === true && o5.s.bpm === 60, JSON.stringify(o5));
+  } catch (e) { t("U8205 击杀节拍 抛异常", false, String(e)); t("U8206 击杀节拍 抛异常", false, String(e)); t("U8207 击杀节拍 抛异常", false, String(e)); t("U8208 击杀节拍 抛异常", false, String(e)); t("U8209 击杀节拍 抛异常", false, String(e)); t("U8210 击杀节拍 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
