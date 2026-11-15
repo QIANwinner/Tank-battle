@@ -22289,6 +22289,21 @@ async function main() {
     t("U8150 DOM 与函数一致（.sval 可写 + data-n 已落 DOM + 进度条/刻度已渲染）", o5.sv === true && o5.dv === true && typeof o5.fi === "string" && o5.fi.length > 0 && typeof o5.ti === "string" && o5.ti.length > 0 && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
   } catch (e) { t("U8145 补给对表 抛异常", false, String(e)); t("U8146 补给对表 抛异常", false, String(e)); t("U8147 补给对表 抛异常", false, String(e)); t("U8148 补给对表 抛异常", false, String(e)); t("U8149 补给对表 抛异常", false, String(e)); t("U8150 补给对表 抛异常", false, String(e)); }
 
+
+  // ===== U8151~U8156: 输出对表(v1.1.48) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('lbDmgWrap'),fi:!!document.querySelector('#lbDmgWrap .lbfill'),ti:!!document.querySelector('#lbDmgWrap .lbtick'),sv:!!document.querySelector('#lbDmgWrap .sval'),s:T.lbDmgStateNow({'p':80,'pmax':100,'t':40,'tmax':100})};return JSON.stringify(r);})()"));
+    t("U8151 输出对表 DOM 已加入 HUD + 对表双元素 + 函数可用", o.dom === true && o.fi === true && o.ti === true && o.sv === true && isFinite(o.s.pct) && o.s.pct >= 0 && o.s.pct <= 100 && isFinite(o.s.t) && o.s.t >= 0 && o.s.t <= 100 && isFinite(o.s.lead) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t("U8152 正常 输出对表 → pct=80 t=40 lead=40 g-good", o.s.pct === 80 && o.s.t === 40 && o.s.lead === 40 && o.s.cls === "g-good" && o.s.danger === false && o.s.txt === "+40", JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={b:T.lbDmgStateNow({'p':20,'pmax':100,'t':60,'tmax':100})};return JSON.stringify(r);})()"));
+    t("U8153 边界 输出对表 → pct=20 t=60 lead=-40 g-bad", o2.b.pct === 20 && o2.b.t === 60 && o2.b.lead === -40 && o2.b.cls === "g-bad" && o2.b.danger === true && o2.b.txt === "-40", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.lbDmgStateNow(null),b:T.lbDmgStateNow([]),c:T.lbDmgStateNow({'p':40,'pmax':100,'t':30,'tmax':100}),d:T.lbDmgStateNow({bad:1})};return JSON.stringify(r);})()"));
+    t("U8154 非法 null/[]/缺字段 → 退化，合法帧非退化", o3.a.txt === "—" && o3.a.cls === "g-warn" && o3.a.pct === 0 && o3.a.lead === 0 && o3.b.txt === "—" && o3.d.txt === "—" && isFinite(o3.c.pct) && o3.c.txt !== "—", JSON.stringify(o3));
+    t("U8155 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签", o.s.txt === "—" || (typeof o.s.unit === "string" && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === "string" && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={sv:!!document.querySelector('#lbDmgWrap .sval'),dv:!!document.getElementById('lbDmgWrap').dataset.n,fi:document.querySelector('#lbDmgWrap .lbfill').style.width,ti:document.querySelector('#lbDmgWrap .lbtick').style.left,s:T.lbDmgStateNow({'p':80,'pmax':100,'t':40,'tmax':100})};return JSON.stringify(r);})()"));
+    t("U8156 DOM 与函数一致（.sval 可写 + data-n 已落 DOM + 进度条/刻度已渲染）", o5.sv === true && o5.dv === true && typeof o5.fi === "string" && o5.fi.length > 0 && typeof o5.ti === "string" && o5.ti.length > 0 && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
+  } catch (e) { t("U8151 输出对表 抛异常", false, String(e)); t("U8152 输出对表 抛异常", false, String(e)); t("U8153 输出对表 抛异常", false, String(e)); t("U8154 输出对表 抛异常", false, String(e)); t("U8155 输出对表 抛异常", false, String(e)); t("U8156 输出对表 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

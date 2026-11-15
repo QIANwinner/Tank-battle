@@ -6923,4 +6923,13 @@ html.compact-hud #hud .m-hide { display:none !important; }
   #lbPackWrap.g-bad .lbfill { background:#e74c3c; }
   #lbPackWrap.g-bad .sval { color:#e74c3c; }
   #lbPackWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
+  #lbDmgWrap .lb { position:relative; display:inline-block; height:8px; width:52px; background:#2a2a3a; border-radius:4px; vertical-align:middle; margin:0 4px; }
+  #lbDmgWrap .lbfill { position:absolute; left:0; top:0; bottom:0; width:0; border-radius:4px 0 0 4px; background:#2ecc71; opacity:.95; }
+  #lbDmgWrap .lbtick { position:absolute; top:-2px; bottom:-2px; width:2px; margin-left:-1px; background:#fff; opacity:.9; }
+  #lbDmgWrap .sval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #lbDmgWrap.g-good .lbfill { background:#2ecc71; }
+  #lbDmgWrap.g-warn .lbfill { background:#f1c40f; }
+  #lbDmgWrap.g-bad .lbfill { background:#e74c3c; }
+  #lbDmgWrap.g-bad .sval { color:#e74c3c; }
+  #lbDmgWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
 
