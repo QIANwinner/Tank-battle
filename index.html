@@ -1290,6 +1290,7 @@
     <div class="pill m-hide" id="mtKillWrap"><span class="k">🗡️</span><i class="mtdot">●</i><span class="v">击杀</span><em class="sval">—</em></div>
     <div class="pill m-hide" id="mtCoinWrap"><span class="k">💰</span><i class="mtdot">●</i><span class="v">金币</span><em class="sval">—</em></div>
     <div class="pill m-hide" id="mtPickWrap"><span class="k">🎁</span><i class="mtdot">●</i><span class="v">道具</span><em class="sval">—</em></div>
+    <div class="pill m-hide" id="mtHurtWrap"><span class="k">💔</span><i class="mtdot">●</i><span class="v">受击</span><em class="sval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1666,7 +1667,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.59</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.60</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7759,6 +7760,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_mtKill = mtKillNow(); const w_mtKill = $('mtKillWrap'); if (w_mtKill) { const pv_mtKill = w_mtKill.dataset.fv || ''; const nv_mtKill = s_mtKill.txt + '|' + s_mtKill.bpm + '|' + Math.floor(Math.min(9, s_mtKill.sinceSec) * 2); if (pv_mtKill !== nv_mtKill) { w_mtKill.dataset.fv = nv_mtKill; w_mtKill.dataset.n = s_mtKill.bpm; w_mtKill.classList.remove('g-good','g-warn','g-bad'); if (s_mtKill.cls) w_mtKill.classList.add(s_mtKill.cls); w_mtKill.classList.toggle('danger', !!s_mtKill.danger); const dv_mtKill = w_mtKill.querySelector('.mtdot'); if (dv_mtKill) { const sn_mtKill = Math.min(2, s_mtKill.sinceSec); dv_mtKill.style.opacity = String(Math.max(.25, 1 - sn_mtKill / 2)); dv_mtKill.style.transform = 'scale(' + Math.max(.55, 1 - sn_mtKill * .45) + ')'; } const sv_mtKill = w_mtKill.querySelector('.sval'); if (sv_mtKill) sv_mtKill.textContent = s_mtKill.txt; } }
     const s_mtCoin = mtCoinNow(); const w_mtCoin = $('mtCoinWrap'); if (w_mtCoin) { const pv_mtCoin = w_mtCoin.dataset.fv || ''; const nv_mtCoin = s_mtCoin.txt + '|' + s_mtCoin.bpm + '|' + Math.floor(Math.min(9, s_mtCoin.sinceSec) * 2); if (pv_mtCoin !== nv_mtCoin) { w_mtCoin.dataset.fv = nv_mtCoin; w_mtCoin.dataset.n = s_mtCoin.bpm; w_mtCoin.classList.remove('g-good','g-warn','g-bad'); if (s_mtCoin.cls) w_mtCoin.classList.add(s_mtCoin.cls); w_mtCoin.classList.toggle('danger', !!s_mtCoin.danger); const dv_mtCoin = w_mtCoin.querySelector('.mtdot'); if (dv_mtCoin) { const sn_mtCoin = Math.min(2, s_mtCoin.sinceSec); dv_mtCoin.style.opacity = String(Math.max(.25, 1 - sn_mtCoin / 2)); dv_mtCoin.style.transform = 'scale(' + Math.max(.55, 1 - sn_mtCoin * .45) + ')'; } const sv_mtCoin = w_mtCoin.querySelector('.sval'); if (sv_mtCoin) sv_mtCoin.textContent = s_mtCoin.txt; } }
     const s_mtPick = mtPickNow(); const w_mtPick = $('mtPickWrap'); if (w_mtPick) { const pv_mtPick = w_mtPick.dataset.fv || ''; const nv_mtPick = s_mtPick.txt + '|' + s_mtPick.bpm + '|' + Math.floor(Math.min(9, s_mtPick.sinceSec) * 2); if (pv_mtPick !== nv_mtPick) { w_mtPick.dataset.fv = nv_mtPick; w_mtPick.dataset.n = s_mtPick.bpm; w_mtPick.classList.remove('g-good','g-warn','g-bad'); if (s_mtPick.cls) w_mtPick.classList.add(s_mtPick.cls); w_mtPick.classList.toggle('danger', !!s_mtPick.danger); const dv_mtPick = w_mtPick.querySelector('.mtdot'); if (dv_mtPick) { const sn_mtPick = Math.min(2, s_mtPick.sinceSec); dv_mtPick.style.opacity = String(Math.max(.25, 1 - sn_mtPick / 2)); dv_mtPick.style.transform = 'scale(' + Math.max(.55, 1 - sn_mtPick * .45) + ')'; } const sv_mtPick = w_mtPick.querySelector('.sval'); if (sv_mtPick) sv_mtPick.textContent = s_mtPick.txt; } }
+    const s_mtHurt = mtHurtNow(); const w_mtHurt = $('mtHurtWrap'); if (w_mtHurt) { const pv_mtHurt = w_mtHurt.dataset.fv || ''; const nv_mtHurt = s_mtHurt.txt + '|' + s_mtHurt.bpm + '|' + Math.floor(Math.min(9, s_mtHurt.sinceSec) * 2); if (pv_mtHurt !== nv_mtHurt) { w_mtHurt.dataset.fv = nv_mtHurt; w_mtHurt.dataset.n = s_mtHurt.bpm; w_mtHurt.classList.remove('g-good','g-warn','g-bad'); if (s_mtHurt.cls) w_mtHurt.classList.add(s_mtHurt.cls); w_mtHurt.classList.toggle('danger', !!s_mtHurt.danger); const dv_mtHurt = w_mtHurt.querySelector('.mtdot'); if (dv_mtHurt) { const sn_mtHurt = Math.min(2, s_mtHurt.sinceSec); dv_mtHurt.style.opacity = String(Math.max(.25, 1 - sn_mtHurt / 2)); dv_mtHurt.style.transform = 'scale(' + Math.max(.55, 1 - sn_mtHurt * .45) + ')'; } const sv_mtHurt = w_mtHurt.querySelector('.sval'); if (sv_mtHurt) sv_mtHurt.textContent = s_mtHurt.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -21476,6 +21478,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   function mtBossNow() { return mtBoss(mtBeat('boss', Number(stat && stat.bossKills) || 0), mtNow()); }
   // 金币节拍（v1.1.58 第八十九辑：mt 系列已在 v1.1.57 引入）
   // 道具节拍（v1.1.59 第八十九辑：mt 系列已在 v1.1.57 引入）
+  // 受击节拍（v1.1.60 第八十九辑：mt 系列已在 v1.1.57 引入）
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -23336,7 +23339,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.59', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.60', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -25589,6 +25592,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       mtKillStateNow: (a, n) => mtKill(a, n), mtKillNow: () => mtKillNow(), mtKillDomNow: () => { const e = document.querySelector('#mtKillWrap .mtdot'); return e ? e.textContent : null; }, mtKillNumDomNow: () => { const e = document.querySelector('#mtKillWrap'); return e ? e.dataset.n : null; }, mtKillSvalDomNow: () => { const e = document.querySelector('#mtKillWrap .sval'); return e ? e.textContent : null; },
       mtCoinStateNow: (a, n) => mtCoin(a, n), mtCoinNow: () => mtCoinNow(), mtCoinDomNow: () => { const e = document.querySelector('#mtCoinWrap .mtdot'); return e ? e.textContent : null; }, mtCoinNumDomNow: () => { const e = document.querySelector('#mtCoinWrap'); return e ? e.dataset.n : null; }, mtCoinSvalDomNow: () => { const e = document.querySelector('#mtCoinWrap .sval'); return e ? e.textContent : null; },
       mtPickStateNow: (a, n) => mtPick(a, n), mtPickNow: () => mtPickNow(), mtPickDomNow: () => { const e = document.querySelector('#mtPickWrap .mtdot'); return e ? e.textContent : null; }, mtPickNumDomNow: () => { const e = document.querySelector('#mtPickWrap'); return e ? e.dataset.n : null; }, mtPickSvalDomNow: () => { const e = document.querySelector('#mtPickWrap .sval'); return e ? e.textContent : null; },
+      mtHurtStateNow: (a, n) => mtHurt(a, n), mtHurtNow: () => mtHurtNow(), mtHurtDomNow: () => { const e = document.querySelector('#mtHurtWrap .mtdot'); return e ? e.textContent : null; }, mtHurtNumDomNow: () => { const e = document.querySelector('#mtHurtWrap'); return e ? e.dataset.n : null; }, mtHurtSvalDomNow: () => { const e = document.querySelector('#mtHurtWrap .sval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
