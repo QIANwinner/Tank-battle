@@ -22021,6 +22021,20 @@ async function main() {
   } catch (e) { t("U8037 围困压力 抛异常", false, String(e)); t("U8038 围困压力 抛异常", false, String(e)); t("U8039 围困压力 抛异常", false, String(e)); t("U8040 围困压力 抛异常", false, String(e)); t("U8041 围困压力 抛异常", false, String(e)); t("U8042 围困压力 抛异常", false, String(e)); }
 
 
+
+  // ===== U8043~U8048: 磁暴压力(v1.1.30) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('prMagnetWrap'),sv:!!document.querySelector('#prMagnetWrap .sval'),cf:!!document.querySelector('#prMagnetWrap .pr'),pc:!!document.querySelector('#prMagnetWrap .pct'),s:T.prMagnetStateNow({'x':3,'y':4})};return JSON.stringify(r);})()"));
+    t("U8043 磁暴压力 DOM 已加入 HUD + 函数可用", o.dom === true && o.sv === true && o.cf === true && o.pc === true && isFinite(o.s.v) && o.s.pct >= 0 && o.s.pct <= 100 && typeof o.s.txt === 'string', JSON.stringify(o));
+    t("U8044 正常 磁暴压力 → pct=75 g-good 75", o.s.pct === 75 && o.s.cls === "g-good" && o.s.danger === false && o.s.txt === "75", JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={b:T.prMagnetStateNow({'x':0,'y':4})};return JSON.stringify(r);})()"));
+    t("U8045 边界 磁暴压力 → pct=0 g-bad 0", o2.b.pct === 0 && o2.b.cls === "g-bad" && o2.b.danger === true && o2.b.txt === "0", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.prMagnetStateNow(null),b:T.prMagnetStateNow([]),c:T.prMagnetStateNow({'x':2,'y':5}),d:T.prMagnetStateNow({bad:1})};return JSON.stringify(r);})()"));
+    t("U8046 非法 null/[]/缺字段 → 退化，合法帧非退化", o3.a.txt === "—" && o3.a.cls === "g-warn" && o3.a.pct === 0 && o3.b.txt === "—" && o3.d.txt === "—" && isFinite(o3.c.pct) && o3.c.txt !== "—", JSON.stringify(o3));
+    t("U8047 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签", o.s.txt === "—" || (typeof o.s.unit === "string" && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === "string" && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={sv:!!document.querySelector('#prMagnetWrap .sval'),dv:!!document.getElementById('prMagnetWrap').dataset.n,s:T.prMagnetStateNow({'x':3,'y':4})};return JSON.stringify(r);})()"));
+    t("U8048 DOM 与函数一致（.sval 可写 + data-n 已落 DOM）", o5.sv === true && o5.dv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
+  } catch (e) { t("U8043 磁暴压力 抛异常", false, String(e)); t("U8044 磁暴压力 抛异常", false, String(e)); t("U8045 磁暴压力 抛异常", false, String(e)); t("U8046 磁暴压力 抛异常", false, String(e)); t("U8047 磁暴压力 抛异常", false, String(e)); t("U8048 磁暴压力 抛异常", false, String(e)); }
   // ===== U8049~U8054: 最高分压力(v1.1.31) =====
   try {
     const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('prScoreWrap'),sv:!!document.querySelector('#prScoreWrap .sval'),cf:!!document.querySelector('#prScoreWrap .pr'),pc:!!document.querySelector('#prScoreWrap .pct'),s:T.prScoreStateNow({'x':3,'y':4})};return JSON.stringify(r);})()"));
