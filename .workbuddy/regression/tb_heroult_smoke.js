@@ -22372,6 +22372,23 @@ async function main() {
     t("U8180 DOM 与函数一致（.tdar 已渲染箭头 + dataset.n 已落 DOM 在 [-2,2] + .sval 可写 + 净变化读数）", typeof o5.ar === "string" && ['▲▲','▲','▬','▼','▼▼','—'].indexOf(o5.ar) >= 0 && typeof o5.dn === "string" && isFinite(Number(o5.dn)) && Number(o5.dn) >= -2 && Number(o5.dn) <= 2 && typeof o5.sv === "string" && o5.sv.length > 0 && o5.s.ok === true && o5.s.dir === 2, JSON.stringify(o5));
   } catch (e) { t("U8175 输出风向 抛异常", false, String(e)); t("U8176 输出风向 抛异常", false, String(e)); t("U8177 输出风向 抛异常", false, String(e)); t("U8178 输出风向 抛异常", false, String(e)); t("U8179 输出风向 抛异常", false, String(e)); t("U8180 输出风向 抛异常", false, String(e)); }
 
+
+  // ===== U8181~U8186: 连击风向(v1.1.53) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('tdComboWrap'),ar:!!document.querySelector('#tdComboWrap .tdar'),sv:!!document.querySelector('#tdComboWrap .sval'),s:T.tdComboStateNow([40,40,40])};return JSON.stringify(r);})()"));
+    t("U8181 连击风向 DOM 已加入 HUD + 箭头/读数双元素 + 函数可用", o.dom === true && o.ar === true && o.sv === true && o.s.ok === true && o.s.dir === 0 && isFinite(o.s.slope), JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tdComboStateNow([0,10])};return JSON.stringify(r);})()"));
+    t("U8182 正常 连击风向（升窗）→ dir=2 g-good slope=10", o1.s.ok === true && o1.s.dir === 2 && o1.s.slope === 10 && o1.s.cls === "g-good" && o1.s.danger === false && o1.s.txt === "▲▲ +10", JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tdComboStateNow([10,0])};return JSON.stringify(r);})()"));
+    t("U8183 边界 连击风向（降窗）→ dir=-2 g-bad slope=-10", o2.s.ok === true && o2.s.dir === -2 && o2.s.slope === -10 && o2.s.cls === "g-bad" && o2.s.danger === true && o2.s.txt === "▼▼ -10", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.tdComboStateNow(null),b:T.tdComboStateNow([]),c:T.tdComboStateNow([1]),d:T.tdComboStateNow(['a']),e:T.tdComboStateNow({bad:1}),l:T.tdComboStateNow([40,40,40])};return JSON.stringify(r);})()"));
+    t("U8184 非法 null/[]/[1]/['a']/{bad} → 退化 '—'，合法平窗 [40,40,40] 非退化", o3.a.txt === "—" && o3.a.ok === false && o3.b.txt === "—" && o3.b.ok === false && o3.c.txt === "—" && o3.d.txt === "—" && o3.e.txt === "—" && o3.l.ok === true && o3.l.txt === "▬ +0" && o3.l.dir === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tdComboStateNow([0,10]),x:T.tdComboStateNow(null)};return JSON.stringify(r);})()"));
+    t("U8185 结构：合法 txt = 箭头 + 空格 + 有符号数字；非法 txt = '—'", o4.s.ok === true && o4.s.txt.split(' ').length === 2 && ['▲▲','▲','▬','▼','▼▼','—'].indexOf(o4.s.txt.split(' ')[0]) >= 0 && ['▲▲','▲','▬','▼','▼▼','—'].indexOf(o4.s.txt.split(' ')[0]) <= 4 && isFinite(Number(o4.s.txt.split(' ')[1])) && (o4.s.txt.split(' ')[1].indexOf('+') === 0 || o4.s.txt.split(' ')[1].indexOf('-') === 0) && o4.x.txt === "—" && o4.x.ok === false, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={ar:(function(){const e=document.querySelector('#tdComboWrap .tdar');return e?e.textContent:null})(),dn:(function(){const e=document.querySelector('#tdComboWrap');return e?e.dataset.n:null})(),sv:(function(){const e=document.querySelector('#tdComboWrap .sval');return e?e.textContent:null})(),s:T.tdComboStateNow([0,10])};return JSON.stringify(r);})()"));
+    t("U8186 DOM 与函数一致（.tdar 已渲染箭头 + dataset.n 已落 DOM 在 [-2,2] + .sval 可写 + 净变化读数）", typeof o5.ar === "string" && ['▲▲','▲','▬','▼','▼▼','—'].indexOf(o5.ar) >= 0 && typeof o5.dn === "string" && isFinite(Number(o5.dn)) && Number(o5.dn) >= -2 && Number(o5.dn) <= 2 && typeof o5.sv === "string" && o5.sv.length > 0 && o5.s.ok === true && o5.s.dir === 2, JSON.stringify(o5));
+  } catch (e) { t("U8181 连击风向 抛异常", false, String(e)); t("U8182 连击风向 抛异常", false, String(e)); t("U8183 连击风向 抛异常", false, String(e)); t("U8184 连击风向 抛异常", false, String(e)); t("U8185 连击风向 抛异常", false, String(e)); t("U8186 连击风向 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
