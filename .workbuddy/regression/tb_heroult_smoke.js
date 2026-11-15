@@ -21960,6 +21960,21 @@ async function main() {
     t("U8018 DOM 与函数一致（.sval 可写 + data-n 已落 DOM）", o5.sv === true && o5.dv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
   } catch (e) { t("U8013 生命压力 抛异常", false, String(e)); t("U8014 生命压力 抛异常", false, String(e)); t("U8015 生命压力 抛异常", false, String(e)); t("U8016 生命压力 抛异常", false, String(e)); t("U8017 生命压力 抛异常", false, String(e)); t("U8018 生命压力 抛异常", false, String(e)); }
 
+
+  // ===== U8019~U8024: 连击压力(v1.1.26) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('prComboWrap'),sv:!!document.querySelector('#prComboWrap .sval'),cf:!!document.querySelector('#prComboWrap .pr'),pc:!!document.querySelector('#prComboWrap .pct'),s:T.prComboStateNow({'x':3,'y':4})};return JSON.stringify(r);})()"));
+    t("U8019 连击压力 DOM 已加入 HUD + 函数可用", o.dom === true && o.sv === true && o.cf === true && o.pc === true && isFinite(o.s.v) && o.s.pct >= 0 && o.s.pct <= 100 && typeof o.s.txt === 'string', JSON.stringify(o));
+    t("U8020 正常 连击压力 → pct=75 g-good 75", o.s.pct === 75 && o.s.cls === "g-good" && o.s.danger === false && o.s.txt === "75", JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={b:T.prComboStateNow({'x':0,'y':4})};return JSON.stringify(r);})()"));
+    t("U8021 边界 连击压力 → pct=0 g-bad 0", o2.b.pct === 0 && o2.b.cls === "g-bad" && o2.b.danger === true && o2.b.txt === "0", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.prComboStateNow(null),b:T.prComboStateNow([]),c:T.prComboStateNow({'x':2,'y':5}),d:T.prComboStateNow({bad:1})};return JSON.stringify(r);})()"));
+    t("U8022 非法 null/[]/缺字段 → 退化，合法帧非退化", o3.a.txt === "—" && o3.a.cls === "g-warn" && o3.a.pct === 0 && o3.b.txt === "—" && o3.d.txt === "—" && isFinite(o3.c.pct) && o3.c.txt !== "—", JSON.stringify(o3));
+    t("U8023 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签", o.s.txt === "—" || (typeof o.s.unit === "string" && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === "string" && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={sv:!!document.querySelector('#prComboWrap .sval'),dv:!!document.getElementById('prComboWrap').dataset.n,s:T.prComboStateNow({'x':3,'y':4})};return JSON.stringify(r);})()"));
+    t("U8024 DOM 与函数一致（.sval 可写 + data-n 已落 DOM）", o5.sv === true && o5.dv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
+  } catch (e) { t("U8019 连击压力 抛异常", false, String(e)); t("U8020 连击压力 抛异常", false, String(e)); t("U8021 连击压力 抛异常", false, String(e)); t("U8022 连击压力 抛异常", false, String(e)); t("U8023 连击压力 抛异常", false, String(e)); t("U8024 连击压力 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
