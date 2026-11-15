@@ -22695,6 +22695,23 @@ async function main() {
     t("U8294 DOM 与函数一致（双条宽度已渲染 + dataset.n 已落 DOM + .sval 可写）", typeof o5.cw === "string" && o5.cw.length > 0 && o5.cw.indexOf('%') > 0 && typeof o5.pw === "string" && o5.pw.length > 0 && typeof o5.dn === "string" && isFinite(Number(o5.dn)) && typeof o5.sv === "string" && o5.sv.length > 0 && o5.s.ok === true && o5.s.d === 3, JSON.stringify(o5));
   } catch (e) { t("U8289 受击对照 抛异常", false, String(e)); t("U8290 受击对照 抛异常", false, String(e)); t("U8291 受击对照 抛异常", false, String(e)); t("U8292 受击对照 抛异常", false, String(e)); t("U8293 受击对照 抛异常", false, String(e)); t("U8294 受击对照 抛异常", false, String(e)); }
 
+
+  // ===== U8295~U8300: 阵亡对照(v1.1.72) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('pvDeathWrap'),bb:!!document.querySelector('#pvDeathWrap .pvbars'),bc:!!document.querySelector('#pvDeathWrap .pvcur'),bp:!!document.querySelector('#pvDeathWrap .pvprev'),sv:!!document.querySelector('#pvDeathWrap .sval'),s:T.pvDeathStateNow(12,9)};return JSON.stringify(r);})()"));
+    t("U8295 阵亡对照 DOM 已加入 HUD + 双条对照元素 + 函数可用", o.dom === true && o.bb === true && o.bc === true && o.bp === true && o.sv === true && o.s.ok === true && o.s.d === 3 && o.s.pct === 33, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.pvDeathStateNow(12,9)};return JSON.stringify(r);})()"));
+    t("U8296 正常 阵亡对照（本波12 vs 上波9）→ d=+3 g-bad", o1.s.ok === true && o1.s.d === 3 && o1.s.pct === 33 && o1.s.cls === "g-bad" && o1.s.danger === false && o1.s.txt === "+3", JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.pvDeathStateNow(4,9)};return JSON.stringify(r);})()"));
+    t("U8297 边界 阵亡对照（本波4 vs 上波9）→ d=-5 g-good", o2.s.ok === true && o2.s.d === -5 && o2.s.pct === -56 && o2.s.cls === "g-good" && o2.s.danger === false && o2.s.txt === "-5", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.pvDeathStateNow(null,9),b:T.pvDeathStateNow('a',9),c:T.pvDeathStateNow(5,'b'),d:T.pvDeathStateNow({},9),e:T.pvDeathStateNow(NaN,9),l:T.pvDeathStateNow(5,null)};return JSON.stringify(r);})()"));
+    t("U8298 非法 null/'a'/{}/NaN 及坏 prev → 退化 '—'，首波 (5,null) 合法 '首次' 非退化", o3.a.txt === "—" && o3.a.ok === false && o3.b.txt === "—" && o3.b.ok === false && o3.c.txt === "—" && o3.d.txt === "—" && o3.e.txt === "—" && o3.l.ok === true && o3.l.txt === "首次" && o3.l.first === true, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.pvDeathStateNow(12,9),x:T.pvDeathStateNow(null,9)};return JSON.stringify(r);})()"));
+    t("U8299 结构：合法 txt = 有符号数字或 '首次'；非法 txt = '—'", o4.s.ok === true && isFinite(Number(o4.s.txt)) && (o4.s.txt.indexOf('+') === 0 || o4.s.txt.indexOf('-') === 0) && o4.x.txt === "—" && o4.x.ok === false, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={cw:(function(){const e=document.querySelector('#pvDeathWrap .pvcur');return e?e.style.width:null})(),pw:(function(){const e=document.querySelector('#pvDeathWrap .pvprev');return e?e.style.width:null})(),dn:(function(){const e=document.querySelector('#pvDeathWrap');return e?e.dataset.n:null})(),sv:(function(){const e=document.querySelector('#pvDeathWrap .sval');return e?e.textContent:null})(),s:T.pvDeathStateNow(12,9)};return JSON.stringify(r);})()"));
+    t("U8300 DOM 与函数一致（双条宽度已渲染 + dataset.n 已落 DOM + .sval 可写）", typeof o5.cw === "string" && o5.cw.length > 0 && o5.cw.indexOf('%') > 0 && typeof o5.pw === "string" && o5.pw.length > 0 && typeof o5.dn === "string" && isFinite(Number(o5.dn)) && typeof o5.sv === "string" && o5.sv.length > 0 && o5.s.ok === true && o5.s.d === 3, JSON.stringify(o5));
+  } catch (e) { t("U8295 阵亡对照 抛异常", false, String(e)); t("U8296 阵亡对照 抛异常", false, String(e)); t("U8297 阵亡对照 抛异常", false, String(e)); t("U8298 阵亡对照 抛异常", false, String(e)); t("U8299 阵亡对照 抛异常", false, String(e)); t("U8300 阵亡对照 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
