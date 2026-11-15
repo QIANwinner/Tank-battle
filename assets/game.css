@@ -6972,4 +6972,12 @@ html.compact-hud #hud .m-hide { display:none !important; }
   #tdComboWrap.g-bad .tdar { color:#e74c3c; }
   #tdComboWrap.g-bad .sval { color:#e74c3c; }
   #tdComboWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
+  #tdAccWrap .tdar { font-style:normal; font-size:11px; margin:0 2px; color:#aaa; }
+  #tdAccWrap .sval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #tdAccWrap.g-good .tdar { color:#2ecc71; }
+  #tdAccWrap.g-good .sval { color:#2ecc71; }
+  #tdAccWrap.g-warn .tdar { color:#f1c40f; }
+  #tdAccWrap.g-bad .tdar { color:#e74c3c; }
+  #tdAccWrap.g-bad .sval { color:#e74c3c; }
+  #tdAccWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
 
