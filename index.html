@@ -1257,6 +1257,7 @@
     <div class="pill m-hide" id="sgBestWrap"><span class="k">🏁</span><span class="v">最佳波</span><i class="sg"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></i><em class="sval">—</em></div>
     <div class="pill m-hide" id="prLifeWrap"><span class="k">❤️</span><span class="pr"><i class="pct">—</i></span><span class="v">生命</span><em class="sval">—</em></div>
     <div class="pill m-hide" id="prComboWrap"><span class="k">⚡</span><span class="pr"><i class="pct">—</i></span><span class="v">连击</span><em class="sval">—</em></div>
+    <div class="pill m-hide" id="prBulletWrap"><span class="k">💨</span><span class="pr"><i class="pct">—</i></span><span class="v">弹幕</span><em class="sval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1633,7 +1634,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.26</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.27</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7693,6 +7694,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_sgBest = sgBest(sgBestNow()); const w_sgBest = $('sgBestWrap'); if (w_sgBest) { const pv = w_sgBest.dataset.fp || ''; const nv = s_sgBest.n + '|' + s_sgBest.txt; if (pv !== nv) { w_sgBest.dataset.fp = nv; w_sgBest.dataset.n = s_sgBest.n; w_sgBest.classList.remove('g-good','g-warn','g-bad'); if (s_sgBest.cls) w_sgBest.classList.add(s_sgBest.cls); w_sgBest.classList.toggle('danger', !!s_sgBest.danger); const sv = w_sgBest.querySelector('.sval'); if (sv) sv.textContent = s_sgBest.txt; const cells = w_sgBest.querySelectorAll('.sg i'); const col = s_sgBest.cls === 'g-good' ? '#2ecc71' : (s_sgBest.cls === 'g-warn' ? '#f1c40f' : '#e74c3c'); for (let i = 0; i < cells.length; i++) cells[i].style.backgroundColor = i < s_sgBest.n ? col : ''; } }
     const s_prLife = prLife(prLifeNow()); const w_prLife = $('prLifeWrap'); if (w_prLife) { const pv = w_prLife.dataset.fp || ''; const nv = s_prLife.pct + '|' + s_prLife.txt; if (pv !== nv) { w_prLife.dataset.fp = nv; w_prLife.dataset.n = s_prLife.pct; w_prLife.classList.remove('g-good','g-warn','g-bad'); if (s_prLife.cls) w_prLife.classList.add(s_prLife.cls); w_prLife.classList.toggle('danger', !!s_prLife.danger); const sv = w_prLife.querySelector('.sval'); if (sv) sv.textContent = s_prLife.txt; const pc = w_prLife.querySelector('.pct'); if (pc) pc.textContent = s_prLife.pct + '%'; const rg = w_prLife.querySelector('.pr'); if (rg) { const col = s_prLife.cls === 'g-good' ? '#2ecc71' : (s_prLife.cls === 'g-warn' ? '#f1c40f' : '#e74c3c'); rg.style.background = 'conic-gradient(' + col + ' ' + (s_prLife.pct * 3.6) + 'deg, rgba(255,255,255,.12) 0deg)'; } } }
     const s_prCombo = prCombo(prComboNow()); const w_prCombo = $('prComboWrap'); if (w_prCombo) { const pv = w_prCombo.dataset.fp || ''; const nv = s_prCombo.pct + '|' + s_prCombo.txt; if (pv !== nv) { w_prCombo.dataset.fp = nv; w_prCombo.dataset.n = s_prCombo.pct; w_prCombo.classList.remove('g-good','g-warn','g-bad'); if (s_prCombo.cls) w_prCombo.classList.add(s_prCombo.cls); w_prCombo.classList.toggle('danger', !!s_prCombo.danger); const sv = w_prCombo.querySelector('.sval'); if (sv) sv.textContent = s_prCombo.txt; const pc = w_prCombo.querySelector('.pct'); if (pc) pc.textContent = s_prCombo.pct + '%'; const rg = w_prCombo.querySelector('.pr'); if (rg) { const col = s_prCombo.cls === 'g-good' ? '#2ecc71' : (s_prCombo.cls === 'g-warn' ? '#f1c40f' : '#e74c3c'); rg.style.background = 'conic-gradient(' + col + ' ' + (s_prCombo.pct * 3.6) + 'deg, rgba(255,255,255,.12) 0deg)'; } } }
+    const s_prBullet = prBullet(prBulletNow()); const w_prBullet = $('prBulletWrap'); if (w_prBullet) { const pv = w_prBullet.dataset.fp || ''; const nv = s_prBullet.pct + '|' + s_prBullet.txt; if (pv !== nv) { w_prBullet.dataset.fp = nv; w_prBullet.dataset.n = s_prBullet.pct; w_prBullet.classList.remove('g-good','g-warn','g-bad'); if (s_prBullet.cls) w_prBullet.classList.add(s_prBullet.cls); w_prBullet.classList.toggle('danger', !!s_prBullet.danger); const sv = w_prBullet.querySelector('.sval'); if (sv) sv.textContent = s_prBullet.txt; const pc = w_prBullet.querySelector('.pct'); if (pc) pc.textContent = s_prBullet.pct + '%'; const rg = w_prBullet.querySelector('.pr'); if (rg) { const col = s_prBullet.cls === 'g-good' ? '#2ecc71' : (s_prBullet.cls === 'g-warn' ? '#f1c40f' : '#e74c3c'); rg.style.background = 'conic-gradient(' + col + ' ' + (s_prBullet.pct * 3.6) + 'deg, rgba(255,255,255,.12) 0deg)'; } } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -21184,6 +21186,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   function prScoreNow() { const s = Math.max(0, Number(score) || 0); const b = Math.max(0, Number((career && career.bestScore) || 0)); return { x: s, y: Math.max(1, b) }; }
   function prSpaceNow() { const e = Math.max(0, Number((enemies && enemies.length) || 0)); const m = Math.max(1, 4); return { x: Math.max(0, m - Math.min(4, e)), y: m }; }
   // 连击压力（v1.1.26 第八十五辑：pr 系列已在 v1.1.25 引入）
+  // 弹幕压力（v1.1.27 第八十五辑：pr 系列已在 v1.1.25 引入）
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -23044,7 +23047,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.26', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.27', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -25264,6 +25267,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       sgBestStateNow: (frame) => sgBest(frame), sgBestNow: () => sgBest(sgBestNow()), sgBestDomNow: () => { const e = document.querySelector('#sgBestWrap .sval'); return e ? e.textContent : null; }, sgBestNumDomNow: () => { const e = document.querySelector('#sgBestWrap'); return e ? e.dataset.n : null; }, sgBestCellNow: () => { const c = document.querySelector('#sgBestWrap .sg i:nth-child(10)'); return c ? c.style.backgroundColor : null; },
       prLifeStateNow: (frame) => prLife(frame), prLifeNow: () => prLife(prLifeNow()), prLifeDomNow: () => { const e = document.querySelector('#prLifeWrap .sval'); return e ? e.textContent : null; }, prLifeNumDomNow: () => { const e = document.querySelector('#prLifeWrap'); return e ? e.dataset.n : null; }, prLifePctDomNow: () => { const e = document.querySelector('#prLifeWrap .pct'); return e ? e.textContent : null; },
       prComboStateNow: (frame) => prCombo(frame), prComboNow: () => prCombo(prComboNow()), prComboDomNow: () => { const e = document.querySelector('#prComboWrap .sval'); return e ? e.textContent : null; }, prComboNumDomNow: () => { const e = document.querySelector('#prComboWrap'); return e ? e.dataset.n : null; }, prComboPctDomNow: () => { const e = document.querySelector('#prComboWrap .pct'); return e ? e.textContent : null; },
+      prBulletStateNow: (frame) => prBullet(frame), prBulletNow: () => prBullet(prBulletNow()), prBulletDomNow: () => { const e = document.querySelector('#prBulletWrap .sval'); return e ? e.textContent : null; }, prBulletNumDomNow: () => { const e = document.querySelector('#prBulletWrap'); return e ? e.dataset.n : null; }, prBulletPctDomNow: () => { const e = document.querySelector('#prBulletWrap .pct'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
