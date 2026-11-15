@@ -22576,6 +22576,23 @@ async function main() {
     t("U8252 DOM 与函数一致（节拍灯 opacity/transform 已渲染 + dataset.n 已落 DOM + .sval 可写）", typeof o5.op === "string" && o5.op.length > 0 && Number(o5.op) >= 0.25 && typeof o5.tf === "string" && o5.tf.indexOf("scale") === 0 && typeof o5.dn === "string" && isFinite(Number(o5.dn)) && Number(o5.dn) >= 0 && typeof o5.sv === "string" && o5.sv.length > 0 && o5.s.ok === true && o5.s.bpm === 60, JSON.stringify(o5));
   } catch (e) { t("U8247 BOSS节拍 抛异常", false, String(e)); t("U8248 BOSS节拍 抛异常", false, String(e)); t("U8249 BOSS节拍 抛异常", false, String(e)); t("U8250 BOSS节拍 抛异常", false, String(e)); t("U8251 BOSS节拍 抛异常", false, String(e)); t("U8252 BOSS节拍 抛异常", false, String(e)); }
 
+
+  // ===== U8253~U8258: 击杀对照(v1.1.65) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('pvKillWrap'),bb:!!document.querySelector('#pvKillWrap .pvbars'),bc:!!document.querySelector('#pvKillWrap .pvcur'),bp:!!document.querySelector('#pvKillWrap .pvprev'),sv:!!document.querySelector('#pvKillWrap .sval'),s:T.pvKillStateNow(12,9)};return JSON.stringify(r);})()"));
+    t("U8253 击杀对照 DOM 已加入 HUD + 双条对照元素 + 函数可用", o.dom === true && o.bb === true && o.bc === true && o.bp === true && o.sv === true && o.s.ok === true && o.s.d === 3 && o.s.pct === 33, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.pvKillStateNow(12,9)};return JSON.stringify(r);})()"));
+    t("U8254 正常 击杀对照（本波12 vs 上波9）→ d=+3 g-good", o1.s.ok === true && o1.s.d === 3 && o1.s.pct === 33 && o1.s.cls === "g-good" && o1.s.danger === false && o1.s.txt === "+3", JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.pvKillStateNow(4,9)};return JSON.stringify(r);})()"));
+    t("U8255 边界 击杀对照（本波4 vs 上波9）→ d=-5 g-bad", o2.s.ok === true && o2.s.d === -5 && o2.s.pct === -56 && o2.s.cls === "g-bad" && o2.s.danger === true && o2.s.txt === "-5", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.pvKillStateNow(null,9),b:T.pvKillStateNow('a',9),c:T.pvKillStateNow(5,'b'),d:T.pvKillStateNow({},9),e:T.pvKillStateNow(NaN,9),l:T.pvKillStateNow(5,null)};return JSON.stringify(r);})()"));
+    t("U8256 非法 null/'a'/{}/NaN 及坏 prev → 退化 '—'，首波 (5,null) 合法 '首次' 非退化", o3.a.txt === "—" && o3.a.ok === false && o3.b.txt === "—" && o3.b.ok === false && o3.c.txt === "—" && o3.d.txt === "—" && o3.e.txt === "—" && o3.l.ok === true && o3.l.txt === "首次" && o3.l.first === true, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.pvKillStateNow(12,9),x:T.pvKillStateNow(null,9)};return JSON.stringify(r);})()"));
+    t("U8257 结构：合法 txt = 有符号数字或 '首次'；非法 txt = '—'", o4.s.ok === true && isFinite(Number(o4.s.txt)) && (o4.s.txt.indexOf('+') === 0 || o4.s.txt.indexOf('-') === 0) && o4.x.txt === "—" && o4.x.ok === false, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={cw:(function(){const e=document.querySelector('#pvKillWrap .pvcur');return e?e.style.width:null})(),pw:(function(){const e=document.querySelector('#pvKillWrap .pvprev');return e?e.style.width:null})(),dn:(function(){const e=document.querySelector('#pvKillWrap');return e?e.dataset.n:null})(),sv:(function(){const e=document.querySelector('#pvKillWrap .sval');return e?e.textContent:null})(),s:T.pvKillStateNow(12,9)};return JSON.stringify(r);})()"));
+    t("U8258 DOM 与函数一致（双条宽度已渲染 + dataset.n 已落 DOM + .sval 可写）", typeof o5.cw === "string" && o5.cw.length > 0 && o5.cw.indexOf('%') > 0 && typeof o5.pw === "string" && o5.pw.length > 0 && typeof o5.dn === "string" && isFinite(Number(o5.dn)) && typeof o5.sv === "string" && o5.sv.length > 0 && o5.s.ok === true && o5.s.d === 3, JSON.stringify(o5));
+  } catch (e) { t("U8253 击杀对照 抛异常", false, String(e)); t("U8254 击杀对照 抛异常", false, String(e)); t("U8255 击杀对照 抛异常", false, String(e)); t("U8256 击杀对照 抛异常", false, String(e)); t("U8257 击杀对照 抛异常", false, String(e)); t("U8258 击杀对照 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
