@@ -22831,6 +22831,23 @@ async function main() {
     t("U8342 DOM 与函数一致（阶梯 6 格已渲染 + dataset.n 已落 + .wltxt 可写）", o5.cw === 6 && typeof o5.dn === "string" && isFinite(Number(o5.dn)) && typeof o5.wt === "string" && o5.wt.length > 0 && o5.s.ok === true && o5.s.trend === "↘ 持续变差", JSON.stringify(o5));
   } catch (e) { t("U8337 受击阶梯 抛异常", false, String(e)); t("U8338 受击阶梯 抛异常", false, String(e)); t("U8339 受击阶梯 抛异常", false, String(e)); t("U8340 受击阶梯 抛异常", false, String(e)); t("U8341 受击阶梯 抛异常", false, String(e)); t("U8342 受击阶梯 抛异常", false, String(e)); }
 
+
+  // ===== U8343~U8348: 阵亡阶梯(v1.1.80) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('wlDeathWrap'),wl:!!document.querySelector('#wlDeathWrap .wl'),cells:document.querySelectorAll('#wlDeathWrap .wlcell').length,wt:!!document.querySelector('#wlDeathWrap .wltxt'),s:T.wlDeathStateNow([3,5,8])};return JSON.stringify(r);})()"));
+    t("U8343 阵亡阶梯 DOM 已加入 HUD + 阶梯容器 + 6 格 + 函数可用", o.dom === true && o.wl === true && o.cells === 6 && o.wt === true && o.s.ok === true && o.s.trend === "↘ 持续变差", JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.wlDeathStateNow([3,5,8])};return JSON.stringify(r);})()"));
+    t("U8344 正常 阵亡阶梯（3 波同向 → ↘ 持续变差）", o1.s.ok === true && o1.s.n === 3 && o1.s.dirs.join('') === "ddd" && o1.s.trend === "↘ 持续变差" && o1.s.cls === "g-bad" && o1.s.danger === true && o1.s.txt === "↘ 持续变差", JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.wlDeathStateNow([3,5,8,-2,-6])};return JSON.stringify(r);})()"));
+    t("U8345 边界 阵亡阶梯（升升降降末2降）→ ↗ 向好", o2.s.ok === true && o2.s.trend === "↗ 向好" && o2.s.cls === "g-good" && o2.s.danger === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wlDeathStateNow(null),b:T.wlDeathStateNow('a'),c:T.wlDeathStateNow([3,'x',8]),d:T.wlDeathStateNow([5]),e:T.wlDeathStateNow([]),f:T.wlDeathStateNow([0,0,0])};return JSON.stringify(r);})()"));
+    t("U8346 非法 null/'a'/坏元素/单波/空 → 退化 '—'；平稳 [0,0,0] → '→ 平稳'", o3.a.txt === "—" && o3.a.ok === false && o3.b.txt === "—" && o3.c.txt === "—" && o3.d.txt === "—" && o3.d.ok === false && o3.e.txt === "—" && o3.f.ok === true && o3.f.trend === "→ 平稳" && o3.f.cls === "g-warn" && o3.f.danger === false, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.wlDeathStateNow([5,3,1,2]),x:T.wlDeathStateNow([5])};return JSON.stringify(r);})()"));
+    t("U8347 结构：4 波同向 → ↘ 持续变差；单波数据不足 → '—'", o4.s.ok === true && o4.s.n === 4 && o4.s.trend === "↘ 持续变差" && o4.s.txt !== "—" && o4.x.txt === "—" && o4.x.ok === false, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={cw:(function(){return document.querySelectorAll('#wlDeathWrap .wlcell').length})(),dn:(function(){const e=document.querySelector('#wlDeathWrap');return e?e.dataset.n:null})(),wt:(function(){const e=document.querySelector('#wlDeathWrap .wltxt');return e?e.textContent:null})(),s:T.wlDeathStateNow([3,5,8])};return JSON.stringify(r);})()"));
+    t("U8348 DOM 与函数一致（阶梯 6 格已渲染 + dataset.n 已落 + .wltxt 可写）", o5.cw === 6 && typeof o5.dn === "string" && isFinite(Number(o5.dn)) && typeof o5.wt === "string" && o5.wt.length > 0 && o5.s.ok === true && o5.s.trend === "↘ 持续变差", JSON.stringify(o5));
+  } catch (e) { t("U8343 阵亡阶梯 抛异常", false, String(e)); t("U8344 阵亡阶梯 抛异常", false, String(e)); t("U8345 阵亡阶梯 抛异常", false, String(e)); t("U8346 阵亡阶梯 抛异常", false, String(e)); t("U8347 阵亡阶梯 抛异常", false, String(e)); t("U8348 阵亡阶梯 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

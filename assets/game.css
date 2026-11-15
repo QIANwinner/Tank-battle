@@ -7194,4 +7194,14 @@ html.compact-hud #hud .m-hide { display:none !important; }
   #wlHurtWrap.g-bad .wltxt { color:#e74c3c; }
   #wlHurtWrap.g-warn .wltxt { color:#f1c40f; }
   #wlHurtWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
+  #wlDeathWrap .wl { position:relative; display:inline-flex; align-items:flex-end; gap:2px; width:42px; height:12px; vertical-align:middle; margin:0 4px; }
+  #wlDeathWrap .wlcell { flex:1; width:5px; border-radius:1px; background:#555; height:4px; }
+  #wlDeathWrap .wlcell.up { background:#2ecc71; height:10px; }
+  #wlDeathWrap .wlcell.down { background:#e74c3c; height:5px; }
+  #wlDeathWrap .wlcell.flat { background:#f1c40f; height:7px; }
+  #wlDeathWrap .wltxt { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #wlDeathWrap.g-good .wltxt { color:#2ecc71; }
+  #wlDeathWrap.g-bad .wltxt { color:#e74c3c; }
+  #wlDeathWrap.g-warn .wltxt { color:#f1c40f; }
+  #wlDeathWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
 
