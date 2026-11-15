@@ -1263,6 +1263,7 @@
     <div class="pill m-hide" id="prScoreWrap"><span class="k">🏆</span><span class="pr"><i class="pct">—</i></span><span class="v">最高分</span><em class="sval">—</em></div>
     <div class="pill m-hide" id="prSpaceWrap"><span class="k">🕺️</span><span class="pr"><i class="pct">—</i></span><span class="v">走位</span><em class="sval">—</em></div>
     <div class="pill m-hide" id="prMagnetWrap"><span class="k">🧲</span><span class="pr"><i class="pct">—</i></span><span class="v">磁暴</span><em class="sval">—</em></div>
+    <div class="pill m-hide" id="pzDmgWrap"><span class="k">⚔️</span><span class="pz"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="v">输出</span><em class="sval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1639,7 +1640,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.30</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.33</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7705,6 +7706,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_prScore = prScore(prScoreNow()); const w_prScore = $('prScoreWrap'); if (w_prScore) { const pv = w_prScore.dataset.fp || ''; const nv = s_prScore.pct + '|' + s_prScore.txt; if (pv !== nv) { w_prScore.dataset.fp = nv; w_prScore.dataset.n = s_prScore.pct; w_prScore.classList.remove('g-good','g-warn','g-bad'); if (s_prScore.cls) w_prScore.classList.add(s_prScore.cls); w_prScore.classList.toggle('danger', !!s_prScore.danger); const sv = w_prScore.querySelector('.sval'); if (sv) sv.textContent = s_prScore.txt; const pc = w_prScore.querySelector('.pct'); if (pc) pc.textContent = s_prScore.pct + '%'; const rg = w_prScore.querySelector('.pr'); if (rg) { const col = s_prScore.cls === 'g-good' ? '#2ecc71' : (s_prScore.cls === 'g-warn' ? '#f1c40f' : '#e74c3c'); rg.style.background = 'conic-gradient(' + col + ' ' + (s_prScore.pct * 3.6) + 'deg, rgba(255,255,255,.12) 0deg)'; } } }
     const s_prSpace = prSpace(prSpaceNow()); const w_prSpace = $('prSpaceWrap'); if (w_prSpace) { const pv = w_prSpace.dataset.fp || ''; const nv = s_prSpace.pct + '|' + s_prSpace.txt; if (pv !== nv) { w_prSpace.dataset.fp = nv; w_prSpace.dataset.n = s_prSpace.pct; w_prSpace.classList.remove('g-good','g-warn','g-bad'); if (s_prSpace.cls) w_prSpace.classList.add(s_prSpace.cls); w_prSpace.classList.toggle('danger', !!s_prSpace.danger); const sv = w_prSpace.querySelector('.sval'); if (sv) sv.textContent = s_prSpace.txt; const pc = w_prSpace.querySelector('.pct'); if (pc) pc.textContent = s_prSpace.pct + '%'; const rg = w_prSpace.querySelector('.pr'); if (rg) { const col = s_prSpace.cls === 'g-good' ? '#2ecc71' : (s_prSpace.cls === 'g-warn' ? '#f1c40f' : '#e74c3c'); rg.style.background = 'conic-gradient(' + col + ' ' + (s_prSpace.pct * 3.6) + 'deg, rgba(255,255,255,.12) 0deg)'; } } }
     const s_prMagnet = prMagnet(prMagnetNow()); const w_prMagnet = $('prMagnetWrap'); if (w_prMagnet) { const pv = w_prMagnet.dataset.fp || ''; const nv = s_prMagnet.pct + '|' + s_prMagnet.txt; if (pv !== nv) { w_prMagnet.dataset.fp = nv; w_prMagnet.dataset.n = s_prMagnet.pct; w_prMagnet.classList.remove('g-good','g-warn','g-bad'); if (s_prMagnet.cls) w_prMagnet.classList.add(s_prMagnet.cls); w_prMagnet.classList.toggle('danger', !!s_prMagnet.danger); const sv = w_prMagnet.querySelector('.sval'); if (sv) sv.textContent = s_prMagnet.txt; const pc = w_prMagnet.querySelector('.pct'); if (pc) pc.textContent = s_prMagnet.pct + '%'; const rg = w_prMagnet.querySelector('.pr'); if (rg) { const col = s_prMagnet.cls === 'g-good' ? '#2ecc71' : (s_prMagnet.cls === 'g-warn' ? '#f1c40f' : '#e74c3c'); rg.style.background = 'conic-gradient(' + col + ' ' + (s_prMagnet.pct * 3.6) + 'deg, rgba(255,255,255,.12) 0deg)'; } } }
+    const s_pzDmg = pzDmg(pzDmgNow()); const w_pzDmg = $('pzDmgWrap'); if (w_pzDmg) { const pv = w_pzDmg.dataset.fp || ''; const nv = s_pzDmg.pct + '|' + s_pzDmg.txt; if (pv !== nv) { w_pzDmg.dataset.fp = nv; w_pzDmg.dataset.n = s_pzDmg.pct; w_pzDmg.classList.remove('g-good','g-warn','g-bad'); if (s_pzDmg.cls) w_pzDmg.classList.add(s_pzDmg.cls); w_pzDmg.classList.toggle('danger', !!s_pzDmg.danger); const sv = w_pzDmg.querySelector('.sval'); if (sv) sv.textContent = s_pzDmg.txt; const bs = w_pzDmg.querySelectorAll('.pz i'); if (bs && bs.length === 12) { const col = s_pzDmg.cls === 'g-good' ? '#2ecc71' : (s_pzDmg.cls === 'g-warn' ? '#f1c40f' : '#e74c3c'); for (let bi = 0; bi < 12; bi++) { const h = s_pzDmg.bars[bi] || 0; bs[bi].style.height = (2 + Math.round(h * 0.12)) + 'px'; bs[bi].style.background = col; } } } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -21202,6 +21204,48 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // 最高分压力（v1.1.31 第八十五辑：pr 系列已在 v1.1.25 引入）
   // 走位压力（v1.1.32 第八十五辑：pr 系列已在 v1.1.25 引入）
   // 磁暴压力（v1.1.30 第八十五辑：pr 系列已在 v1.1.25 引入）
+  // —— 战局脉冲·节奏频谱：pz 系列纯函数（v1.1.33 第八十六辑）——
+  // 12 柱频谱：bars[i]=近 12 采样强度(0..100)，pct=当前/峰值强度，good 决定高低是否正向
+  const pzHist = {};
+  function pzDeg() { const z = []; for (let i = 0; i < 12; i++) z.push(0); return { v: 0, pct: 0, bars: z, cls: 'g-warn', danger: false, unit: '', txt: '—' }; }
+  function pzWin(key) { if (!pzHist[key]) { pzHist[key] = []; for (let i = 0; i < 12; i++) pzHist[key].push(0); } return pzHist[key]; }
+  function pzPush(key, v) { const w = pzWin(key); w.push(Math.max(0, Number(v) || 0)); w.shift(); return w; }
+  function pzFmt(frame, unit, good) {
+    if (!frame || typeof frame !== 'object' || !('hist' in frame) || !('cap' in frame)) return pzDeg();
+    if (!Array.isArray(frame.hist) || frame.hist.length === 0) return pzDeg();
+    const cap = Math.max(0, Number(frame.cap) || 0); if (cap <= 0) return pzDeg();
+    const cur = Math.max(0, Number(frame.cur) || 0);
+    const bars = []; for (let i = 0; i < 12; i++) { const s = Number(frame.hist[i]) || 0; bars.push(Math.round(Math.min(1, Math.max(0, s) / cap) * 100)); }
+    const p = Math.round(Math.min(1, cur / cap) * 100);
+    const gr = good ? p : (100 - p);
+    const cls = gr >= 60 ? 'g-good' : (gr >= 30 ? 'g-warn' : 'g-bad');
+    return { v: Math.round(cur * 100) / 100, pct: p, bars: bars, cls: cls, danger: good ? p < 25 : p > 75, unit: unit || '', txt: p + (unit || '') };
+  }
+  // 1) 输出脉冲：近期伤害强度 / 峰值伤害 → 高=好（节奏是否持续输出）
+  function pzDmg(frame) { return pzFmt(frame, '', true); }
+  // 2) 击杀脉冲：近期击杀强度 / 峰值击杀 → 高=好
+  function pzKill(frame) { return pzFmt(frame, '', true); }
+  // 3) 命中脉冲：近期命中强度 / 峰值命中 → 高=好
+  function pzHit(frame) { return pzFmt(frame, '', true); }
+  // 4) 连击脉冲：近期连击强度 / 连击窗口峰值 → 高=好
+  function pzCombo(frame) { return pzFmt(frame, '', true); }
+  // 5) 弹幕脉冲：敌方弹幕强度 / 峰值弹幕 → 高=差（危险）
+  function pzBullet(frame) { return pzFmt(frame, '', false); }
+  // 6) 受击脉冲：近期受击强度 / 峰值受击 → 高=差（危险）
+  function pzHurt(frame) { return pzFmt(frame, '', false); }
+  // 7) 补给脉冲：近期补给强度 / 峰值补给 → 高=好
+  function pzPack(frame) { return pzFmt(frame, '', true); }
+  // 8) 波次脉冲：近期波次推进强度 / 峰值波次 → 高=好
+  function pzWave(frame) { return pzFmt(frame, '', true); }
+  // —— 战局脉冲·节奏频谱：数据源（读全局构造 frame，滚动 12 采样）——
+  function pzDmgNow() { const d = Math.max(0, Number(runDmg) || 0); const w = pzPush('dmg', d); const peak = Math.max(1, Math.max.apply(null, w)); return { hist: w, cap: peak, cur: d }; }
+  function pzKillNow() { const k = Math.max(0, Number((stat && stat.kills) || 0)); const w = pzPush('kill', k); const peak = Math.max(1, Math.max.apply(null, w)); return { hist: w, cap: peak, cur: k }; }
+  function pzHitNow() { const h = Math.max(0, Number((stat && stat.hits) || 0)); const w = pzPush('hit', h); const peak = Math.max(1, Math.max.apply(null, w)); return { hist: w, cap: peak, cur: h }; }
+  function pzComboNow() { const c = Math.max(0, Number(combo) || 0); const w = pzPush('combo', c); const peak = Math.max(1, Math.max.apply(null, w)); return { hist: w, cap: peak, cur: c }; }
+  function pzBulletNow() { const b = Math.max(0, Number((bullets && bullets.length) || 0)); const w = pzPush('bullet', b); const peak = Math.max(1, Math.max.apply(null, w)); return { hist: w, cap: peak, cur: b }; }
+  function pzHurtNow() { const h = Math.max(0, Number(hurtCount) || 0); const w = pzPush('hurt', h); const peak = Math.max(1, Math.max.apply(null, w)); return { hist: w, cap: peak, cur: h }; }
+  function pzPackNow() { const p = Math.max(0, Number(runPowerups) || 0); const w = pzPush('pack', p); const peak = Math.max(1, Math.max.apply(null, w)); return { hist: w, cap: peak, cur: p }; }
+  function pzWaveNow() { const wv = Math.max(0, Number(wave) || 0); const w = pzPush('wave', wv); const peak = Math.max(1, Math.max.apply(null, w)); return { hist: w, cap: peak, cur: wv }; }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -23062,7 +23106,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.30', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.33', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -25288,6 +25332,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       prScoreStateNow: (frame) => prScore(frame), prScoreNow: () => prScore(prScoreNow()), prScoreDomNow: () => { const e = document.querySelector('#prScoreWrap .sval'); return e ? e.textContent : null; }, prScoreNumDomNow: () => { const e = document.querySelector('#prScoreWrap'); return e ? e.dataset.n : null; }, prScorePctDomNow: () => { const e = document.querySelector('#prScoreWrap .pct'); return e ? e.textContent : null; },
       prSpaceStateNow: (frame) => prSpace(frame), prSpaceNow: () => prSpace(prSpaceNow()), prSpaceDomNow: () => { const e = document.querySelector('#prSpaceWrap .sval'); return e ? e.textContent : null; }, prSpaceNumDomNow: () => { const e = document.querySelector('#prSpaceWrap'); return e ? e.dataset.n : null; }, prSpacePctDomNow: () => { const e = document.querySelector('#prSpaceWrap .pct'); return e ? e.textContent : null; },
       prMagnetStateNow: (frame) => prMagnet(frame), prMagnetNow: () => prMagnet(prMagnetNow()), prMagnetDomNow: () => { const e = document.querySelector('#prMagnetWrap .sval'); return e ? e.textContent : null; }, prMagnetNumDomNow: () => { const e = document.querySelector('#prMagnetWrap'); return e ? e.dataset.n : null; }, prMagnetPctDomNow: () => { const e = document.querySelector('#prMagnetWrap .pct'); return e ? e.textContent : null; },
+      pzDmgStateNow: (frame) => pzDmg(frame), pzDmgNow: () => pzDmg(pzDmgNow()), pzDmgDomNow: () => { const e = document.querySelector('#pzDmgWrap .sval'); return e ? e.textContent : null; }, pzDmgNumDomNow: () => { const e = document.querySelector('#pzDmgWrap'); return e ? e.dataset.n : null; }, pzDmgBarsDomNow: () => { const e = document.querySelectorAll('#pzDmgWrap .pz i'); return e && e.length === 12 ? e[0].style.height : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

@@ -6951,3 +6951,9 @@ html.compact-hud #hud .m-hide { display:none !important; }
   #prMagnetWrap.danger .sval { color:#e74c3c; }
   #prMagnetWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
 @CSS@
+  #pzDmgWrap .pz { display:inline-flex; align-items:flex-end; gap:1px; height:14px; width:38px; vertical-align:middle; }
+  #pzDmgWrap .pz i { flex:1; width:2px; border-radius:1px 1px 0 0; background:#2ecc71; opacity:.9; }
+  #pzDmgWrap .sval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #pzDmgWrap.danger .sval { color:#e74c3c; }
+  #pzDmgWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
+@CSS@
