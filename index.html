@@ -1303,6 +1303,7 @@
     <div class="pill m-hide" id="pvPickWrap"><span class="k">🎁</span><i class="pvbars"><i class="pvcur"></i><i class="pvprev"></i></i><span class="v">道具</span><em class="sval">—</em></div>
     <div class="pill m-hide" id="pvHurtWrap"><span class="k">💔</span><i class="pvbars"><i class="pvcur"></i><i class="pvprev"></i></i><span class="v">受击</span><em class="sval">—</em></div>
     <div class="pill m-hide" id="pvDeathWrap"><span class="k">💀</span><i class="pvbars"><i class="pvcur"></i><i class="pvprev"></i></i><span class="v">阵亡</span><em class="sval">—</em></div>
+    <div class="pill m-hide" id="wlKillWrap"><span class="k">⚔️</span><i class="wl"><i class="wlcell"></i><i class="wlcell"></i><i class="wlcell"></i><i class="wlcell"></i><i class="wlcell"></i><i class="wlcell"></i></i><span class="v">击杀</span><em class="wltxt">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1679,7 +1680,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.72</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.73</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7785,6 +7786,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_pvPick = pvPickNow(); const w_pvPick = $('pvPickWrap'); if (w_pvPick) { const pv_pvPick = w_pvPick.dataset.fv || ''; const nv_pvPick = s_pvPick.txt + '|' + s_pvPick.cur; if (pv_pvPick !== nv_pvPick) { w_pvPick.dataset.fv = nv_pvPick; w_pvPick.dataset.n = s_pvPick.d; w_pvPick.classList.remove('g-good','g-warn','g-bad'); if (s_pvPick.cls) w_pvPick.classList.add(s_pvPick.cls); w_pvPick.classList.toggle('danger', !!s_pvPick.danger); const mx_pvPick = Math.max(s_pvPick.cur, s_pvPick.prev, 1); const bc_pvPick = w_pvPick.querySelector('.pvcur'); if (bc_pvPick) bc_pvPick.style.width = (s_pvPick.cur > 0 ? Math.min(100, Math.round(s_pvPick.cur / mx_pvPick * 100)) : 0) + '%'; const bp_pvPick = w_pvPick.querySelector('.pvprev'); if (bp_pvPick) bp_pvPick.style.width = (s_pvPick.prev > 0 ? Math.min(100, Math.round(s_pvPick.prev / mx_pvPick * 100)) : 0) + '%'; const sv_pvPick = w_pvPick.querySelector('.sval'); if (sv_pvPick) sv_pvPick.textContent = s_pvPick.txt; } }
     const s_pvHurt = pvHurtNow(); const w_pvHurt = $('pvHurtWrap'); if (w_pvHurt) { const pv_pvHurt = w_pvHurt.dataset.fv || ''; const nv_pvHurt = s_pvHurt.txt + '|' + s_pvHurt.cur; if (pv_pvHurt !== nv_pvHurt) { w_pvHurt.dataset.fv = nv_pvHurt; w_pvHurt.dataset.n = s_pvHurt.d; w_pvHurt.classList.remove('g-good','g-warn','g-bad'); if (s_pvHurt.cls) w_pvHurt.classList.add(s_pvHurt.cls); w_pvHurt.classList.toggle('danger', !!s_pvHurt.danger); const mx_pvHurt = Math.max(s_pvHurt.cur, s_pvHurt.prev, 1); const bc_pvHurt = w_pvHurt.querySelector('.pvcur'); if (bc_pvHurt) bc_pvHurt.style.width = (s_pvHurt.cur > 0 ? Math.min(100, Math.round(s_pvHurt.cur / mx_pvHurt * 100)) : 0) + '%'; const bp_pvHurt = w_pvHurt.querySelector('.pvprev'); if (bp_pvHurt) bp_pvHurt.style.width = (s_pvHurt.prev > 0 ? Math.min(100, Math.round(s_pvHurt.prev / mx_pvHurt * 100)) : 0) + '%'; const sv_pvHurt = w_pvHurt.querySelector('.sval'); if (sv_pvHurt) sv_pvHurt.textContent = s_pvHurt.txt; } }
     const s_pvDeath = pvDeathNow(); const w_pvDeath = $('pvDeathWrap'); if (w_pvDeath) { const pv_pvDeath = w_pvDeath.dataset.fv || ''; const nv_pvDeath = s_pvDeath.txt + '|' + s_pvDeath.cur; if (pv_pvDeath !== nv_pvDeath) { w_pvDeath.dataset.fv = nv_pvDeath; w_pvDeath.dataset.n = s_pvDeath.d; w_pvDeath.classList.remove('g-good','g-warn','g-bad'); if (s_pvDeath.cls) w_pvDeath.classList.add(s_pvDeath.cls); w_pvDeath.classList.toggle('danger', !!s_pvDeath.danger); const mx_pvDeath = Math.max(s_pvDeath.cur, s_pvDeath.prev, 1); const bc_pvDeath = w_pvDeath.querySelector('.pvcur'); if (bc_pvDeath) bc_pvDeath.style.width = (s_pvDeath.cur > 0 ? Math.min(100, Math.round(s_pvDeath.cur / mx_pvDeath * 100)) : 0) + '%'; const bp_pvDeath = w_pvDeath.querySelector('.pvprev'); if (bp_pvDeath) bp_pvDeath.style.width = (s_pvDeath.prev > 0 ? Math.min(100, Math.round(s_pvDeath.prev / mx_pvDeath * 100)) : 0) + '%'; const sv_pvDeath = w_pvDeath.querySelector('.sval'); if (sv_pvDeath) sv_pvDeath.textContent = s_pvDeath.txt; } }
+    const s_wlKill = wlKillNow(); const w_wlKill = $('wlKillWrap'); if (w_wlKill) { const pv_wlKill = w_wlKill.dataset.fv || ''; const nv_wlKill = s_wlKill.txt + '|' + s_wlKill.n; if (pv_wlKill !== nv_wlKill) { w_wlKill.dataset.fv = nv_wlKill; w_wlKill.dataset.n = s_wlKill.n; w_wlKill.classList.remove('g-good','g-warn','g-bad'); if (s_wlKill.cls) w_wlKill.classList.add(s_wlKill.cls); w_wlKill.classList.toggle('danger', !!s_wlKill.danger); const cs_wlKill = w_wlKill.querySelectorAll('.wlcell'); const ds_wlKill = s_wlKill.dirs || []; cs_wlKill.forEach((c, i) => { const di = ds_wlKill[i - (ds_wlKill.length - cs_wlKill.length)] || ''; c.className = 'wlcell' + (di ? ' ' + di : ''); }); const tv_wlKill = w_wlKill.querySelector('.wltxt'); if (tv_wlKill) tv_wlKill.textContent = s_wlKill.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -21566,6 +21568,60 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // 道具对照（v1.1.70 第九十辑：pv 系列已在 v1.1.65 引入）
   // 受击对照（v1.1.71 第九十辑：pv 系列已在 v1.1.65 引入）
   // 阵亡对照（v1.1.72 第九十辑：pv 系列已在 v1.1.65 引入）
+  // —— 连波趋势阶梯：wl 系列（v1.1.73 第九十一辑）——
+  // 波次快照仓：每 key 一个 {wave, base, hist[]}；wave 增→归档每波净增量（保留最近 6 波）；
+  // wave 减（新关/新局）→ hist 清空待重新积累
+  var __wlH = __wlH || {};
+  function wlTrack(key, wave, cur) {
+    const st = __wlH[key] || (__wlH[key] = { wave: -1, base: 0, hist: [] });
+    const w = Number(wave) || 0, v = Number(cur) || 0;
+    if (w !== st.wave) {
+      if (w > st.wave && st.wave >= 0) { const d = v - st.base; st.hist.push(d); if (st.hist.length > 6) st.hist.shift(); }
+      else st.hist = [];
+      st.wave = w; st.base = v;
+    }
+    return st.hist;
+  }
+  // 纯函数：净增量序列 → 方向一致性阶梯 {ok,n,dirs,s,trend,cls,danger,txt}
+  // s>0=好方向（goodUp=false 时净增为坏事→翻转符号）；评级看最近 3 波方向：
+  // 全 u 持续向好 / 全 d 持续变差(danger) / 全 f 平稳 / 末2同u 向好 / 末2同d 变差(danger) / 其余 震荡
+  // 非法（非数组/坏元素/单波/空）→ 退化 '—'
+  function wlCalc(hist, goodUp) {
+    const deg = { ok: false, n: 0, dirs: [], trend: '—', cls: 'g-warn', danger: false, txt: '—' };
+    if (!Array.isArray(hist)) return deg;
+    const vals = [];
+    for (const h of hist) { const v = Number(h); if (!isFinite(v)) return deg; vals.push(v); }
+    if (vals.length < 2) return deg;
+    const up = goodUp !== false;
+    const s = vals.map(v => up ? v : -v);
+    const dirs = s.map(x => x > 0 ? 'u' : x < 0 ? 'd' : 'f');
+    const last = dirs.slice(-3);
+    const all = (ch) => last.every(x => x === ch);
+    let trend, cls, danger;
+    if (all('u')) { trend = '↗ 持续向好'; cls = 'g-good'; danger = false; }
+    else if (all('d')) { trend = '↘ 持续变差'; cls = 'g-bad'; danger = true; }
+    else if (all('f')) { trend = '→ 平稳'; cls = 'g-warn'; danger = false; }
+    else { const d2 = dirs.slice(-2); if (d2[0] === 'u' && d2[1] === 'u') { trend = '↗ 向好'; cls = 'g-good'; danger = false; } else if (d2[0] === 'd' && d2[1] === 'd') { trend = '↘ 变差'; cls = 'g-bad'; danger = true; } else { trend = '⇄ 震荡'; cls = 'g-warn'; danger = false; } }
+    return { ok: true, n: vals.length, dirs: dirs, s: s, trend: trend, cls: cls, danger: danger, txt: trend };
+  }
+  // —— 8 个阶梯纯函数（正向 x6；受击/阵亡反向 x2）——
+  function wlKill(a) { return wlCalc(a, true); }
+  function wlCoin(a) { return wlCalc(a, true); }
+  function wlDmg(a) { return wlCalc(a, true); }
+  function wlHit(a) { return wlCalc(a, true); }
+  function wlPick(a) { return wlCalc(a, true); }
+  function wlScore(a) { return wlCalc(a, true); }
+  function wlHurt(a) { return wlCalc(a, false); }
+  function wlDeath(a) { return wlCalc(a, false); }
+  // —— 连波趋势阶梯：数据源（波次快照跟踪 + 阶梯计算）——
+  function wlKillNow() { return wlKill(wlTrack('kill', wave, Number(stat && stat.kills) || 0)); }
+  function wlCoinNow() { return wlCoin(wlTrack('coin', wave, Number(runCoins) || 0)); }
+  function wlDmgNow() { return wlDmg(wlTrack('dmg', wave, Number(runDmg) || 0)); }
+  function wlHitNow() { return wlHit(wlTrack('hit', wave, Number(stat && stat.hits) || 0)); }
+  function wlPickNow() { return wlPick(wlTrack('pick', wave, Number(runPowerups) || 0)); }
+  function wlScoreNow() { return wlScore(wlTrack('score', wave, Number(score) || 0)); }
+  function wlHurtNow() { return wlHurt(wlTrack('hurt', wave, Number(hurtCount) || 0)); }
+  function wlDeathNow() { return wlDeath(wlTrack('death', wave, Number(stat && stat.deaths) || 0)); }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -23426,7 +23482,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.72', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.73', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -25692,6 +25748,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       pvPickStateNow: (a, b) => pvPick(a, b), pvPickNow: () => pvPickNow(), pvPickDomNow: () => { const e = document.querySelector('#pvPickWrap .sval'); return e ? e.textContent : null; }, pvPickNumDomNow: () => { const e = document.querySelector('#pvPickWrap'); return e ? e.dataset.n : null; }, pvPickCurDomNow: () => { const e = document.querySelector('#pvPickWrap .pvcur'); return e ? e.style.width : null; }, pvPickPrevDomNow: () => { const e = document.querySelector('#pvPickWrap .pvprev'); return e ? e.style.width : null; },
       pvHurtStateNow: (a, b) => pvHurt(a, b), pvHurtNow: () => pvHurtNow(), pvHurtDomNow: () => { const e = document.querySelector('#pvHurtWrap .sval'); return e ? e.textContent : null; }, pvHurtNumDomNow: () => { const e = document.querySelector('#pvHurtWrap'); return e ? e.dataset.n : null; }, pvHurtCurDomNow: () => { const e = document.querySelector('#pvHurtWrap .pvcur'); return e ? e.style.width : null; }, pvHurtPrevDomNow: () => { const e = document.querySelector('#pvHurtWrap .pvprev'); return e ? e.style.width : null; },
       pvDeathStateNow: (a, b) => pvDeath(a, b), pvDeathNow: () => pvDeathNow(), pvDeathDomNow: () => { const e = document.querySelector('#pvDeathWrap .sval'); return e ? e.textContent : null; }, pvDeathNumDomNow: () => { const e = document.querySelector('#pvDeathWrap'); return e ? e.dataset.n : null; }, pvDeathCurDomNow: () => { const e = document.querySelector('#pvDeathWrap .pvcur'); return e ? e.style.width : null; }, pvDeathPrevDomNow: () => { const e = document.querySelector('#pvDeathWrap .pvprev'); return e ? e.style.width : null; },
+      wlKillStateNow: (a) => wlKill(a), wlKillNow: () => wlKillNow(), wlKillDomNow: () => { const e = document.querySelector('#wlKillWrap .wltxt'); return e ? e.textContent : null; }, wlKillCellsNow: () => { const c = document.querySelectorAll('#wlKillWrap .wlcell'); return c ? c.length : 0; }, wlKillNumDomNow: () => { const e = document.querySelector('#wlKillWrap'); return e ? e.dataset.n : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
