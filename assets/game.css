@@ -7076,4 +7076,12 @@ html.compact-hud #hud .m-hide { display:none !important; }
   #pvDmgWrap .sval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
   #pvDmgWrap.g-bad .sval { color:#e74c3c; }
   #pvDmgWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
+  #pvHitWrap .pvbars { position:relative; display:inline-block; width:44px; height:10px; vertical-align:middle; margin:0 4px; background:#2a2a3a; border-radius:2px; }
+  #pvHitWrap .pvcur { position:absolute; left:0; top:0; height:4px; width:0; border-radius:2px; background:#2ecc71; }
+  #pvHitWrap .pvprev { position:absolute; left:0; bottom:0; height:3px; width:0; border-radius:2px; background:#8a8a9a; opacity:.7; }
+  #pvHitWrap.g-warn .pvcur { background:#f1c40f; }
+  #pvHitWrap.g-bad .pvcur { background:#e74c3c; }
+  #pvHitWrap .sval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #pvHitWrap.g-bad .sval { color:#e74c3c; }
+  #pvHitWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
 

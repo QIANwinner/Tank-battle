@@ -22627,6 +22627,23 @@ async function main() {
     t("U8270 DOM 与函数一致（双条宽度已渲染 + dataset.n 已落 DOM + .sval 可写）", typeof o5.cw === "string" && o5.cw.length > 0 && o5.cw.indexOf('%') > 0 && typeof o5.pw === "string" && o5.pw.length > 0 && typeof o5.dn === "string" && isFinite(Number(o5.dn)) && typeof o5.sv === "string" && o5.sv.length > 0 && o5.s.ok === true && o5.s.d === 3, JSON.stringify(o5));
   } catch (e) { t("U8265 伤害对照 抛异常", false, String(e)); t("U8266 伤害对照 抛异常", false, String(e)); t("U8267 伤害对照 抛异常", false, String(e)); t("U8268 伤害对照 抛异常", false, String(e)); t("U8269 伤害对照 抛异常", false, String(e)); t("U8270 伤害对照 抛异常", false, String(e)); }
 
+
+  // ===== U8271~U8276: 命中对照(v1.1.68) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('pvHitWrap'),bb:!!document.querySelector('#pvHitWrap .pvbars'),bc:!!document.querySelector('#pvHitWrap .pvcur'),bp:!!document.querySelector('#pvHitWrap .pvprev'),sv:!!document.querySelector('#pvHitWrap .sval'),s:T.pvHitStateNow(12,9)};return JSON.stringify(r);})()"));
+    t("U8271 命中对照 DOM 已加入 HUD + 双条对照元素 + 函数可用", o.dom === true && o.bb === true && o.bc === true && o.bp === true && o.sv === true && o.s.ok === true && o.s.d === 3 && o.s.pct === 33, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.pvHitStateNow(12,9)};return JSON.stringify(r);})()"));
+    t("U8272 正常 命中对照（本波12 vs 上波9）→ d=+3 g-good", o1.s.ok === true && o1.s.d === 3 && o1.s.pct === 33 && o1.s.cls === "g-good" && o1.s.danger === false && o1.s.txt === "+3", JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.pvHitStateNow(4,9)};return JSON.stringify(r);})()"));
+    t("U8273 边界 命中对照（本波4 vs 上波9）→ d=-5 g-bad", o2.s.ok === true && o2.s.d === -5 && o2.s.pct === -56 && o2.s.cls === "g-bad" && o2.s.danger === true && o2.s.txt === "-5", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.pvHitStateNow(null,9),b:T.pvHitStateNow('a',9),c:T.pvHitStateNow(5,'b'),d:T.pvHitStateNow({},9),e:T.pvHitStateNow(NaN,9),l:T.pvHitStateNow(5,null)};return JSON.stringify(r);})()"));
+    t("U8274 非法 null/'a'/{}/NaN 及坏 prev → 退化 '—'，首波 (5,null) 合法 '首次' 非退化", o3.a.txt === "—" && o3.a.ok === false && o3.b.txt === "—" && o3.b.ok === false && o3.c.txt === "—" && o3.d.txt === "—" && o3.e.txt === "—" && o3.l.ok === true && o3.l.txt === "首次" && o3.l.first === true, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.pvHitStateNow(12,9),x:T.pvHitStateNow(null,9)};return JSON.stringify(r);})()"));
+    t("U8275 结构：合法 txt = 有符号数字或 '首次'；非法 txt = '—'", o4.s.ok === true && isFinite(Number(o4.s.txt)) && (o4.s.txt.indexOf('+') === 0 || o4.s.txt.indexOf('-') === 0) && o4.x.txt === "—" && o4.x.ok === false, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={cw:(function(){const e=document.querySelector('#pvHitWrap .pvcur');return e?e.style.width:null})(),pw:(function(){const e=document.querySelector('#pvHitWrap .pvprev');return e?e.style.width:null})(),dn:(function(){const e=document.querySelector('#pvHitWrap');return e?e.dataset.n:null})(),sv:(function(){const e=document.querySelector('#pvHitWrap .sval');return e?e.textContent:null})(),s:T.pvHitStateNow(12,9)};return JSON.stringify(r);})()"));
+    t("U8276 DOM 与函数一致（双条宽度已渲染 + dataset.n 已落 DOM + .sval 可写）", typeof o5.cw === "string" && o5.cw.length > 0 && o5.cw.indexOf('%') > 0 && typeof o5.pw === "string" && o5.pw.length > 0 && typeof o5.dn === "string" && isFinite(Number(o5.dn)) && typeof o5.sv === "string" && o5.sv.length > 0 && o5.s.ok === true && o5.s.d === 3, JSON.stringify(o5));
+  } catch (e) { t("U8271 命中对照 抛异常", false, String(e)); t("U8272 命中对照 抛异常", false, String(e)); t("U8273 命中对照 抛异常", false, String(e)); t("U8274 命中对照 抛异常", false, String(e)); t("U8275 命中对照 抛异常", false, String(e)); t("U8276 命中对照 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
