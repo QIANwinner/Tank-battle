@@ -1286,6 +1286,7 @@
     <div class="pill m-hide" id="tdComboWrap"><span class="k">⚡</span><i class="tdar">—</i><span class="v">连击</span><em class="sval">—</em></div>
     <div class="pill m-hide" id="tdAccWrap"><span class="k">🎯</span><i class="tdar">—</i><span class="v">命中</span><em class="sval">—</em></div>
     <div class="pill m-hide" id="tdWaveWrap"><span class="k">🌊</span><i class="tdar">—</i><span class="v">波次</span><em class="sval">—</em></div>
+    <div class="pill m-hide" id="tdThreatWrap"><span class="k">☠️</span><i class="tdar">—</i><span class="v">威胁</span><em class="sval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1662,7 +1663,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.55</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.56</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7751,6 +7752,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_tdCombo = tdComboNow(); const w_tdCombo = $('tdComboWrap'); if (w_tdCombo) { const pv_tdCombo = w_tdCombo.dataset.fv || ''; const nv_tdCombo = s_tdCombo.txt + '|' + s_tdCombo.dir; if (pv_tdCombo !== nv_tdCombo) { w_tdCombo.dataset.fv = nv_tdCombo; w_tdCombo.dataset.n = s_tdCombo.dir; w_tdCombo.classList.remove('g-good','g-warn','g-bad'); if (s_tdCombo.cls) w_tdCombo.classList.add(s_tdCombo.cls); w_tdCombo.classList.toggle('danger', !!s_tdCombo.danger); const av_tdCombo = w_tdCombo.querySelector('.tdar'); if (av_tdCombo) av_tdCombo.textContent = s_tdCombo.txt.split(' ')[0]; const sv_tdCombo = w_tdCombo.querySelector('.sval'); if (sv_tdCombo) sv_tdCombo.textContent = s_tdCombo.txt; } }
     const s_tdAcc = tdAccNow(); const w_tdAcc = $('tdAccWrap'); if (w_tdAcc) { const pv_tdAcc = w_tdAcc.dataset.fv || ''; const nv_tdAcc = s_tdAcc.txt + '|' + s_tdAcc.dir; if (pv_tdAcc !== nv_tdAcc) { w_tdAcc.dataset.fv = nv_tdAcc; w_tdAcc.dataset.n = s_tdAcc.dir; w_tdAcc.classList.remove('g-good','g-warn','g-bad'); if (s_tdAcc.cls) w_tdAcc.classList.add(s_tdAcc.cls); w_tdAcc.classList.toggle('danger', !!s_tdAcc.danger); const av_tdAcc = w_tdAcc.querySelector('.tdar'); if (av_tdAcc) av_tdAcc.textContent = s_tdAcc.txt.split(' ')[0]; const sv_tdAcc = w_tdAcc.querySelector('.sval'); if (sv_tdAcc) sv_tdAcc.textContent = s_tdAcc.txt; } }
     const s_tdWave = tdWaveNow(); const w_tdWave = $('tdWaveWrap'); if (w_tdWave) { const pv_tdWave = w_tdWave.dataset.fv || ''; const nv_tdWave = s_tdWave.txt + '|' + s_tdWave.dir; if (pv_tdWave !== nv_tdWave) { w_tdWave.dataset.fv = nv_tdWave; w_tdWave.dataset.n = s_tdWave.dir; w_tdWave.classList.remove('g-good','g-warn','g-bad'); if (s_tdWave.cls) w_tdWave.classList.add(s_tdWave.cls); w_tdWave.classList.toggle('danger', !!s_tdWave.danger); const av_tdWave = w_tdWave.querySelector('.tdar'); if (av_tdWave) av_tdWave.textContent = s_tdWave.txt.split(' ')[0]; const sv_tdWave = w_tdWave.querySelector('.sval'); if (sv_tdWave) sv_tdWave.textContent = s_tdWave.txt; } }
+    const s_tdThreat = tdThreatNow(); const w_tdThreat = $('tdThreatWrap'); if (w_tdThreat) { const pv_tdThreat = w_tdThreat.dataset.fv || ''; const nv_tdThreat = s_tdThreat.txt + '|' + s_tdThreat.dir; if (pv_tdThreat !== nv_tdThreat) { w_tdThreat.dataset.fv = nv_tdThreat; w_tdThreat.dataset.n = s_tdThreat.dir; w_tdThreat.classList.remove('g-good','g-warn','g-bad'); if (s_tdThreat.cls) w_tdThreat.classList.add(s_tdThreat.cls); w_tdThreat.classList.toggle('danger', !!s_tdThreat.danger); const av_tdThreat = w_tdThreat.querySelector('.tdar'); if (av_tdThreat) av_tdThreat.textContent = s_tdThreat.txt.split(' ')[0]; const sv_tdThreat = w_tdThreat.querySelector('.sval'); if (sv_tdThreat) sv_tdThreat.textContent = s_tdThreat.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -21412,6 +21414,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // 连击风向（v1.1.53 第八十八辑：td 系列已在 v1.1.49 引入）
   // 命中风向（v1.1.54 第八十八辑：td 系列已在 v1.1.49 引入）
   // 波次风向（v1.1.55 第八十八辑：td 系列已在 v1.1.49 引入）
+  // 威胁风向（v1.1.56 第八十八辑：td 系列已在 v1.1.49 引入）
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -23272,7 +23275,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.55', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.56', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -25521,6 +25524,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       tdComboStateNow: (a) => tdCombo(a), tdComboNow: () => tdComboNow(), tdComboDomNow: () => { const e = document.querySelector('#tdComboWrap .tdar'); return e ? e.textContent : null; }, tdComboNumDomNow: () => { const e = document.querySelector('#tdComboWrap'); return e ? e.dataset.n : null; }, tdComboSvalDomNow: () => { const e = document.querySelector('#tdComboWrap .sval'); return e ? e.textContent : null; },
       tdAccStateNow: (a) => tdAcc(a), tdAccNow: () => tdAccNow(), tdAccDomNow: () => { const e = document.querySelector('#tdAccWrap .tdar'); return e ? e.textContent : null; }, tdAccNumDomNow: () => { const e = document.querySelector('#tdAccWrap'); return e ? e.dataset.n : null; }, tdAccSvalDomNow: () => { const e = document.querySelector('#tdAccWrap .sval'); return e ? e.textContent : null; },
       tdWaveStateNow: (a) => tdWave(a), tdWaveNow: () => tdWaveNow(), tdWaveDomNow: () => { const e = document.querySelector('#tdWaveWrap .tdar'); return e ? e.textContent : null; }, tdWaveNumDomNow: () => { const e = document.querySelector('#tdWaveWrap'); return e ? e.dataset.n : null; }, tdWaveSvalDomNow: () => { const e = document.querySelector('#tdWaveWrap .sval'); return e ? e.textContent : null; },
+      tdThreatStateNow: (a) => tdThreat(a), tdThreatNow: () => tdThreatNow(), tdThreatDomNow: () => { const e = document.querySelector('#tdThreatWrap .tdar'); return e ? e.textContent : null; }, tdThreatNumDomNow: () => { const e = document.querySelector('#tdThreatWrap'); return e ? e.dataset.n : null; }, tdThreatSvalDomNow: () => { const e = document.querySelector('#tdThreatWrap .sval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
