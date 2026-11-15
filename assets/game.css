@@ -6993,3 +6993,9 @@ html.compact-hud #hud .m-hide { display:none !important; }
   #pzPackWrap.danger .sval { color:#e74c3c; }
   #pzPackWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
 @CSS@
+  #pzWaveWrap .pz { display:inline-flex; align-items:flex-end; gap:1px; height:14px; width:38px; vertical-align:middle; }
+  #pzWaveWrap .pz i { flex:1; width:2px; border-radius:1px 1px 0 0; background:#2ecc71; opacity:.9; }
+  #pzWaveWrap .sval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #pzWaveWrap.danger .sval { color:#e74c3c; }
+  #pzWaveWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
+@CSS@
