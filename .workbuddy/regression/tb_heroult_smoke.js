@@ -22899,6 +22899,23 @@ async function main() {
     t("U8366 DOM 与函数一致（SVG 渲染管线可出点 + polyline 可写 + 函数正确）", typeof o5.pt === "string" && o5.pt.indexOf(',') > 0 && o5.pt.length > 4 && o5.dom === "1,1" && o5.s.ok === true && o5.s.trend === "↗ 较稳", JSON.stringify(o5));
   } catch (e) { t("U8361 金币累积 抛异常", false, String(e)); t("U8362 金币累积 抛异常", false, String(e)); t("U8363 金币累积 抛异常", false, String(e)); t("U8364 金币累积 抛异常", false, String(e)); t("U8365 金币累积 抛异常", false, String(e)); t("U8366 金币累积 抛异常", false, String(e)); }
 
+
+  // ===== U8367~U8372: 射击累积(v1.1.84) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('cuShotWrap'),sv:!!document.querySelector('#cuShotWrap .cu'),pl:!!document.querySelector('#cuShotWrap polyline'),ct:!!document.querySelector('#cuShotWrap .cutxt'),s:T.cuShotStateNow([2,4,6])};return JSON.stringify(r);})()"));
+    t("U8367 射击累积 DOM 已加入 HUD + SVG 曲线 + polyline + 文本 + 函数可用", o.dom === true && o.sv === true && o.pl === true && o.ct === true && o.s.ok === true && o.s.trend === "↗ 较稳", JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.cuShotStateNow([2,4,6])};return JSON.stringify(r);})()"));
+    t("U8368 正常 射击累积（[2,4,6] 累积 2,6,12 均4 CV0.41→较稳）", o1.s.ok === true && o1.s.n === 3 && o1.s.curve.join(',') === "2,6,12" && Math.abs(o1.s.mean - 4) < 0.001 && Math.abs(o1.s.cv - 0.408) < 0.01 && o1.s.mom === "↗" && o1.s.stb === "较稳" && o1.s.trend === "↗ 较稳" && o1.s.cls === "g-warn" && o1.s.danger === false, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.cuShotStateNow([1,1,20])};return JSON.stringify(r);})()"));
+    t("U8369 边界 射击累积（[1,1,20] 高离散 CV1.22→波动）→ ↗ 波动", o2.s.ok === true && o2.s.n === 3 && Math.abs(o2.s.cv - 1.221) < 0.01 && o2.s.stb === "波动" && o2.s.trend === "↗ 波动" && o2.s.cls === "g-bad" && o2.s.danger === true, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.cuShotStateNow(null),b:T.cuShotStateNow('a'),c:T.cuShotStateNow([3,'x',8]),d:T.cuShotStateNow([5]),e:T.cuShotStateNow([]),f:T.cuShotStateNow([0,0,0])};return JSON.stringify(r);})()"));
+    t("U8370 非法 null/'a'/坏元素/单波/空 → 退化 '—'；平稳 [0,0,0] → '→ 稳'", o3.a.txt === "—" && o3.a.ok === false && o3.b.txt === "—" && o3.c.txt === "—" && o3.d.txt === "—" && o3.d.ok === false && o3.e.txt === "—" && o3.e.ok === false && o3.f.ok === true && o3.f.trend === "→ 稳" && o3.f.cls === "g-good" && o3.f.danger === false, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.cuShotStateNow([2,4,6]),x:T.cuShotStateNow([5])};return JSON.stringify(r);})()"));
+    t("U8371 结构：3 波同向累积可读；单波数据不足 → '—'", o4.s.ok === true && o4.s.n === 3 && o4.s.trend === "↗ 较稳" && o4.x.txt === "—" && o4.x.ok === false, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={pt:T.cuShotPtsNow([2,4,6]),dom:(function(){const p=document.querySelector('#cuShotWrap polyline');if(!p)return null;p.setAttribute('points','1,1');return p.getAttribute('points');})(),s:T.cuShotStateNow([2,4,6])};return JSON.stringify(r);})()"));
+    t("U8372 DOM 与函数一致（SVG 渲染管线可出点 + polyline 可写 + 函数正确）", typeof o5.pt === "string" && o5.pt.indexOf(',') > 0 && o5.pt.length > 4 && o5.dom === "1,1" && o5.s.ok === true && o5.s.trend === "↗ 较稳", JSON.stringify(o5));
+  } catch (e) { t("U8367 射击累积 抛异常", false, String(e)); t("U8368 射击累积 抛异常", false, String(e)); t("U8369 射击累积 抛异常", false, String(e)); t("U8370 射击累积 抛异常", false, String(e)); t("U8371 射击累积 抛异常", false, String(e)); t("U8372 射击累积 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
