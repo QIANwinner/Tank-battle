@@ -22079,6 +22079,21 @@ async function main() {
     t("U8066 DOM 与函数一致（.sval 可写 + data-n 已落 DOM + 首柱已渲染高度）", o5.sv === true && o5.dv === true && typeof o5.hh === "string" && o5.hh.length > 0 && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
   } catch (e) { t("U8061 输出脉冲 抛异常", false, String(e)); t("U8062 输出脉冲 抛异常", false, String(e)); t("U8063 输出脉冲 抛异常", false, String(e)); t("U8064 输出脉冲 抛异常", false, String(e)); t("U8065 输出脉冲 抛异常", false, String(e)); t("U8066 输出脉冲 抛异常", false, String(e)); }
 
+
+  // ===== U8067~U8072: 击杀脉冲(v1.1.34) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('pzKillWrap'),sv:!!document.querySelector('#pzKillWrap .sval'),sp:!!document.querySelector('#pzKillWrap .pz'),nb:document.querySelectorAll('#pzKillWrap .pz i').length,s:T.pzKillStateNow({'hist':[4,4,4,4,4,4,4,4,4,4,4,4],'cap':5,'cur':4})};return JSON.stringify(r);})()"));
+    t("U8067 击杀脉冲 DOM 已加入 HUD + 频谱 12 柱 + 函数可用", o.dom === true && o.sv === true && o.sp === true && o.nb === 12 && Array.isArray(o.s.bars) && o.s.bars.length === 12 && isFinite(o.s.pct) && o.s.pct >= 0 && o.s.pct <= 100 && typeof o.s.txt === 'string', JSON.stringify(o));
+    t("U8068 正常 击杀脉冲 → pct=80 g-good bars=[80,80,80,80,80,80,80,80,80,80,80,80]", o.s.pct === 80 && o.s.cls === "g-good" && o.s.danger === false && o.s.txt === "80" && JSON.stringify(o.s.bars) === "[80,80,80,80,80,80,80,80,80,80,80,80]", JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={b:T.pzKillStateNow({'hist':[0,0,0,0,0,0,0,0,0,0,0,0],'cap':5,'cur':0})};return JSON.stringify(r);})()"));
+    t("U8069 边界 击杀脉冲 → pct=0 g-bad bars=[0,0,0,0,0,0,0,0,0,0,0,0]", o2.b.pct === 0 && o2.b.cls === "g-bad" && o2.b.danger === true && o2.b.txt === "0" && JSON.stringify(o2.b.bars) === "[0,0,0,0,0,0,0,0,0,0,0,0]", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.pzKillStateNow(null),b:T.pzKillStateNow([]),c:T.pzKillStateNow({'hist':[2,4,3,5,2,4,3,5,2,4,3,5],'cap':5,'cur':3}),d:T.pzKillStateNow({bad:1})};return JSON.stringify(r);})()"));
+    t("U8070 非法 null/[]/缺字段 → 退化，合法帧非退化", o3.a.txt === "—" && o3.a.cls === "g-warn" && o3.a.pct === 0 && o3.a.bars.length === 12 && o3.b.txt === "—" && o3.d.txt === "—" && isFinite(o3.c.pct) && o3.c.txt !== "—", JSON.stringify(o3));
+    t("U8071 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签", o.s.txt === "—" || (typeof o.s.unit === "string" && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === "string" && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={sv:!!document.querySelector('#pzKillWrap .sval'),dv:!!document.getElementById('pzKillWrap').dataset.n,hh:document.querySelectorAll('#pzKillWrap .pz i')[0].style.height,s:T.pzKillStateNow({'hist':[4,4,4,4,4,4,4,4,4,4,4,4],'cap':5,'cur':4})};return JSON.stringify(r);})()"));
+    t("U8072 DOM 与函数一致（.sval 可写 + data-n 已落 DOM + 首柱已渲染高度）", o5.sv === true && o5.dv === true && typeof o5.hh === "string" && o5.hh.length > 0 && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
+  } catch (e) { t("U8067 击杀脉冲 抛异常", false, String(e)); t("U8068 击杀脉冲 抛异常", false, String(e)); t("U8069 击杀脉冲 抛异常", false, String(e)); t("U8070 击杀脉冲 抛异常", false, String(e)); t("U8071 击杀脉冲 抛异常", false, String(e)); t("U8072 击杀脉冲 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
