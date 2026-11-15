@@ -21930,6 +21930,21 @@ async function main() {
     t("U8006 DOM 与函数一致（.sval 可写 + data-n 已落 DOM）", o5.sv === true && o5.dv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
   } catch (e) { t("U8001 最高分追近分段 抛异常", false, String(e)); t("U8002 最高分追近分段 抛异常", false, String(e)); t("U8003 最高分追近分段 抛异常", false, String(e)); t("U8004 最高分追近分段 抛异常", false, String(e)); t("U8005 最高分追近分段 抛异常", false, String(e)); t("U8006 最高分追近分段 抛异常", false, String(e)); }
 
+
+  // ===== U8007~U8012: 最佳波追近分段(v1.1.24) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('sgBestWrap'),sv:!!document.querySelector('#sgBestWrap .sval'),cf:!!document.querySelector('#sgBestWrap .sg i'),s:T.sgBestStateNow({'x':3,'y':4})};return JSON.stringify(r);})()"));
+    t("U8007 最佳波追近分段 DOM 已加入 HUD + 函数可用", o.dom === true && o.sv === true && o.cf === true && isFinite(o.s.v) && o.s.n >= 0 && o.s.n <= 10 && typeof o.s.txt === 'string', JSON.stringify(o));
+    t("U8008 正常 最佳波追近分段 → v=0.75 n=8 g-good 3/4", o.s.v === 0.75 && o.s.n === 8 && o.s.cls === "g-good" && o.s.danger === false && o.s.txt === "3/4", JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={b:T.sgBestStateNow({'x':0,'y':4})};return JSON.stringify(r);})()"));
+    t("U8009 边界 最佳波追近分段 → v=0 n=0 g-bad 0/4", o2.b.v === 0 && o2.b.n === 0 && o2.b.cls === "g-bad" && o2.b.danger === true && o2.b.txt === "0/4", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.sgBestStateNow(null),b:T.sgBestStateNow([]),c:T.sgBestStateNow({'x':2,'y':5}),d:T.sgBestStateNow({x:1})};return JSON.stringify(r);})()"));
+    t("U8010 非法 null/[]/缺 y → 退化，合法帧(有 x,y)非退化", o3.a.txt === "—" && o3.a.cls === "g-warn" && o3.a.v === 0 && o3.b.txt === "—" && o3.d.txt === "—" && isFinite(o3.c.v) && o3.c.txt !== "—", JSON.stringify(o3));
+    t("U8011 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签", o.s.txt === "—" || (typeof o.s.unit === "string" && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === "string" && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={sv:!!document.querySelector('#sgBestWrap .sval'),dv:!!document.getElementById('sgBestWrap').dataset.n,s:T.sgBestStateNow({'x':3,'y':4})};return JSON.stringify(r);})()"));
+    t("U8012 DOM 与函数一致（.sval 可写 + data-n 已落 DOM）", o5.sv === true && o5.dv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
+  } catch (e) { t("U8007 最佳波追近分段 抛异常", false, String(e)); t("U8008 最佳波追近分段 抛异常", false, String(e)); t("U8009 最佳波追近分段 抛异常", false, String(e)); t("U8010 最佳波追近分段 抛异常", false, String(e)); t("U8011 最佳波追近分段 抛异常", false, String(e)); t("U8012 最佳波追近分段 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
