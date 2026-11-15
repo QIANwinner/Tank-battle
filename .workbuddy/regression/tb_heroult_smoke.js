@@ -22005,6 +22005,36 @@ async function main() {
     t("U8036 DOM 与函数一致（.sval 可写 + data-n 已落 DOM）", o5.sv === true && o5.dv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
   } catch (e) { t("U8031 首领压力 抛异常", false, String(e)); t("U8032 首领压力 抛异常", false, String(e)); t("U8033 首领压力 抛异常", false, String(e)); t("U8034 首领压力 抛异常", false, String(e)); t("U8035 首领压力 抛异常", false, String(e)); t("U8036 首领压力 抛异常", false, String(e)); }
 
+
+  // ===== U8037~U8042: 围困压力(v1.1.29) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('prSurroundWrap'),sv:!!document.querySelector('#prSurroundWrap .sval'),cf:!!document.querySelector('#prSurroundWrap .pr'),pc:!!document.querySelector('#prSurroundWrap .pct'),s:T.prSurroundStateNow({'x':1,'y':4})};return JSON.stringify(r);})()"));
+    t("U8037 围困压力 DOM 已加入 HUD + 函数可用", o.dom === true && o.sv === true && o.cf === true && o.pc === true && isFinite(o.s.v) && o.s.pct >= 0 && o.s.pct <= 100 && typeof o.s.txt === 'string', JSON.stringify(o));
+    t("U8038 正常 围困压力 → pct=25 g-good 25", o.s.pct === 25 && o.s.cls === "g-good" && o.s.danger === false && o.s.txt === "25", JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={b:T.prSurroundStateNow({'x':4,'y':4})};return JSON.stringify(r);})()"));
+    t("U8039 边界 围困压力 → pct=100 g-bad 100", o2.b.pct === 100 && o2.b.cls === "g-bad" && o2.b.danger === true && o2.b.txt === "100", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.prSurroundStateNow(null),b:T.prSurroundStateNow([]),c:T.prSurroundStateNow({'x':2,'y':5}),d:T.prSurroundStateNow({bad:1})};return JSON.stringify(r);})()"));
+    t("U8040 非法 null/[]/缺字段 → 退化，合法帧非退化", o3.a.txt === "—" && o3.a.cls === "g-warn" && o3.a.pct === 0 && o3.b.txt === "—" && o3.d.txt === "—" && isFinite(o3.c.pct) && o3.c.txt !== "—", JSON.stringify(o3));
+    t("U8041 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签", o.s.txt === "—" || (typeof o.s.unit === "string" && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === "string" && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={sv:!!document.querySelector('#prSurroundWrap .sval'),dv:!!document.getElementById('prSurroundWrap').dataset.n,s:T.prSurroundStateNow({'x':1,'y':4})};return JSON.stringify(r);})()"));
+    t("U8042 DOM 与函数一致（.sval 可写 + data-n 已落 DOM）", o5.sv === true && o5.dv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
+  } catch (e) { t("U8037 围困压力 抛异常", false, String(e)); t("U8038 围困压力 抛异常", false, String(e)); t("U8039 围困压力 抛异常", false, String(e)); t("U8040 围困压力 抛异常", false, String(e)); t("U8041 围困压力 抛异常", false, String(e)); t("U8042 围困压力 抛异常", false, String(e)); }
+
+
+  // ===== U8049~U8054: 最高分压力(v1.1.31) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('prScoreWrap'),sv:!!document.querySelector('#prScoreWrap .sval'),cf:!!document.querySelector('#prScoreWrap .pr'),pc:!!document.querySelector('#prScoreWrap .pct'),s:T.prScoreStateNow({'x':3,'y':4})};return JSON.stringify(r);})()"));
+    t("U8049 最高分压力 DOM 已加入 HUD + 函数可用", o.dom === true && o.sv === true && o.cf === true && o.pc === true && isFinite(o.s.v) && o.s.pct >= 0 && o.s.pct <= 100 && typeof o.s.txt === 'string', JSON.stringify(o));
+    t("U8050 正常 最高分压力 → pct=75 g-good 75", o.s.pct === 75 && o.s.cls === "g-good" && o.s.danger === false && o.s.txt === "75", JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={b:T.prScoreStateNow({'x':0,'y':4})};return JSON.stringify(r);})()"));
+    t("U8051 边界 最高分压力 → pct=0 g-bad 0", o2.b.pct === 0 && o2.b.cls === "g-bad" && o2.b.danger === true && o2.b.txt === "0", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.prScoreStateNow(null),b:T.prScoreStateNow([]),c:T.prScoreStateNow({'x':2,'y':5}),d:T.prScoreStateNow({bad:1})};return JSON.stringify(r);})()"));
+    t("U8052 非法 null/[]/缺字段 → 退化，合法帧非退化", o3.a.txt === "—" && o3.a.cls === "g-warn" && o3.a.pct === 0 && o3.b.txt === "—" && o3.d.txt === "—" && isFinite(o3.c.pct) && o3.c.txt !== "—", JSON.stringify(o3));
+    t("U8053 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签", o.s.txt === "—" || (typeof o.s.unit === "string" && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === "string" && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={sv:!!document.querySelector('#prScoreWrap .sval'),dv:!!document.getElementById('prScoreWrap').dataset.n,s:T.prScoreStateNow({'x':3,'y':4})};return JSON.stringify(r);})()"));
+    t("U8054 DOM 与函数一致（.sval 可写 + data-n 已落 DOM）", o5.sv === true && o5.dv === true && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
+  } catch (e) { t("U8049 最高分压力 抛异常", false, String(e)); t("U8050 最高分压力 抛异常", false, String(e)); t("U8051 最高分压力 抛异常", false, String(e)); t("U8052 最高分压力 抛异常", false, String(e)); t("U8053 最高分压力 抛异常", false, String(e)); t("U8054 最高分压力 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
