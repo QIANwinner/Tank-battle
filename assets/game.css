@@ -6895,3 +6895,10 @@ html.compact-hud #hud .m-hide { display:none !important; }
   #sgBestWrap.danger .sval { color:#e74c3c; }
   #sgBestWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
 @CSS@
+  #prLifeWrap .pr { display:inline-block; width:26px; height:26px; border-radius:50%; background:conic-gradient(#e74c3c 0deg, rgba(255,255,255,.12) 0deg); position:relative; vertical-align:middle; }
+  #prLifeWrap .pr::before { content:''; position:absolute; inset:4px; border-radius:50%; background:#181b1f; }
+  #prLifeWrap .pct { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:8px; font-weight:700; color:#fff; z-index:1; }
+  #prLifeWrap .sval { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #prLifeWrap.danger .sval { color:#e74c3c; }
+  #prLifeWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
+@CSS@
