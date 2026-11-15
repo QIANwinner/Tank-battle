@@ -22124,6 +22124,21 @@ async function main() {
     t("U8084 DOM 与函数一致（.sval 可写 + data-n 已落 DOM + 首柱已渲染高度）", o5.sv === true && o5.dv === true && typeof o5.hh === "string" && o5.hh.length > 0 && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
   } catch (e) { t("U8079 连击脉冲 抛异常", false, String(e)); t("U8080 连击脉冲 抛异常", false, String(e)); t("U8081 连击脉冲 抛异常", false, String(e)); t("U8082 连击脉冲 抛异常", false, String(e)); t("U8083 连击脉冲 抛异常", false, String(e)); t("U8084 连击脉冲 抛异常", false, String(e)); }
 
+
+  // ===== U8085~U8090: 弹幕脉冲(v1.1.37) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('pzBulletWrap'),sv:!!document.querySelector('#pzBulletWrap .sval'),sp:!!document.querySelector('#pzBulletWrap .pz'),nb:document.querySelectorAll('#pzBulletWrap .pz i').length,s:T.pzBulletStateNow({'hist':[1,1,1,1,1,1,1,1,1,1,1,1],'cap':5,'cur':1})};return JSON.stringify(r);})()"));
+    t("U8085 弹幕脉冲 DOM 已加入 HUD + 频谱 12 柱 + 函数可用", o.dom === true && o.sv === true && o.sp === true && o.nb === 12 && Array.isArray(o.s.bars) && o.s.bars.length === 12 && isFinite(o.s.pct) && o.s.pct >= 0 && o.s.pct <= 100 && typeof o.s.txt === 'string', JSON.stringify(o));
+    t("U8086 正常 弹幕脉冲 → pct=20 g-good bars=[20,20,20,20,20,20,20,20,20,20,20,20]", o.s.pct === 20 && o.s.cls === "g-good" && o.s.danger === false && o.s.txt === "20" && JSON.stringify(o.s.bars) === "[20,20,20,20,20,20,20,20,20,20,20,20]", JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={b:T.pzBulletStateNow({'hist':[5,5,5,5,5,5,5,5,5,5,5,5],'cap':5,'cur':5})};return JSON.stringify(r);})()"));
+    t("U8087 边界 弹幕脉冲 → pct=100 g-bad bars=[100,100,100,100,100,100,100,100,100,100,100,100]", o2.b.pct === 100 && o2.b.cls === "g-bad" && o2.b.danger === true && o2.b.txt === "100" && JSON.stringify(o2.b.bars) === "[100,100,100,100,100,100,100,100,100,100,100,100]", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.pzBulletStateNow(null),b:T.pzBulletStateNow([]),c:T.pzBulletStateNow({'hist':[2,4,3,5,2,4,3,5,2,4,3,5],'cap':5,'cur':3}),d:T.pzBulletStateNow({bad:1})};return JSON.stringify(r);})()"));
+    t("U8088 非法 null/[]/缺字段 → 退化，合法帧非退化", o3.a.txt === "—" && o3.a.cls === "g-warn" && o3.a.pct === 0 && o3.a.bars.length === 12 && o3.b.txt === "—" && o3.d.txt === "—" && isFinite(o3.c.pct) && o3.c.txt !== "—", JSON.stringify(o3));
+    t("U8089 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签", o.s.txt === "—" || (typeof o.s.unit === "string" && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === "string" && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={sv:!!document.querySelector('#pzBulletWrap .sval'),dv:!!document.getElementById('pzBulletWrap').dataset.n,hh:document.querySelectorAll('#pzBulletWrap .pz i')[0].style.height,s:T.pzBulletStateNow({'hist':[1,1,1,1,1,1,1,1,1,1,1,1],'cap':5,'cur':1})};return JSON.stringify(r);})()"));
+    t("U8090 DOM 与函数一致（.sval 可写 + data-n 已落 DOM + 首柱已渲染高度）", o5.sv === true && o5.dv === true && typeof o5.hh === "string" && o5.hh.length > 0 && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
+  } catch (e) { t("U8085 弹幕脉冲 抛异常", false, String(e)); t("U8086 弹幕脉冲 抛异常", false, String(e)); t("U8087 弹幕脉冲 抛异常", false, String(e)); t("U8088 弹幕脉冲 抛异常", false, String(e)); t("U8089 弹幕脉冲 抛异常", false, String(e)); t("U8090 弹幕脉冲 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
