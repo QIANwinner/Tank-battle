@@ -1275,6 +1275,7 @@
     <div class="pill m-hide" id="lbWaveWrap"><span class="k">🌊</span><i class="lb"><i class="lbfill"></i><i class="lbtick"></i></i><span class="v">波次</span><em class="sval">—</em></div>
     <div class="pill m-hide" id="lbBossWrap"><span class="k">👹</span><i class="lb"><i class="lbfill"></i><i class="lbtick"></i></i><span class="v">Boss</span><em class="sval">—</em></div>
     <div class="pill m-hide" id="lbComboWrap"><span class="k">⚡</span><i class="lb"><i class="lbfill"></i><i class="lbtick"></i></i><span class="v">连击</span><em class="sval">—</em></div>
+    <div class="pill m-hide" id="lbCoinWrap"><span class="k">💰</span><i class="lb"><i class="lbfill"></i><i class="lbtick"></i></i><span class="v">金币</span><em class="sval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1651,7 +1652,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.44</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.45</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7729,6 +7730,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_lbWave = lbWave(lbWaveNow()); const w_lbWave = $('lbWaveWrap'); if (w_lbWave) { const pv = w_lbWave.dataset.fp || ''; const nv = s_lbWave.pct + '|' + s_lbWave.t + '|' + s_lbWave.txt; if (pv !== nv) { w_lbWave.dataset.fp = nv; w_lbWave.dataset.n = s_lbWave.lead; w_lbWave.classList.remove('g-good','g-warn','g-bad'); if (s_lbWave.cls) w_lbWave.classList.add(s_lbWave.cls); w_lbWave.classList.toggle('danger', !!s_lbWave.danger); const sv = w_lbWave.querySelector('.sval'); if (sv) sv.textContent = s_lbWave.txt; const bf = w_lbWave.querySelector('.lbfill'); if (bf) bf.style.width = s_lbWave.pct + '%'; const tk = w_lbWave.querySelector('.lbtick'); if (tk) tk.style.left = s_lbWave.t + '%'; } }
     const s_lbBoss = lbBoss(lbBossNow()); const w_lbBoss = $('lbBossWrap'); if (w_lbBoss) { const pv = w_lbBoss.dataset.fp || ''; const nv = s_lbBoss.pct + '|' + s_lbBoss.t + '|' + s_lbBoss.txt; if (pv !== nv) { w_lbBoss.dataset.fp = nv; w_lbBoss.dataset.n = s_lbBoss.lead; w_lbBoss.classList.remove('g-good','g-warn','g-bad'); if (s_lbBoss.cls) w_lbBoss.classList.add(s_lbBoss.cls); w_lbBoss.classList.toggle('danger', !!s_lbBoss.danger); const sv = w_lbBoss.querySelector('.sval'); if (sv) sv.textContent = s_lbBoss.txt; const bf = w_lbBoss.querySelector('.lbfill'); if (bf) bf.style.width = s_lbBoss.pct + '%'; const tk = w_lbBoss.querySelector('.lbtick'); if (tk) tk.style.left = s_lbBoss.t + '%'; } }
     const s_lbCombo = lbCombo(lbComboNow()); const w_lbCombo = $('lbComboWrap'); if (w_lbCombo) { const pv = w_lbCombo.dataset.fp || ''; const nv = s_lbCombo.pct + '|' + s_lbCombo.t + '|' + s_lbCombo.txt; if (pv !== nv) { w_lbCombo.dataset.fp = nv; w_lbCombo.dataset.n = s_lbCombo.lead; w_lbCombo.classList.remove('g-good','g-warn','g-bad'); if (s_lbCombo.cls) w_lbCombo.classList.add(s_lbCombo.cls); w_lbCombo.classList.toggle('danger', !!s_lbCombo.danger); const sv = w_lbCombo.querySelector('.sval'); if (sv) sv.textContent = s_lbCombo.txt; const bf = w_lbCombo.querySelector('.lbfill'); if (bf) bf.style.width = s_lbCombo.pct + '%'; const tk = w_lbCombo.querySelector('.lbtick'); if (tk) tk.style.left = s_lbCombo.t + '%'; } }
+    const s_lbCoin = lbCoin(lbCoinNow()); const w_lbCoin = $('lbCoinWrap'); if (w_lbCoin) { const pv = w_lbCoin.dataset.fp || ''; const nv = s_lbCoin.pct + '|' + s_lbCoin.t + '|' + s_lbCoin.txt; if (pv !== nv) { w_lbCoin.dataset.fp = nv; w_lbCoin.dataset.n = s_lbCoin.lead; w_lbCoin.classList.remove('g-good','g-warn','g-bad'); if (s_lbCoin.cls) w_lbCoin.classList.add(s_lbCoin.cls); w_lbCoin.classList.toggle('danger', !!s_lbCoin.danger); const sv = w_lbCoin.querySelector('.sval'); if (sv) sv.textContent = s_lbCoin.txt; const bf = w_lbCoin.querySelector('.lbfill'); if (bf) bf.style.width = s_lbCoin.pct + '%'; const tk = w_lbCoin.querySelector('.lbtick'); if (tk) tk.style.left = s_lbCoin.t + '%'; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -21318,6 +21320,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // 波次对表（v1.1.42 第八十七辑：lb 系列已在 v1.1.41 引入）
   // Boss对表（v1.1.43 第八十七辑：lb 系列已在 v1.1.41 引入）
   // 连击对表（v1.1.44 第八十七辑：lb 系列已在 v1.1.41 引入）
+  // 金币对表（v1.1.45 第八十七辑：lb 系列已在 v1.1.41 引入）
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -23178,7 +23181,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.44', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.45', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -25416,6 +25419,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       lbWaveStateNow: (frame) => lbWave(frame), lbWaveNow: () => lbWave(lbWaveNow()), lbWaveDomNow: () => { const e = document.querySelector('#lbWaveWrap .sval'); return e ? e.textContent : null; }, lbWaveNumDomNow: () => { const e = document.querySelector('#lbWaveWrap'); return e ? e.dataset.n : null; }, lbWaveFillDomNow: () => { const e = document.querySelector('#lbWaveWrap .lbfill'); return e ? e.style.width : null; }, lbWaveTickDomNow: () => { const e = document.querySelector('#lbWaveWrap .lbtick'); return e ? e.style.left : null; },
       lbBossStateNow: (frame) => lbBoss(frame), lbBossNow: () => lbBoss(lbBossNow()), lbBossDomNow: () => { const e = document.querySelector('#lbBossWrap .sval'); return e ? e.textContent : null; }, lbBossNumDomNow: () => { const e = document.querySelector('#lbBossWrap'); return e ? e.dataset.n : null; }, lbBossFillDomNow: () => { const e = document.querySelector('#lbBossWrap .lbfill'); return e ? e.style.width : null; }, lbBossTickDomNow: () => { const e = document.querySelector('#lbBossWrap .lbtick'); return e ? e.style.left : null; },
       lbComboStateNow: (frame) => lbCombo(frame), lbComboNow: () => lbCombo(lbComboNow()), lbComboDomNow: () => { const e = document.querySelector('#lbComboWrap .sval'); return e ? e.textContent : null; }, lbComboNumDomNow: () => { const e = document.querySelector('#lbComboWrap'); return e ? e.dataset.n : null; }, lbComboFillDomNow: () => { const e = document.querySelector('#lbComboWrap .lbfill'); return e ? e.style.width : null; }, lbComboTickDomNow: () => { const e = document.querySelector('#lbComboWrap .lbtick'); return e ? e.style.left : null; },
+      lbCoinStateNow: (frame) => lbCoin(frame), lbCoinNow: () => lbCoin(lbCoinNow()), lbCoinDomNow: () => { const e = document.querySelector('#lbCoinWrap .sval'); return e ? e.textContent : null; }, lbCoinNumDomNow: () => { const e = document.querySelector('#lbCoinWrap'); return e ? e.dataset.n : null; }, lbCoinFillDomNow: () => { const e = document.querySelector('#lbCoinWrap .lbfill'); return e ? e.style.width : null; }, lbCoinTickDomNow: () => { const e = document.querySelector('#lbCoinWrap .lbtick'); return e ? e.style.left : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

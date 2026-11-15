@@ -22244,6 +22244,21 @@ async function main() {
     t("U8132 DOM 与函数一致（.sval 可写 + data-n 已落 DOM + 进度条/刻度已渲染）", o5.sv === true && o5.dv === true && typeof o5.fi === "string" && o5.fi.length > 0 && typeof o5.ti === "string" && o5.ti.length > 0 && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
   } catch (e) { t("U8127 连击对表 抛异常", false, String(e)); t("U8128 连击对表 抛异常", false, String(e)); t("U8129 连击对表 抛异常", false, String(e)); t("U8130 连击对表 抛异常", false, String(e)); t("U8131 连击对表 抛异常", false, String(e)); t("U8132 连击对表 抛异常", false, String(e)); }
 
+
+  // ===== U8133~U8138: 金币对表(v1.1.45) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('lbCoinWrap'),fi:!!document.querySelector('#lbCoinWrap .lbfill'),ti:!!document.querySelector('#lbCoinWrap .lbtick'),sv:!!document.querySelector('#lbCoinWrap .sval'),s:T.lbCoinStateNow({'p':80,'pmax':100,'t':40,'tmax':100})};return JSON.stringify(r);})()"));
+    t("U8133 金币对表 DOM 已加入 HUD + 对表双元素 + 函数可用", o.dom === true && o.fi === true && o.ti === true && o.sv === true && isFinite(o.s.pct) && o.s.pct >= 0 && o.s.pct <= 100 && isFinite(o.s.t) && o.s.t >= 0 && o.s.t <= 100 && isFinite(o.s.lead) && typeof o.s.txt === 'string', JSON.stringify(o));
+    t("U8134 正常 金币对表 → pct=80 t=40 lead=40 g-good", o.s.pct === 80 && o.s.t === 40 && o.s.lead === 40 && o.s.cls === "g-good" && o.s.danger === false && o.s.txt === "+40", JSON.stringify(o));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={b:T.lbCoinStateNow({'p':20,'pmax':100,'t':60,'tmax':100})};return JSON.stringify(r);})()"));
+    t("U8135 边界 金币对表 → pct=20 t=60 lead=-40 g-bad", o2.b.pct === 20 && o2.b.t === 60 && o2.b.lead === -40 && o2.b.cls === "g-bad" && o2.b.danger === true && o2.b.txt === "-40", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.lbCoinStateNow(null),b:T.lbCoinStateNow([]),c:T.lbCoinStateNow({'p':40,'pmax':100,'t':30,'tmax':100}),d:T.lbCoinStateNow({bad:1})};return JSON.stringify(r);})()"));
+    t("U8136 非法 null/[]/缺字段 → 退化，合法帧非退化", o3.a.txt === "—" && o3.a.cls === "g-warn" && o3.a.pct === 0 && o3.a.lead === 0 && o3.b.txt === "—" && o3.d.txt === "—" && isFinite(o3.c.pct) && o3.c.txt !== "—", JSON.stringify(o3));
+    t("U8137 单位结构 txt 以 unit 结尾，无 unit 时须为合法标签", o.s.txt === "—" || (typeof o.s.unit === "string" && (o.s.unit.length > 0 ? o.s.txt.endsWith(o.s.unit) : (typeof o.s.txt === "string" && o.s.txt.length > 0))), JSON.stringify(o));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={sv:!!document.querySelector('#lbCoinWrap .sval'),dv:!!document.getElementById('lbCoinWrap').dataset.n,fi:document.querySelector('#lbCoinWrap .lbfill').style.width,ti:document.querySelector('#lbCoinWrap .lbtick').style.left,s:T.lbCoinStateNow({'p':80,'pmax':100,'t':40,'tmax':100})};return JSON.stringify(r);})()"));
+    t("U8138 DOM 与函数一致（.sval 可写 + data-n 已落 DOM + 进度条/刻度已渲染）", o5.sv === true && o5.dv === true && typeof o5.fi === "string" && o5.fi.length > 0 && typeof o5.ti === "string" && o5.ti.length > 0 && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
+  } catch (e) { t("U8133 金币对表 抛异常", false, String(e)); t("U8134 金币对表 抛异常", false, String(e)); t("U8135 金币对表 抛异常", false, String(e)); t("U8136 金币对表 抛异常", false, String(e)); t("U8137 金币对表 抛异常", false, String(e)); t("U8138 金币对表 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
