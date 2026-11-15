@@ -22304,6 +22304,23 @@ async function main() {
     t("U8156 DOM 与函数一致（.sval 可写 + data-n 已落 DOM + 进度条/刻度已渲染）", o5.sv === true && o5.dv === true && typeof o5.fi === "string" && o5.fi.length > 0 && typeof o5.ti === "string" && o5.ti.length > 0 && typeof o5.s.txt === "string" && o5.s.txt.length > 0, JSON.stringify(o5));
   } catch (e) { t("U8151 输出对表 抛异常", false, String(e)); t("U8152 输出对表 抛异常", false, String(e)); t("U8153 输出对表 抛异常", false, String(e)); t("U8154 输出对表 抛异常", false, String(e)); t("U8155 输出对表 抛异常", false, String(e)); t("U8156 输出对表 抛异常", false, String(e)); }
 
+
+  // ===== U8157~U8162: 得分风向(v1.1.49) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('tdScoreWrap'),ar:!!document.querySelector('#tdScoreWrap .tdar'),sv:!!document.querySelector('#tdScoreWrap .sval'),s:T.tdScoreStateNow([40,40,40])};return JSON.stringify(r);})()"));
+    t("U8157 得分风向 DOM 已加入 HUD + 箭头/读数双元素 + 函数可用", o.dom === true && o.ar === true && o.sv === true && o.s.ok === true && o.s.dir === 0 && isFinite(o.s.slope), JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tdScoreStateNow([0,10])};return JSON.stringify(r);})()"));
+    t("U8158 正常 得分风向（升窗）→ dir=2 g-good slope=10", o1.s.ok === true && o1.s.dir === 2 && o1.s.slope === 10 && o1.s.cls === "g-good" && o1.s.danger === false && o1.s.txt === "▲▲ +10", JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tdScoreStateNow([10,0])};return JSON.stringify(r);})()"));
+    t("U8159 边界 得分风向（降窗）→ dir=-2 g-bad slope=-10", o2.s.ok === true && o2.s.dir === -2 && o2.s.slope === -10 && o2.s.cls === "g-bad" && o2.s.danger === true && o2.s.txt === "▼▼ -10", JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.tdScoreStateNow(null),b:T.tdScoreStateNow([]),c:T.tdScoreStateNow([1]),d:T.tdScoreStateNow(['a']),e:T.tdScoreStateNow({bad:1}),l:T.tdScoreStateNow([40,40,40])};return JSON.stringify(r);})()"));
+    t("U8160 非法 null/[]/[1]/['a']/{bad} → 退化 '—'，合法平窗 [40,40,40] 非退化", o3.a.txt === "—" && o3.a.ok === false && o3.b.txt === "—" && o3.b.ok === false && o3.c.txt === "—" && o3.d.txt === "—" && o3.e.txt === "—" && o3.l.ok === true && o3.l.txt === "▬ +0" && o3.l.dir === 0, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tdScoreStateNow([0,10]),x:T.tdScoreStateNow(null)};return JSON.stringify(r);})()"));
+    t("U8161 结构：合法 txt = 箭头 + 空格 + 有符号数字；非法 txt = '—'", o4.s.ok === true && o4.s.txt.split(' ').length === 2 && ['▲▲','▲','▬','▼','▼▼','—'].indexOf(o4.s.txt.split(' ')[0]) >= 0 && ['▲▲','▲','▬','▼','▼▼','—'].indexOf(o4.s.txt.split(' ')[0]) <= 4 && isFinite(Number(o4.s.txt.split(' ')[1])) && (o4.s.txt.split(' ')[1].indexOf('+') === 0 || o4.s.txt.split(' ')[1].indexOf('-') === 0) && o4.x.txt === "—" && o4.x.ok === false, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={ar:(function(){const e=document.querySelector('#tdScoreWrap .tdar');return e?e.textContent:null})(),dn:(function(){const e=document.querySelector('#tdScoreWrap');return e?e.dataset.n:null})(),sv:(function(){const e=document.querySelector('#tdScoreWrap .sval');return e?e.textContent:null})(),s:T.tdScoreStateNow([0,10])};return JSON.stringify(r);})()"));
+    t("U8162 DOM 与函数一致（.tdar 已渲染箭头 + dataset.n 已落 DOM 在 [-2,2] + .sval 可写 + 净变化读数）", typeof o5.ar === "string" && ['▲▲','▲','▬','▼','▼▼','—'].indexOf(o5.ar) >= 0 && typeof o5.dn === "string" && isFinite(Number(o5.dn)) && Number(o5.dn) >= -2 && Number(o5.dn) <= 2 && typeof o5.sv === "string" && o5.sv.length > 0 && o5.s.ok === true && o5.s.dir === 2, JSON.stringify(o5));
+  } catch (e) { t("U8157 得分风向 抛异常", false, String(e)); t("U8158 得分风向 抛异常", false, String(e)); t("U8159 得分风向 抛异常", false, String(e)); t("U8160 得分风向 抛异常", false, String(e)); t("U8161 得分风向 抛异常", false, String(e)); t("U8162 得分风向 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

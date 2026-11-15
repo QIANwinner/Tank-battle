@@ -1279,6 +1279,7 @@
     <div class="pill m-hide" id="lbUpgWrap"><span class="k">💪</span><i class="lb"><i class="lbfill"></i><i class="lbtick"></i></i><span class="v">强化</span><em class="sval">—</em></div>
     <div class="pill m-hide" id="lbPackWrap"><span class="k">🎁</span><i class="lb"><i class="lbfill"></i><i class="lbtick"></i></i><span class="v">补给</span><em class="sval">—</em></div>
     <div class="pill m-hide" id="lbDmgWrap"><span class="k">💥</span><i class="lb"><i class="lbfill"></i><i class="lbtick"></i></i><span class="v">输出</span><em class="sval">—</em></div>
+    <div class="pill m-hide" id="tdScoreWrap"><span class="k">📈</span><i class="tdar">—</i><span class="v">得分</span><em class="sval">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1655,7 +1656,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.48</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.49</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7737,6 +7738,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_lbUpg = lbUpg(lbUpgNow()); const w_lbUpg = $('lbUpgWrap'); if (w_lbUpg) { const pv = w_lbUpg.dataset.fp || ''; const nv = s_lbUpg.pct + '|' + s_lbUpg.t + '|' + s_lbUpg.txt; if (pv !== nv) { w_lbUpg.dataset.fp = nv; w_lbUpg.dataset.n = s_lbUpg.lead; w_lbUpg.classList.remove('g-good','g-warn','g-bad'); if (s_lbUpg.cls) w_lbUpg.classList.add(s_lbUpg.cls); w_lbUpg.classList.toggle('danger', !!s_lbUpg.danger); const sv = w_lbUpg.querySelector('.sval'); if (sv) sv.textContent = s_lbUpg.txt; const bf = w_lbUpg.querySelector('.lbfill'); if (bf) bf.style.width = s_lbUpg.pct + '%'; const tk = w_lbUpg.querySelector('.lbtick'); if (tk) tk.style.left = s_lbUpg.t + '%'; } }
     const s_lbPack = lbPack(lbPackNow()); const w_lbPack = $('lbPackWrap'); if (w_lbPack) { const pv = w_lbPack.dataset.fp || ''; const nv = s_lbPack.pct + '|' + s_lbPack.t + '|' + s_lbPack.txt; if (pv !== nv) { w_lbPack.dataset.fp = nv; w_lbPack.dataset.n = s_lbPack.lead; w_lbPack.classList.remove('g-good','g-warn','g-bad'); if (s_lbPack.cls) w_lbPack.classList.add(s_lbPack.cls); w_lbPack.classList.toggle('danger', !!s_lbPack.danger); const sv = w_lbPack.querySelector('.sval'); if (sv) sv.textContent = s_lbPack.txt; const bf = w_lbPack.querySelector('.lbfill'); if (bf) bf.style.width = s_lbPack.pct + '%'; const tk = w_lbPack.querySelector('.lbtick'); if (tk) tk.style.left = s_lbPack.t + '%'; } }
     const s_lbDmg = lbDmg(lbDmgNow()); const w_lbDmg = $('lbDmgWrap'); if (w_lbDmg) { const pv = w_lbDmg.dataset.fp || ''; const nv = s_lbDmg.pct + '|' + s_lbDmg.t + '|' + s_lbDmg.txt; if (pv !== nv) { w_lbDmg.dataset.fp = nv; w_lbDmg.dataset.n = s_lbDmg.lead; w_lbDmg.classList.remove('g-good','g-warn','g-bad'); if (s_lbDmg.cls) w_lbDmg.classList.add(s_lbDmg.cls); w_lbDmg.classList.toggle('danger', !!s_lbDmg.danger); const sv = w_lbDmg.querySelector('.sval'); if (sv) sv.textContent = s_lbDmg.txt; const bf = w_lbDmg.querySelector('.lbfill'); if (bf) bf.style.width = s_lbDmg.pct + '%'; const tk = w_lbDmg.querySelector('.lbtick'); if (tk) tk.style.left = s_lbDmg.t + '%'; } }
+    const s_tdScore = tdScoreNow(); const w_tdScore = $('tdScoreWrap'); if (w_tdScore) { const pv_tdScore = w_tdScore.dataset.fv || ''; const nv_tdScore = s_tdScore.txt + '|' + s_tdScore.dir; if (pv_tdScore !== nv_tdScore) { w_tdScore.dataset.fv = nv_tdScore; w_tdScore.dataset.n = s_tdScore.dir; w_tdScore.classList.remove('g-good','g-warn','g-bad'); if (s_tdScore.cls) w_tdScore.classList.add(s_tdScore.cls); w_tdScore.classList.toggle('danger', !!s_tdScore.danger); const av_tdScore = w_tdScore.querySelector('.tdar'); if (av_tdScore) av_tdScore.textContent = s_tdScore.txt.split(' ')[0]; const sv_tdScore = w_tdScore.querySelector('.sval'); if (sv_tdScore) sv_tdScore.textContent = s_tdScore.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -21330,6 +21332,68 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // 强化对表（v1.1.46 第八十七辑：lb 系列已在 v1.1.41 引入）
   // 补给对表（v1.1.47 第八十七辑：lb 系列已在 v1.1.41 引入）
   // 输出对表（v1.1.48 第八十七辑：lb 系列已在 v1.1.41 引入）
+  // —— 战局风向·实时趋势：td 系列（v1.1.49 第八十八辑）——
+  // 历史采样仓：每 key 一个 {t: 上次采样时刻, a: 样本数组(最多12)}；500ms 节流入仓
+  var __tdH = __tdH || {};
+  function tdPush(key, v) {
+    const now = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    const st = __tdH[key] || (__tdH[key] = { t: 0, a: [] });
+    if (now - st.t < 500) return st.a;
+    st.t = now;
+    st.a.push(Number(v) || 0);
+    if (st.a.length > 12) st.a.shift();
+    return st.a;
+  }
+  // 纯函数：样本数组 → 趋势 {ok,dir,slope,span,cls,danger,txt}
+  // dir: -2..2（▼▼/▼/▬/▲/▲▲）；前后半窗均值差 d，d/span 定档；
+  // goodUp=true 升=好(g-good)，false 降=好；非法输入 → ok:false 退化 '—'
+  function tdCalc(arr, goodUp) {
+    const deg = { ok: false, dir: 0, slope: 0, span: 0, cls: 'g-warn', danger: false, txt: '—' };
+    if (!Array.isArray(arr) || arr.length < 2) return deg;
+    const h = Math.floor(arr.length / 2);
+    if (h < 1) return deg;
+    let a = 0, b = 0, lo = Infinity, hi = -Infinity;
+    for (let i = 0; i < arr.length; i++) {
+      const v = Number(arr[i]);
+      if (!isFinite(v)) return deg;
+      if (i < h) a += v;
+      if (i >= arr.length - h) b += v;
+      if (v < lo) lo = v;
+      if (v > hi) hi = v;
+    }
+    a /= h; b /= h;
+    const span = hi - lo;
+    const d = b - a;
+    let dir = 0;
+    if (span > 0) {
+      const r = d / span;
+      dir = r >= 0.25 ? 2 : (r > 0 ? 1 : (r <= -0.25 ? -2 : -1));
+    }
+    const up = goodUp !== false;
+    const cls = dir === 0 ? 'g-warn' : ((dir > 0) === up ? 'g-good' : 'g-bad');
+    const danger = up ? dir <= -2 : dir >= 2;
+    const arw = dir === 2 ? '▲▲' : dir === 1 ? '▲' : dir === 0 ? '▬' : dir === -1 ? '▼' : '▼▼';
+    const slope = Math.round(d * 10) / 10;
+    return { ok: true, dir: dir, slope: slope, span: span, cls: cls, danger: danger, txt: arw + (d >= 0 ? ' +' : ' ') + slope };
+  }
+  // —— 8 个风向纯函数（升=好 x7；威胁降=好 x1）——
+  function tdScore(a) { return tdCalc(a, true); }
+  function tdCoin(a) { return tdCalc(a, true); }
+  function tdKill(a) { return tdCalc(a, true); }
+  function tdDmg(a) { return tdCalc(a, true); }
+  function tdCombo(a) { return tdCalc(a, true); }
+  function tdAcc(a) { return tdCalc(a, true); }
+  function tdWave(a) { return tdCalc(a, true); }
+  function tdThreat(a) { return tdCalc(a, false); }
+  // —— 战局风向：数据源（0.5s 采样入仓，读仓算趋势）——
+  function tdScoreNow() { tdPush('score', Number(score) || 0); return tdScore(__tdH.score.a); }
+  function tdCoinNow() { tdPush('coin', Number(runCoins) || 0); return tdCoin(__tdH.coin.a); }
+  function tdKillNow() { tdPush('kill', Number(stat && stat.kills) || 0); return tdKill(__tdH.kill.a); }
+  function tdDmgNow() { tdPush('dmg', Number(runDmg) || 0); return tdDmg(__tdH.dmg.a); }
+  function tdComboNow() { tdPush('combo', Number(combo) || 0); return tdCombo(__tdH.combo.a); }
+  function tdAccNow() { const sh = Number(stat && stat.shots) || 0; const hi = Number(stat && stat.hits) || 0; tdPush('acc', sh > 0 ? Math.round(hi / sh * 1000) / 10 : 0); return tdAcc(__tdH.acc.a); }
+  function tdWaveNow() { tdPush('wave', Number(wave) || 0); return tdWave(__tdH.wave.a); }
+  function tdThreatNow() { tdPush('threat', (enemies && enemies.length) || 0); return tdThreat(__tdH.threat.a); }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -23190,7 +23254,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.48', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.49', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -25432,6 +25496,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       lbUpgStateNow: (frame) => lbUpg(frame), lbUpgNow: () => lbUpg(lbUpgNow()), lbUpgDomNow: () => { const e = document.querySelector('#lbUpgWrap .sval'); return e ? e.textContent : null; }, lbUpgNumDomNow: () => { const e = document.querySelector('#lbUpgWrap'); return e ? e.dataset.n : null; }, lbUpgFillDomNow: () => { const e = document.querySelector('#lbUpgWrap .lbfill'); return e ? e.style.width : null; }, lbUpgTickDomNow: () => { const e = document.querySelector('#lbUpgWrap .lbtick'); return e ? e.style.left : null; },
       lbPackStateNow: (frame) => lbPack(frame), lbPackNow: () => lbPack(lbPackNow()), lbPackDomNow: () => { const e = document.querySelector('#lbPackWrap .sval'); return e ? e.textContent : null; }, lbPackNumDomNow: () => { const e = document.querySelector('#lbPackWrap'); return e ? e.dataset.n : null; }, lbPackFillDomNow: () => { const e = document.querySelector('#lbPackWrap .lbfill'); return e ? e.style.width : null; }, lbPackTickDomNow: () => { const e = document.querySelector('#lbPackWrap .lbtick'); return e ? e.style.left : null; },
       lbDmgStateNow: (frame) => lbDmg(frame), lbDmgNow: () => lbDmg(lbDmgNow()), lbDmgDomNow: () => { const e = document.querySelector('#lbDmgWrap .sval'); return e ? e.textContent : null; }, lbDmgNumDomNow: () => { const e = document.querySelector('#lbDmgWrap'); return e ? e.dataset.n : null; }, lbDmgFillDomNow: () => { const e = document.querySelector('#lbDmgWrap .lbfill'); return e ? e.style.width : null; }, lbDmgTickDomNow: () => { const e = document.querySelector('#lbDmgWrap .lbtick'); return e ? e.style.left : null; },
+      tdScoreStateNow: (a) => tdScore(a), tdScoreNow: () => tdScoreNow(), tdScoreDomNow: () => { const e = document.querySelector('#tdScoreWrap .tdar'); return e ? e.textContent : null; }, tdScoreNumDomNow: () => { const e = document.querySelector('#tdScoreWrap'); return e ? e.dataset.n : null; }, tdScoreSvalDomNow: () => { const e = document.querySelector('#tdScoreWrap .sval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
