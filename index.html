@@ -1319,6 +1319,7 @@
     <div class="pill m-hide" id="cuBossWrap"><span class="k">👑</span><svg class="cu" width="44" height="14" viewBox="0 0 44 14"><polyline fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" points=""></polyline></svg><span class="v">BOSS</span><em class="cutxt">—</em></div>
     <div class="pill m-hide" id="cuHurtWrap"><span class="k">💔</span><svg class="cu" width="44" height="14" viewBox="0 0 44 14"><polyline fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" points=""></polyline></svg><span class="v">受击</span><em class="cutxt">—</em></div>
     <div class="pill m-hide" id="cuDeathWrap"><span class="k">💀</span><svg class="cu" width="44" height="14" viewBox="0 0 44 14"><polyline fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round" points=""></polyline></svg><span class="v">阵亡</span><em class="cutxt">—</em></div>
+    <div class="pill m-hide" id="stScoreWrap"><span class="k">📈</span><svg class="stbars" width="40" height="16" viewBox="0 0 40 16"></svg><span class="v">跨局得分</span><em class="sttxt">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1695,7 +1696,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.88</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.89</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7817,6 +7818,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_cuBoss = cuBossNow(); const w_cuBoss = $('cuBossWrap'); if (w_cuBoss) { const pv_cuBoss = w_cuBoss.dataset.fv || ''; const nv_cuBoss = s_cuBoss.txt + '|' + s_cuBoss.n + '|' + ((s_cuBoss.curve || []).join(',')); if (pv_cuBoss !== nv_cuBoss) { w_cuBoss.dataset.fv = nv_cuBoss; w_cuBoss.dataset.n = s_cuBoss.n; w_cuBoss.classList.remove('g-good','g-warn','g-bad'); if (s_cuBoss.cls) w_cuBoss.classList.add(s_cuBoss.cls); w_cuBoss.classList.toggle('danger', !!s_cuBoss.danger); const pl_cuBoss = w_cuBoss.querySelector('polyline'); if (pl_cuBoss) pl_cuBoss.setAttribute('points', cuPoints(s_cuBoss.curve, 44, 14)); const tv_cuBoss = w_cuBoss.querySelector('.cutxt'); if (tv_cuBoss) tv_cuBoss.textContent = s_cuBoss.txt; } }
     const s_cuHurt = cuHurtNow(); const w_cuHurt = $('cuHurtWrap'); if (w_cuHurt) { const pv_cuHurt = w_cuHurt.dataset.fv || ''; const nv_cuHurt = s_cuHurt.txt + '|' + s_cuHurt.n + '|' + ((s_cuHurt.curve || []).join(',')); if (pv_cuHurt !== nv_cuHurt) { w_cuHurt.dataset.fv = nv_cuHurt; w_cuHurt.dataset.n = s_cuHurt.n; w_cuHurt.classList.remove('g-good','g-warn','g-bad'); if (s_cuHurt.cls) w_cuHurt.classList.add(s_cuHurt.cls); w_cuHurt.classList.toggle('danger', !!s_cuHurt.danger); const pl_cuHurt = w_cuHurt.querySelector('polyline'); if (pl_cuHurt) pl_cuHurt.setAttribute('points', cuPoints(s_cuHurt.curve, 44, 14)); const tv_cuHurt = w_cuHurt.querySelector('.cutxt'); if (tv_cuHurt) tv_cuHurt.textContent = s_cuHurt.txt; } }
     const s_cuDeath = cuDeathNow(); const w_cuDeath = $('cuDeathWrap'); if (w_cuDeath) { const pv_cuDeath = w_cuDeath.dataset.fv || ''; const nv_cuDeath = s_cuDeath.txt + '|' + s_cuDeath.n + '|' + ((s_cuDeath.curve || []).join(',')); if (pv_cuDeath !== nv_cuDeath) { w_cuDeath.dataset.fv = nv_cuDeath; w_cuDeath.dataset.n = s_cuDeath.n; w_cuDeath.classList.remove('g-good','g-warn','g-bad'); if (s_cuDeath.cls) w_cuDeath.classList.add(s_cuDeath.cls); w_cuDeath.classList.toggle('danger', !!s_cuDeath.danger); const pl_cuDeath = w_cuDeath.querySelector('polyline'); if (pl_cuDeath) pl_cuDeath.setAttribute('points', cuPoints(s_cuDeath.curve, 44, 14)); const tv_cuDeath = w_cuDeath.querySelector('.cutxt'); if (tv_cuDeath) tv_cuDeath.textContent = s_cuDeath.txt; } }
+    const s_stScore = stScoreNow(); const w_stScore = $('stScoreWrap'); if (w_stScore) { const pv_stScore = w_stScore.dataset.fv || ''; const nv_stScore = s_stScore.txt + '|' + s_stScore.n + '|' + (s_stScore.vals || []).join(','); if (pv_stScore !== nv_stScore) { w_stScore.dataset.fv = nv_stScore; w_stScore.dataset.n = s_stScore.n; w_stScore.classList.remove('g-good','g-warn','g-bad'); if (s_stScore.cls) w_stScore.classList.add(s_stScore.cls); w_stScore.classList.toggle('danger', !!s_stScore.danger); const sv_stScore = w_stScore.querySelector('svg'); if (sv_stScore) sv_stScore.innerHTML = stRects(s_stScore.vals, 40, 16); const tv_stScore = w_stScore.querySelector('.sttxt'); if (tv_stScore) tv_stScore.textContent = s_stScore.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -21737,6 +21739,172 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // BOSS累积（v1.1.86 第九十二辑：cu 系列已在 v1.1.81 引入）
   // 受击累积（v1.1.87 第九十二辑：cu 系列已在 v1.1.81 引入）
   // 阵亡累积（v1.1.88 第九十二辑：cu 系列已在 v1.1.81 引入）
+  // —— 跨局趋势：st 系列（v1.1.89 第九十三辑）——
+  // 每局结束（endGame）把该局指标归档到滚动仓（保留最近 6 局）；stCalc 读仓算趋势。
+  var __stH = __stH || {};
+  function stRecord(key, val) {
+    const st = __stH[key] || (__stH[key] = { hist: [] });
+    st.hist.push(Number(val) || 0);
+    if (st.hist.length > 6) st.hist.shift();
+  }
+  // 局末一次性归档 8 个关键指标（endGame 首行调用，值均为当时全局快照）
+  function stRecordAll(m) {
+    const map = { score: Number(m.score) || 0, kill: Number(m.kill) || 0, coin: Number(m.coin) || 0, wave: Number(m.wave) || 0, time: Number(m.time) || 0, shot: Number(m.shot) || 0, upg: Number(m.upg) || 0, boss: Number(m.boss) || 0 };
+    for (const k in map) stRecord(k, map[k]);
+  }
+  // 纯函数：逐局指标序列 → 跨局趋势 {ok,n,dir,streak,stb,trend,cls,danger,txt,vals}
+  // dir：后半均值 vs 前半均值（>1e-6 升 / <-1e-6 降 / 其余 平）；
+  // streak：从最新往前「≥ 全序列下中位」的连续局数（连续 N 局处于高位/低位）；
+  // stb：cv<0.3 '稳' / <0.7 '较稳' / 否则 '波动'；cls/danger 按方向+稳定性。
+  // 非法（非数组/坏元素/不足 3 局/空）→ 退化 '—'
+  function stCalc(h, goodUp) {
+    const deg = { ok: false, n: 0, dir: '', streak: 0, stb: '', trend: '—', cls: 'g-warn', danger: false, txt: '—', vals: [] };
+    if (!Array.isArray(h)) return deg;
+    const vals = [];
+    for (const v of h) { const x = Number(v); if (!isFinite(x)) return deg; vals.push(x); }
+    if (vals.length < 3) return deg;
+    const up = goodUp !== false;
+    const s = vals.map(x => up ? x : -x);
+    const n = vals.length;
+    const half = Math.floor(n / 2);
+    const a = s.slice(0, half), b = s.slice(half);
+    const ma = a.reduce((t, x) => t + x, 0) / a.length;
+    const mb = b.reduce((t, x) => t + x, 0) / b.length;
+    const d = mb - ma;
+    const dir = d > 1e-6 ? '升' : d < -1e-6 ? '降' : '平';
+    const mean = s.reduce((t, x) => t + x, 0) / n;
+    const sd = Math.sqrt(s.reduce((t, x) => t + (x - mean) * (x - mean), 0) / n);
+    const cv = mean !== 0 ? Math.abs(sd / mean) : (sd > 0 ? 99 : 0);
+    let stb; if (cv < 0.3) stb = '稳'; else if (cv < 0.7) stb = '较稳'; else stb = '波动';
+    const sorted = [...s].sort((p, q) => p - q);
+    const median = sorted[Math.floor(n / 2)];
+    const hiSide = s[n - 1] >= median;
+    let streak = 0;
+    for (let i = n - 1; i >= 0; i--) { if (hiSide ? (s[i] >= median) : (s[i] < median)) streak++; else break; }
+    let cls, danger;
+    if (dir === '升') { cls = 'g-good'; danger = false; }
+    else if (dir === '降') { cls = 'g-bad'; danger = (stb === '波动'); }
+    else { cls = 'g-warn'; danger = false; }
+    const trend = dir + '·' + streak + '连';
+    return { ok: true, n: n, dir: dir, streak: streak, stb: stb, trend: trend, cls: cls, danger: danger, txt: trend, vals: vals };
+  }
+  // 逐局柱状 → SVG <rect> 标记串（W×H 视口，留 2px 边距；rng=0 画等高柱；新柱更亮）
+  function stRects(vals, W, H) {
+    if (!Array.isArray(vals) || vals.length < 2) return '';
+    const n = vals.length;
+    const bw = (W - 4) / n;
+    const mx = Math.max.apply(null, vals), mn = Math.min.apply(null, vals);
+    const rng = mx - mn;
+    let out = '';
+    for (let i = 0; i < n; i++) {
+      const x = 2 + i * bw;
+      const hgt = rng > 0 ? (H - 4) * (vals[i] - mn) / rng + 1 : 2;
+      const y = H - hgt;
+      out += '<rect x="' + (Math.round(x * 10) / 10) + '" y="' + (Math.round(y * 10) / 10) + '" width="' + (Math.round(bw * 10) / 10) + '" height="' + (Math.round(hgt * 10) / 10) + '" rx="1" fill="currentColor" opacity="' + (Math.round((0.55 + 0.45 * (i / (n - 1))) * 100) / 100) + '"/>';
+    }
+    return out;
+  }
+  // —— 8 个纯函数（全部 goodUp=true，越多越好）——
+  function stScore(a) { return stCalc(a, true); }
+  function stKill(a) { return stCalc(a, true); }
+  function stCoin(a) { return stCalc(a, true); }
+  function stWave(a) { return stCalc(a, true); }
+  function stTime(a) { return stCalc(a, true); }
+  function stShot(a) { return stCalc(a, true); }
+  function stUpg(a) { return stCalc(a, true); }
+  function stBoss(a) { return stCalc(a, true); }
+  // —— 跨局趋势：数据源（读滚动仓）——
+  function stScoreNow() { return stCalc(__stH.score ? __stH.score.hist : [], true); }
+  function stKillNow() { return stCalc(__stH.kill ? __stH.kill.hist : [], true); }
+  function stCoinNow() { return stCalc(__stH.coin ? __stH.coin.hist : [], true); }
+  function stWaveNow() { return stCalc(__stH.wave ? __stH.wave.hist : [], true); }
+  function stTimeNow() { return stCalc(__stH.time ? __stH.time.hist : [], true); }
+  function stShotNow() { return stCalc(__stH.shot ? __stH.shot.hist : [], true); }
+  function stUpgNow() { return stCalc(__stH.upg ? __stH.upg.hist : [], true); }
+  function stBossNow() { return stCalc(__stH.boss ? __stH.boss.hist : [], true); }
+  // —— 跨局趋势：st 系列（v1.1.89 第九十三辑）——
+  // 每局结束（endGame）把该局指标归档到滚动仓（保留最近 6 局）；stCalc 读仓算趋势。
+  var __stH = __stH || {};
+  function stRecord(key, val) {
+    const st = __stH[key] || (__stH[key] = { hist: [] });
+    st.hist.push(Number(val) || 0);
+    if (st.hist.length > 6) st.hist.shift();
+  }
+  // 局末一次性归档 8 个关键指标（endGame 首行调用，值均为当时全局快照）
+  function stRecordAll(m) {
+    const map = { score: Number(m.score) || 0, kill: Number(m.kill) || 0, coin: Number(m.coin) || 0, wave: Number(m.wave) || 0, time: Number(m.time) || 0, shot: Number(m.shot) || 0, upg: Number(m.upg) || 0, boss: Number(m.boss) || 0 };
+    for (const k in map) stRecord(k, map[k]);
+  }
+  // 纯函数：逐局指标序列 → 跨局趋势 {ok,n,dir,streak,stb,trend,cls,danger,txt,vals}
+  // dir：后半均值 vs 前半均值（>1e-6 升 / <-1e-6 降 / 其余 平）；
+  // streak：从最新往前「最新局同侧」的连续局数（最新≥中位 → 连续高位；最新<中位 → 连续低位）；
+  // stb：cv<0.3 '稳' / <0.7 '较稳' / 否则 '波动'；cls/danger 按方向+稳定性。
+  // 非法（非数组/坏元素/不足 3 局/空）→ 退化 '—'
+  function stCalc(h, goodUp) {
+    const deg = { ok: false, n: 0, dir: '', streak: 0, stb: '', trend: '—', cls: 'g-warn', danger: false, txt: '—', vals: [] };
+    if (!Array.isArray(h)) return deg;
+    const vals = [];
+    for (const v of h) { const x = Number(v); if (!isFinite(x)) return deg; vals.push(x); }
+    if (vals.length < 3) return deg;
+    const up = goodUp !== false;
+    const s = vals.map(x => up ? x : -x);
+    const n = vals.length;
+    const half = Math.floor(n / 2);
+    const a = s.slice(0, half), b = s.slice(half);
+    const ma = a.reduce((t, x) => t + x, 0) / a.length;
+    const mb = b.reduce((t, x) => t + x, 0) / b.length;
+    const d = mb - ma;
+    const dir = d > 1e-6 ? '升' : d < -1e-6 ? '降' : '平';
+    const mean = s.reduce((t, x) => t + x, 0) / n;
+    const sd = Math.sqrt(s.reduce((t, x) => t + (x - mean) * (x - mean), 0) / n);
+    const cv = mean !== 0 ? Math.abs(sd / mean) : (sd > 0 ? 99 : 0);
+    let stb; if (cv < 0.3) stb = '稳'; else if (cv < 0.7) stb = '较稳'; else stb = '波动';
+    const sorted = [...s].sort((p, q) => p - q);
+    const median = sorted[Math.floor(n / 2)];
+    const hiSide = s[n - 1] >= median;
+    let streak = 0;
+    for (let i = n - 1; i >= 0; i--) { if (hiSide ? (s[i] >= median) : (s[i] < median)) streak++; else break; }
+    let cls, danger;
+    if (dir === '升') { cls = 'g-good'; danger = false; }
+    else if (dir === '降') { cls = 'g-bad'; danger = (stb === '波动'); }
+    else { cls = 'g-warn'; danger = false; }
+    const trend = dir + '·' + streak + '连';
+    return { ok: true, n: n, dir: dir, streak: streak, stb: stb, trend: trend, cls: cls, danger: danger, txt: trend, vals: vals };
+  }
+  // 逐局柱状 → SVG <rect> 标记串（W×H 视口，留 2px 边距；rng=0 画等高柱；新柱更亮）
+  function stRects(vals, W, H) {
+    if (!Array.isArray(vals) || vals.length < 2) return '';
+    const n = vals.length;
+    const bw = (W - 4) / n;
+    const mx = Math.max.apply(null, vals), mn = Math.min.apply(null, vals);
+    const rng = mx - mn;
+    let out = '';
+    for (let i = 0; i < n; i++) {
+      const x = 2 + i * bw;
+      const hgt = rng > 0 ? (H - 4) * (vals[i] - mn) / rng + 1 : 2;
+      const y = H - hgt;
+      out += '<rect x="' + (Math.round(x * 10) / 10) + '" y="' + (Math.round(y * 10) / 10) + '" width="' + (Math.round(bw * 10) / 10) + '" height="' + (Math.round(hgt * 10) / 10) + '" rx="1" fill="currentColor" opacity="' + (Math.round((0.55 + 0.45 * (i / (n - 1))) * 100) / 100) + '"/>';
+    }
+    return out;
+  }
+  // —— 8 个纯函数（全部 goodUp=true，越多越好）——
+  function stScore(a) { return stCalc(a, true); }
+  function stKill(a) { return stCalc(a, true); }
+  function stCoin(a) { return stCalc(a, true); }
+  function stWave(a) { return stCalc(a, true); }
+  function stTime(a) { return stCalc(a, true); }
+  function stShot(a) { return stCalc(a, true); }
+  function stUpg(a) { return stCalc(a, true); }
+  function stBoss(a) { return stCalc(a, true); }
+  // —— 跨局趋势：数据源（读滚动仓）——
+  function stScoreNow() { return stCalc(__stH.score ? __stH.score.hist : [], true); }
+  function stKillNow() { return stCalc(__stH.kill ? __stH.kill.hist : [], true); }
+  function stCoinNow() { return stCalc(__stH.coin ? __stH.coin.hist : [], true); }
+  function stWaveNow() { return stCalc(__stH.wave ? __stH.wave.hist : [], true); }
+  function stTimeNow() { return stCalc(__stH.time ? __stH.time.hist : [], true); }
+  function stShotNow() { return stCalc(__stH.shot ? __stH.shot.hist : [], true); }
+  function stUpgNow() { return stCalc(__stH.upg ? __stH.upg.hist : [], true); }
+  function stBossNow() { return stCalc(__stH.boss ? __stH.boss.hist : [], true); }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -21971,6 +22139,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   }
 
   function endGame(win) {
+    stRecordAll({ score: score, kill: (stat && stat.kills), coin: runCoins, wave: level, time: playSecRun, shot: (stat && stat.shots), upg: upgTotal, boss: (stat && stat.bossKills) });
     gameOver = true;
     running = false;
     won = win;
@@ -23597,7 +23766,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.88', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.89', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -25879,6 +26048,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       cuBossStateNow: (a) => cuBoss(a), cuBossPtsNow: (a) => cuPoints(cuBoss(a).curve, 44, 14), cuBossNow: () => cuBossNow(), cuBossDomNow: () => { const e = document.querySelector('#cuBossWrap .cutxt'); return e ? e.textContent : null; }, cuBossNumDomNow: () => { const e = document.querySelector('#cuBossWrap'); return e ? e.dataset.n : null; },
       cuHurtStateNow: (a) => cuHurt(a), cuHurtPtsNow: (a) => cuPoints(cuHurt(a).curve, 44, 14), cuHurtNow: () => cuHurtNow(), cuHurtDomNow: () => { const e = document.querySelector('#cuHurtWrap .cutxt'); return e ? e.textContent : null; }, cuHurtNumDomNow: () => { const e = document.querySelector('#cuHurtWrap'); return e ? e.dataset.n : null; },
       cuDeathStateNow: (a) => cuDeath(a), cuDeathPtsNow: (a) => cuPoints(cuDeath(a).curve, 44, 14), cuDeathNow: () => cuDeathNow(), cuDeathDomNow: () => { const e = document.querySelector('#cuDeathWrap .cutxt'); return e ? e.textContent : null; }, cuDeathNumDomNow: () => { const e = document.querySelector('#cuDeathWrap'); return e ? e.dataset.n : null; },
+      stScoreStateNow: (a) => stScore(a), stScoreRectsNow: (a) => stRects(stScore(a).vals, 40, 16), stScoreNow: () => stScoreNow(), stScoreDomNow: () => { const e = document.querySelector('#stScoreWrap .sttxt'); return e ? e.textContent : null; }, stScoreNumDomNow: () => { const e = document.querySelector('#stScoreWrap'); return e ? e.dataset.n : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
