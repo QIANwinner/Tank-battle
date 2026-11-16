@@ -7368,4 +7368,14 @@ html.compact-hud #hud .m-hide { display:none !important; }
   #pjKillWrap.g-warn .pjmeter { color:#f1c40f; }
   #pjKillWrap.g-warn .pjtxt { color:#f1c40f; }
   #pjKillWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
+  #pjCoinWrap .pjmeter { display:inline-block; vertical-align:middle; margin:0 4px; color:#888; opacity:.9; }
+  #pjCoinWrap .pjv { font-size:11px; color:#fff; font-weight:700; margin:0 3px; }
+  #pjCoinWrap .pjtxt { font-style:normal; font-size:10px; color:#aaa; margin:0 3px; }
+  #pjCoinWrap.g-good .pjmeter { color:#2ecc71; }
+  #pjCoinWrap.g-good .pjtxt { color:#2ecc71; }
+  #pjCoinWrap.g-bad .pjmeter { color:#e74c3c; }
+  #pjCoinWrap.g-bad .pjtxt { color:#e74c3c; }
+  #pjCoinWrap.g-warn .pjmeter { color:#f1c40f; }
+  #pjCoinWrap.g-warn .pjtxt { color:#f1c40f; }
+  #pjCoinWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
 
