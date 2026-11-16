@@ -23171,6 +23171,23 @@ async function main() {
     t("U8462 DOM 与函数一致（双段投影条可出段 + SVG 可写 + 函数正确）", typeof o5.pt === "string" && o5.pt.split('<rect').length - 1 >= 3 && o5.pt.indexOf('width="29"') >= 0 && o5.dom.indexOf('<rect') >= 0 && o5.s.ok === true && Math.abs(o5.s.proj - 1300) < 1e-9, JSON.stringify(o5));
   } catch (e) { t("U8457 金币外推 抛异常", false, String(e)); t("U8458 金币外推 抛异常", false, String(e)); t("U8459 金币外推 抛异常", false, String(e)); t("U8460 金币外推 抛异常", false, String(e)); t("U8461 金币外推 抛异常", false, String(e)); t("U8462 金币外推 抛异常", false, String(e)); }
 
+
+  // ===== U8463~U8468: 射击外推(v1.1.100) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('pjShotWrap'),sv:!!document.querySelector('#pjShotWrap .pjmeter'),ct:!!document.querySelector('#pjShotWrap .pjtxt'),s:T.pjShotStateNow(1000,10)};return JSON.stringify(r);})()"));
+    t("U8463 射击外推 DOM 已加入 HUD + 双段投影条 + 文本 + 函数可用", o.dom === true && o.sv === true && o.ct === true && o.s.ok === true && o.s.proj === 1300, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.pjShotStateNow(0,0)};return JSON.stringify(r);})()"));
+    t("U8464 初值 射击外推（无数据 0/0 → 无增长 平）", o1.s.ok === true && o1.s.delta === 0 && o1.s.proj === 0 && o1.s.pct === 0 && o1.s.cls === "g-warn" && o1.s.danger === false && o1.s.txt === "+0 → 0", JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.pjShotStateNow(1000,10)};return JSON.stringify(r);})()"));
+    t("U8465 正常值 射击外推（1000@10/s 30s → +300 → 1300，增长 30%）", o2.s.ok === true && Math.abs(o2.s.delta - 300) < 1e-9 && Math.abs(o2.s.proj - 1300) < 1e-9 && Math.abs(o2.s.pct - 0.3) < 1e-9 && o2.s.cls === "g-good" && o2.s.danger === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.pjShotStateNow(200,5),b:T.pjShotStateNow(0,10)};return JSON.stringify(r);})()"));
+    t("U8466 边界 射击外推（200@5/s → +150→350，增长 75%；0@10/s → 全增 100%）", o3.a.ok === true && Math.abs(o3.a.delta - 150) < 1e-9 && Math.abs(o3.a.proj - 350) < 1e-9 && Math.abs(o3.a.pct - 0.75) < 1e-9 && o3.b.ok === true && Math.abs(o3.b.delta - 300) < 1e-9 && o3.b.pct === 1, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.pjShotStateNow(null,5),b:T.pjShotStateNow(100,NaN),c:T.pjShotStateNow(-5,2),d:T.pjShotStateNow(100,-2),e:T.pjShotStateNow(100,5,0)};return JSON.stringify(r);})()"));
+    t("U8467 非法 null/NaN/负值/H<=0 → 退化 '—'", o4.a.ok === false && o4.a.txt === "—" && o4.b.ok === false && o4.b.txt === "—" && o4.c.ok === false && o4.c.txt === "—" && o4.d.ok === false && o4.d.txt === "—" && o4.e.ok === false && o4.e.txt === "—", JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={pt:T.pjShotRectsNow(50,100),dom:(function(){const s=document.querySelector('#pjShotWrap svg');if(!s)return null;s.innerHTML='<rect x=1 y=1 width=2 height=2/>';return s.innerHTML;})(),s:T.pjShotStateNow(1000,10)};return JSON.stringify(r);})()"));
+    t("U8468 DOM 与函数一致（双段投影条可出段 + SVG 可写 + 函数正确）", typeof o5.pt === "string" && o5.pt.split('<rect').length - 1 >= 3 && o5.pt.indexOf('width="29"') >= 0 && o5.dom.indexOf('<rect') >= 0 && o5.s.ok === true && Math.abs(o5.s.proj - 1300) < 1e-9, JSON.stringify(o5));
+  } catch (e) { t("U8463 射击外推 抛异常", false, String(e)); t("U8464 射击外推 抛异常", false, String(e)); t("U8465 射击外推 抛异常", false, String(e)); t("U8466 射击外推 抛异常", false, String(e)); t("U8467 射击外推 抛异常", false, String(e)); t("U8468 射击外推 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
