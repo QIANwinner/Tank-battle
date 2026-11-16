@@ -23279,6 +23279,29 @@ async function main() {
     t("U8498 DOM 与函数一致（偏离带可绘游标 + SVG 可写 + 函数正确）", typeof o5.pt === 'string' && o5.pt.indexOf('class="vzm"') >= 0 && o5.pt.indexOf('data-dv="0.5"') >= 0 && mx && Number(mx) > 32 && o5.dom.indexOf('<rect') >= 0 && o5.s.ok === true && o5.s.dir === 'above', JSON.stringify(o5));
   } catch (e) { t("U8493 击杀偏离 抛异常", false, String(e)); t("U8494 击杀偏离 抛异常", false, String(e)); t("U8495 击杀偏离 抛异常", false, String(e)); t("U8496 击杀偏离 抛异常", false, String(e)); t("U8497 击杀偏离 抛异常", false, String(e)); t("U8498 击杀偏离 抛异常", false, String(e)); }
 
+
+  // ===== U8499~U8504: 射击偏离(v1.1.106) =====
+  try {
+    const up = true;
+    const expAbove = up ? 'g-good' : 'g-bad';
+    const expAboveDanger = up ? false : true;
+    const expBelow = up ? 'g-bad' : 'g-good';
+    const expBelowDanger = up ? true : false;
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('vzShotWrap'),sv:!!document.querySelector('#vzShotWrap .dvband'),mk:!!document.querySelector('#vzShotWrap .vzm'),tx:!!document.querySelector('#vzShotWrap .dvtxt'),s:T.vzShotStateNow(1000,800)};return JSON.stringify(r);})()"));
+    t("U8499 射击偏离 DOM 已加入 HUD + 偏离带 + 游标 + 文本 + 函数可用", o.dom === true && o.sv === true && o.mk === true && o.tx === true && o.s.ok === true && o.s.dir === 'above' && Math.abs(o.s.pct - 0.25) < 1e-9 && o.s.txt === '+25%', JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.vzShotStateNow(0,0)};return JSON.stringify(r);})()"));
+    t("U8500 初值 射击偏离（0/0 → 无基准 持平）", o1.s.ok === true && o1.s.dev === 0 && o1.s.dir === 'steady' && o1.s.pct === 0 && o1.s.cls === 'g-warn' && o1.s.danger === false && o1.s.txt === '0%', JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.vzShotStateNow(1000,800)};return JSON.stringify(r);})()"));
+    t("U8501 正常值 射击偏离（1000 vs 800 → 超常 25%）", o2.s.ok === true && Math.abs(o2.s.dev - 0.25) < 1e-9 && o2.s.dir === 'above' && Math.abs(o2.s.pct - 0.25) < 1e-9 && o2.s.txt === '+25%' && o2.s.cls === expAbove && o2.s.danger === expAboveDanger, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.vzShotStateNow(1000,900,0.2),b:T.vzShotStateNow(1000,800,0.2),c:T.vzShotStateNow(800,1000,0.2),d:T.vzShotStateNow(700,1000,0.2)};return JSON.stringify(r);})()"));
+    t("U8502 边界 射击偏离（±20% 容差内=持平；超限=同向/反向）", o3.a.dir === 'steady' && o3.a.cls === 'g-warn' && o3.b.dir === 'above' && o3.b.cls === expAbove && o3.b.danger === expAboveDanger && o3.c.dir === 'steady' && o3.c.cls === 'g-warn' && o3.d.dir === 'below' && o3.d.cls === expBelow && o3.d.danger === expBelowDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.vzShotStateNow(null,5),b:T.vzShotStateNow(100,NaN),c:T.vzShotStateNow(-5,2),d:T.vzShotStateNow(100,-2),e:T.vzShotStateNow(100,5,0),f:T.vzShotStateNow([1],2),g:T.vzShotStateNow(100,5,-1)};return JSON.stringify(r);})()"));
+    t("U8503 非法 null/NaN/负值/容差<=0/数组 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={pt:T.vzShotMarkerNow(0.5,0.15),dom:(function(){const s=document.querySelector('#vzShotWrap svg');if(!s)return null;s.innerHTML='<rect x=1 y=1 width=2 height=2/>';return s.innerHTML;})(),s:T.vzShotStateNow(1000,800)};return JSON.stringify(r);})()"));
+    const mx = (o5.pt.match(/data-dv="0.5" x="([0-9.]+)"/) || [])[1];
+    t("U8504 DOM 与函数一致（偏离带可绘游标 + SVG 可写 + 函数正确）", typeof o5.pt === 'string' && o5.pt.indexOf('class="vzm"') >= 0 && o5.pt.indexOf('data-dv="0.5"') >= 0 && mx && Number(mx) > 32 && o5.dom.indexOf('<rect') >= 0 && o5.s.ok === true && o5.s.dir === 'above', JSON.stringify(o5));
+  } catch (e) { t("U8499 射击偏离 抛异常", false, String(e)); t("U8500 射击偏离 抛异常", false, String(e)); t("U8501 射击偏离 抛异常", false, String(e)); t("U8502 射击偏离 抛异常", false, String(e)); t("U8503 射击偏离 抛异常", false, String(e)); t("U8504 射击偏离 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
