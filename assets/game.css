@@ -7408,4 +7408,14 @@ html.compact-hud #hud .m-hide { display:none !important; }
   #pjBossWrap.g-warn .pjmeter { color:#f1c40f; }
   #pjBossWrap.g-warn .pjtxt { color:#f1c40f; }
   #pjBossWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
+  #pjUpgWrap .pjmeter { display:inline-block; vertical-align:middle; margin:0 4px; color:#888; opacity:.9; }
+  #pjUpgWrap .pjv { font-size:11px; color:#fff; font-weight:700; margin:0 3px; }
+  #pjUpgWrap .pjtxt { font-style:normal; font-size:10px; color:#aaa; margin:0 3px; }
+  #pjUpgWrap.g-good .pjmeter { color:#2ecc71; }
+  #pjUpgWrap.g-good .pjtxt { color:#2ecc71; }
+  #pjUpgWrap.g-bad .pjmeter { color:#e74c3c; }
+  #pjUpgWrap.g-bad .pjtxt { color:#e74c3c; }
+  #pjUpgWrap.g-warn .pjmeter { color:#f1c40f; }
+  #pjUpgWrap.g-warn .pjtxt { color:#f1c40f; }
+  #pjUpgWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
 
