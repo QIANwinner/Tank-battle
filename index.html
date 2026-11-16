@@ -1327,6 +1327,7 @@
     <div class="pill m-hide" id="stShotWrap"><span class="k">🔫</span><svg class="stbars" width="40" height="16" viewBox="0 0 40 16"></svg><span class="v">跨局射击</span><em class="sttxt">—</em></div>
     <div class="pill m-hide" id="stUpgWrap"><span class="k">⚙️</span><svg class="stbars" width="40" height="16" viewBox="0 0 40 16"></svg><span class="v">跨局强化</span><em class="sttxt">—</em></div>
     <div class="pill m-hide" id="stBossWrap"><span class="k">👑</span><svg class="stbars" width="40" height="16" viewBox="0 0 40 16"></svg><span class="v">跨局BOSS</span><em class="sttxt">—</em></div>
+    <div class="pill m-hide" id="pjScoreWrap"><span class="k">📈</span><span class="pjv">—</span><svg class="pjmeter" width="60" height="12" viewBox="0 0 60 12"></svg><em class="pjtxt">30s 后</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1703,7 +1704,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.96</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.97</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7833,6 +7834,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_stShot = stShotNow(); const w_stShot = $('stShotWrap'); if (w_stShot) { const pv_stShot = w_stShot.dataset.fv || ''; const nv_stShot = s_stShot.txt + '|' + s_stShot.n + '|' + (s_stShot.vals || []).join(','); if (pv_stShot !== nv_stShot) { w_stShot.dataset.fv = nv_stShot; w_stShot.dataset.n = s_stShot.n; w_stShot.classList.remove('g-good','g-warn','g-bad'); if (s_stShot.cls) w_stShot.classList.add(s_stShot.cls); w_stShot.classList.toggle('danger', !!s_stShot.danger); const sv_stShot = w_stShot.querySelector('svg'); if (sv_stShot) sv_stShot.innerHTML = stRects(s_stShot.vals, 40, 16); const tv_stShot = w_stShot.querySelector('.sttxt'); if (tv_stShot) tv_stShot.textContent = s_stShot.txt; } }
     const s_stUpg = stUpgNow(); const w_stUpg = $('stUpgWrap'); if (w_stUpg) { const pv_stUpg = w_stUpg.dataset.fv || ''; const nv_stUpg = s_stUpg.txt + '|' + s_stUpg.n + '|' + (s_stUpg.vals || []).join(','); if (pv_stUpg !== nv_stUpg) { w_stUpg.dataset.fv = nv_stUpg; w_stUpg.dataset.n = s_stUpg.n; w_stUpg.classList.remove('g-good','g-warn','g-bad'); if (s_stUpg.cls) w_stUpg.classList.add(s_stUpg.cls); w_stUpg.classList.toggle('danger', !!s_stUpg.danger); const sv_stUpg = w_stUpg.querySelector('svg'); if (sv_stUpg) sv_stUpg.innerHTML = stRects(s_stUpg.vals, 40, 16); const tv_stUpg = w_stUpg.querySelector('.sttxt'); if (tv_stUpg) tv_stUpg.textContent = s_stUpg.txt; } }
     const s_stBoss = stBossNow(); const w_stBoss = $('stBossWrap'); if (w_stBoss) { const pv_stBoss = w_stBoss.dataset.fv || ''; const nv_stBoss = s_stBoss.txt + '|' + s_stBoss.n + '|' + (s_stBoss.vals || []).join(','); if (pv_stBoss !== nv_stBoss) { w_stBoss.dataset.fv = nv_stBoss; w_stBoss.dataset.n = s_stBoss.n; w_stBoss.classList.remove('g-good','g-warn','g-bad'); if (s_stBoss.cls) w_stBoss.classList.add(s_stBoss.cls); w_stBoss.classList.toggle('danger', !!s_stBoss.danger); const sv_stBoss = w_stBoss.querySelector('svg'); if (sv_stBoss) sv_stBoss.innerHTML = stRects(s_stBoss.vals, 40, 16); const tv_stBoss = w_stBoss.querySelector('.sttxt'); if (tv_stBoss) tv_stBoss.textContent = s_stBoss.txt; } }
+    const s_pjScore = pjScoreNow(); const w_pjScore = document.getElementById('pjScoreWrap'); if (w_pjScore) { const pv_pjScore = w_pjScore.dataset.fv || ''; const nv_pjScore = s_pjScore.txt + '|' + s_pjScore.proj + '|' + s_pjScore.pct; if (pv_pjScore !== nv_pjScore) { w_pjScore.dataset.fv = nv_pjScore; w_pjScore.classList.remove('g-good','g-warn','g-bad'); if (s_pjScore.cls) w_pjScore.classList.add(s_pjScore.cls); w_pjScore.classList.toggle('danger', !!s_pjScore.danger); const sv_pjScore = w_pjScore.querySelector('svg'); if (sv_pjScore) sv_pjScore.innerHTML = pjRects(s_pjScore.cur, s_pjScore.proj, 60, 12); const tv_pjScore = w_pjScore.querySelector('.pjtxt'); if (tv_pjScore) tv_pjScore.textContent = s_pjScore.txt; const vv_pjScore = w_pjScore.querySelector('.pjv'); if (vv_pjScore) vv_pjScore.textContent = Math.round(s_pjScore.cur); } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -21926,6 +21928,54 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // 射击趋势（v1.1.94 第九十三辑：st 系列已在 v1.1.89 引入）
   // 强化趋势（v1.1.95 第九十三辑：st 系列已在 v1.1.89 引入）
   // BOSS趋势（v1.1.96 第九十三辑：st 系列已在 v1.1.89 引入）
+  // —— 照此节奏外推：pj 系列（v1.1.97 第九十四辑）——
+  // 纯函数：当前累计值 cur + 每秒速率 rate → 线性外推 H 秒后 {ok,cur,rate,delta,proj,pct,cls,danger,txt}
+  // delta=rate*H（未来 H 秒预计增量）；proj=cur+delta；pct=cur>0?delta/cur:(delta>0?1:0)（钳[0,1]）；
+  // cls/danger 按 delta 方向分级；非法（非有限数/H<=0/cur<0/rate<0）→ 退化 '—'。
+  function pjCalc(cur, rate, H) {
+    const deg = { ok: false, cur: 0, rate: 0, delta: 0, proj: 0, pct: 0, cls: 'g-warn', danger: false, txt: '—' };
+    if (cur === null || cur === undefined || rate === null || rate === undefined || Array.isArray(cur) || Array.isArray(rate)) return deg;
+    const c = Number(cur), r = Number(rate), h = Number(H);
+    if (!isFinite(c) || !isFinite(r) || !isFinite(h) || h <= 0 || c < 0 || r < 0) return deg;
+    const delta = r * h;
+    const proj = c + delta;
+    const pct = c > 0 ? Math.max(0, Math.min(1, delta / c)) : (delta > 0 ? 1 : 0);
+    let cls, danger;
+    if (delta > 0) { cls = 'g-good'; danger = false; }
+    else if (delta < 0) { cls = 'g-bad'; danger = true; }
+    else { cls = 'g-warn'; danger = false; }
+    const txt = '+' + Math.round(delta) + ' → ' + Math.round(proj);
+    return { ok: true, cur: c, rate: r, delta: delta, proj: proj, pct: pct, cls: cls, danger: danger, txt: txt };
+  }
+  // 双段投影条 → SVG <rect> 标记串（W×H 视口，留 1px 边距；实色段=cur/proj，半透明段=增量/proj）
+  function pjRects(cur, proj, W, H) {
+    const c = Number(cur), p = Number(proj), w = Number(W) || 60, h = Number(H) || 12;
+    const m = 1, tw = w - 2 * m, bh = h - 2 * m;
+    const ratio = (p > 0 && isFinite(c) && isFinite(p)) ? Math.max(0, Math.min(1, c / p)) : 0;
+    const cw = ratio * tw;
+    let out = '<rect x="' + m + '" y="' + m + '" width="' + (Math.round(tw * 10) / 10) + '" height="' + bh + '" rx="2" fill="none" stroke="currentColor" stroke-opacity=".3"/>';
+    out += '<rect x="' + m + '" y="' + m + '" width="' + (Math.round(cw * 10) / 10) + '" height="' + bh + '" rx="2" fill="currentColor"/>';
+    out += '<rect x="' + (Math.round((m + cw) * 10) / 10) + '" y="' + m + '" width="' + (Math.round((tw - cw) * 10) / 10) + '" height="' + bh + '" rx="2" fill="currentColor" opacity=".35"/>';
+    return out;
+  }
+  // —— 8 个纯函数（全部 goodUp=true，H 固定 30s；可选第三参覆盖 H 供测试）——
+  function pjScore(a, b, h) { return pjCalc(a, b, h === undefined ? 30 : h); }
+  function pjKill(a, b, h) { return pjCalc(a, b, h === undefined ? 30 : h); }
+  function pjCoin(a, b, h) { return pjCalc(a, b, h === undefined ? 30 : h); }
+  function pjShot(a, b, h) { return pjCalc(a, b, h === undefined ? 30 : h); }
+  function pjDmg(a, b, h) { return pjCalc(a, b, h === undefined ? 30 : h); }
+  function pjBoss(a, b, h) { return pjCalc(a, b, h === undefined ? 30 : h); }
+  function pjUpg(a, b, h) { return pjCalc(a, b, h === undefined ? 30 : h); }
+  function pjPu(a, b, h) { return pjCalc(a, b, h === undefined ? 30 : h); }
+  // —— 照此节奏外推：数据源（读当前累计值 + 每秒速率，H=30）——
+  function pjScoreNow() { const v = Number(score) || 0; const r = playSecRun > 0 ? v / playSecRun : 0; return pjCalc(v, r, 30); }
+  function pjKillNow() { const v = (stat && Number(stat.kills)) || 0; const r = playSecRun > 0 ? v / playSecRun : 0; return pjCalc(v, r, 30); }
+  function pjCoinNow() { const v = Number(runCoins) || 0; const r = playSecRun > 0 ? v / playSecRun : 0; return pjCalc(v, r, 30); }
+  function pjShotNow() { const v = (stat && Number(stat.shots)) || 0; const r = playSecRun > 0 ? v / playSecRun : 0; return pjCalc(v, r, 30); }
+  function pjDmgNow() { const v = Number(runDmg) || 0; const r = playSecRun > 0 ? v / playSecRun : 0; return pjCalc(v, r, 30); }
+  function pjBossNow() { const v = (stat && Number(stat.bossKills)) || 0; const r = playSecRun > 0 ? v / playSecRun : 0; return pjCalc(v, r, 30); }
+  function pjUpgNow() { const v = Number(upgTotal) || 0; const r = playSecRun > 0 ? v / playSecRun : 0; return pjCalc(v, r, 30); }
+  function pjPuNow() { const v = Number(runPowerups) || 0; const r = playSecRun > 0 ? v / playSecRun : 0; return pjCalc(v, r, 30); }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -23787,7 +23837,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.96', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.97', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -26077,6 +26127,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       stShotStateNow: (a) => stShot(a), stShotRectsNow: (a) => stRects(stShot(a).vals, 40, 16), stShotNow: () => stShotNow(), stShotDomNow: () => { const e = document.querySelector('#stShotWrap .sttxt'); return e ? e.textContent : null; }, stShotNumDomNow: () => { const e = document.querySelector('#stShotWrap'); return e ? e.dataset.n : null; },
       stUpgStateNow: (a) => stUpg(a), stUpgRectsNow: (a) => stRects(stUpg(a).vals, 40, 16), stUpgNow: () => stUpgNow(), stUpgDomNow: () => { const e = document.querySelector('#stUpgWrap .sttxt'); return e ? e.textContent : null; }, stUpgNumDomNow: () => { const e = document.querySelector('#stUpgWrap'); return e ? e.dataset.n : null; },
       stBossStateNow: (a) => stBoss(a), stBossRectsNow: (a) => stRects(stBoss(a).vals, 40, 16), stBossNow: () => stBossNow(), stBossDomNow: () => { const e = document.querySelector('#stBossWrap .sttxt'); return e ? e.textContent : null; }, stBossNumDomNow: () => { const e = document.querySelector('#stBossWrap'); return e ? e.dataset.n : null; },
+      pjScoreStateNow: (a, b, h) => pjScore(a, b, h), pjScoreRectsNow: (a, b) => pjRects(a, b, 60, 12), pjScoreNow: () => pjScoreNow(), pjScoreDomNow: () => { const e = document.querySelector('#pjScoreWrap .pjtxt'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
