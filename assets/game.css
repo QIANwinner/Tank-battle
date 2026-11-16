@@ -7339,4 +7339,13 @@ html.compact-hud #hud .m-hide { display:none !important; }
   #stUpgWrap.g-warn .stbars { color:#f1c40f; }
   #stUpgWrap.g-warn .sttxt { color:#f1c40f; }
   #stUpgWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
+  #stBossWrap .stbars { display:inline-block; vertical-align:middle; margin:0 4px; opacity:.9; color:#888; }
+  #stBossWrap .sttxt { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #stBossWrap.g-good .stbars { color:#2ecc71; }
+  #stBossWrap.g-good .sttxt { color:#2ecc71; }
+  #stBossWrap.g-bad .stbars { color:#e74c3c; }
+  #stBossWrap.g-bad .sttxt { color:#e74c3c; }
+  #stBossWrap.g-warn .stbars { color:#f1c40f; }
+  #stBossWrap.g-warn .sttxt { color:#f1c40f; }
+  #stBossWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
 
