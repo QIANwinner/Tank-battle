@@ -1323,6 +1323,7 @@
     <div class="pill m-hide" id="stKillWrap"><span class="k">⚔️</span><svg class="stbars" width="40" height="16" viewBox="0 0 40 16"></svg><span class="v">跨局击杀</span><em class="sttxt">—</em></div>
     <div class="pill m-hide" id="stCoinWrap"><span class="k">💰</span><svg class="stbars" width="40" height="16" viewBox="0 0 40 16"></svg><span class="v">跨局金币</span><em class="sttxt">—</em></div>
     <div class="pill m-hide" id="stWaveWrap"><span class="k">🌊</span><svg class="stbars" width="40" height="16" viewBox="0 0 40 16"></svg><span class="v">跨局波次</span><em class="sttxt">—</em></div>
+    <div class="pill m-hide" id="stTimeWrap"><span class="k">⏱️</span><svg class="stbars" width="40" height="16" viewBox="0 0 40 16"></svg><span class="v">跨局时长</span><em class="sttxt">—</em></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1699,7 +1700,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.92</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.93</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7825,6 +7826,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_stKill = stKillNow(); const w_stKill = $('stKillWrap'); if (w_stKill) { const pv_stKill = w_stKill.dataset.fv || ''; const nv_stKill = s_stKill.txt + '|' + s_stKill.n + '|' + (s_stKill.vals || []).join(','); if (pv_stKill !== nv_stKill) { w_stKill.dataset.fv = nv_stKill; w_stKill.dataset.n = s_stKill.n; w_stKill.classList.remove('g-good','g-warn','g-bad'); if (s_stKill.cls) w_stKill.classList.add(s_stKill.cls); w_stKill.classList.toggle('danger', !!s_stKill.danger); const sv_stKill = w_stKill.querySelector('svg'); if (sv_stKill) sv_stKill.innerHTML = stRects(s_stKill.vals, 40, 16); const tv_stKill = w_stKill.querySelector('.sttxt'); if (tv_stKill) tv_stKill.textContent = s_stKill.txt; } }
     const s_stCoin = stCoinNow(); const w_stCoin = $('stCoinWrap'); if (w_stCoin) { const pv_stCoin = w_stCoin.dataset.fv || ''; const nv_stCoin = s_stCoin.txt + '|' + s_stCoin.n + '|' + (s_stCoin.vals || []).join(','); if (pv_stCoin !== nv_stCoin) { w_stCoin.dataset.fv = nv_stCoin; w_stCoin.dataset.n = s_stCoin.n; w_stCoin.classList.remove('g-good','g-warn','g-bad'); if (s_stCoin.cls) w_stCoin.classList.add(s_stCoin.cls); w_stCoin.classList.toggle('danger', !!s_stCoin.danger); const sv_stCoin = w_stCoin.querySelector('svg'); if (sv_stCoin) sv_stCoin.innerHTML = stRects(s_stCoin.vals, 40, 16); const tv_stCoin = w_stCoin.querySelector('.sttxt'); if (tv_stCoin) tv_stCoin.textContent = s_stCoin.txt; } }
     const s_stWave = stWaveNow(); const w_stWave = $('stWaveWrap'); if (w_stWave) { const pv_stWave = w_stWave.dataset.fv || ''; const nv_stWave = s_stWave.txt + '|' + s_stWave.n + '|' + (s_stWave.vals || []).join(','); if (pv_stWave !== nv_stWave) { w_stWave.dataset.fv = nv_stWave; w_stWave.dataset.n = s_stWave.n; w_stWave.classList.remove('g-good','g-warn','g-bad'); if (s_stWave.cls) w_stWave.classList.add(s_stWave.cls); w_stWave.classList.toggle('danger', !!s_stWave.danger); const sv_stWave = w_stWave.querySelector('svg'); if (sv_stWave) sv_stWave.innerHTML = stRects(s_stWave.vals, 40, 16); const tv_stWave = w_stWave.querySelector('.sttxt'); if (tv_stWave) tv_stWave.textContent = s_stWave.txt; } }
+    const s_stTime = stTimeNow(); const w_stTime = $('stTimeWrap'); if (w_stTime) { const pv_stTime = w_stTime.dataset.fv || ''; const nv_stTime = s_stTime.txt + '|' + s_stTime.n + '|' + (s_stTime.vals || []).join(','); if (pv_stTime !== nv_stTime) { w_stTime.dataset.fv = nv_stTime; w_stTime.dataset.n = s_stTime.n; w_stTime.classList.remove('g-good','g-warn','g-bad'); if (s_stTime.cls) w_stTime.classList.add(s_stTime.cls); w_stTime.classList.toggle('danger', !!s_stTime.danger); const sv_stTime = w_stTime.querySelector('svg'); if (sv_stTime) sv_stTime.innerHTML = stRects(s_stTime.vals, 40, 16); const tv_stTime = w_stTime.querySelector('.sttxt'); if (tv_stTime) tv_stTime.textContent = s_stTime.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -21914,6 +21916,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // 击杀趋势（v1.1.90 第九十三辑：st 系列已在 v1.1.89 引入）
   // 金币趋势（v1.1.91 第九十三辑：st 系列已在 v1.1.89 引入）
   // 波次趋势（v1.1.92 第九十三辑：st 系列已在 v1.1.89 引入）
+  // 时长趋势（v1.1.93 第九十三辑：st 系列已在 v1.1.89 引入）
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -23775,7 +23778,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.92', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.93', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -26061,6 +26064,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       stKillStateNow: (a) => stKill(a), stKillRectsNow: (a) => stRects(stKill(a).vals, 40, 16), stKillNow: () => stKillNow(), stKillDomNow: () => { const e = document.querySelector('#stKillWrap .sttxt'); return e ? e.textContent : null; }, stKillNumDomNow: () => { const e = document.querySelector('#stKillWrap'); return e ? e.dataset.n : null; },
       stCoinStateNow: (a) => stCoin(a), stCoinRectsNow: (a) => stRects(stCoin(a).vals, 40, 16), stCoinNow: () => stCoinNow(), stCoinDomNow: () => { const e = document.querySelector('#stCoinWrap .sttxt'); return e ? e.textContent : null; }, stCoinNumDomNow: () => { const e = document.querySelector('#stCoinWrap'); return e ? e.dataset.n : null; },
       stWaveStateNow: (a) => stWave(a), stWaveRectsNow: (a) => stRects(stWave(a).vals, 40, 16), stWaveNow: () => stWaveNow(), stWaveDomNow: () => { const e = document.querySelector('#stWaveWrap .sttxt'); return e ? e.textContent : null; }, stWaveNumDomNow: () => { const e = document.querySelector('#stWaveWrap'); return e ? e.dataset.n : null; },
+      stTimeStateNow: (a) => stTime(a), stTimeRectsNow: (a) => stRects(stTime(a).vals, 40, 16), stTimeNow: () => stTimeNow(), stTimeDomNow: () => { const e = document.querySelector('#stTimeWrap .sttxt'); return e ? e.textContent : null; }, stTimeNumDomNow: () => { const e = document.querySelector('#stTimeWrap'); return e ? e.dataset.n : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

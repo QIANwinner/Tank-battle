@@ -7312,4 +7312,13 @@ html.compact-hud #hud .m-hide { display:none !important; }
   #stWaveWrap.g-warn .stbars { color:#f1c40f; }
   #stWaveWrap.g-warn .sttxt { color:#f1c40f; }
   #stWaveWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
+  #stTimeWrap .stbars { display:inline-block; vertical-align:middle; margin:0 4px; opacity:.9; color:#888; }
+  #stTimeWrap .sttxt { font-style:normal; font-size:10px; color:#aaa; margin:0 4px; }
+  #stTimeWrap.g-good .stbars { color:#2ecc71; }
+  #stTimeWrap.g-good .sttxt { color:#2ecc71; }
+  #stTimeWrap.g-bad .stbars { color:#e74c3c; }
+  #stTimeWrap.g-bad .sttxt { color:#e74c3c; }
+  #stTimeWrap.g-warn .stbars { color:#f1c40f; }
+  #stTimeWrap.g-warn .sttxt { color:#f1c40f; }
+  #stTimeWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
 
