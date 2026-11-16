@@ -23001,6 +23001,23 @@ async function main() {
     t("U8402 DOM 与函数一致（柱状图渲染管线可出柱 + SVG 可写 + 函数正确）", typeof o5.pt === "string" && o5.pt.indexOf('<rect') >= 0 && o5.pt.split('<rect').length - 1 >= 2 && o5.dom.indexOf('<rect') >= 0 && o5.s.ok === true && o5.s.trend === "升·3连", JSON.stringify(o5));
   } catch (e) { t("U8397 得分趋势 抛异常", false, String(e)); t("U8398 得分趋势 抛异常", false, String(e)); t("U8399 得分趋势 抛异常", false, String(e)); t("U8400 得分趋势 抛异常", false, String(e)); t("U8401 得分趋势 抛异常", false, String(e)); t("U8402 得分趋势 抛异常", false, String(e)); }
 
+
+  // ===== U8403~U8408: 击杀趋势(v1.1.90) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('stKillWrap'),sv:!!document.querySelector('#stKillWrap .stbars'),ct:!!document.querySelector('#stKillWrap .sttxt'),s:T.stKillStateNow([2,4,6,8,10,12])};return JSON.stringify(r);})()"));
+    t("U8403 击杀趋势 DOM 已加入 HUD + 柱状图 + 文本 + 函数可用", o.dom === true && o.sv === true && o.ct === true && o.s.ok === true && o.s.trend === "升·3连", JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.stKillStateNow([2,4,6,8,10,12])};return JSON.stringify(r);})()"));
+    t("U8404 正常 击杀趋势（[2,4,6,8,10,12] 升·3连 CV0.49→较稳）", o1.s.ok === true && o1.s.n === 6 && o1.s.dir === "升" && o1.s.streak === 3 && o1.s.stb === "较稳" && o1.s.trend === "升·3连" && o1.s.cls === "g-good" && o1.s.danger === false, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.stKillStateNow([10,9,8,7,6,5])};return JSON.stringify(r);})()"));
+    t("U8405 边界 击杀趋势（[10,9,8,7,6,5] 降·3连 CV0.23→稳）→ 降", o2.s.ok === true && o2.s.n === 6 && o2.s.dir === "降" && o2.s.streak === 3 && o2.s.stb === "稳" && o2.s.trend === "降·3连" && o2.s.cls === "g-bad" && o2.s.danger === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.stKillStateNow(null),b:T.stKillStateNow('a'),c:T.stKillStateNow([1,'x',2]),d:T.stKillStateNow([5]),e:T.stKillStateNow([]),f:T.stKillStateNow([3,3,3])};return JSON.stringify(r);})()"));
+    t("U8406 非法 null/'a'/坏元素/不足3局/空 → 退化 '—'；平稳 [3,3,3] → '平·3连'", o3.a.txt === "—" && o3.a.ok === false && o3.b.txt === "—" && o3.c.txt === "—" && o3.d.txt === "—" && o3.d.ok === false && o3.e.txt === "—" && o3.e.ok === false && o3.f.ok === true && o3.f.trend === "平·3连" && o3.f.cls === "g-warn" && o3.f.danger === false, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.stKillStateNow([1,2,3,4,5,6]),x:T.stKillStateNow([10])};return JSON.stringify(r);})()"));
+    t("U8407 结构：6 局升势可读；不足3局 → '—'", o4.s.ok === true && o4.s.n === 6 && o4.s.trend === "升·3连" && o4.x.txt === "—" && o4.x.ok === false, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={pt:T.stKillRectsNow([2,4,6,8,10,12]),dom:(function(){const s=document.querySelector('#stKillWrap svg');if(!s)return null;s.innerHTML='<rect x=1 y=1 width=2 height=2/>';return s.innerHTML;})(),s:T.stKillStateNow([2,4,6,8,10,12])};return JSON.stringify(r);})()"));
+    t("U8408 DOM 与函数一致（柱状图渲染管线可出柱 + SVG 可写 + 函数正确）", typeof o5.pt === "string" && o5.pt.indexOf('<rect') >= 0 && o5.pt.split('<rect').length - 1 >= 2 && o5.dom.indexOf('<rect') >= 0 && o5.s.ok === true && o5.s.trend === "升·3连", JSON.stringify(o5));
+  } catch (e) { t("U8403 击杀趋势 抛异常", false, String(e)); t("U8404 击杀趋势 抛异常", false, String(e)); t("U8405 击杀趋势 抛异常", false, String(e)); t("U8406 击杀趋势 抛异常", false, String(e)); t("U8407 击杀趋势 抛异常", false, String(e)); t("U8408 击杀趋势 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
