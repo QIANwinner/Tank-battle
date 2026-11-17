@@ -23624,6 +23624,190 @@ async function main() {
     t("U8588 DOM 与函数一致（偏离带可绘游标 + SVG 可写 + 函数正确）", typeof o5.pt === 'string' && o5.pt.indexOf('class="vzm"') >= 0 && o5.pt.indexOf('data-dv="0.5"') >= 0 && mx && Number(mx) > 32 && o5.dom.indexOf('<rect') >= 0 && o5.s.ok === true && o5.s.dir === 'above', JSON.stringify(o5));
   } catch (e) { t("U8583 金币每阵亡偏离 抛异常", false, String(e)); t("U8584 金币每阵亡偏离 抛异常", false, String(e)); t("U8585 金币每阵亡偏离 抛异常", false, String(e)); t("U8586 金币每阵亡偏离 抛异常", false, String(e)); t("U8587 金币每阵亡偏离 抛异常", false, String(e)); t("U8588 金币每阵亡偏离 抛异常", false, String(e)); }
 
+
+  // ===== U8589~U8594: 得分强度(v1.1.121) =====
+  try {
+    const up = true;
+    const L = [100,400,1200,3000];
+    const expInitCls = up ? 'g-bad' : 'g-good';
+    const expInitDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('tgScoreWrap'),tr:!!document.querySelector('#tgScoreWrap .tgtrk'),sg:document.querySelectorAll('#tgScoreWrap .tgtrk i').length,tg:!!document.querySelector('#tgScoreWrap .tgv'),s:T.tgScoreStateNow(1550,[100,400,1200,3000],true)};return JSON.stringify(r);})()"));
+    t("U8589 得分强度 DOM 已加入 HUD + 5 段阶梯 + 值元素 + 函数可用", o.dom === true && o.tr === true && o.sg === 5 && o.tg === true && o.s.ok === true && o.s.tier >= 2 && o.s.tier <= 5, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tgScoreStateNow(0,[100,400,1200,3000],true)};return JSON.stringify(r);})()"));
+    t("U8590 初值 得分强度（0 → 最低级 L1·低）", o1.s.ok === true && o1.s.tier === 1 && o1.s.idx === 0 && o1.s.pct === 0 && o1.s.cls === expInitCls && o1.s.danger === expInitDanger && o1.s.txt === 'L1·低' && o1.s.segs[0] === true && o1.s.segs[4] === false, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tgScoreStateNow(800,[100,400,1200,3000],true)};return JSON.stringify(r);})()"));
+    t("U8591 正常值 得分强度（中段 → L3·中）", o2.s.ok === true && o2.s.tier === 3 && o2.s.idx === 2 && o2.s.cls === 'g-warn' && o2.s.danger === false && o2.s.txt === 'L3·中' && o2.s.pct > 0 && o2.s.pct < 1 && o2.s.segs[0] === true && o2.s.segs[1] === true && o2.s.segs[2] === true && o2.s.segs[3] === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.tgScoreStateNow(100,[100,400,1200,3000],true),b:T.tgScoreStateNow(400,[100,400,1200,3000],true),c:T.tgScoreStateNow(1200,[100,400,1200,3000],true),d:T.tgScoreStateNow(3000,[100,400,1200,3000],true),e:T.tgScoreStateNow(2999.999,[100,400,1200,3000],true),f:T.tgScoreStateNow(50,[100,400,1200,3000],true)};return JSON.stringify(r);})()"));
+    t("U8592 边界 得分强度（四阈值分级正确 + 最差/最好级颜色反转）", o3.a.tier === 2 && o3.a.idx === 1 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.e.tier === 4 && o3.f.tier === 1 && o3.f.cls === expInitCls && o3.f.danger === expInitDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.tgScoreStateNow(null,[100,400,1200,3000],true),b:T.tgScoreStateNow(NaN,[100,400,1200,3000],true),c:T.tgScoreStateNow(-5,[100,400,1200,3000],true),d:T.tgScoreStateNow([1],[100,400,1200,3000],true),e:T.tgScoreStateNow(5,[1,2,3],true),f:T.tgScoreStateNow(5,[2,2,8,20],true),g:T.tgScoreStateNow(5,[0,8,20,50],true),h:T.tgScoreStateNow(5,[2,8,20,NaN],true)};return JSON.stringify(r);})()"));
+    t("U8593 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={sg3:T.tgScoreSegsNow(3),sg5:T.tgScoreSegsNow(5),s:T.tgScoreNow(),dom:(function(){const e=document.querySelector('#tgScoreWrap .tgv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8594 DOM 与函数一致（阶梯段位可算 + 数据源可用 + DOM 值可写）", o5.sg3.length === 5 && o5.sg3[0] === true && o5.sg3[1] === true && o5.sg3[2] === true && o5.sg3[3] === false && o5.sg3[4] === false && o5.sg5[0] === true && o5.sg5[4] === true && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8589 得分强度 抛异常", false, String(e)); t("U8590 得分强度 抛异常", false, String(e)); t("U8591 得分强度 抛异常", false, String(e)); t("U8592 得分强度 抛异常", false, String(e)); t("U8593 得分强度 抛异常", false, String(e)); t("U8594 得分强度 抛异常", false, String(e)); }
+
+
+  // ===== U8595~U8600: 金币强度(v1.1.122) =====
+  try {
+    const up = true;
+    const L = [2,8,20,50];
+    const expInitCls = up ? 'g-bad' : 'g-good';
+    const expInitDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('tgCoinWrap'),tr:!!document.querySelector('#tgCoinWrap .tgtrk'),sg:document.querySelectorAll('#tgCoinWrap .tgtrk i').length,tg:!!document.querySelector('#tgCoinWrap .tgv'),s:T.tgCoinStateNow(26,[2,8,20,50],true)};return JSON.stringify(r);})()"));
+    t("U8595 金币强度 DOM 已加入 HUD + 5 段阶梯 + 值元素 + 函数可用", o.dom === true && o.tr === true && o.sg === 5 && o.tg === true && o.s.ok === true && o.s.tier >= 2 && o.s.tier <= 5, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tgCoinStateNow(0,[2,8,20,50],true)};return JSON.stringify(r);})()"));
+    t("U8596 初值 金币强度（0 → 最低级 L1·低）", o1.s.ok === true && o1.s.tier === 1 && o1.s.idx === 0 && o1.s.pct === 0 && o1.s.cls === expInitCls && o1.s.danger === expInitDanger && o1.s.txt === 'L1·低' && o1.s.segs[0] === true && o1.s.segs[4] === false, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tgCoinStateNow(14,[2,8,20,50],true)};return JSON.stringify(r);})()"));
+    t("U8597 正常值 金币强度（中段 → L3·中）", o2.s.ok === true && o2.s.tier === 3 && o2.s.idx === 2 && o2.s.cls === 'g-warn' && o2.s.danger === false && o2.s.txt === 'L3·中' && o2.s.pct > 0 && o2.s.pct < 1 && o2.s.segs[0] === true && o2.s.segs[1] === true && o2.s.segs[2] === true && o2.s.segs[3] === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.tgCoinStateNow(2,[2,8,20,50],true),b:T.tgCoinStateNow(8,[2,8,20,50],true),c:T.tgCoinStateNow(20,[2,8,20,50],true),d:T.tgCoinStateNow(50,[2,8,20,50],true),e:T.tgCoinStateNow(49.999,[2,8,20,50],true),f:T.tgCoinStateNow(1,[2,8,20,50],true)};return JSON.stringify(r);})()"));
+    t("U8598 边界 金币强度（四阈值分级正确 + 最差/最好级颜色反转）", o3.a.tier === 2 && o3.a.idx === 1 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.e.tier === 4 && o3.f.tier === 1 && o3.f.cls === expInitCls && o3.f.danger === expInitDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.tgCoinStateNow(null,[2,8,20,50],true),b:T.tgCoinStateNow(NaN,[2,8,20,50],true),c:T.tgCoinStateNow(-5,[2,8,20,50],true),d:T.tgCoinStateNow([1],[2,8,20,50],true),e:T.tgCoinStateNow(5,[1,2,3],true),f:T.tgCoinStateNow(5,[2,2,8,20],true),g:T.tgCoinStateNow(5,[0,8,20,50],true),h:T.tgCoinStateNow(5,[2,8,20,NaN],true)};return JSON.stringify(r);})()"));
+    t("U8599 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={sg3:T.tgCoinSegsNow(3),sg5:T.tgCoinSegsNow(5),s:T.tgCoinNow(),dom:(function(){const e=document.querySelector('#tgCoinWrap .tgv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8600 DOM 与函数一致（阶梯段位可算 + 数据源可用 + DOM 值可写）", o5.sg3.length === 5 && o5.sg3[0] === true && o5.sg3[1] === true && o5.sg3[2] === true && o5.sg3[3] === false && o5.sg3[4] === false && o5.sg5[0] === true && o5.sg5[4] === true && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8595 金币强度 抛异常", false, String(e)); t("U8596 金币强度 抛异常", false, String(e)); t("U8597 金币强度 抛异常", false, String(e)); t("U8598 金币强度 抛异常", false, String(e)); t("U8599 金币强度 抛异常", false, String(e)); t("U8600 金币强度 抛异常", false, String(e)); }
+
+
+  // ===== U8601~U8606: 击杀强度(v1.1.123) =====
+  try {
+    const up = true;
+    const L = [0.2,0.5,1.2,2.5];
+    const expInitCls = up ? 'g-bad' : 'g-good';
+    const expInitDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('tgKillWrap'),tr:!!document.querySelector('#tgKillWrap .tgtrk'),sg:document.querySelectorAll('#tgKillWrap .tgtrk i').length,tg:!!document.querySelector('#tgKillWrap .tgv'),s:T.tgKillStateNow(1.35,[0.2,0.5,1.2,2.5],true)};return JSON.stringify(r);})()"));
+    t("U8601 击杀强度 DOM 已加入 HUD + 5 段阶梯 + 值元素 + 函数可用", o.dom === true && o.tr === true && o.sg === 5 && o.tg === true && o.s.ok === true && o.s.tier >= 2 && o.s.tier <= 5, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tgKillStateNow(0,[0.2,0.5,1.2,2.5],true)};return JSON.stringify(r);})()"));
+    t("U8602 初值 击杀强度（0 → 最低级 L1·低）", o1.s.ok === true && o1.s.tier === 1 && o1.s.idx === 0 && o1.s.pct === 0 && o1.s.cls === expInitCls && o1.s.danger === expInitDanger && o1.s.txt === 'L1·低' && o1.s.segs[0] === true && o1.s.segs[4] === false, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tgKillStateNow(0.85,[0.2,0.5,1.2,2.5],true)};return JSON.stringify(r);})()"));
+    t("U8603 正常值 击杀强度（中段 → L3·中）", o2.s.ok === true && o2.s.tier === 3 && o2.s.idx === 2 && o2.s.cls === 'g-warn' && o2.s.danger === false && o2.s.txt === 'L3·中' && o2.s.pct > 0 && o2.s.pct < 1 && o2.s.segs[0] === true && o2.s.segs[1] === true && o2.s.segs[2] === true && o2.s.segs[3] === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.tgKillStateNow(0.2,[0.2,0.5,1.2,2.5],true),b:T.tgKillStateNow(0.5,[0.2,0.5,1.2,2.5],true),c:T.tgKillStateNow(1.2,[0.2,0.5,1.2,2.5],true),d:T.tgKillStateNow(2.5,[0.2,0.5,1.2,2.5],true),e:T.tgKillStateNow(2.499,[0.2,0.5,1.2,2.5],true),f:T.tgKillStateNow(0.1,[0.2,0.5,1.2,2.5],true)};return JSON.stringify(r);})()"));
+    t("U8604 边界 击杀强度（四阈值分级正确 + 最差/最好级颜色反转）", o3.a.tier === 2 && o3.a.idx === 1 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.e.tier === 4 && o3.f.tier === 1 && o3.f.cls === expInitCls && o3.f.danger === expInitDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.tgKillStateNow(null,[0.2,0.5,1.2,2.5],true),b:T.tgKillStateNow(NaN,[0.2,0.5,1.2,2.5],true),c:T.tgKillStateNow(-5,[0.2,0.5,1.2,2.5],true),d:T.tgKillStateNow([1],[0.2,0.5,1.2,2.5],true),e:T.tgKillStateNow(5,[1,2,3],true),f:T.tgKillStateNow(5,[2,2,8,20],true),g:T.tgKillStateNow(5,[0,8,20,50],true),h:T.tgKillStateNow(5,[2,8,20,NaN],true)};return JSON.stringify(r);})()"));
+    t("U8605 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={sg3:T.tgKillSegsNow(3),sg5:T.tgKillSegsNow(5),s:T.tgKillNow(),dom:(function(){const e=document.querySelector('#tgKillWrap .tgv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8606 DOM 与函数一致（阶梯段位可算 + 数据源可用 + DOM 值可写）", o5.sg3.length === 5 && o5.sg3[0] === true && o5.sg3[1] === true && o5.sg3[2] === true && o5.sg3[3] === false && o5.sg3[4] === false && o5.sg5[0] === true && o5.sg5[4] === true && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8601 击杀强度 抛异常", false, String(e)); t("U8602 击杀强度 抛异常", false, String(e)); t("U8603 击杀强度 抛异常", false, String(e)); t("U8604 击杀强度 抛异常", false, String(e)); t("U8605 击杀强度 抛异常", false, String(e)); t("U8606 击杀强度 抛异常", false, String(e)); }
+
+
+  // ===== U8607~U8612: 弹幕强度(v1.1.124) =====
+  try {
+    const up = true;
+    const L = [1,3,6,12];
+    const expInitCls = up ? 'g-bad' : 'g-good';
+    const expInitDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('tgShotWrap'),tr:!!document.querySelector('#tgShotWrap .tgtrk'),sg:document.querySelectorAll('#tgShotWrap .tgtrk i').length,tg:!!document.querySelector('#tgShotWrap .tgv'),s:T.tgShotStateNow(6.5,[1,3,6,12],true)};return JSON.stringify(r);})()"));
+    t("U8607 弹幕强度 DOM 已加入 HUD + 5 段阶梯 + 值元素 + 函数可用", o.dom === true && o.tr === true && o.sg === 5 && o.tg === true && o.s.ok === true && o.s.tier >= 2 && o.s.tier <= 5, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tgShotStateNow(0,[1,3,6,12],true)};return JSON.stringify(r);})()"));
+    t("U8608 初值 弹幕强度（0 → 最低级 L1·低）", o1.s.ok === true && o1.s.tier === 1 && o1.s.idx === 0 && o1.s.pct === 0 && o1.s.cls === expInitCls && o1.s.danger === expInitDanger && o1.s.txt === 'L1·低' && o1.s.segs[0] === true && o1.s.segs[4] === false, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tgShotStateNow(4.5,[1,3,6,12],true)};return JSON.stringify(r);})()"));
+    t("U8609 正常值 弹幕强度（中段 → L3·中）", o2.s.ok === true && o2.s.tier === 3 && o2.s.idx === 2 && o2.s.cls === 'g-warn' && o2.s.danger === false && o2.s.txt === 'L3·中' && o2.s.pct > 0 && o2.s.pct < 1 && o2.s.segs[0] === true && o2.s.segs[1] === true && o2.s.segs[2] === true && o2.s.segs[3] === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.tgShotStateNow(1,[1,3,6,12],true),b:T.tgShotStateNow(3,[1,3,6,12],true),c:T.tgShotStateNow(6,[1,3,6,12],true),d:T.tgShotStateNow(12,[1,3,6,12],true),e:T.tgShotStateNow(11.999,[1,3,6,12],true),f:T.tgShotStateNow(0.5,[1,3,6,12],true)};return JSON.stringify(r);})()"));
+    t("U8610 边界 弹幕强度（四阈值分级正确 + 最差/最好级颜色反转）", o3.a.tier === 2 && o3.a.idx === 1 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.e.tier === 4 && o3.f.tier === 1 && o3.f.cls === expInitCls && o3.f.danger === expInitDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.tgShotStateNow(null,[1,3,6,12],true),b:T.tgShotStateNow(NaN,[1,3,6,12],true),c:T.tgShotStateNow(-5,[1,3,6,12],true),d:T.tgShotStateNow([1],[1,3,6,12],true),e:T.tgShotStateNow(5,[1,2,3],true),f:T.tgShotStateNow(5,[2,2,8,20],true),g:T.tgShotStateNow(5,[0,8,20,50],true),h:T.tgShotStateNow(5,[2,8,20,NaN],true)};return JSON.stringify(r);})()"));
+    t("U8611 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={sg3:T.tgShotSegsNow(3),sg5:T.tgShotSegsNow(5),s:T.tgShotNow(),dom:(function(){const e=document.querySelector('#tgShotWrap .tgv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8612 DOM 与函数一致（阶梯段位可算 + 数据源可用 + DOM 值可写）", o5.sg3.length === 5 && o5.sg3[0] === true && o5.sg3[1] === true && o5.sg3[2] === true && o5.sg3[3] === false && o5.sg3[4] === false && o5.sg5[0] === true && o5.sg5[4] === true && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8607 弹幕强度 抛异常", false, String(e)); t("U8608 弹幕强度 抛异常", false, String(e)); t("U8609 弹幕强度 抛异常", false, String(e)); t("U8610 弹幕强度 抛异常", false, String(e)); t("U8611 弹幕强度 抛异常", false, String(e)); t("U8612 弹幕强度 抛异常", false, String(e)); }
+
+
+  // ===== U8613~U8618: 连击强度(v1.1.125) =====
+  try {
+    const up = true;
+    const L = [0.2,0.4,0.7,1];
+    const expInitCls = up ? 'g-bad' : 'g-good';
+    const expInitDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('tgComboWrap'),tr:!!document.querySelector('#tgComboWrap .tgtrk'),sg:document.querySelectorAll('#tgComboWrap .tgtrk i').length,tg:!!document.querySelector('#tgComboWrap .tgv'),s:T.tgComboStateNow(0.6,[0.2,0.4,0.7,1],true)};return JSON.stringify(r);})()"));
+    t("U8613 连击强度 DOM 已加入 HUD + 5 段阶梯 + 值元素 + 函数可用", o.dom === true && o.tr === true && o.sg === 5 && o.tg === true && o.s.ok === true && o.s.tier >= 2 && o.s.tier <= 5, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tgComboStateNow(0,[0.2,0.4,0.7,1],true)};return JSON.stringify(r);})()"));
+    t("U8614 初值 连击强度（0 → 最低级 L1·低）", o1.s.ok === true && o1.s.tier === 1 && o1.s.idx === 0 && o1.s.pct === 0 && o1.s.cls === expInitCls && o1.s.danger === expInitDanger && o1.s.txt === 'L1·低' && o1.s.segs[0] === true && o1.s.segs[4] === false, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tgComboStateNow(0.55,[0.2,0.4,0.7,1],true)};return JSON.stringify(r);})()"));
+    t("U8615 正常值 连击强度（中段 → L3·中）", o2.s.ok === true && o2.s.tier === 3 && o2.s.idx === 2 && o2.s.cls === 'g-warn' && o2.s.danger === false && o2.s.txt === 'L3·中' && o2.s.pct > 0 && o2.s.pct < 1 && o2.s.segs[0] === true && o2.s.segs[1] === true && o2.s.segs[2] === true && o2.s.segs[3] === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.tgComboStateNow(0.2,[0.2,0.4,0.7,1],true),b:T.tgComboStateNow(0.4,[0.2,0.4,0.7,1],true),c:T.tgComboStateNow(0.7,[0.2,0.4,0.7,1],true),d:T.tgComboStateNow(1,[0.2,0.4,0.7,1],true),e:T.tgComboStateNow(0.999,[0.2,0.4,0.7,1],true),f:T.tgComboStateNow(0.1,[0.2,0.4,0.7,1],true)};return JSON.stringify(r);})()"));
+    t("U8616 边界 连击强度（四阈值分级正确 + 最差/最好级颜色反转）", o3.a.tier === 2 && o3.a.idx === 1 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.e.tier === 4 && o3.f.tier === 1 && o3.f.cls === expInitCls && o3.f.danger === expInitDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.tgComboStateNow(null,[0.2,0.4,0.7,1],true),b:T.tgComboStateNow(NaN,[0.2,0.4,0.7,1],true),c:T.tgComboStateNow(-5,[0.2,0.4,0.7,1],true),d:T.tgComboStateNow([1],[0.2,0.4,0.7,1],true),e:T.tgComboStateNow(5,[1,2,3],true),f:T.tgComboStateNow(5,[2,2,8,20],true),g:T.tgComboStateNow(5,[0,8,20,50],true),h:T.tgComboStateNow(5,[2,8,20,NaN],true)};return JSON.stringify(r);})()"));
+    t("U8617 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={sg3:T.tgComboSegsNow(3),sg5:T.tgComboSegsNow(5),s:T.tgComboNow(),dom:(function(){const e=document.querySelector('#tgComboWrap .tgv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8618 DOM 与函数一致（阶梯段位可算 + 数据源可用 + DOM 值可写）", o5.sg3.length === 5 && o5.sg3[0] === true && o5.sg3[1] === true && o5.sg3[2] === true && o5.sg3[3] === false && o5.sg3[4] === false && o5.sg5[0] === true && o5.sg5[4] === true && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8613 连击强度 抛异常", false, String(e)); t("U8614 连击强度 抛异常", false, String(e)); t("U8615 连击强度 抛异常", false, String(e)); t("U8616 连击强度 抛异常", false, String(e)); t("U8617 连击强度 抛异常", false, String(e)); t("U8618 连击强度 抛异常", false, String(e)); }
+
+
+  // ===== U8619~U8624: 伤害强度(v1.1.126) =====
+  try {
+    const up = true;
+    const L = [50,200,600,1500];
+    const expInitCls = up ? 'g-bad' : 'g-good';
+    const expInitDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('tgDmgWrap'),tr:!!document.querySelector('#tgDmgWrap .tgtrk'),sg:document.querySelectorAll('#tgDmgWrap .tgtrk i').length,tg:!!document.querySelector('#tgDmgWrap .tgv'),s:T.tgDmgStateNow(775,[50,200,600,1500],true)};return JSON.stringify(r);})()"));
+    t("U8619 伤害强度 DOM 已加入 HUD + 5 段阶梯 + 值元素 + 函数可用", o.dom === true && o.tr === true && o.sg === 5 && o.tg === true && o.s.ok === true && o.s.tier >= 2 && o.s.tier <= 5, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tgDmgStateNow(0,[50,200,600,1500],true)};return JSON.stringify(r);})()"));
+    t("U8620 初值 伤害强度（0 → 最低级 L1·低）", o1.s.ok === true && o1.s.tier === 1 && o1.s.idx === 0 && o1.s.pct === 0 && o1.s.cls === expInitCls && o1.s.danger === expInitDanger && o1.s.txt === 'L1·低' && o1.s.segs[0] === true && o1.s.segs[4] === false, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tgDmgStateNow(400,[50,200,600,1500],true)};return JSON.stringify(r);})()"));
+    t("U8621 正常值 伤害强度（中段 → L3·中）", o2.s.ok === true && o2.s.tier === 3 && o2.s.idx === 2 && o2.s.cls === 'g-warn' && o2.s.danger === false && o2.s.txt === 'L3·中' && o2.s.pct > 0 && o2.s.pct < 1 && o2.s.segs[0] === true && o2.s.segs[1] === true && o2.s.segs[2] === true && o2.s.segs[3] === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.tgDmgStateNow(50,[50,200,600,1500],true),b:T.tgDmgStateNow(200,[50,200,600,1500],true),c:T.tgDmgStateNow(600,[50,200,600,1500],true),d:T.tgDmgStateNow(1500,[50,200,600,1500],true),e:T.tgDmgStateNow(1499.999,[50,200,600,1500],true),f:T.tgDmgStateNow(25,[50,200,600,1500],true)};return JSON.stringify(r);})()"));
+    t("U8622 边界 伤害强度（四阈值分级正确 + 最差/最好级颜色反转）", o3.a.tier === 2 && o3.a.idx === 1 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.e.tier === 4 && o3.f.tier === 1 && o3.f.cls === expInitCls && o3.f.danger === expInitDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.tgDmgStateNow(null,[50,200,600,1500],true),b:T.tgDmgStateNow(NaN,[50,200,600,1500],true),c:T.tgDmgStateNow(-5,[50,200,600,1500],true),d:T.tgDmgStateNow([1],[50,200,600,1500],true),e:T.tgDmgStateNow(5,[1,2,3],true),f:T.tgDmgStateNow(5,[2,2,8,20],true),g:T.tgDmgStateNow(5,[0,8,20,50],true),h:T.tgDmgStateNow(5,[2,8,20,NaN],true)};return JSON.stringify(r);})()"));
+    t("U8623 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={sg3:T.tgDmgSegsNow(3),sg5:T.tgDmgSegsNow(5),s:T.tgDmgNow(),dom:(function(){const e=document.querySelector('#tgDmgWrap .tgv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8624 DOM 与函数一致（阶梯段位可算 + 数据源可用 + DOM 值可写）", o5.sg3.length === 5 && o5.sg3[0] === true && o5.sg3[1] === true && o5.sg3[2] === true && o5.sg3[3] === false && o5.sg3[4] === false && o5.sg5[0] === true && o5.sg5[4] === true && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8619 伤害强度 抛异常", false, String(e)); t("U8620 伤害强度 抛异常", false, String(e)); t("U8621 伤害强度 抛异常", false, String(e)); t("U8622 伤害强度 抛异常", false, String(e)); t("U8623 伤害强度 抛异常", false, String(e)); t("U8624 伤害强度 抛异常", false, String(e)); }
+
+
+  // ===== U8625~U8630: 受击强度(v1.1.127) =====
+  try {
+    const up = false;
+    const L = [0.05,0.15,0.4,0.8];
+    const expInitCls = up ? 'g-bad' : 'g-good';
+    const expInitDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('tgHurtWrap'),tr:!!document.querySelector('#tgHurtWrap .tgtrk'),sg:document.querySelectorAll('#tgHurtWrap .tgtrk i').length,tg:!!document.querySelector('#tgHurtWrap .tgv'),s:T.tgHurtStateNow(0.42500000000000004,[0.05,0.15,0.4,0.8],false)};return JSON.stringify(r);})()"));
+    t("U8625 受击强度 DOM 已加入 HUD + 5 段阶梯 + 值元素 + 函数可用", o.dom === true && o.tr === true && o.sg === 5 && o.tg === true && o.s.ok === true && o.s.tier >= 2 && o.s.tier <= 5, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tgHurtStateNow(0,[0.05,0.15,0.4,0.8],false)};return JSON.stringify(r);})()"));
+    t("U8626 初值 受击强度（0 → 最低级 L1·低）", o1.s.ok === true && o1.s.tier === 1 && o1.s.idx === 0 && o1.s.pct === 0 && o1.s.cls === expInitCls && o1.s.danger === expInitDanger && o1.s.txt === 'L1·低' && o1.s.segs[0] === true && o1.s.segs[4] === false, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tgHurtStateNow(0.275,[0.05,0.15,0.4,0.8],false)};return JSON.stringify(r);})()"));
+    t("U8627 正常值 受击强度（中段 → L3·中）", o2.s.ok === true && o2.s.tier === 3 && o2.s.idx === 2 && o2.s.cls === 'g-warn' && o2.s.danger === false && o2.s.txt === 'L3·中' && o2.s.pct > 0 && o2.s.pct < 1 && o2.s.segs[0] === true && o2.s.segs[1] === true && o2.s.segs[2] === true && o2.s.segs[3] === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.tgHurtStateNow(0.05,[0.05,0.15,0.4,0.8],false),b:T.tgHurtStateNow(0.15,[0.05,0.15,0.4,0.8],false),c:T.tgHurtStateNow(0.4,[0.05,0.15,0.4,0.8],false),d:T.tgHurtStateNow(0.8,[0.05,0.15,0.4,0.8],false),e:T.tgHurtStateNow(0.799,[0.05,0.15,0.4,0.8],false),f:T.tgHurtStateNow(0.025,[0.05,0.15,0.4,0.8],false)};return JSON.stringify(r);})()"));
+    t("U8628 边界 受击强度（四阈值分级正确 + 最差/最好级颜色反转）", o3.a.tier === 2 && o3.a.idx === 1 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.e.tier === 4 && o3.f.tier === 1 && o3.f.cls === expInitCls && o3.f.danger === expInitDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.tgHurtStateNow(null,[0.05,0.15,0.4,0.8],false),b:T.tgHurtStateNow(NaN,[0.05,0.15,0.4,0.8],false),c:T.tgHurtStateNow(-5,[0.05,0.15,0.4,0.8],false),d:T.tgHurtStateNow([1],[0.05,0.15,0.4,0.8],false),e:T.tgHurtStateNow(5,[1,2,3],false),f:T.tgHurtStateNow(5,[2,2,8,20],false),g:T.tgHurtStateNow(5,[0,8,20,50],false),h:T.tgHurtStateNow(5,[2,8,20,NaN],false)};return JSON.stringify(r);})()"));
+    t("U8629 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={sg3:T.tgHurtSegsNow(3),sg5:T.tgHurtSegsNow(5),s:T.tgHurtNow(),dom:(function(){const e=document.querySelector('#tgHurtWrap .tgv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8630 DOM 与函数一致（阶梯段位可算 + 数据源可用 + DOM 值可写）", o5.sg3.length === 5 && o5.sg3[0] === true && o5.sg3[1] === true && o5.sg3[2] === true && o5.sg3[3] === false && o5.sg3[4] === false && o5.sg5[0] === true && o5.sg5[4] === true && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8625 受击强度 抛异常", false, String(e)); t("U8626 受击强度 抛异常", false, String(e)); t("U8627 受击强度 抛异常", false, String(e)); t("U8628 受击强度 抛异常", false, String(e)); t("U8629 受击强度 抛异常", false, String(e)); t("U8630 受击强度 抛异常", false, String(e)); }
+
+
+  // ===== U8631~U8636: 阵亡强度(v1.1.128) =====
+  try {
+    const up = false;
+    const L = [1,2,3,4];
+    const expInitCls = up ? 'g-bad' : 'g-good';
+    const expInitDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('tgDeathWrap'),tr:!!document.querySelector('#tgDeathWrap .tgtrk'),sg:document.querySelectorAll('#tgDeathWrap .tgtrk i').length,tg:!!document.querySelector('#tgDeathWrap .tgv'),s:T.tgDeathStateNow(2.5,[1,2,3,4],false)};return JSON.stringify(r);})()"));
+    t("U8631 阵亡强度 DOM 已加入 HUD + 5 段阶梯 + 值元素 + 函数可用", o.dom === true && o.tr === true && o.sg === 5 && o.tg === true && o.s.ok === true && o.s.tier >= 2 && o.s.tier <= 5, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tgDeathStateNow(0,[1,2,3,4],false)};return JSON.stringify(r);})()"));
+    t("U8632 初值 阵亡强度（0 → 最低级 L1·低）", o1.s.ok === true && o1.s.tier === 1 && o1.s.idx === 0 && o1.s.pct === 0 && o1.s.cls === expInitCls && o1.s.danger === expInitDanger && o1.s.txt === 'L1·低' && o1.s.segs[0] === true && o1.s.segs[4] === false, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tgDeathStateNow(2.5,[1,2,3,4],false)};return JSON.stringify(r);})()"));
+    t("U8633 正常值 阵亡强度（中段 → L3·中）", o2.s.ok === true && o2.s.tier === 3 && o2.s.idx === 2 && o2.s.cls === 'g-warn' && o2.s.danger === false && o2.s.txt === 'L3·中' && o2.s.pct > 0 && o2.s.pct < 1 && o2.s.segs[0] === true && o2.s.segs[1] === true && o2.s.segs[2] === true && o2.s.segs[3] === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.tgDeathStateNow(1,[1,2,3,4],false),b:T.tgDeathStateNow(2,[1,2,3,4],false),c:T.tgDeathStateNow(3,[1,2,3,4],false),d:T.tgDeathStateNow(4,[1,2,3,4],false),e:T.tgDeathStateNow(3.999,[1,2,3,4],false),f:T.tgDeathStateNow(0.5,[1,2,3,4],false)};return JSON.stringify(r);})()"));
+    t("U8634 边界 阵亡强度（四阈值分级正确 + 最差/最好级颜色反转）", o3.a.tier === 2 && o3.a.idx === 1 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.e.tier === 4 && o3.f.tier === 1 && o3.f.cls === expInitCls && o3.f.danger === expInitDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.tgDeathStateNow(null,[1,2,3,4],false),b:T.tgDeathStateNow(NaN,[1,2,3,4],false),c:T.tgDeathStateNow(-5,[1,2,3,4],false),d:T.tgDeathStateNow([1],[1,2,3,4],false),e:T.tgDeathStateNow(5,[1,2,3],false),f:T.tgDeathStateNow(5,[2,2,8,20],false),g:T.tgDeathStateNow(5,[0,8,20,50],false),h:T.tgDeathStateNow(5,[2,8,20,NaN],false)};return JSON.stringify(r);})()"));
+    t("U8635 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={sg3:T.tgDeathSegsNow(3),sg5:T.tgDeathSegsNow(5),s:T.tgDeathNow(),dom:(function(){const e=document.querySelector('#tgDeathWrap .tgv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8636 DOM 与函数一致（阶梯段位可算 + 数据源可用 + DOM 值可写）", o5.sg3.length === 5 && o5.sg3[0] === true && o5.sg3[1] === true && o5.sg3[2] === true && o5.sg3[3] === false && o5.sg3[4] === false && o5.sg5[0] === true && o5.sg5[4] === true && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8631 阵亡强度 抛异常", false, String(e)); t("U8632 阵亡强度 抛异常", false, String(e)); t("U8633 阵亡强度 抛异常", false, String(e)); t("U8634 阵亡强度 抛异常", false, String(e)); t("U8635 阵亡强度 抛异常", false, String(e)); t("U8636 阵亡强度 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
