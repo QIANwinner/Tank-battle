@@ -24048,6 +24048,30 @@ async function main() {
     t("U8696 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8691 生存时长 抛异常", false, String(e)); t("U8692 生存时长 抛异常", false, String(e)); t("U8693 生存时长 抛异常", false, String(e)); t("U8694 生存时长 抛异常", false, String(e)); t("U8695 生存时长 抛异常", false, String(e)); t("U8696 生存时长 抛异常", false, String(e)); }
 
+
+  // ===== U8697~U8702: 波次推进(v1.1.139) =====
+  try {
+    const up = true;
+    const L = [25,50,75,95];
+    const expLowCls = up ? 'g-bad' : 'g-good';
+    const expLowDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const expNormCls = up ? 'g-warn' : 'g-warn';
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('dzWaveWrap'),bar:!!document.querySelector('#dzWaveWrap .dzbar i'),v:!!document.querySelector('#dzWaveWrap .dzv'),s:T.dzWaveStateNow(62.5,[25,50,75,95],true,'x')};return JSON.stringify(r);})()"));
+    t("U8697 波次推进 DOM 已加入 HUD（单进度条 + 值元素 + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.s.ok === true && o.s.tier === 3 && o.s.pct > 0 && o.s.pct < 1 && o.s.txt.indexOf('x') > 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzWaveStateNow(12.5,[25,50,75,95],true,'x')};return JSON.stringify(r);})()"));
+    t("U8698 初值 波次推进（低值 → L1 档，无危险或危险按方向、分级色按方向动态）", o1.s.ok === true && o1.s.tier === 1 && o1.s.pct === 0 && o1.s.cls === expLowCls && o1.s.danger === expLowDanger && o1.s.txt.length >= 3, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzWaveStateNow(37.5,[25,50,75,95],true,'x')};return JSON.stringify(r);})()"));
+    t("U8699 正常值 波次推进（中段 → L2 档，进度 ~0.5，文案含值）", o2.s.ok === true && o2.s.tier === 2 && Math.abs(o2.s.pct - 0.5) < 0.001 && o2.s.txt.indexOf('x') > 0 && o2.s.danger === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzWaveStateNow(25,[25,50,75,95],true,'x'),b:T.dzWaveStateNow(50,[25,50,75,95],true,'x'),c:T.dzWaveStateNow(75,[25,50,75,95],true,'x'),d:T.dzWaveStateNow(95,[25,50,75,95],true,'x'),e:T.dzWaveStateNow(94.999,[25,50,75,95],true,'x'),f:T.dzWaveStateNow(12.5,[25,50,75,95],true,'x')};return JSON.stringify(r);})()"));
+    t("U8700 边界 波次推进（四阈值定档 + 顶/底界正确 + 最好/最差色反转）", o3.a.tier === 2 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.d.pct === 1 && o3.e.tier === 4 && o3.f.tier === 1 && o3.f.pct === 0 && o3.f.cls === expLowCls && o3.f.danger === expLowDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzWaveStateNow(null,[25,50,75,95],true,'x'),b:T.dzWaveStateNow(NaN,[25,50,75,95],true,'x'),c:T.dzWaveStateNow(-5,[25,50,75,95],true,'x'),d:T.dzWaveStateNow([1],[25,50,75,95],true,'x'),e:T.dzWaveStateNow(5,[1,2,3],true,'x'),f:T.dzWaveStateNow(5,[2,2,8,20],true,'x'),g:T.dzWaveStateNow(5,[0,8,20,50],true,'x'),h:T.dzWaveStateNow(5,[2,8,20,NaN],true,'x')};return JSON.stringify(r);})()"));
+    t("U8701 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzWaveNow(),dom:(function(){const e=document.querySelector('#dzWaveWrap .dzv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8702 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8697 波次推进 抛异常", false, String(e)); t("U8698 波次推进 抛异常", false, String(e)); t("U8699 波次推进 抛异常", false, String(e)); t("U8700 波次推进 抛异常", false, String(e)); t("U8701 波次推进 抛异常", false, String(e)); t("U8702 波次推进 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
