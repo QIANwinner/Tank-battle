@@ -23785,6 +23785,29 @@ async function main() {
     t("U8630 DOM 与函数一致（阶梯段位可算 + 数据源可用 + DOM 值可写）", o5.sg3.length === 5 && o5.sg3[0] === true && o5.sg3[1] === true && o5.sg3[2] === true && o5.sg3[3] === false && o5.sg3[4] === false && o5.sg5[0] === true && o5.sg5[4] === true && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8625 受击强度 抛异常", false, String(e)); t("U8626 受击强度 抛异常", false, String(e)); t("U8627 受击强度 抛异常", false, String(e)); t("U8628 受击强度 抛异常", false, String(e)); t("U8629 受击强度 抛异常", false, String(e)); t("U8630 受击强度 抛异常", false, String(e)); }
 
+
+  // ===== U8631~U8636: 阵亡强度(v1.1.128) =====
+  try {
+    const up = false;
+    const L = [1,2,3,4];
+    const expInitCls = up ? 'g-bad' : 'g-good';
+    const expInitDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('tgDeathWrap'),tr:!!document.querySelector('#tgDeathWrap .tgtrk'),sg:document.querySelectorAll('#tgDeathWrap .tgtrk i').length,tg:!!document.querySelector('#tgDeathWrap .tgv'),s:T.tgDeathStateNow(2.5,[1,2,3,4],false)};return JSON.stringify(r);})()"));
+    t("U8631 阵亡强度 DOM 已加入 HUD + 5 段阶梯 + 值元素 + 函数可用", o.dom === true && o.tr === true && o.sg === 5 && o.tg === true && o.s.ok === true && o.s.tier >= 2 && o.s.tier <= 5, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tgDeathStateNow(0,[1,2,3,4],false)};return JSON.stringify(r);})()"));
+    t("U8632 初值 阵亡强度（0 → 最低级 L1·低）", o1.s.ok === true && o1.s.tier === 1 && o1.s.idx === 0 && o1.s.pct === 0 && o1.s.cls === expInitCls && o1.s.danger === expInitDanger && o1.s.txt === 'L1·低' && o1.s.segs[0] === true && o1.s.segs[4] === false, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tgDeathStateNow(2.5,[1,2,3,4],false)};return JSON.stringify(r);})()"));
+    t("U8633 正常值 阵亡强度（中段 → L3·中）", o2.s.ok === true && o2.s.tier === 3 && o2.s.idx === 2 && o2.s.cls === 'g-warn' && o2.s.danger === false && o2.s.txt === 'L3·中' && o2.s.pct > 0 && o2.s.pct < 1 && o2.s.segs[0] === true && o2.s.segs[1] === true && o2.s.segs[2] === true && o2.s.segs[3] === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.tgDeathStateNow(1,[1,2,3,4],false),b:T.tgDeathStateNow(2,[1,2,3,4],false),c:T.tgDeathStateNow(3,[1,2,3,4],false),d:T.tgDeathStateNow(4,[1,2,3,4],false),e:T.tgDeathStateNow(3.999,[1,2,3,4],false),f:T.tgDeathStateNow(0.5,[1,2,3,4],false)};return JSON.stringify(r);})()"));
+    t("U8634 边界 阵亡强度（四阈值分级正确 + 最差/最好级颜色反转）", o3.a.tier === 2 && o3.a.idx === 1 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.e.tier === 4 && o3.f.tier === 1 && o3.f.cls === expInitCls && o3.f.danger === expInitDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.tgDeathStateNow(null,[1,2,3,4],false),b:T.tgDeathStateNow(NaN,[1,2,3,4],false),c:T.tgDeathStateNow(-5,[1,2,3,4],false),d:T.tgDeathStateNow([1],[1,2,3,4],false),e:T.tgDeathStateNow(5,[1,2,3],false),f:T.tgDeathStateNow(5,[2,2,8,20],false),g:T.tgDeathStateNow(5,[0,8,20,50],false),h:T.tgDeathStateNow(5,[2,8,20,NaN],false)};return JSON.stringify(r);})()"));
+    t("U8635 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={sg3:T.tgDeathSegsNow(3),sg5:T.tgDeathSegsNow(5),s:T.tgDeathNow(),dom:(function(){const e=document.querySelector('#tgDeathWrap .tgv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8636 DOM 与函数一致（阶梯段位可算 + 数据源可用 + DOM 值可写）", o5.sg3.length === 5 && o5.sg3[0] === true && o5.sg3[1] === true && o5.sg3[2] === true && o5.sg3[3] === false && o5.sg3[4] === false && o5.sg5[0] === true && o5.sg5[4] === true && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8631 阵亡强度 抛异常", false, String(e)); t("U8632 阵亡强度 抛异常", false, String(e)); t("U8633 阵亡强度 抛异常", false, String(e)); t("U8634 阵亡强度 抛异常", false, String(e)); t("U8635 阵亡强度 抛异常", false, String(e)); t("U8636 阵亡强度 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
