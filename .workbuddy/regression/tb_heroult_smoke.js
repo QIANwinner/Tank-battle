@@ -24024,6 +24024,30 @@ async function main() {
     t("U8690 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8685 命中率 抛异常", false, String(e)); t("U8686 命中率 抛异常", false, String(e)); t("U8687 命中率 抛异常", false, String(e)); t("U8688 命中率 抛异常", false, String(e)); t("U8689 命中率 抛异常", false, String(e)); t("U8690 命中率 抛异常", false, String(e)); }
 
+
+  // ===== U8691~U8696: 生存时长(v1.1.138) =====
+  try {
+    const up = true;
+    const L = [60,180,360,600];
+    const expLowCls = up ? 'g-bad' : 'g-good';
+    const expLowDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const expNormCls = up ? 'g-warn' : 'g-warn';
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('dzTimeWrap'),bar:!!document.querySelector('#dzTimeWrap .dzbar i'),v:!!document.querySelector('#dzTimeWrap .dzv'),s:T.dzTimeStateNow(270,[60,180,360,600],true,'x')};return JSON.stringify(r);})()"));
+    t("U8691 生存时长 DOM 已加入 HUD（单进度条 + 值元素 + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.s.ok === true && o.s.tier === 3 && o.s.pct > 0 && o.s.pct < 1 && o.s.txt.indexOf('x') > 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzTimeStateNow(30,[60,180,360,600],true,'x')};return JSON.stringify(r);})()"));
+    t("U8692 初值 生存时长（低值 → L1 档，无危险或危险按方向、分级色按方向动态）", o1.s.ok === true && o1.s.tier === 1 && o1.s.pct === 0 && o1.s.cls === expLowCls && o1.s.danger === expLowDanger && o1.s.txt.length >= 3, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzTimeStateNow(120,[60,180,360,600],true,'x')};return JSON.stringify(r);})()"));
+    t("U8693 正常值 生存时长（中段 → L2 档，进度 ~0.5，文案含值）", o2.s.ok === true && o2.s.tier === 2 && Math.abs(o2.s.pct - 0.5) < 0.001 && o2.s.txt.indexOf('x') > 0 && o2.s.danger === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzTimeStateNow(60,[60,180,360,600],true,'x'),b:T.dzTimeStateNow(180,[60,180,360,600],true,'x'),c:T.dzTimeStateNow(360,[60,180,360,600],true,'x'),d:T.dzTimeStateNow(600,[60,180,360,600],true,'x'),e:T.dzTimeStateNow(599.999,[60,180,360,600],true,'x'),f:T.dzTimeStateNow(30,[60,180,360,600],true,'x')};return JSON.stringify(r);})()"));
+    t("U8694 边界 生存时长（四阈值定档 + 顶/底界正确 + 最好/最差色反转）", o3.a.tier === 2 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.d.pct === 1 && o3.e.tier === 4 && o3.f.tier === 1 && o3.f.pct === 0 && o3.f.cls === expLowCls && o3.f.danger === expLowDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzTimeStateNow(null,[60,180,360,600],true,'x'),b:T.dzTimeStateNow(NaN,[60,180,360,600],true,'x'),c:T.dzTimeStateNow(-5,[60,180,360,600],true,'x'),d:T.dzTimeStateNow([1],[60,180,360,600],true,'x'),e:T.dzTimeStateNow(5,[1,2,3],true,'x'),f:T.dzTimeStateNow(5,[2,2,8,20],true,'x'),g:T.dzTimeStateNow(5,[0,8,20,50],true,'x'),h:T.dzTimeStateNow(5,[2,8,20,NaN],true,'x')};return JSON.stringify(r);})()"));
+    t("U8695 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzTimeNow(),dom:(function(){const e=document.querySelector('#dzTimeWrap .dzv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8696 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8691 生存时长 抛异常", false, String(e)); t("U8692 生存时长 抛异常", false, String(e)); t("U8693 生存时长 抛异常", false, String(e)); t("U8694 生存时长 抛异常", false, String(e)); t("U8695 生存时长 抛异常", false, String(e)); t("U8696 生存时长 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
