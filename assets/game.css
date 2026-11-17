@@ -7558,4 +7558,14 @@ html.compact-hud #hud .m-hide { display:none !important; }
   #fcCoinBossWrap.g-warn .dvband { color:#f1c40f; }
   #fcCoinBossWrap.g-warn .dvtxt { color:#f1c40f; }
   #fcCoinBossWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
+  #fcHitLifeWrap .dvband { display:inline-block; vertical-align:middle; margin:0 4px; color:#888; opacity:.9; }
+  #fcHitLifeWrap .dvv { font-size:11px; color:#fff; font-weight:700; margin:0 3px; }
+  #fcHitLifeWrap .dvtxt { font-style:normal; font-size:10px; color:#aaa; margin:0 3px; }
+  #fcHitLifeWrap.g-good .dvband { color:#2ecc71; }
+  #fcHitLifeWrap.g-good .dvtxt { color:#2ecc71; }
+  #fcHitLifeWrap.g-bad .dvband { color:#e74c3c; }
+  #fcHitLifeWrap.g-bad .dvtxt { color:#e74c3c; }
+  #fcHitLifeWrap.g-warn .dvband { color:#f1c40f; }
+  #fcHitLifeWrap.g-warn .dvtxt { color:#f1c40f; }
+  #fcHitLifeWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
 
