@@ -24246,6 +24246,24 @@ async function main() {
     t("U8750 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8745 波次里程碑 抛异常", false, String(e)); t("U8746 波次里程碑 抛异常", false, String(e)); t("U8747 波次里程碑 抛异常", false, String(e)); t("U8748 波次里程碑 抛异常", false, String(e)); t("U8749 波次里程碑 抛异常", false, String(e)); t("U8750 波次里程碑 抛异常", false, String(e)); }
 
+
+  // ===== U8751~U8756: 金币里程碑(v1.1.148) =====
+  try {
+    const L = [100,500,1000,2000];
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('mwCoinWrap'),bar:!!document.querySelector('#mwCoinWrap .mwbar i'),v:!!document.querySelector('#mwCoinWrap .mwt'),d:!!document.querySelector('#mwCoinWrap .mwdone'),toast:!!document.getElementById('mwToast'),s:T.mwCoinStateNow(300,[100,500,1000,2000],[false,false,false,false],'金币')};return JSON.stringify(r);})()"));
+    t("U8751 金币里程碑 里程碑 DOM 已加入（进度条 + 值 + 达成勾 + 共享 toast + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.d === true && o.toast === true && o.s.ok === true && o.s.hit === true && o.s.idx === 0 && o.s.txt.indexOf('金币') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwCoinStateNow(0,[100,500,1000,2000],[false,false,false,false],'金币')};return JSON.stringify(r);})()"));
+    t("U8752 初值 金币里程碑（0 → 未达成，下一档为 L1，文案含标签）", o1.s.ok === true && o1.s.hit === false && o1.s.idx === -1 && o1.s.t === null && o1.s.next === L[0] && o1.s.txt.indexOf('金币') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwCoinStateNow(300,[100,500,1000,2000],[false,false,false,false],'金币')};return JSON.stringify(r);})()"));
+    t("U8753 正常值 金币里程碑（中段跨过 L1 → 命中第 1 档，值 = L1）", o2.s.ok === true && o2.s.hit === true && o2.s.idx === 0 && o2.s.t === L[0] && o2.s.txt === '金币 ' + L[0], JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwCoinStateNow(99.999,[100,500,1000,2000],[false,false,false,false],'金币'),b:T.mwCoinStateNow(100,[100,500,1000,2000],[false,false,false,false],'金币'),c:T.mwCoinStateNow(500,[100,500,1000,2000],[true,false,false,false],'金币'),d:T.mwCoinStateNow(2000,[100,500,1000,2000],[true,true,true,false],'金币'),e:T.mwCoinStateNow(2000,[100,500,1000,2000],[true,true,true,true],'金币'),f:T.mwCoinStateNow(50,[100,500,1000,2000],[false,false,false,false],'金币')};return JSON.stringify(r);})()"));
+    t("U8754 边界 金币里程碑（阈值下方不中/恰在阈值中/逐档推进/全达成不中）", o3.a.hit === false && o3.a.next === L[0] && o3.b.hit === true && o3.b.idx === 0 && o3.c.hit === true && o3.c.idx === 1 && o3.c.t === L[1] && o3.d.hit === true && o3.d.idx === 3 && o3.d.t === L[3] && o3.e.hit === false && o3.e.next === null && o3.f.hit === false && o3.f.next === L[0], JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwCoinStateNow(null,[100,500,1000,2000],[false,false,false,false],'金币'),b:T.mwCoinStateNow(NaN,[100,500,1000,2000],[false,false,false,false],'金币'),c:T.mwCoinStateNow(-5,[100,500,1000,2000],[false,false,false,false],'金币'),d:T.mwCoinStateNow([1],[100,500,1000,2000],[false,false,false,false],'金币'),e:T.mwCoinStateNow(5,[], [false,false,false,false],'金币'),f:T.mwCoinStateNow(5,[5,5,8,20],[false,false,false,false],'金币'),g:T.mwCoinStateNow(5,[0,8,20,50],[false,false,false,false],'金币'),h:T.mwCoinStateNow(5,[5,8,20,NaN],[false,false,false,false],'金币'),i:T.mwCoinStateNow(5,[100,500,1000,2000],[true],'金币')};return JSON.stringify(r);})()"));
+    t("U8755 非法 null/NaN/负值/数组/空阶梯/非升序/非正/NaN/done 长度 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwCoinNow(),dom:(function(){const e=document.querySelector('#mwCoinWrap .mwt');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8756 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8751 金币里程碑 抛异常", false, String(e)); t("U8752 金币里程碑 抛异常", false, String(e)); t("U8753 金币里程碑 抛异常", false, String(e)); t("U8754 金币里程碑 抛异常", false, String(e)); t("U8755 金币里程碑 抛异常", false, String(e)); t("U8756 金币里程碑 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
