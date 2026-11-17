@@ -24210,6 +24210,24 @@ async function main() {
     t("U8738 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8733 击杀里程碑 抛异常", false, String(e)); t("U8734 击杀里程碑 抛异常", false, String(e)); t("U8735 击杀里程碑 抛异常", false, String(e)); t("U8736 击杀里程碑 抛异常", false, String(e)); t("U8737 击杀里程碑 抛异常", false, String(e)); t("U8738 击杀里程碑 抛异常", false, String(e)); }
 
+
+  // ===== U8739~U8744: 连杀里程碑(v1.1.146) =====
+  try {
+    const L = [3,5,8,12];
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('mwComboWrap'),bar:!!document.querySelector('#mwComboWrap .mwbar i'),v:!!document.querySelector('#mwComboWrap .mwt'),d:!!document.querySelector('#mwComboWrap .mwdone'),toast:!!document.getElementById('mwToast'),s:T.mwComboStateNow(4,[3,5,8,12],[false,false,false,false],'连杀')};return JSON.stringify(r);})()"));
+    t("U8739 连杀里程碑 里程碑 DOM 已加入（进度条 + 值 + 达成勾 + 共享 toast + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.d === true && o.toast === true && o.s.ok === true && o.s.hit === true && o.s.idx === 0 && o.s.txt.indexOf('连杀') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwComboStateNow(0,[3,5,8,12],[false,false,false,false],'连杀')};return JSON.stringify(r);})()"));
+    t("U8740 初值 连杀里程碑（0 → 未达成，下一档为 L1，文案含标签）", o1.s.ok === true && o1.s.hit === false && o1.s.idx === -1 && o1.s.t === null && o1.s.next === L[0] && o1.s.txt.indexOf('连杀') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwComboStateNow(4,[3,5,8,12],[false,false,false,false],'连杀')};return JSON.stringify(r);})()"));
+    t("U8741 正常值 连杀里程碑（中段跨过 L1 → 命中第 1 档，值 = L1）", o2.s.ok === true && o2.s.hit === true && o2.s.idx === 0 && o2.s.t === L[0] && o2.s.txt === '连杀 ' + L[0], JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwComboStateNow(2.999,[3,5,8,12],[false,false,false,false],'连杀'),b:T.mwComboStateNow(3,[3,5,8,12],[false,false,false,false],'连杀'),c:T.mwComboStateNow(5,[3,5,8,12],[true,false,false,false],'连杀'),d:T.mwComboStateNow(12,[3,5,8,12],[true,true,true,false],'连杀'),e:T.mwComboStateNow(12,[3,5,8,12],[true,true,true,true],'连杀'),f:T.mwComboStateNow(1.5,[3,5,8,12],[false,false,false,false],'连杀')};return JSON.stringify(r);})()"));
+    t("U8742 边界 连杀里程碑（阈值下方不中/恰在阈值中/逐档推进/全达成不中）", o3.a.hit === false && o3.a.next === L[0] && o3.b.hit === true && o3.b.idx === 0 && o3.c.hit === true && o3.c.idx === 1 && o3.c.t === L[1] && o3.d.hit === true && o3.d.idx === 3 && o3.d.t === L[3] && o3.e.hit === false && o3.e.next === null && o3.f.hit === false && o3.f.next === L[0], JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwComboStateNow(null,[3,5,8,12],[false,false,false,false],'连杀'),b:T.mwComboStateNow(NaN,[3,5,8,12],[false,false,false,false],'连杀'),c:T.mwComboStateNow(-5,[3,5,8,12],[false,false,false,false],'连杀'),d:T.mwComboStateNow([1],[3,5,8,12],[false,false,false,false],'连杀'),e:T.mwComboStateNow(5,[], [false,false,false,false],'连杀'),f:T.mwComboStateNow(5,[5,5,8,20],[false,false,false,false],'连杀'),g:T.mwComboStateNow(5,[0,8,20,50],[false,false,false,false],'连杀'),h:T.mwComboStateNow(5,[5,8,20,NaN],[false,false,false,false],'连杀'),i:T.mwComboStateNow(5,[3,5,8,12],[true],'连杀')};return JSON.stringify(r);})()"));
+    t("U8743 非法 null/NaN/负值/数组/空阶梯/非升序/非正/NaN/done 长度 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwComboNow(),dom:(function(){const e=document.querySelector('#mwComboWrap .mwt');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8744 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8739 连杀里程碑 抛异常", false, String(e)); t("U8740 连杀里程碑 抛异常", false, String(e)); t("U8741 连杀里程碑 抛异常", false, String(e)); t("U8742 连杀里程碑 抛异常", false, String(e)); t("U8743 连杀里程碑 抛异常", false, String(e)); t("U8744 连杀里程碑 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
