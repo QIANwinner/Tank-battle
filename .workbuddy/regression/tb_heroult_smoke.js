@@ -23693,6 +23693,29 @@ async function main() {
     t("U8606 DOM 与函数一致（阶梯段位可算 + 数据源可用 + DOM 值可写）", o5.sg3.length === 5 && o5.sg3[0] === true && o5.sg3[1] === true && o5.sg3[2] === true && o5.sg3[3] === false && o5.sg3[4] === false && o5.sg5[0] === true && o5.sg5[4] === true && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8601 击杀强度 抛异常", false, String(e)); t("U8602 击杀强度 抛异常", false, String(e)); t("U8603 击杀强度 抛异常", false, String(e)); t("U8604 击杀强度 抛异常", false, String(e)); t("U8605 击杀强度 抛异常", false, String(e)); t("U8606 击杀强度 抛异常", false, String(e)); }
 
+
+  // ===== U8607~U8612: 弹幕强度(v1.1.124) =====
+  try {
+    const up = true;
+    const L = [1,3,6,12];
+    const expInitCls = up ? 'g-bad' : 'g-good';
+    const expInitDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('tgShotWrap'),tr:!!document.querySelector('#tgShotWrap .tgtrk'),sg:document.querySelectorAll('#tgShotWrap .tgtrk i').length,tg:!!document.querySelector('#tgShotWrap .tgv'),s:T.tgShotStateNow(6.5,[1,3,6,12],true)};return JSON.stringify(r);})()"));
+    t("U8607 弹幕强度 DOM 已加入 HUD + 5 段阶梯 + 值元素 + 函数可用", o.dom === true && o.tr === true && o.sg === 5 && o.tg === true && o.s.ok === true && o.s.tier >= 2 && o.s.tier <= 5, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tgShotStateNow(0,[1,3,6,12],true)};return JSON.stringify(r);})()"));
+    t("U8608 初值 弹幕强度（0 → 最低级 L1·低）", o1.s.ok === true && o1.s.tier === 1 && o1.s.idx === 0 && o1.s.pct === 0 && o1.s.cls === expInitCls && o1.s.danger === expInitDanger && o1.s.txt === 'L1·低' && o1.s.segs[0] === true && o1.s.segs[4] === false, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tgShotStateNow(4.5,[1,3,6,12],true)};return JSON.stringify(r);})()"));
+    t("U8609 正常值 弹幕强度（中段 → L3·中）", o2.s.ok === true && o2.s.tier === 3 && o2.s.idx === 2 && o2.s.cls === 'g-warn' && o2.s.danger === false && o2.s.txt === 'L3·中' && o2.s.pct > 0 && o2.s.pct < 1 && o2.s.segs[0] === true && o2.s.segs[1] === true && o2.s.segs[2] === true && o2.s.segs[3] === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.tgShotStateNow(1,[1,3,6,12],true),b:T.tgShotStateNow(3,[1,3,6,12],true),c:T.tgShotStateNow(6,[1,3,6,12],true),d:T.tgShotStateNow(12,[1,3,6,12],true),e:T.tgShotStateNow(11.999,[1,3,6,12],true),f:T.tgShotStateNow(0.5,[1,3,6,12],true)};return JSON.stringify(r);})()"));
+    t("U8610 边界 弹幕强度（四阈值分级正确 + 最差/最好级颜色反转）", o3.a.tier === 2 && o3.a.idx === 1 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.e.tier === 4 && o3.f.tier === 1 && o3.f.cls === expInitCls && o3.f.danger === expInitDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.tgShotStateNow(null,[1,3,6,12],true),b:T.tgShotStateNow(NaN,[1,3,6,12],true),c:T.tgShotStateNow(-5,[1,3,6,12],true),d:T.tgShotStateNow([1],[1,3,6,12],true),e:T.tgShotStateNow(5,[1,2,3],true),f:T.tgShotStateNow(5,[2,2,8,20],true),g:T.tgShotStateNow(5,[0,8,20,50],true),h:T.tgShotStateNow(5,[2,8,20,NaN],true)};return JSON.stringify(r);})()"));
+    t("U8611 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={sg3:T.tgShotSegsNow(3),sg5:T.tgShotSegsNow(5),s:T.tgShotNow(),dom:(function(){const e=document.querySelector('#tgShotWrap .tgv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8612 DOM 与函数一致（阶梯段位可算 + 数据源可用 + DOM 值可写）", o5.sg3.length === 5 && o5.sg3[0] === true && o5.sg3[1] === true && o5.sg3[2] === true && o5.sg3[3] === false && o5.sg3[4] === false && o5.sg5[0] === true && o5.sg5[4] === true && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8607 弹幕强度 抛异常", false, String(e)); t("U8608 弹幕强度 抛异常", false, String(e)); t("U8609 弹幕强度 抛异常", false, String(e)); t("U8610 弹幕强度 抛异常", false, String(e)); t("U8611 弹幕强度 抛异常", false, String(e)); t("U8612 弹幕强度 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

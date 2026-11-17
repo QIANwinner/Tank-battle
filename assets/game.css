@@ -7624,4 +7624,16 @@ html.compact-hud #hud .m-hide { display:none !important; }
   #tgKillWrap.g-warn .tgtrk i.on { background:#f1c40f; border-color:#f1c40f; }
   #tgKillWrap.g-warn .tgv { color:#f1c40f; }
   #tgKillWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
+  #tgShotWrap .tgl { font-style:normal; font-size:10px; color:#aaa; margin:0 3px; }
+  #tgShotWrap .tgtrk { display:inline-flex; gap:2px; vertical-align:middle; margin:0 4px; }
+  #tgShotWrap .tgtrk i { width:10px; height:8px; border-radius:2px; background:#333; border:1px solid #555; }
+  #tgShotWrap .tgtrk i.on { background:#888; border-color:#aaa; }
+  #tgShotWrap .tgv { font-size:11px; color:#fff; font-weight:700; margin:0 2px; }
+  #tgShotWrap.g-good .tgtrk i.on { background:#2ecc71; border-color:#2ecc71; }
+  #tgShotWrap.g-good .tgv { color:#2ecc71; }
+  #tgShotWrap.g-bad .tgtrk i.on { background:#e74c3c; border-color:#e74c3c; }
+  #tgShotWrap.g-bad .tgv { color:#e74c3c; }
+  #tgShotWrap.g-warn .tgtrk i.on { background:#f1c40f; border-color:#f1c40f; }
+  #tgShotWrap.g-warn .tgv { color:#f1c40f; }
+  #tgShotWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
 
