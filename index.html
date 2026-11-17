@@ -1351,6 +1351,7 @@
     <div class="pill m-hide" id="fcHitLifeWrap"><span class="k">🎯</span><span class="dvv">—</span><svg class="dvband" width="64" height="12" viewBox="0 0 64 12"></svg><em class="dvtxt">命中/命</em></div>
     <div class="pill m-hide" id="fcShotKillWrap"><span class="k">🔫</span><span class="dvv">—</span><svg class="dvband" width="64" height="12" viewBox="0 0 64 12"></svg><em class="dvtxt">射击/杀</em></div>
     <div class="pill m-hide" id="fcCoinDeathWrap"><span class="k">💀</span><span class="dvv">—</span><svg class="dvband" width="64" height="12" viewBox="0 0 64 12"></svg><em class="dvtxt">金币/阵亡</em></div>
+    <div class="pill m-hide" id="tgScoreWrap"><span class="k">📈</span><span class="tgl">得分</span><span class="tgtrk"><i></i><i></i><i></i><i></i><i></i></span><span class="tgv">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1727,7 +1728,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.120</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.121</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7881,6 +7882,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_fcHitLife = fcHitLifeNow(); const w_fcHitLife = document.getElementById('fcHitLifeWrap'); if (w_fcHitLife) { const pv_fcHitLife = w_fcHitLife.dataset.fv || ''; const nv_fcHitLife = s_fcHitLife.txt + '|' + s_fcHitLife.dir + '|' + s_fcHitLife.dev; if (pv_fcHitLife !== nv_fcHitLife) { w_fcHitLife.dataset.fv = nv_fcHitLife; w_fcHitLife.classList.remove('g-good','g-warn','g-bad'); if (s_fcHitLife.cls) w_fcHitLife.classList.add(s_fcHitLife.cls); w_fcHitLife.classList.toggle('danger', !!s_fcHitLife.danger); const sv_fcHitLife = w_fcHitLife.querySelector('svg'); if (sv_fcHitLife) sv_fcHitLife.innerHTML = fcMarker(s_fcHitLife.dev, 0.15, 64, 12); const vv_fcHitLife = w_fcHitLife.querySelector('.dvv'); if (vv_fcHitLife) vv_fcHitLife.textContent = s_fcHitLife.txt; } }
     const s_fcShotKill = fcShotKillNow(); const w_fcShotKill = document.getElementById('fcShotKillWrap'); if (w_fcShotKill) { const pv_fcShotKill = w_fcShotKill.dataset.fv || ''; const nv_fcShotKill = s_fcShotKill.txt + '|' + s_fcShotKill.dir + '|' + s_fcShotKill.dev; if (pv_fcShotKill !== nv_fcShotKill) { w_fcShotKill.dataset.fv = nv_fcShotKill; w_fcShotKill.classList.remove('g-good','g-warn','g-bad'); if (s_fcShotKill.cls) w_fcShotKill.classList.add(s_fcShotKill.cls); w_fcShotKill.classList.toggle('danger', !!s_fcShotKill.danger); const sv_fcShotKill = w_fcShotKill.querySelector('svg'); if (sv_fcShotKill) sv_fcShotKill.innerHTML = fcMarker(s_fcShotKill.dev, 0.15, 64, 12); const vv_fcShotKill = w_fcShotKill.querySelector('.dvv'); if (vv_fcShotKill) vv_fcShotKill.textContent = s_fcShotKill.txt; } }
     const s_fcCoinDeath = fcCoinDeathNow(); const w_fcCoinDeath = document.getElementById('fcCoinDeathWrap'); if (w_fcCoinDeath) { const pv_fcCoinDeath = w_fcCoinDeath.dataset.fv || ''; const nv_fcCoinDeath = s_fcCoinDeath.txt + '|' + s_fcCoinDeath.dir + '|' + s_fcCoinDeath.dev; if (pv_fcCoinDeath !== nv_fcCoinDeath) { w_fcCoinDeath.dataset.fv = nv_fcCoinDeath; w_fcCoinDeath.classList.remove('g-good','g-warn','g-bad'); if (s_fcCoinDeath.cls) w_fcCoinDeath.classList.add(s_fcCoinDeath.cls); w_fcCoinDeath.classList.toggle('danger', !!s_fcCoinDeath.danger); const sv_fcCoinDeath = w_fcCoinDeath.querySelector('svg'); if (sv_fcCoinDeath) sv_fcCoinDeath.innerHTML = fcMarker(s_fcCoinDeath.dev, 0.15, 64, 12); const vv_fcCoinDeath = w_fcCoinDeath.querySelector('.dvv'); if (vv_fcCoinDeath) vv_fcCoinDeath.textContent = s_fcCoinDeath.txt; } }
+    const s_tgScore = tgScoreNow(); const w_tgScore = document.getElementById('tgScoreWrap'); if (w_tgScore) { const pv_tgScore = w_tgScore.dataset.fv || ''; const nv_tgScore = s_tgScore.txt + '|' + s_tgScore.tier; if (pv_tgScore !== nv_tgScore) { w_tgScore.dataset.fv = nv_tgScore; w_tgScore.classList.remove('g-good','g-warn','g-bad'); if (s_tgScore.cls) w_tgScore.classList.add(s_tgScore.cls); w_tgScore.classList.toggle('danger', !!s_tgScore.danger); const tr_tgScore = w_tgScore.querySelectorAll('.tgtrk i'); for (let i_tgScore = 0; i_tgScore < tr_tgScore.length; i_tgScore++) { tr_tgScore[i_tgScore].className = (s_tgScore.segs && s_tgScore.segs[i_tgScore]) ? 'on' : ''; } const vv_tgScore = w_tgScore.querySelector('.tgv'); if (vv_tgScore) vv_tgScore.textContent = s_tgScore.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -22149,6 +22151,55 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // 命中每命偏离（v1.1.118 第九十六辑：fc 系列已在 v1.1.113 引入）
   // 射击每杀偏离（v1.1.119 第九十六辑：fc 系列已在 v1.1.113 引入）
   // 金币每阵亡偏离（v1.1.120 第九十六辑：fc 系列已在 v1.1.113 引入）
+  // —— 战局强度阶梯：tg 系列（v1.1.121 第九十七辑）——
+  // 纯函数：连续值 value 对四阈值 ladders=[t1,t2,t3,t4]（严格递增正数）分级 → tier 1~5。
+  //  good=true：L5 最好(g-good) / L1 最差(g-bad+danger)；good=false 反向（受击/阵亡：越高越差）。
+  //  非法（null/NaN/负/数组/ladders 长度非 4/非升序/非正/含 NaN）→ 退化 '—'。
+  function tgCalc(value, ladders, good) {
+    const deg = { ok: false, tier: 0, idx: 0, pct: 0, cls: 'g-warn', danger: false, txt: '—', unit: '', segs: [false, false, false, false, false], raw: null };
+    if (value === null || value === undefined || Array.isArray(value)) return deg;
+    const v = Number(value);
+    if (!isFinite(v) || v < 0) return deg;
+    if (!Array.isArray(ladders) || ladders.length !== 4) return deg;
+    const L = [];
+    for (let i = 0; i < 4; i++) { const x = Number(ladders[i]); if (!isFinite(x) || x <= 0) return deg; L.push(x); }
+    if (!(L[0] < L[1] && L[1] < L[2] && L[2] < L[3])) return deg;
+    const up = good !== false;
+    let tier = 1;
+    if (v >= L[3]) tier = 5; else if (v >= L[2]) tier = 4; else if (v >= L[1]) tier = 3; else if (v >= L[0]) tier = 2; else tier = 1;
+    const idx = tier - 1;
+    const pct = Math.max(0, Math.min(1, (v - L[0]) / (L[3] - L[0])));
+    const q = up ? (tier - 1) / 4 : (5 - tier) / 4;
+    let cls;
+    if (q >= 0.75) cls = 'g-good'; else if (q >= 0.25) cls = 'g-warn'; else cls = 'g-bad';
+    const danger = up ? (tier === 1) : (tier === 5);
+    const lbl = ['低', '偏低', '中', '偏高', '顶'][idx];
+    const segs = [tier >= 1, tier >= 2, tier >= 3, tier >= 4, tier >= 5];
+    return { ok: true, tier: tier, idx: idx, pct: pct, cls: cls, danger: danger, txt: 'L' + tier + '·' + lbl, unit: '', segs: segs, raw: v };
+  }
+  // 段位向量：tier 1~5 → 5 段点亮布尔（供 DOM 阶梯轨道渲染）
+  function tgSegs(tier) {
+    const t = Math.max(0, Math.min(5, Math.floor(Number(tier) || 0)));
+    return [t >= 1, t >= 2, t >= 3, t >= 4, t >= 5];
+  }
+  // —— 8 个纯函数（阈值阶梯各维度；good=true 正向 / tgHurt、tgDeath 反向）——
+  function tgScore(v, l, g) { return tgCalc(v, l, g); }
+  function tgCoin(v, l, g) { return tgCalc(v, l, g); }
+  function tgKill(v, l, g) { return tgCalc(v, l, g); }
+  function tgShot(v, l, g) { return tgCalc(v, l, g); }
+  function tgCombo(v, l, g) { return tgCalc(v, l, g); }
+  function tgDmg(v, l, g) { return tgCalc(v, l, g); }
+  function tgHurt(v, l, g) { return tgCalc(v, l, g); }
+  function tgDeath(v, l, g) { return tgCalc(v, l, g); }
+  // —— 8 个数据源（本局实时强度 → 阶梯分级；分母 clamp >=1 防除零）——
+  function tgScoreNow() { const t = isFinite(Number(playSecRun)) ? Math.max(1, Number(playSecRun)) : 1; const v = (isFinite(Number(score)) ? Math.max(0, Number(score)) : 0) / t; return tgCalc(v, [100, 400, 1200, 3000], true); }
+  function tgCoinNow() { const t = isFinite(Number(playSecRun)) ? Math.max(1, Number(playSecRun)) : 1; const v = (isFinite(Number(runCoins)) ? Math.max(0, Number(runCoins)) : 0) / t; return tgCalc(v, [2, 8, 20, 50], true); }
+  function tgKillNow() { const st = (stat && typeof stat === 'object') ? stat : {}; const t = isFinite(Number(playSecRun)) ? Math.max(1, Number(playSecRun)) : 1; const v = (isFinite(Number(st.kills)) ? Math.max(0, Number(st.kills)) : 0) / t; return tgCalc(v, [0.2, 0.5, 1.2, 2.5], true); }
+  function tgShotNow() { const st = (stat && typeof stat === 'object') ? stat : {}; const t = isFinite(Number(playSecRun)) ? Math.max(1, Number(playSecRun)) : 1; const v = (isFinite(Number(st.shots)) ? Math.max(0, Number(st.shots)) : 0) / t; return tgCalc(v, [1, 3, 6, 12], true); }
+  function tgComboNow() { const t = isFinite(Number(comboWindowMax)) ? Math.max(1, Number(comboWindowMax)) : 1; const v = (isFinite(Number(combo)) ? Math.max(0, Number(combo)) : 0) / t; return tgCalc(v, [0.2, 0.4, 0.7, 1.0], true); }
+  function tgDmgNow() { const t = isFinite(Number(playSecRun)) ? Math.max(1, Number(playSecRun)) : 1; const v = (isFinite(Number(runDmg)) ? Math.max(0, Number(runDmg)) : 0) / t; return tgCalc(v, [50, 200, 600, 1500], true); }
+  function tgHurtNow() { const t = isFinite(Number(playSecRun)) ? Math.max(1, Number(playSecRun)) : 1; const v = (isFinite(Number(hurtCount)) ? Math.max(0, Number(hurtCount)) : 0) / t; return tgCalc(v, [0.05, 0.15, 0.4, 0.8], false); }
+  function tgDeathNow() { const st = (stat && typeof stat === 'object') ? stat : {}; const v = isFinite(Number(st.deaths)) ? Math.max(0, Number(st.deaths)) : 0; return tgCalc(v, [1, 2, 3, 4], false); }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -24010,7 +24061,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.120', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.121', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -26324,6 +26375,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       fcHitLifeStateNow: (a, b, h) => fcHitLife(a, b, h), fcHitLifeMarkerNow: (d, b) => fcMarker(d, b, 64, 12), fcHitLifeNow: () => fcHitLifeNow(), fcHitLifeDomNow: () => { const e = document.querySelector('#fcHitLifeWrap .dvv'); return e ? e.textContent : null; },
       fcShotKillStateNow: (a, b, h) => fcShotKill(a, b, h), fcShotKillMarkerNow: (d, b) => fcMarker(d, b, 64, 12), fcShotKillNow: () => fcShotKillNow(), fcShotKillDomNow: () => { const e = document.querySelector('#fcShotKillWrap .dvv'); return e ? e.textContent : null; },
       fcCoinDeathStateNow: (a, b, h) => fcCoinDeath(a, b, h), fcCoinDeathMarkerNow: (d, b) => fcMarker(d, b, 64, 12), fcCoinDeathNow: () => fcCoinDeathNow(), fcCoinDeathDomNow: () => { const e = document.querySelector('#fcCoinDeathWrap .dvv'); return e ? e.textContent : null; },
+      tgScoreStateNow: (v, l, g) => tgCalc(v, l, g), tgScoreSegsNow: (tier) => tgSegs(tier), tgScoreNow: () => tgScoreNow(), tgScoreDomNow: () => { const e = document.querySelector('#tgScoreWrap .tgv'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

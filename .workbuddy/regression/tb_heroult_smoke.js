@@ -23624,6 +23624,29 @@ async function main() {
     t("U8588 DOM 与函数一致（偏离带可绘游标 + SVG 可写 + 函数正确）", typeof o5.pt === 'string' && o5.pt.indexOf('class="vzm"') >= 0 && o5.pt.indexOf('data-dv="0.5"') >= 0 && mx && Number(mx) > 32 && o5.dom.indexOf('<rect') >= 0 && o5.s.ok === true && o5.s.dir === 'above', JSON.stringify(o5));
   } catch (e) { t("U8583 金币每阵亡偏离 抛异常", false, String(e)); t("U8584 金币每阵亡偏离 抛异常", false, String(e)); t("U8585 金币每阵亡偏离 抛异常", false, String(e)); t("U8586 金币每阵亡偏离 抛异常", false, String(e)); t("U8587 金币每阵亡偏离 抛异常", false, String(e)); t("U8588 金币每阵亡偏离 抛异常", false, String(e)); }
 
+
+  // ===== U8589~U8594: 得分强度(v1.1.121) =====
+  try {
+    const up = true;
+    const L = [100,400,1200,3000];
+    const expInitCls = up ? 'g-bad' : 'g-good';
+    const expInitDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('tgScoreWrap'),tr:!!document.querySelector('#tgScoreWrap .tgtrk'),sg:document.querySelectorAll('#tgScoreWrap .tgtrk i').length,tg:!!document.querySelector('#tgScoreWrap .tgv'),s:T.tgScoreStateNow(1550,[100,400,1200,3000],true)};return JSON.stringify(r);})()"));
+    t("U8589 得分强度 DOM 已加入 HUD + 5 段阶梯 + 值元素 + 函数可用", o.dom === true && o.tr === true && o.sg === 5 && o.tg === true && o.s.ok === true && o.s.tier >= 2 && o.s.tier <= 5, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tgScoreStateNow(0,[100,400,1200,3000],true)};return JSON.stringify(r);})()"));
+    t("U8590 初值 得分强度（0 → 最低级 L1·低）", o1.s.ok === true && o1.s.tier === 1 && o1.s.idx === 0 && o1.s.pct === 0 && o1.s.cls === expInitCls && o1.s.danger === expInitDanger && o1.s.txt === 'L1·低' && o1.s.segs[0] === true && o1.s.segs[4] === false, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.tgScoreStateNow(800,[100,400,1200,3000],true)};return JSON.stringify(r);})()"));
+    t("U8591 正常值 得分强度（中段 → L3·中）", o2.s.ok === true && o2.s.tier === 3 && o2.s.idx === 2 && o2.s.cls === 'g-warn' && o2.s.danger === false && o2.s.txt === 'L3·中' && o2.s.pct > 0 && o2.s.pct < 1 && o2.s.segs[0] === true && o2.s.segs[1] === true && o2.s.segs[2] === true && o2.s.segs[3] === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.tgScoreStateNow(100,[100,400,1200,3000],true),b:T.tgScoreStateNow(400,[100,400,1200,3000],true),c:T.tgScoreStateNow(1200,[100,400,1200,3000],true),d:T.tgScoreStateNow(3000,[100,400,1200,3000],true),e:T.tgScoreStateNow(2999.999,[100,400,1200,3000],true),f:T.tgScoreStateNow(50,[100,400,1200,3000],true)};return JSON.stringify(r);})()"));
+    t("U8592 边界 得分强度（四阈值分级正确 + 最差/最好级颜色反转）", o3.a.tier === 2 && o3.a.idx === 1 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.e.tier === 4 && o3.f.tier === 1 && o3.f.cls === expInitCls && o3.f.danger === expInitDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.tgScoreStateNow(null,[100,400,1200,3000],true),b:T.tgScoreStateNow(NaN,[100,400,1200,3000],true),c:T.tgScoreStateNow(-5,[100,400,1200,3000],true),d:T.tgScoreStateNow([1],[100,400,1200,3000],true),e:T.tgScoreStateNow(5,[1,2,3],true),f:T.tgScoreStateNow(5,[2,2,8,20],true),g:T.tgScoreStateNow(5,[0,8,20,50],true),h:T.tgScoreStateNow(5,[2,8,20,NaN],true)};return JSON.stringify(r);})()"));
+    t("U8593 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={sg3:T.tgScoreSegsNow(3),sg5:T.tgScoreSegsNow(5),s:T.tgScoreNow(),dom:(function(){const e=document.querySelector('#tgScoreWrap .tgv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8594 DOM 与函数一致（阶梯段位可算 + 数据源可用 + DOM 值可写）", o5.sg3.length === 5 && o5.sg3[0] === true && o5.sg3[1] === true && o5.sg3[2] === true && o5.sg3[3] === false && o5.sg3[4] === false && o5.sg5[0] === true && o5.sg5[4] === true && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8589 得分强度 抛异常", false, String(e)); t("U8590 得分强度 抛异常", false, String(e)); t("U8591 得分强度 抛异常", false, String(e)); t("U8592 得分强度 抛异常", false, String(e)); t("U8593 得分强度 抛异常", false, String(e)); t("U8594 得分强度 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
