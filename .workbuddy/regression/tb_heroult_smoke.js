@@ -23856,6 +23856,30 @@ async function main() {
     t("U8648 DOM 与函数一致（上/下界可算 + 数据源可用 + DOM 值可写）", Math.abs(o5.nxt - 8) < 1e-6 && o5.top === null && Math.abs(o5.prv - 50) < 1e-6 && o5.bot === null && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8643 金币冲刺 抛异常", false, String(e)); t("U8644 金币冲刺 抛异常", false, String(e)); t("U8645 金币冲刺 抛异常", false, String(e)); t("U8646 金币冲刺 抛异常", false, String(e)); t("U8647 金币冲刺 抛异常", false, String(e)); t("U8648 金币冲刺 抛异常", false, String(e)); }
 
+
+  // ===== U8649~U8654: 击杀冲刺(v1.1.131) =====
+  try {
+    const up = true;
+    const L = [0.2,0.5,1.2,2.5];
+    const expInitCls = up ? 'g-bad' : 'g-good';
+    const expInitDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const expNormCls = up ? 'g-warn' : 'g-good';
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('djKillWrap'),up:!!document.querySelector('#djKillWrap .djup i'),dn:!!document.querySelector('#djKillWrap .djdn i'),v:!!document.querySelector('#djKillWrap .djv'),s:T.djKillStateNow(0.35,[0.2,0.5,1.2,2.5],true)};return JSON.stringify(r);})()"));
+    t("U8649 击杀冲刺 DOM 已加入 HUD（双冲刺条 + 值元素 + 函数可用）", o.dom === true && o.up === true && o.dn === true && o.v === true && o.s.ok === true && o.s.tier === 2 && o.s.next.delta > 0 && o.s.prev.buffer > 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.djKillStateNow(0,[0.2,0.5,1.2,2.5],true)};return JSON.stringify(r);})()"));
+    t("U8650 初值 击杀冲刺（0 → L1·低，距上一档 = t1，无掉落缓冲，最差级颜色）", o1.s.ok === true && o1.s.tier === 1 && Math.abs(o1.s.next.delta - 0.2) < 1e-6 && o1.s.next.need === 0.2 && o1.s.prev.buffer === 0 && o1.s.prev.drop === null && o1.s.cls === expInitCls && o1.s.danger === expInitDanger && o1.s.txt.indexOf('L1·低·↑') === 0 && o1.s.txt.length >= 7 && o1.s.next.pct === 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.djKillStateNow(0.35,[0.2,0.5,1.2,2.5],true)};return JSON.stringify(r);})()"));
+    t("U8651 正常值 击杀冲刺（中段 → L2 双界：↑有差、↓有缓冲、进度 ~0.5、颜色按方向动态）", o2.s.ok === true && o2.s.tier === 2 && o2.s.next.delta > 0 && o2.s.next.delta < 0.5 && o2.s.prev.buffer > 0 && o2.s.prev.buffer < (0.5 - 0.2) && Math.abs(o2.s.next.pct - 0.5) < 0.001 && o2.s.cls === expNormCls && o2.s.danger === false && o2.s.txt.indexOf('L2·↑') === 0 && o2.s.txt.indexOf('↓') > 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.djKillStateNow(0.2,[0.2,0.5,1.2,2.5],true),b:T.djKillStateNow(0.5,[0.2,0.5,1.2,2.5],true),c:T.djKillStateNow(1.2,[0.2,0.5,1.2,2.5],true),d:T.djKillStateNow(2.5,[0.2,0.5,1.2,2.5],true),e:T.djKillStateNow(2.499,[0.2,0.5,1.2,2.5],true),f:T.djKillStateNow(0.1,[0.2,0.5,1.2,2.5],true)};return JSON.stringify(r);})()"));
+    t("U8652 边界 击杀冲刺（四阈值定档 + 顶/底界正确 + 最差/最好色反转）", o3.a.tier === 2 && o3.a.prev.buffer === 0 && Math.abs(o3.a.next.delta - (0.5 - 0.2)) < 1e-6 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.d.next.delta === 0 && o3.d.next.need === null && o3.d.txt === 'L5·顶' && o3.e.tier === 4 && o3.f.tier === 1 && Math.abs(o3.f.next.delta - (0.2 * 0.5)) < 1e-6 && o3.f.prev.buffer === 0 && o3.f.cls === expInitCls && o3.f.danger === expInitDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.djKillStateNow(null,[0.2,0.5,1.2,2.5],true),b:T.djKillStateNow(NaN,[0.2,0.5,1.2,2.5],true),c:T.djKillStateNow(-5,[0.2,0.5,1.2,2.5],true),d:T.djKillStateNow([1],[0.2,0.5,1.2,2.5],true),e:T.djKillStateNow(5,[1,2,3],true),f:T.djKillStateNow(5,[2,2,8,20],true),g:T.djKillStateNow(5,[0,8,20,50],true),h:T.djKillStateNow(5,[2,8,20,NaN],true)};return JSON.stringify(r);})()"));
+    t("U8653 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={nxt:T.djNextAt(0.2,[0.2,0.5,1.2,2.5]),top:T.djNextAt(2.5,[0.2,0.5,1.2,2.5]),prv:T.djPrevAt(2.5,[0.2,0.5,1.2,2.5]),bot:T.djPrevAt(0,[0.2,0.5,1.2,2.5]),s:T.djKillNow(),dom:(function(){const e=document.querySelector('#djKillWrap .djv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8654 DOM 与函数一致（上/下界可算 + 数据源可用 + DOM 值可写）", Math.abs(o5.nxt - 0.5) < 1e-6 && o5.top === null && Math.abs(o5.prv - 2.5) < 1e-6 && o5.bot === null && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8649 击杀冲刺 抛异常", false, String(e)); t("U8650 击杀冲刺 抛异常", false, String(e)); t("U8651 击杀冲刺 抛异常", false, String(e)); t("U8652 击杀冲刺 抛异常", false, String(e)); t("U8653 击杀冲刺 抛异常", false, String(e)); t("U8654 击杀冲刺 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
