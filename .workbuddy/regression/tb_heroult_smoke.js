@@ -24144,6 +24144,30 @@ async function main() {
     t("U8720 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8715 清场预计 抛异常", false, String(e)); t("U8716 清场预计 抛异常", false, String(e)); t("U8717 清场预计 抛异常", false, String(e)); t("U8718 清场预计 抛异常", false, String(e)); t("U8719 清场预计 抛异常", false, String(e)); t("U8720 清场预计 抛异常", false, String(e)); }
 
+
+  // ===== U8721~U8726: 经济效率(v1.1.143) =====
+  try {
+    const up = true;
+    const L = [1,3,8,20];
+    const expLowCls = up ? 'g-bad' : 'g-good';
+    const expLowDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const expNormCls = up ? 'g-warn' : 'g-warn';
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('dzEconWrap'),bar:!!document.querySelector('#dzEconWrap .dzbar i'),v:!!document.querySelector('#dzEconWrap .dzv'),s:T.dzEconStateNow(5.5,[1,3,8,20],true,'x')};return JSON.stringify(r);})()"));
+    t("U8721 经济效率 DOM 已加入 HUD（单进度条 + 值元素 + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.s.ok === true && o.s.tier === 3 && o.s.pct > 0 && o.s.pct < 1 && o.s.txt.indexOf('x') > 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzEconStateNow(0.5,[1,3,8,20],true,'x')};return JSON.stringify(r);})()"));
+    t("U8722 初值 经济效率（低值 → L1 档，无危险或危险按方向、分级色按方向动态）", o1.s.ok === true && o1.s.tier === 1 && o1.s.pct === 0 && o1.s.cls === expLowCls && o1.s.danger === expLowDanger && o1.s.txt.length >= 3, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzEconStateNow(2,[1,3,8,20],true,'x')};return JSON.stringify(r);})()"));
+    t("U8723 正常值 经济效率（中段 → L2 档，进度 ~0.5，文案含值）", o2.s.ok === true && o2.s.tier === 2 && Math.abs(o2.s.pct - 0.5) < 0.001 && o2.s.txt.indexOf('x') > 0 && o2.s.danger === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzEconStateNow(1,[1,3,8,20],true,'x'),b:T.dzEconStateNow(3,[1,3,8,20],true,'x'),c:T.dzEconStateNow(8,[1,3,8,20],true,'x'),d:T.dzEconStateNow(20,[1,3,8,20],true,'x'),e:T.dzEconStateNow(19.999,[1,3,8,20],true,'x'),f:T.dzEconStateNow(0.5,[1,3,8,20],true,'x')};return JSON.stringify(r);})()"));
+    t("U8724 边界 经济效率（四阈值定档 + 顶/底界正确 + 最好/最差色反转）", o3.a.tier === 2 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.d.pct === 1 && o3.e.tier === 4 && o3.f.tier === 1 && o3.f.pct === 0 && o3.f.cls === expLowCls && o3.f.danger === expLowDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzEconStateNow(null,[1,3,8,20],true,'x'),b:T.dzEconStateNow(NaN,[1,3,8,20],true,'x'),c:T.dzEconStateNow(-5,[1,3,8,20],true,'x'),d:T.dzEconStateNow([1],[1,3,8,20],true,'x'),e:T.dzEconStateNow(5,[1,2,3],true,'x'),f:T.dzEconStateNow(5,[2,2,8,20],true,'x'),g:T.dzEconStateNow(5,[0,8,20,50],true,'x'),h:T.dzEconStateNow(5,[2,8,20,NaN],true,'x')};return JSON.stringify(r);})()"));
+    t("U8725 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzEconNow(),dom:(function(){const e=document.querySelector('#dzEconWrap .dzv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8726 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8721 经济效率 抛异常", false, String(e)); t("U8722 经济效率 抛异常", false, String(e)); t("U8723 经济效率 抛异常", false, String(e)); t("U8724 经济效率 抛异常", false, String(e)); t("U8725 经济效率 抛异常", false, String(e)); t("U8726 经济效率 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
