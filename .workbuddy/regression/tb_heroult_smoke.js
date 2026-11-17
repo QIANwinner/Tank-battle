@@ -24300,6 +24300,24 @@ async function main() {
     t("U8768 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8763 存活里程碑 抛异常", false, String(e)); t("U8764 存活里程碑 抛异常", false, String(e)); t("U8765 存活里程碑 抛异常", false, String(e)); t("U8766 存活里程碑 抛异常", false, String(e)); t("U8767 存活里程碑 抛异常", false, String(e)); t("U8768 存活里程碑 抛异常", false, String(e)); }
 
+
+  // ===== U8769~U8774: 受击里程碑(v1.1.151) =====
+  try {
+    const L = [5,15,40,80];
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('mwHurtWrap'),bar:!!document.querySelector('#mwHurtWrap .mwbar i'),v:!!document.querySelector('#mwHurtWrap .mwt'),d:!!document.querySelector('#mwHurtWrap .mwdone'),toast:!!document.getElementById('mwToast'),s:T.mwHurtStateNow(10,[5,15,40,80],[false,false,false,false],'受击')};return JSON.stringify(r);})()"));
+    t("U8769 受击里程碑 里程碑 DOM 已加入（进度条 + 值 + 达成勾 + 共享 toast + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.d === true && o.toast === true && o.s.ok === true && o.s.hit === true && o.s.idx === 0 && o.s.txt.indexOf('受击') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwHurtStateNow(0,[5,15,40,80],[false,false,false,false],'受击')};return JSON.stringify(r);})()"));
+    t("U8770 初值 受击里程碑（0 → 未达成，下一档为 L1，文案含标签）", o1.s.ok === true && o1.s.hit === false && o1.s.idx === -1 && o1.s.t === null && o1.s.next === L[0] && o1.s.txt.indexOf('受击') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwHurtStateNow(10,[5,15,40,80],[false,false,false,false],'受击')};return JSON.stringify(r);})()"));
+    t("U8771 正常值 受击里程碑（中段跨过 L1 → 命中第 1 档，值 = L1）", o2.s.ok === true && o2.s.hit === true && o2.s.idx === 0 && o2.s.t === L[0] && o2.s.txt === '受击 ' + L[0], JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwHurtStateNow(4.999,[5,15,40,80],[false,false,false,false],'受击'),b:T.mwHurtStateNow(5,[5,15,40,80],[false,false,false,false],'受击'),c:T.mwHurtStateNow(15,[5,15,40,80],[true,false,false,false],'受击'),d:T.mwHurtStateNow(80,[5,15,40,80],[true,true,true,false],'受击'),e:T.mwHurtStateNow(80,[5,15,40,80],[true,true,true,true],'受击'),f:T.mwHurtStateNow(2.5,[5,15,40,80],[false,false,false,false],'受击')};return JSON.stringify(r);})()"));
+    t("U8772 边界 受击里程碑（阈值下方不中/恰在阈值中/逐档推进/全达成不中）", o3.a.hit === false && o3.a.next === L[0] && o3.b.hit === true && o3.b.idx === 0 && o3.c.hit === true && o3.c.idx === 1 && o3.c.t === L[1] && o3.d.hit === true && o3.d.idx === 3 && o3.d.t === L[3] && o3.e.hit === false && o3.e.next === null && o3.f.hit === false && o3.f.next === L[0], JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwHurtStateNow(null,[5,15,40,80],[false,false,false,false],'受击'),b:T.mwHurtStateNow(NaN,[5,15,40,80],[false,false,false,false],'受击'),c:T.mwHurtStateNow(-5,[5,15,40,80],[false,false,false,false],'受击'),d:T.mwHurtStateNow([1],[5,15,40,80],[false,false,false,false],'受击'),e:T.mwHurtStateNow(5,[], [false,false,false,false],'受击'),f:T.mwHurtStateNow(5,[5,5,8,20],[false,false,false,false],'受击'),g:T.mwHurtStateNow(5,[0,8,20,50],[false,false,false,false],'受击'),h:T.mwHurtStateNow(5,[5,8,20,NaN],[false,false,false,false],'受击'),i:T.mwHurtStateNow(5,[5,15,40,80],[true],'受击')};return JSON.stringify(r);})()"));
+    t("U8773 非法 null/NaN/负值/数组/空阶梯/非升序/非正/NaN/done 长度 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwHurtNow(),dom:(function(){const e=document.querySelector('#mwHurtWrap .mwt');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8774 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8769 受击里程碑 抛异常", false, String(e)); t("U8770 受击里程碑 抛异常", false, String(e)); t("U8771 受击里程碑 抛异常", false, String(e)); t("U8772 受击里程碑 抛异常", false, String(e)); t("U8773 受击里程碑 抛异常", false, String(e)); t("U8774 受击里程碑 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
