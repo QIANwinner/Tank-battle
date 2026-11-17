@@ -24168,6 +24168,30 @@ async function main() {
     t("U8726 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8721 经济效率 抛异常", false, String(e)); t("U8722 经济效率 抛异常", false, String(e)); t("U8723 经济效率 抛异常", false, String(e)); t("U8724 经济效率 抛异常", false, String(e)); t("U8725 经济效率 抛异常", false, String(e)); t("U8726 经济效率 抛异常", false, String(e)); }
 
+
+  // ===== U8727~U8732: 生命续航(v1.1.144) =====
+  try {
+    const up = true;
+    const L = [30,90,240,600];
+    const expLowCls = up ? 'g-bad' : 'g-good';
+    const expLowDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const expNormCls = up ? 'g-warn' : 'g-warn';
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('dzHpWrap'),bar:!!document.querySelector('#dzHpWrap .dzbar i'),v:!!document.querySelector('#dzHpWrap .dzv'),s:T.dzHpStateNow(165,[30,90,240,600],true,'x')};return JSON.stringify(r);})()"));
+    t("U8727 生命续航 DOM 已加入 HUD（单进度条 + 值元素 + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.s.ok === true && o.s.tier === 3 && o.s.pct > 0 && o.s.pct < 1 && o.s.txt.indexOf('x') > 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzHpStateNow(15,[30,90,240,600],true,'x')};return JSON.stringify(r);})()"));
+    t("U8728 初值 生命续航（低值 → L1 档，无危险或危险按方向、分级色按方向动态）", o1.s.ok === true && o1.s.tier === 1 && o1.s.pct === 0 && o1.s.cls === expLowCls && o1.s.danger === expLowDanger && o1.s.txt.length >= 3, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzHpStateNow(60,[30,90,240,600],true,'x')};return JSON.stringify(r);})()"));
+    t("U8729 正常值 生命续航（中段 → L2 档，进度 ~0.5，文案含值）", o2.s.ok === true && o2.s.tier === 2 && Math.abs(o2.s.pct - 0.5) < 0.001 && o2.s.txt.indexOf('x') > 0 && o2.s.danger === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzHpStateNow(30,[30,90,240,600],true,'x'),b:T.dzHpStateNow(90,[30,90,240,600],true,'x'),c:T.dzHpStateNow(240,[30,90,240,600],true,'x'),d:T.dzHpStateNow(600,[30,90,240,600],true,'x'),e:T.dzHpStateNow(599.999,[30,90,240,600],true,'x'),f:T.dzHpStateNow(15,[30,90,240,600],true,'x')};return JSON.stringify(r);})()"));
+    t("U8730 边界 生命续航（四阈值定档 + 顶/底界正确 + 最好/最差色反转）", o3.a.tier === 2 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.d.pct === 1 && o3.e.tier === 4 && o3.f.tier === 1 && o3.f.pct === 0 && o3.f.cls === expLowCls && o3.f.danger === expLowDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzHpStateNow(null,[30,90,240,600],true,'x'),b:T.dzHpStateNow(NaN,[30,90,240,600],true,'x'),c:T.dzHpStateNow(-5,[30,90,240,600],true,'x'),d:T.dzHpStateNow([1],[30,90,240,600],true,'x'),e:T.dzHpStateNow(5,[1,2,3],true,'x'),f:T.dzHpStateNow(5,[2,2,8,20],true,'x'),g:T.dzHpStateNow(5,[0,8,20,50],true,'x'),h:T.dzHpStateNow(5,[2,8,20,NaN],true,'x')};return JSON.stringify(r);})()"));
+    t("U8731 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzHpNow(),dom:(function(){const e=document.querySelector('#dzHpWrap .dzv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8732 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8727 生命续航 抛异常", false, String(e)); t("U8728 生命续航 抛异常", false, String(e)); t("U8729 生命续航 抛异常", false, String(e)); t("U8730 生命续航 抛异常", false, String(e)); t("U8731 生命续航 抛异常", false, String(e)); t("U8732 生命续航 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
