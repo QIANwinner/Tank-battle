@@ -24228,6 +24228,24 @@ async function main() {
     t("U8744 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8739 连杀里程碑 抛异常", false, String(e)); t("U8740 连杀里程碑 抛异常", false, String(e)); t("U8741 连杀里程碑 抛异常", false, String(e)); t("U8742 连杀里程碑 抛异常", false, String(e)); t("U8743 连杀里程碑 抛异常", false, String(e)); t("U8744 连杀里程碑 抛异常", false, String(e)); }
 
+
+  // ===== U8745~U8750: 波次里程碑(v1.1.147) =====
+  try {
+    const L = [3,5,10,20];
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('mwWaveWrap'),bar:!!document.querySelector('#mwWaveWrap .mwbar i'),v:!!document.querySelector('#mwWaveWrap .mwt'),d:!!document.querySelector('#mwWaveWrap .mwdone'),toast:!!document.getElementById('mwToast'),s:T.mwWaveStateNow(4,[3,5,10,20],[false,false,false,false],'波次')};return JSON.stringify(r);})()"));
+    t("U8745 波次里程碑 里程碑 DOM 已加入（进度条 + 值 + 达成勾 + 共享 toast + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.d === true && o.toast === true && o.s.ok === true && o.s.hit === true && o.s.idx === 0 && o.s.txt.indexOf('波次') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwWaveStateNow(0,[3,5,10,20],[false,false,false,false],'波次')};return JSON.stringify(r);})()"));
+    t("U8746 初值 波次里程碑（0 → 未达成，下一档为 L1，文案含标签）", o1.s.ok === true && o1.s.hit === false && o1.s.idx === -1 && o1.s.t === null && o1.s.next === L[0] && o1.s.txt.indexOf('波次') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwWaveStateNow(4,[3,5,10,20],[false,false,false,false],'波次')};return JSON.stringify(r);})()"));
+    t("U8747 正常值 波次里程碑（中段跨过 L1 → 命中第 1 档，值 = L1）", o2.s.ok === true && o2.s.hit === true && o2.s.idx === 0 && o2.s.t === L[0] && o2.s.txt === '波次 ' + L[0], JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwWaveStateNow(2.999,[3,5,10,20],[false,false,false,false],'波次'),b:T.mwWaveStateNow(3,[3,5,10,20],[false,false,false,false],'波次'),c:T.mwWaveStateNow(5,[3,5,10,20],[true,false,false,false],'波次'),d:T.mwWaveStateNow(20,[3,5,10,20],[true,true,true,false],'波次'),e:T.mwWaveStateNow(20,[3,5,10,20],[true,true,true,true],'波次'),f:T.mwWaveStateNow(1.5,[3,5,10,20],[false,false,false,false],'波次')};return JSON.stringify(r);})()"));
+    t("U8748 边界 波次里程碑（阈值下方不中/恰在阈值中/逐档推进/全达成不中）", o3.a.hit === false && o3.a.next === L[0] && o3.b.hit === true && o3.b.idx === 0 && o3.c.hit === true && o3.c.idx === 1 && o3.c.t === L[1] && o3.d.hit === true && o3.d.idx === 3 && o3.d.t === L[3] && o3.e.hit === false && o3.e.next === null && o3.f.hit === false && o3.f.next === L[0], JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwWaveStateNow(null,[3,5,10,20],[false,false,false,false],'波次'),b:T.mwWaveStateNow(NaN,[3,5,10,20],[false,false,false,false],'波次'),c:T.mwWaveStateNow(-5,[3,5,10,20],[false,false,false,false],'波次'),d:T.mwWaveStateNow([1],[3,5,10,20],[false,false,false,false],'波次'),e:T.mwWaveStateNow(5,[], [false,false,false,false],'波次'),f:T.mwWaveStateNow(5,[5,5,8,20],[false,false,false,false],'波次'),g:T.mwWaveStateNow(5,[0,8,20,50],[false,false,false,false],'波次'),h:T.mwWaveStateNow(5,[5,8,20,NaN],[false,false,false,false],'波次'),i:T.mwWaveStateNow(5,[3,5,10,20],[true],'波次')};return JSON.stringify(r);})()"));
+    t("U8749 非法 null/NaN/负值/数组/空阶梯/非升序/非正/NaN/done 长度 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwWaveNow(),dom:(function(){const e=document.querySelector('#mwWaveWrap .mwt');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8750 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8745 波次里程碑 抛异常", false, String(e)); t("U8746 波次里程碑 抛异常", false, String(e)); t("U8747 波次里程碑 抛异常", false, String(e)); t("U8748 波次里程碑 抛异常", false, String(e)); t("U8749 波次里程碑 抛异常", false, String(e)); t("U8750 波次里程碑 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
