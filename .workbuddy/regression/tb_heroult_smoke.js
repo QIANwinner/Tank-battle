@@ -24072,6 +24072,30 @@ async function main() {
     t("U8702 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8697 波次推进 抛异常", false, String(e)); t("U8698 波次推进 抛异常", false, String(e)); t("U8699 波次推进 抛异常", false, String(e)); t("U8700 波次推进 抛异常", false, String(e)); t("U8701 波次推进 抛异常", false, String(e)); t("U8702 波次推进 抛异常", false, String(e)); }
 
+
+  // ===== U8703~U8708: Boss阶段(v1.1.140) =====
+  try {
+    const up = true;
+    const L = [25,50,75,90];
+    const expLowCls = up ? 'g-bad' : 'g-good';
+    const expLowDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const expNormCls = up ? 'g-warn' : 'g-warn';
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('dzBossPhaseWrap'),bar:!!document.querySelector('#dzBossPhaseWrap .dzbar i'),v:!!document.querySelector('#dzBossPhaseWrap .dzv'),s:T.dzBossPhaseStateNow(62.5,[25,50,75,90],true,'x')};return JSON.stringify(r);})()"));
+    t("U8703 Boss阶段 DOM 已加入 HUD（单进度条 + 值元素 + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.s.ok === true && o.s.tier === 3 && o.s.pct > 0 && o.s.pct < 1 && o.s.txt.indexOf('x') > 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzBossPhaseStateNow(12.5,[25,50,75,90],true,'x')};return JSON.stringify(r);})()"));
+    t("U8704 初值 Boss阶段（低值 → L1 档，无危险或危险按方向、分级色按方向动态）", o1.s.ok === true && o1.s.tier === 1 && o1.s.pct === 0 && o1.s.cls === expLowCls && o1.s.danger === expLowDanger && o1.s.txt.length >= 3, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzBossPhaseStateNow(37.5,[25,50,75,90],true,'x')};return JSON.stringify(r);})()"));
+    t("U8705 正常值 Boss阶段（中段 → L2 档，进度 ~0.5，文案含值）", o2.s.ok === true && o2.s.tier === 2 && Math.abs(o2.s.pct - 0.5) < 0.001 && o2.s.txt.indexOf('x') > 0 && o2.s.danger === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzBossPhaseStateNow(25,[25,50,75,90],true,'x'),b:T.dzBossPhaseStateNow(50,[25,50,75,90],true,'x'),c:T.dzBossPhaseStateNow(75,[25,50,75,90],true,'x'),d:T.dzBossPhaseStateNow(90,[25,50,75,90],true,'x'),e:T.dzBossPhaseStateNow(89.999,[25,50,75,90],true,'x'),f:T.dzBossPhaseStateNow(12.5,[25,50,75,90],true,'x')};return JSON.stringify(r);})()"));
+    t("U8706 边界 Boss阶段（四阈值定档 + 顶/底界正确 + 最好/最差色反转）", o3.a.tier === 2 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.d.pct === 1 && o3.e.tier === 4 && o3.f.tier === 1 && o3.f.pct === 0 && o3.f.cls === expLowCls && o3.f.danger === expLowDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzBossPhaseStateNow(null,[25,50,75,90],true,'x'),b:T.dzBossPhaseStateNow(NaN,[25,50,75,90],true,'x'),c:T.dzBossPhaseStateNow(-5,[25,50,75,90],true,'x'),d:T.dzBossPhaseStateNow([1],[25,50,75,90],true,'x'),e:T.dzBossPhaseStateNow(5,[1,2,3],true,'x'),f:T.dzBossPhaseStateNow(5,[2,2,8,20],true,'x'),g:T.dzBossPhaseStateNow(5,[0,8,20,50],true,'x'),h:T.dzBossPhaseStateNow(5,[2,8,20,NaN],true,'x')};return JSON.stringify(r);})()"));
+    t("U8707 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzBossPhaseNow(),dom:(function(){const e=document.querySelector('#dzBossPhaseWrap .dzv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8708 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8703 Boss阶段 抛异常", false, String(e)); t("U8704 Boss阶段 抛异常", false, String(e)); t("U8705 Boss阶段 抛异常", false, String(e)); t("U8706 Boss阶段 抛异常", false, String(e)); t("U8707 Boss阶段 抛异常", false, String(e)); t("U8708 Boss阶段 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
