@@ -1359,6 +1359,7 @@
     <div class="pill m-hide" id="tgDmgWrap"><span class="k">💥</span><span class="tgl">伤害</span><span class="tgtrk"><i></i><i></i><i></i><i></i><i></i></span><span class="tgv">—</span></div>
     <div class="pill m-hide" id="tgHurtWrap"><span class="k">🛡️</span><span class="tgl">受击</span><span class="tgtrk"><i></i><i></i><i></i><i></i><i></i></span><span class="tgv">—</span></div>
     <div class="pill m-hide" id="tgDeathWrap"><span class="k">💀</span><span class="tgl">阵亡</span><span class="tgtrk"><i></i><i></i><i></i><i></i><i></i></span><span class="tgv">—</span></div>
+    <div class="pill m-hide" id="djScoreWrap"><span class="k">📈</span><span class="tgl">得分</span><span class="djbars"><span class="djbar djup"><i></i></span><span class="djbar djdn"><i></i></span></span><span class="djv">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1735,7 +1736,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.128</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.129</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7897,6 +7898,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_tgDmg = tgDmgNow(); const w_tgDmg = document.getElementById('tgDmgWrap'); if (w_tgDmg) { const pv_tgDmg = w_tgDmg.dataset.fv || ''; const nv_tgDmg = s_tgDmg.txt + '|' + s_tgDmg.tier; if (pv_tgDmg !== nv_tgDmg) { w_tgDmg.dataset.fv = nv_tgDmg; w_tgDmg.classList.remove('g-good','g-warn','g-bad'); if (s_tgDmg.cls) w_tgDmg.classList.add(s_tgDmg.cls); w_tgDmg.classList.toggle('danger', !!s_tgDmg.danger); const tr_tgDmg = w_tgDmg.querySelectorAll('.tgtrk i'); for (let i_tgDmg = 0; i_tgDmg < tr_tgDmg.length; i_tgDmg++) { tr_tgDmg[i_tgDmg].className = (s_tgDmg.segs && s_tgDmg.segs[i_tgDmg]) ? 'on' : ''; } const vv_tgDmg = w_tgDmg.querySelector('.tgv'); if (vv_tgDmg) vv_tgDmg.textContent = s_tgDmg.txt; } }
     const s_tgHurt = tgHurtNow(); const w_tgHurt = document.getElementById('tgHurtWrap'); if (w_tgHurt) { const pv_tgHurt = w_tgHurt.dataset.fv || ''; const nv_tgHurt = s_tgHurt.txt + '|' + s_tgHurt.tier; if (pv_tgHurt !== nv_tgHurt) { w_tgHurt.dataset.fv = nv_tgHurt; w_tgHurt.classList.remove('g-good','g-warn','g-bad'); if (s_tgHurt.cls) w_tgHurt.classList.add(s_tgHurt.cls); w_tgHurt.classList.toggle('danger', !!s_tgHurt.danger); const tr_tgHurt = w_tgHurt.querySelectorAll('.tgtrk i'); for (let i_tgHurt = 0; i_tgHurt < tr_tgHurt.length; i_tgHurt++) { tr_tgHurt[i_tgHurt].className = (s_tgHurt.segs && s_tgHurt.segs[i_tgHurt]) ? 'on' : ''; } const vv_tgHurt = w_tgHurt.querySelector('.tgv'); if (vv_tgHurt) vv_tgHurt.textContent = s_tgHurt.txt; } }
     const s_tgDeath = tgDeathNow(); const w_tgDeath = document.getElementById('tgDeathWrap'); if (w_tgDeath) { const pv_tgDeath = w_tgDeath.dataset.fv || ''; const nv_tgDeath = s_tgDeath.txt + '|' + s_tgDeath.tier; if (pv_tgDeath !== nv_tgDeath) { w_tgDeath.dataset.fv = nv_tgDeath; w_tgDeath.classList.remove('g-good','g-warn','g-bad'); if (s_tgDeath.cls) w_tgDeath.classList.add(s_tgDeath.cls); w_tgDeath.classList.toggle('danger', !!s_tgDeath.danger); const tr_tgDeath = w_tgDeath.querySelectorAll('.tgtrk i'); for (let i_tgDeath = 0; i_tgDeath < tr_tgDeath.length; i_tgDeath++) { tr_tgDeath[i_tgDeath].className = (s_tgDeath.segs && s_tgDeath.segs[i_tgDeath]) ? 'on' : ''; } const vv_tgDeath = w_tgDeath.querySelector('.tgv'); if (vv_tgDeath) vv_tgDeath.textContent = s_tgDeath.txt; } }
+    const s_djScore = djScoreNow(); const w_djScore = document.getElementById('djScoreWrap'); if (w_djScore) { const pv_djScore = w_djScore.dataset.fv || ''; const nv_djScore = s_djScore.txt + '|' + s_djScore.next.pct + '|' + s_djScore.prev.pct; if (pv_djScore !== nv_djScore) { w_djScore.dataset.fv = nv_djScore; w_djScore.classList.remove('g-good','g-warn','g-bad'); if (s_djScore.cls) w_djScore.classList.add(s_djScore.cls); w_djScore.classList.toggle('danger', !!s_djScore.danger); const up_djScore = w_djScore.querySelector('.djup i'); if (up_djScore) up_djScore.style.width = (s_djScore.next.pct * 100) + '%'; const dn_djScore = w_djScore.querySelector('.djdn i'); if (dn_djScore) dn_djScore.style.width = (s_djScore.prev.pct * 100) + '%'; const vv_djScore = w_djScore.querySelector('.djv'); if (vv_djScore) vv_djScore.textContent = s_djScore.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -22221,6 +22223,61 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // 伤害强度（v1.1.126 第九十七辑：tg 系列已在 v1.1.121 引入）
   // 受击强度（v1.1.127 第九十七辑：tg 系列已在 v1.1.121 引入）
   // 阵亡强度（v1.1.128 第九十七辑：tg 系列已在 v1.1.121 引入）
+  // —— 双界冲刺：dj 系列（v1.1.129 第九十八辑）——
+  // 纯函数：连续值 value 对四阈值 ladders=[t1,t2,t3,t4]（严格递增正数）分级 → tier 1~5，
+  //  并给出「↑ 到上一档余量 next」与「↓ 掉到下一档缓冲 prev」；good=true：L5 最好/L1 最差。
+  //  非法（null/NaN/负/数组/ladders 长度非 4/非升序/非正/含 NaN）→ 退化 '—'。
+  function djCalc(value, ladders, good) {
+    const deg = { ok: false, tier: 0, up: false, next: { delta: null, need: null, pct: 0 }, prev: { buffer: null, drop: null, pct: 0 }, cls: 'g-warn', danger: false, txt: '—', raw: null };
+    if (value === null || value === undefined || Array.isArray(value)) return deg;
+    const v = Number(value);
+    if (!isFinite(v) || v < 0) return deg;
+    if (!Array.isArray(ladders) || ladders.length !== 4) return deg;
+    const L = [];
+    for (let i = 0; i < 4; i++) { const x = Number(ladders[i]); if (!isFinite(x) || x <= 0) return deg; L.push(x); }
+    if (!(L[0] < L[1] && L[1] < L[2] && L[2] < L[3])) return deg;
+    const up = good !== false;
+    let tier = 1;
+    if (v >= L[3]) tier = 5; else if (v >= L[2]) tier = 4; else if (v >= L[1]) tier = 3; else if (v >= L[0]) tier = 2; else tier = 1;
+    const lo = tier > 1 ? L[tier - 2] : 0;
+    const hi = tier < 5 ? L[tier - 1] : v;
+    const span = (hi - lo) > 0 ? (hi - lo) : 1;
+    const next = { delta: null, need: null, pct: 0 };
+    if (tier < 5) { next.need = L[tier - 1]; next.delta = Math.max(0, next.need - v); next.pct = Math.max(0, Math.min(1, (v - lo) / span)); }
+    else { next.delta = 0; next.need = null; next.pct = 1; }
+    const prev = { buffer: null, drop: null, pct: 0 };
+    if (tier > 1) { prev.drop = L[tier - 2]; prev.buffer = Math.max(0, v - prev.drop); prev.pct = Math.max(0, Math.min(1, (v - lo) / span)); }
+    else { prev.buffer = 0; prev.drop = null; prev.pct = 0; }
+    const q = up ? (tier - 1) / 4 : (5 - tier) / 4;
+    let cls;
+    if (q >= 0.75) cls = 'g-good'; else if (q >= 0.25) cls = 'g-warn'; else cls = 'g-bad';
+    const danger = up ? (tier === 1) : (tier === 5);
+    let txt;
+    if (tier === 5) txt = 'L5·顶';
+    else if (tier === 1) txt = 'L1·低·↑' + djFmt(next.delta);
+    else txt = 'L' + tier + '·↑' + djFmt(next.delta) + '↓' + djFmt(prev.buffer);
+    return { ok: true, tier: tier, up: up, next: next, prev: prev, cls: cls, danger: danger, txt: txt, raw: v };
+  }
+  // 数值格式化：小数值保留小数（0.2 → '0.2'，0.05 → '0.05'），大数值取整（312 → '312'）
+  function djFmt(x) {
+    if (!isFinite(x)) return '—';
+    const a = Math.abs(x);
+    if (a >= 100) return String(Math.round(x));
+    if (a >= 1) return String(Math.round(x * 10) / 10);
+    return String(Math.round(x * 100) / 100);
+  }
+  // 上/下界查询：当前档位的上一档阈值（顶档 null）/下一档阈值（底档 null）
+  function djNext(value, ladders) { const r = djCalc(value, ladders, true); return r.ok ? r.next.need : null; }
+  function djPrev(value, ladders) { const r = djCalc(value, ladders, true); return r.ok ? r.prev.drop : null; }
+  // —— 8 个数据源（本局实时冲刺值 → 双界分级；分母 clamp >=1 防除零）——
+  function djScoreNow() { const t = isFinite(Number(playSecRun)) ? Math.max(1, Number(playSecRun)) : 1; const v = (isFinite(Number(score)) ? Math.max(0, Number(score)) : 0) / t; return djCalc(v, [100, 400, 1200, 3000], true); }
+  function djCoinNow() { const t = isFinite(Number(playSecRun)) ? Math.max(1, Number(playSecRun)) : 1; const v = (isFinite(Number(runCoins)) ? Math.max(0, Number(runCoins)) : 0) / t; return djCalc(v, [2, 8, 20, 50], true); }
+  function djKillNow() { const st = (stat && typeof stat === 'object') ? stat : {}; const t = isFinite(Number(playSecRun)) ? Math.max(1, Number(playSecRun)) : 1; const v = (isFinite(Number(st.kills)) ? Math.max(0, Number(st.kills)) : 0) / t; return djCalc(v, [0.2, 0.5, 1.2, 2.5], true); }
+  function djShotNow() { const st = (stat && typeof stat === 'object') ? stat : {}; const t = isFinite(Number(playSecRun)) ? Math.max(1, Number(playSecRun)) : 1; const v = (isFinite(Number(st.shots)) ? Math.max(0, Number(st.shots)) : 0) / t; return djCalc(v, [1, 3, 6, 12], true); }
+  function djComboNow() { const t = isFinite(Number(comboWindowMax)) ? Math.max(1, Number(comboWindowMax)) : 1; const v = (isFinite(Number(combo)) ? Math.max(0, Number(combo)) : 0) / t; return djCalc(v, [0.2, 0.4, 0.7, 1.0], true); }
+  function djDmgNow() { const t = isFinite(Number(playSecRun)) ? Math.max(1, Number(playSecRun)) : 1; const v = (isFinite(Number(runDmg)) ? Math.max(0, Number(runDmg)) : 0) / t; return djCalc(v, [50, 200, 600, 1500], true); }
+  function djHurtNow() { const t = isFinite(Number(playSecRun)) ? Math.max(1, Number(playSecRun)) : 1; const v = (isFinite(Number(hurtCount)) ? Math.max(0, Number(hurtCount)) : 0) / t; return djCalc(v, [0.05, 0.15, 0.4, 0.8], false); }
+  function djDeathNow() { const st = (stat && typeof stat === 'object') ? stat : {}; const v = isFinite(Number(st.deaths)) ? Math.max(0, Number(st.deaths)) : 0; return djCalc(v, [1, 2, 3, 4], false); }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -24082,7 +24139,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.128', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.129', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -26404,6 +26461,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       tgDmgStateNow: (v, l, g) => tgCalc(v, l, g), tgDmgSegsNow: (tier) => tgSegs(tier), tgDmgNow: () => tgDmgNow(), tgDmgDomNow: () => { const e = document.querySelector('#tgDmgWrap .tgv'); return e ? e.textContent : null; },
       tgHurtStateNow: (v, l, g) => tgCalc(v, l, g), tgHurtSegsNow: (tier) => tgSegs(tier), tgHurtNow: () => tgHurtNow(), tgHurtDomNow: () => { const e = document.querySelector('#tgHurtWrap .tgv'); return e ? e.textContent : null; },
       tgDeathStateNow: (v, l, g) => tgCalc(v, l, g), tgDeathSegsNow: (tier) => tgSegs(tier), tgDeathNow: () => tgDeathNow(), tgDeathDomNow: () => { const e = document.querySelector('#tgDeathWrap .tgv'); return e ? e.textContent : null; },
+      djScoreStateNow: (v, l, g) => djCalc(v, l, g), djScoreNow: () => djScoreNow(), djScoreDomNow: () => { const e = document.querySelector('#djScoreWrap .djv'); return e ? e.textContent : null; }, djNextAt: (v, l) => djNext(v, l), djPrevAt: (v, l) => djPrev(v, l),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
