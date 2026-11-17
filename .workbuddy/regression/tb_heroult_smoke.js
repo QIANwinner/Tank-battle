@@ -24120,6 +24120,30 @@ async function main() {
     t("U8714 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8709 输出受击比 抛异常", false, String(e)); t("U8710 输出受击比 抛异常", false, String(e)); t("U8711 输出受击比 抛异常", false, String(e)); t("U8712 输出受击比 抛异常", false, String(e)); t("U8713 输出受击比 抛异常", false, String(e)); t("U8714 输出受击比 抛异常", false, String(e)); }
 
+
+  // ===== U8715~U8720: 清场预计(v1.1.142) =====
+  try {
+    const up = false;
+    const L = [3,8,20,60];
+    const expLowCls = up ? 'g-bad' : 'g-good';
+    const expLowDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const expNormCls = up ? 'g-warn' : 'g-warn';
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('dzClearWrap'),bar:!!document.querySelector('#dzClearWrap .dzbar i'),v:!!document.querySelector('#dzClearWrap .dzv'),s:T.dzClearStateNow(14,[3,8,20,60],false,'x')};return JSON.stringify(r);})()"));
+    t("U8715 清场预计 DOM 已加入 HUD（单进度条 + 值元素 + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.s.ok === true && o.s.tier === 3 && o.s.pct > 0 && o.s.pct < 1 && o.s.txt.indexOf('x') > 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzClearStateNow(1.5,[3,8,20,60],false,'x')};return JSON.stringify(r);})()"));
+    t("U8716 初值 清场预计（低值 → L1 档，无危险或危险按方向、分级色按方向动态）", o1.s.ok === true && o1.s.tier === 1 && o1.s.pct === 0 && o1.s.cls === expLowCls && o1.s.danger === expLowDanger && o1.s.txt.length >= 3, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzClearStateNow(5.5,[3,8,20,60],false,'x')};return JSON.stringify(r);})()"));
+    t("U8717 正常值 清场预计（中段 → L2 档，进度 ~0.5，文案含值）", o2.s.ok === true && o2.s.tier === 2 && Math.abs(o2.s.pct - 0.5) < 0.001 && o2.s.txt.indexOf('x') > 0 && o2.s.danger === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzClearStateNow(3,[3,8,20,60],false,'x'),b:T.dzClearStateNow(8,[3,8,20,60],false,'x'),c:T.dzClearStateNow(20,[3,8,20,60],false,'x'),d:T.dzClearStateNow(60,[3,8,20,60],false,'x'),e:T.dzClearStateNow(59.999,[3,8,20,60],false,'x'),f:T.dzClearStateNow(1.5,[3,8,20,60],false,'x')};return JSON.stringify(r);})()"));
+    t("U8718 边界 清场预计（四阈值定档 + 顶/底界正确 + 最好/最差色反转）", o3.a.tier === 2 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.d.pct === 1 && o3.e.tier === 4 && o3.f.tier === 1 && o3.f.pct === 0 && o3.f.cls === expLowCls && o3.f.danger === expLowDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzClearStateNow(null,[3,8,20,60],false,'x'),b:T.dzClearStateNow(NaN,[3,8,20,60],false,'x'),c:T.dzClearStateNow(-5,[3,8,20,60],false,'x'),d:T.dzClearStateNow([1],[3,8,20,60],false,'x'),e:T.dzClearStateNow(5,[1,2,3],false,'x'),f:T.dzClearStateNow(5,[2,2,8,20],false,'x'),g:T.dzClearStateNow(5,[0,8,20,50],false,'x'),h:T.dzClearStateNow(5,[2,8,20,NaN],false,'x')};return JSON.stringify(r);})()"));
+    t("U8719 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzClearNow(),dom:(function(){const e=document.querySelector('#dzClearWrap .dzv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8720 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8715 清场预计 抛异常", false, String(e)); t("U8716 清场预计 抛异常", false, String(e)); t("U8717 清场预计 抛异常", false, String(e)); t("U8718 清场预计 抛异常", false, String(e)); t("U8719 清场预计 抛异常", false, String(e)); t("U8720 清场预计 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
