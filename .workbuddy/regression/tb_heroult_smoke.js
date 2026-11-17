@@ -24282,6 +24282,24 @@ async function main() {
     t("U8762 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8757 伤害里程碑 抛异常", false, String(e)); t("U8758 伤害里程碑 抛异常", false, String(e)); t("U8759 伤害里程碑 抛异常", false, String(e)); t("U8760 伤害里程碑 抛异常", false, String(e)); t("U8761 伤害里程碑 抛异常", false, String(e)); t("U8762 伤害里程碑 抛异常", false, String(e)); }
 
+
+  // ===== U8763~U8768: 存活里程碑(v1.1.150) =====
+  try {
+    const L = [60,120,300,600];
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('mwSurvWrap'),bar:!!document.querySelector('#mwSurvWrap .mwbar i'),v:!!document.querySelector('#mwSurvWrap .mwt'),d:!!document.querySelector('#mwSurvWrap .mwdone'),toast:!!document.getElementById('mwToast'),s:T.mwSurvStateNow(90,[60,120,300,600],[false,false,false,false],'存活')};return JSON.stringify(r);})()"));
+    t("U8763 存活里程碑 里程碑 DOM 已加入（进度条 + 值 + 达成勾 + 共享 toast + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.d === true && o.toast === true && o.s.ok === true && o.s.hit === true && o.s.idx === 0 && o.s.txt.indexOf('存活') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwSurvStateNow(0,[60,120,300,600],[false,false,false,false],'存活')};return JSON.stringify(r);})()"));
+    t("U8764 初值 存活里程碑（0 → 未达成，下一档为 L1，文案含标签）", o1.s.ok === true && o1.s.hit === false && o1.s.idx === -1 && o1.s.t === null && o1.s.next === L[0] && o1.s.txt.indexOf('存活') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwSurvStateNow(90,[60,120,300,600],[false,false,false,false],'存活')};return JSON.stringify(r);})()"));
+    t("U8765 正常值 存活里程碑（中段跨过 L1 → 命中第 1 档，值 = L1）", o2.s.ok === true && o2.s.hit === true && o2.s.idx === 0 && o2.s.t === L[0] && o2.s.txt === '存活 ' + L[0], JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwSurvStateNow(59.999,[60,120,300,600],[false,false,false,false],'存活'),b:T.mwSurvStateNow(60,[60,120,300,600],[false,false,false,false],'存活'),c:T.mwSurvStateNow(120,[60,120,300,600],[true,false,false,false],'存活'),d:T.mwSurvStateNow(600,[60,120,300,600],[true,true,true,false],'存活'),e:T.mwSurvStateNow(600,[60,120,300,600],[true,true,true,true],'存活'),f:T.mwSurvStateNow(30,[60,120,300,600],[false,false,false,false],'存活')};return JSON.stringify(r);})()"));
+    t("U8766 边界 存活里程碑（阈值下方不中/恰在阈值中/逐档推进/全达成不中）", o3.a.hit === false && o3.a.next === L[0] && o3.b.hit === true && o3.b.idx === 0 && o3.c.hit === true && o3.c.idx === 1 && o3.c.t === L[1] && o3.d.hit === true && o3.d.idx === 3 && o3.d.t === L[3] && o3.e.hit === false && o3.e.next === null && o3.f.hit === false && o3.f.next === L[0], JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwSurvStateNow(null,[60,120,300,600],[false,false,false,false],'存活'),b:T.mwSurvStateNow(NaN,[60,120,300,600],[false,false,false,false],'存活'),c:T.mwSurvStateNow(-5,[60,120,300,600],[false,false,false,false],'存活'),d:T.mwSurvStateNow([1],[60,120,300,600],[false,false,false,false],'存活'),e:T.mwSurvStateNow(5,[], [false,false,false,false],'存活'),f:T.mwSurvStateNow(5,[5,5,8,20],[false,false,false,false],'存活'),g:T.mwSurvStateNow(5,[0,8,20,50],[false,false,false,false],'存活'),h:T.mwSurvStateNow(5,[5,8,20,NaN],[false,false,false,false],'存活'),i:T.mwSurvStateNow(5,[60,120,300,600],[true],'存活')};return JSON.stringify(r);})()"));
+    t("U8767 非法 null/NaN/负值/数组/空阶梯/非升序/非正/NaN/done 长度 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwSurvNow(),dom:(function(){const e=document.querySelector('#mwSurvWrap .mwt');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8768 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8763 存活里程碑 抛异常", false, String(e)); t("U8764 存活里程碑 抛异常", false, String(e)); t("U8765 存活里程碑 抛异常", false, String(e)); t("U8766 存活里程碑 抛异常", false, String(e)); t("U8767 存活里程碑 抛异常", false, String(e)); t("U8768 存活里程碑 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
