@@ -23880,6 +23880,30 @@ async function main() {
     t("U8654 DOM 与函数一致（上/下界可算 + 数据源可用 + DOM 值可写）", Math.abs(o5.nxt - 0.5) < 1e-6 && o5.top === null && Math.abs(o5.prv - 2.5) < 1e-6 && o5.bot === null && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8649 击杀冲刺 抛异常", false, String(e)); t("U8650 击杀冲刺 抛异常", false, String(e)); t("U8651 击杀冲刺 抛异常", false, String(e)); t("U8652 击杀冲刺 抛异常", false, String(e)); t("U8653 击杀冲刺 抛异常", false, String(e)); t("U8654 击杀冲刺 抛异常", false, String(e)); }
 
+
+  // ===== U8655~U8660: 弹幕冲刺(v1.1.132) =====
+  try {
+    const up = true;
+    const L = [1,3,6,12];
+    const expInitCls = up ? 'g-bad' : 'g-good';
+    const expInitDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const expNormCls = up ? 'g-warn' : 'g-good';
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('djShotWrap'),up:!!document.querySelector('#djShotWrap .djup i'),dn:!!document.querySelector('#djShotWrap .djdn i'),v:!!document.querySelector('#djShotWrap .djv'),s:T.djShotStateNow(2,[1,3,6,12],true)};return JSON.stringify(r);})()"));
+    t("U8655 弹幕冲刺 DOM 已加入 HUD（双冲刺条 + 值元素 + 函数可用）", o.dom === true && o.up === true && o.dn === true && o.v === true && o.s.ok === true && o.s.tier === 2 && o.s.next.delta > 0 && o.s.prev.buffer > 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.djShotStateNow(0,[1,3,6,12],true)};return JSON.stringify(r);})()"));
+    t("U8656 初值 弹幕冲刺（0 → L1·低，距上一档 = t1，无掉落缓冲，最差级颜色）", o1.s.ok === true && o1.s.tier === 1 && Math.abs(o1.s.next.delta - 1) < 1e-6 && o1.s.next.need === 1 && o1.s.prev.buffer === 0 && o1.s.prev.drop === null && o1.s.cls === expInitCls && o1.s.danger === expInitDanger && o1.s.txt.indexOf('L1·低·↑') === 0 && o1.s.txt.length >= 7 && o1.s.next.pct === 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.djShotStateNow(2,[1,3,6,12],true)};return JSON.stringify(r);})()"));
+    t("U8657 正常值 弹幕冲刺（中段 → L2 双界：↑有差、↓有缓冲、进度 ~0.5、颜色按方向动态）", o2.s.ok === true && o2.s.tier === 2 && o2.s.next.delta > 0 && o2.s.next.delta < 3 && o2.s.prev.buffer > 0 && o2.s.prev.buffer < (3 - 1) && Math.abs(o2.s.next.pct - 0.5) < 0.001 && o2.s.cls === expNormCls && o2.s.danger === false && o2.s.txt.indexOf('L2·↑') === 0 && o2.s.txt.indexOf('↓') > 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.djShotStateNow(1,[1,3,6,12],true),b:T.djShotStateNow(3,[1,3,6,12],true),c:T.djShotStateNow(6,[1,3,6,12],true),d:T.djShotStateNow(12,[1,3,6,12],true),e:T.djShotStateNow(11.999,[1,3,6,12],true),f:T.djShotStateNow(0.5,[1,3,6,12],true)};return JSON.stringify(r);})()"));
+    t("U8658 边界 弹幕冲刺（四阈值定档 + 顶/底界正确 + 最差/最好色反转）", o3.a.tier === 2 && o3.a.prev.buffer === 0 && Math.abs(o3.a.next.delta - (3 - 1)) < 1e-6 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.d.next.delta === 0 && o3.d.next.need === null && o3.d.txt === 'L5·顶' && o3.e.tier === 4 && o3.f.tier === 1 && Math.abs(o3.f.next.delta - (1 * 0.5)) < 1e-6 && o3.f.prev.buffer === 0 && o3.f.cls === expInitCls && o3.f.danger === expInitDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.djShotStateNow(null,[1,3,6,12],true),b:T.djShotStateNow(NaN,[1,3,6,12],true),c:T.djShotStateNow(-5,[1,3,6,12],true),d:T.djShotStateNow([1],[1,3,6,12],true),e:T.djShotStateNow(5,[1,2,3],true),f:T.djShotStateNow(5,[2,2,8,20],true),g:T.djShotStateNow(5,[0,8,20,50],true),h:T.djShotStateNow(5,[2,8,20,NaN],true)};return JSON.stringify(r);})()"));
+    t("U8659 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={nxt:T.djNextAt(1,[1,3,6,12]),top:T.djNextAt(12,[1,3,6,12]),prv:T.djPrevAt(12,[1,3,6,12]),bot:T.djPrevAt(0,[1,3,6,12]),s:T.djShotNow(),dom:(function(){const e=document.querySelector('#djShotWrap .djv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8660 DOM 与函数一致（上/下界可算 + 数据源可用 + DOM 值可写）", Math.abs(o5.nxt - 3) < 1e-6 && o5.top === null && Math.abs(o5.prv - 12) < 1e-6 && o5.bot === null && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8655 弹幕冲刺 抛异常", false, String(e)); t("U8656 弹幕冲刺 抛异常", false, String(e)); t("U8657 弹幕冲刺 抛异常", false, String(e)); t("U8658 弹幕冲刺 抛异常", false, String(e)); t("U8659 弹幕冲刺 抛异常", false, String(e)); t("U8660 弹幕冲刺 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
