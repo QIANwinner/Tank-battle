@@ -1367,6 +1367,7 @@
     <div class="pill m-hide" id="djDmgWrap"><span class="k">💥</span><span class="tgl">伤害</span><span class="djbars"><span class="djbar djup"><i></i></span><span class="djbar djdn"><i></i></span></span><span class="djv">—</span></div>
     <div class="pill m-hide" id="djHurtWrap"><span class="k">🛡️</span><span class="tgl">受击</span><span class="djbars"><span class="djbar djup"><i></i></span><span class="djbar djdn"><i></i></span></span><span class="djv">—</span></div>
     <div class="pill m-hide" id="djDeathWrap"><span class="k">💀</span><span class="tgl">阵亡</span><span class="djbars"><span class="djbar djup"><i></i></span><span class="djbar djdn"><i></i></span></span><span class="djv">—</span></div>
+    <div class="pill m-hide" id="dzAccWrap"><span class="k">🎯</span><span class="tgl">命中</span><span class="dzbar"><i></i></span><span class="dzv">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1743,7 +1744,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.136</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.137</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7913,6 +7914,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_djDmg = djDmgNow(); const w_djDmg = document.getElementById('djDmgWrap'); if (w_djDmg) { const pv_djDmg = w_djDmg.dataset.fv || ''; const nv_djDmg = s_djDmg.txt + '|' + s_djDmg.next.pct + '|' + s_djDmg.prev.pct; if (pv_djDmg !== nv_djDmg) { w_djDmg.dataset.fv = nv_djDmg; w_djDmg.classList.remove('g-good','g-warn','g-bad'); if (s_djDmg.cls) w_djDmg.classList.add(s_djDmg.cls); w_djDmg.classList.toggle('danger', !!s_djDmg.danger); const up_djDmg = w_djDmg.querySelector('.djup i'); if (up_djDmg) up_djDmg.style.width = (s_djDmg.next.pct * 100) + '%'; const dn_djDmg = w_djDmg.querySelector('.djdn i'); if (dn_djDmg) dn_djDmg.style.width = (s_djDmg.prev.pct * 100) + '%'; const vv_djDmg = w_djDmg.querySelector('.djv'); if (vv_djDmg) vv_djDmg.textContent = s_djDmg.txt; } }
     const s_djHurt = djHurtNow(); const w_djHurt = document.getElementById('djHurtWrap'); if (w_djHurt) { const pv_djHurt = w_djHurt.dataset.fv || ''; const nv_djHurt = s_djHurt.txt + '|' + s_djHurt.next.pct + '|' + s_djHurt.prev.pct; if (pv_djHurt !== nv_djHurt) { w_djHurt.dataset.fv = nv_djHurt; w_djHurt.classList.remove('g-good','g-warn','g-bad'); if (s_djHurt.cls) w_djHurt.classList.add(s_djHurt.cls); w_djHurt.classList.toggle('danger', !!s_djHurt.danger); const up_djHurt = w_djHurt.querySelector('.djup i'); if (up_djHurt) up_djHurt.style.width = (s_djHurt.next.pct * 100) + '%'; const dn_djHurt = w_djHurt.querySelector('.djdn i'); if (dn_djHurt) dn_djHurt.style.width = (s_djHurt.prev.pct * 100) + '%'; const vv_djHurt = w_djHurt.querySelector('.djv'); if (vv_djHurt) vv_djHurt.textContent = s_djHurt.txt; } }
     const s_djDeath = djDeathNow(); const w_djDeath = document.getElementById('djDeathWrap'); if (w_djDeath) { const pv_djDeath = w_djDeath.dataset.fv || ''; const nv_djDeath = s_djDeath.txt + '|' + s_djDeath.next.pct + '|' + s_djDeath.prev.pct; if (pv_djDeath !== nv_djDeath) { w_djDeath.dataset.fv = nv_djDeath; w_djDeath.classList.remove('g-good','g-warn','g-bad'); if (s_djDeath.cls) w_djDeath.classList.add(s_djDeath.cls); w_djDeath.classList.toggle('danger', !!s_djDeath.danger); const up_djDeath = w_djDeath.querySelector('.djup i'); if (up_djDeath) up_djDeath.style.width = (s_djDeath.next.pct * 100) + '%'; const dn_djDeath = w_djDeath.querySelector('.djdn i'); if (dn_djDeath) dn_djDeath.style.width = (s_djDeath.prev.pct * 100) + '%'; const vv_djDeath = w_djDeath.querySelector('.djv'); if (vv_djDeath) vv_djDeath.textContent = s_djDeath.txt; } }
+    const s_dzAcc = dzAccNow(); const w_dzAcc = document.getElementById('dzAccWrap'); if (w_dzAcc) { const pv_dzAcc = w_dzAcc.dataset.fv || ''; const nv_dzAcc = s_dzAcc.txt + '|' + s_dzAcc.pct; if (pv_dzAcc !== nv_dzAcc) { w_dzAcc.dataset.fv = nv_dzAcc; w_dzAcc.classList.remove('g-good','g-warn','g-bad'); if (s_dzAcc.cls) w_dzAcc.classList.add(s_dzAcc.cls); w_dzAcc.classList.toggle('danger', !!s_dzAcc.danger); const bar_dzAcc = w_dzAcc.querySelector('.dzbar i'); if (bar_dzAcc) bar_dzAcc.style.width = (s_dzAcc.pct * 100) + '%'; const vv_dzAcc = w_dzAcc.querySelector('.dzv'); if (vv_dzAcc) vv_dzAcc.textContent = s_dzAcc.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -22299,6 +22301,53 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // 伤害冲刺（v1.1.134 第九十八辑：dj 系列已在 v1.1.129 引入）
   // 受击冲刺（v1.1.135 第九十八辑：dj 系列已在 v1.1.129 引入）
   // 阵亡冲刺（v1.1.136 第九十八辑：dj 系列已在 v1.1.129 引入）
+  // —— 战局质量仪表：dz 系列（v1.1.137 第九十九辑）——
+  // 纯函数：连续值 value 对四阈值 ladders=[t1,t2,t3,t4]（严格递增正数）分级 → tier 1~5，
+  //  给出档内进度 pct(0~1)、分级色 cls(极差/较差/中等/良好/极佳)、危险脉冲 danger；
+  //  good=true：tier5 最好/tier1 最差；good=false（清场耗时：越长越差）反转。
+  //  非法（null/NaN/负/数组/ladders 长度非 4/非升序/非正/含 NaN）→ 退化 '—'。
+  function dzGauge(value, ladders, good, unit) {
+    const deg = { ok: false, tier: 0, pct: 0, cls: 'g-warn', danger: false, txt: '—', raw: null };
+    if (value === null || value === undefined || Array.isArray(value)) return deg;
+    const v = Number(value);
+    if (!isFinite(v) || v < 0) return deg;
+    if (!Array.isArray(ladders) || ladders.length !== 4) return deg;
+    const L = [];
+    for (let i = 0; i < 4; i++) { const x = Number(ladders[i]); if (!isFinite(x) || x <= 0) return deg; L.push(x); }
+    if (!(L[0] < L[1] && L[1] < L[2] && L[2] < L[3])) return deg;
+    const up = good !== false;
+    let tier = 1;
+    if (v >= L[3]) tier = 5; else if (v >= L[2]) tier = 4; else if (v >= L[1]) tier = 3; else if (v >= L[0]) tier = 2; else tier = 1;
+    const lo = tier > 1 ? L[tier - 2] : 0;
+    const hi = tier < 5 ? L[tier - 1] : v;
+    const span = (hi - lo) > 0 ? (hi - lo) : 1;
+    const pct = tier === 1 ? 0 : (tier === 5 ? 1 : Math.max(0, Math.min(1, (v - lo) / span)));
+    const names = up ? ['极差', '较差', '中等', '良好', '极佳'] : ['极佳', '良好', '中等', '较差', '极差'];
+    const name = names[tier - 1];
+    let cls;
+    if (up) { cls = tier <= 1 ? 'g-bad' : (tier <= 3 ? 'g-warn' : 'g-good'); }
+    else { cls = tier >= 5 ? 'g-bad' : (tier >= 3 ? 'g-warn' : 'g-good'); }
+    const danger = up ? (tier === 1) : (tier === 5);
+    const u = (unit && String(unit).length > 0) ? String(unit) : '';
+    return { ok: true, tier: tier, pct: pct, cls: cls, danger: danger, txt: name + '·' + dzFmt(v) + u, raw: v };
+  }
+  // 数值格式化：小数值保留小数（0.2 → '0.2'，0.05 → '0.05'），大数值取整（312 → '312'）
+  function dzFmt(x) {
+    if (!isFinite(x)) return '—';
+    const a = Math.abs(x);
+    if (a >= 100) return String(Math.round(x));
+    if (a >= 1) return String(Math.round(x * 10) / 10);
+    return String(Math.round(x * 100) / 100);
+  }
+  // —— 8 个数据源（本局实时质量/预测值 → 单档分级；分母 clamp >=1 防除零）——
+  function dzAccNow() { const st = (stat && typeof stat === 'object') ? stat : {}; const sh = isFinite(Number(st.shots)) ? Math.max(0, Number(st.shots)) : 0; const hi = isFinite(Number(st.hits)) ? Math.max(0, Number(st.hits)) : 0; const v = sh > 0 ? (hi / sh) * 100 : 0; return dzGauge(v, [30, 50, 70, 90], true, '%'); }
+  function dzTimeNow() { const v = isFinite(Number(playSecRun)) ? Math.max(0, Number(playSecRun)) : 0; return dzGauge(v, [60, 180, 360, 600], true, 's'); }
+  function dzWaveNow() { const t = isFinite(Number(wavesTotal)) ? Math.max(1, Number(wavesTotal)) : 1; const w = isFinite(Number(wave)) ? Math.max(1, Number(wave)) : 1; const v = Math.min(1, w / t) * 100; return dzGauge(v, [25, 50, 75, 95], true, '%'); }
+  function dzBossPhaseNow() { const m = isFinite(Number(bossMaxHp)) ? Math.max(0, Number(bossMaxHp)) : 0; if (m <= 0) return dzGauge(0, [25, 50, 75, 90], true, '%'); const h = isFinite(Number(bossHp)) ? Math.max(0, Number(bossHp)) : 0; const v = Math.min(100, (h / m) * 100); return dzGauge(v, [25, 50, 75, 90], true, '%'); }
+  function dzTradeNow() { const d = isFinite(Number(runDmg)) ? Math.max(0, Number(runDmg)) : 0; const h = isFinite(Number(hurtCount)) ? Math.max(0, Number(hurtCount)) : 0; const v = d / (h + 1); return dzGauge(v, [10, 30, 80, 200], true, '×'); }
+  function dzClearNow() { const st = (stat && typeof stat === 'object') ? stat : {}; const k = isFinite(Number(st.kills)) ? Math.max(0, Number(st.kills)) : 0; const t = isFinite(Number(playSecRun)) ? Math.max(1, Number(playSecRun)) : 1; const rate = k / t; const n = (Array.isArray(enemies)) ? enemies.length : 0; const v = rate > 0 ? (n / rate) : 999; return dzGauge(v, [3, 8, 20, 60], false, 's'); }
+  function dzEconNow() { const c = isFinite(Number(runCoins)) ? Math.max(0, Number(runCoins)) : 0; const t = isFinite(Number(playSecRun)) ? Math.max(1, Number(playSecRun)) : 1; const v = c / t; return dzGauge(v, [1, 3, 8, 20], true, '/s'); }
+  function dzHpNow() { const lv = isFinite(Number(lives)) ? Math.max(0, Number(lives)) : 0; const h = isFinite(Number(hurtCount)) ? Math.max(0, Number(hurtCount)) : 0; const t = isFinite(Number(playSecRun)) ? Math.max(1, Number(playSecRun)) : 1; const v = h > 0 ? (lv / (h / t)) : 999; return dzGauge(v, [30, 90, 240, 600], true, 's'); }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -24160,7 +24209,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.136', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.137', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -26490,6 +26539,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       djDmgStateNow: (v, l, g) => djCalc(v, l, g), djDmgNow: () => djDmgNow(), djDmgDomNow: () => { const e = document.querySelector('#djDmgWrap .djv'); return e ? e.textContent : null; }, djNextAt: (v, l) => djNext(v, l), djPrevAt: (v, l) => djPrev(v, l),
       djHurtStateNow: (v, l, g) => djCalc(v, l, g), djHurtNow: () => djHurtNow(), djHurtDomNow: () => { const e = document.querySelector('#djHurtWrap .djv'); return e ? e.textContent : null; }, djNextAt: (v, l) => djNext(v, l), djPrevAt: (v, l) => djPrev(v, l),
       djDeathStateNow: (v, l, g) => djCalc(v, l, g), djDeathNow: () => djDeathNow(), djDeathDomNow: () => { const e = document.querySelector('#djDeathWrap .djv'); return e ? e.textContent : null; }, djNextAt: (v, l) => djNext(v, l), djPrevAt: (v, l) => djPrev(v, l),
+      dzAccStateNow: (v, l, g, u) => dzGauge(v, l, g, u), dzAccNow: () => dzAccNow(), dzAccDomNow: () => { const e = document.querySelector('#dzAccWrap .dzv'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
