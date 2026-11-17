@@ -1357,6 +1357,7 @@
     <div class="pill m-hide" id="tgShotWrap"><span class="k">🔫</span><span class="tgl">弹幕</span><span class="tgtrk"><i></i><i></i><i></i><i></i><i></i></span><span class="tgv">—</span></div>
     <div class="pill m-hide" id="tgComboWrap"><span class="k">🔥</span><span class="tgl">连击</span><span class="tgtrk"><i></i><i></i><i></i><i></i><i></i></span><span class="tgv">—</span></div>
     <div class="pill m-hide" id="tgDmgWrap"><span class="k">💥</span><span class="tgl">伤害</span><span class="tgtrk"><i></i><i></i><i></i><i></i><i></i></span><span class="tgv">—</span></div>
+    <div class="pill m-hide" id="tgHurtWrap"><span class="k">🛡️</span><span class="tgl">受击</span><span class="tgtrk"><i></i><i></i><i></i><i></i><i></i></span><span class="tgv">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1733,7 +1734,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.126</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.127</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7893,6 +7894,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_tgShot = tgShotNow(); const w_tgShot = document.getElementById('tgShotWrap'); if (w_tgShot) { const pv_tgShot = w_tgShot.dataset.fv || ''; const nv_tgShot = s_tgShot.txt + '|' + s_tgShot.tier; if (pv_tgShot !== nv_tgShot) { w_tgShot.dataset.fv = nv_tgShot; w_tgShot.classList.remove('g-good','g-warn','g-bad'); if (s_tgShot.cls) w_tgShot.classList.add(s_tgShot.cls); w_tgShot.classList.toggle('danger', !!s_tgShot.danger); const tr_tgShot = w_tgShot.querySelectorAll('.tgtrk i'); for (let i_tgShot = 0; i_tgShot < tr_tgShot.length; i_tgShot++) { tr_tgShot[i_tgShot].className = (s_tgShot.segs && s_tgShot.segs[i_tgShot]) ? 'on' : ''; } const vv_tgShot = w_tgShot.querySelector('.tgv'); if (vv_tgShot) vv_tgShot.textContent = s_tgShot.txt; } }
     const s_tgCombo = tgComboNow(); const w_tgCombo = document.getElementById('tgComboWrap'); if (w_tgCombo) { const pv_tgCombo = w_tgCombo.dataset.fv || ''; const nv_tgCombo = s_tgCombo.txt + '|' + s_tgCombo.tier; if (pv_tgCombo !== nv_tgCombo) { w_tgCombo.dataset.fv = nv_tgCombo; w_tgCombo.classList.remove('g-good','g-warn','g-bad'); if (s_tgCombo.cls) w_tgCombo.classList.add(s_tgCombo.cls); w_tgCombo.classList.toggle('danger', !!s_tgCombo.danger); const tr_tgCombo = w_tgCombo.querySelectorAll('.tgtrk i'); for (let i_tgCombo = 0; i_tgCombo < tr_tgCombo.length; i_tgCombo++) { tr_tgCombo[i_tgCombo].className = (s_tgCombo.segs && s_tgCombo.segs[i_tgCombo]) ? 'on' : ''; } const vv_tgCombo = w_tgCombo.querySelector('.tgv'); if (vv_tgCombo) vv_tgCombo.textContent = s_tgCombo.txt; } }
     const s_tgDmg = tgDmgNow(); const w_tgDmg = document.getElementById('tgDmgWrap'); if (w_tgDmg) { const pv_tgDmg = w_tgDmg.dataset.fv || ''; const nv_tgDmg = s_tgDmg.txt + '|' + s_tgDmg.tier; if (pv_tgDmg !== nv_tgDmg) { w_tgDmg.dataset.fv = nv_tgDmg; w_tgDmg.classList.remove('g-good','g-warn','g-bad'); if (s_tgDmg.cls) w_tgDmg.classList.add(s_tgDmg.cls); w_tgDmg.classList.toggle('danger', !!s_tgDmg.danger); const tr_tgDmg = w_tgDmg.querySelectorAll('.tgtrk i'); for (let i_tgDmg = 0; i_tgDmg < tr_tgDmg.length; i_tgDmg++) { tr_tgDmg[i_tgDmg].className = (s_tgDmg.segs && s_tgDmg.segs[i_tgDmg]) ? 'on' : ''; } const vv_tgDmg = w_tgDmg.querySelector('.tgv'); if (vv_tgDmg) vv_tgDmg.textContent = s_tgDmg.txt; } }
+    const s_tgHurt = tgHurtNow(); const w_tgHurt = document.getElementById('tgHurtWrap'); if (w_tgHurt) { const pv_tgHurt = w_tgHurt.dataset.fv || ''; const nv_tgHurt = s_tgHurt.txt + '|' + s_tgHurt.tier; if (pv_tgHurt !== nv_tgHurt) { w_tgHurt.dataset.fv = nv_tgHurt; w_tgHurt.classList.remove('g-good','g-warn','g-bad'); if (s_tgHurt.cls) w_tgHurt.classList.add(s_tgHurt.cls); w_tgHurt.classList.toggle('danger', !!s_tgHurt.danger); const tr_tgHurt = w_tgHurt.querySelectorAll('.tgtrk i'); for (let i_tgHurt = 0; i_tgHurt < tr_tgHurt.length; i_tgHurt++) { tr_tgHurt[i_tgHurt].className = (s_tgHurt.segs && s_tgHurt.segs[i_tgHurt]) ? 'on' : ''; } const vv_tgHurt = w_tgHurt.querySelector('.tgv'); if (vv_tgHurt) vv_tgHurt.textContent = s_tgHurt.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -22215,6 +22217,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // 弹幕强度（v1.1.124 第九十七辑：tg 系列已在 v1.1.121 引入）
   // 连击强度（v1.1.125 第九十七辑：tg 系列已在 v1.1.121 引入）
   // 伤害强度（v1.1.126 第九十七辑：tg 系列已在 v1.1.121 引入）
+  // 受击强度（v1.1.127 第九十七辑：tg 系列已在 v1.1.121 引入）
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -24076,7 +24079,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.126', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.127', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -26396,6 +26399,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       tgShotStateNow: (v, l, g) => tgCalc(v, l, g), tgShotSegsNow: (tier) => tgSegs(tier), tgShotNow: () => tgShotNow(), tgShotDomNow: () => { const e = document.querySelector('#tgShotWrap .tgv'); return e ? e.textContent : null; },
       tgComboStateNow: (v, l, g) => tgCalc(v, l, g), tgComboSegsNow: (tier) => tgSegs(tier), tgComboNow: () => tgComboNow(), tgComboDomNow: () => { const e = document.querySelector('#tgComboWrap .tgv'); return e ? e.textContent : null; },
       tgDmgStateNow: (v, l, g) => tgCalc(v, l, g), tgDmgSegsNow: (tier) => tgSegs(tier), tgDmgNow: () => tgDmgNow(), tgDmgDomNow: () => { const e = document.querySelector('#tgDmgWrap .tgv'); return e ? e.textContent : null; },
+      tgHurtStateNow: (v, l, g) => tgCalc(v, l, g), tgHurtSegsNow: (tier) => tgSegs(tier), tgHurtNow: () => tgHurtNow(), tgHurtDomNow: () => { const e = document.querySelector('#tgHurtWrap .tgv'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
