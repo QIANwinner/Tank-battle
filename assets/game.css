@@ -7861,4 +7861,10 @@ html.compact-hud #hud .m-hide { display:none !important; }
   #mwCoinWrap .mwdone { display:none; font-size:11px; color:#2ecc71; margin:0 3px; font-weight:700; }
   #mwCoinWrap.mw-hit .mwbar i { background:#2ecc71; }
   #mwCoinWrap.mw-hit { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
+  #mwDmgWrap .mwbar { display:inline-block; width:60px; height:6px; background:#333; border:1px solid #555; border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #mwDmgWrap .mwbar i { display:block; height:100%; width:0; background:#3498db; transition:width .15s linear; }
+  #mwDmgWrap .mwt { font-size:11px; color:#fff; font-weight:700; margin:0 2px; }
+  #mwDmgWrap .mwdone { display:none; font-size:11px; color:#2ecc71; margin:0 3px; font-weight:700; }
+  #mwDmgWrap.mw-hit .mwbar i { background:#2ecc71; }
+  #mwDmgWrap.mw-hit { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
 
