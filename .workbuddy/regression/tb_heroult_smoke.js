@@ -24660,6 +24660,23 @@ async function main() {
     t("U8870 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8865 受击预见 抛异常", false, String(e)); t("U8866 受击预见 抛异常", false, String(e)); t("U8867 受击预见 抛异常", false, String(e)); t("U8868 受击预见 抛异常", false, String(e)); t("U8869 受击预见 抛异常", false, String(e)); t("U8870 受击预见 抛异常", false, String(e)); }
 
+
+  // ===== U8871~U8876: 生存预见(v1.1.168) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('wzSurvWrap'),bar:!!document.querySelector('#wzSurvWrap .wbar i'),val:!!document.querySelector('#wzSurvWrap .wval'),s:T.wzSurvStateNow(3,0.1,'生存')};return JSON.stringify(r);})()"));
+    t("U8871 生存预见 预见条 DOM 已加入（条 + 文案 + 函数可用）", o.dom === true && o.bar === true && o.val === true && o.s.ok === true && o.s.pct > 0 && o.s.reached === false && o.s.txt.indexOf('生存') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.wzSurvStateNow(3,0,'生存')};return JSON.stringify(r);})()"));
+    t("U8872 初值 生存预见（hurtRate=0 → 无伤·生存无限）", o1.s.ok === true && o1.s.pct === 100 && o1.s.reached === false && o1.s.txt.indexOf('生存') >= 0 && o1.s.cls === 'g-good' && o1.s.danger === false, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzSurvStateNow(3,0.1,'生存'),b:T.wzSurvStateNow(5,0.1,'生存')};return JSON.stringify(r);})()"));
+    t("U8873 正常值 生存预见（3命@0.1/s → 30s；5命@0.1/s → 50s，更长更健康）", o2.a.ok === true && o2.a.eta.indexOf('30') >= 0 && o2.b.ok === true && o2.b.eta.indexOf('50') >= 0 && o2.b.pct > o2.a.pct && o2.b.cls !== 'g-bad', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzSurvStateNow(0,0.1,'生存'),b:T.wzSurvStateNow(-1,0.1,'生存')};return JSON.stringify(r);})()"));
+    t("U8874 边界 生存预见（lives=0 → 已阵亡 / 负值 → 非法退化 '—'）", o3.a.ok === true && o3.a.reached === true && o3.a.txt.indexOf('已阵亡') >= 0 && o3.b.ok === false && o3.b.reached === false && o3.b.txt === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzSurvStateNow(null,0.1,'生存'),b:T.wzSurvStateNow(NaN,0.1,'生存'),c:T.wzSurvStateNow(3,-1,'生存'),d:T.wzSurvStateNow(3,0.1,''),e:T.wzSurvStateNow(3,NaN,'生存')};return JSON.stringify(r);})()"));
+    t("U8875 非法 null/NaN/负速率/空标签/NaN速率 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.wzSurvNow(),dom:(function(){const e=document.querySelector('#wzSurvWrap .wval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8876 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8871 生存预见 抛异常", false, String(e)); t("U8872 生存预见 抛异常", false, String(e)); t("U8873 生存预见 抛异常", false, String(e)); t("U8874 生存预见 抛异常", false, String(e)); t("U8875 生存预见 抛异常", false, String(e)); t("U8876 生存预见 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

@@ -7990,4 +7990,11 @@ html.compact-hud #hud .m-hide { display:none !important; }
   #wzHurtWrap.g-warn .wbar i { background:#f1c40f; }
   #wzHurtWrap.g-bad .wbar i { background:#e74c3c; }
   #wzHurtWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
+  #wzSurvWrap .wbar { display:inline-block; width:52px; height:6px; background:#333; border:1px solid #555; border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #wzSurvWrap .wbar i { display:block; height:100%; width:0; background:#3498db; transition:width .15s linear; }
+  #wzSurvWrap .wval { font-size:11px; color:#fff; font-weight:700; margin:0 2px; }
+  #wzSurvWrap.g-good .wbar i { background:#2ecc71; }
+  #wzSurvWrap.g-warn .wbar i { background:#f1c40f; }
+  #wzSurvWrap.g-bad .wbar i { background:#e74c3c; }
+  #wzSurvWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
 
