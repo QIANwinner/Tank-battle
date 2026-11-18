@@ -24405,6 +24405,29 @@ async function main() {
     t("U8798 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8793 血线警戒 抛异常", false, String(e)); t("U8794 血线警戒 抛异常", false, String(e)); t("U8795 血线警戒 抛异常", false, String(e)); t("U8796 血线警戒 抛异常", false, String(e)); t("U8797 血线警戒 抛异常", false, String(e)); t("U8798 血线警戒 抛异常", false, String(e)); }
 
+
+  // ===== U8799~U8804: 受击警戒(v1.1.156) =====
+  try {
+    const L = [10,20]; const HH = ["受击少","受击渐多","护盾：受击频繁"]; const G = false;
+    const __expLv = (v, l1, l2, g) => g ? (v >= l1 ? 0 : (v >= l2 ? 1 : 2)) : (v < l1 ? 0 : (v < l2 ? 1 : 2));
+    const __expCls = (lv) => lv === 2 ? 'g-bad' : (lv === 1 ? 'g-warn' : 'g-good');
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('ocHurtWrap'),bar:!!document.querySelector('#ocHurtWrap .obar i'),val:!!document.querySelector('#ocHurtWrap .oval'),s:T.ocHurtStateNow(0,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁'])};return JSON.stringify(r);})()"));
+    t("U8799 受击警戒 警戒芯片 DOM 已加入（三态条 + 文案 + 函数可用）", o.dom === true && o.bar === true && o.val === true && o.s.ok === true && o.s.lv === 0 && o.s.txt.indexOf('受击') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocHurtStateNow(0,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁'])};return JSON.stringify(r);})()"));
+    t("U8800 初值 受击警戒（val=0 → 按 good 方向取健康/告警档，文案含标签）", o1.s.ok === true && o1.s.lv === (G ? 2 : 0) && o1.s.txt.indexOf('受击') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocHurtStateNow(0,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁']),b:T.ocHurtStateNow(10,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁'])};return JSON.stringify(r);})()"));
+    t("U8801 正常值 受击警戒（健康值→lv0 稳定 / 中档值→lv1 留意）", o2.a.ok === true && o2.a.lv === 0 && o2.b.ok === true && o2.b.lv === 1 && o2.a.pct === 15 && o2.b.pct === 55, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r=[T.ocHurtStateNow(0,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁']).lv,T.ocHurtStateNow(19.999,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁']).lv,T.ocHurtStateNow(20,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁']).lv,T.ocHurtStateNow(15,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁']).lv,T.ocHurtStateNow(9.999,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁']).lv,T.ocHurtStateNow(10,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁']).lv,T.ocHurtStateNow(60,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁']).lv];return JSON.stringify(r);})()"));
+    const expVals = [0,19.999,20,15,9.999,10,60];
+    let bOk = true;
+    for (let i = 0; i < expVals.length; i++) { if (o3[i] !== __expLv(expVals[i], L[0], L[1], G)) bOk = false; }
+    t("U8802 边界 受击警戒（阈值上下/跨越逐个核对 lv）", bOk && o3.length === expVals.length, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocHurtStateNow(null,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁']),b:T.ocHurtStateNow(NaN,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁']),c:T.ocHurtStateNow(-5,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁']),d:T.ocHurtStateNow([1],10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁']),e:T.ocHurtStateNow(5,null,2,'受击',false,['受击少','受击渐多','护盾：受击频繁']),f:T.ocHurtStateNow(5,2,3,'受击',false,[1,2]),g:T.ocHurtStateNow(5,20,10,'受击',false,['受击少','受击渐多','护盾：受击频繁']),h:T.ocHurtStateNow(5,NaN,8,'受击',false,['受击少','受击渐多','护盾：受击频繁']),i:T.ocHurtStateNow(5,-3,8,'受击',false,['受击少','受击渐多','护盾：受击频繁'])};return JSON.stringify(r);})()"));
+    t("U8803 非法 null/NaN/负值/数组/阈值无效/坏hints/方向错/NaN/负阈值 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocHurtNow(),dom:(function(){const e=document.querySelector('#ocHurtWrap .oval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8804 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8799 受击警戒 抛异常", false, String(e)); t("U8800 受击警戒 抛异常", false, String(e)); t("U8801 受击警戒 抛异常", false, String(e)); t("U8802 受击警戒 抛异常", false, String(e)); t("U8803 受击警戒 抛异常", false, String(e)); t("U8804 受击警戒 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
