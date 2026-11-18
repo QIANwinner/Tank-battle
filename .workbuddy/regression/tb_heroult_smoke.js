@@ -24382,6 +24382,29 @@ async function main() {
     t("U8792 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8787 弹幕警戒 抛异常", false, String(e)); t("U8788 弹幕警戒 抛异常", false, String(e)); t("U8789 弹幕警戒 抛异常", false, String(e)); t("U8790 弹幕警戒 抛异常", false, String(e)); t("U8791 弹幕警戒 抛异常", false, String(e)); t("U8792 弹幕警戒 抛异常", false, String(e)); }
 
+
+  // ===== U8793~U8798: 血线警戒(v1.1.155) =====
+  try {
+    const L = [3,1]; const HH = ["血量充足","留意：血量偏低","保命：仅剩 1 命"]; const G = true;
+    const __expLv = (v, l1, l2, g) => g ? (v >= l1 ? 0 : (v >= l2 ? 1 : 2)) : (v < l1 ? 0 : (v < l2 ? 1 : 2));
+    const __expCls = (lv) => lv === 2 ? 'g-bad' : (lv === 1 ? 'g-warn' : 'g-good');
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('ocLifeWrap'),bar:!!document.querySelector('#ocLifeWrap .obar i'),val:!!document.querySelector('#ocLifeWrap .oval'),s:T.ocLifeStateNow(3,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命'])};return JSON.stringify(r);})()"));
+    t("U8793 血线警戒 警戒芯片 DOM 已加入（三态条 + 文案 + 函数可用）", o.dom === true && o.bar === true && o.val === true && o.s.ok === true && o.s.lv === 0 && o.s.txt.indexOf('血线') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocLifeStateNow(0,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命'])};return JSON.stringify(r);})()"));
+    t("U8794 初值 血线警戒（val=0 → 按 good 方向取健康/告警档，文案含标签）", o1.s.ok === true && o1.s.lv === (G ? 2 : 0) && o1.s.txt.indexOf('血线') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocLifeStateNow(3,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']),b:T.ocLifeStateNow(1,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命'])};return JSON.stringify(r);})()"));
+    t("U8795 正常值 血线警戒（健康值→lv0 稳定 / 中档值→lv1 留意）", o2.a.ok === true && o2.a.lv === 0 && o2.b.ok === true && o2.b.lv === 1 && o2.a.pct === 15 && o2.b.pct === 55, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r=[T.ocLifeStateNow(0,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']).lv,T.ocLifeStateNow(0.999,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']).lv,T.ocLifeStateNow(1,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']).lv,T.ocLifeStateNow(2,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']).lv,T.ocLifeStateNow(2.999,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']).lv,T.ocLifeStateNow(3,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']).lv,T.ocLifeStateNow(53,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']).lv];return JSON.stringify(r);})()"));
+    const expVals = [0,0.999,1,2,2.999,3,53];
+    let bOk = true;
+    for (let i = 0; i < expVals.length; i++) { if (o3[i] !== __expLv(expVals[i], L[0], L[1], G)) bOk = false; }
+    t("U8796 边界 血线警戒（阈值上下/跨越逐个核对 lv）", bOk && o3.length === expVals.length, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocLifeStateNow(null,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']),b:T.ocLifeStateNow(NaN,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']),c:T.ocLifeStateNow(-5,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']),d:T.ocLifeStateNow([1],3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']),e:T.ocLifeStateNow(5,null,2,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']),f:T.ocLifeStateNow(5,2,3,'血线',true,[1,2]),g:T.ocLifeStateNow(5,1,3,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']),h:T.ocLifeStateNow(5,NaN,8,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']),i:T.ocLifeStateNow(5,-3,8,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命'])};return JSON.stringify(r);})()"));
+    t("U8797 非法 null/NaN/负值/数组/阈值无效/坏hints/方向错/NaN/负阈值 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocLifeNow(),dom:(function(){const e=document.querySelector('#ocLifeWrap .oval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8798 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8793 血线警戒 抛异常", false, String(e)); t("U8794 血线警戒 抛异常", false, String(e)); t("U8795 血线警戒 抛异常", false, String(e)); t("U8796 血线警戒 抛异常", false, String(e)); t("U8797 血线警戒 抛异常", false, String(e)); t("U8798 血线警戒 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
