@@ -24359,6 +24359,29 @@ async function main() {
     t("U8786 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8781 敌群警戒 抛异常", false, String(e)); t("U8782 敌群警戒 抛异常", false, String(e)); t("U8783 敌群警戒 抛异常", false, String(e)); t("U8784 敌群警戒 抛异常", false, String(e)); t("U8785 敌群警戒 抛异常", false, String(e)); t("U8786 敌群警戒 抛异常", false, String(e)); }
 
+
+  // ===== U8787~U8792: 弹幕警戒(v1.1.154) =====
+  try {
+    const L = [18,30]; const HH = ["弹幕稀疏","弹幕渐密","规避：弹幕过密"]; const G = false;
+    const __expLv = (v, l1, l2, g) => g ? (v >= l1 ? 0 : (v >= l2 ? 1 : 2)) : (v < l1 ? 0 : (v < l2 ? 1 : 2));
+    const __expCls = (lv) => lv === 2 ? 'g-bad' : (lv === 1 ? 'g-warn' : 'g-good');
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('ocBulletWrap'),bar:!!document.querySelector('#ocBulletWrap .obar i'),val:!!document.querySelector('#ocBulletWrap .oval'),s:T.ocBulletStateNow(0,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密'])};return JSON.stringify(r);})()"));
+    t("U8787 弹幕警戒 警戒芯片 DOM 已加入（三态条 + 文案 + 函数可用）", o.dom === true && o.bar === true && o.val === true && o.s.ok === true && o.s.lv === 0 && o.s.txt.indexOf('弹幕') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocBulletStateNow(0,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密'])};return JSON.stringify(r);})()"));
+    t("U8788 初值 弹幕警戒（val=0 → 按 good 方向取健康/告警档，文案含标签）", o1.s.ok === true && o1.s.lv === (G ? 2 : 0) && o1.s.txt.indexOf('弹幕') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocBulletStateNow(0,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']),b:T.ocBulletStateNow(18,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密'])};return JSON.stringify(r);})()"));
+    t("U8789 正常值 弹幕警戒（健康值→lv0 稳定 / 中档值→lv1 留意）", o2.a.ok === true && o2.a.lv === 0 && o2.b.ok === true && o2.b.lv === 1 && o2.a.pct === 15 && o2.b.pct === 55, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r=[T.ocBulletStateNow(0,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']).lv,T.ocBulletStateNow(29.999,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']).lv,T.ocBulletStateNow(30,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']).lv,T.ocBulletStateNow(24,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']).lv,T.ocBulletStateNow(17.999,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']).lv,T.ocBulletStateNow(18,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']).lv,T.ocBulletStateNow(68,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']).lv];return JSON.stringify(r);})()"));
+    const expVals = [0,29.999,30,24,17.999,18,68];
+    let bOk = true;
+    for (let i = 0; i < expVals.length; i++) { if (o3[i] !== __expLv(expVals[i], L[0], L[1], G)) bOk = false; }
+    t("U8790 边界 弹幕警戒（阈值上下/跨越逐个核对 lv）", bOk && o3.length === expVals.length, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocBulletStateNow(null,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']),b:T.ocBulletStateNow(NaN,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']),c:T.ocBulletStateNow(-5,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']),d:T.ocBulletStateNow([1],18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']),e:T.ocBulletStateNow(5,null,2,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']),f:T.ocBulletStateNow(5,2,3,'弹幕',false,[1,2]),g:T.ocBulletStateNow(5,30,18,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']),h:T.ocBulletStateNow(5,NaN,8,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']),i:T.ocBulletStateNow(5,-3,8,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密'])};return JSON.stringify(r);})()"));
+    t("U8791 非法 null/NaN/负值/数组/阈值无效/坏hints/方向错/NaN/负阈值 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocBulletNow(),dom:(function(){const e=document.querySelector('#ocBulletWrap .oval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8792 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8787 弹幕警戒 抛异常", false, String(e)); t("U8788 弹幕警戒 抛异常", false, String(e)); t("U8789 弹幕警戒 抛异常", false, String(e)); t("U8790 弹幕警戒 抛异常", false, String(e)); t("U8791 弹幕警戒 抛异常", false, String(e)); t("U8792 弹幕警戒 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
