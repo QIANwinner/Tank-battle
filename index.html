@@ -1395,6 +1395,7 @@
     <div class="pill m-hide" id="wzScoreWrap"><span class="k">🏆</span><span class="tgl">破纪录</span><span class="wbar"><i></i></span><span class="wval">—</span></div>
     <div class="pill m-hide" id="wzWaveWrap"><span class="k">🚩</span><span class="tgl">通关</span><span class="wbar"><i></i></span><span class="wval">—</span></div>
     <div class="pill m-hide" id="wzComboWrap"><span class="k">🔥</span><span class="tgl">连击</span><span class="wbar"><i></i></span><span class="wval">—</span></div>
+    <div class="pill m-hide" id="wzUpgWrap"><span class="k">⬆️</span><span class="tgl">升级</span><span class="wbar"><i></i></span><span class="wval">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1771,7 +1772,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.163</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.164</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7968,6 +7969,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_wzScore = wzScoreNow(); const w_wzScore = document.getElementById('wzScoreWrap'); if (w_wzScore) { const pv_wzScore = w_wzScore.dataset.fv || ''; const nv_wzScore = s_wzScore.pct + '|' + s_wzScore.txt; if (pv_wzScore !== nv_wzScore) { w_wzScore.dataset.fv = nv_wzScore; w_wzScore.classList.remove('g-good','g-warn','g-bad'); w_wzScore.classList.add(s_wzScore.cls); w_wzScore.classList.toggle('danger', !!s_wzScore.danger); const bar_wzScore = w_wzScore.querySelector('.wbar i'); if (bar_wzScore) bar_wzScore.style.width = s_wzScore.pct + '%'; const val_wzScore = w_wzScore.querySelector('.wval'); if (val_wzScore) val_wzScore.textContent = s_wzScore.txt; } }
     const s_wzWave = wzWaveNow(); const w_wzWave = document.getElementById('wzWaveWrap'); if (w_wzWave) { const pv_wzWave = w_wzWave.dataset.fv || ''; const nv_wzWave = s_wzWave.pct + '|' + s_wzWave.txt; if (pv_wzWave !== nv_wzWave) { w_wzWave.dataset.fv = nv_wzWave; w_wzWave.classList.remove('g-good','g-warn','g-bad'); w_wzWave.classList.add(s_wzWave.cls); w_wzWave.classList.toggle('danger', !!s_wzWave.danger); const bar_wzWave = w_wzWave.querySelector('.wbar i'); if (bar_wzWave) bar_wzWave.style.width = s_wzWave.pct + '%'; const val_wzWave = w_wzWave.querySelector('.wval'); if (val_wzWave) val_wzWave.textContent = s_wzWave.txt; } }
     const s_wzCombo = wzComboNow(); const w_wzCombo = document.getElementById('wzComboWrap'); if (w_wzCombo) { const pv_wzCombo = w_wzCombo.dataset.fv || ''; const nv_wzCombo = s_wzCombo.pct + '|' + s_wzCombo.txt; if (pv_wzCombo !== nv_wzCombo) { w_wzCombo.dataset.fv = nv_wzCombo; w_wzCombo.classList.remove('g-good','g-warn','g-bad'); w_wzCombo.classList.add(s_wzCombo.cls); w_wzCombo.classList.toggle('danger', !!s_wzCombo.danger); const bar_wzCombo = w_wzCombo.querySelector('.wbar i'); if (bar_wzCombo) bar_wzCombo.style.width = s_wzCombo.pct + '%'; const val_wzCombo = w_wzCombo.querySelector('.wval'); if (val_wzCombo) val_wzCombo.textContent = s_wzCombo.txt; } }
+    const s_wzUpg = wzUpgNow(); const w_wzUpg = document.getElementById('wzUpgWrap'); if (w_wzUpg) { const pv_wzUpg = w_wzUpg.dataset.fv || ''; const nv_wzUpg = s_wzUpg.pct + '|' + s_wzUpg.txt; if (pv_wzUpg !== nv_wzUpg) { w_wzUpg.dataset.fv = nv_wzUpg; w_wzUpg.classList.remove('g-good','g-warn','g-bad'); w_wzUpg.classList.add(s_wzUpg.cls); w_wzUpg.classList.toggle('danger', !!s_wzUpg.danger); const bar_wzUpg = w_wzUpg.querySelector('.wbar i'); if (bar_wzUpg) bar_wzUpg.style.width = s_wzUpg.pct + '%'; const val_wzUpg = w_wzUpg.querySelector('.wval'); if (val_wzUpg) val_wzUpg.textContent = s_wzUpg.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -22616,6 +22618,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   }
   // 波次预见（v1.1.162 第一百零二辑：wz 系列已在 v1.1.161 引入）
   // 连击预见（v1.1.163 第一百零二辑：wz 系列已在 v1.1.161 引入）
+  // 升级预见（v1.1.164 第一百零二辑：wz 系列已在 v1.1.161 引入）
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -24477,7 +24480,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.163', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.164', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -26834,6 +26837,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       wzCalcStateNow: (cur, rate, target, label, unit, good, reached) => wzCalc(cur, rate, target, label, unit, good, reached), wzSurvStateNow: (lives, rate, label) => wzSurv(lives, rate, label), wzScoreNow: () => wzScoreNow(), wzScoreDomNow: () => { const e = document.querySelector('#wzScoreWrap .wval'); return e ? e.textContent : null; },
       wzCalcStateNow: (cur, rate, target, label, unit, good, reached) => wzCalc(cur, rate, target, label, unit, good, reached), wzSurvStateNow: (lives, rate, label) => wzSurv(lives, rate, label), wzWaveNow: () => wzWaveNow(), wzWaveDomNow: () => { const e = document.querySelector('#wzWaveWrap .wval'); return e ? e.textContent : null; },
       wzCalcStateNow: (cur, rate, target, label, unit, good, reached) => wzCalc(cur, rate, target, label, unit, good, reached), wzSurvStateNow: (lives, rate, label) => wzSurv(lives, rate, label), wzComboNow: () => wzComboNow(), wzComboDomNow: () => { const e = document.querySelector('#wzComboWrap .wval'); return e ? e.textContent : null; },
+      wzCalcStateNow: (cur, rate, target, label, unit, good, reached) => wzCalc(cur, rate, target, label, unit, good, reached), wzSurvStateNow: (lives, rate, label) => wzSurv(lives, rate, label), wzUpgNow: () => wzUpgNow(), wzUpgDomNow: () => { const e = document.querySelector('#wzUpgWrap .wval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
