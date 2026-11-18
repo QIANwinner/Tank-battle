@@ -1400,6 +1400,7 @@
     <div class="pill m-hide" id="wzPickWrap"><span class="k">🎁</span><span class="tgl">补给</span><span class="wbar"><i></i></span><span class="wval">—</span></div>
     <div class="pill m-hide" id="wzHurtWrap"><span class="k">🛡️</span><span class="tgl">受击</span><span class="wbar"><i></i></span><span class="wval">—</span></div>
     <div class="pill m-hide" id="wzSurvWrap"><span class="k">❤️</span><span class="tgl">生存</span><span class="wbar"><i></i></span><span class="wval">—</span></div>
+    <div class="pill m-hide" id="perfHzWrap"><span class="k">⚡</span><span class="tgl">刷新</span><span class="wval">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1776,7 +1777,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.168</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.169</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -5077,6 +5078,7 @@
   // ===== 主循环（deltaTime 驱动） =====
   function tick(now) {
     rafId = requestAnimationFrame(tick);
+    perfSample();
     animTime = now;
     let dt = (now - lastTime) / 1000;
   fpsMeterFrames++; fpsMeterAcc += dt; if (fpsMeterAcc >= 0.5) { fpsMeterValue = Math.round(fpsMeterFrames / fpsMeterAcc); fpsMeterFrames = 0; fpsMeterAcc = 0; const fp = $('fpsVal'); if (fp) fp.textContent = fpsText(fpsMeterValue); }   // —— v0.6.21 FPS 计数 ——
@@ -5092,8 +5094,10 @@
         const fps = fpsFrames * 1000 / (now - fpsCheckAt);
         fpsCheckAt = now; fpsFrames = 0;
         if (running && !paused) {
-          if (fps < 42) { fpsLowStreak++; fpsHighStreak = 0; }
-          else if (fps > 55) { fpsHighStreak++; fpsLowStreak = 0; }
+          perfLastFps = fps;
+          const th = perfScaleAuto(fps, perfHzNow());
+          if (fps < th.low) { fpsLowStreak++; fpsHighStreak = 0; }
+          else if (fps > th.high) { fpsHighStreak++; fpsLowStreak = 0; }
           else { fpsLowStreak = 0; fpsHighStreak = 0; }
           if (fpsLowStreak >= 3 && autoTier < 2) { autoTier++; applyAutoTier(); fpsLowStreak = 0; }
           else if (fpsHighStreak >= 5 && autoTier > 0) { autoTier--; applyAutoTier(); fpsHighStreak = 0; }
@@ -5277,14 +5281,7 @@
       best = score;
       try { saveStore.setItem(LS_BEST, String(best)); } catch (e) { /* 忽略 */ }
     }
-    elScore.textContent = hudNum(score);
-    elBest.textContent = hudNum(best);
-    elLevel.textContent = hudLevelText(level);
-    // —— v0.3.36 无尽模式 HUD 关卡标签显示「波」(普通保持「关」) ——
-    const lvPill = elLevel ? elLevel.parentElement : null;
-    const lvTag = lvPill ? lvPill.querySelector('.k') : null;
-    if (lvTag) lvTag.textContent = waveTagText(endlessMode);
-    elRemaining.textContent = remainingText(enemiesTotal, enemiesSpawned, enemies.length);
+    perfHudWrite(score, best, level, enemiesTotal, enemiesSpawned, enemies.length);
     updateTimerHud();
     const hudNow = performance.now();
     if (forceExtra || hudNow - lastExtraHudAt >= 100) { lastExtraHudAt = hudNow; updateExtraHud(); }
@@ -5471,14 +5468,16 @@
     }
 
     // 子弹（霓虹辉光；敌弹统一红色系，一眼识别敌我）
+    const pfPlan = perfPlanNow(perfTier(), perfFpsEstimate(), bullets.length, perfHzNow());
     for (const b of bullets) {
       if (b.owner.isPlayer) {
-        setGlow('#00f0ff', 8); ctx.fillStyle = '#00f0ff';
+        if (pfPlan.glow) setGlow('#00f0ff', 8); else ctx.shadowBlur = 0;
+        ctx.fillStyle = '#00f0ff';
       } else {
         const isSnip = b.owner.type === 'sniper';
         // —— v0.2.5 色弱友好：重映射敌方子弹冲突色；Boss 弹用其类型色 ——
         const bcol = cbColor(b.owner.isBoss ? (b.owner.color || '#ff2d55') : (isSnip ? '#ff1a2e' : '#ff3355'));
-        setGlow(bcol, b.owner.isBoss ? 10 : (isSnip ? 9 : 6));
+        if (pfPlan.glow) setGlow(bcol, b.owner.isBoss ? 10 : (isSnip ? 9 : 6)); else ctx.shadowBlur = 0;
         ctx.fillStyle = bcol;
       }
       ctx.fillRect(b.x, b.y, b.size, b.size);
@@ -7978,6 +7977,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_wzPick = wzPickNow(); const w_wzPick = document.getElementById('wzPickWrap'); if (w_wzPick) { const pv_wzPick = w_wzPick.dataset.fv || ''; const nv_wzPick = s_wzPick.pct + '|' + s_wzPick.txt; if (pv_wzPick !== nv_wzPick) { w_wzPick.dataset.fv = nv_wzPick; w_wzPick.classList.remove('g-good','g-warn','g-bad'); w_wzPick.classList.add(s_wzPick.cls); w_wzPick.classList.toggle('danger', !!s_wzPick.danger); const bar_wzPick = w_wzPick.querySelector('.wbar i'); if (bar_wzPick) bar_wzPick.style.width = s_wzPick.pct + '%'; const val_wzPick = w_wzPick.querySelector('.wval'); if (val_wzPick) val_wzPick.textContent = s_wzPick.txt; } }
     const s_wzHurt = wzHurtNow(); const w_wzHurt = document.getElementById('wzHurtWrap'); if (w_wzHurt) { const pv_wzHurt = w_wzHurt.dataset.fv || ''; const nv_wzHurt = s_wzHurt.pct + '|' + s_wzHurt.txt; if (pv_wzHurt !== nv_wzHurt) { w_wzHurt.dataset.fv = nv_wzHurt; w_wzHurt.classList.remove('g-good','g-warn','g-bad'); w_wzHurt.classList.add(s_wzHurt.cls); w_wzHurt.classList.toggle('danger', !!s_wzHurt.danger); const bar_wzHurt = w_wzHurt.querySelector('.wbar i'); if (bar_wzHurt) bar_wzHurt.style.width = s_wzHurt.pct + '%'; const val_wzHurt = w_wzHurt.querySelector('.wval'); if (val_wzHurt) val_wzHurt.textContent = s_wzHurt.txt; } }
     const s_wzSurv = wzSurvNow(); const w_wzSurv = document.getElementById('wzSurvWrap'); if (w_wzSurv) { const pv_wzSurv = w_wzSurv.dataset.fv || ''; const nv_wzSurv = s_wzSurv.pct + '|' + s_wzSurv.txt; if (pv_wzSurv !== nv_wzSurv) { w_wzSurv.dataset.fv = nv_wzSurv; w_wzSurv.classList.remove('g-good','g-warn','g-bad'); w_wzSurv.classList.add(s_wzSurv.cls); w_wzSurv.classList.toggle('danger', !!s_wzSurv.danger); const bar_wzSurv = w_wzSurv.querySelector('.wbar i'); if (bar_wzSurv) bar_wzSurv.style.width = s_wzSurv.pct + '%'; const val_wzSurv = w_wzSurv.querySelector('.wval'); if (val_wzSurv) val_wzSurv.textContent = s_wzSurv.txt; } }
+    perfHudUpdate();
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -22632,6 +22632,114 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // 补给预见（v1.1.166 第一百零二辑：wz 系列已在 v1.1.161 引入）
   // 受击预见（v1.1.167 第一百零二辑：wz 系列已在 v1.1.161 引入）
   // 生存预见（v1.1.168 第一百零二辑：wz 系列已在 v1.1.161 引入）
+  // —— 性能引擎：perf 系列（v1.1.169 第一百零三辑）——
+  // Hz 合法区间 30~240：越界钳到边界，未知/非法（NaN/0/负）一律 60 兜底。
+  function perfClampHz(x) {
+    const v = Number(x);
+    if (!isFinite(v) || v <= 0) return 60;
+    return Math.min(240, Math.max(30, Math.round(v)));
+  }
+  // 由 rAF 真实间隔数组估显示器刷新率：dominant 平均间隔 → Hz；样本 <3 或非法 → 60。
+  function perfDetectHz(deltas) {
+    if (!Array.isArray(deltas)) return 60;
+    let sum = 0, n = 0;
+    for (const d of deltas) {
+      const v = Number(d);
+      if (isFinite(v) && v > 0 && v < 200) { sum += v; n++; }
+    }
+    if (n < 3) return 60;
+    const avg = sum / n;
+    if (avg <= 0) return 60;
+    return perfClampHz(Math.round(1000 / avg));
+  }
+  // 自动档阈值按 Hz 缩放（原硬编码 42/55 按 60Hz 设计，120Hz 屏会振荡）：low=0.7*Hz, high=0.9*Hz。
+  function perfScaleAuto(fps, hz) {
+    const h = perfClampHz(hz);
+    return { low: Math.max(30, Math.round(h * 0.7)), high: Math.round(h * 0.9) };
+  }
+  // 渲染计划：tier(0高/1中/2低)、fps、子弹数、显示Hz → 辉光开关/预算/限帧/DPR/粒子/标签。
+  function perfPlanNow(tier, fps, bullets, hz) {
+    const t = (typeof tier === 'number' && isFinite(tier) && tier >= 0) ? Math.min(2, Math.floor(tier)) : 1;
+    const h = perfClampHz(hz);
+    const b = (isFinite(Number(bullets)) && Number(bullets) >= 0) ? Math.floor(Number(bullets)) : 0;
+    const fp = (isFinite(Number(fps)) && Number(fps) >= 0) ? Number(fps) : 60;
+    const label = t === 0 ? '高' : (t === 1 ? '中' : '低');
+    const dpr = t === 0 ? 2 : (t === 1 ? 1.5 : 1);
+    const particles = t === 0 ? 1 : (t === 1 ? 0.6 : 0.3);
+    let renderHz = h;
+    if (t === 2) renderHz = Math.min(h, 60);
+    else if (t === 1) renderHz = Math.min(h, 90);
+    let glow = true, glowBudget = 40;
+    if (b > 40) { glow = false; glowBudget = 0; }
+    else if (b > 20) { glowBudget = 20; }
+    if (t === 2) { glow = false; glowBudget = 0; }
+    if (glow && fp > 0 && fp < h * 0.7) { glow = false; glowBudget = 0; }
+    return { tier: t, hz: h, glow, glowBudget, renderHz, dpr, particles, label, overloaded: b > 40 };
+  }
+  // 徽章文案：如「120Hz · 高画质 · 辉光」。
+  function perfBadge(plan, hz) {
+    const h = perfClampHz(hz);
+    const lbl = (plan && typeof plan === 'object' && plan.label) ? plan.label : '—';
+    const glow = (plan && typeof plan === 'object') ? (plan.glow ? '辉光' : '节能') : '—';
+    return h + 'Hz · ' + lbl + '画质 · ' + glow;
+  }
+  // —— 运行时状态 ——
+  let perfDeltas = [];
+  let perfLastT = 0;
+  let perfLastFps = 60;
+  let perfBadgeLast = '';
+  let perfHudCache = { s: -1, b: -1, l: -1, r: '', w: '' };
+  // 每帧采样 rAF 真实间隔（供 perfDetectHz）。
+  function perfSample() {
+    const t = performance.now();
+    if (perfLastT > 0) {
+      const d = t - perfLastT;
+      if (d > 0 && d < 500) {
+        perfDeltas.push(d);
+        if (perfDeltas.length > 30) perfDeltas.shift();
+      }
+    }
+    perfLastT = t;
+  }
+  // 当前检测刷新率（未采样满 → 60 兜底）。
+  function perfHzNow() {
+    return perfDetectHz(perfDeltas);
+  }
+  // 最近一次实测 FPS（auto 档每 1s 更新；未更新 → 60）。
+  function perfFpsEstimate() {
+    return perfLastFps;
+  }
+  // updateHud 换检测写入：值未变则不写 DOM（120Hz 屏静态帧零写入）。
+  function perfHudWrite(score, best, level, enemiesTotal, enemiesSpawned, enemiesLeft) {
+    const s = hudNum(score), b = hudNum(best), l = hudLevelText(level);
+    const r = remainingText(enemiesTotal, enemiesSpawned, enemiesLeft);
+    if (s !== perfHudCache.s) { perfHudCache.s = s; elScore.textContent = s; }
+    if (b !== perfHudCache.b) { perfHudCache.b = b; elBest.textContent = b; }
+    if (l !== perfHudCache.l) { perfHudCache.l = l; elLevel.textContent = l; }
+    const lvPill = elLevel ? elLevel.parentElement : null;
+    const lvTag = lvPill ? lvPill.querySelector('.k') : null;
+    if (lvTag) {
+      const wt = waveTagText(endlessMode);
+      if (wt !== perfHudCache.w) { perfHudCache.w = wt; lvTag.textContent = wt; }
+    }
+    if (r !== perfHudCache.r) { perfHudCache.r = r; elRemaining.textContent = r; }
+  }
+  // 徽章刷新（// __EXTRA_HUD__ 每帧调用；值未变不写 DOM）。
+  function perfHudUpdate() {
+    const el = document.getElementById('perfHzWrap');
+    if (!el) return;
+    const hz = perfHzNow();
+    const plan = perfPlanNow(perfTier(), perfFpsEstimate(), (typeof bullets !== 'undefined' && Array.isArray(bullets)) ? bullets.length : 0, hz);
+    const txt = perfBadge(plan, hz);
+    if (txt !== perfBadgeLast) {
+      perfBadgeLast = txt;
+      const v = el.querySelector('.wval');
+      if (v) v.textContent = txt;
+      el.classList.remove('m-hide');
+      el.classList.toggle('g-good', !!plan.glow);
+      el.classList.toggle('g-bad', !plan.glow);
+    }
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -24493,7 +24601,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.168', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.169', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -26855,6 +26963,12 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       wzCalcStateNow: (cur, rate, target, label, unit, good, reached) => wzCalc(cur, rate, target, label, unit, good, reached), wzSurvStateNow: (lives, rate, label) => wzSurv(lives, rate, label), wzPickNow: () => wzPickNow(), wzPickDomNow: () => { const e = document.querySelector('#wzPickWrap .wval'); return e ? e.textContent : null; },
       wzCalcStateNow: (cur, rate, target, label, unit, good, reached) => wzCalc(cur, rate, target, label, unit, good, reached), wzSurvStateNow: (lives, rate, label) => wzSurv(lives, rate, label), wzHurtNow: () => wzHurtNow(), wzHurtDomNow: () => { const e = document.querySelector('#wzHurtWrap .wval'); return e ? e.textContent : null; },
       wzCalcStateNow: (cur, rate, target, label, unit, good, reached) => wzCalc(cur, rate, target, label, unit, good, reached), wzSurvStateNow: (lives, rate, label) => wzSurv(lives, rate, label), wzSurvNow: () => wzSurvNow(), wzSurvDomNow: () => { const e = document.querySelector('#wzSurvWrap .wval'); return e ? e.textContent : null; },
+      perfPlanNow: (tier, fps, bullets, hz) => perfPlanNow(tier, fps, bullets, hz),
+      perfScaleNow: (fps, hz) => perfScaleAuto(fps, hz),
+      perfDetectHzNow: (deltas) => perfDetectHz(deltas),
+      perfBadgeNow: (plan, hz) => perfBadge(plan, hz),
+      perfHzNow: () => perfHzNow(),
+      perfBadgeDomNow: () => { const e = document.querySelector('#perfHzWrap .wval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

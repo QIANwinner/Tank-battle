@@ -24677,6 +24677,23 @@ async function main() {
     t("U8876 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8871 生存预见 抛异常", false, String(e)); t("U8872 生存预见 抛异常", false, String(e)); t("U8873 生存预见 抛异常", false, String(e)); t("U8874 生存预见 抛异常", false, String(e)); t("U8875 生存预见 抛异常", false, String(e)); t("U8876 生存预见 抛异常", false, String(e)); }
 
+
+  // ===== U8877~U8882: 性能引擎(v1.1.169) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('perfHzWrap'),wval:!!document.querySelector('#perfHzWrap .wval'),plan:typeof T.perfPlanNow==='function',scale:typeof T.perfScaleNow==='function',hz:typeof T.perfDetectHzNow==='function',badge:typeof T.perfBadgeNow==='function'};return JSON.stringify(r);})()"));
+    t("U8877 性能引擎 徽章 DOM + 引擎函数可用", o.dom === true && o.wval === true && o.plan === true && o.scale === true && o.hz === true && o.badge === true, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfScaleNow(60,60),b:T.perfScaleNow(120,120),c:T.perfScaleNow(144,144),d:T.perfScaleNow(60,0)};return JSON.stringify(r);})()"));
+    t("U8878 自动档阈值按 Hz 缩放（60Hz→{42,54} / 120Hz→{84,108} / 144Hz→{101,130} / Hz=0→60 兜底）", o1.a.low === 42 && o1.a.high === 54 && o1.b.low === 84 && o1.b.high === 108 && o1.c.low === 101 && o1.c.high === 130 && o1.d.low === 42 && o1.d.high === 54, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfPlanNow(0,120,10,120),b:T.perfPlanNow(1,90,15,120),c:T.perfPlanNow(2,60,10,120)};return JSON.stringify(r);})()"));
+    t("U8879 渲染计划正常（高/中/低档：辉光开关·限帧·DPR·粒子·标签）", o2.a.glow === true && o2.a.renderHz === 120 && o2.a.dpr === 2 && o2.a.label === '高' && o2.b.glow === true && o2.b.renderHz === 90 && o2.b.dpr === 1.5 && o2.b.label === '中' && o2.c.glow === false && o2.c.renderHz === 60 && o2.c.dpr === 1 && o2.c.label === '低', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfPlanNow(0,120,20,120),b:T.perfPlanNow(0,120,41,120),c:T.perfPlanNow(1,120,30,120),d:T.perfPlanNow(0,60,10,120)};return JSON.stringify(r);})()"));
+    t("U8880 辉光预算边界（20弹满辉光 / 41弹关辉光·过载 / 30弹预算20 / 低帧强制关辉光）", o3.a.glow === true && o3.a.glowBudget === 40 && o3.b.glow === false && o3.b.glowBudget === 0 && o3.b.overloaded === true && o3.c.glowBudget === 20 && o3.d.glow === false && o3.d.overloaded === false, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfPlanNow(null,120,10,120),b:T.perfPlanNow(-1,120,10,120),c:T.perfPlanNow(NaN,120,10,120),d:T.perfPlanNow(0,120,-5,120),e:T.perfPlanNow(0,120,10,0),f:T.perfPlanNow(0,120,10,1000)};return JSON.stringify(r);})()"));
+    t("U8881 非法 tier/null/NaN/负弹/Hz=0/Hz超上限 → 中档兜底 + 上限 240Hz", o4.a.label === '中' && o4.a.dpr === 1.5 && o4.b.label === '中' && o4.c.label === '中' && o4.d.glow === true && o4.d.glowBudget === 40 && o4.e.hz === 60 && o4.e.renderHz === 60 && o4.f.hz === 240 && o4.f.glow === false, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfDetectHzNow([8.33,8.33,8.33]),b:T.perfDetectHzNow([16.7,16.7,16.7]),c:T.perfDetectHzNow([3]),d:T.perfDetectHzNow(null),e:T.perfBadgeNow(T.perfPlanNow(0,120,10,120),120),dom:(function(){const e=document.querySelector('#perfHzWrap .wval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8882 Hz 检测 + 徽章文案 + DOM 一致性", o5.a === 120 && o5.b === 60 && o5.c === 60 && o5.d === 60 && o5.e.indexOf('120Hz') === 0 && o5.e.indexOf('高画质') >= 0 && o5.e.indexOf('辉光') >= 0 && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8877 性能引擎 抛异常", false, String(e)); t("U8878 性能引擎 抛异常", false, String(e)); t("U8879 性能引擎 抛异常", false, String(e)); t("U8880 性能引擎 抛异常", false, String(e)); t("U8881 性能引擎 抛异常", false, String(e)); t("U8882 性能引擎 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
