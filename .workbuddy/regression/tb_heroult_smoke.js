@@ -24497,6 +24497,29 @@ async function main() {
     t("U8822 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8817 波次警戒 抛异常", false, String(e)); t("U8818 波次警戒 抛异常", false, String(e)); t("U8819 波次警戒 抛异常", false, String(e)); t("U8820 波次警戒 抛异常", false, String(e)); t("U8821 波次警戒 抛异常", false, String(e)); t("U8822 波次警戒 抛异常", false, String(e)); }
 
+
+  // ===== U8823~U8828: 时长警戒(v1.1.160) =====
+  try {
+    const L = [180,60]; const HH = ["稳定发挥","留意：时长渐长","开局阶段"]; const G = true;
+    const __expLv = (v, l1, l2, g) => g ? (v >= l1 ? 0 : (v >= l2 ? 1 : 2)) : (v < l1 ? 0 : (v < l2 ? 1 : 2));
+    const __expCls = (lv) => lv === 2 ? 'g-bad' : (lv === 1 ? 'g-warn' : 'g-good');
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('ocTimeWrap'),bar:!!document.querySelector('#ocTimeWrap .obar i'),val:!!document.querySelector('#ocTimeWrap .oval'),s:T.ocTimeStateNow(180,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段'])};return JSON.stringify(r);})()"));
+    t("U8823 时长警戒 警戒芯片 DOM 已加入（三态条 + 文案 + 函数可用）", o.dom === true && o.bar === true && o.val === true && o.s.ok === true && o.s.lv === 0 && o.s.txt.indexOf('时长') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocTimeStateNow(0,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段'])};return JSON.stringify(r);})()"));
+    t("U8824 初值 时长警戒（val=0 → 按 good 方向取健康/告警档，文案含标签）", o1.s.ok === true && o1.s.lv === (G ? 2 : 0) && o1.s.txt.indexOf('时长') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocTimeStateNow(180,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']),b:T.ocTimeStateNow(60,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段'])};return JSON.stringify(r);})()"));
+    t("U8825 正常值 时长警戒（健康值→lv0 稳定 / 中档值→lv1 留意）", o2.a.ok === true && o2.a.lv === 0 && o2.b.ok === true && o2.b.lv === 1 && o2.a.pct === 15 && o2.b.pct === 55, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r=[T.ocTimeStateNow(0,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']).lv,T.ocTimeStateNow(59.999,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']).lv,T.ocTimeStateNow(60,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']).lv,T.ocTimeStateNow(120,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']).lv,T.ocTimeStateNow(179.999,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']).lv,T.ocTimeStateNow(180,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']).lv,T.ocTimeStateNow(230,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']).lv];return JSON.stringify(r);})()"));
+    const expVals = [0,59.999,60,120,179.999,180,230];
+    let bOk = true;
+    for (let i = 0; i < expVals.length; i++) { if (o3[i] !== __expLv(expVals[i], L[0], L[1], G)) bOk = false; }
+    t("U8826 边界 时长警戒（阈值上下/跨越逐个核对 lv）", bOk && o3.length === expVals.length, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocTimeStateNow(null,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']),b:T.ocTimeStateNow(NaN,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']),c:T.ocTimeStateNow(-5,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']),d:T.ocTimeStateNow([1],180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']),e:T.ocTimeStateNow(5,null,2,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']),f:T.ocTimeStateNow(5,2,3,'时长',true,[1,2]),g:T.ocTimeStateNow(5,60,180,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']),h:T.ocTimeStateNow(5,NaN,8,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']),i:T.ocTimeStateNow(5,-3,8,'时长',true,['稳定发挥','留意：时长渐长','开局阶段'])};return JSON.stringify(r);})()"));
+    t("U8827 非法 null/NaN/负值/数组/阈值无效/坏hints/方向错/NaN/负阈值 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocTimeNow(),dom:(function(){const e=document.querySelector('#ocTimeWrap .oval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8828 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8823 时长警戒 抛异常", false, String(e)); t("U8824 时长警戒 抛异常", false, String(e)); t("U8825 时长警戒 抛异常", false, String(e)); t("U8826 时长警戒 抛异常", false, String(e)); t("U8827 时长警戒 抛异常", false, String(e)); t("U8828 时长警戒 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

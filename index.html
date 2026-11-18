@@ -1391,6 +1391,7 @@
     <div class="pill m-hide" id="ocComboWrap"><span class="k">🔥</span><span class="tgl">连击</span><span class="obar"><i></i></span><span class="oval">—</span></div>
     <div class="pill m-hide" id="ocPickWrap"><span class="k">🎁</span><span class="tgl">补给</span><span class="obar"><i></i></span><span class="oval">—</span></div>
     <div class="pill m-hide" id="ocWaveWrap"><span class="k">🚩</span><span class="tgl">波次</span><span class="obar"><i></i></span><span class="oval">—</span></div>
+    <div class="pill m-hide" id="ocTimeWrap"><span class="k">⏱️</span><span class="tgl">时长</span><span class="obar"><i></i></span><span class="oval">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1767,7 +1768,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.159</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.160</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7960,6 +7961,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_ocCombo = ocComboNow(); const w_ocCombo = document.getElementById('ocComboWrap'); if (w_ocCombo) { const pv_ocCombo = w_ocCombo.dataset.fv || ''; const nv_ocCombo = s_ocCombo.lv + '|' + s_ocCombo.pct + '|' + s_ocCombo.txt; if (pv_ocCombo !== nv_ocCombo) { w_ocCombo.dataset.fv = nv_ocCombo; w_ocCombo.classList.remove('g-good','g-warn','g-bad'); w_ocCombo.classList.add(s_ocCombo.cls); w_ocCombo.classList.toggle('danger', !!s_ocCombo.danger); const bar_ocCombo = w_ocCombo.querySelector('.obar i'); if (bar_ocCombo) bar_ocCombo.style.width = s_ocCombo.pct + '%'; const val_ocCombo = w_ocCombo.querySelector('.oval'); if (val_ocCombo) val_ocCombo.textContent = s_ocCombo.txt; } }
     const s_ocPick = ocPickNow(); const w_ocPick = document.getElementById('ocPickWrap'); if (w_ocPick) { const pv_ocPick = w_ocPick.dataset.fv || ''; const nv_ocPick = s_ocPick.lv + '|' + s_ocPick.pct + '|' + s_ocPick.txt; if (pv_ocPick !== nv_ocPick) { w_ocPick.dataset.fv = nv_ocPick; w_ocPick.classList.remove('g-good','g-warn','g-bad'); w_ocPick.classList.add(s_ocPick.cls); w_ocPick.classList.toggle('danger', !!s_ocPick.danger); const bar_ocPick = w_ocPick.querySelector('.obar i'); if (bar_ocPick) bar_ocPick.style.width = s_ocPick.pct + '%'; const val_ocPick = w_ocPick.querySelector('.oval'); if (val_ocPick) val_ocPick.textContent = s_ocPick.txt; } }
     const s_ocWave = ocWaveNow(); const w_ocWave = document.getElementById('ocWaveWrap'); if (w_ocWave) { const pv_ocWave = w_ocWave.dataset.fv || ''; const nv_ocWave = s_ocWave.lv + '|' + s_ocWave.pct + '|' + s_ocWave.txt; if (pv_ocWave !== nv_ocWave) { w_ocWave.dataset.fv = nv_ocWave; w_ocWave.classList.remove('g-good','g-warn','g-bad'); w_ocWave.classList.add(s_ocWave.cls); w_ocWave.classList.toggle('danger', !!s_ocWave.danger); const bar_ocWave = w_ocWave.querySelector('.obar i'); if (bar_ocWave) bar_ocWave.style.width = s_ocWave.pct + '%'; const val_ocWave = w_ocWave.querySelector('.oval'); if (val_ocWave) val_ocWave.textContent = s_ocWave.txt; } }
+    const s_ocTime = ocTimeNow(); const w_ocTime = document.getElementById('ocTimeWrap'); if (w_ocTime) { const pv_ocTime = w_ocTime.dataset.fv || ''; const nv_ocTime = s_ocTime.lv + '|' + s_ocTime.pct + '|' + s_ocTime.txt; if (pv_ocTime !== nv_ocTime) { w_ocTime.dataset.fv = nv_ocTime; w_ocTime.classList.remove('g-good','g-warn','g-bad'); w_ocTime.classList.add(s_ocTime.cls); w_ocTime.classList.toggle('danger', !!s_ocTime.danger); const bar_ocTime = w_ocTime.querySelector('.obar i'); if (bar_ocTime) bar_ocTime.style.width = s_ocTime.pct + '%'; const val_ocTime = w_ocTime.querySelector('.oval'); if (val_ocTime) val_ocTime.textContent = s_ocTime.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -22504,6 +22506,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // 连击警戒（v1.1.157 第一百零一辑：oc 系列已在 v1.1.153 引入）
   // 补给警戒（v1.1.158 第一百零一辑：oc 系列已在 v1.1.153 引入）
   // 波次警戒（v1.1.159 第一百零一辑：oc 系列已在 v1.1.153 引入）
+  // 时长警戒（v1.1.160 第一百零一辑：oc 系列已在 v1.1.153 引入）
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -24365,7 +24368,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.159', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.160', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -26718,6 +26721,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       ocComboStateNow: (v, l1, l2, lb, g, hh) => ocLv(v, l1, l2, lb, g, hh), ocComboNow: () => ocComboNow(), ocComboDomNow: () => { const e = document.querySelector('#ocComboWrap .oval'); return e ? e.textContent : null; },
       ocPickStateNow: (v, l1, l2, lb, g, hh) => ocLv(v, l1, l2, lb, g, hh), ocPickNow: () => ocPickNow(), ocPickDomNow: () => { const e = document.querySelector('#ocPickWrap .oval'); return e ? e.textContent : null; },
       ocWaveStateNow: (v, l1, l2, lb, g, hh) => ocLv(v, l1, l2, lb, g, hh), ocWaveNow: () => ocWaveNow(), ocWaveDomNow: () => { const e = document.querySelector('#ocWaveWrap .oval'); return e ? e.textContent : null; },
+      ocTimeStateNow: (v, l1, l2, lb, g, hh) => ocLv(v, l1, l2, lb, g, hh), ocTimeNow: () => ocTimeNow(), ocTimeDomNow: () => { const e = document.querySelector('#ocTimeWrap .oval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
