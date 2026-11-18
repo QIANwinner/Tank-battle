@@ -1401,6 +1401,12 @@
     <div class="pill m-hide" id="wzHurtWrap"><span class="k">🛡️</span><span class="tgl">受击</span><span class="wbar"><i></i></span><span class="wval">—</span></div>
     <div class="pill m-hide" id="wzSurvWrap"><span class="k">❤️</span><span class="tgl">生存</span><span class="wbar"><i></i></span><span class="wval">—</span></div>
     <div class="pill m-hide" id="perfHzWrap"><span class="k">⚡</span><span class="tgl">刷新</span><span class="wval">—</span></div>
+    <div class="perfMon pm-hidden" id="perfMonWrap">
+      <div class="perfMonHead"><span class="perfMonDot">—</span><span class="perfMonTitle">⚡ 性能中心</span><button class="perfMonClose" id="perfMonCloseBtn" aria-label="关闭">✕</button></div>
+      <div class="perfMonBody"></div>
+      <div class="perfMonHint"></div>
+      <button class="perfMonOptBtn" id="perfMonOptBtn">⚡ 一键优化</button>
+    </div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1523,6 +1529,14 @@
     </div>
     <div class="muteHint" id="muteHint">🔊 按 M 键一键静音</div>
     <div class="settings" id="settings">
+      <div class="setRow">
+        <span class="setLabel">⚡ 性能中心<span class="hint">实时帧监控</span></span>
+        <div class="seg" id="perfMonSeg">
+          <button data-perfmon="0">关</button>
+          <button data-perfmon="1">开</button>
+        </div>
+      </div>
+
       <div class="setRow"><span class="setLabel">🏆 成就</span><span id="nextAchTip"></span></div>
       <div class="setRow"><span class="setLabel">⌨️ 开火键</span><button id="fireKeyBtn">空格 / J（默认）</button></div>
       <div class="setRow"><span>📖 新手引导</span><button class="setBtn" id="btnTourReplay">重新查看</button></div>
@@ -1777,7 +1791,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.169</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.170</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -22740,6 +22754,108 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       el.classList.toggle('g-bad', !plan.glow);
     }
   }
+  // —— 性能中心：perfMon 系列（v1.1.170 第一百零四辑）——
+  const LS_PERFMON = 'tank-battle-perfmon';
+  let perfMonOn = false;
+  let perfMonTimer = null;
+  // 帧耗时分级：<=16.7ms 流畅 / <=25ms 较卡 / >25ms 卡顿；未知/非法（NaN/0/负/∞）→ 流畅（不误报）。
+  function perfMonLevel(frameMs) {
+    const v = Number(frameMs);
+    if (!isFinite(v) || v <= 0) return 'ok';
+    if (v <= 16.7) return 'ok';
+    if (v <= 25) return 'warn';
+    return 'bad';
+  }
+  // 状态告警：由帧耗时分级得状态与建议文案。
+  function perfMonAlert(stats) {
+    const lv = perfMonLevel(stats && stats.frameMs);
+    if (lv === 'warn') return { cls: 'g-warn', txt: '较卡', hint: '建议调低画质' };
+    if (lv === 'bad') return { cls: 'g-bad', txt: '卡顿', hint: '点击一键优化' };
+    return { cls: 'g-good', txt: '流畅', hint: '' };
+  }
+  // 格式化监控行：[标签, 值] 数组（7 行）。
+  function perfMonFmt(stats) {
+    const s = stats || {};
+    const lv = perfMonAlert(s);
+    const fps = (isFinite(Number(s.fps)) && Number(s.fps) > 0) ? Math.round(Number(s.fps)) + ' fps' : '—';
+    const ms = (isFinite(Number(s.frameMs)) && Number(s.frameMs) > 0) ? Number(s.frameMs).toFixed(1) + ' ms' : '—';
+    const hz = (isFinite(Number(s.hz)) && Number(s.hz) > 0) ? Math.round(Number(s.hz)) + ' Hz' : '—';
+    const tier = (s.tier === 0 || s.tier === 1 || s.tier === 2) ? ['高', '中', '低'][s.tier] + '档' : '—';
+    const glow = (s.glow === true) ? '开' : (s.glow === false ? '关' : '—');
+    return [
+      ['帧率', fps], ['帧耗时', ms], ['刷新', hz], ['渲染', tier],
+      ['辉光', glow], ['画质', (typeof s.quality === 'string' && s.quality) ? s.quality : '—'], ['状态', lv.txt]
+    ];
+  }
+  // 采集实时性能状态（复用 v1.1.169 引擎：perfHzNow/perfFpsEstimate/perfTier/perfPlanNow）。
+  function perfMonRead() {
+    const hz = perfHzNow();
+    const fps = perfFpsEstimate();
+    const tier = perfTier();
+    const bCount = (typeof bullets !== 'undefined' && Array.isArray(bullets)) ? bullets.length : 0;
+    const plan = perfPlanNow(tier, fps, bCount, hz);
+    return {
+      fps: fps, frameMs: (isFinite(fps) && fps > 0) ? 1000 / fps : 0,
+      hz: hz, tier: plan.tier, glow: plan.glow, glowBudget: plan.glowBudget,
+      dpr: plan.dpr, particles: plan.particles, bullets: bCount,
+      quality: (typeof perfQuality !== 'undefined') ? perfQuality : 'auto'
+    };
+  }
+  // 渲染监控面板内容（500ms 一次，7 行量小，无需换检测）。
+  function perfMonApply() {
+    const el = document.getElementById('perfMonWrap');
+    if (!el) return;
+    const stats = perfMonRead();
+    const alert = perfMonAlert(stats);
+    el.classList.remove('g-good', 'g-warn', 'g-bad');
+    el.classList.add(alert.cls);
+    const body = el.querySelector('.perfMonBody');
+    if (body) {
+      let html = '';
+      for (const row of perfMonFmt(stats)) html += '<div class="pmRow"><span>' + row[0] + '</span><em>' + row[1] + '</em></div>';
+      body.innerHTML = html;
+    }
+    const dot = el.querySelector('.perfMonDot');
+    if (dot) dot.textContent = alert.txt;
+    const hint = el.querySelector('.perfMonHint');
+    if (hint) hint.textContent = alert.hint;
+    const btn = el.querySelector('.perfMonOptBtn');
+    if (btn) btn.style.display = (alert.cls === 'g-bad') ? '' : 'none';
+  }
+  // 开关面板（持久化 + 同步按钮态 + 启停 500ms 刷新）。
+  function perfMonToggle(on) {
+    perfMonOn = (typeof on === 'boolean') ? on : !perfMonOn;
+    try { saveStore.setItem(LS_PERFMON, perfMonOn ? '1' : '0'); } catch (e) { /* 忽略 */ }
+    const seg = document.getElementById('perfMonSeg');
+    if (seg) for (const b of seg.querySelectorAll('button')) b.classList.toggle('active', (b.dataset.perfmon === '1') === perfMonOn);
+    const el = document.getElementById('perfMonWrap');
+    if (el) el.classList.toggle('pm-hidden', !perfMonOn);
+    if (perfMonOn) {
+      if (!perfMonTimer) perfMonTimer = setInterval(perfMonApply, 500);
+      perfMonApply();
+    } else if (perfMonTimer) {
+      clearInterval(perfMonTimer); perfMonTimer = null;
+    }
+    return perfMonOn;
+  }
+  // 一键优化：低画质 + 关动效（setPerf/setMotion 已持久化），立即更流畅。
+  function perfMonOneClick() {
+    if (typeof setPerf === 'function') setPerf('low');
+    if (typeof setMotion === 'function') setMotion('off');
+    showToast('⚡ 已一键优化：低画质 + 关动效');
+    return { quality: (typeof perfQuality !== 'undefined') ? perfQuality : 'auto', motion: (typeof reduceMotion !== 'undefined') ? reduceMotion : 'auto' };
+  }
+  // 初始化：读持久化开关 + 同步按钮态 + 面板可见性 + 启停刷新。
+  function perfMonInit() {
+    let on = false;
+    try { on = saveStore.getItem(LS_PERFMON) === '1'; } catch (e) { /* 忽略 */ }
+    perfMonOn = on;
+    const seg = document.getElementById('perfMonSeg');
+    if (seg) for (const b of seg.querySelectorAll('button')) b.classList.toggle('active', (b.dataset.perfmon === '1') === perfMonOn);
+    const el = document.getElementById('perfMonWrap');
+    if (el) el.classList.toggle('pm-hidden', !perfMonOn);
+    if (perfMonOn && !perfMonTimer) perfMonTimer = setInterval(perfMonApply, 500);
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -24601,7 +24717,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.169', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.170', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -24786,6 +24902,14 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   randMapSeg.addEventListener('click', (e) => {
     const b = e.target.closest('button'); if (b) setRandomMaps(b.dataset.rand);
   });
+  const perfMonSegEl = $('perfMonSeg');
+  if (perfMonSegEl) perfMonSegEl.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) perfMonToggle(b.dataset.perfmon === '1'); });
+  const perfMonOptBtnEl = $('perfMonOptBtn');
+  if (perfMonOptBtnEl) perfMonOptBtnEl.addEventListener('click', () => { perfMonOneClick(); perfMonApply(); });
+  const perfMonCloseBtnEl = $('perfMonCloseBtn');
+  if (perfMonCloseBtnEl) perfMonCloseBtnEl.addEventListener('click', () => perfMonToggle(false));
+  perfMonInit();
+
   diffSeg.addEventListener('click', (e) => {
     const b = e.target.closest('button'); if (b) setDifficulty(b.dataset.diff);
   });
@@ -26969,6 +27093,14 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       perfBadgeNow: (plan, hz) => perfBadge(plan, hz),
       perfHzNow: () => perfHzNow(),
       perfBadgeDomNow: () => { const e = document.querySelector('#perfHzWrap .wval'); return e ? e.textContent : null; },
+      perfMonReadNow: () => perfMonRead(),
+      perfMonFmtNow: (stats) => perfMonFmt(stats),
+      perfMonAlertNow: (stats) => perfMonAlert(stats),
+      perfMonLevelNow: (frameMs) => perfMonLevel(frameMs),
+      perfMonToggleNow: (on) => perfMonToggle(on),
+      perfMonOneClickNow: () => perfMonOneClick(),
+      perfMonSegNow: () => { const el = document.getElementById('perfMonSeg'); if (!el) return null; const a = el.querySelector('button.active'); return a ? a.dataset.perfmon : null; },
+      perfMonDomNow: () => { const e = document.getElementById('perfMonWrap'); return e ? { vis: !e.classList.contains('pm-hidden'), rows: (e.querySelector('.perfMonBody') || {}).childElementCount || 0 } : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

@@ -24694,6 +24694,23 @@ async function main() {
     t("U8882 Hz 检测 + 徽章文案 + DOM 一致性", o5.a === 120 && o5.b === 60 && o5.c === 60 && o5.d === 60 && o5.e.indexOf('120Hz') === 0 && o5.e.indexOf('高画质') >= 0 && o5.e.indexOf('辉光') >= 0 && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8877 性能引擎 抛异常", false, String(e)); t("U8878 性能引擎 抛异常", false, String(e)); t("U8879 性能引擎 抛异常", false, String(e)); t("U8880 性能引擎 抛异常", false, String(e)); t("U8881 性能引擎 抛异常", false, String(e)); t("U8882 性能引擎 抛异常", false, String(e)); }
 
+
+  // ===== U8883~U8888: 性能中心(v1.1.170) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('perfMonWrap'),body:!!document.querySelector('#perfMonWrap .perfMonBody'),opt:!!document.getElementById('perfMonOptBtn'),seg:!!document.getElementById('perfMonSeg'),read:typeof T.perfMonReadNow==='function',fmt:typeof T.perfMonFmtNow==='function',alert:typeof T.perfMonAlertNow==='function',level:typeof T.perfMonLevelNow==='function',toggle:typeof T.perfMonToggleNow==='function',one:typeof T.perfMonOneClickNow==='function'};return JSON.stringify(r);})()"));
+    t("U8883 性能中心 面板 DOM + 引擎函数可用", o.dom === true && o.body === true && o.opt === true && o.seg === true && o.read === true && o.fmt === true && o.alert === true && o.level === true && o.toggle === true && o.one === true, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfMonLevelNow(8),b:T.perfMonLevelNow(20),c:T.perfMonLevelNow(40),d:T.perfMonLevelNow(16.7),e:T.perfMonLevelNow(25),f:T.perfMonLevelNow(25.1)};return JSON.stringify(r);})()"));
+    t("U8884 帧耗时分级正常（8ms流畅 / 20ms较卡 / 40ms卡顿 / 16.7界畅 / 25界卡 / 25.1卡）", o1.a === 'ok' && o1.b === 'warn' && o1.c === 'bad' && o1.d === 'ok' && o1.e === 'warn' && o1.f === 'bad', JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfMonAlertNow({frameMs:8}),b:T.perfMonAlertNow({frameMs:20}),c:T.perfMonAlertNow({frameMs:40})};return JSON.stringify(r);})()"));
+    t("U8885 状态告警正常（流畅/较卡/卡顿 → 文案+建议）", o2.a.cls === 'g-good' && o2.a.txt === '流畅' && o2.a.hint === '' && o2.b.cls === 'g-warn' && o2.b.txt === '较卡' && o2.b.hint === '建议调低画质' && o2.c.cls === 'g-bad' && o2.c.txt === '卡顿' && o2.c.hint === '点击一键优化', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfMonFmtNow({fps:120,frameMs:8.3,hz:120,tier:0,glow:true,quality:'auto'}),b:T.perfMonFmtNow({fps:60,frameMs:16.7,hz:60,tier:2,glow:false,quality:'low'}),c:T.perfMonFmtNow({})};return JSON.stringify(r);})()"));
+    t("U8886 监控行格式化正常（7 行：帧率/帧耗时/刷新/渲染档/辉光/画质/状态）", o3.a[0][0] === '帧率' && o3.a[0][1] === '120 fps' && o3.a[1][1] === '8.3 ms' && o3.a[2][1] === '120 Hz' && o3.a[3][1] === '高档' && o3.a[4][1] === '开' && o3.a[5][1] === 'auto' && o3.a[6][1] === '流畅' && o3.b[0][1] === '60 fps' && o3.b[3][1] === '低档' && o3.b[4][1] === '关' && o3.b[5][1] === 'low' && o3.b[6][1] === '流畅' && o3.c[0][1] === '—' && o3.c[3][1] === '—' && o3.c[4][1] === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfMonLevelNow(null),b:T.perfMonLevelNow(-5),c:T.perfMonLevelNow(NaN),d:T.perfMonLevelNow(Infinity),e:T.perfMonAlertNow(null),f:T.perfMonFmtNow({fps:-1,frameMs:NaN,tier:9,glow:null})};return JSON.stringify(r);})()"));
+    t("U8887 非法输入（null/负/NaN/Infinity → 不误报流畅；空状态行全占位）", o4.a === 'ok' && o4.b === 'ok' && o4.c === 'ok' && o4.d === 'ok' && o4.e.cls === 'g-good' && o4.e.txt === '流畅' && o4.f[0][1] === '—' && o4.f[1][1] === '—' && o4.f[3][1] === '—' && o4.f[4][1] === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={};const el=document.getElementById('perfMonWrap');r.toggleOn=T.perfMonToggleNow(true);r.visOn=el?!el.classList.contains('pm-hidden'):false;r.rows=el?(el.querySelector('.perfMonBody')||{}).childElementCount||0:0;r.segOn=T.perfMonSegNow();r.toggleOff=T.perfMonToggleNow(false);r.visOff=el?!el.classList.contains('pm-hidden'):true;r.one=typeof T.perfMonOneClickNow==='function';return JSON.stringify(r);})()"));
+    t("U8888 面板开关 + DOM 一致性（开→可见 7 行 seg=1 / 关→隐藏）", o5.toggleOn === true && o5.visOn === true && o5.rows >= 5 && o5.segOn === '1' && o5.toggleOff === false && o5.visOff === false && o5.one === true, JSON.stringify(o5));
+  } catch (e) { t("U8883 性能中心 抛异常", false, String(e)); t("U8884 性能中心 抛异常", false, String(e)); t("U8885 性能中心 抛异常", false, String(e)); t("U8886 性能中心 抛异常", false, String(e)); t("U8887 性能中心 抛异常", false, String(e)); t("U8888 性能中心 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
