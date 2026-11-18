@@ -24451,6 +24451,29 @@ async function main() {
     t("U8810 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8805 连击警戒 抛异常", false, String(e)); t("U8806 连击警戒 抛异常", false, String(e)); t("U8807 连击警戒 抛异常", false, String(e)); t("U8808 连击警戒 抛异常", false, String(e)); t("U8809 连击警戒 抛异常", false, String(e)); t("U8810 连击警戒 抛异常", false, String(e)); }
 
+
+  // ===== U8811~U8816: 补给警戒(v1.1.158) =====
+  try {
+    const L = [5,2]; const HH = ["补给充足","留意：补给渐多","找补给"]; const G = true;
+    const __expLv = (v, l1, l2, g) => g ? (v >= l1 ? 0 : (v >= l2 ? 1 : 2)) : (v < l1 ? 0 : (v < l2 ? 1 : 2));
+    const __expCls = (lv) => lv === 2 ? 'g-bad' : (lv === 1 ? 'g-warn' : 'g-good');
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('ocPickWrap'),bar:!!document.querySelector('#ocPickWrap .obar i'),val:!!document.querySelector('#ocPickWrap .oval'),s:T.ocPickStateNow(5,5,2,'补给',true,['补给充足','留意：补给渐多','找补给'])};return JSON.stringify(r);})()"));
+    t("U8811 补给警戒 警戒芯片 DOM 已加入（三态条 + 文案 + 函数可用）", o.dom === true && o.bar === true && o.val === true && o.s.ok === true && o.s.lv === 0 && o.s.txt.indexOf('补给') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocPickStateNow(0,5,2,'补给',true,['补给充足','留意：补给渐多','找补给'])};return JSON.stringify(r);})()"));
+    t("U8812 初值 补给警戒（val=0 → 按 good 方向取健康/告警档，文案含标签）", o1.s.ok === true && o1.s.lv === (G ? 2 : 0) && o1.s.txt.indexOf('补给') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocPickStateNow(5,5,2,'补给',true,['补给充足','留意：补给渐多','找补给']),b:T.ocPickStateNow(2,5,2,'补给',true,['补给充足','留意：补给渐多','找补给'])};return JSON.stringify(r);})()"));
+    t("U8813 正常值 补给警戒（健康值→lv0 稳定 / 中档值→lv1 留意）", o2.a.ok === true && o2.a.lv === 0 && o2.b.ok === true && o2.b.lv === 1 && o2.a.pct === 15 && o2.b.pct === 55, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r=[T.ocPickStateNow(0,5,2,'补给',true,['补给充足','留意：补给渐多','找补给']).lv,T.ocPickStateNow(1.999,5,2,'补给',true,['补给充足','留意：补给渐多','找补给']).lv,T.ocPickStateNow(2,5,2,'补给',true,['补给充足','留意：补给渐多','找补给']).lv,T.ocPickStateNow(3.5,5,2,'补给',true,['补给充足','留意：补给渐多','找补给']).lv,T.ocPickStateNow(4.999,5,2,'补给',true,['补给充足','留意：补给渐多','找补给']).lv,T.ocPickStateNow(5,5,2,'补给',true,['补给充足','留意：补给渐多','找补给']).lv,T.ocPickStateNow(55,5,2,'补给',true,['补给充足','留意：补给渐多','找补给']).lv];return JSON.stringify(r);})()"));
+    const expVals = [0,1.999,2,3.5,4.999,5,55];
+    let bOk = true;
+    for (let i = 0; i < expVals.length; i++) { if (o3[i] !== __expLv(expVals[i], L[0], L[1], G)) bOk = false; }
+    t("U8814 边界 补给警戒（阈值上下/跨越逐个核对 lv）", bOk && o3.length === expVals.length, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocPickStateNow(null,5,2,'补给',true,['补给充足','留意：补给渐多','找补给']),b:T.ocPickStateNow(NaN,5,2,'补给',true,['补给充足','留意：补给渐多','找补给']),c:T.ocPickStateNow(-5,5,2,'补给',true,['补给充足','留意：补给渐多','找补给']),d:T.ocPickStateNow([1],5,2,'补给',true,['补给充足','留意：补给渐多','找补给']),e:T.ocPickStateNow(5,null,2,'补给',true,['补给充足','留意：补给渐多','找补给']),f:T.ocPickStateNow(5,2,3,'补给',true,[1,2]),g:T.ocPickStateNow(5,2,5,'补给',true,['补给充足','留意：补给渐多','找补给']),h:T.ocPickStateNow(5,NaN,8,'补给',true,['补给充足','留意：补给渐多','找补给']),i:T.ocPickStateNow(5,-3,8,'补给',true,['补给充足','留意：补给渐多','找补给'])};return JSON.stringify(r);})()"));
+    t("U8815 非法 null/NaN/负值/数组/阈值无效/坏hints/方向错/NaN/负阈值 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocPickNow(),dom:(function(){const e=document.querySelector('#ocPickWrap .oval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8816 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8811 补给警戒 抛异常", false, String(e)); t("U8812 补给警戒 抛异常", false, String(e)); t("U8813 补给警戒 抛异常", false, String(e)); t("U8814 补给警戒 抛异常", false, String(e)); t("U8815 补给警戒 抛异常", false, String(e)); t("U8816 补给警戒 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
