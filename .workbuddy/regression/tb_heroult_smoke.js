@@ -24336,6 +24336,29 @@ async function main() {
     t("U8780 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8775 分数里程碑 抛异常", false, String(e)); t("U8776 分数里程碑 抛异常", false, String(e)); t("U8777 分数里程碑 抛异常", false, String(e)); t("U8778 分数里程碑 抛异常", false, String(e)); t("U8779 分数里程碑 抛异常", false, String(e)); t("U8780 分数里程碑 抛异常", false, String(e)); }
 
+
+  // ===== U8781~U8786: 敌群警戒(v1.1.153) =====
+  try {
+    const L = [6,10]; const HH = ["场上平静","敌人增多","清场：敌人过多"]; const G = false;
+    const __expLv = (v, l1, l2, g) => g ? (v >= l1 ? 0 : (v >= l2 ? 1 : 2)) : (v < l1 ? 0 : (v < l2 ? 1 : 2));
+    const __expCls = (lv) => lv === 2 ? 'g-bad' : (lv === 1 ? 'g-warn' : 'g-good');
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('ocEnemyWrap'),bar:!!document.querySelector('#ocEnemyWrap .obar i'),val:!!document.querySelector('#ocEnemyWrap .oval'),s:T.ocEnemyStateNow(0,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多'])};return JSON.stringify(r);})()"));
+    t("U8781 敌群警戒 警戒芯片 DOM 已加入（三态条 + 文案 + 函数可用）", o.dom === true && o.bar === true && o.val === true && o.s.ok === true && o.s.lv === 0 && o.s.txt.indexOf('敌群') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocEnemyStateNow(0,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多'])};return JSON.stringify(r);})()"));
+    t("U8782 初值 敌群警戒（val=0 → 按 good 方向取健康/告警档，文案含标签）", o1.s.ok === true && o1.s.lv === (G ? 2 : 0) && o1.s.txt.indexOf('敌群') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocEnemyStateNow(0,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多']),b:T.ocEnemyStateNow(6,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多'])};return JSON.stringify(r);})()"));
+    t("U8783 正常值 敌群警戒（健康值→lv0 稳定 / 中档值→lv1 留意）", o2.a.ok === true && o2.a.lv === 0 && o2.b.ok === true && o2.b.lv === 1 && o2.a.pct === 15 && o2.b.pct === 55, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r=[T.ocEnemyStateNow(0,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多']).lv,T.ocEnemyStateNow(9.999,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多']).lv,T.ocEnemyStateNow(10,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多']).lv,T.ocEnemyStateNow(8,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多']).lv,T.ocEnemyStateNow(5.999,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多']).lv,T.ocEnemyStateNow(6,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多']).lv,T.ocEnemyStateNow(56,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多']).lv];return JSON.stringify(r);})()"));
+    const expVals = [0,9.999,10,8,5.999,6,56];
+    let bOk = true;
+    for (let i = 0; i < expVals.length; i++) { if (o3[i] !== __expLv(expVals[i], L[0], L[1], G)) bOk = false; }
+    t("U8784 边界 敌群警戒（阈值上下/跨越逐个核对 lv）", bOk && o3.length === expVals.length, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocEnemyStateNow(null,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多']),b:T.ocEnemyStateNow(NaN,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多']),c:T.ocEnemyStateNow(-5,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多']),d:T.ocEnemyStateNow([1],6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多']),e:T.ocEnemyStateNow(5,null,2,'敌群',false,['场上平静','敌人增多','清场：敌人过多']),f:T.ocEnemyStateNow(5,2,3,'敌群',false,[1,2]),g:T.ocEnemyStateNow(5,10,6,'敌群',false,['场上平静','敌人增多','清场：敌人过多']),h:T.ocEnemyStateNow(5,NaN,8,'敌群',false,['场上平静','敌人增多','清场：敌人过多']),i:T.ocEnemyStateNow(5,-3,8,'敌群',false,['场上平静','敌人增多','清场：敌人过多'])};return JSON.stringify(r);})()"));
+    t("U8785 非法 null/NaN/负值/数组/阈值无效/坏hints/方向错/NaN/负阈值 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocEnemyNow(),dom:(function(){const e=document.querySelector('#ocEnemyWrap .oval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8786 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8781 敌群警戒 抛异常", false, String(e)); t("U8782 敌群警戒 抛异常", false, String(e)); t("U8783 敌群警戒 抛异常", false, String(e)); t("U8784 敌群警戒 抛异常", false, String(e)); t("U8785 敌群警戒 抛异常", false, String(e)); t("U8786 敌群警戒 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

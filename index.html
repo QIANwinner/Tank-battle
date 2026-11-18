@@ -1384,6 +1384,7 @@
     <div class="pill m-hide" id="mwSurvWrap"><span class="k">⏱️</span><span class="tgl">存活</span><span class="mwbar"><i></i></span><span class="mwt">0</span><span class="mwdone">✓</span></div>
     <div class="pill m-hide" id="mwHurtWrap"><span class="k">🛡️</span><span class="tgl">受击</span><span class="mwbar"><i></i></span><span class="mwt">0</span><span class="mwdone">✓</span></div>
     <div class="pill m-hide" id="mwScoreWrap"><span class="k">🏆</span><span class="tgl">分数</span><span class="mwbar"><i></i></span><span class="mwt">0</span><span class="mwdone">✓</span></div>
+    <div class="pill m-hide" id="ocEnemyWrap"><span class="k">👾</span><span class="tgl">敌群</span><span class="obar"><i></i></span><span class="oval">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1760,7 +1761,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.152</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.153</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7946,6 +7947,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_mwSurv = mwSurvNow(); const w_mwSurv = document.getElementById('mwSurvWrap'); if (w_mwSurv) { const pv_mwSurv = w_mwSurv.dataset.fv || ''; const nv_mwSurv = s_mwSurv.v + '|' + s_mwSurv.next + '|' + s_mwSurv.hit; if (pv_mwSurv !== nv_mwSurv) { w_mwSurv.dataset.fv = nv_mwSurv; w_mwSurv.classList.toggle('mw-hit', !!s_mwSurv.hit); const bar_mwSurv = w_mwSurv.querySelector('.mwbar i'); if (bar_mwSurv) bar_mwSurv.style.width = (s_mwSurv.pct * 100) + '%'; const vt_mwSurv = w_mwSurv.querySelector('.mwt'); if (vt_mwSurv) vt_mwSurv.textContent = Math.floor(s_mwSurv.v) + '/' + (s_mwSurv.next === null ? 'MAX' : s_mwSurv.next); const dk_mwSurv = w_mwSurv.querySelector('.mwdone'); if (dk_mwSurv) dk_mwSurv.style.display = s_mwSurv.hit ? 'inline' : 'none'; } }
     const s_mwHurt = mwHurtNow(); const w_mwHurt = document.getElementById('mwHurtWrap'); if (w_mwHurt) { const pv_mwHurt = w_mwHurt.dataset.fv || ''; const nv_mwHurt = s_mwHurt.v + '|' + s_mwHurt.next + '|' + s_mwHurt.hit; if (pv_mwHurt !== nv_mwHurt) { w_mwHurt.dataset.fv = nv_mwHurt; w_mwHurt.classList.toggle('mw-hit', !!s_mwHurt.hit); const bar_mwHurt = w_mwHurt.querySelector('.mwbar i'); if (bar_mwHurt) bar_mwHurt.style.width = (s_mwHurt.pct * 100) + '%'; const vt_mwHurt = w_mwHurt.querySelector('.mwt'); if (vt_mwHurt) vt_mwHurt.textContent = Math.floor(s_mwHurt.v) + '/' + (s_mwHurt.next === null ? 'MAX' : s_mwHurt.next); const dk_mwHurt = w_mwHurt.querySelector('.mwdone'); if (dk_mwHurt) dk_mwHurt.style.display = s_mwHurt.hit ? 'inline' : 'none'; } }
     const s_mwScore = mwScoreNow(); const w_mwScore = document.getElementById('mwScoreWrap'); if (w_mwScore) { const pv_mwScore = w_mwScore.dataset.fv || ''; const nv_mwScore = s_mwScore.v + '|' + s_mwScore.next + '|' + s_mwScore.hit; if (pv_mwScore !== nv_mwScore) { w_mwScore.dataset.fv = nv_mwScore; w_mwScore.classList.toggle('mw-hit', !!s_mwScore.hit); const bar_mwScore = w_mwScore.querySelector('.mwbar i'); if (bar_mwScore) bar_mwScore.style.width = (s_mwScore.pct * 100) + '%'; const vt_mwScore = w_mwScore.querySelector('.mwt'); if (vt_mwScore) vt_mwScore.textContent = Math.floor(s_mwScore.v) + '/' + (s_mwScore.next === null ? 'MAX' : s_mwScore.next); const dk_mwScore = w_mwScore.querySelector('.mwdone'); if (dk_mwScore) dk_mwScore.style.display = s_mwScore.hit ? 'inline' : 'none'; } }
+    const s_ocEnemy = ocEnemyNow(); const w_ocEnemy = document.getElementById('ocEnemyWrap'); if (w_ocEnemy) { const pv_ocEnemy = w_ocEnemy.dataset.fv || ''; const nv_ocEnemy = s_ocEnemy.lv + '|' + s_ocEnemy.pct + '|' + s_ocEnemy.txt; if (pv_ocEnemy !== nv_ocEnemy) { w_ocEnemy.dataset.fv = nv_ocEnemy; w_ocEnemy.classList.remove('g-good','g-warn','g-bad'); w_ocEnemy.classList.add(s_ocEnemy.cls); w_ocEnemy.classList.toggle('danger', !!s_ocEnemy.danger); const bar_ocEnemy = w_ocEnemy.querySelector('.obar i'); if (bar_ocEnemy) bar_ocEnemy.style.width = s_ocEnemy.pct + '%'; const val_ocEnemy = w_ocEnemy.querySelector('.oval'); if (val_ocEnemy) val_ocEnemy.textContent = s_ocEnemy.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -22450,6 +22452,40 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // 存活里程碑（v1.1.150 第一百辑：mw 系列已在 v1.1.145 引入）
   // 受击里程碑（v1.1.151 第一百辑：mw 系列已在 v1.1.145 引入）
   // 分数里程碑（v1.1.152 第一百辑：mw 系列已在 v1.1.145 引入）
+  // —— 战局警戒：oc 系列（v1.1.153 第一百零一辑）——
+  // 纯函数：val 对 (l1,l2) 阈值按 good 方向做三档判定。
+  //   good=true：高值=健康（lv0 稳定@val>=l1；lv1 留意@l2<=val<l1；lv2 告警@val<l2；要求 l2<=l1）。
+  //   good=false：高值=危险（lv0 稳定@val<l1；lv1 留意@l1<=val<l2；lv2 告警@val>=l2；要求 l1<=l2）。
+  //   返回 { ok, lv, pct(15/55/90), txt, cls, danger, hint }；非法 → 退化 '—'。
+  function ocFmt(x) { if (!isFinite(x)) return '—'; const a = Math.abs(x); if (a >= 100) return String(Math.round(x)); if (a >= 1) return String(Math.round(x * 10) / 10); return String(Math.round(x * 100) / 100); }
+  function ocLv(val, l1, l2, label, good, hints) {
+    const deg = { ok: false, lv: -1, pct: 0, txt: '—', cls: 'g-good', danger: false, hint: '—' };
+    if (val === null || val === undefined || Array.isArray(val)) return deg;
+    if (l1 === null || l1 === undefined || Array.isArray(l1)) return deg;
+    if (l2 === null || l2 === undefined || Array.isArray(l2)) return deg;
+    const v = Number(val); const a = Number(l1); const b = Number(l2);
+    if (!isFinite(v) || v < 0 || !isFinite(a) || !isFinite(b)) return deg;
+    if (a < 0 || b < 0) return deg;
+    const g = !!good;
+    if (g) { if (b > a) return deg; } else { if (a > b) return deg; }
+    const lv = g ? (v >= a ? 0 : (v >= b ? 1 : 2)) : (v < a ? 0 : (v < b ? 1 : 2));
+    const pct = lv === 0 ? 15 : (lv === 1 ? 55 : 90);
+    const cls = lv === 2 ? 'g-bad' : (lv === 1 ? 'g-warn' : 'g-good');
+    const lb = (label && String(label).length > 0) ? String(label) : '';
+    if (!Array.isArray(hints) || hints.length !== 3) return deg;
+    const hh = hints;
+    const hint = String(hh[lv]);
+    return { ok: true, lv: lv, pct: pct, txt: lb + ' · ' + hint, cls: cls, danger: lv === 2, hint: hint };
+  }
+  // —— 8 个数据源（本局实时值 → 三态警戒；good 方向按维度语义定）——
+  function ocEnemyNow() { return ocLv(enemies.length, 6, 10, '敌群', false, ['场上平静', '敌人增多', '清场：敌人过多']); }
+  function ocBulletNow() { return ocLv(bullets.length, 18, 30, '弹幕', false, ['弹幕稀疏', '弹幕渐密', '规避：弹幕过密']); }
+  function ocLifeNow() { return ocLv(lives, 3, 1, '血线', true, ['血量充足', '留意：血量偏低', '保命：仅剩 1 命']); }
+  function ocHurtNow() { return ocLv(hurtCount, 10, 20, '受击', false, ['受击少', '受击渐多', '护盾：受击频繁']); }
+  function ocComboNow() { return ocLv(combo, 5, 2, '连击', true, ['连击火热', '留意：连击渐起', '连击未起']); }
+  function ocPickNow() { return ocLv(runPowerups, 5, 2, '补给', true, ['补给充足', '留意：补给渐多', '找补给']); }
+  function ocWaveNow() { const wt = isFinite(Number(wavesTotal)) ? Math.max(1, Number(wavesTotal)) : 1; const w = isFinite(Number(wave)) ? Math.max(1, Number(wave)) : 1; return ocLv(w, Math.ceil(wt * 0.7), Math.ceil(wt * 0.4), '波次', true, ['接近尾声', '留意：推进中', '起步阶段']); }
+  function ocTimeNow() { return ocLv(playSecRun, 180, 60, '时长', true, ['稳定发挥', '留意：时长渐长', '开局阶段']); }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -24311,7 +24347,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.152', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.153', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -26657,6 +26693,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       mwSurvStateNow: (v, th, d, lb) => mwHit(v, th, d, lb), mwSurvNow: () => mwSurvNow(), mwSurvDomNow: () => { const e = document.querySelector('#mwSurvWrap .mwt'); return e ? e.textContent : null; },
       mwHurtStateNow: (v, th, d, lb) => mwHit(v, th, d, lb), mwHurtNow: () => mwHurtNow(), mwHurtDomNow: () => { const e = document.querySelector('#mwHurtWrap .mwt'); return e ? e.textContent : null; },
       mwScoreStateNow: (v, th, d, lb) => mwHit(v, th, d, lb), mwScoreNow: () => mwScoreNow(), mwScoreDomNow: () => { const e = document.querySelector('#mwScoreWrap .mwt'); return e ? e.textContent : null; },
+      ocEnemyStateNow: (v, l1, l2, lb, g, hh) => ocLv(v, l1, l2, lb, g, hh), ocEnemyNow: () => ocEnemyNow(), ocEnemyDomNow: () => { const e = document.querySelector('#ocEnemyWrap .oval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
