@@ -1393,6 +1393,7 @@
     <div class="pill m-hide" id="ocWaveWrap"><span class="k">🚩</span><span class="tgl">波次</span><span class="obar"><i></i></span><span class="oval">—</span></div>
     <div class="pill m-hide" id="ocTimeWrap"><span class="k">⏱️</span><span class="tgl">时长</span><span class="obar"><i></i></span><span class="oval">—</span></div>
     <div class="pill m-hide" id="wzScoreWrap"><span class="k">🏆</span><span class="tgl">破纪录</span><span class="wbar"><i></i></span><span class="wval">—</span></div>
+    <div class="pill m-hide" id="wzWaveWrap"><span class="k">🚩</span><span class="tgl">通关</span><span class="wbar"><i></i></span><span class="wval">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1769,7 +1770,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.161</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.162</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7964,6 +7965,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_ocWave = ocWaveNow(); const w_ocWave = document.getElementById('ocWaveWrap'); if (w_ocWave) { const pv_ocWave = w_ocWave.dataset.fv || ''; const nv_ocWave = s_ocWave.lv + '|' + s_ocWave.pct + '|' + s_ocWave.txt; if (pv_ocWave !== nv_ocWave) { w_ocWave.dataset.fv = nv_ocWave; w_ocWave.classList.remove('g-good','g-warn','g-bad'); w_ocWave.classList.add(s_ocWave.cls); w_ocWave.classList.toggle('danger', !!s_ocWave.danger); const bar_ocWave = w_ocWave.querySelector('.obar i'); if (bar_ocWave) bar_ocWave.style.width = s_ocWave.pct + '%'; const val_ocWave = w_ocWave.querySelector('.oval'); if (val_ocWave) val_ocWave.textContent = s_ocWave.txt; } }
     const s_ocTime = ocTimeNow(); const w_ocTime = document.getElementById('ocTimeWrap'); if (w_ocTime) { const pv_ocTime = w_ocTime.dataset.fv || ''; const nv_ocTime = s_ocTime.lv + '|' + s_ocTime.pct + '|' + s_ocTime.txt; if (pv_ocTime !== nv_ocTime) { w_ocTime.dataset.fv = nv_ocTime; w_ocTime.classList.remove('g-good','g-warn','g-bad'); w_ocTime.classList.add(s_ocTime.cls); w_ocTime.classList.toggle('danger', !!s_ocTime.danger); const bar_ocTime = w_ocTime.querySelector('.obar i'); if (bar_ocTime) bar_ocTime.style.width = s_ocTime.pct + '%'; const val_ocTime = w_ocTime.querySelector('.oval'); if (val_ocTime) val_ocTime.textContent = s_ocTime.txt; } }
     const s_wzScore = wzScoreNow(); const w_wzScore = document.getElementById('wzScoreWrap'); if (w_wzScore) { const pv_wzScore = w_wzScore.dataset.fv || ''; const nv_wzScore = s_wzScore.pct + '|' + s_wzScore.txt; if (pv_wzScore !== nv_wzScore) { w_wzScore.dataset.fv = nv_wzScore; w_wzScore.classList.remove('g-good','g-warn','g-bad'); w_wzScore.classList.add(s_wzScore.cls); w_wzScore.classList.toggle('danger', !!s_wzScore.danger); const bar_wzScore = w_wzScore.querySelector('.wbar i'); if (bar_wzScore) bar_wzScore.style.width = s_wzScore.pct + '%'; const val_wzScore = w_wzScore.querySelector('.wval'); if (val_wzScore) val_wzScore.textContent = s_wzScore.txt; } }
+    const s_wzWave = wzWaveNow(); const w_wzWave = document.getElementById('wzWaveWrap'); if (w_wzWave) { const pv_wzWave = w_wzWave.dataset.fv || ''; const nv_wzWave = s_wzWave.pct + '|' + s_wzWave.txt; if (pv_wzWave !== nv_wzWave) { w_wzWave.dataset.fv = nv_wzWave; w_wzWave.classList.remove('g-good','g-warn','g-bad'); w_wzWave.classList.add(s_wzWave.cls); w_wzWave.classList.toggle('danger', !!s_wzWave.danger); const bar_wzWave = w_wzWave.querySelector('.wbar i'); if (bar_wzWave) bar_wzWave.style.width = s_wzWave.pct + '%'; const val_wzWave = w_wzWave.querySelector('.wval'); if (val_wzWave) val_wzWave.textContent = s_wzWave.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -22610,6 +22612,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const hr = wzRate(hurtCount, playSecRun);
     return wzSurv(lv, hr, '生存');
   }
+  // 波次预见（v1.1.162 第一百零二辑：wz 系列已在 v1.1.161 引入）
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -24471,7 +24474,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.161', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.162', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -26826,6 +26829,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       ocWaveStateNow: (v, l1, l2, lb, g, hh) => ocLv(v, l1, l2, lb, g, hh), ocWaveNow: () => ocWaveNow(), ocWaveDomNow: () => { const e = document.querySelector('#ocWaveWrap .oval'); return e ? e.textContent : null; },
       ocTimeStateNow: (v, l1, l2, lb, g, hh) => ocLv(v, l1, l2, lb, g, hh), ocTimeNow: () => ocTimeNow(), ocTimeDomNow: () => { const e = document.querySelector('#ocTimeWrap .oval'); return e ? e.textContent : null; },
       wzCalcStateNow: (cur, rate, target, label, unit, good, reached) => wzCalc(cur, rate, target, label, unit, good, reached), wzSurvStateNow: (lives, rate, label) => wzSurv(lives, rate, label), wzScoreNow: () => wzScoreNow(), wzScoreDomNow: () => { const e = document.querySelector('#wzScoreWrap .wval'); return e ? e.textContent : null; },
+      wzCalcStateNow: (cur, rate, target, label, unit, good, reached) => wzCalc(cur, rate, target, label, unit, good, reached), wzSurvStateNow: (lives, rate, label) => wzSurv(lives, rate, label), wzWaveNow: () => wzWaveNow(), wzWaveDomNow: () => { const e = document.querySelector('#wzWaveWrap .wval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
