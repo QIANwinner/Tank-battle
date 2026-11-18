@@ -8019,4 +8019,13 @@ html.compact-hud #hud .m-hide { display:none !important; }
   .perfMonHint { margin-top:4px; color:#f39c12; min-height:12px; }
   .perfMonOptBtn { display:none; margin-top:5px; width:100%; background:linear-gradient(135deg,#002FA7,#7a4bff); border:none; color:#fff; font-weight:700; padding:5px 0; border-radius:6px; cursor:pointer; }
   .perfMonOptBtn:hover { filter:brightness(1.15); }
+  #perfGovWrap .wval { font-size:11px; color:#fff; font-weight:700; margin:0 2px; }
+  #perfGovWrap.g-good .wval { color:#2ecc71; }
+  #perfGovWrap.g-warn .wval { color:#f39c12; }
+  #perfGovWrap.g-bad .wval { color:#e74c3c; }
+  #perfGovWrap { border-color:#16a085; }
+  .pgovTrend { position:fixed; top:44px; right:14px; z-index:69; background:rgba(10,14,26,0.9); border:1px solid #16a085; border-radius:8px; padding:4px; }
+  .pgovTrend.pgov-hidden { display:none !important; }
+  .pgovTrend canvas { display:block; }
+  .pgovTrend .pgovCap { font-size:9px; color:#8a93a6; margin:2px 2px 0; }
 

@@ -24711,6 +24711,23 @@ async function main() {
     t("U8888 面板开关 + DOM 一致性（开→可见 7 行 seg=1 / 关→隐藏）", o5.toggleOn === true && o5.visOn === true && o5.rows >= 5 && o5.segOn === '1' && o5.toggleOff === false && o5.visOff === false && o5.one === true, JSON.stringify(o5));
   } catch (e) { t("U8883 性能中心 抛异常", false, String(e)); t("U8884 性能中心 抛异常", false, String(e)); t("U8885 性能中心 抛异常", false, String(e)); t("U8886 性能中心 抛异常", false, String(e)); t("U8887 性能中心 抛异常", false, String(e)); t("U8888 性能中心 抛异常", false, String(e)); }
 
+
+  // ===== U8889~U8894: 帧时自适应引擎(v1.1.171) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={wrap:!!document.getElementById('perfGovWrap'),trend:!!document.getElementById('perfGovTrend'),box:!!document.getElementById('perfGovTrendBox'),seg:!!document.getElementById('perfGovSeg'),frame:typeof T.perfGovFrameMsNow==='function',budget:typeof T.perfGovBudgetNow==='function',step:typeof T.perfGovStepNow==='function',scale:typeof T.perfGovScaleNow==='function',badge:typeof T.perfGovBadgeNow==='function',glow:typeof T.perfGovGlowNow==='function',toggle:typeof T.perfGovToggleNow==='function'};return JSON.stringify(r);})()"));
+    t("U8889 帧时自适应引擎 徽章/趋势图/设置 DOM + 引擎函数可用", o.wrap === true && o.trend === true && o.box === true && o.seg === true && o.frame === true && o.budget === true && o.step === true && o.scale === true && o.badge === true && o.glow === true && o.toggle === true, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfGovBudgetNow(60),b:T.perfGovBudgetNow(120),c:T.perfGovBudgetNow(144),d:T.perfGovStepNow(20,15,0),e:T.perfGovStepNow(10,15,1),f:T.perfGovStepNow(13,15,1)};return JSON.stringify(r);})()"));
+    t("U8890 帧时预算 + 单步决策正常（60→15 / 120→8 / 144→8；超预算升 1 级 / 低于预算降 1 级 / 中间不变）", o1.a === 15 && o1.b === 8 && o1.c === 8 && o1.d.level === 1 && o1.d.dir === 1 && o1.e.level === 0 && o1.e.dir === -1 && o1.f.level === 1 && o1.f.dir === 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfGovScaleNow(0,0),b:T.perfGovScaleNow(1,0),c:T.perfGovScaleNow(2,0),d:T.perfGovScaleNow(3,2)};return JSON.stringify(r);})()"));
+    t("U8891 自适应覆盖层正常（稳定 1 粒子辉光 / 轻载 0.5 / 中载 0.3 关辉光 / 重载 0.2 关辉光 DPR1 限帧60）", o2.a.particles === 1 && o2.a.glow === true && o2.b.particles === 0.5 && o2.b.glow === true && o2.c.particles === 0.3 && o2.c.glow === false && o2.d.particles === 0.2 && o2.d.glow === false && o2.d.dpr === 1 && o2.d.renderHz === 60, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfGovStepNow(20,15,3),b:T.perfGovStepNow(10,15,0),c:T.perfGovBudgetNow(0),d:T.perfGovBudgetNow(NaN),e:T.perfGovScaleNow(0,9)};return JSON.stringify(r);})()"));
+    t("U8892 边界（level3 超预算仍钳 3 / level0 低预算仍钳 0 / Hz=0→16.7 兜底 / NaN→16.7 / tier9 钳 2）", o3.a.level === 3 && o3.a.dir === 1 && o3.b.level === 0 && o3.b.dir === -1 && o3.c === 16.7 && o3.d === 16.7 && o3.e.dpr === 1 && o3.e.renderHz === 60, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfGovStepNow(null,15,1),b:T.perfGovStepNow(NaN,15,1),c:T.perfGovStepNow(20,NaN,1),d:T.perfGovScaleNow(-1,0),e:T.perfGovBadgeNow(0,null,null)};return JSON.stringify(r);})()"));
+    t("U8893 非法输入（null/NaN 帧时或预算 → 不升降级；负 level 钳 0；空数据徽章占位）", o4.a.dir === 0 && o4.a.level === 1 && o4.b.dir === 0 && o4.c.dir === 0 && o4.d.particles === 1 && o4.e.indexOf('—') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={};r.toggleOn=T.perfGovToggleNow(true);r.visOn=(function(){const e=document.getElementById('perfGovWrap');return e?!e.classList.contains('m-hide'):false;})();r.trendVis=(function(){const e=document.getElementById('perfGovTrendBox');return e?!e.classList.contains('pgov-hidden'):false;})();r.segOn=T.perfGovSegNow();r.glow=T.perfGovGlowNow();r.toggleOff=T.perfGovToggleNow(false);r.visOff=(function(){const e=document.getElementById('perfGovWrap');return e?!e.classList.contains('m-hide'):true;})();r.segOff=T.perfGovSegNow();return JSON.stringify(r);})()"));
+    t("U8894 开关 + DOM 一致性（开→徽章可见/趋势图可见/seg=1；关→隐藏/seg=0）", o5.toggleOn === true && o5.visOn === true && o5.trendVis === true && o5.segOn === '1' && o5.glow === true && o5.toggleOff === false && o5.visOff === false && o5.segOff === '0', JSON.stringify(o5));
+  } catch (e) { t("U8889 帧时自适应引擎 抛异常", false, String(e)); t("U8890 帧时自适应引擎 抛异常", false, String(e)); t("U8891 帧时自适应引擎 抛异常", false, String(e)); t("U8892 帧时自适应引擎 抛异常", false, String(e)); t("U8893 帧时自适应引擎 抛异常", false, String(e)); t("U8894 帧时自适应引擎 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

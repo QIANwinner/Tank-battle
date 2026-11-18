@@ -1407,6 +1407,9 @@
       <div class="perfMonHint"></div>
       <button class="perfMonOptBtn" id="perfMonOptBtn">⚡ 一键优化</button>
     </div>
+    <div class="pill m-hide" id="perfGovWrap"><span class="k">⚡</span><span class="tgl">自适应</span><span class="wval">—</span></div>
+    <div class="pgovTrend pgov-hidden" id="perfGovTrendBox"><canvas id="perfGovTrend" width="220" height="34"></canvas><div class="pgovCap">帧时(ms) · 虚线=预算 · 近 30 帧</div></div>
+
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1529,6 +1532,14 @@
     </div>
     <div class="muteHint" id="muteHint">🔊 按 M 键一键静音</div>
     <div class="settings" id="settings">
+      <div class="setRow">
+        <span class="setLabel">⚡ 帧时自适应<span class="hint">自动降载</span></span>
+        <div class="seg" id="perfGovSeg">
+          <button data-perfgov="0">关</button>
+          <button data-perfgov="1">开</button>
+        </div>
+      </div>
+
       <div class="setRow">
         <span class="setLabel">⚡ 性能中心<span class="hint">实时帧监控</span></span>
         <div class="seg" id="perfMonSeg">
@@ -1791,7 +1802,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.170</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.171</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -3505,6 +3516,7 @@
   function particleMul() {
     let m = perfTier() === 2 ? 0.5 : 1;
     if (reduced()) m *= 0.5;
+    m *= perfGovScale(perfGovLevel, perfTier()).particles;
     return m;
   }
   // 霓虹辉光：低画质档直接关掉 shadowBlur（每帧高频路径的最大开销）
@@ -5093,6 +5105,7 @@
   function tick(now) {
     rafId = requestAnimationFrame(tick);
     perfSample();
+    perfGovTick();
     animTime = now;
     let dt = (now - lastTime) / 1000;
   fpsMeterFrames++; fpsMeterAcc += dt; if (fpsMeterAcc >= 0.5) { fpsMeterValue = Math.round(fpsMeterFrames / fpsMeterAcc); fpsMeterFrames = 0; fpsMeterAcc = 0; const fp = $('fpsVal'); if (fp) fp.textContent = fpsText(fpsMeterValue); }   // —— v0.6.21 FPS 计数 ——
@@ -5440,6 +5453,7 @@
   function markMapDirty() { mapDirty = true; }
 
   function draw() {
+    if (perfGovSkipRender()) return;
     if (!map.length) return;
     ctx.setTransform(renderScale, 0, 0, renderScale, 0, 0);
     ctx.save();
@@ -5485,13 +5499,13 @@
     const pfPlan = perfPlanNow(perfTier(), perfFpsEstimate(), bullets.length, perfHzNow());
     for (const b of bullets) {
       if (b.owner.isPlayer) {
-        if (pfPlan.glow) setGlow('#00f0ff', 8); else ctx.shadowBlur = 0;
+        if (pfPlan.glow && perfGovGlow()) setGlow('#00f0ff', 8); else ctx.shadowBlur = 0;
         ctx.fillStyle = '#00f0ff';
       } else {
         const isSnip = b.owner.type === 'sniper';
         // —— v0.2.5 色弱友好：重映射敌方子弹冲突色；Boss 弹用其类型色 ——
         const bcol = cbColor(b.owner.isBoss ? (b.owner.color || '#ff2d55') : (isSnip ? '#ff1a2e' : '#ff3355'));
-        if (pfPlan.glow) setGlow(bcol, b.owner.isBoss ? 10 : (isSnip ? 9 : 6)); else ctx.shadowBlur = 0;
+        if (pfPlan.glow && perfGovGlow()) setGlow(bcol, b.owner.isBoss ? 10 : (isSnip ? 9 : 6)); else ctx.shadowBlur = 0;
         ctx.fillStyle = bcol;
       }
       ctx.fillRect(b.x, b.y, b.size, b.size);
@@ -7992,6 +8006,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_wzHurt = wzHurtNow(); const w_wzHurt = document.getElementById('wzHurtWrap'); if (w_wzHurt) { const pv_wzHurt = w_wzHurt.dataset.fv || ''; const nv_wzHurt = s_wzHurt.pct + '|' + s_wzHurt.txt; if (pv_wzHurt !== nv_wzHurt) { w_wzHurt.dataset.fv = nv_wzHurt; w_wzHurt.classList.remove('g-good','g-warn','g-bad'); w_wzHurt.classList.add(s_wzHurt.cls); w_wzHurt.classList.toggle('danger', !!s_wzHurt.danger); const bar_wzHurt = w_wzHurt.querySelector('.wbar i'); if (bar_wzHurt) bar_wzHurt.style.width = s_wzHurt.pct + '%'; const val_wzHurt = w_wzHurt.querySelector('.wval'); if (val_wzHurt) val_wzHurt.textContent = s_wzHurt.txt; } }
     const s_wzSurv = wzSurvNow(); const w_wzSurv = document.getElementById('wzSurvWrap'); if (w_wzSurv) { const pv_wzSurv = w_wzSurv.dataset.fv || ''; const nv_wzSurv = s_wzSurv.pct + '|' + s_wzSurv.txt; if (pv_wzSurv !== nv_wzSurv) { w_wzSurv.dataset.fv = nv_wzSurv; w_wzSurv.classList.remove('g-good','g-warn','g-bad'); w_wzSurv.classList.add(s_wzSurv.cls); w_wzSurv.classList.toggle('danger', !!s_wzSurv.danger); const bar_wzSurv = w_wzSurv.querySelector('.wbar i'); if (bar_wzSurv) bar_wzSurv.style.width = s_wzSurv.pct + '%'; const val_wzSurv = w_wzSurv.querySelector('.wval'); if (val_wzSurv) val_wzSurv.textContent = s_wzSurv.txt; } }
     perfHudUpdate();
+    perfGovHudUpdate();
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -22856,6 +22871,163 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (el) el.classList.toggle('pm-hidden', !perfMonOn);
     if (perfMonOn && !perfMonTimer) perfMonTimer = setInterval(perfMonApply, 500);
   }
+  // —— 帧时自适应引擎：perfGov 系列（v1.1.171 第一百零五辑）——
+  const LS_PERFGOV = 'tank-battle-perfgov';
+  let perfGovOn = false;
+  let perfGovLevel = 0;      // 0 稳定 / 1 轻载 / 2 中载 / 3 重载（限帧）
+  let perfGovLow = 0;        // 连续超预算帧数
+  let perfGovHigh = 0;       // 连续低于预算帧数（恢复）
+  let perfGovBadgeLast = '';
+  let perfGovTrendLast = 0;  // 趋势图上一次绘制时间（4Hz）
+  let perfGovLastDraw = 0;   // 限帧：上一次实际渲染时间
+  // 实时帧时 EMA（近 10 帧平均）：deltas 缺省读 perfDeltas；样本 <3 → null（数据不足）。
+  function perfGovFrameMs(deltas) {
+    const arr = Array.isArray(deltas) ? deltas : perfDeltas;
+    if (!Array.isArray(arr) || arr.length < 3) return null;
+    const tail = arr.slice(-10);
+    let sum = 0, n = 0;
+    for (const d of tail) {
+      const v = Number(d);
+      if (isFinite(v) && v > 0) { sum += v; n++; }
+    }
+    if (n < 3) return null;
+    return sum / n;
+  }
+  // 目标帧时预算：1000/hz*0.9，clamp 8..16.7；非法（NaN/0/负）→ 16.7 兜底。
+  function perfGovBudget(hz) {
+    const v = Number(hz);
+    if (!isFinite(v) || v <= 0) return 16.7;
+    const b = (1000 / v) * 0.9;
+    return Math.min(16.7, Math.max(8, Math.round(b * 10) / 10));
+  }
+  // 单步决策（纯函数）：帧时 > 预算*1.25 → 升 1 级（dir=1）；< 预算*0.7 → 降 1 级（dir=-1）；
+  //   中间 → 不变（dir=0）。level clamp 0..3；非法输入 → 不变。
+  function perfGovStep(frameMs, budget, level) {
+    const f = Number(frameMs), b = Number(budget);
+    const l = (typeof level === 'number' && isFinite(level) && level >= 0) ? Math.min(3, Math.floor(level)) : 0;
+    if (!isFinite(f) || f <= 0 || !isFinite(b) || b <= 0) return { level: l, dir: 0 };
+    if (f > b * 1.25) return { level: Math.min(3, l + 1), dir: 1 };
+    if (f < b * 0.7) return { level: Math.max(0, l - 1), dir: -1 };
+    return { level: l, dir: 0 };
+  }
+  // 自适应覆盖层：level 叠加粒子系数/辉光/DPR/限帧（不动 perfTier 既有语义，只叠加渲染负载）。
+  function perfGovScale(level, tier) {
+    const l = (typeof level === 'number' && isFinite(level) && level >= 0) ? Math.min(3, Math.floor(level)) : 0;
+    const t = (typeof tier === 'number' && isFinite(tier) && tier >= 0) ? Math.min(2, Math.floor(tier)) : 1;
+    const baseDpr = t === 0 ? 2 : (t === 1 ? 1.5 : 1);
+    const baseHz = t === 0 ? 240 : (t === 1 ? 90 : 60);
+    if (l === 0) return { particles: 1, glow: true, dpr: baseDpr, renderHz: baseHz, label: '稳定' };
+    if (l === 1) return { particles: 0.5, glow: true, dpr: baseDpr, renderHz: baseHz, label: '轻载' };
+    if (l === 2) return { particles: 0.3, glow: false, dpr: Math.min(baseDpr, 1), renderHz: Math.min(baseHz, 90), label: '中载' };
+    return { particles: 0.2, glow: false, dpr: 1, renderHz: 60, label: '重载' };
+  }
+  // 徽章文案：如「自适应 2 级 · 中载 · 12.5ms/15.0ms」。
+  function perfGovBadge(level, frameMs, budget) {
+    const l = (typeof level === 'number' && isFinite(level) && level >= 0) ? Math.min(3, Math.floor(level)) : 0;
+    const ms = (isFinite(Number(frameMs)) && Number(frameMs) > 0) ? Number(frameMs).toFixed(1) + 'ms' : '—';
+    const b = (isFinite(Number(budget)) && Number(budget) > 0) ? Number(budget).toFixed(1) + 'ms' : '—';
+    const lbl = l === 0 ? '稳定' : (l === 1 ? '轻载' : (l === 2 ? '中载' : '重载'));
+    return '自适应 ' + l + ' 级 · ' + lbl + ' · ' + ms + '/' + b;
+  }
+  // 辉光覆盖：自适应中/重载（level>=2）强制关辉光（与 perfPlanNow 静态预算叠加）。
+  function perfGovGlow() {
+    return perfGovOn && perfGovLevel < 2;
+  }
+  // 每帧闭环：采样帧时 → 单步决策 → streak 门槛（升 2 帧 / 恢复 5 帧，滞回防振荡）→ 更新 level。
+  function perfGovTick() {
+    if (!perfGovOn) { if (perfGovLevel !== 0) perfGovLevel = 0; return 0; }
+    const fm = perfGovFrameMs();
+    if (fm === null) return perfGovLevel;
+    const budget = perfGovBudget(perfHzNow());
+    const st = perfGovStep(fm, budget, perfGovLevel);
+    if (st.dir === 1) { perfGovLow++; perfGovHigh = 0; if (perfGovLow >= 2) { perfGovLevel = st.level; perfGovLow = 0; } }
+    else if (st.dir === -1) { perfGovHigh++; perfGovLow = 0; if (perfGovHigh >= 5) { perfGovLevel = st.level; perfGovHigh = 0; } }
+    else { perfGovLow = 0; perfGovHigh = 0; }
+    return perfGovLevel;
+  }
+  // 渲染限帧：重载（level>=3）且距上次实际渲染 <16.7ms → 跳过本帧渲染（逻辑仍全速）。
+  function perfGovSkipRender() {
+    if (!perfGovOn || perfGovLevel < 3) return false;
+    const t = performance.now();
+    if (t - perfGovLastDraw < (1000 / 60)) return true;
+    perfGovLastDraw = t;
+    return false;
+  }
+  // 趋势图：近 30 帧帧时曲线 + 预算基线（4Hz 刷新，防高频 DOM 写入）。
+  function perfGovTrendDraw() {
+    const cv = document.getElementById('perfGovTrend');
+    if (!cv) return;
+    const now = performance.now();
+    if (now - perfGovTrendLast < 250) return;
+    perfGovTrendLast = now;
+    const c2 = cv.getContext('2d');
+    const w = cv.width, h = cv.height;
+    c2.clearRect(0, 0, w, h);
+    const tail = perfDeltas.slice(-30);
+    if (tail.length < 2) return;
+    const budget = perfGovBudget(perfHzNow());
+    const maxMs = 30;
+    c2.strokeStyle = 'rgba(0,240,255,0.4)'; c2.lineWidth = 1;
+    c2.setLineDash([3, 3]);
+    c2.beginPath();
+    const by = h - Math.min(1, budget / maxMs) * h;
+    c2.moveTo(0, by); c2.lineTo(w, by); c2.stroke();
+    c2.setLineDash([]);
+    c2.strokeStyle = perfGovLevel >= 2 ? '#ff2d55' : '#00f0ff';
+    c2.beginPath();
+    for (let i = 0; i < tail.length; i++) {
+      const v = Number(tail[i]);
+      const y = h - Math.min(1, (isFinite(v) && v > 0 ? v : 0) / maxMs) * h;
+      const x = (i / (tail.length - 1)) * w;
+      if (i === 0) c2.moveTo(x, y); else c2.lineTo(x, y);
+    }
+    c2.stroke();
+  }
+  // 徽章 + 趋势图刷新（// __EXTRA_HUD__ 每帧调用；值未变不写 DOM）。
+  function perfGovHudUpdate() {
+    if (!perfGovOn) return;
+    const el = document.getElementById('perfGovWrap');
+    if (!el) return;
+    const fm = perfGovFrameMs();
+    const budget = perfGovBudget(perfHzNow());
+    const txt = perfGovBadge(perfGovLevel, fm, budget);
+    if (txt !== perfGovBadgeLast) {
+      perfGovBadgeLast = txt;
+      const v = el.querySelector('.wval');
+      if (v) v.textContent = txt;
+      el.classList.remove('m-hide');
+      el.classList.toggle('g-good', perfGovLevel === 0);
+      el.classList.toggle('g-warn', perfGovLevel >= 1 && perfGovLevel < 3);
+      el.classList.toggle('g-bad', perfGovLevel >= 3);
+    }
+    perfGovTrendDraw();
+  }
+  // 开关（持久化 + 同步按钮态 + 徽章/趋势图显隐 + level 归零）。
+  function perfGovToggle(on) {
+    perfGovOn = (typeof on === 'boolean') ? on : !perfGovOn;
+    if (!perfGovOn) perfGovLevel = 0;
+    try { saveStore.setItem(LS_PERFGOV, perfGovOn ? '1' : '0'); } catch (e) { /* 忽略 */ }
+    const seg = document.getElementById('perfGovSeg');
+    if (seg) for (const b of seg.querySelectorAll('button')) b.classList.toggle('active', (b.dataset.perfgov === '1') === perfGovOn);
+    const el = document.getElementById('perfGovWrap');
+    if (el) el.classList.toggle('m-hide', !perfGovOn);
+    const tb = document.getElementById('perfGovTrendBox');
+    if (tb) tb.classList.toggle('pgov-hidden', !perfGovOn);
+    return perfGovOn;
+  }
+  // 初始化：读持久化开关 + 同步按钮态 + 显隐。
+  function perfGovInit() {
+    let on = false;
+    try { on = saveStore.getItem(LS_PERFGOV) === '1'; } catch (e) { /* 忽略 */ }
+    perfGovOn = on;
+    if (!on) perfGovLevel = 0;
+    const seg = document.getElementById('perfGovSeg');
+    if (seg) for (const b of seg.querySelectorAll('button')) b.classList.toggle('active', (b.dataset.perfgov === '1') === perfGovOn);
+    const el = document.getElementById('perfGovWrap');
+    if (el) el.classList.toggle('m-hide', !perfGovOn);
+    const tb = document.getElementById('perfGovTrendBox');
+    if (tb) tb.classList.toggle('pgov-hidden', !perfGovOn);
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -24717,7 +24889,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.170', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.171', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -24902,6 +25074,10 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   randMapSeg.addEventListener('click', (e) => {
     const b = e.target.closest('button'); if (b) setRandomMaps(b.dataset.rand);
   });
+  const perfGovSegEl = $('perfGovSeg');
+  if (perfGovSegEl) perfGovSegEl.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) perfGovToggle(b.dataset.perfgov === '1'); });
+  perfGovInit();
+
   const perfMonSegEl = $('perfMonSeg');
   if (perfMonSegEl) perfMonSegEl.addEventListener('click', (e) => { const b = e.target.closest('button'); if (b) perfMonToggle(b.dataset.perfmon === '1'); });
   const perfMonOptBtnEl = $('perfMonOptBtn');
@@ -27101,6 +27277,16 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       perfMonOneClickNow: () => perfMonOneClick(),
       perfMonSegNow: () => { const el = document.getElementById('perfMonSeg'); if (!el) return null; const a = el.querySelector('button.active'); return a ? a.dataset.perfmon : null; },
       perfMonDomNow: () => { const e = document.getElementById('perfMonWrap'); return e ? { vis: !e.classList.contains('pm-hidden'), rows: (e.querySelector('.perfMonBody') || {}).childElementCount || 0 } : null; },
+      perfGovFrameMsNow: (deltas) => perfGovFrameMs(deltas),
+      perfGovBudgetNow: (hz) => perfGovBudget(hz),
+      perfGovStepNow: (frameMs, budget, level) => perfGovStep(frameMs, budget, level),
+      perfGovScaleNow: (level, tier) => perfGovScale(level, tier),
+      perfGovBadgeNow: (level, frameMs, budget) => perfGovBadge(level, frameMs, budget),
+      perfGovGlowNow: () => perfGovGlow(),
+      perfGovLevelNow: () => perfGovLevel,
+      perfGovToggleNow: (on) => perfGovToggle(on),
+      perfGovSegNow: () => { const el = document.getElementById('perfGovSeg'); if (!el) return null; const a = el.querySelector('button.active'); return a ? a.dataset.perfgov : null; },
+      perfGovDomNow: () => { const e = document.getElementById('perfGovWrap'); const t = document.getElementById('perfGovTrend'); return { vis: e ? !e.classList.contains('m-hide') : false, trend: !!t, badge: (e && e.querySelector('.wval')) ? e.querySelector('.wval').textContent : null }; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
