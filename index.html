@@ -1392,6 +1392,7 @@
     <div class="pill m-hide" id="ocPickWrap"><span class="k">🎁</span><span class="tgl">补给</span><span class="obar"><i></i></span><span class="oval">—</span></div>
     <div class="pill m-hide" id="ocWaveWrap"><span class="k">🚩</span><span class="tgl">波次</span><span class="obar"><i></i></span><span class="oval">—</span></div>
     <div class="pill m-hide" id="ocTimeWrap"><span class="k">⏱️</span><span class="tgl">时长</span><span class="obar"><i></i></span><span class="oval">—</span></div>
+    <div class="pill m-hide" id="wzScoreWrap"><span class="k">🏆</span><span class="tgl">破纪录</span><span class="wbar"><i></i></span><span class="wval">—</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1768,7 +1769,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.160</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.161</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -7962,6 +7963,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_ocPick = ocPickNow(); const w_ocPick = document.getElementById('ocPickWrap'); if (w_ocPick) { const pv_ocPick = w_ocPick.dataset.fv || ''; const nv_ocPick = s_ocPick.lv + '|' + s_ocPick.pct + '|' + s_ocPick.txt; if (pv_ocPick !== nv_ocPick) { w_ocPick.dataset.fv = nv_ocPick; w_ocPick.classList.remove('g-good','g-warn','g-bad'); w_ocPick.classList.add(s_ocPick.cls); w_ocPick.classList.toggle('danger', !!s_ocPick.danger); const bar_ocPick = w_ocPick.querySelector('.obar i'); if (bar_ocPick) bar_ocPick.style.width = s_ocPick.pct + '%'; const val_ocPick = w_ocPick.querySelector('.oval'); if (val_ocPick) val_ocPick.textContent = s_ocPick.txt; } }
     const s_ocWave = ocWaveNow(); const w_ocWave = document.getElementById('ocWaveWrap'); if (w_ocWave) { const pv_ocWave = w_ocWave.dataset.fv || ''; const nv_ocWave = s_ocWave.lv + '|' + s_ocWave.pct + '|' + s_ocWave.txt; if (pv_ocWave !== nv_ocWave) { w_ocWave.dataset.fv = nv_ocWave; w_ocWave.classList.remove('g-good','g-warn','g-bad'); w_ocWave.classList.add(s_ocWave.cls); w_ocWave.classList.toggle('danger', !!s_ocWave.danger); const bar_ocWave = w_ocWave.querySelector('.obar i'); if (bar_ocWave) bar_ocWave.style.width = s_ocWave.pct + '%'; const val_ocWave = w_ocWave.querySelector('.oval'); if (val_ocWave) val_ocWave.textContent = s_ocWave.txt; } }
     const s_ocTime = ocTimeNow(); const w_ocTime = document.getElementById('ocTimeWrap'); if (w_ocTime) { const pv_ocTime = w_ocTime.dataset.fv || ''; const nv_ocTime = s_ocTime.lv + '|' + s_ocTime.pct + '|' + s_ocTime.txt; if (pv_ocTime !== nv_ocTime) { w_ocTime.dataset.fv = nv_ocTime; w_ocTime.classList.remove('g-good','g-warn','g-bad'); w_ocTime.classList.add(s_ocTime.cls); w_ocTime.classList.toggle('danger', !!s_ocTime.danger); const bar_ocTime = w_ocTime.querySelector('.obar i'); if (bar_ocTime) bar_ocTime.style.width = s_ocTime.pct + '%'; const val_ocTime = w_ocTime.querySelector('.oval'); if (val_ocTime) val_ocTime.textContent = s_ocTime.txt; } }
+    const s_wzScore = wzScoreNow(); const w_wzScore = document.getElementById('wzScoreWrap'); if (w_wzScore) { const pv_wzScore = w_wzScore.dataset.fv || ''; const nv_wzScore = s_wzScore.pct + '|' + s_wzScore.txt; if (pv_wzScore !== nv_wzScore) { w_wzScore.dataset.fv = nv_wzScore; w_wzScore.classList.remove('g-good','g-warn','g-bad'); w_wzScore.classList.add(s_wzScore.cls); w_wzScore.classList.toggle('danger', !!s_wzScore.danger); const bar_wzScore = w_wzScore.querySelector('.wbar i'); if (bar_wzScore) bar_wzScore.style.width = s_wzScore.pct + '%'; const val_wzScore = w_wzScore.querySelector('.wval'); if (val_wzScore) val_wzScore.textContent = s_wzScore.txt; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -22507,6 +22509,107 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // 补给警戒（v1.1.158 第一百零一辑：oc 系列已在 v1.1.153 引入）
   // 波次警戒（v1.1.159 第一百零一辑：oc 系列已在 v1.1.153 引入）
   // 时长警戒（v1.1.160 第一百零一辑：oc 系列已在 v1.1.153 引入）
+  // —— 战局预见：wz 系列（v1.1.161 第一百零二辑）——
+  // 数字格式化：≥100 取整，≥1 保留 1 位，<1 保留 2 位。
+  function wzFmt(x) { if (!isFinite(x)) return '—'; const a = Math.abs(x); if (a >= 100) return String(Math.round(x)); if (a >= 1) return String(Math.round(x * 10) / 10); return String(Math.round(x * 100) / 100); }
+  // 安全速率：secs>0 才返回 n/secs，否则 0（避免除零）。
+  function wzRate(n, secs) { const nn = Number(n), ss = Number(secs); if (!isFinite(nn) || !isFinite(ss) || nn < 0 || ss <= 0) return 0; return nn / ss; }
+  // 距目标倒数条：cur=当前累计，rate=当前速率(/秒)，target=下一里程碑值。
+  //   good=true：靠近目标=健康；good=false：靠近目标=危险（反向）。
+  //   返回 { ok, pct(0-100), txt, cls, danger, eta, reached }；非法 → 退化 '—'。
+  function wzCalc(cur, rate, target, label, unit, good, reachedTxt) {
+    const deg = { ok: false, pct: 0, txt: '—', cls: 'g-good', danger: false, eta: '—', reached: false };
+    if (cur === null || cur === undefined || Array.isArray(cur)) return deg;
+    if (rate === null || rate === undefined || Array.isArray(rate)) return deg;
+    if (target === null || target === undefined || Array.isArray(target)) return deg;
+    const c = Number(cur), r = Number(rate), tg = Number(target);
+    if (!isFinite(c) || !isFinite(r) || !isFinite(tg)) return deg;
+    if (c < 0 || r < 0 || tg <= 0) return deg;
+    const lb = (label && String(label).length > 0) ? String(label) : '';
+    if (lb.length === 0) return deg;
+    const un = (unit && String(unit).length > 0) ? String(unit) : '';
+    const rt = (reachedTxt && String(reachedTxt).length > 0) ? String(reachedTxt) : '已达成';
+    const g = !!good;
+    const gap = tg - c;
+    if (gap <= 0) return { ok: true, pct: 100, txt: rt, cls: g ? 'g-good' : 'g-bad', danger: !g, eta: g ? '已达成' : '已触发', reached: true };
+    const pct = Math.max(0, Math.min(99, Math.round(c / tg * 100)));
+    const cls = g ? (pct >= 70 ? 'g-good' : (pct >= 40 ? 'g-warn' : 'g-bad')) : (pct < 30 ? 'g-good' : (pct < 60 ? 'g-warn' : 'g-bad'));
+    const danger = g ? (pct < 25) : (pct >= 70);
+    const eta = r > 0 ? ('≈' + wzFmt(gap / r) + 's') : '待积累';
+    return { ok: true, pct: pct, txt: lb + ' · 距 ' + wzFmt(gap) + un + ' · ' + eta, cls: cls, danger: danger, eta: eta, reached: false };
+  }
+  // 生存预见：按当前受击频率预估还能撑多久。lives<=0→已阵亡；hurtRate<=0→无伤·无限。
+  //   estSec=lives/hurtRate，120s 满格；返回同 wzCalc 结构。
+  function wzSurv(lives, hurtRate, label) {
+    const deg = { ok: false, pct: 0, txt: '—', cls: 'g-good', danger: false, eta: '—', reached: false };
+    if (lives === null || lives === undefined || Array.isArray(lives)) return deg;
+    if (hurtRate === null || hurtRate === undefined || Array.isArray(hurtRate)) return deg;
+    const lv = Number(lives), hr = Number(hurtRate);
+    if (!isFinite(lv) || !isFinite(hr) || lv < 0 || hr < 0) return deg;
+    const lb = (label && String(label).length > 0) ? String(label) : '';
+    if (lb.length === 0) return deg;
+    if (lv <= 0) return { ok: true, pct: 100, txt: lb + ' · 已阵亡', cls: 'g-bad', danger: true, eta: '已阵亡', reached: true };
+    if (hr <= 0) return { ok: true, pct: 100, txt: lb + ' · 无伤·无限', cls: 'g-good', danger: false, eta: '∞', reached: false };
+    const est = lv / hr;
+    const pct = Math.max(0, Math.min(100, Math.round(est / 120 * 100)));
+    const cls = est >= 60 ? 'g-good' : (est >= 20 ? 'g-warn' : 'g-bad');
+    return { ok: true, pct: pct, txt: lb + ' · 约可撑 ' + wzFmt(est) + 's', cls: cls, danger: est < 20, eta: '≈' + wzFmt(est) + 's', reached: false };
+  }
+  // —— 8 个数据源（本局实时值 + 生涯基准 → wzCalc/wzSurv）——
+  function wzScoreNow() {
+    const sc = isFinite(Number(score)) ? Math.max(0, Math.floor(Number(score))) : 0;
+    const sr = wzRate(sc, playSecRun);
+    const best = (typeof career !== 'undefined' && career && isFinite(Number(career.bestScore))) ? Math.max(0, Math.floor(Number(career.bestScore))) : 0;
+    if (best <= 0) return { ok: true, pct: 0, txt: '首局 · 记录待立', cls: 'g-good', danger: false, eta: '—', reached: false };
+    return wzCalc(sc, sr, best, '破纪录', '分', true, '已破纪录!');
+  }
+  function wzWaveNow() {
+    const w = isFinite(Number(wave)) ? Math.max(1, Math.floor(Number(wave))) : 1;
+    const wr = wzRate(w, playSecRun);
+    const total = (isFinite(Number(wavesTotal)) && Number(wavesTotal) > 0) ? Math.max(1, Math.floor(Number(wavesTotal))) : Math.max(1, w);
+    return wzCalc(w, wr, total, '通关', '关', true, '已通关');
+  }
+  function wzComboNow() {
+    const cb = isFinite(Number(combo)) ? Math.max(0, Math.floor(Number(combo))) : 0;
+    const cr = wzRate(cb, playSecRun);
+    const next = cb < 8 ? 8 : (cb < 15 ? 15 : cb);
+    return wzCalc(cb, cr, next, '连击', '连', true, '连击封顶');
+  }
+  function wzUpgNow() {
+    const cns = isFinite(Number(coins)) ? Math.max(0, Math.floor(Number(coins))) : 0;
+    const cr = wzRate(cns, playSecRun);
+    const lv = (typeof baseLevel !== 'undefined' && isFinite(Number(baseLevel))) ? Math.max(0, Math.floor(Number(baseLevel))) : 0;
+    const PR = [0, 250, 650, 1400, 3000, 6000];
+    if (lv >= PR.length - 1) return { ok: true, pct: 100, txt: '已满级', cls: 'g-good', danger: false, eta: '已满级', reached: true };
+    return wzCalc(cns, cr, PR[lv + 1], '升级', '金', true, '已满级');
+  }
+  function wzBossNow() {
+    const lv = (isFinite(Number(level)) && Number(level) >= 1) ? Math.max(1, Math.floor(Number(level))) : ((isFinite(Number(wave)) && Number(wave) >= 1) ? Math.max(1, Math.floor(Number(wave))) : 1);
+    if (isBoss === true) return { ok: true, pct: 100, txt: 'BOSS 战中', cls: 'g-warn', danger: true, eta: 'BOSS 战中', reached: true };
+    let n = 5; try { n = nextBossIn(lv); } catch (e) { n = 5; }
+    if (!isFinite(n) || n <= 0) return { ok: true, pct: 100, txt: 'BOSS 战中', cls: 'g-warn', danger: true, eta: 'BOSS 战中', reached: true };
+    const cur = Math.max(0, Math.min(5, 5 - n));
+    const wr = wzRate(isFinite(Number(wave)) ? Math.max(1, Math.floor(Number(wave))) : 1, playSecRun);
+    return wzCalc(cur, wr, 5, 'BOSS', '关', true, 'BOSS 战中');
+  }
+  function wzPickNow() {
+    const pk = isFinite(Number(runPowerups)) ? Math.max(0, Math.floor(Number(runPowerups))) : 0;
+    const pr = wzRate(pk, playSecRun);
+    if (pr <= 0) return { ok: true, pct: 0, txt: '补给 · 尚未拾取', cls: 'g-bad', danger: true, eta: '—', reached: false };
+    return wzCalc(pk, pr, pk + 1, '补给', '个', true, '拾取中');
+  }
+  function wzHurtNow() {
+    const hc = isFinite(Number(hurtCount)) ? Math.max(0, Math.floor(Number(hurtCount))) : 0;
+    const hr = wzRate(hc, playSecRun);
+    const ps = isFinite(Number(playSecRun)) ? Math.max(1, Number(playSecRun)) : 1;
+    const tgt = Math.max(8, Math.min(30, Math.ceil(ps / 6)));
+    return wzCalc(hc, hr, tgt, '受击', '次', false, '受击过量!');
+  }
+  function wzSurvNow() {
+    const lv = isFinite(Number(lives)) ? Math.max(0, Math.floor(Number(lives))) : 0;
+    const hr = wzRate(hurtCount, playSecRun);
+    return wzSurv(lv, hr, '生存');
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -24368,7 +24471,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.160', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.161', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -26722,6 +26825,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       ocPickStateNow: (v, l1, l2, lb, g, hh) => ocLv(v, l1, l2, lb, g, hh), ocPickNow: () => ocPickNow(), ocPickDomNow: () => { const e = document.querySelector('#ocPickWrap .oval'); return e ? e.textContent : null; },
       ocWaveStateNow: (v, l1, l2, lb, g, hh) => ocLv(v, l1, l2, lb, g, hh), ocWaveNow: () => ocWaveNow(), ocWaveDomNow: () => { const e = document.querySelector('#ocWaveWrap .oval'); return e ? e.textContent : null; },
       ocTimeStateNow: (v, l1, l2, lb, g, hh) => ocLv(v, l1, l2, lb, g, hh), ocTimeNow: () => ocTimeNow(), ocTimeDomNow: () => { const e = document.querySelector('#ocTimeWrap .oval'); return e ? e.textContent : null; },
+      wzCalcStateNow: (cur, rate, target, label, unit, good, reached) => wzCalc(cur, rate, target, label, unit, good, reached), wzSurvStateNow: (lives, rate, label) => wzSurv(lives, rate, label), wzScoreNow: () => wzScoreNow(), wzScoreDomNow: () => { const e = document.querySelector('#wzScoreWrap .wval'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

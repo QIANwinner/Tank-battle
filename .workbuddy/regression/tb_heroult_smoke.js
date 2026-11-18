@@ -24520,6 +24520,26 @@ async function main() {
     t("U8828 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8823 时长警戒 抛异常", false, String(e)); t("U8824 时长警戒 抛异常", false, String(e)); t("U8825 时长警戒 抛异常", false, String(e)); t("U8826 时长警戒 抛异常", false, String(e)); t("U8827 时长警戒 抛异常", false, String(e)); t("U8828 时长警戒 抛异常", false, String(e)); }
 
+
+  // ===== U8829~U8834: 战绩预见(v1.1.161) =====
+  try {
+    const G = true;
+    const __expCls = (pct, g) => g ? (pct >= 70 ? 'g-good' : (pct >= 40 ? 'g-warn' : 'g-bad')) : (pct < 30 ? 'g-good' : (pct < 60 ? 'g-warn' : 'g-bad'));
+    const __expDan = (pct, g) => g ? (pct < 25) : (pct >= 70);
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('wzScoreWrap'),bar:!!document.querySelector('#wzScoreWrap .wbar i'),val:!!document.querySelector('#wzScoreWrap .wval'),s:T.wzCalcStateNow(0,0,100,'破纪录','分',true,'已破纪录!')};return JSON.stringify(r);})()"));
+    t("U8829 战绩预见 预见条 DOM 已加入（条 + 文案 + 函数可用）", o.dom === true && o.bar === true && o.val === true && o.s.ok === true && o.s.pct === 0 && o.s.reached === false && o.s.txt.indexOf("破纪录") >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.wzCalcStateNow(0,0,100,'破纪录','分',true,'已破纪录!')};return JSON.stringify(r);})()"));
+    t("U8830 初值 战绩预见（cur=0 → pct 0 未达，文案含标签，着色按 good 方向）", o1.s.ok === true && o1.s.pct === 0 && o1.s.reached === false && o1.s.txt.indexOf("破纪录") >= 0 && o1.s.cls === __expCls(0, G) && o1.s.danger === __expDan(0, G), JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzCalcStateNow(50,1,100,'破纪录','分',true,'已破纪录!'),b:T.wzCalcStateNow(80,1,100,'破纪录','分',true,'已破纪录!')};return JSON.stringify(r);})()"));
+    t("U8831 正常值 战绩预见（50%→pct50 / 80%→pct80，着色按 good 方向）", o2.a.ok === true && o2.a.pct === 50 && o2.b.ok === true && o2.b.pct === 80 && o2.a.cls === __expCls(50, G) && o2.b.cls === __expCls(80, G), JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzCalcStateNow(100,1,100,'破纪录','分',true,'已破纪录!'),b:T.wzCalcStateNow(99.999,1,100,'破纪录','分',true,'已破纪录!')};return JSON.stringify(r);})()"));
+    t("U8832 边界 战绩预见（cur=target→已达 / target-ε→未达）", o3.a.ok === true && o3.a.reached === true && o3.a.pct === 100 && o3.a.txt.indexOf("已破纪录!") >= 0 && o3.b.ok === true && o3.b.reached === false, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzCalcStateNow(null,1,100,'破纪录','分',true,'已破纪录!'),b:T.wzCalcStateNow(NaN,1,100,'破纪录','分',true,'已破纪录!'),c:T.wzCalcStateNow(-5,1,100,'破纪录','分',true,'已破纪录!'),d:T.wzCalcStateNow(5,-1,100,'破纪录','分',true,'已破纪录!'),e:T.wzCalcStateNow(5,1,0,'破纪录','分',true,'已破纪录!'),f:T.wzCalcStateNow(5,1,-3,'破纪录','分',true,'已破纪录!'),g:T.wzCalcStateNow(5,1,[2],'破纪录','分',true,'已破纪录!'),h:T.wzCalcStateNow(5,1,100,'','分',true,'已破纪录!')};return JSON.stringify(r);})()"));
+    t("U8833 非法 null/NaN/负值/负速率/target≤0/数组/空标签 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.wzScoreNow(),dom:(function(){const e=document.querySelector('#wzScoreWrap .wval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8834 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8829 战绩预见 抛异常", false, String(e)); t("U8830 战绩预见 抛异常", false, String(e)); t("U8831 战绩预见 抛异常", false, String(e)); t("U8832 战绩预见 抛异常", false, String(e)); t("U8833 战绩预见 抛异常", false, String(e)); t("U8834 战绩预见 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
