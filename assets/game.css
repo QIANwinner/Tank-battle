@@ -7913,4 +7913,11 @@ html.compact-hud #hud .m-hide { display:none !important; }
   #ocHurtWrap.g-warn .obar i { background:#f1c40f; }
   #ocHurtWrap.g-bad .obar i { background:#e74c3c; }
   #ocHurtWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
+  #ocComboWrap .obar { display:inline-block; width:52px; height:6px; background:#333; border:1px solid #555; border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #ocComboWrap .obar i { display:block; height:100%; width:0; background:#3498db; transition:width .15s linear; }
+  #ocComboWrap .oval { font-size:11px; color:#fff; font-weight:700; margin:0 2px; }
+  #ocComboWrap.g-good .obar i { background:#2ecc71; }
+  #ocComboWrap.g-warn .obar i { background:#f1c40f; }
+  #ocComboWrap.g-bad .obar i { background:#e74c3c; }
+  #ocComboWrap.danger { animation: tbMlsPulse .4s ease-in-out infinite alternate; }
 

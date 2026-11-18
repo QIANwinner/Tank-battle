@@ -24428,6 +24428,29 @@ async function main() {
     t("U8804 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8799 受击警戒 抛异常", false, String(e)); t("U8800 受击警戒 抛异常", false, String(e)); t("U8801 受击警戒 抛异常", false, String(e)); t("U8802 受击警戒 抛异常", false, String(e)); t("U8803 受击警戒 抛异常", false, String(e)); t("U8804 受击警戒 抛异常", false, String(e)); }
 
+
+  // ===== U8805~U8810: 连击警戒(v1.1.157) =====
+  try {
+    const L = [5,2]; const HH = ["连击火热","留意：连击渐起","连击未起"]; const G = true;
+    const __expLv = (v, l1, l2, g) => g ? (v >= l1 ? 0 : (v >= l2 ? 1 : 2)) : (v < l1 ? 0 : (v < l2 ? 1 : 2));
+    const __expCls = (lv) => lv === 2 ? 'g-bad' : (lv === 1 ? 'g-warn' : 'g-good');
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('ocComboWrap'),bar:!!document.querySelector('#ocComboWrap .obar i'),val:!!document.querySelector('#ocComboWrap .oval'),s:T.ocComboStateNow(5,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起'])};return JSON.stringify(r);})()"));
+    t("U8805 连击警戒 警戒芯片 DOM 已加入（三态条 + 文案 + 函数可用）", o.dom === true && o.bar === true && o.val === true && o.s.ok === true && o.s.lv === 0 && o.s.txt.indexOf('连击') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocComboStateNow(0,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起'])};return JSON.stringify(r);})()"));
+    t("U8806 初值 连击警戒（val=0 → 按 good 方向取健康/告警档，文案含标签）", o1.s.ok === true && o1.s.lv === (G ? 2 : 0) && o1.s.txt.indexOf('连击') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocComboStateNow(5,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起']),b:T.ocComboStateNow(2,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起'])};return JSON.stringify(r);})()"));
+    t("U8807 正常值 连击警戒（健康值→lv0 稳定 / 中档值→lv1 留意）", o2.a.ok === true && o2.a.lv === 0 && o2.b.ok === true && o2.b.lv === 1 && o2.a.pct === 15 && o2.b.pct === 55, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r=[T.ocComboStateNow(0,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起']).lv,T.ocComboStateNow(1.999,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起']).lv,T.ocComboStateNow(2,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起']).lv,T.ocComboStateNow(3.5,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起']).lv,T.ocComboStateNow(4.999,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起']).lv,T.ocComboStateNow(5,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起']).lv,T.ocComboStateNow(55,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起']).lv];return JSON.stringify(r);})()"));
+    const expVals = [0,1.999,2,3.5,4.999,5,55];
+    let bOk = true;
+    for (let i = 0; i < expVals.length; i++) { if (o3[i] !== __expLv(expVals[i], L[0], L[1], G)) bOk = false; }
+    t("U8808 边界 连击警戒（阈值上下/跨越逐个核对 lv）", bOk && o3.length === expVals.length, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocComboStateNow(null,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起']),b:T.ocComboStateNow(NaN,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起']),c:T.ocComboStateNow(-5,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起']),d:T.ocComboStateNow([1],5,2,'连击',true,['连击火热','留意：连击渐起','连击未起']),e:T.ocComboStateNow(5,null,2,'连击',true,['连击火热','留意：连击渐起','连击未起']),f:T.ocComboStateNow(5,2,3,'连击',true,[1,2]),g:T.ocComboStateNow(5,2,5,'连击',true,['连击火热','留意：连击渐起','连击未起']),h:T.ocComboStateNow(5,NaN,8,'连击',true,['连击火热','留意：连击渐起','连击未起']),i:T.ocComboStateNow(5,-3,8,'连击',true,['连击火热','留意：连击渐起','连击未起'])};return JSON.stringify(r);})()"));
+    t("U8809 非法 null/NaN/负值/数组/阈值无效/坏hints/方向错/NaN/负阈值 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocComboNow(),dom:(function(){const e=document.querySelector('#ocComboWrap .oval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8810 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8805 连击警戒 抛异常", false, String(e)); t("U8806 连击警戒 抛异常", false, String(e)); t("U8807 连击警戒 抛异常", false, String(e)); t("U8808 连击警戒 抛异常", false, String(e)); t("U8809 连击警戒 抛异常", false, String(e)); t("U8810 连击警戒 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
