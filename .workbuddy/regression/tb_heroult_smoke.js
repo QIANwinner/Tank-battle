@@ -25008,6 +25008,23 @@ async function main() {
     t("U8978 DOM 与函数一致（建/复用计数可读 + DOM 可写）", o5.s.created >= 0 && o5.s.reused >= 0 && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8973 粒子桶复用 抛异常", false, String(e)); t("U8974 粒子桶复用 抛异常", false, String(e)); t("U8975 粒子桶复用 抛异常", false, String(e)); t("U8976 粒子桶复用 抛异常", false, String(e)); t("U8977 粒子桶复用 抛异常", false, String(e)); t("U8978 粒子桶复用 抛异常", false, String(e)); }
 
+
+  // ===== U8979~U8984: 输入响应仪表(v1.1.186) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('smInputWrap'),cnt:!!document.querySelector('#smInputWrap .smn'),s:T.smInputStateNow(1000,1016.7)};return JSON.stringify(r);})()"));
+    t("U8979 输入 pill 已加入（值位 + 函数可用，16.7ms 延迟）", o.dom === true && o.cnt === true && o.s.ok === true && o.s.ms > 16.5 && o.s.ms < 16.9, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smInputStateNow(NaN,NaN),b:T.smInputStateNow(null,100)};return JSON.stringify(r);})()"));
+    t("U8980 初值 NaN/null → 退化", o1.a.ok === false && o1.a.txt === '—' && o1.b.ok === false && o1.b.txt === '—', JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.smInputStateNow(1000,1016.7)};return JSON.stringify(r);})()"));
+    t("U8981 正常值 1000→1016.7 → 16.7ms（txt 含 ms）", o2.s.ok === true && o2.s.ms > 16.5 && o2.s.ms < 16.9 && o2.s.txt.indexOf('ms') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smInputStateNow(1000,1000),b:T.smInputStateNow(1000,1000.5)};return JSON.stringify(r);})()"));
+    t("U8982 边界 0ms 合法 / 0.5ms 合法", o3.a.ok === true && o3.a.ms === 0 && o3.b.ok === true && o3.b.ms > 0 && o3.b.ms < 1, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smInputStateNow(1016.7,1000),b:T.smInputStateNow(100,NaN)};return JSON.stringify(r);})()"));
+    t("U8983 非法 负延迟/NaN → 退化", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={n:T.smInputNow(),dom:(function(){const e=document.querySelector('#smInputWrap .smn');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8984 DOM 与函数一致（输入延迟可读 + DOM 可写）", typeof o5.n === 'number' && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8979 输入响应仪表 抛异常", false, String(e)); t("U8980 输入响应仪表 抛异常", false, String(e)); t("U8981 输入响应仪表 抛异常", false, String(e)); t("U8982 输入响应仪表 抛异常", false, String(e)); t("U8983 输入响应仪表 抛异常", false, String(e)); t("U8984 输入响应仪表 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
