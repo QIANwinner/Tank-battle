@@ -24817,6 +24817,24 @@ async function main() {
     t("U8924 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8919 火力节奏态势 抛异常", false, String(e)); t("U8920 火力节奏态势 抛异常", false, String(e)); t("U8921 火力节奏态势 抛异常", false, String(e)); t("U8922 火力节奏态势 抛异常", false, String(e)); t("U8923 火力节奏态势 抛异常", false, String(e)); t("U8924 火力节奏态势 抛异常", false, String(e)); }
 
+
+  // ===== U8925~U8930: 击杀效率态势(v1.1.177) =====
+  try {
+    const L = [1,3,6,12];
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('bsEffWrap'),bar:!!document.querySelector('#bsEffWrap .bsbar i'),v:!!document.querySelector('#bsEffWrap .bst'),d:!!document.querySelector('#bsEffWrap .bsd'),toast:!!document.getElementById('bsToast'),card:(T.bsCardHtml()||'').indexOf('战场态势达成')>=0,s:T.bsEffStateNow(2,[1,3,6,12],[false,false,false,false],'效率')};return JSON.stringify(r);})()"));
+    t("U8925 击杀效率态势 态势 pill 已加入（进度条 + 值 + 达成勾 + 共享 toast + 结算卡 + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.d === true && o.toast === true && o.card === true && o.s.ok === true && o.s.hit === true && o.s.idx === 0 && o.s.txt.indexOf('效率') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsEffStateNow(0,[1,3,6,12],[false,false,false,false],'效率')};return JSON.stringify(r);})()"));
+    t("U8926 初值 击杀效率态势（0 → 未达成，下一档为 L1，文案含标签）", o1.s.ok === true && o1.s.hit === false && o1.s.idx === -1 && o1.s.t === null && o1.s.next === L[0] && o1.s.txt.indexOf('效率') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsEffStateNow(2,[1,3,6,12],[false,false,false,false],'效率')};return JSON.stringify(r);})()"));
+    t("U8927 正常值 击杀效率态势（中段跨过 L1 → 命中第 1 档，值 = L1）", o2.s.ok === true && o2.s.hit === true && o2.s.idx === 0 && o2.s.t === L[0] && o2.s.txt === '效率 ' + L[0], JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.bsEffStateNow(0.999,[1,3,6,12],[false,false,false,false],'效率'),b:T.bsEffStateNow(1,[1,3,6,12],[false,false,false,false],'效率'),c:T.bsEffStateNow(3,[1,3,6,12],[true,false,false,false],'效率'),d:T.bsEffStateNow(12,[1,3,6,12],[true,true,true,false],'效率'),e:T.bsEffStateNow(12,[1,3,6,12],[true,true,true,true],'效率'),f:T.bsEffStateNow(0.5,[1,3,6,12],[false,false,false,false],'效率')};return JSON.stringify(r);})()"));
+    t("U8928 边界 击杀效率态势（阈值下方不中/恰在阈值中/逐档推进/全达成不中）", o3.a.hit === false && o3.a.next === L[0] && o3.b.hit === true && o3.b.idx === 0 && o3.c.hit === true && o3.c.idx === 1 && o3.c.t === L[1] && o3.d.hit === true && o3.d.idx === 3 && o3.d.t === L[3] && o3.e.hit === false && o3.e.next === null && o3.f.hit === false && o3.f.next === L[0], JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.bsEffStateNow(null,[1,3,6,12],[false,false,false,false],'效率'),b:T.bsEffStateNow(NaN,[1,3,6,12],[false,false,false,false],'效率'),c:T.bsEffStateNow(-5,[1,3,6,12],[false,false,false,false],'效率'),d:T.bsEffStateNow([1],[1,3,6,12],[false,false,false,false],'效率'),e:T.bsEffStateNow(5,[], [false,false,false,false],'效率'),f:T.bsEffStateNow(5,[5,5,8,20],[false,false,false,false],'效率'),g:T.bsEffStateNow(5,[0,8,20,50],[false,false,false,false],'效率'),h:T.bsEffStateNow(5,[5,8,20,NaN],[false,false,false,false],'效率'),i:T.bsEffStateNow(5,[1,3,6,12],[true],'效率')};return JSON.stringify(r);})()"));
+    t("U8929 非法 null/NaN/负值/数组/空阶梯/非升序/非正/NaN/done 长度 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsEffNow(),dom:(function(){const e=document.querySelector('#bsEffWrap .bst');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8930 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8925 击杀效率态势 抛异常", false, String(e)); t("U8926 击杀效率态势 抛异常", false, String(e)); t("U8927 击杀效率态势 抛异常", false, String(e)); t("U8928 击杀效率态势 抛异常", false, String(e)); t("U8929 击杀效率态势 抛异常", false, String(e)); t("U8930 击杀效率态势 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
