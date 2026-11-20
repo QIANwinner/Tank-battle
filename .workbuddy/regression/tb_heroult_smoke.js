@@ -24991,6 +24991,23 @@ async function main() {
     t("U8996 DOM 与函数一致（均 FPS 可读 + DOM 为合法评级）", o5.n.avgFps >= 0 && o5.n.stut >= 0 && (o5.dom === null || ['极佳','良好','一般','吃力','—'].indexOf(o5.dom) >= 0), JSON.stringify(o5));
   } catch (e) { t("U8991 流畅度总结卡 抛异常", false, String(e)); t("U8992 流畅度总结卡 抛异常", false, String(e)); t("U8993 流畅度总结卡 抛异常", false, String(e)); t("U8994 流畅度总结卡 抛异常", false, String(e)); t("U8995 流畅度总结卡 抛异常", false, String(e)); t("U8996 流畅度总结卡 抛异常", false, String(e)); }
 
+
+  // ===== U8973~U8978: 粒子桶复用(v1.1.185) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('smBucketWrap'),cnt:!!document.querySelector('#smBucketWrap .smn'),s:(function(){const mp=new Map();const bk=T.smBucketPutNow(mp,'k','red',0.5,{x:1},1);return {rects:bk.rects.length,size:mp.size};})()};return JSON.stringify(r);})()"));
+    t("U8973 桶复用 pill 已加入（计数 + 函数可用，首插新建桶）", o.dom === true && o.cnt === true && o.s.rects === 1 && o.s.size === 1, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r=(function(){const mp=new Map();const bk=T.smBucketPutNow(mp,'k','red',0.5,{x:1},1);return {rects:bk.rects.length,size:mp.size,has:mp.has('k')};})();return JSON.stringify(r);})()"));
+    t("U8974 初值 空桶首插（新建 1 桶 / 1 粒子 / key 命中）", o1.rects === 1 && o1.size === 1 && o1.has === true, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r=(function(){const mp=new Map();const b1=T.smBucketPutNow(mp,'k','red',0.5,{x:1},1);const b2=T.smBucketPutNow(mp,'k','red',0.5,{x:2},1);return {rects:b2.rects.length,same:b1===b2,size:mp.size};})();return JSON.stringify(r);})()"));
+    t("U8975 正常值 同帧同 key 二次插入（复用同对象 + rects 2）", o2.rects === 2 && o2.same === true && o2.size === 1, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r=(function(){const mp=new Map();const b1=T.smBucketPutNow(mp,'k','red',0.5,{x:1},1);const b2=T.smBucketPutNow(mp,'k','red',0.5,{x:2},2);return {rects:b2.rects.length,same:b1===b2,size:mp.size};})();return JSON.stringify(r);})()"));
+    t("U8976 边界 跨帧同 key（帧令牌重置 rects + 复用对象）", o3.rects === 1 && o3.same === true && o3.size === 1, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smBucketPutNow({},'k','red',0.5,{x:1},1),b:(function(){const mp=new Map();const bk=T.smBucketPutNow(mp,'k','red',0.5,{x:1},NaN);return {rects:bk.rects.length,frame:bk.frame};})()};return JSON.stringify(r);})()"));
+    t("U8977 非法 非 Map → null；frame NaN → 按 0 帧新建", o4.a === null && o4.b.rects === 1 && o4.b.frame === 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.smBucketStatNow(),dom:(function(){const e=document.querySelector('#smBucketWrap .smn');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8978 DOM 与函数一致（建/复用计数可读 + DOM 可写）", o5.s.created >= 0 && o5.s.reused >= 0 && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8973 粒子桶复用 抛异常", false, String(e)); t("U8974 粒子桶复用 抛异常", false, String(e)); t("U8975 粒子桶复用 抛异常", false, String(e)); t("U8976 粒子桶复用 抛异常", false, String(e)); t("U8977 粒子桶复用 抛异常", false, String(e)); t("U8978 粒子桶复用 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
