@@ -24974,6 +24974,23 @@ async function main() {
     t("U8990 DOM 与函数一致（序列可读 + sparkline 48 条在 DOM）", Array.isArray(o5.s) && o5.n === 48, JSON.stringify(o5));
   } catch (e) { t("U8985 帧时趋势图 抛异常", false, String(e)); t("U8986 帧时趋势图 抛异常", false, String(e)); t("U8987 帧时趋势图 抛异常", false, String(e)); t("U8988 帧时趋势图 抛异常", false, String(e)); t("U8989 帧时趋势图 抛异常", false, String(e)); t("U8990 帧时趋势图 抛异常", false, String(e)); }
 
+
+  // ===== U8991~U8996: 流畅度总结卡(v1.1.188) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('smSumWrap'),card:(T.smCardHtml()||'').indexOf('流畅度')>=0,s:T.smSummaryStateNow({avgFps:60,stut:0})};return JSON.stringify(r);})()"));
+    t("U8991 评级 pill 已加入 + 结算卡含流畅度 + 函数可用（60FPS/0卡 → 极佳）", o.dom === true && o.card === true && o.s.ok === true && o.s.rating === '极佳', JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smSummaryStateNow(null),b:T.smSummaryStateNow({})};return JSON.stringify(r);})()"));
+    t("U8992 初值 null/空对象 → 退化", o1.a.ok === false && o1.a.rating === '—' && o1.b.ok === false && o1.b.rating === '—', JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smSummaryStateNow({avgFps:60,stut:0}),b:T.smSummaryStateNow({avgFps:50,stut:0}),c:T.smSummaryStateNow({avgFps:35,stut:0}),d:T.smSummaryStateNow({avgFps:20,stut:0})};return JSON.stringify(r);})()"));
+    t("U8993 正常值 60→极佳 / 50→良好 / 35→一般 / 20→吃力", o2.a.rating === '极佳' && o2.b.rating === '良好' && o2.c.rating === '一般' && o2.d.rating === '吃力', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smSummaryStateNow({avgFps:55,stut:3}),b:T.smSummaryStateNow({avgFps:55,stut:4}),c:T.smSummaryStateNow({avgFps:45,stut:0}),d:T.smSummaryStateNow({avgFps:30,stut:0}),e:T.smSummaryStateNow({avgFps:29.9,stut:0})};return JSON.stringify(r);})()"));
+    t("U8994 边界 55FPS/3卡→极佳 / 55FPS/4卡→良好 / 45→良好 / 30→一般 / 29.9→吃力", o3.a.rating === '极佳' && o3.b.rating === '良好' && o3.c.rating === '良好' && o3.d.rating === '一般' && o3.e.rating === '吃力', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smSummaryStateNow({avgFps:0,stut:0}),b:T.smSummaryStateNow({avgFps:NaN,stut:0}),c:T.smSummaryStateNow('x')};return JSON.stringify(r);})()"));
+    t("U8995 非法 0FPS/NaN/字符串 → 退化", o4.a.ok === false && o4.b.ok === false && o4.c.ok === false, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={n:T.smSummaryNow(),dom:(function(){const e=document.querySelector('#smSumWrap .smn');return e?e.textContent:null;})()};return JSON.stringify(r);})()"));
+    t("U8996 DOM 与函数一致（均 FPS 可读 + DOM 为合法评级）", o5.n.avgFps >= 0 && o5.n.stut >= 0 && (o5.dom === null || ['极佳','良好','一般','吃力','—'].indexOf(o5.dom) >= 0), JSON.stringify(o5));
+  } catch (e) { t("U8991 流畅度总结卡 抛异常", false, String(e)); t("U8992 流畅度总结卡 抛异常", false, String(e)); t("U8993 流畅度总结卡 抛异常", false, String(e)); t("U8994 流畅度总结卡 抛异常", false, String(e)); t("U8995 流畅度总结卡 抛异常", false, String(e)); t("U8996 流畅度总结卡 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
