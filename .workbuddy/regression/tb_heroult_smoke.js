@@ -24763,6 +24763,24 @@ async function main() {
     t("U8906 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8901 敌军规模态势 抛异常", false, String(e)); t("U8902 敌军规模态势 抛异常", false, String(e)); t("U8903 敌军规模态势 抛异常", false, String(e)); t("U8904 敌军规模态势 抛异常", false, String(e)); t("U8905 敌军规模态势 抛异常", false, String(e)); t("U8906 敌军规模态势 抛异常", false, String(e)); }
 
+
+  // ===== U8907~U8912: 火力密度态势(v1.1.174) =====
+  try {
+    const L = [10,20,40,70];
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('bsBulletWrap'),bar:!!document.querySelector('#bsBulletWrap .bsbar i'),v:!!document.querySelector('#bsBulletWrap .bst'),d:!!document.querySelector('#bsBulletWrap .bsd'),toast:!!document.getElementById('bsToast'),card:(T.bsCardHtml()||'').indexOf('战场态势达成')>=0,s:T.bsBulletStateNow(15,[10,20,40,70],[false,false,false,false],'火力')};return JSON.stringify(r);})()"));
+    t("U8907 火力密度态势 态势 pill 已加入（进度条 + 值 + 达成勾 + 共享 toast + 结算卡 + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.d === true && o.toast === true && o.card === true && o.s.ok === true && o.s.hit === true && o.s.idx === 0 && o.s.txt.indexOf('火力') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsBulletStateNow(0,[10,20,40,70],[false,false,false,false],'火力')};return JSON.stringify(r);})()"));
+    t("U8908 初值 火力密度态势（0 → 未达成，下一档为 L1，文案含标签）", o1.s.ok === true && o1.s.hit === false && o1.s.idx === -1 && o1.s.t === null && o1.s.next === L[0] && o1.s.txt.indexOf('火力') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsBulletStateNow(15,[10,20,40,70],[false,false,false,false],'火力')};return JSON.stringify(r);})()"));
+    t("U8909 正常值 火力密度态势（中段跨过 L1 → 命中第 1 档，值 = L1）", o2.s.ok === true && o2.s.hit === true && o2.s.idx === 0 && o2.s.t === L[0] && o2.s.txt === '火力 ' + L[0], JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.bsBulletStateNow(9.999,[10,20,40,70],[false,false,false,false],'火力'),b:T.bsBulletStateNow(10,[10,20,40,70],[false,false,false,false],'火力'),c:T.bsBulletStateNow(20,[10,20,40,70],[true,false,false,false],'火力'),d:T.bsBulletStateNow(70,[10,20,40,70],[true,true,true,false],'火力'),e:T.bsBulletStateNow(70,[10,20,40,70],[true,true,true,true],'火力'),f:T.bsBulletStateNow(5,[10,20,40,70],[false,false,false,false],'火力')};return JSON.stringify(r);})()"));
+    t("U8910 边界 火力密度态势（阈值下方不中/恰在阈值中/逐档推进/全达成不中）", o3.a.hit === false && o3.a.next === L[0] && o3.b.hit === true && o3.b.idx === 0 && o3.c.hit === true && o3.c.idx === 1 && o3.c.t === L[1] && o3.d.hit === true && o3.d.idx === 3 && o3.d.t === L[3] && o3.e.hit === false && o3.e.next === null && o3.f.hit === false && o3.f.next === L[0], JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.bsBulletStateNow(null,[10,20,40,70],[false,false,false,false],'火力'),b:T.bsBulletStateNow(NaN,[10,20,40,70],[false,false,false,false],'火力'),c:T.bsBulletStateNow(-5,[10,20,40,70],[false,false,false,false],'火力'),d:T.bsBulletStateNow([1],[10,20,40,70],[false,false,false,false],'火力'),e:T.bsBulletStateNow(5,[], [false,false,false,false],'火力'),f:T.bsBulletStateNow(5,[5,5,8,20],[false,false,false,false],'火力'),g:T.bsBulletStateNow(5,[0,8,20,50],[false,false,false,false],'火力'),h:T.bsBulletStateNow(5,[5,8,20,NaN],[false,false,false,false],'火力'),i:T.bsBulletStateNow(5,[10,20,40,70],[true],'火力')};return JSON.stringify(r);})()"));
+    t("U8911 非法 null/NaN/负值/数组/空阶梯/非升序/非正/NaN/done 长度 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsBulletNow(),dom:(function(){const e=document.querySelector('#bsBulletWrap .bst');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8912 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8907 火力密度态势 抛异常", false, String(e)); t("U8908 火力密度态势 抛异常", false, String(e)); t("U8909 火力密度态势 抛异常", false, String(e)); t("U8910 火力密度态势 抛异常", false, String(e)); t("U8911 火力密度态势 抛异常", false, String(e)); t("U8912 火力密度态势 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
