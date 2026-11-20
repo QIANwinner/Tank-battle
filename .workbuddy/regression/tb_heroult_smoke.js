@@ -24889,6 +24889,23 @@ async function main() {
     t("U8948 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8943 战场危险态势 抛异常", false, String(e)); t("U8944 战场危险态势 抛异常", false, String(e)); t("U8945 战场危险态势 抛异常", false, String(e)); t("U8946 战场危险态势 抛异常", false, String(e)); t("U8947 战场危险态势 抛异常", false, String(e)); t("U8948 战场危险态势 抛异常", false, String(e)); }
 
+
+  // ===== U8949~U8954: 阵存压缩引擎(v1.1.181) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('smCompactWrap'),cnt:!!document.querySelector('#smCompactWrap .smn'),card:(T.smCardHtml()||'').indexOf('流畅度')>=0,s:T.smCompactStateNow([1,2],function(x){return true;})};return JSON.stringify(r);})()"));
+    t("U8949 阵存压缩 pill 已加入（计数 + 结算卡 + 纯函数可用，全存活压缩保留）", o.dom === true && o.cnt === true && o.card === true && o.s.ok === true && o.s.kept === 2 && o.s.removed === 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.smCompactStateNow([],function(x){return true;})};return JSON.stringify(r);})()"));
+    t("U8950 初值 空数组压缩（kept 0 / removed 0）", o1.s.ok === true && o1.s.kept === 0 && o1.s.removed === 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={};const arr=[1,2,3,4,5];const res=T.smCompactStateNow(arr,function(x){return x%2===0;});r={kept:res.kept,removed:res.removed,len:arr.length,first:arr[0],second:arr[1]};return JSON.stringify(r);})()"));
+    t("U8951 正常值 偶数组压缩（kept 2 / removed 3，顺序保留 [2,4]）", o2.kept === 2 && o2.removed === 3 && o2.len === 2 && o2.first === 2 && o2.second === 4, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smCompactStateNow([1,2,3],function(){return false;}),b:(function(){const q=[1,2,3];const s=T.smCompactStateNow(q,function(){return true;});return {kept:s.kept,removed:s.removed,len:q.length};})(),c:(function(){const q=[7];const s=T.smCompactStateNow(q,function(x){return x>0;});return {kept:s.kept,removed:s.removed,len:q.length};})()};return JSON.stringify(r);})()"));
+    t("U8952 边界 全灭 kept0 / 全活 kept3 / 单元素 kept1", o3.a.kept === 0 && o3.a.removed === 3 && o3.b.kept === 3 && o3.b.removed === 0 && o3.b.len === 3 && o3.c.kept === 1 && o3.c.removed === 0 && o3.c.len === 1, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smCompactStateNow(null,function(){return true;}),b:T.smCompactStateNow('x',function(){return true;}),c:T.smCompactStateNow({},function(){return true;}),d:T.smCompactStateNow(5,function(){return true;}),e:(function(){const q=[1,2];const s=T.smCompactStateNow(q,null);return {ok:s.ok,kept:s.kept,len:q.length};})()};return JSON.stringify(r);})()"));
+    t("U8953 非法 null/字符串/对象/数字 → 退化；alive 非函数 → 全部保留", o4.a.ok === false && o4.b.ok === false && o4.c.ok === false && o4.d.ok === false && o4.e.ok === true && o4.e.kept === 2 && o4.e.len === 2, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.smCompactStat(),dom:(function(){const e=document.querySelector('#smCompactWrap .smn');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8954 DOM 与函数一致（统计对象含敌/文/波 + DOM 可写）", o5.s.enemies >= 0 && o5.s.texts >= 0 && o5.s.waves >= 0 && o5.s.stut >= 0 && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8949 阵存压缩引擎 抛异常", false, String(e)); t("U8950 阵存压缩引擎 抛异常", false, String(e)); t("U8951 阵存压缩引擎 抛异常", false, String(e)); t("U8952 阵存压缩引擎 抛异常", false, String(e)); t("U8953 阵存压缩引擎 抛异常", false, String(e)); t("U8954 阵存压缩引擎 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

@@ -1421,6 +1421,8 @@
     <div class="pill m-hide" id="bsComboWrap"><span class="k">🔥</span><span class="tgl">热度</span><span class="bsbar"><i></i></span><span class="bst">0</span><span class="bsd">✓</span></div>
     <div class="pill m-hide" id="bsWaveWrap"><span class="k">🚩</span><span class="tgl">推进</span><span class="bsbar"><i></i></span><span class="bst">0</span><span class="bsd">✓</span></div>
     <div class="pill m-hide" id="bsHurtWrap"><span class="k">⚠️</span><span class="tgl">危险</span><span class="bsbar"><i></i></span><span class="bst">0</span><span class="bsd">✓</span></div>
+    <div class="bsToast" id="smToast"></div>
+    <div class="pill m-hide" id="smCompactWrap"><span class="k">♻️</span><span class="tgl">阵存回收</span><span class="smn">0</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1813,7 +1815,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.180</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.181</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -8027,6 +8029,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_bsCombo = bsComboNow(); const w_bsCombo = document.getElementById('bsComboWrap'); if (w_bsCombo) { const pv_bsCombo = w_bsCombo.dataset.fv || ''; const nv_bsCombo = s_bsCombo.v + '|' + s_bsCombo.next + '|' + s_bsCombo.hit; if (pv_bsCombo !== nv_bsCombo) { w_bsCombo.dataset.fv = nv_bsCombo; w_bsCombo.classList.toggle('bs-hit', !!s_bsCombo.hit); w_bsCombo.classList.toggle('bs-hot', !!s_bsCombo.hot); const bar_bsCombo = w_bsCombo.querySelector('.bsbar i'); if (bar_bsCombo) bar_bsCombo.style.width = (s_bsCombo.pct * 100) + '%'; const vt_bsCombo = w_bsCombo.querySelector('.bst'); if (vt_bsCombo) vt_bsCombo.textContent = Math.floor(s_bsCombo.v) + '/' + (s_bsCombo.next === null ? 'MAX' : s_bsCombo.next); const dk_bsCombo = w_bsCombo.querySelector('.bsd'); if (dk_bsCombo) dk_bsCombo.style.display = s_bsCombo.hit ? 'inline' : 'none'; } }
     const s_bsWave = bsWaveNow(); const w_bsWave = document.getElementById('bsWaveWrap'); if (w_bsWave) { const pv_bsWave = w_bsWave.dataset.fv || ''; const nv_bsWave = s_bsWave.v + '|' + s_bsWave.next + '|' + s_bsWave.hit; if (pv_bsWave !== nv_bsWave) { w_bsWave.dataset.fv = nv_bsWave; w_bsWave.classList.toggle('bs-hit', !!s_bsWave.hit); w_bsWave.classList.toggle('bs-hot', !!s_bsWave.hot); const bar_bsWave = w_bsWave.querySelector('.bsbar i'); if (bar_bsWave) bar_bsWave.style.width = (s_bsWave.pct * 100) + '%'; const vt_bsWave = w_bsWave.querySelector('.bst'); if (vt_bsWave) vt_bsWave.textContent = Math.floor(s_bsWave.v) + '/' + (s_bsWave.next === null ? 'MAX' : s_bsWave.next); const dk_bsWave = w_bsWave.querySelector('.bsd'); if (dk_bsWave) dk_bsWave.style.display = s_bsWave.hit ? 'inline' : 'none'; } }
     const s_bsHurt = bsHurtNow(); const w_bsHurt = document.getElementById('bsHurtWrap'); if (w_bsHurt) { const pv_bsHurt = w_bsHurt.dataset.fv || ''; const nv_bsHurt = s_bsHurt.v + '|' + s_bsHurt.next + '|' + s_bsHurt.hit; if (pv_bsHurt !== nv_bsHurt) { w_bsHurt.dataset.fv = nv_bsHurt; w_bsHurt.classList.toggle('bs-hit', !!s_bsHurt.hit); w_bsHurt.classList.toggle('bs-hot', !!s_bsHurt.hot); const bar_bsHurt = w_bsHurt.querySelector('.bsbar i'); if (bar_bsHurt) bar_bsHurt.style.width = (s_bsHurt.pct * 100) + '%'; const vt_bsHurt = w_bsHurt.querySelector('.bst'); if (vt_bsHurt) vt_bsHurt.textContent = Math.floor(s_bsHurt.v) + '/' + (s_bsHurt.next === null ? 'MAX' : s_bsHurt.next); const dk_bsHurt = w_bsHurt.querySelector('.bsd'); if (dk_bsHurt) dk_bsHurt.style.display = s_bsHurt.hit ? 'inline' : 'none'; } }
+    { const t = smStat.enemies + smStat.texts + smStat.waves; const e = document.querySelector('#smCompactWrap .smn'); if (e) e.textContent = t; }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -23240,6 +23243,110 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // 连杀热度态势（v1.1.178 一百零七辑：bs 机制已在 v1.1.173 引入）
   // 波次推进态势（v1.1.179 一百零七辑：bs 机制已在 v1.1.173 引入）
   // 战场危险态势（v1.1.180 一百零七辑：bs 机制已在 v1.1.173 引入）
+  // —— 流畅度：sm 系列（v1.1.181 一百零八辑）——
+  // smCompact(arr, alive)：写索引法就地压缩，返回 { ok, kept, removed }；非数组 → ok:false；
+  //   alive 非函数 → 全部保留。消除每帧 filter 数组分配。
+  // smFrame(now, last)：两时间戳差 → { ok, ms, fps, jit, rate, txt }；非法/Δt≤0 → 退化。
+  // smBudget(ms)：渲染耗时对 16.7ms 预算 → { ok, level(轻/中/重), pct, txt }。
+  // smStutter(ms, budget)：单帧耗时超 1.5x 预算 → { ok, stutter, ratio, streak }。
+  // smBucketPut(map, key, color, alpha, p, frame)：帧令牌复用桶对象，返回桶；非法 map → null。
+  // smInput(tDown, tApply)：输入延迟 → { ok, ms, txt }；非法/负 → 退化。
+  // smTrend(series, val)：环形缓冲 push（cap 48）→ { ok, arr }；非法 val → ok:false。
+  // smSummary(s)：{ avgFps, stut } → { ok, rating(极佳/良好/一般/吃力), txt }。
+  let smStat = { enemies: 0, texts: 0, waves: 0, stut: 0, created: 0, reused: 0 };
+  let smPrevNow = 0;
+  let smLastFrame = { ok: false, ms: 0, fps: 0, jit: 0, rate: '—', txt: '—' };
+  let smLastRenderMs = 0;
+  let smSeries = [];
+  let smKeyMark = 0;
+  let smInputMs = 0;
+  let smStutLast = 0;
+  let smBucketMap = new Map();
+  let smBucketFrame = 0;
+  function smCompact(arr, alive) {
+    if (!Array.isArray(arr)) return { ok: false, kept: 0, removed: 0 };
+    const aliveFn = (typeof alive === 'function') ? alive : null;
+    let w = 0;
+    for (let i = 0; i < arr.length; i++) {
+      const keep = aliveFn ? !!aliveFn(arr[i], i) : true;
+      if (keep) { if (w !== i) arr[w] = arr[i]; w++; }
+    }
+    const removed = arr.length - w;
+    arr.length = w;
+    return { ok: true, kept: w, removed: removed };
+  }
+  function smFrame(now, last) {
+    const n = Number(now), l = Number(last);
+    if (!isFinite(n) || !isFinite(l)) return { ok: false, ms: 0, fps: 0, jit: 0, rate: '—', txt: '—' };
+    const dt = n - l;
+    if (dt <= 0) return { ok: false, ms: 0, fps: 0, jit: 0, rate: '—', txt: '—' };
+    const fps = 1000 / dt;
+    const rate = fps >= 50 ? '流畅' : fps >= 30 ? '正常' : fps >= 20 ? '吃力' : '卡顿';
+    return { ok: true, ms: dt, fps: fps, jit: Math.abs(dt - 16.7), rate: rate, txt: Math.round(fps) + 'FPS' };
+  }
+  function smBudget(ms) {
+    const m = Number(ms);
+    if (!isFinite(m) || m < 0) return { ok: false, level: '—', pct: 0, txt: '—' };
+    const pct = Math.min(1, m / 16.7);
+    const level = pct < 0.5 ? '轻' : pct < 0.8 ? '中' : '重';
+    return { ok: true, level: level, pct: pct, txt: level + '负载' + Math.round(pct * 100) + '%' };
+  }
+  function smStutter(ms, budget) {
+    const m = Number(ms);
+    if (!isFinite(m) || m <= 0) return { ok: false, stutter: false, ratio: 0, streak: 0 };
+    const b = (isFinite(Number(budget)) && Number(budget) > 0) ? Number(budget) : 16.7;
+    const ratio = m / b;
+    return { ok: true, stutter: ratio >= 1.5, ratio: ratio, streak: ratio >= 1.5 ? 1 : 0 };
+  }
+  function smBucketPut(map, key, color, alpha, p, frame) {
+    if (!(map instanceof Map)) return null;
+    const f = isFinite(Number(frame)) ? Number(frame) : 0;
+    let b = map.get(key);
+    if (b && b.frame === f) { b.color = color; b.alpha = alpha; b.rects.push(p); smStat.reused++; return b; }
+    if (!b) { b = { color: color, alpha: alpha, rects: [], frame: f }; map.set(key, b); smStat.created++; }
+    else { b.color = color; b.alpha = alpha; b.rects.length = 0; b.frame = f; smStat.reused++; }
+    b.rects.push(p);
+    return b;
+  }
+  function smInput(tDown, tApply) {
+    const a = Number(tDown), b = Number(tApply);
+    if (!isFinite(a) || !isFinite(b)) return { ok: false, ms: 0, txt: '—' };
+    const ms = b - a;
+    if (ms < 0) return { ok: false, ms: 0, txt: '—' };
+    return { ok: true, ms: ms, txt: Math.round(ms) + 'ms' };
+  }
+  function smTrend(series, val) {
+    const v = Number(val);
+    if (!isFinite(v)) return { ok: false, arr: Array.isArray(series) ? series.slice() : [] };
+    const s = Array.isArray(series) ? series : [];
+    s.push(v);
+    if (s.length > 48) s.shift();
+    return { ok: true, arr: s };
+  }
+  function smSummary(s) {
+    if (!s || typeof s !== 'object') return { ok: false, rating: '—', txt: '—' };
+    const avg = Number(s.avgFps), st = Number(s.stut);
+    if (!isFinite(avg) || avg <= 0) return { ok: false, rating: '—', txt: '—' };
+    const rating = (avg >= 55 && st <= 3) ? '极佳' : avg >= 45 ? '良好' : avg >= 30 ? '一般' : '吃力';
+    return { ok: true, rating: rating, txt: rating + '·' + Math.round(avg) + 'FPS' };
+  }
+  function smToastShow(txt) {
+    const e = document.getElementById('smToast');
+    if (e) { e.textContent = txt; e.classList.remove('sm-fade'); void e.offsetWidth; e.classList.add('sm-fade'); }
+  }
+  function smCardHtml() {
+    const avg = smLastFrame.ok ? smLastFrame.fps : 0;
+    const sum = smSummary({ avgFps: avg, stut: smStat.stut });
+    const tot = smStat.enemies + smStat.texts + smStat.waves;
+    return '<div class="stat2">流畅度 <b>' + sum.rating + '</b> · ' + Math.round(avg) + 'FPS · 卡顿 ' + smStat.stut + ' · 回收 ' + tot + ' · 输入 ' + Math.round(smInputMs) + 'ms</div>';
+  }
+  function smReset() {
+    smStat = { enemies: 0, texts: 0, waves: 0, stut: 0, created: 0, reused: 0 };
+    smPrevNow = 0; smLastFrame = { ok: false, ms: 0, fps: 0, jit: 0, rate: '—', txt: '—' };
+    smLastRenderMs = 0; smSeries = []; smKeyMark = 0; smInputMs = 0; smStutLast = 0;
+    smBucketFrame = 0;
+    const e = document.getElementById('smToast'); if (e) e.classList.remove('sm-fade');
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -23352,7 +23459,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
                 return a ? `<span class="chip">${a.icon} ${a.name}</span>` : '';
               }).join('')}</div>`
             : (achUnlocked.size ? `<div class="achrow">已解锁成就 <b>${achUnlocked.size}</b>/${ACHIEVE.length}</div>` : ''))
-        + perfHealthCardHtml() + bsCardHtml()
+        + perfHealthCardHtml() + bsCardHtml() + smCardHtml()
       btnPlay.textContent = playBtnText('replay');
       btnShare.style.display = 'block';      // 结算页可分享成绩、发起挑战
       btnReport.style.display = 'block';     // 生成战绩图
@@ -23383,6 +23490,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (startLv && startLv > 1) level = Math.min(startLv | 0, 999);
     // —— v0.2.5 战绩档案：本局计时清零 ——
     playSecRun = 0;
+    smReset();
     bsRoundReset();
     perfHealthReset();
     dailyRng = dailyMode ? mulberry32(dailySeed()) : null;
@@ -25104,7 +25212,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.180', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.181', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -27520,6 +27628,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       bsComboStateNow: (v, th, d, lb) => bsHit(v, th, d, lb), bsComboNow: () => bsComboNow(), bsComboDomNow: () => { const e = document.querySelector('#bsComboWrap .bst'); return e ? e.textContent : null; },
       bsWaveStateNow: (v, th, d, lb) => bsHit(v, th, d, lb), bsWaveNow: () => bsWaveNow(), bsWaveDomNow: () => { const e = document.querySelector('#bsWaveWrap .bst'); return e ? e.textContent : null; },
       bsHurtStateNow: (v, th, d, lb) => bsHit(v, th, d, lb), bsHurtNow: () => bsHurtNow(), bsHurtDomNow: () => { const e = document.querySelector('#bsHurtWrap .bst'); return e ? e.textContent : null; },
+      smCompactStateNow: (a, al) => smCompact(a, al), smCompactStat: () => ({ enemies: smStat.enemies, texts: smStat.texts, waves: smStat.waves, stut: smStat.stut }), smCompactDom: () => { const e = document.querySelector('#smCompactWrap .smn'); return e ? e.textContent : null; }, smCardHtml: () => smCardHtml(),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
