@@ -8083,4 +8083,13 @@ html.compact-hud #hud .m-hide { display:none !important; }
   #bsEffWrap.bs-hot .bsbar i { background:#f44336; }
   #bsEffWrap.bs-hot .bst { color:#f44336; }
   #bsEffWrap.bs-hot { animation: bsPulse .5s ease-in-out infinite alternate; }
+  #bsComboWrap .bsbar { display:inline-block; width:58px; height:6px; background:#333; border:1px solid #555; border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #bsComboWrap .bsbar i { display:block; height:100%; width:0; background:#00bcd4; transition:width .15s linear; }
+  #bsComboWrap .bst { font-size:11px; color:#fff; font-weight:700; margin:0 2px; }
+  #bsComboWrap .bsd { display:none; font-size:11px; color:#2ecc71; margin:0 3px; font-weight:700; }
+  #bsComboWrap.bs-hit .bsbar i { background:#ff9800; }
+  #bsComboWrap.bs-hit .bst { color:#ff9800; }
+  #bsComboWrap.bs-hot .bsbar i { background:#f44336; }
+  #bsComboWrap.bs-hot .bst { color:#f44336; }
+  #bsComboWrap.bs-hot { animation: bsPulse .5s ease-in-out infinite alternate; }
 
