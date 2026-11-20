@@ -24923,6 +24923,23 @@ async function main() {
     t("U8960 DOM 与函数一致（帧状态可读 + DOM 可写）", (o5.now.ok === true || o5.now.ok === false) && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8955 帧时仪表 抛异常", false, String(e)); t("U8956 帧时仪表 抛异常", false, String(e)); t("U8957 帧时仪表 抛异常", false, String(e)); t("U8958 帧时仪表 抛异常", false, String(e)); t("U8959 帧时仪表 抛异常", false, String(e)); t("U8960 帧时仪表 抛异常", false, String(e)); }
 
+
+  // ===== U8961~U8966: 帧预算分级(v1.1.183) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('smBudgetWrap'),bar:!!document.querySelector('#smBudgetWrap .smbar i'),s:T.smBudgetStateNow(8)};return JSON.stringify(r);})()"));
+    t("U8961 渲染负载 pill 已加入（进度条 + 函数可用，8ms → 轻）", o.dom === true && o.bar === true && o.s.ok === true && o.s.level === '轻', JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smBudgetStateNow(-1),b:T.smBudgetStateNow(NaN)};return JSON.stringify(r);})()"));
+    t("U8962 初值 负值/NaN → 退化", o1.a.ok === false && o1.a.txt === '—' && o1.b.ok === false && o1.b.txt === '—', JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smBudgetStateNow(8),b:T.smBudgetStateNow(12),c:T.smBudgetStateNow(15)};return JSON.stringify(r);})()"));
+    t("U8963 正常值 8ms轻 / 12ms中 / 15ms重（pct 递增）", o2.a.level === '轻' && o2.b.level === '中' && o2.c.level === '重' && o2.a.pct < o2.b.pct && o2.b.pct < o2.c.pct, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smBudgetStateNow(8.349),b:T.smBudgetStateNow(8.35),c:T.smBudgetStateNow(13.359),d:T.smBudgetStateNow(13.36)};return JSON.stringify(r);})()"));
+    t("U8964 边界 8.349轻 / 8.35中 / 13.359中 / 13.36重", o3.a.level === '轻' && o3.b.level === '中' && o3.c.level === '中' && o3.d.level === '重', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smBudgetStateNow(-1),b:T.smBudgetStateNow(NaN),c:T.smBudgetStateNow('x')};return JSON.stringify(r);})()"));
+    t("U8965 非法 负值/NaN/字符串 → 退化", o4.a.ok === false && o4.b.ok === false && o4.c.ok === false, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={n:T.smBudgetNow(),dom:(function(){const e=document.querySelector('#smBudgetWrap .smf');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8966 DOM 与函数一致（渲染耗时可读 + DOM 可写）", isFinite(o5.n) && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8961 帧预算分级 抛异常", false, String(e)); t("U8962 帧预算分级 抛异常", false, String(e)); t("U8963 帧预算分级 抛异常", false, String(e)); t("U8964 帧预算分级 抛异常", false, String(e)); t("U8965 帧预算分级 抛异常", false, String(e)); t("U8966 帧预算分级 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
