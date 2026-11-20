@@ -24940,6 +24940,40 @@ async function main() {
     t("U8966 DOM 与函数一致（渲染耗时可读 + DOM 可写）", isFinite(o5.n) && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8961 帧预算分级 抛异常", false, String(e)); t("U8962 帧预算分级 抛异常", false, String(e)); t("U8963 帧预算分级 抛异常", false, String(e)); t("U8964 帧预算分级 抛异常", false, String(e)); t("U8965 帧预算分级 抛异常", false, String(e)); t("U8966 帧预算分级 抛异常", false, String(e)); }
 
+
+  // ===== U8967~U8972: 卡顿侦测(v1.1.184) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('smStutWrap'),cnt:!!document.querySelector('#smStutWrap .smn'),toast:!!document.getElementById('smToast'),s:T.smStutterStateNow(16.7,16.7)};return JSON.stringify(r);})()"));
+    t("U8967 卡顿 pill 已加入（计数 + 卡顿 toast + 函数可用，16.7ms → 不卡顿）", o.dom === true && o.cnt === true && o.toast === true && o.s.ok === true && o.s.stutter === false, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smStutterStateNow(0,16.7),b:T.smStutterStateNow(-5,16.7)};return JSON.stringify(r);})()"));
+    t("U8968 初值 0/负值 → 退化", o1.a.ok === false && o1.a.stutter === false && o1.b.ok === false && o1.b.stutter === false, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smStutterStateNow(16.7,16.7),b:T.smStutterStateNow(25.1,16.7)};return JSON.stringify(r);})()"));
+    t("U8969 正常值 16.7ms不卡 / 25.1ms卡（1.5x）", o2.a.stutter === false && o2.a.ratio < 1.5 && o2.b.stutter === true && o2.b.ratio >= 1.5, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smStutterStateNow(24.9,16.7),b:T.smStutterStateNow(25.05,16.7),c:T.smStutterStateNow(33.4,16.7),d:T.smStutterStateNow(16.7,20)};return JSON.stringify(r);})()"));
+    t("U8970 边界 24.9不卡 / 25.05卡 / 33.4卡(2x) / 自定义预算20时不卡", o3.a.stutter === false && o3.b.stutter === true && o3.c.stutter === true && o3.c.ratio > 1.9 && o3.d.stutter === false && o3.d.ratio < 1, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smStutterStateNow(0,16.7),b:T.smStutterStateNow(NaN,16.7)};return JSON.stringify(r);})()"));
+    t("U8971 非法 0/NaN → 退化", o4.a.ok === false && o4.b.ok === false, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={n:T.smStutterNow(),dom:(function(){const e=document.querySelector('#smStutWrap .smn');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8972 DOM 与函数一致（卡顿计数可读 + DOM 可写）", typeof o5.n === 'number' && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8967 卡顿侦测 抛异常", false, String(e)); t("U8968 卡顿侦测 抛异常", false, String(e)); t("U8969 卡顿侦测 抛异常", false, String(e)); t("U8970 卡顿侦测 抛异常", false, String(e)); t("U8971 卡顿侦测 抛异常", false, String(e)); t("U8972 卡顿侦测 抛异常", false, String(e)); }
+
+
+  // ===== U8985~U8990: 帧时趋势图(v1.1.187) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('smTrendWrap'),spark:document.querySelector('#smTrendWrap .smspark')?document.querySelector('#smTrendWrap .smspark').children.length:0,s:T.smTrendStateNow([],5)};return JSON.stringify(r);})()"));
+    t("U8985 趋势 pill 已加入（48 根 sparkline 条 + 函数可用，首值入队）", o.dom === true && o.spark === 48 && o.s.ok === true && o.s.arr.length === 1 && o.s.arr[0] === 5, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.smTrendStateNow([],5)};return JSON.stringify(r);})()"));
+    t("U8986 初值 空序列入队（[5]）", o1.s.ok === true && o1.s.arr.length === 1 && o1.s.arr[0] === 5, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.smTrendStateNow([1,2,3],4)};return JSON.stringify(r);})()"));
+    t("U8987 正常值 顺序追加（[1,2,3,4]）", o2.s.ok === true && o2.s.arr.length === 4 && o2.s.arr[3] === 4 && o2.s.arr[0] === 1, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r=(function(){const big=[];for(let i=0;i<48;i++)big.push(i);const s=T.smTrendStateNow(big,99);return {len:s.arr.length,first:s.arr[0],last:s.arr[s.arr.length-1]};})();return JSON.stringify(r);})()"));
+    t("U8988 边界 超 48 截断（长度恒 48，丢最旧留最新）", o3.len === 48 && o3.first === 1 && o3.last === 99, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smTrendStateNow([],NaN),b:T.smTrendStateNow(null,5)};return JSON.stringify(r);})()"));
+    t("U8989 非法 NaN 值退化 / 非数组入队可建（null → [5]）", o4.a.ok === false && o4.a.arr.length === 0 && o4.b.ok === true && o4.b.arr.length === 1 && o4.b.arr[0] === 5, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.smTrendSeries(),n:(function(){const e=document.querySelector('#smTrendWrap .smspark');return e?e.children.length:0;})()};return JSON.stringify(r);})()"));
+    t("U8990 DOM 与函数一致（序列可读 + sparkline 48 条在 DOM）", Array.isArray(o5.s) && o5.n === 48, JSON.stringify(o5));
+  } catch (e) { t("U8985 帧时趋势图 抛异常", false, String(e)); t("U8986 帧时趋势图 抛异常", false, String(e)); t("U8987 帧时趋势图 抛异常", false, String(e)); t("U8988 帧时趋势图 抛异常", false, String(e)); t("U8989 帧时趋势图 抛异常", false, String(e)); t("U8990 帧时趋势图 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
