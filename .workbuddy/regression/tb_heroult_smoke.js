@@ -24906,6 +24906,23 @@ async function main() {
     t("U8954 DOM 与函数一致（统计对象含敌/文/波 + DOM 可写）", o5.s.enemies >= 0 && o5.s.texts >= 0 && o5.s.waves >= 0 && o5.s.stut >= 0 && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8949 阵存压缩引擎 抛异常", false, String(e)); t("U8950 阵存压缩引擎 抛异常", false, String(e)); t("U8951 阵存压缩引擎 抛异常", false, String(e)); t("U8952 阵存压缩引擎 抛异常", false, String(e)); t("U8953 阵存压缩引擎 抛异常", false, String(e)); t("U8954 阵存压缩引擎 抛异常", false, String(e)); }
 
+
+  // ===== U8955~U8960: 帧时仪表(v1.1.182) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('smFrameWrap'),f:!!document.querySelector('#smFrameWrap .smf'),s:T.smFrameStateNow(1016.7,1000)};return JSON.stringify(r);})()"));
+    t("U8955 帧时 pill 已加入（值位 + 函数可用，16.7ms → 流畅）", o.dom === true && o.f === true && o.s.ok === true && o.s.rate === '流畅' && o.s.ms > 16.5 && o.s.ms < 16.9, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smFrameStateNow(NaN,NaN),b:T.smFrameStateNow(1000,1000)};return JSON.stringify(r);})()"));
+    t("U8956 初值 非法时间戳/Δt=0 → 退化", o1.a.ok === false && o1.a.txt === '—' && o1.b.ok === false && o1.b.txt === '—', JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.smFrameStateNow(1016.7,1000)};return JSON.stringify(r);})()"));
+    t("U8957 正常值 16.7ms → ~59.9FPS 流畅（txt 含 FPS）", o2.s.ok === true && o2.s.fps > 59 && o2.s.fps < 61 && o2.s.rate === '流畅' && o2.s.txt.indexOf('FPS') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smFrameStateNow(1025,1000),b:T.smFrameStateNow(1033.4,1000),c:T.smFrameStateNow(1050,1000),d:T.smFrameStateNow(1060,1000)};return JSON.stringify(r);})()"));
+    t("U8958 边界 25ms→40FPS正常 / 33.4ms→29.9FPS吃力 / 50ms→20FPS吃力 / 60ms→16.7FPS卡顿", o3.a.ok === true && o3.a.rate === '正常' && o3.b.rate === '吃力' && o3.c.rate === '吃力' && o3.d.rate === '卡顿', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smFrameStateNow(null,undefined),b:T.smFrameStateNow(1000,1016.7)};return JSON.stringify(r);})()"));
+    t("U8959 非法 null/undefined/负 Δt → 退化", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={now:T.smFrameNow(),dom:(function(){const e=document.querySelector('#smFrameWrap .smf');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8960 DOM 与函数一致（帧状态可读 + DOM 可写）", (o5.now.ok === true || o5.now.ok === false) && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8955 帧时仪表 抛异常", false, String(e)); t("U8956 帧时仪表 抛异常", false, String(e)); t("U8957 帧时仪表 抛异常", false, String(e)); t("U8958 帧时仪表 抛异常", false, String(e)); t("U8959 帧时仪表 抛异常", false, String(e)); t("U8960 帧时仪表 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
