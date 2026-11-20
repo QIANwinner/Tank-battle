@@ -8065,4 +8065,13 @@ html.compact-hud #hud .m-hide { display:none !important; }
   #bsPartWrap.bs-hot .bsbar i { background:#f44336; }
   #bsPartWrap.bs-hot .bst { color:#f44336; }
   #bsPartWrap.bs-hot { animation: bsPulse .5s ease-in-out infinite alternate; }
+  #bsDpsWrap .bsbar { display:inline-block; width:58px; height:6px; background:#333; border:1px solid #555; border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #bsDpsWrap .bsbar i { display:block; height:100%; width:0; background:#00bcd4; transition:width .15s linear; }
+  #bsDpsWrap .bst { font-size:11px; color:#fff; font-weight:700; margin:0 2px; }
+  #bsDpsWrap .bsd { display:none; font-size:11px; color:#2ecc71; margin:0 3px; font-weight:700; }
+  #bsDpsWrap.bs-hit .bsbar i { background:#ff9800; }
+  #bsDpsWrap.bs-hit .bst { color:#ff9800; }
+  #bsDpsWrap.bs-hot .bsbar i { background:#f44336; }
+  #bsDpsWrap.bs-hot .bst { color:#f44336; }
+  #bsDpsWrap.bs-hot { animation: bsPulse .5s ease-in-out infinite alternate; }
 

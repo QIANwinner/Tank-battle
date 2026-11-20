@@ -1416,6 +1416,7 @@
     <div class="pill m-hide" id="bsEnemyWrap"><span class="k">💀</span><span class="tgl">敌军</span><span class="bsbar"><i></i></span><span class="bst">0</span><span class="bsd">✓</span></div>
     <div class="pill m-hide" id="bsBulletWrap"><span class="k">💥</span><span class="tgl">火力</span><span class="bsbar"><i></i></span><span class="bst">0</span><span class="bsd">✓</span></div>
     <div class="pill m-hide" id="bsPartWrap"><span class="k">✨</span><span class="tgl">爆炸</span><span class="bsbar"><i></i></span><span class="bst">0</span><span class="bsd">✓</span></div>
+    <div class="pill m-hide" id="bsDpsWrap"><span class="k">🔫</span><span class="tgl">节奏</span><span class="bsbar"><i></i></span><span class="bst">0</span><span class="bsd">✓</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1808,7 +1809,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.175</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.176</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -8017,6 +8018,7 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_bsEnemy = bsEnemyNow(); const w_bsEnemy = document.getElementById('bsEnemyWrap'); if (w_bsEnemy) { const pv_bsEnemy = w_bsEnemy.dataset.fv || ''; const nv_bsEnemy = s_bsEnemy.v + '|' + s_bsEnemy.next + '|' + s_bsEnemy.hit; if (pv_bsEnemy !== nv_bsEnemy) { w_bsEnemy.dataset.fv = nv_bsEnemy; w_bsEnemy.classList.toggle('bs-hit', !!s_bsEnemy.hit); w_bsEnemy.classList.toggle('bs-hot', !!s_bsEnemy.hot); const bar_bsEnemy = w_bsEnemy.querySelector('.bsbar i'); if (bar_bsEnemy) bar_bsEnemy.style.width = (s_bsEnemy.pct * 100) + '%'; const vt_bsEnemy = w_bsEnemy.querySelector('.bst'); if (vt_bsEnemy) vt_bsEnemy.textContent = Math.floor(s_bsEnemy.v) + '/' + (s_bsEnemy.next === null ? 'MAX' : s_bsEnemy.next); const dk_bsEnemy = w_bsEnemy.querySelector('.bsd'); if (dk_bsEnemy) dk_bsEnemy.style.display = s_bsEnemy.hit ? 'inline' : 'none'; } }
     const s_bsBullet = bsBulletNow(); const w_bsBullet = document.getElementById('bsBulletWrap'); if (w_bsBullet) { const pv_bsBullet = w_bsBullet.dataset.fv || ''; const nv_bsBullet = s_bsBullet.v + '|' + s_bsBullet.next + '|' + s_bsBullet.hit; if (pv_bsBullet !== nv_bsBullet) { w_bsBullet.dataset.fv = nv_bsBullet; w_bsBullet.classList.toggle('bs-hit', !!s_bsBullet.hit); w_bsBullet.classList.toggle('bs-hot', !!s_bsBullet.hot); const bar_bsBullet = w_bsBullet.querySelector('.bsbar i'); if (bar_bsBullet) bar_bsBullet.style.width = (s_bsBullet.pct * 100) + '%'; const vt_bsBullet = w_bsBullet.querySelector('.bst'); if (vt_bsBullet) vt_bsBullet.textContent = Math.floor(s_bsBullet.v) + '/' + (s_bsBullet.next === null ? 'MAX' : s_bsBullet.next); const dk_bsBullet = w_bsBullet.querySelector('.bsd'); if (dk_bsBullet) dk_bsBullet.style.display = s_bsBullet.hit ? 'inline' : 'none'; } }
     const s_bsPart = bsPartNow(); const w_bsPart = document.getElementById('bsPartWrap'); if (w_bsPart) { const pv_bsPart = w_bsPart.dataset.fv || ''; const nv_bsPart = s_bsPart.v + '|' + s_bsPart.next + '|' + s_bsPart.hit; if (pv_bsPart !== nv_bsPart) { w_bsPart.dataset.fv = nv_bsPart; w_bsPart.classList.toggle('bs-hit', !!s_bsPart.hit); w_bsPart.classList.toggle('bs-hot', !!s_bsPart.hot); const bar_bsPart = w_bsPart.querySelector('.bsbar i'); if (bar_bsPart) bar_bsPart.style.width = (s_bsPart.pct * 100) + '%'; const vt_bsPart = w_bsPart.querySelector('.bst'); if (vt_bsPart) vt_bsPart.textContent = Math.floor(s_bsPart.v) + '/' + (s_bsPart.next === null ? 'MAX' : s_bsPart.next); const dk_bsPart = w_bsPart.querySelector('.bsd'); if (dk_bsPart) dk_bsPart.style.display = s_bsPart.hit ? 'inline' : 'none'; } }
+    const s_bsDps = bsDpsNow(); const w_bsDps = document.getElementById('bsDpsWrap'); if (w_bsDps) { const pv_bsDps = w_bsDps.dataset.fv || ''; const nv_bsDps = s_bsDps.v + '|' + s_bsDps.next + '|' + s_bsDps.hit; if (pv_bsDps !== nv_bsDps) { w_bsDps.dataset.fv = nv_bsDps; w_bsDps.classList.toggle('bs-hit', !!s_bsDps.hit); w_bsDps.classList.toggle('bs-hot', !!s_bsDps.hot); const bar_bsDps = w_bsDps.querySelector('.bsbar i'); if (bar_bsDps) bar_bsDps.style.width = (s_bsDps.pct * 100) + '%'; const vt_bsDps = w_bsDps.querySelector('.bst'); if (vt_bsDps) vt_bsDps.textContent = Math.floor(s_bsDps.v) + '/' + (s_bsDps.next === null ? 'MAX' : s_bsDps.next); const dk_bsDps = w_bsDps.querySelector('.bsd'); if (dk_bsDps) dk_bsDps.style.display = s_bsDps.hit ? 'inline' : 'none'; } }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -23225,6 +23227,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   function bsHurtNow() { return bsEval('hurt', [5, 15, 40, 80], '危险'); }
   // 火力密度态势（v1.1.174 一百零七辑：bs 机制已在 v1.1.173 引入）
   // 爆炸密度态势（v1.1.175 一百零七辑：bs 机制已在 v1.1.173 引入）
+  // 火力节奏态势（v1.1.176 一百零七辑：bs 机制已在 v1.1.173 引入）
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -25089,7 +25092,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.175', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.176', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -27500,6 +27503,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       bsEnemyStateNow: (v, th, d, lb) => bsHit(v, th, d, lb), bsEnemyNow: () => bsEnemyNow(), bsEnemyDomNow: () => { const e = document.querySelector('#bsEnemyWrap .bst'); return e ? e.textContent : null; }, bsCardHtml: () => bsCardHtml(),
       bsBulletStateNow: (v, th, d, lb) => bsHit(v, th, d, lb), bsBulletNow: () => bsBulletNow(), bsBulletDomNow: () => { const e = document.querySelector('#bsBulletWrap .bst'); return e ? e.textContent : null; },
       bsPartStateNow: (v, th, d, lb) => bsHit(v, th, d, lb), bsPartNow: () => bsPartNow(), bsPartDomNow: () => { const e = document.querySelector('#bsPartWrap .bst'); return e ? e.textContent : null; },
+      bsDpsStateNow: (v, th, d, lb) => bsHit(v, th, d, lb), bsDpsNow: () => bsDpsNow(), bsDpsDomNow: () => { const e = document.querySelector('#bsDpsWrap .bst'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
