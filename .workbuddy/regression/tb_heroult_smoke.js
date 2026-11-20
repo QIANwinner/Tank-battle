@@ -24745,6 +24745,24 @@ async function main() {
     t("U8900 真实状态一致性（stat.live===bullets.length；rate 0..100 整数；快照 level 四态；文案对象完整）", o5.same === true && o5.rateOk === true && o5.hOk === true && o5.lblOk === true && (o5.pill === null || typeof o5.pill === 'boolean'), JSON.stringify(o5));
   } catch (e) { t("U8895 子弹对象池 + 性能健康报告 抛异常", false, String(e)); t("U8896 子弹对象池 + 性能健康报告 抛异常", false, String(e)); t("U8897 子弹对象池 + 性能健康报告 抛异常", false, String(e)); t("U8898 子弹对象池 + 性能健康报告 抛异常", false, String(e)); t("U8899 子弹对象池 + 性能健康报告 抛异常", false, String(e)); t("U8900 子弹对象池 + 性能健康报告 抛异常", false, String(e)); }
 
+
+  // ===== U8901~U8906: 敌军规模态势(v1.1.173) =====
+  try {
+    const L = [4,8,15,25];
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('bsEnemyWrap'),bar:!!document.querySelector('#bsEnemyWrap .bsbar i'),v:!!document.querySelector('#bsEnemyWrap .bst'),d:!!document.querySelector('#bsEnemyWrap .bsd'),toast:!!document.getElementById('bsToast'),card:(T.bsCardHtml()||'').indexOf('战场态势达成')>=0,s:T.bsEnemyStateNow(6,[4,8,15,25],[false,false,false,false],'敌军')};return JSON.stringify(r);})()"));
+    t("U8901 敌军规模态势 态势 pill 已加入（进度条 + 值 + 达成勾 + 共享 toast + 结算卡 + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.d === true && o.toast === true && o.card === true && o.s.ok === true && o.s.hit === true && o.s.idx === 0 && o.s.txt.indexOf('敌军') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsEnemyStateNow(0,[4,8,15,25],[false,false,false,false],'敌军')};return JSON.stringify(r);})()"));
+    t("U8902 初值 敌军规模态势（0 → 未达成，下一档为 L1，文案含标签）", o1.s.ok === true && o1.s.hit === false && o1.s.idx === -1 && o1.s.t === null && o1.s.next === L[0] && o1.s.txt.indexOf('敌军') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsEnemyStateNow(6,[4,8,15,25],[false,false,false,false],'敌军')};return JSON.stringify(r);})()"));
+    t("U8903 正常值 敌军规模态势（中段跨过 L1 → 命中第 1 档，值 = L1）", o2.s.ok === true && o2.s.hit === true && o2.s.idx === 0 && o2.s.t === L[0] && o2.s.txt === '敌军 ' + L[0], JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.bsEnemyStateNow(3.999,[4,8,15,25],[false,false,false,false],'敌军'),b:T.bsEnemyStateNow(4,[4,8,15,25],[false,false,false,false],'敌军'),c:T.bsEnemyStateNow(8,[4,8,15,25],[true,false,false,false],'敌军'),d:T.bsEnemyStateNow(25,[4,8,15,25],[true,true,true,false],'敌军'),e:T.bsEnemyStateNow(25,[4,8,15,25],[true,true,true,true],'敌军'),f:T.bsEnemyStateNow(2,[4,8,15,25],[false,false,false,false],'敌军')};return JSON.stringify(r);})()"));
+    t("U8904 边界 敌军规模态势（阈值下方不中/恰在阈值中/逐档推进/全达成不中）", o3.a.hit === false && o3.a.next === L[0] && o3.b.hit === true && o3.b.idx === 0 && o3.c.hit === true && o3.c.idx === 1 && o3.c.t === L[1] && o3.d.hit === true && o3.d.idx === 3 && o3.d.t === L[3] && o3.e.hit === false && o3.e.next === null && o3.f.hit === false && o3.f.next === L[0], JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.bsEnemyStateNow(null,[4,8,15,25],[false,false,false,false],'敌军'),b:T.bsEnemyStateNow(NaN,[4,8,15,25],[false,false,false,false],'敌军'),c:T.bsEnemyStateNow(-5,[4,8,15,25],[false,false,false,false],'敌军'),d:T.bsEnemyStateNow([1],[4,8,15,25],[false,false,false,false],'敌军'),e:T.bsEnemyStateNow(5,[], [false,false,false,false],'敌军'),f:T.bsEnemyStateNow(5,[5,5,8,20],[false,false,false,false],'敌军'),g:T.bsEnemyStateNow(5,[0,8,20,50],[false,false,false,false],'敌军'),h:T.bsEnemyStateNow(5,[5,8,20,NaN],[false,false,false,false],'敌军'),i:T.bsEnemyStateNow(5,[4,8,15,25],[true],'敌军')};return JSON.stringify(r);})()"));
+    t("U8905 非法 null/NaN/负值/数组/空阶梯/非升序/非正/NaN/done 长度 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsEnemyNow(),dom:(function(){const e=document.querySelector('#bsEnemyWrap .bst');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8906 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8901 敌军规模态势 抛异常", false, String(e)); t("U8902 敌军规模态势 抛异常", false, String(e)); t("U8903 敌军规模态势 抛异常", false, String(e)); t("U8904 敌军规模态势 抛异常", false, String(e)); t("U8905 敌军规模态势 抛异常", false, String(e)); t("U8906 敌军规模态势 抛异常", false, String(e)); }
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

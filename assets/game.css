@@ -8036,4 +8036,15 @@ html.compact-hud #hud .m-hide { display:none !important; }
   #perfHealthWrap.h-good .wval { color:#2ecc71; }
   #perfHealthWrap.h-bad .wval { color:#e74c3c; }
   #perfHealthWrap { border-color:#16a085; }
+  #bsToast { position:fixed; top:46px; left:50%; transform:translateX(-50%); z-index:9999; background:rgba(12,26,38,.94); border:1px solid #00bcd4; color:#00bcd4; font-size:14px; font-weight:700; padding:7px 18px; border-radius:20px; pointer-events:none; opacity:0; transition:opacity .25s ease, transform .25s ease; box-shadow:0 4px 18px rgba(0,0,0,.45); }
+  #bsToast.bs-fade { opacity:1; transform:translateX(-50%) translateY(2px); }
+  @keyframes bsPulse { from { opacity:.55; } to { opacity:1; } }  #bsEnemyWrap .bsbar { display:inline-block; width:58px; height:6px; background:#333; border:1px solid #555; border-radius:3px; overflow:hidden; vertical-align:middle; margin:0 4px; }
+  #bsEnemyWrap .bsbar i { display:block; height:100%; width:0; background:#00bcd4; transition:width .15s linear; }
+  #bsEnemyWrap .bst { font-size:11px; color:#fff; font-weight:700; margin:0 2px; }
+  #bsEnemyWrap .bsd { display:none; font-size:11px; color:#2ecc71; margin:0 3px; font-weight:700; }
+  #bsEnemyWrap.bs-hit .bsbar i { background:#ff9800; }
+  #bsEnemyWrap.bs-hit .bst { color:#ff9800; }
+  #bsEnemyWrap.bs-hot .bsbar i { background:#f44336; }
+  #bsEnemyWrap.bs-hot .bst { color:#f44336; }
+  #bsEnemyWrap.bs-hot { animation: bsPulse .5s ease-in-out infinite alternate; }
 
