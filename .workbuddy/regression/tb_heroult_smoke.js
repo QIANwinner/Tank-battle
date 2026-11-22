@@ -25177,6 +25177,58 @@ async function main() {
       T.quit(); T.startGame(); const fresh=T.senseRoundNow(); T.quit(); return ok && fresh.sounds===0 && fresh.returns===0 && card.hidden;
     });
 
+  // U9045–U9050: cold start and frame-paced battle HUD
+  await senseCheck("U9045 菜单不刷新被遮住的战斗统计", async (T,$) => {
+    T.quit();
+    const el = $('fxText'), prior = el.textContent, next = T.hudScheduleNow().next;
+    try {
+      el.textContent = 'probe';
+      for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
+      return el.textContent === 'probe' && T.hudScheduleNow().next === next && getComputedStyle($('fxWrap')).display === 'none';
+    } finally { el.textContent = prior; }
+  });
+  await senseCheck("U9046 菜单按键设置无需等待战斗仪表", (T,$) => {
+    const old = T.customFireKeyNow(), btn = $('fireKeyBtn');
+    try { btn.click(); return old !== T.customFireKeyNow() && btn.textContent === T.fireKeySummaryNow(); }
+    finally { T.setCustomFireKeyNow(old); T.showOverlay('title'); }
+  });
+  await senseCheck("U9047 开局先显示正确的生命、关卡和分数", (T,$) => {
+    T.startGame();
+    return !$('hud').classList.contains('hud-covered') && T.hudScheduleNow().next === 0 &&
+      $('score').textContent === '0' && $('level').textContent === '1' &&
+      $('lives').querySelectorAll('span:not(.off)').length === T.livesNow();
+  });
+  await senseCheck("U9048 真实动画帧内至多推进一组，所有统计都会刷新", async (T,$) => {
+    T.startGame();
+    const {total} = T.hudScheduleNow(), seen = new Set(), el = $('cuUpgWrap');
+    delete el.dataset.fv;
+    let prev = T.hudScheduleNow().next;
+    const deadline = performance.now() + 5000;
+    while (seen.size < total && performance.now() < deadline) {
+      await new Promise(requestAnimationFrame);
+      const next = T.hudScheduleNow().next;
+      if (next !== prev) {
+        if (next !== (prev + 1) % total) return false;
+        seen.add(prev); prev = next;
+      }
+    }
+    return total > 1 && seen.size === total && !!el.dataset.fv && window.__tbErrCount === 0;
+  });
+  await senseCheck("U9049 重绘统计不伪造帧时或卡顿", T => {
+    const series = T.smTrendSeries().join(','), stutters = T.smStutterNow();
+    T.extraHudRefreshNow(); T.extraHudRefreshNow();
+    return !!series && T.smTrendSeries().join(',') === series && T.smStutterNow() === stutters;
+  });
+  await senseCheck("U9050 暂停冻结采样，继续时不把离开时间算成一帧", async (T,$) => {
+    $('pauseBtn').click();
+    const before = T.smTrendSeries().join(','), next = T.hudScheduleNow().next;
+    await new Promise(resolve => setTimeout(resolve, 250));
+    const frozen = $('hud').classList.contains('hud-covered') && T.smTrendSeries().join(',') === before && T.hudScheduleNow().next === next;
+    $('btnPlay').click(); await new Promise(requestAnimationFrame);
+    const resumed = $('overlay').classList.contains('hide') && T.smTrendSeries().join(',') === before;
+    T.quit(); return frozen && resumed;
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

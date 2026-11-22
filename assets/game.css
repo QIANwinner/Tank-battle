@@ -101,6 +101,8 @@
     background: linear-gradient(180deg, rgba(5, 5, 10, 0.95) 40%, rgba(5, 5, 10, 0));
     pointer-events: none;
   }
+  /* Keep menu controls and notices live without laying out the battle readouts behind them. */
+  #hud.hud-covered > .pill.m-hide[id$="Wrap"] { display: none; }
   .pill {
     display: flex; align-items: baseline; gap: 4px;
     padding: 3px 8px; border-radius: 999px;

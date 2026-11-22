@@ -21,3 +21,25 @@ node .workbuddy/regression/tb_release_smoke.js
 比较性能时应固定 Chrome 版本、窗口尺寸、画质、存档和机器负载。脚本不是压力关卡或手机帧率保证；后续平衡测试应记录固定操作下的通关时长、受伤次数及金币收入。
 
 样式在 `assets/game.css`，存档重试在 `assets/storage.js`；战斗与 UI 仍在 `index.html`。新增离线必需资源时同步修改 `sw.js` 的 ASSETS，并更新缓存版本。保存失败的待写内容仅在当前页面内存中保留，不能替代持久化事务或外部备份。
+
+## 冷启动与开局
+
+启动静态服务器后，在 Git Bash 或其他 POSIX shell 运行：
+
+```sh
+for trial in 1 2 3; do
+  TB_THROTTLE=4 TB_MOBILE=1 node .workbuddy/regression/perf_probe.js
+done
+```
+
+探针每次使用新的临时 Chrome 配置，在本机 HTTP 上访问正常游戏入口（不使用 `?test=1`），绕过 Service Worker 并点击首次引导的「开始游戏」。`fcp` 取 Paint Timing，`ready` 取 DOMContentLoaded 结束时刻。`startHandler` 是点击处理耗时；`startPaint` 是点击到第二次 rAF 回调的间隔，代表已经有一次绘制机会，不是屏幕实测延迟。开场字幕结束后再采 90 帧。
+
+| 指标（三次独立运行的中位数） | v1.1.196 | v1.1.197 |
+| --- | ---: | ---: |
+| 首次内容绘制 | 1352 ms | 940 ms |
+| 菜单初始化完成 | 4733 ms | 2571 ms |
+| 开始按钮处理 | 594 ms | 128 ms |
+| 点击至首次绘制机会 | 762 ms | 401 ms |
+| 开场后帧间隔 P95 | 100.1 ms | 33.4 ms |
+
+同机 Chrome 156 无头模式、390×844 触屏视口、DPR 1、CPU 降速 4 倍、默认画质、全新存档。结果用于比较主线程开销，不包含公网下载延迟，也不是对真机帧率的承诺。

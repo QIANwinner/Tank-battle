@@ -21,7 +21,7 @@
 <body>
   <div id="stage"><div id="frame"><canvas id="game" width="624" height="624"></canvas><div id="wm"><i>◆</i>QIAN</div><span id="sfxVizWrap" hidden></span></div></div>
 
-  <div id="hud">
+  <div id="hud" class="hud-covered">
     <div id="brandTag"><i class="q">Q</i><span class="n">QIAN</span></div>
     <div class="pill"><span class="k">分数</span><span class="v" id="score">0</span></div>
     <div class="pill best m-hide"><span class="k">最高</span><span class="v" id="best">0</span></div>
@@ -1829,7 +1829,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.196</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.197</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -4983,8 +4983,10 @@
   function showLevelIntro(text) {
     const el = $('lvIntro');
     el.querySelector('.lvT').textContent = text;
-    el.classList.remove('show');
-    void el.offsetWidth;             // 强制重排以重放动画
+    if (el.classList.contains('show')) {
+      el.classList.remove('show');
+      void el.offsetWidth;           // 只有重播正在显示的动画时才需同步布局
+    }
     el.classList.add('show');
     lvIntroT = 1.5;
   }
@@ -5255,7 +5257,14 @@
       }
     }
 
-    if (!running || paused) { draw(); return; }
+    if (!running || paused) {
+      smPrevNow = 0; smKeyMark = 0;
+      if (now >= nextBackdropAt) { nextBackdropAt = now + 1000 / 15; draw(); }
+      return;
+    }
+    sampleBattleFrame(now);
+    if (cueKind && !sfxVizText(cueKind, performance.now() - cueAt)) clearSoundCue();
+    advanceHudGroup(now);
 
     // —— v0.2.5 局内计时（战绩档案累计时长） ——
     playSecRun += dt;
@@ -5427,16 +5436,26 @@
     elTimerNum.textContent = fmtTime(timeLeft);
     elTimerWrap.classList.toggle('low', timeLeft <= 10);
   }
-  let lastExtraHudAt = -Infinity;
-  function updateHud(forceExtra = true) {
+  const hudGroups = [updateHudVitals, updateHudPerformance, updateHudAlerts, updateHudRatios,
+    updateHudCombat, updateHudPickupRates, updateHudEconomy, updateHudUpgrades, updateHudTrends,
+    updateHudRadar, updateHudWingman, updateHudForecast];
+  let hudGroupIndex = 0, nextHudGroupAt = 0, nextBackdropAt = 0;
+  function advanceHudGroup(now) {
+    if (nextHudGroupAt === null) { nextHudGroupAt = now; return; }
+    if (now < nextHudGroupAt) return;
+    const update = hudGroups[hudGroupIndex];
+    hudGroupIndex = (hudGroupIndex + 1) % hudGroups.length;
+    // One slice per animation frame, never catch up with a burst after a slow frame.
+    nextHudGroupAt = now + 100 / hudGroups.length;
+    update();
+  }
+  function updateHud() {
     if (score > best) {
       best = score;
       try { saveStore.setItem(LS_BEST, String(best)); } catch (e) { /* 忽略 */ }
     }
     perfHudWrite(score, best, level, enemiesTotal, enemiesSpawned, enemies.length);
     updateTimerHud();
-    const hudNow = performance.now();
-    if (forceExtra || hudNow - lastExtraHudAt >= 100) { lastExtraHudAt = hudNow; updateExtraHud(); }
     if (lives !== lastLives) {
       lastLives = lives;
       let html = '';
@@ -6760,13 +6779,20 @@ function v5SkinPrevHtml(){return '<span class="siIcon skinPrev"><canvas width="4
 function v5SkinDescHtml(d){return '<span class="siDesc">'+d+'</span>';}
 function v5BaseIconHtml(){return '<span class="baseIcon">🏰</span>';}
 function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n) || 0))); }
+  function updateMenuReadouts() {
+    $('coinLogText').textContent = coinLogText(coinLog);
+    $('keyHintText').textContent = keyHintText();
+    $('fireKeyBtn').textContent = fireKeySummary();
+    $('nextAchTip').textContent = nextAchText(achUnlocked, ACHIEVE);
+  }
   function updateExtraHud() {
-  try {
+    updateMenuReadouts();
+    for (const update of hudGroups) update();
+  }
+  function updateHudVitals() {
     {
     const fxEl = $('fxText'); if (fxEl) fxEl.textContent = activeFxText(fx);
     const bs = $('bossSoonNum'); if (bs) bs.textContent = bossSoonText(level);
-    const cl = $('coinLogText'); if (cl) cl.textContent = coinLogText(coinLog);
-    const kh = $('keyHintText'); if (kh) kh.textContent = keyHintText();
     const mn = $('modeName'); if (mn) mn.textContent = modeNameText();
     const dt = $('dangerTip'); if (dt) { dt.textContent = dangerTip(lives); dt.className = 'm-hide ' + dangerClass(lives); }
     const bondB = $('bondBadge'); if (bondB) bondB.textContent = bondBadgeHtml();
@@ -6811,8 +6837,6 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const bfV = $('bulletFlyVal'); if (bfV) bfV.textContent = bulletFlyText(bullets.length);
     const pfV = $('powerupFieldVal'); if (pfV) pfV.textContent = powerupFieldText(powerups.length);
     const fxBar = $('fxBarFill'); if (fxBar) fxBar.style.width = fxBarWidth(fx, FX_MAX);
-    const fkb = $('fireKeyBtn'); if (fkb) { if (!fkb.dataset.wired) { fkb.onclick = () => { cycleFireKey(); updateExtraHud(); }; fkb.dataset.wired = '1'; } fkb.textContent = fireKeySummary(); }
-    const nat = $('nextAchTip'); if (nat) nat.textContent = nextAchText(achUnlocked, ACHIEVE);
     const sr = $('scoreRateVal'); if (sr) sr.textContent = scoreRateText(score, playSecRun);
     const brv = $('bossRunVal'); if (brv) brv.textContent = bossRunText(stat.bossKills);
     const ca = $('comboAchVal'); if (ca) ca.textContent = comboAchBadge(stat.maxCombo);
@@ -7001,6 +7025,8 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r43wgV = $('wingmanStatusVal'); if (r43wgV) r43wgV.textContent = wingmanStatusText(wingman);
     const r43spV_d2 = $('starPreviewVal'); if (r43spV_d2) r43spV_d2.textContent = starPreviewText(!tookHitThisLevel, lives);
     }
+  }
+  function updateHudAlerts() {
     const r45lhV = $('lowHpAlertVal'); if (r45lhV) { const r45lhT = lowHpAlertText(lives); r45lhV.textContent = r45lhT || '—'; const r45lhW = $('lowHpAlertWrap'); if (r45lhW) r45lhW.classList.toggle('danger', !!r45lhT); }
     const r45bnV = $('bossNearAlertVal'); if (r45bnV) { const r45bnT = bossNearAlertText(level); r45bnV.textContent = r45bnT || '—'; const r45bnW = $('bossNearAlertWrap'); if (r45bnW) r45bnW.classList.toggle('danger', !!r45bnT); }
     const r45cbV = $('comboBreakAlertVal'); if (r45cbV) { const r45cbT = comboBreakAlertText(combo, comboTimer); r45cbV.textContent = r45cbT || '—'; const r45cbW = $('comboBreakAlertWrap'); if (r45cbW) r45cbW.classList.toggle('danger', !!r45cbT); }
@@ -7119,6 +7145,8 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r59ckV = $('comboPerKillVal'); if (r59ckV) { const r59ckT = comboPerKillText(stat.maxCombo, stat.kills); r59ckV.textContent = r59ckT; const r59ckW = $('comboPerKillWrap'); if (r59ckW) r59ckW.classList.toggle('danger', stat.maxCombo > 0 && stat.kills > 0 && stat.maxCombo / stat.kills * 100 >= 50); }
     const r59ebV = $('enemyBacklogVal'); if (r59ebV) { const r59ebT = enemyBacklogText(enemiesSpawned, stat.kills); r59ebV.textContent = r59ebT; const r59ebW = $('enemyBacklogWrap'); if (r59ebW) r59ebW.classList.toggle('danger', enemiesSpawned > 0 && enemiesSpawned - stat.kills >= 10); }
     const r59lmV = $('lifeMarginVal'); if (r59lmV) { const r59lmT = lifeMarginText(lives, stat.deaths); r59lmV.textContent = r59lmT; const r59lmW = $('lifeMarginWrap'); if (r59lmW) r59lmW.classList.toggle('danger', stat.deaths > 0 && lives <= stat.deaths); }
+  }
+  function updateHudRatios() {
     const r59sdV = $('surviveDensityVal'); if (r59sdV) { const r59sdT = surviveDensityText(lives, wave); r59sdV.textContent = r59sdT; const r59sdW = $('surviveDensityWrap'); if (r59sdW) r59sdW.classList.toggle('danger', wave > 0 && lives / wave < 1); }
     const r60dsV = $('dmgPerShotVal'); if (r60dsV) { const r60dsT = dmgPerShotText(runDmg, stat.shots); r60dsV.textContent = r60dsT; const r60dsW = $('dmgPerShotWrap'); if (r60dsW) r60dsW.classList.toggle('danger', stat.shots > 0 && runDmg / stat.shots >= 40); }
     const r60hpV = $('hitPaceVal'); if (r60hpV) { const r60hpT = hitPaceText(stat.hits, playSecRun); r60hpV.textContent = r60hpT; const r60hpW = $('hitPaceWrap'); if (r60hpW) r60hpW.classList.toggle('danger', stat.hits > 0 && playSecRun > 0 && stat.hits / playSecRun * 60 >= 60); }
@@ -7266,6 +7294,8 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r79raS = runAmmoEffText(stat.shots, stat.kills); const r79raF = $('runAmmoEffFill'); if (r79raF) r79raF.style.width = r79raS.pct + '%'; const r79raV = $('runAmmoEffVal'); if (r79raV) r79raV.textContent = r79raS.txt; const r79raW = $('runAmmoEffWrap'); if (r79raW) { r79raW.classList.remove('g-good','g-warn','g-bad'); if (r79raS.cls) r79raW.classList.add(r79raS.cls); r79raW.classList.toggle('danger', !!r79raS.danger); }
     const r79crS = runCoinRateText(runCoins, playSecRun); const r79crF = $('runCoinRateFill'); if (r79crF) r79crF.style.width = r79crS.pct + '%'; const r79crV = $('runCoinRateVal'); if (r79crV) r79crV.textContent = r79crS.txt; const r79crW = $('runCoinRateWrap'); if (r79crW) { r79crW.classList.remove('g-good','g-warn','g-bad'); if (r79crS.cls) r79crW.classList.add(r79crS.cls); r79crW.classList.toggle('danger', !!r79crS.danger); }
     const r79srS = runScoreRateText(score, playSecRun); const r79srF = $('runScoreRateFill'); if (r79srF) r79srF.style.width = r79srS.pct + '%'; const r79srV = $('runScoreRateVal'); if (r79srV) r79srV.textContent = r79srS.txt; const r79srW = $('runScoreRateWrap'); if (r79srW) { r79srW.classList.remove('g-good','g-warn','g-bad'); if (r79srS.cls) r79srW.classList.add(r79srS.cls); r79srW.classList.toggle('danger', !!r79srS.danger); }
+  }
+  function updateHudCombat() {
     const r79kdS = runKDText(stat.kills, stat.deaths); const r79kdF = $('runKDFill'); if (r79kdF) r79kdF.style.width = r79kdS.pct + '%'; const r79kdV = $('runKDVal'); if (r79kdV) r79kdV.textContent = r79kdS.txt; const r79kdW = $('runKDWrap'); if (r79kdW) { r79kdW.classList.remove('g-good','g-warn','g-bad'); if (r79kdS.cls) r79kdW.classList.add(r79kdS.cls); r79kdW.classList.toggle('danger', !!r79kdS.danger); }
     const r79wrS = waveRhythmText(wave, playSecRun); const r79wrF = $('waveRhythmFill'); if (r79wrF) r79wrF.style.width = r79wrS.pct + '%'; const r79wrV = $('waveRhythmVal'); if (r79wrV) r79wrV.textContent = r79wrS.txt; const r79wrW = $('waveRhythmWrap'); if (r79wrW) { r79wrW.classList.remove('g-good','g-warn','g-bad'); if (r79wrS.cls) r79wrW.classList.add(r79wrS.cls); r79wrW.classList.toggle('danger', !!r79wrS.danger); }
     const r80cpmS = careerCoinPerMinText(career.totalCoins, career.playSec); const r80cpmF = $('careerCoinPerMinFill'); if (r80cpmF) r80cpmF.style.width = r80cpmS.pct + '%'; const r80cpmV = $('careerCoinPerMinVal'); if (r80cpmV) r80cpmV.textContent = r80cpmS.txt; const r80cpmW = $('careerCoinPerMinWrap'); if (r80cpmW) { r80cpmW.classList.remove('g-good','g-warn','g-bad'); if (r80cpmS.cls) r80cpmW.classList.add(r80cpmS.cls); r80cpmW.classList.toggle('danger', !!r80cpmS.danger); }
@@ -7393,6 +7423,8 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_hurtKillText = hurtKillText(stat.kills, Math.max(1, hurtCount)); const f_hurtKillText = $('hurtKillFill'); if (f_hurtKillText) f_hurtKillText.style.width = r_hurtKillText.pct + '%'; const v_hurtKillText = $('hurtKillVal'); if (v_hurtKillText) v_hurtKillText.textContent = r_hurtKillText.txt; const w_hurtKillText = $('hurtKillWrap'); if (w_hurtKillText) { w_hurtKillText.classList.remove('g-good','g-warn','g-bad'); if (r_hurtKillText.cls) w_hurtKillText.classList.add(r_hurtKillText.cls); w_hurtKillText.classList.toggle('danger', !!r_hurtKillText.danger); }
     const r_reviveComboText = reviveComboText(stat.maxCombo, Math.max(1, reviveCount)); const f_reviveComboText = $('reviveComboFill'); if (f_reviveComboText) f_reviveComboText.style.width = r_reviveComboText.pct + '%'; const v_reviveComboText = $('reviveComboVal'); if (v_reviveComboText) v_reviveComboText.textContent = r_reviveComboText.txt; const w_reviveComboText = $('reviveComboWrap'); if (w_reviveComboText) { w_reviveComboText.classList.remove('g-good','g-warn','g-bad'); if (r_reviveComboText.cls) w_reviveComboText.classList.add(r_reviveComboText.cls); w_reviveComboText.classList.toggle('danger', !!r_reviveComboText.danger); }
     const r_shotScoreText = shotScoreText(score, Math.max(1, stat.shots)); const f_shotScoreText = $('shotScoreFill'); if (f_shotScoreText) f_shotScoreText.style.width = r_shotScoreText.pct + '%'; const v_shotScoreText = $('shotScoreVal'); if (v_shotScoreText) v_shotScoreText.textContent = r_shotScoreText.txt; const w_shotScoreText = $('shotScoreWrap'); if (w_shotScoreText) { w_shotScoreText.classList.remove('g-good','g-warn','g-bad'); if (r_shotScoreText.cls) w_shotScoreText.classList.add(r_shotScoreText.cls); w_shotScoreText.classList.toggle('danger', !!r_shotScoreText.danger); }
+  }
+  function updateHudPickupRates() {
     const r_hitPuText = hitPuText(runPowerups, Math.max(1, stat.hits)); const f_hitPuText = $('hitPuFill'); if (f_hitPuText) f_hitPuText.style.width = r_hitPuText.pct + '%'; const v_hitPuText = $('hitPuVal'); if (v_hitPuText) v_hitPuText.textContent = r_hitPuText.txt; const w_hitPuText = $('hitPuWrap'); if (w_hitPuText) { w_hitPuText.classList.remove('g-good','g-warn','g-bad'); if (r_hitPuText.cls) w_hitPuText.classList.add(r_hitPuText.cls); w_hitPuText.classList.toggle('danger', !!r_hitPuText.danger); }
     const r_hurtUpgText = hurtUpgText(upgTotal, Math.max(1, hurtCount)); const f_hurtUpgText = $('hurtUpgFill'); if (f_hurtUpgText) f_hurtUpgText.style.width = r_hurtUpgText.pct + '%'; const v_hurtUpgText = $('hurtUpgVal'); if (v_hurtUpgText) v_hurtUpgText.textContent = r_hurtUpgText.txt; const w_hurtUpgText = $('hurtUpgWrap'); if (w_hurtUpgText) { w_hurtUpgText.classList.remove('g-good','g-warn','g-bad'); if (r_hurtUpgText.cls) w_hurtUpgText.classList.add(r_hurtUpgText.cls); w_hurtUpgText.classList.toggle('danger', !!r_hurtUpgText.danger); }
     const r_upgHitText = upgHitText(stat.hits, Math.max(1, upgTotal)); const f_upgHitText = $('upgHitFill'); if (f_upgHitText) f_upgHitText.style.width = r_upgHitText.pct + '%'; const v_upgHitText = $('upgHitVal'); if (v_upgHitText) v_upgHitText.textContent = r_upgHitText.txt; const w_upgHitText = $('upgHitWrap'); if (w_upgHitText) { w_upgHitText.classList.remove('g-good','g-warn','g-bad'); if (r_upgHitText.cls) w_upgHitText.classList.add(r_upgHitText.cls); w_upgHitText.classList.toggle('danger', !!r_upgHitText.danger); }
@@ -7511,6 +7543,8 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_scorePace = scorePaceText(score, stat.shots); const f_scorePace = $('scorePaceFill'); if (f_scorePace) f_scorePace.style.width = r_scorePace.pct + '%'; const v_scorePace = $('scorePaceVal'); if (v_scorePace) v_scorePace.textContent = r_scorePace.txt; const w_scorePace = $('scorePaceWrap'); if (w_scorePace) { w_scorePace.classList.remove('g-good','g-warn','g-bad'); if (r_scorePace.cls) w_scorePace.classList.add(r_scorePace.cls); w_scorePace.classList.toggle('danger', !!r_scorePace.danger); }
     const r_wavePress = wavePressText(wave, enemies.length); const f_wavePress = $('wavePressFill'); if (f_wavePress) f_wavePress.style.width = r_wavePress.pct + '%'; const v_wavePress = $('wavePressVal'); if (v_wavePress) v_wavePress.textContent = r_wavePress.txt; const w_wavePress = $('wavePressWrap'); if (w_wavePress) { w_wavePress.classList.remove('g-good','g-warn','g-bad'); if (r_wavePress.cls) w_wavePress.classList.add(r_wavePress.cls); w_wavePress.classList.toggle('danger', !!r_wavePress.danger); }
     const r_comboPress = comboPressText(combo, enemies.length); const f_comboPress = $('comboPressFill'); if (f_comboPress) f_comboPress.style.width = r_comboPress.pct + '%'; const v_comboPress = $('comboPressVal'); if (v_comboPress) v_comboPress.textContent = r_comboPress.txt; const w_comboPress = $('comboPressWrap'); if (w_comboPress) { w_comboPress.classList.remove('g-good','g-warn','g-bad'); if (r_comboPress.cls) w_comboPress.classList.add(r_comboPress.cls); w_comboPress.classList.toggle('danger', !!r_comboPress.danger); }
+  }
+  function updateHudEconomy() {
     const r_coinUpg = coinUpgText(coins, upgTotal); const f_coinUpg = $('coinUpgFill'); if (f_coinUpg) f_coinUpg.style.width = r_coinUpg.pct + '%'; const v_coinUpg = $('coinUpgVal'); if (v_coinUpg) v_coinUpg.textContent = r_coinUpg.txt; const w_coinUpg = $('coinUpgWrap'); if (w_coinUpg) { w_coinUpg.classList.remove('g-good','g-warn','g-bad'); if (r_coinUpg.cls) w_coinUpg.classList.add(r_coinUpg.cls); w_coinUpg.classList.toggle('danger', !!r_coinUpg.danger); }
     const r_hitShotSwap = hitShotSwapText(stat.hits, stat.shots); const f_hitShotSwap = $('hitShotSwapFill'); if (f_hitShotSwap) f_hitShotSwap.style.width = r_hitShotSwap.pct + '%'; const v_hitShotSwap = $('hitShotSwapVal'); if (v_hitShotSwap) v_hitShotSwap.textContent = r_hitShotSwap.txt; const w_hitShotSwap = $('hitShotSwapWrap'); if (w_hitShotSwap) { w_hitShotSwap.classList.remove('g-good','g-warn','g-bad'); if (r_hitShotSwap.cls) w_hitShotSwap.classList.add(r_hitShotSwap.cls); w_hitShotSwap.classList.toggle('danger', !!r_hitShotSwap.danger); }
     const r_lifeWave = lifeWaveText(lives, wave); const f_lifeWave = $('lifeWaveFill'); if (f_lifeWave) f_lifeWave.style.width = r_lifeWave.pct + '%'; const v_lifeWave = $('lifeWaveVal'); if (v_lifeWave) v_lifeWave.textContent = r_lifeWave.txt; const w_lifeWave = $('lifeWaveWrap'); if (w_lifeWave) { w_lifeWave.classList.remove('g-good','g-warn','g-bad'); if (r_lifeWave.cls) w_lifeWave.classList.add(r_lifeWave.cls); w_lifeWave.classList.toggle('danger', !!r_lifeWave.danger); }
@@ -7603,6 +7637,8 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_deathRevive = deathReviveText(stat.deaths, reviveCount); const f_deathRevive = $('deathReviveFill'); if (f_deathRevive) f_deathRevive.style.width = r_deathRevive.pct + '%'; const v_deathRevive = $('deathReviveVal'); if (v_deathRevive) v_deathRevive.textContent = r_deathRevive.txt; const w_deathRevive = $('deathReviveWrap'); if (w_deathRevive) { w_deathRevive.classList.remove('g-good','g-warn','g-bad'); if (r_deathRevive.cls) w_deathRevive.classList.add(r_deathRevive.cls); w_deathRevive.classList.toggle('danger', !!r_deathRevive.danger); }
     const r_lifeRevive = lifeReviveText(lives, reviveCount); const f_lifeRevive = $('lifeReviveFill'); if (f_lifeRevive) f_lifeRevive.style.width = r_lifeRevive.pct + '%'; const v_lifeRevive = $('lifeReviveVal'); if (v_lifeRevive) v_lifeRevive.textContent = r_lifeRevive.txt; const w_lifeRevive = $('lifeReviveWrap'); if (w_lifeRevive) { w_lifeRevive.classList.remove('g-good','g-warn','g-bad'); if (r_lifeRevive.cls) w_lifeRevive.classList.add(r_lifeRevive.cls); w_lifeRevive.classList.toggle('danger', !!r_lifeRevive.danger); }
     const r_bulletDmg = bulletDmgText(bullets.length, runDmg); const f_bulletDmg = $('bulletDmgFill'); if (f_bulletDmg) f_bulletDmg.style.width = r_bulletDmg.pct + '%'; const v_bulletDmg = $('bulletDmgVal'); if (v_bulletDmg) v_bulletDmg.textContent = r_bulletDmg.txt; const w_bulletDmg = $('bulletDmgWrap'); if (w_bulletDmg) { w_bulletDmg.classList.remove('g-good','g-warn','g-bad'); if (r_bulletDmg.cls) w_bulletDmg.classList.add(r_bulletDmg.cls); w_bulletDmg.classList.toggle('danger', !!r_bulletDmg.danger); }
+  }
+  function updateHudUpgrades() {
     const r_puUpg = puUpgText(runPowerups, upgTotal); const f_puUpg = $('puUpgFill'); if (f_puUpg) f_puUpg.style.width = r_puUpg.pct + '%'; const v_puUpg = $('puUpgVal'); if (v_puUpg) v_puUpg.textContent = r_puUpg.txt; const w_puUpg = $('puUpgWrap'); if (w_puUpg) { w_puUpg.classList.remove('g-good','g-warn','g-bad'); if (r_puUpg.cls) w_puUpg.classList.add(r_puUpg.cls); w_puUpg.classList.toggle('danger', !!r_puUpg.danger); }
     const r_waveDmg = waveDmgText(wave, runDmg); const f_waveDmg = $('waveDmgFill'); if (f_waveDmg) f_waveDmg.style.width = r_waveDmg.pct + '%'; const v_waveDmg = $('waveDmgVal'); if (v_waveDmg) v_waveDmg.textContent = r_waveDmg.txt; const w_waveDmg = $('waveDmgWrap'); if (w_waveDmg) { w_waveDmg.classList.remove('g-good','g-warn','g-bad'); if (r_waveDmg.cls) w_waveDmg.classList.add(r_waveDmg.cls); w_waveDmg.classList.toggle('danger', !!r_waveDmg.danger); }
     const r_waveCombo = waveComboText(wave, combo); const f_waveCombo = $('waveComboFill'); if (f_waveCombo) f_waveCombo.style.width = r_waveCombo.pct + '%'; const v_waveCombo = $('waveComboVal'); if (v_waveCombo) v_waveCombo.textContent = r_waveCombo.txt; const w_waveCombo = $('waveComboWrap'); if (w_waveCombo) { w_waveCombo.classList.remove('g-good','g-warn','g-bad'); if (r_waveCombo.cls) w_waveCombo.classList.add(r_waveCombo.cls); w_waveCombo.classList.toggle('danger', !!r_waveCombo.danger); }
@@ -7726,6 +7762,8 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r_sparkEnemy = sparkEnemySpark(enemies.length, 20); const w_sparkEnemy = $('sparkEnemyWrap'); if (w_sparkEnemy) { w_sparkEnemy.classList.remove('g-good','g-warn','g-bad'); w_sparkEnemy.classList.add(r_sparkEnemy.cls); w_sparkEnemy.classList.toggle('danger', !!r_sparkEnemy.danger); const ds = w_sparkEnemy.querySelectorAll('.spk i'); ds.forEach((d, di) => { d.classList.toggle('on', di < r_sparkEnemy.n); }); const va = w_sparkEnemy.querySelector('.val'); if (va) va.textContent = r_sparkEnemy.txt; }
     const r_sparkLife = sparkLifeSpark(lives, 5); const w_sparkLife = $('sparkLifeWrap'); if (w_sparkLife) { w_sparkLife.classList.remove('g-good','g-warn','g-bad'); w_sparkLife.classList.add(r_sparkLife.cls); w_sparkLife.classList.toggle('danger', !!r_sparkLife.danger); const ds = w_sparkLife.querySelectorAll('.spk i'); ds.forEach((d, di) => { d.classList.toggle('on', di < r_sparkLife.n); }); const va = w_sparkLife.querySelector('.val'); if (va) va.textContent = r_sparkLife.txt; }
     const r_sparkCombo = sparkComboSpark(combo, 50); const w_sparkCombo = $('sparkComboWrap'); if (w_sparkCombo) { w_sparkCombo.classList.remove('g-good','g-warn','g-bad'); w_sparkCombo.classList.add(r_sparkCombo.cls); w_sparkCombo.classList.toggle('danger', !!r_sparkCombo.danger); const ds = w_sparkCombo.querySelectorAll('.spk i'); ds.forEach((d, di) => { d.classList.toggle('on', di < r_sparkCombo.n); }); const va = w_sparkCombo.querySelector('.val'); if (va) va.textContent = r_sparkCombo.txt; }
+  }
+  function updateHudTrends() {
     trendScorePush(score); const r_trendScore = trendScore(__trendScoreBuf, score); const w_trendScore = $('trendScoreWrap'); if (w_trendScore) { w_trendScore.classList.remove('g-good','g-warn','g-bad'); w_trendScore.classList.add(r_trendScore.cls); w_trendScore.classList.toggle('danger', !!r_trendScore.danger); const ds = w_trendScore.querySelectorAll('.tm i'); ds.forEach((d, di) => { d.classList.toggle('on', di < r_trendScore.n); }); const va = w_trendScore.querySelector('.val'); if (va) va.textContent = r_trendScore.txt; }
     trendCoinPush(coins); const r_trendCoin = trendCoin(__trendCoinBuf, coins); const w_trendCoin = $('trendCoinWrap'); if (w_trendCoin) { w_trendCoin.classList.remove('g-good','g-warn','g-bad'); w_trendCoin.classList.add(r_trendCoin.cls); w_trendCoin.classList.toggle('danger', !!r_trendCoin.danger); const ds = w_trendCoin.querySelectorAll('.tm i'); ds.forEach((d, di) => { d.classList.toggle('on', di < r_trendCoin.n); }); const va = w_trendCoin.querySelector('.val'); if (va) va.textContent = r_trendCoin.txt; }
     trendKillPush(stat.kills); const r_trendKill = trendKill(__trendKillBuf, stat.kills); const w_trendKill = $('trendKillWrap'); if (w_trendKill) { w_trendKill.classList.remove('g-good','g-warn','g-bad'); w_trendKill.classList.add(r_trendKill.cls); w_trendKill.classList.toggle('danger', !!r_trendKill.danger); const ds = w_trendKill.querySelectorAll('.tm i'); ds.forEach((d, di) => { d.classList.toggle('on', di < r_trendKill.n); }); const va = w_trendKill.querySelector('.val'); if (va) va.textContent = r_trendKill.txt; }
@@ -7821,6 +7859,8 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_czEncircle = czEncircle(czLive()); const w_czEncircle = $('czEncircleWrap'); if (w_czEncircle) { const pv = w_czEncircle.dataset.cz || ''; const nv = l_czEncircle.cls + '|' + l_czEncircle.txt + '|' + (l_czEncircle.danger ? '1' : '0'); if (pv !== nv) { w_czEncircle.dataset.cz = nv; w_czEncircle.classList.remove('g-good','g-warn','g-bad'); w_czEncircle.classList.add(l_czEncircle.cls); w_czEncircle.classList.toggle('danger', !!l_czEncircle.danger); const mv = w_czEncircle.querySelector('.mval'); if (mv) mv.textContent = l_czEncircle.txt; } }
     const l_czSpd = czSpd(czLive()); const w_czSpd = $('czSpdWrap'); if (w_czSpd) { const pv = w_czSpd.dataset.cz || ''; const nv = l_czSpd.cls + '|' + l_czSpd.txt + '|' + (l_czSpd.danger ? '1' : '0'); if (pv !== nv) { w_czSpd.dataset.cz = nv; w_czSpd.classList.remove('g-good','g-warn','g-bad'); w_czSpd.classList.add(l_czSpd.cls); w_czSpd.classList.toggle('danger', !!l_czSpd.danger); const mv = w_czSpd.querySelector('.mval'); if (mv) mv.textContent = l_czSpd.txt; } }
     const l_czGrid = czGrid(czLive()); const w_czGrid = $('czGridWrap'); if (w_czGrid) { const cc = l_czGrid.cells || []; const pv = w_czGrid.dataset.cz || ''; const nv = l_czGrid.cls + '|' + l_czGrid.txt + '|' + (l_czGrid.danger ? '1' : '0') + '|' + cc.join(','); if (pv !== nv) { w_czGrid.dataset.cz = nv; w_czGrid.classList.remove('g-good','g-warn','g-bad'); w_czGrid.classList.add(l_czGrid.cls); w_czGrid.classList.toggle('danger', !!l_czGrid.danger); const mv = w_czGrid.querySelector('.mval'); if (mv) mv.textContent = l_czGrid.txt; const cels = w_czGrid.querySelectorAll('.czg-c'); for (let i = 0; i < cels.length && i < 9; i++) { const n = cc[i] || 0; cels[i].classList.toggle('hot', n >= 3); cels[i].classList.toggle('warm', n >= 1 && n < 3); } } }
+  }
+  function updateHudRadar() {
     const l_czIdx = czIdx(czLive()); const w_czIdx = $('czIdxWrap'); if (w_czIdx) { const pv = w_czIdx.dataset.cz || ''; const nv = l_czIdx.cls + '|' + l_czIdx.txt + '|' + (l_czIdx.danger ? '1' : '0'); if (pv !== nv) { w_czIdx.dataset.cz = nv; w_czIdx.classList.remove('g-good','g-warn','g-bad'); w_czIdx.classList.add(l_czIdx.cls); w_czIdx.classList.toggle('danger', !!l_czIdx.danger); const mv = w_czIdx.querySelector('.mval'); if (mv) mv.textContent = l_czIdx.txt; } }
     const l_fpNear = fpNear(fpLive()); const w_fpNear = $('fpNearWrap'); if (w_fpNear) { const pv = w_fpNear.dataset.fp || ''; const nv = l_fpNear.cls + '|' + l_fpNear.txt + '|' + (l_fpNear.danger ? '1' : '0'); if (pv !== nv) { w_fpNear.dataset.fp = nv; w_fpNear.classList.remove('g-good','g-warn','g-bad'); w_fpNear.classList.add(l_fpNear.cls); w_fpNear.classList.toggle('danger', !!l_fpNear.danger); const mv = w_fpNear.querySelector('.mval'); if (mv) mv.textContent = l_fpNear.txt; } }
     const l_fpSoon = fpSoon(fpLive()); const w_fpSoon = $('fpSoonWrap'); if (w_fpSoon) { const pv = w_fpSoon.dataset.fp || ''; const nv = l_fpSoon.cls + '|' + l_fpSoon.txt + '|' + (l_fpSoon.danger ? '1' : '0'); if (pv !== nv) { w_fpSoon.dataset.fp = nv; w_fpSoon.classList.remove('g-good','g-warn','g-bad'); w_fpSoon.classList.add(l_fpSoon.cls); w_fpSoon.classList.toggle('danger', !!l_fpSoon.danger); const mv = w_fpSoon.querySelector('.mval'); if (mv) mv.textContent = l_fpSoon.txt; } }
@@ -7939,6 +7979,8 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const l_arsPet = arsPetNow(); const w_arsPet = $('arsPetWrap'); if (w_arsPet) { const pv = w_arsPet.dataset.fp || ''; const nv = l_arsPet.cls + '|' + l_arsPet.txt + '|' + (l_arsPet.danger ? '1' : '0'); if (pv !== nv) { w_arsPet.dataset.fp = nv; w_arsPet.classList.remove('g-good','g-warn','g-bad'); w_arsPet.classList.add(l_arsPet.cls); w_arsPet.classList.toggle('danger', !!l_arsPet.danger); const mv = w_arsPet.querySelector('.mval'); if (mv) mv.textContent = l_arsPet.txt; } }
     const l_wmgMode = wmgModeNow(); const w_wmgMode = $('wmgModeWrap'); if (w_wmgMode) { const pv = w_wmgMode.dataset.fp || ''; const nv = l_wmgMode.cls + '|' + l_wmgMode.txt + '|' + (l_wmgMode.danger ? '1' : '0'); if (pv !== nv) { w_wmgMode.dataset.fp = nv; w_wmgMode.classList.remove('g-good','g-warn','g-bad'); w_wmgMode.classList.add(l_wmgMode.cls); w_wmgMode.classList.toggle('danger', !!l_wmgMode.danger); const mv = w_wmgMode.querySelector('.mval'); if (mv) mv.textContent = l_wmgMode.txt; } }
     const l_wmgRespawn = wmgRespawnNow(); const w_wmgRespawn = $('wmgRespawnWrap'); if (w_wmgRespawn) { const pv = w_wmgRespawn.dataset.fp || ''; const nv = l_wmgRespawn.cls + '|' + l_wmgRespawn.txt + '|' + (l_wmgRespawn.danger ? '1' : '0'); if (pv !== nv) { w_wmgRespawn.dataset.fp = nv; w_wmgRespawn.classList.remove('g-good','g-warn','g-bad'); w_wmgRespawn.classList.add(l_wmgRespawn.cls); w_wmgRespawn.classList.toggle('danger', !!l_wmgRespawn.danger); const mv = w_wmgRespawn.querySelector('.mval'); if (mv) mv.textContent = l_wmgRespawn.txt; } }
+  }
+  function updateHudWingman() {
     const l_wmgCd = wmgCdNow(); const w_wmgCd = $('wmgCdWrap'); if (w_wmgCd) { const pv = w_wmgCd.dataset.fp || ''; const nv = l_wmgCd.cls + '|' + l_wmgCd.txt + '|' + (l_wmgCd.danger ? '1' : '0'); if (pv !== nv) { w_wmgCd.dataset.fp = nv; w_wmgCd.classList.remove('g-good','g-warn','g-bad'); w_wmgCd.classList.add(l_wmgCd.cls); w_wmgCd.classList.toggle('danger', !!l_wmgCd.danger); const mv = w_wmgCd.querySelector('.mval'); if (mv) mv.textContent = l_wmgCd.txt; } }
     const l_wmgShield = wmgShieldNow(); const w_wmgShield = $('wmgShieldWrap'); if (w_wmgShield) { const pv = w_wmgShield.dataset.fp || ''; const nv = l_wmgShield.cls + '|' + l_wmgShield.txt + '|' + (l_wmgShield.danger ? '1' : '0'); if (pv !== nv) { w_wmgShield.dataset.fp = nv; w_wmgShield.classList.remove('g-good','g-warn','g-bad'); w_wmgShield.classList.add(l_wmgShield.cls); w_wmgShield.classList.toggle('danger', !!l_wmgShield.danger); const mv = w_wmgShield.querySelector('.mval'); if (mv) mv.textContent = l_wmgShield.txt; } }
     const l_wmgStrafe = wmgStrafeNow(); const w_wmgStrafe = $('wmgStrafeWrap'); if (w_wmgStrafe) { const pv = w_wmgStrafe.dataset.fp || ''; const nv = l_wmgStrafe.cls + '|' + l_wmgStrafe.txt + '|' + (l_wmgStrafe.danger ? '1' : '0'); if (pv !== nv) { w_wmgStrafe.dataset.fp = nv; w_wmgStrafe.classList.remove('g-good','g-warn','g-bad'); w_wmgStrafe.classList.add(l_wmgStrafe.cls); w_wmgStrafe.classList.toggle('danger', !!l_wmgStrafe.danger); const mv = w_wmgStrafe.querySelector('.mval'); if (mv) mv.textContent = l_wmgStrafe.txt; } }
@@ -8045,7 +8087,9 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_cuKill = cuKillNow(); const w_cuKill = $('cuKillWrap'); if (w_cuKill) { const pv_cuKill = w_cuKill.dataset.fv || ''; const nv_cuKill = s_cuKill.txt + '|' + s_cuKill.n + '|' + ((s_cuKill.curve || []).join(',')); if (pv_cuKill !== nv_cuKill) { w_cuKill.dataset.fv = nv_cuKill; w_cuKill.dataset.n = s_cuKill.n; w_cuKill.classList.remove('g-good','g-warn','g-bad'); if (s_cuKill.cls) w_cuKill.classList.add(s_cuKill.cls); w_cuKill.classList.toggle('danger', !!s_cuKill.danger); const pl_cuKill = w_cuKill.querySelector('polyline'); if (pl_cuKill) pl_cuKill.setAttribute('points', cuPoints(s_cuKill.curve, 44, 14)); const tv_cuKill = w_cuKill.querySelector('.cutxt'); if (tv_cuKill) tv_cuKill.textContent = s_cuKill.txt; } }
     const s_cuCoin = cuCoinNow(); const w_cuCoin = $('cuCoinWrap'); if (w_cuCoin) { const pv_cuCoin = w_cuCoin.dataset.fv || ''; const nv_cuCoin = s_cuCoin.txt + '|' + s_cuCoin.n + '|' + ((s_cuCoin.curve || []).join(',')); if (pv_cuCoin !== nv_cuCoin) { w_cuCoin.dataset.fv = nv_cuCoin; w_cuCoin.dataset.n = s_cuCoin.n; w_cuCoin.classList.remove('g-good','g-warn','g-bad'); if (s_cuCoin.cls) w_cuCoin.classList.add(s_cuCoin.cls); w_cuCoin.classList.toggle('danger', !!s_cuCoin.danger); const pl_cuCoin = w_cuCoin.querySelector('polyline'); if (pl_cuCoin) pl_cuCoin.setAttribute('points', cuPoints(s_cuCoin.curve, 44, 14)); const tv_cuCoin = w_cuCoin.querySelector('.cutxt'); if (tv_cuCoin) tv_cuCoin.textContent = s_cuCoin.txt; } }
     const s_cuShot = cuShotNow(); const w_cuShot = $('cuShotWrap'); if (w_cuShot) { const pv_cuShot = w_cuShot.dataset.fv || ''; const nv_cuShot = s_cuShot.txt + '|' + s_cuShot.n + '|' + ((s_cuShot.curve || []).join(',')); if (pv_cuShot !== nv_cuShot) { w_cuShot.dataset.fv = nv_cuShot; w_cuShot.dataset.n = s_cuShot.n; w_cuShot.classList.remove('g-good','g-warn','g-bad'); if (s_cuShot.cls) w_cuShot.classList.add(s_cuShot.cls); w_cuShot.classList.toggle('danger', !!s_cuShot.danger); const pl_cuShot = w_cuShot.querySelector('polyline'); if (pl_cuShot) pl_cuShot.setAttribute('points', cuPoints(s_cuShot.curve, 44, 14)); const tv_cuShot = w_cuShot.querySelector('.cutxt'); if (tv_cuShot) tv_cuShot.textContent = s_cuShot.txt; } }
-    const s_cuUpg = cuUpgNow(); const w_cuUpg = $('cuUpgWrap'); if (w_cuUpg) { const pv_cuUpg = w_cuUpg.dataset.fv || ''; const nv_cuUpg = s_cuUpg.txt + '|' + s_cuUpg.n + '|' + ((s_cuUpg.curve || []).join(',')); if (pv_cuUpg !== nv_cuUpg) { w_cuUpg.dataset.fv = nv_cuUpg; w_cuUpg.dataset.n = s_cuUpg.n; w_cuUpg.classList.remove('g-good','g-warn','g-bad'); if (s_cuUpg.cls) w_cuUpg.classList.add(s_cuUpg.cls); w_cuUpg.classList.toggle('danger', !!s_cuUpg.danger); const pl_cuUpg = w_cuUpg.querySelector('polyline'); if (pl_cuUpg) pl_cuUpg.setAttribute('points', cuPoints(s_cuUpg.curve, 44, 14)); const tv_cuUpg = w_cuUpg.querySelector('.cutxt'); if (tv_cuUpg) tv_cuUpg.textContent = s_cuUpg.txt; } }
+  }
+  function updateHudForecast() {
+    const s_cuUpg = cuUpgNow(); const w_cuUpg = document.getElementById('cuUpgWrap'); if (w_cuUpg) { const pv_cuUpg = w_cuUpg.dataset.fv || ''; const nv_cuUpg = s_cuUpg.txt + '|' + s_cuUpg.n + '|' + ((s_cuUpg.curve || []).join(',')); if (pv_cuUpg !== nv_cuUpg) { w_cuUpg.dataset.fv = nv_cuUpg; w_cuUpg.dataset.n = s_cuUpg.n; w_cuUpg.classList.remove('g-good','g-warn','g-bad'); if (s_cuUpg.cls) w_cuUpg.classList.add(s_cuUpg.cls); w_cuUpg.classList.toggle('danger', !!s_cuUpg.danger); const pl_cuUpg = w_cuUpg.querySelector('polyline'); if (pl_cuUpg) pl_cuUpg.setAttribute('points', cuPoints(s_cuUpg.curve, 44, 14)); const tv_cuUpg = w_cuUpg.querySelector('.cutxt'); if (tv_cuUpg) tv_cuUpg.textContent = s_cuUpg.txt; } }
     const s_cuBoss = cuBossNow(); const w_cuBoss = $('cuBossWrap'); if (w_cuBoss) { const pv_cuBoss = w_cuBoss.dataset.fv || ''; const nv_cuBoss = s_cuBoss.txt + '|' + s_cuBoss.n + '|' + ((s_cuBoss.curve || []).join(',')); if (pv_cuBoss !== nv_cuBoss) { w_cuBoss.dataset.fv = nv_cuBoss; w_cuBoss.dataset.n = s_cuBoss.n; w_cuBoss.classList.remove('g-good','g-warn','g-bad'); if (s_cuBoss.cls) w_cuBoss.classList.add(s_cuBoss.cls); w_cuBoss.classList.toggle('danger', !!s_cuBoss.danger); const pl_cuBoss = w_cuBoss.querySelector('polyline'); if (pl_cuBoss) pl_cuBoss.setAttribute('points', cuPoints(s_cuBoss.curve, 44, 14)); const tv_cuBoss = w_cuBoss.querySelector('.cutxt'); if (tv_cuBoss) tv_cuBoss.textContent = s_cuBoss.txt; } }
     const s_cuHurt = cuHurtNow(); const w_cuHurt = $('cuHurtWrap'); if (w_cuHurt) { const pv_cuHurt = w_cuHurt.dataset.fv || ''; const nv_cuHurt = s_cuHurt.txt + '|' + s_cuHurt.n + '|' + ((s_cuHurt.curve || []).join(',')); if (pv_cuHurt !== nv_cuHurt) { w_cuHurt.dataset.fv = nv_cuHurt; w_cuHurt.dataset.n = s_cuHurt.n; w_cuHurt.classList.remove('g-good','g-warn','g-bad'); if (s_cuHurt.cls) w_cuHurt.classList.add(s_cuHurt.cls); w_cuHurt.classList.toggle('danger', !!s_cuHurt.danger); const pl_cuHurt = w_cuHurt.querySelector('polyline'); if (pl_cuHurt) pl_cuHurt.setAttribute('points', cuPoints(s_cuHurt.curve, 44, 14)); const tv_cuHurt = w_cuHurt.querySelector('.cutxt'); if (tv_cuHurt) tv_cuHurt.textContent = s_cuHurt.txt; } }
     const s_cuDeath = cuDeathNow(); const w_cuDeath = $('cuDeathWrap'); if (w_cuDeath) { const pv_cuDeath = w_cuDeath.dataset.fv || ''; const nv_cuDeath = s_cuDeath.txt + '|' + s_cuDeath.n + '|' + ((s_cuDeath.curve || []).join(',')); if (pv_cuDeath !== nv_cuDeath) { w_cuDeath.dataset.fv = nv_cuDeath; w_cuDeath.dataset.n = s_cuDeath.n; w_cuDeath.classList.remove('g-good','g-warn','g-bad'); if (s_cuDeath.cls) w_cuDeath.classList.add(s_cuDeath.cls); w_cuDeath.classList.toggle('danger', !!s_cuDeath.danger); const pl_cuDeath = w_cuDeath.querySelector('polyline'); if (pl_cuDeath) pl_cuDeath.setAttribute('points', cuPoints(s_cuDeath.curve, 44, 14)); const tv_cuDeath = w_cuDeath.querySelector('.cutxt'); if (tv_cuDeath) tv_cuDeath.textContent = s_cuDeath.txt; } }
@@ -8129,6 +8173,8 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_wzPick = wzPickNow(); const w_wzPick = document.getElementById('wzPickWrap'); if (w_wzPick) { const pv_wzPick = w_wzPick.dataset.fv || ''; const nv_wzPick = s_wzPick.pct + '|' + s_wzPick.txt; if (pv_wzPick !== nv_wzPick) { w_wzPick.dataset.fv = nv_wzPick; w_wzPick.classList.remove('g-good','g-warn','g-bad'); w_wzPick.classList.add(s_wzPick.cls); w_wzPick.classList.toggle('danger', !!s_wzPick.danger); const bar_wzPick = w_wzPick.querySelector('.wbar i'); if (bar_wzPick) bar_wzPick.style.width = s_wzPick.pct + '%'; const val_wzPick = w_wzPick.querySelector('.wval'); if (val_wzPick) val_wzPick.textContent = s_wzPick.txt; } }
     const s_wzHurt = wzHurtNow(); const w_wzHurt = document.getElementById('wzHurtWrap'); if (w_wzHurt) { const pv_wzHurt = w_wzHurt.dataset.fv || ''; const nv_wzHurt = s_wzHurt.pct + '|' + s_wzHurt.txt; if (pv_wzHurt !== nv_wzHurt) { w_wzHurt.dataset.fv = nv_wzHurt; w_wzHurt.classList.remove('g-good','g-warn','g-bad'); w_wzHurt.classList.add(s_wzHurt.cls); w_wzHurt.classList.toggle('danger', !!s_wzHurt.danger); const bar_wzHurt = w_wzHurt.querySelector('.wbar i'); if (bar_wzHurt) bar_wzHurt.style.width = s_wzHurt.pct + '%'; const val_wzHurt = w_wzHurt.querySelector('.wval'); if (val_wzHurt) val_wzHurt.textContent = s_wzHurt.txt; } }
     const s_wzSurv = wzSurvNow(); const w_wzSurv = document.getElementById('wzSurvWrap'); if (w_wzSurv) { const pv_wzSurv = w_wzSurv.dataset.fv || ''; const nv_wzSurv = s_wzSurv.pct + '|' + s_wzSurv.txt; if (pv_wzSurv !== nv_wzSurv) { w_wzSurv.dataset.fv = nv_wzSurv; w_wzSurv.classList.remove('g-good','g-warn','g-bad'); w_wzSurv.classList.add(s_wzSurv.cls); w_wzSurv.classList.toggle('danger', !!s_wzSurv.danger); const bar_wzSurv = w_wzSurv.querySelector('.wbar i'); if (bar_wzSurv) bar_wzSurv.style.width = s_wzSurv.pct + '%'; const val_wzSurv = w_wzSurv.querySelector('.wval'); if (val_wzSurv) val_wzSurv.textContent = s_wzSurv.txt; } }
+  }
+  function updateHudPerformance() {
     perfHudUpdate();
     perfGovHudUpdate();
     perfHealthHudUpdate();
@@ -8141,20 +8187,18 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const s_bsWave = bsWaveNow(); const w_bsWave = document.getElementById('bsWaveWrap'); if (w_bsWave) { const pv_bsWave = w_bsWave.dataset.fv || ''; const nv_bsWave = s_bsWave.v + '|' + s_bsWave.next + '|' + s_bsWave.hit; if (pv_bsWave !== nv_bsWave) { w_bsWave.dataset.fv = nv_bsWave; w_bsWave.classList.toggle('bs-hit', !!s_bsWave.hit); w_bsWave.classList.toggle('bs-hot', !!s_bsWave.hot); const bar_bsWave = w_bsWave.querySelector('.bsbar i'); if (bar_bsWave) bar_bsWave.style.width = (s_bsWave.pct * 100) + '%'; const vt_bsWave = w_bsWave.querySelector('.bst'); if (vt_bsWave) vt_bsWave.textContent = Math.floor(s_bsWave.v) + '/' + (s_bsWave.next === null ? 'MAX' : s_bsWave.next); const dk_bsWave = w_bsWave.querySelector('.bsd'); if (dk_bsWave) dk_bsWave.style.display = s_bsWave.hit ? 'inline' : 'none'; } }
     const s_bsHurt = bsHurtNow(); const w_bsHurt = document.getElementById('bsHurtWrap'); if (w_bsHurt) { const pv_bsHurt = w_bsHurt.dataset.fv || ''; const nv_bsHurt = s_bsHurt.v + '|' + s_bsHurt.next + '|' + s_bsHurt.hit; if (pv_bsHurt !== nv_bsHurt) { w_bsHurt.dataset.fv = nv_bsHurt; w_bsHurt.classList.toggle('bs-hit', !!s_bsHurt.hit); w_bsHurt.classList.toggle('bs-hot', !!s_bsHurt.hot); const bar_bsHurt = w_bsHurt.querySelector('.bsbar i'); if (bar_bsHurt) bar_bsHurt.style.width = (s_bsHurt.pct * 100) + '%'; const vt_bsHurt = w_bsHurt.querySelector('.bst'); if (vt_bsHurt) vt_bsHurt.textContent = Math.floor(s_bsHurt.v) + '/' + (s_bsHurt.next === null ? 'MAX' : s_bsHurt.next); const dk_bsHurt = w_bsHurt.querySelector('.bsd'); if (dk_bsHurt) dk_bsHurt.style.display = s_bsHurt.hit ? 'inline' : 'none'; } }
     { const t = smStat.enemies + smStat.texts + smStat.waves; const e = document.querySelector('#smCompactWrap .smn'); if (e) e.textContent = t; }
-    { const n = performance.now(); const f = smFrame(n, smPrevNow); if (f.ok) smPrevNow = n; smLastFrame = f; const e = document.querySelector('#smFrameWrap .smf'); if (e) e.textContent = f.ok ? f.txt : '--'; }
+    { const e = document.querySelector('#smFrameWrap .smf'); if (e) e.textContent = smLastFrame.ok ? smLastFrame.txt : '--'; }
     { const b = smBudget(smLastRenderMs); const w = document.getElementById('smBudgetWrap'); if (w) { w.classList.toggle('sm-mid', b.ok && b.level === '中'); w.classList.toggle('sm-hvy', b.ok && b.level === '重'); const bar = w.querySelector('.smbar i'); if (bar) bar.style.width = (b.ok ? b.pct * 100 : 0) + '%'; const t = w.querySelector('.smf'); if (t) t.textContent = b.ok ? b.txt : '--'; } }
-    { if (smLastFrame.ok && smLastFrame.ms >= 16.7 * 1.5) { const nw = performance.now(); if (nw - smStutLast > 1200) { smStutLast = nw; smStat.stut++; smToastShow('⚡ 卡顿 ' + Math.round(smLastFrame.ms) + 'ms'); } } const e = document.querySelector('#smStutWrap .smn'); if (e) e.textContent = smStat.stut; const w = document.getElementById('smStutWrap'); if (w) w.classList.toggle('sm-hit', smStat.stut > 0); }
+    { const e = document.querySelector('#smStutWrap .smn'); if (e) e.textContent = smStat.stut; const w = document.getElementById('smStutWrap'); if (w) w.classList.toggle('sm-hit', smStat.stut > 0); }
     { const e = document.querySelector('#smBucketWrap .smn'); if (e) e.textContent = smStat.reused; }
-    { if (smKeyMark > 0) { const im = performance.now() - smKeyMark; if (im > 0 && im < 500) { smInputMs = im; smKeyMark = 0; } } const e = document.querySelector('#smInputWrap .smn'); if (e) e.textContent = smInputMs > 0 ? Math.round(smInputMs) + 'ms' : '--'; }
-    { if (smLastFrame.ok) { smSeries = smTrend(smSeries, smLastFrame.ms).arr; const sp = document.querySelector('#smTrendWrap .smspark'); if (sp) { const mx = Math.max.apply(null, smSeries.concat([16.7])); const bars = sp.children; for (let i = 0; i < bars.length; i++) { const v = smSeries[i] || 0; bars[i].style.height = Math.max(1, Math.round(v / mx * 12)) + 'px'; } } const t = document.querySelector('#smTrendWrap .smf'); if (t) t.textContent = Math.round(smLastFrame.ms) + 'ms'; } }
+    { const e = document.querySelector('#smInputWrap .smn'); if (e) e.textContent = smInputMs > 0 ? Math.round(smInputMs) + 'ms' : '--'; }
+    { if (smLastFrame.ok) { const sp = document.querySelector('#smTrendWrap .smspark'); if (sp) { const mx = Math.max.apply(null, smSeries.concat([16.7])); const bars = sp.children; for (let i = 0; i < bars.length; i++) { const v = smSeries[i] || 0; bars[i].style.height = Math.max(1, Math.round(v / mx * 12)) + 'px'; } } const t = document.querySelector('#smTrendWrap .smf'); if (t) t.textContent = Math.round(smLastFrame.ms) + 'ms'; } }
     { const avg = smLastFrame.ok ? smLastFrame.fps : 0; const s = smSummary({ avgFps: avg, stut: smStat.stut }); const e = document.querySelector('#smSumWrap .smn'); if (e && e.textContent !== s.rating) e.textContent = s.ok ? s.rating : '--'; }
-    if (cueKind && !sfxVizText(cueKind, performance.now() - cueAt)) clearSoundCue();
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
   
     }
-  } catch (e) { /* pill defense */ }
   }
 function activeFxText(fx) { const a = []; if (fx.rapid > 0) a.push('⚡速射 ' + Math.ceil(fx.rapid) + 's'); if (fx.double > 0) a.push('✨双倍 ' + Math.ceil(fx.double) + 's'); if (fx.freeze > 0) a.push('❄冰冻 ' + Math.ceil(fx.freeze) + 's'); return a.length ? a.join(' · ') : '无'; }
 function nextBossIn(lv) { const r = Math.max(0, Math.floor(Number(lv) || 1)) % 5; return r === 0 ? 5 : 5 - r; }
@@ -23460,6 +23504,24 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const tot = smStat.enemies + smStat.texts + smStat.waves;
     return '<div class="stat2">流畅度 <b>' + sum.rating + '</b> · ' + Math.round(avg) + 'FPS · 卡顿 ' + smStat.stut + ' · 回收 ' + tot + ' · 输入 ' + Math.round(smInputMs) + 'ms</div>';
   }
+  function sampleBattleFrame(now) {
+    if (smPrevNow > 0) {
+      smLastFrame = smFrame(now, smPrevNow);
+      if (smLastFrame.ok) {
+        smTrend(smSeries, smLastFrame.ms);
+        if (smLastFrame.ms >= 16.7 * 1.5 && now - smStutLast > 1200) {
+          smStutLast = now; smStat.stut++;
+          smToastShow('⚡ 卡顿 ' + Math.round(smLastFrame.ms) + 'ms');
+        }
+      }
+    }
+    smPrevNow = now;
+    if (smKeyMark > 0) {
+      const ms = performance.now() - smKeyMark;
+      if (ms > 0 && ms < 500) smInputMs = ms;
+      smKeyMark = 0;
+    }
+  }
   function smReset() {
     smStat = { enemies: 0, texts: 0, waves: 0, stut: 0, created: 0, reused: 0 };
     smPrevNow = 0; smLastFrame = { ok: false, ms: 0, fps: 0, jit: 0, rate: '—', txt: '—' };
@@ -23521,6 +23583,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   let signinReminded = false;          // —— v0.3.1 签到提醒（每页一次） ——
 
   function showOverlay(kind) {
+    $('hud').classList.add('hud-covered');
     overlayKind = kind;
     const recap = document.getElementById('senseDashWrap');
     recap.hidden = kind !== 'over';
@@ -23632,7 +23695,13 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const nw = $('nextWaveTip'); if (nw) { nw.textContent = nextWavePreview(level, endlessMode); nw.classList.remove('m-hide'); }
     }
   }
-  function hideOverlay() { clearAwayNote(); overlay.classList.add('hide'); }
+  function hideOverlay() {
+    clearAwayNote();
+    $('hud').classList.remove('hud-covered');
+    overlay.classList.add('hide');
+    nextHudGroupAt = null; // Leave the first battle frame free for input and paint.
+    smPrevNow = 0;
+  }
 
   // ===== 控制 =====
   function start(mode, startLv) {
@@ -23647,6 +23716,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (startLv && startLv > 1) level = Math.min(startLv | 0, 999);
     // —— v0.2.5 战绩档案：本局计时清零 ——
     playSecRun = 0;
+    hudGroupIndex = 0;
     senseWriteBase = saveStore.status().writes;
     awayReturns = 0; clearAwayNote();
     cueCount = 0; clearSoundCue();
@@ -24316,6 +24386,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
 
   // ===== v0.2.0 设置：画质档位 / 减弱动效 / 分音量 =====
   function applySettingsUI() {
+    updateMenuReadouts();
     refreshBgmLive();
     // v0.2.5 主界面装饰元素：减弱动效时冻结装饰动画
     document.documentElement.classList.toggle('motion-off', reduced());
@@ -25412,7 +25483,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.196', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.197', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -25468,6 +25539,9 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   }
 
   // ===== 事件 =====
+  $('fireKeyBtn').addEventListener('click', e => {
+    cycleFireKey(); e.currentTarget.textContent = fireKeySummary();
+  });
   btnPlay.addEventListener('click', () => {
     ensureAudio();
     if (overlayKind === 'paused') togglePause();
@@ -28258,7 +28332,8 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       lvIntroNow: () => { const el = document.getElementById('lvIntro'); const t = el ? el.querySelector('.lvT') : null; return t ? t.textContent : null; },
       // —— v0.3.36 HUD 关卡标签探针(无尽显示「波」) ——
       hudLevelTagNow: () => { const p = elLevel ? elLevel.parentElement : null; const k = p ? p.querySelector('.k') : null; return k ? k.textContent : null; },
-      updateHudNow: () => { updateHud(); return true; },
+      updateHudNow: () => { updateHud(); updateExtraHud(); return true; },
+      hudScheduleNow: () => ({ next:hudGroupIndex, total:hudGroups.length }),
       showLvResultNow: () => { showLvResult(); return { stars: lvStarsNow, pending: lvResultPending, show: lvResult.classList.contains('show') }; },
       claimLvNow: () => { const g = lvStarsNow * 25; claimLvResult(); return { gold: g }; },
       // —— v0.2.6 战绩图增强：分享/复制/快照 ——
