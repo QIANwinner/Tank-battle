@@ -25654,6 +25654,29 @@ async function main() {
       return (two && three && four && faded && reset && b.hidden) || JSON.stringify({ two, three, four, faded, reset, text: b.textContent });
     });
 
+  // U9159–U9164: 顶部提示自动收起
+  await senseCheck("U9159 三个顶部提示都在，菜单中没有一个亮着", (T,$) => typeof T.topToastHoldNow === 'function' && ['mw', 'bs', 'sm'].every(k => !!$(k + 'Toast') && !$(k + 'Toast').classList.contains(k + '-fade')));
+  await senseCheck("U9160 新一局开始时顶部干净，不带上一局的提示", (T,$) => { T.startGame(); T.topToastShowNow('mw', '击杀 10'); T.quit(); T.startGame(); const ok = ['mw', 'bs', 'sm'].every(k => !$(k + 'Toast').classList.contains(k + '-fade')); T.quit(); return ok; });
+  await senseCheck("U9161 里程碑约 2.2 秒、态势 1.8 秒、卡顿 1.5 秒后收起", T => T.topToastHoldNow('mw') === 2200 && T.topToastHoldNow('bs') === 1800 && T.topToastHoldNow('sm') === 1500);
+  await senseCheck("U9162 空文案不弹；卡顿提示只在打开帧率显示时弹", (T,$) => T.topToastShowNow('mw', '') === false && !$('mwToast').classList.contains('mw-fade') && T.stutterToastOnNow(true) === true && T.stutterToastOnNow(false) === false);
+  await senseCheck("U9163 未知提示类型和非文本内容不弹", T => [null, 'xx', 'toString', 7, undefined].every(k => T.topToastHoldNow(k) === 0) && T.topToastShowNow('toString', '击杀 10') === false && T.topToastShowNow('mw', 5) === false && T.topToastShowNow('bs', null) === false && T.stutterToastOnNow('1') === false && T.stutterToastOnNow(1) === false);
+  await senseCheck("U9164 真实弹出：里程碑自动收起；卡顿提示随帧率开关；暂停即清空", async (T,$) => {
+      const wait = ms => new Promise(r => setTimeout(r, ms));
+      const mw = $('mwToast'), bs = $('bsToast'), sm = $('smToast');
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+      const shown = T.topToastShowNow('mw', '击杀 10') === true && mw.classList.contains('mw-fade') && mw.textContent === '击杀 10';
+      T.fpsToggleNow(false); const quiet = T.stutterToastNow('⚡ 卡顿 40ms') === false;
+      T.fpsToggleNow(true); const loud = T.stutterToastNow('⚡ 卡顿 40ms') === true && sm.textContent === '⚡ 卡顿 40ms';
+      T.fpsToggleNow(false);
+      const end = performance.now() + 4000;
+      while ((mw.classList.contains('mw-fade') || sm.classList.contains('sm-fade')) && performance.now() < end) await wait(50);
+      const faded = !mw.classList.contains('mw-fade') && !sm.classList.contains('sm-fade');
+      T.topToastShowNow('bs', '效率 3'); const up = bs.classList.contains('bs-fade');
+      $('pauseBtn').click(); const cleared = !bs.classList.contains('bs-fade');
+      T.quit();
+      return (shown && quiet && loud && faded && up && cleared) || JSON.stringify({ shown, quiet, loud, faded, up, cleared });
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
