@@ -25229,6 +25229,71 @@ async function main() {
     T.quit(); return frozen && resumed;
   });
 
+  // U9051–U9056: 120 Hz frame budget — off-screen readouts, cached sprites, no render cap
+  await senseCheck("U9051 屏外读数留在 DOM 但不参与渲染，主读数照常显示", async (T,$) => {
+    T.startGame(); T.skipIntro();
+    const box = document.querySelector('.hudReadouts'), pill = $('smCompactWrap');
+    const end = performance.now() + 2000;
+    while (!box.classList.contains('offscreen') && performance.now() < end) await new Promise(requestAnimationFrame);
+    return box.getBoundingClientRect().left >= innerWidth && box.classList.contains('offscreen') && box.contains(pill) &&
+      !pill.checkVisibility() && $('score').checkVisibility();
+  });
+  await senseCheck("U9052 被跳过的读数仍随刷新更新数值", (T,$) => {
+    const el = $('runShotsVal'), before = el.textContent;
+    T.addStat('shots', 7); T.extraHudRefreshNow();
+    return !!el.closest('.hudReadouts.offscreen') && el.textContent !== before && el.textContent.includes('7');
+  });
+  await senseCheck("U9053 读数区进入视口即恢复渲染，移出后再次跳过", async (T,$) => {
+    const box = document.querySelector('.hudReadouts'), pill = $('runShotsVal');
+    const settle = async skipped => {
+      const end = performance.now() + 2000;
+      while (box.classList.contains('offscreen') !== skipped && performance.now() < end) await new Promise(requestAnimationFrame);
+      return box.classList.contains('offscreen') === skipped;
+    };
+    try {
+      box.style.transform = 'translateX(' + (-box.getBoundingClientRect().left) + 'px)';
+      if (!(await settle(false) && pill.checkVisibility())) return false;
+    } finally { box.style.transform = ''; }
+    return await settle(true) && !pill.checkVisibility();
+  });
+  await senseCheck("U9054 同款坦克复用一张贴图且照常出画", (T,$) => {
+    T.startGame(); T.skipIntro(); T.forceClear(); T.clearMap();
+    for (let i = 0; i < 4; i++) T.spawnEnemyAt(60 + i * 60, 120, 'normal');
+    const base = T.renderCacheNow().tanks;
+    T.renderOnce(); const once = T.renderCacheNow().tanks; T.renderOnce();
+    const c = $('game'), k = c.width / 624;
+    const px = c.getContext('2d').getImageData(Math.round(71 * k) - 5, Math.round(131 * k) - 5, 10, 10).data;
+    let lit = 0; for (let i = 0; i < px.length; i += 4) if (px[i] + px[i + 1] + px[i + 2] > 150) lit++;
+    const again = T.renderCacheNow().tanks;
+    return (once >= 1 && once - base <= 2 && again === once && lit > 20) || JSON.stringify({ base, once, again, lit });
+  });
+  await senseCheck("U9055 飘字同文案复用贴图，移动时不再逐帧排字", (T,$) => {
+    T.addTextNow(200, 300, '+198 稳', '#39ff14'); T.addTextNow(260, 340, '+198 稳', '#39ff14');
+    const c = $('game'), ctx = c.getContext('2d'), fillText = ctx.fillText; let typeset = 0;
+    ctx.fillText = function (s, ...rest) { if (String(s).includes('+198')) typeset++; return fillText.call(this, s, ...rest); };
+    let once, twice;
+    try { T.renderOnce(); once = T.renderCacheNow().labels; T.renderOnce(); twice = T.renderCacheNow().labels; }
+    finally { delete ctx.fillText; }
+    const k = c.width / 624, px = ctx.getImageData(Math.round(180 * k), Math.round(292 * k), Math.round(40 * k), Math.round(16 * k)).data;
+    let green = 0; for (let i = 0; i < px.length; i += 4) if (px[i + 1] > 140 && px[i] < 140) green++;
+    return (typeset === 0 && once >= 1 && twice === once && green > 10) || JSON.stringify({ typeset, once, twice, green });
+  });
+  await senseCheck("U9056 掉帧不改判刷新率；自适应重载仍逐帧出画", async (T,$) => {
+    const hz = T.perfDetectHzNow([8.3, 8.4, 8.3, 16.7, 8.3, 25, 8.3, 8.3, 33.3, 8.3, 8.4]);
+    T.startGame(); T.skipIntro();
+    const ctx = $('game').getContext('2d'), drawImage = ctx.drawImage; let frames = 0, painted = false;
+    ctx.drawImage = function (...a) { painted = true; return drawImage.apply(this, a); };
+    try {
+      await new Promise(requestAnimationFrame);
+      for (let i = 0; i < 4; i++) {
+        T.perfGovForceNow(3); painted = false;
+        await new Promise(requestAnimationFrame);
+        if (painted) frames++;
+      }
+    } finally { delete ctx.drawImage; T.perfGovToggleNow(false); T.quit(); }
+    return hz === 120 && frames === 4;
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

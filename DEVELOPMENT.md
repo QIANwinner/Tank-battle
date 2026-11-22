@@ -43,3 +43,13 @@ done
 | 开场后帧间隔 P95 | 100.1 ms | 33.4 ms |
 
 同机 Chrome 156 无头模式、390×844 触屏视口、DPR 1、CPU 降速 4 倍、默认画质、全新存档。结果用于比较主线程开销，不包含公网下载延迟，也不是对真机帧率的承诺。
+
+## 战斗帧间隔
+
+```sh
+TB_BATTLE=1 TB_SCENE=boss node .workbuddy/regression/perf_probe.js
+```
+
+`TB_BATTLE=1` 会打开一个真实的 Chrome 窗口（不是无头模式），在显示器自己的垂直同步节奏上采样；`TB_SCENE` 取 `wave`（6 辆普通敌人）或 `boss`（另加 Boss、散射弹幕和粒子）。脚本先在空白页采 720 帧作为这台机器当下的基线（`reference`），再进固定种子 20261113 的每日模式，热身 1.5 秒后采 6 秒：`drawGapsMs` 是相邻两次出画的间隔分位数，`callbackMs` 是单次 `tick` 的脚本耗时，`mainThreadMsPerSec` 把主线程时间拆成脚本、样式和布局，`slowFrames` 列出最慢的三个长动画帧。
+
+采样期间不要切走或遮挡该窗口：失焦会让游戏暂停，脚本会直接报错而不是给出一份无意义的数字。结果只能和同一台机器、同一刷新率下的 `reference` 以及上一版本的同场景结果对比。

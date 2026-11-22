@@ -4,6 +4,7 @@
 .workbuddy/regression/*
 !.workbuddy/regression/serve.js
 !.workbuddy/regression/perf_probe.js
+!.workbuddy/regression/perf_battle.js
 !.workbuddy/regression/tb_cdp_test.js
 !.workbuddy/regression/tb_pet_smoke.js
 !.workbuddy/regression/tb_wingman_smoke.js

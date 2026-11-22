@@ -93,6 +93,7 @@
     <div class="pill m-hide"><span class="k">💥</span><span class="v" id="bulletFlyVal"></span></div>
     <div class="pill m-hide"><span class="k">🧰</span><span class="v" id="powerupFieldVal"></span></div>
     <div class="fxBarWrap m-hide" id="fxBarWrap"><i id="fxBarFill" style="width:0%"></i></div>
+    <div class="hudReadouts">
     <div class="pill m-hide" id="scoreRatePill"><span class="k">速率</span><span class="v" id="scoreRateVal">0 分/分</span></div>
     <div class="pill m-hide" id="bossRunPill"><span class="k">BOSS</span><span class="v" id="bossRunVal">BOSS ×0</span></div>
     <div class="pill m-hide" id="comboAchWrap"><span class="v" id="comboAchVal"></span></div>
@@ -1375,7 +1376,6 @@
     <div class="pill m-hide" id="dzClearWrap"><span class="k">🧹</span><span class="tgl">清场</span><span class="dzbar"><i></i></span><span class="dzv">—</span></div>
     <div class="pill m-hide" id="dzEconWrap"><span class="k">💰</span><span class="tgl">经济</span><span class="dzbar"><i></i></span><span class="dzv">—</span></div>
     <div class="pill m-hide" id="dzHpWrap"><span class="k">❤️</span><span class="tgl">续航</span><span class="dzbar"><i></i></span><span class="dzv">—</span></div>
-    <div class="mwToast" id="mwToast"></div>
     <div class="pill m-hide" id="mwKillsWrap"><span class="k">💀</span><span class="tgl">击杀</span><span class="mwbar"><i></i></span><span class="mwt">0</span><span class="mwdone">✓</span></div>
     <div class="pill m-hide" id="mwComboWrap"><span class="k">🔥</span><span class="tgl">连杀</span><span class="mwbar"><i></i></span><span class="mwt">0</span><span class="mwdone">✓</span></div>
     <div class="pill m-hide" id="mwWaveWrap"><span class="k">🚩</span><span class="tgl">波次</span><span class="mwbar"><i></i></span><span class="mwt">0</span><span class="mwdone">✓</span></div>
@@ -1401,18 +1401,10 @@
     <div class="pill m-hide" id="wzHurtWrap"><span class="k">🛡️</span><span class="tgl">受击</span><span class="wbar"><i></i></span><span class="wval">—</span></div>
     <div class="pill m-hide" id="wzSurvWrap"><span class="k">❤️</span><span class="tgl">生存</span><span class="wbar"><i></i></span><span class="wval">—</span></div>
     <div class="pill m-hide" id="perfHzWrap"><span class="k">⚡</span><span class="tgl">刷新</span><span class="wval">—</span></div>
-    <div class="perfMon pm-hidden" id="perfMonWrap">
-      <div class="perfMonHead"><span class="perfMonDot">—</span><span class="perfMonTitle">⚡ 性能中心</span><button class="perfMonClose" id="perfMonCloseBtn" aria-label="关闭">✕</button></div>
-      <div class="perfMonBody"></div>
-      <div class="perfMonHint"></div>
-      <button class="perfMonOptBtn" id="perfMonOptBtn">⚡ 一键优化</button>
-    </div>
     <div class="pill m-hide" id="perfGovWrap"><span class="k">⚡</span><span class="tgl">自适应</span><span class="wval">—</span></div>
-    <div class="pgovTrend pgov-hidden" id="perfGovTrendBox"><canvas id="perfGovTrend" width="220" height="34"></canvas><div class="pgovCap">帧时(ms) · 虚线=预算 · 近 30 帧</div></div>
 
     <div class="pill m-hide" id="perfHealthWrap"><span class="k">📊</span><span class="wval">—</span></div>
 
-    <div class="bsToast" id="bsToast"></div>
     <div class="pill m-hide" id="bsEnemyWrap"><span class="k">💀</span><span class="tgl">敌军</span><span class="bsbar"><i></i></span><span class="bst">0</span><span class="bsd">✓</span></div>
     <div class="pill m-hide" id="bsBulletWrap"><span class="k">💥</span><span class="tgl">火力</span><span class="bsbar"><i></i></span><span class="bst">0</span><span class="bsd">✓</span></div>
     <div class="pill m-hide" id="bsPartWrap"><span class="k">✨</span><span class="tgl">爆炸</span><span class="bsbar"><i></i></span><span class="bst">0</span><span class="bsd">✓</span></div>
@@ -1421,7 +1413,6 @@
     <div class="pill m-hide" id="bsComboWrap"><span class="k">🔥</span><span class="tgl">热度</span><span class="bsbar"><i></i></span><span class="bst">0</span><span class="bsd">✓</span></div>
     <div class="pill m-hide" id="bsWaveWrap"><span class="k">🚩</span><span class="tgl">推进</span><span class="bsbar"><i></i></span><span class="bst">0</span><span class="bsd">✓</span></div>
     <div class="pill m-hide" id="bsHurtWrap"><span class="k">⚠️</span><span class="tgl">危险</span><span class="bsbar"><i></i></span><span class="bst">0</span><span class="bsd">✓</span></div>
-    <div class="bsToast" id="smToast"></div>
     <div class="pill m-hide" id="smCompactWrap"><span class="k">♻️</span><span class="tgl">阵存回收</span><span class="smn">0</span></div>
     <div class="pill m-hide" id="smFrameWrap"><span class="k">⚡</span><span class="tgl">帧率</span><span class="smf">--</span></div>
     <div class="pill m-hide" id="smBudgetWrap"><span class="k">🎯</span><span class="tgl">渲染</span><span class="smbar"><i></i></span><span class="smf">--</span></div>
@@ -1430,6 +1421,17 @@
     <div class="pill m-hide" id="smInputWrap"><span class="k">🎮</span><span class="tgl">输入</span><span class="smn">--</span></div>
     <div class="pill m-hide" id="smTrendWrap"><span class="k">📈</span><span class="tgl">帧时</span><span class="smspark"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="smf">--</span></div>
     <div class="pill m-hide" id="smSumWrap"><span class="k">🏅</span><span class="tgl">评级</span><span class="smn">--</span></div>
+    </div>
+    <div class="mwToast" id="mwToast"></div>
+    <div class="perfMon pm-hidden" id="perfMonWrap">
+      <div class="perfMonHead"><span class="perfMonDot">—</span><span class="perfMonTitle">⚡ 性能中心</span><button class="perfMonClose" id="perfMonCloseBtn" aria-label="关闭">✕</button></div>
+      <div class="perfMonBody"></div>
+      <div class="perfMonHint"></div>
+      <button class="perfMonOptBtn" id="perfMonOptBtn">⚡ 一键优化</button>
+    </div>
+    <div class="pgovTrend pgov-hidden" id="perfGovTrendBox"><canvas id="perfGovTrend" width="220" height="34"></canvas><div class="pgovCap">帧时(ms) · 虚线=预算 · 近 30 帧</div></div>
+    <div class="bsToast" id="bsToast"></div>
+    <div class="bsToast" id="smToast"></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -1829,7 +1831,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.197</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.198</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2604,10 +2606,12 @@
 
   // ===== 状态 =====
   let map = [];
-  // v0.2.0 静态地图离屏缓存：背景+网格+砖/钢/水 烘焙一次，每帧只 drawImage，油桶/传送门/草丛/实体仍动态
+  // The terrain index shares the same invalidation as the background bitmap.
   let mapStaticCanvas = document.createElement('canvas');
   let mapStaticCtx = null;
   let mapDirty = true;
+  const animatedTiles = [], treeTiles = [], tankSprites = new Map(), floatTextSprites = new Map();
+  let treeStamp = null, treeScale = 0;
   let player = null;
   let player2 = null;          // v0.2.7 双人同屏 P2
   let multiMode = 0;           // v0.2.7 0 单人 / 1 合作 / 2 对抗
@@ -5226,10 +5230,16 @@
     });
   }
 
+  // Readouts past the right edge stay in the DOM but are not rendered until the viewport reaches them.
+  const hudReadouts = document.querySelector('.hudReadouts');
+  new IntersectionObserver(entries => {
+    hudReadouts.classList.toggle('offscreen', !entries[entries.length - 1].isIntersecting);
+  }).observe(hudReadouts);
+
   // ===== 主循环（deltaTime 驱动） =====
   function tick(now) {
     rafId = requestAnimationFrame(tick);
-    perfSample();
+    perfSample(now);
     perfGovTick();
     animTime = now;
     let dt = (now - lastTime) / 1000;
@@ -5446,7 +5456,7 @@
     const update = hudGroups[hudGroupIndex];
     hudGroupIndex = (hudGroupIndex + 1) % hudGroups.length;
     // One slice per animation frame, never catch up with a burst after a slow frame.
-    nextHudGroupAt = now + 100 / hudGroups.length;
+    nextHudGroupAt = now + 200 / hudGroups.length - 0.5;
     update();
   }
   function updateHud() {
@@ -5584,12 +5594,15 @@
       for (let i = 0; i <= W; i += TILE) { c.beginPath(); c.moveTo(i, 0); c.lineTo(i, H); c.stroke(); }
       for (let i = 0; i <= H; i += TILE) { c.beginPath(); c.moveTo(0, i); c.lineTo(W, i); c.stroke(); }
       // 静态地块：砖/钢/水（油桶闪烁、传送门旋转属动态层，不烘焙）
+      animatedTiles.length = treeTiles.length = 0;
       for (let y = 0; y < ROWS; y++)
         for (let x = 0; x < COLS; x++) {
           const t = map[y][x];
           if (t === TILE_BRICK) drawBrick(x * TILE, y * TILE);
           else if (t === TILE_STEEL) drawSteel(x * TILE, y * TILE);
           else if (t === TILE_WATER) drawWater(x * TILE, y * TILE);
+          else if (t === TILE_BARREL || t === TILE_PORTAL) animatedTiles.push({ t, x:x * TILE, y:y * TILE });
+          else if (t === TILE_TREE) treeTiles.push({ x:x * TILE, y:y * TILE });
         }
     } finally { ctx = prev; }
     mapDirty = false;
@@ -5597,7 +5610,6 @@
   function markMapDirty() { mapDirty = true; }
 
   function draw() {
-    if (perfGovSkipRender()) return;
     if (!map.length) return;
     ctx.setTransform(renderScale, 0, 0, renderScale, 0, 0);
     ctx.save();
@@ -5608,12 +5620,9 @@
     ctx.drawImage(mapStaticCanvas, 0, 0, W, H);
 
     // 动态地块：油桶（警示灯闪烁）/ 传送门（旋转脉冲）
-    for (let y = 0; y < ROWS; y++) {
-      for (let x = 0; x < COLS; x++) {
-        const t = map[y][x];
-        if (t === TILE_BARREL) drawBarrel(x * TILE, y * TILE);
-        else if (t === TILE_PORTAL) drawPortal(x * TILE, y * TILE);
-      }
+    for (const cell of animatedTiles) {
+      if (cell.t === TILE_BARREL) drawBarrel(cell.x, cell.y);
+      else drawPortal(cell.x, cell.y);
     }
 
     drawBase();
@@ -5702,9 +5711,18 @@
     }
 
     // 草丛（覆盖上层）
-    for (let y = 0; y < ROWS; y++)
-      for (let x = 0; x < COLS; x++)
-        if (map[y][x] === TILE_TREE) drawTree(x * TILE, y * TILE);
+    if (treeTiles.length) {
+      if (treeScale !== renderScale) {
+        treeScale = renderScale;
+        treeStamp = document.createElement('canvas');
+        treeStamp.width = Math.ceil((TILE + 6) * treeScale);
+        treeStamp.height = Math.ceil(TILE * treeScale);
+        const g = treeStamp.getContext('2d');
+        g.scale(treeScale, treeScale);
+        drawTree(0, 0, g);
+      }
+      for (const cell of treeTiles) ctx.drawImage(treeStamp, cell.x, cell.y, treeStamp.width / treeScale, treeStamp.height / treeScale);
+    }
 
     // 道具
     for (const p of powerups) drawPowerup(p);
@@ -5750,12 +5768,10 @@
 
     // 飘分
     if (texts.length) {
-      ctx.font = '700 13px "Segoe UI", sans-serif';
-      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       for (const t of texts) {
+        const label = floatTextSprite(t.str, t.color);
         ctx.globalAlpha = clamp(t.life / t.max, 0, 1);
-        ctx.fillStyle = t.color;
-        ctx.fillText(t.str, t.x, t.y);
+        ctx.drawImage(label.image, t.x - label.w / 2, t.y - label.h / 2, label.w, label.h);
       }
       ctx.globalAlpha = 1;
     }
@@ -5933,19 +5949,42 @@
     ctx.stroke();
   }
 
-  function drawTree(px, py) {
-    ctx.fillStyle = 'rgba(10, 30, 20, 0.85)';
-    ctx.fillRect(px, py, TILE, TILE);
-    ctx.fillStyle = '#1a4020';
-    for (let i = 0; i < 3; i++) {
-      ctx.beginPath();
-      ctx.arc(px + 6 + i * 7, py + 8, 6, 0, Math.PI * 2);
-      ctx.arc(px + 10 + i * 7, py + 15, 6, 0, Math.PI * 2);
-      ctx.fill();
+  // Drifting score labels are drawn once and then moved as images: re-laying out text at a new
+  // sub-pixel position every frame was the slowest part of a 120 Hz frame.
+  function floatTextSprite(str, color) {
+    const key = str + '|' + color + '|' + renderScale;
+    let label = floatTextSprites.get(key);
+    if (!label) {
+      const font = '700 13px "Segoe UI", sans-serif';
+      ctx.font = font;
+      const w = Math.ceil(ctx.measureText(str).width) + 4, h = 20;
+      const image = document.createElement('canvas');
+      image.width = Math.ceil(w * renderScale); image.height = Math.ceil(h * renderScale);
+      const g = image.getContext('2d');
+      g.scale(renderScale, renderScale);
+      g.font = font; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillStyle = color;
+      g.fillText(str, w / 2, h / 2);
+      label = { image, w, h };
+      if (floatTextSprites.size >= 64) floatTextSprites.delete(floatTextSprites.keys().next().value);
+      floatTextSprites.set(key, label);
     }
-    ctx.fillStyle = 'rgba(57, 255, 20, 0.4)';
-    ctx.fillRect(px + 4, py + 4, 2, 2);
-    ctx.fillRect(px + 18, py + 14, 2, 2);
+    return label;
+  }
+
+  function drawTree(px, py, g) {
+    g.fillStyle = 'rgba(10, 30, 20, 0.85)';
+    g.fillRect(px, py, TILE, TILE);
+    g.fillStyle = '#1a4020';
+    for (let i = 0; i < 3; i++) {
+      g.beginPath();
+      g.arc(px + 6 + i * 7, py + 8, 6, 0, Math.PI * 2);
+      g.arc(px + 10 + i * 7, py + 15, 6, 0, Math.PI * 2);
+      g.fill();
+    }
+    g.fillStyle = 'rgba(57, 255, 20, 0.4)';
+    g.fillRect(px + 4, py + 4, 2, 2);
+    g.fillRect(px + 18, py + 14, 2, 2);
   }
 
   // 可爆炸油桶：圆柱体 + 危险警示条 + 顶部引信
@@ -6123,10 +6162,46 @@
     ctx.rotate(t.dir * Math.PI / 4);
     ctx.scale(scale, scale);
 
+    const skin = t.isPlayer ? (SKINS[equippedSkin] || SKINS.classic) : null;
+    if (ctx.canvas !== canvas || (skin && skin.fx && !t.isWingman)) {
+      paintTankBody(t, skin);   // previews and animated skins are painted live
+    } else {
+      const density = renderScale * scale;
+      const blink = t.type === 'suicide' && Math.floor(animTime / 120) % 2 === 0;
+      const look = t.isWingman ? 'wing:' + equippedWSkin : t.isPlayer ? 'skin:' + equippedSkin : (t.bossId || t.type);
+      const key = [look, t.color, t.isBoss ? bossType.accent : '', t.hitFlash > 0, blink,
+        colorBlind, highContrast, glowBlur(1), density].join('|');
+      let sprite = tankSprites.get(key);
+      if (!sprite) {
+        // Shadows are measured in device pixels; keep the halo margin outside the scaled body.
+        const half = Math.ceil(22 * density + 2 * glowBlur(t.isBoss ? 18 : 10) + 2);
+        sprite = document.createElement('canvas');
+        sprite.width = sprite.height = half * 2;
+        const main = ctx;
+        try {
+          ctx = sprite.getContext('2d');
+          ctx.setTransform(density, 0, 0, density, half, half);
+          paintTankBody(t, skin);
+        } finally { ctx = main; }
+        if (tankSprites.size >= 96) tankSprites.delete(tankSprites.keys().next().value);
+      } else tankSprites.delete(key);
+      tankSprites.set(key, sprite);   // most recently drawn last, so eviction takes the stalest look
+      const width = sprite.width / density;
+      ctx.drawImage(sprite, -width / 2, -width / 2, width, width);
+    }
+    ctx.restore();
+    if (!t.isPlayer && !t.isWingman && !t.isBoss && t.maxHp > 1) {
+      const width = t.maxHp * 6 - 2;
+      for (let i = 0; i < t.maxHp; i++) {
+        ctx.fillStyle = i < t.hp ? cbColor(t.color) : 'rgba(255,255,255,0.15)';
+        ctx.fillRect(cx - width / 2 + i * 6, t.y - 5, 4, 3);
+      }
+    }
+  }
+
+  function paintTankBody(t, skin) {
     const isPlayer = t.isPlayer;
     const flashing = t.hitFlash > 0;
-    // 装备皮肤（仅玩家）：按当前装备的皮肤配色绘制
-    const skin = isPlayer ? (SKINS[equippedSkin] || SKINS.classic) : null;
 
     // —— v0.3.3 僚机专属造型：按装备的僚机皮肤配色绘制 + 白色菱形徽标 ——
     if (t.isWingman) {
@@ -6154,7 +6229,6 @@
       ctx.moveTo(0, -2.4); ctx.lineTo(1.8, 0); ctx.lineTo(0, 2.4); ctx.lineTo(-1.8, 0);
       ctx.closePath(); ctx.fill();
       ctx.shadowBlur = 0;
-      ctx.restore();
       return;
     }
 
@@ -6166,7 +6240,6 @@
     if (isPlayer && skin.fish) {
       drawFishTank(flashing, skin);
       ctx.shadowBlur = 0;
-      ctx.restore();
       return;
     }
 
@@ -6435,21 +6508,6 @@
       ctx.strokeRect(-11, -10, 22, 20);
     }
 
-    ctx.restore();
-
-    // 多血敌人：头顶血点（Boss 用顶部血条）
-    if (!isPlayer && !t.isBoss && t.maxHp > 1) {
-      const dots = t.maxHp;
-      const dw = 4, gap = 2;
-      const totalW = dots * dw + (dots - 1) * gap;
-      let dx = t.x + s / 2 - totalW / 2;
-      const dy = t.y - 5;
-      for (let i = 0; i < dots; i++) {
-        ctx.fillStyle = i < t.hp ? cbColor(t.color) : 'rgba(255,255,255,0.15)';
-        ctx.fillRect(dx, dy, dw, 3);
-        dx += dw + gap;
-      }
-    }
   }
 
   // 限定皮肤「蓝色大肥鱼」专属绘制：调用方已 translate/rotate/scale，前方 = -y
@@ -22854,18 +22912,18 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (!isFinite(v) || v <= 0) return 60;
     return Math.min(240, Math.max(30, Math.round(v)));
   }
-  // 由 rAF 真实间隔数组估显示器刷新率：dominant 平均间隔 → Hz；样本 <3 或非法 → 60。
+  // 由 rAF 真实间隔数组估显示器刷新率：间隔中位数 → Hz；样本 <3 或非法 → 60。
   function perfDetectHz(deltas) {
     if (!Array.isArray(deltas)) return 60;
-    let sum = 0, n = 0;
+    const valid = [];
     for (const d of deltas) {
       const v = Number(d);
-      if (isFinite(v) && v > 0 && v < 200) { sum += v; n++; }
+      if (isFinite(v) && v > 0 && v < 200) valid.push(v);
     }
-    if (n < 3) return 60;
-    const avg = sum / n;
-    if (avg <= 0) return 60;
-    return perfClampHz(Math.round(1000 / avg));
+    if (valid.length < 3) return 60;
+    // Median, so dropped frames read as a slow game rather than a slower display.
+    valid.sort((a, b) => a - b);
+    return perfClampHz(Math.round(1000 / valid[valid.length >> 1]));
   }
   // 自动档阈值按 Hz 缩放（原硬编码 42/55 按 60Hz 设计，120Hz 屏会振荡）：low=0.7*Hz, high=0.9*Hz。
   function perfScaleAuto(fps, hz) {
@@ -22905,8 +22963,8 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   let perfBadgeLast = '';
   let perfHudCache = { s: -1, b: -1, l: -1, r: '', w: '' };
   // 每帧采样 rAF 真实间隔（供 perfDetectHz）。
-  function perfSample() {
-    const t = performance.now();
+  function perfSample(now) {
+    const t = now;
     if (perfLastT > 0) {
       const d = t - perfLastT;
       if (d > 0 && d < 500) {
@@ -23061,12 +23119,11 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // —— 帧时自适应引擎：perfGov 系列（v1.1.171 第一百零五辑）——
   const LS_PERFGOV = 'tank-battle-perfgov';
   let perfGovOn = false;
-  let perfGovLevel = 0;      // 0 稳定 / 1 轻载 / 2 中载 / 3 重载（限帧）
+  let perfGovLevel = 0;      // 0 稳定 / 1 轻载 / 2 中载 / 3 重载
   let perfGovLow = 0;        // 连续超预算帧数
   let perfGovHigh = 0;       // 连续低于预算帧数（恢复）
   let perfGovBadgeLast = '';
   let perfGovTrendLast = 0;  // 趋势图上一次绘制时间（4Hz）
-  let perfGovLastDraw = 0;   // 限帧：上一次实际渲染时间
   // 实时帧时 EMA（近 10 帧平均）：deltas 缺省读 perfDeltas；样本 <3 → null（数据不足）。
   function perfGovFrameMs(deltas) {
     const arr = Array.isArray(deltas) ? deltas : perfDeltas;
@@ -23131,14 +23188,6 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     else if (st.dir === -1) { perfGovHigh++; perfGovLow = 0; if (perfGovHigh >= 5) { perfGovLevel = st.level; perfGovHigh = 0; } }
     else { perfGovLow = 0; perfGovHigh = 0; }
     return perfGovLevel;
-  }
-  // 渲染限帧：重载（level>=3）且距上次实际渲染 <16.7ms → 跳过本帧渲染（逻辑仍全速）。
-  function perfGovSkipRender() {
-    if (!perfGovOn || perfGovLevel < 3) return false;
-    const t = performance.now();
-    if (t - perfGovLastDraw < (1000 / 60)) return true;
-    perfGovLastDraw = t;
-    return false;
   }
   // 趋势图：近 30 帧帧时曲线 + 预算基线（4Hz 刷新，防高频 DOM 写入）。
   function perfGovTrendDraw() {
@@ -25483,7 +25532,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.197', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.198', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -28334,6 +28383,9 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       hudLevelTagNow: () => { const p = elLevel ? elLevel.parentElement : null; const k = p ? p.querySelector('.k') : null; return k ? k.textContent : null; },
       updateHudNow: () => { updateHud(); updateExtraHud(); return true; },
       hudScheduleNow: () => ({ next:hudGroupIndex, total:hudGroups.length }),
+      renderCacheNow: () => ({ tanks:tankSprites.size, labels:floatTextSprites.size }),
+      addTextNow: (x, y, str, color) => addText(x, y, str, color),
+      perfGovForceNow: (level) => { perfGovOn = true; perfGovLevel = level; },
       showLvResultNow: () => { showLvResult(); return { stars: lvStarsNow, pending: lvResultPending, show: lvResult.classList.contains('show') }; },
       claimLvNow: () => { const g = lvStarsNow * 25; claimLvResult(); return { gold: g }; },
       // —— v0.2.6 战绩图增强：分享/复制/快照 ——
