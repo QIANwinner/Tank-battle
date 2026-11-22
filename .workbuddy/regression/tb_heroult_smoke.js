@@ -25529,6 +25529,25 @@ async function main() {
       return (plain && first && once && saved && T.enemyIntroMarkNow() === null) || JSON.stringify({ plain, first, once, saved, text, mark });
     });
 
+  // U9129–U9134: 基地护墙告警
+  await senseCheck("U9129 护墙告警用战场提示条，菜单中基地不闪框", (T,$) => typeof T.baseWallAlertTextNow === 'function' && T.baseAlertNow() === false && $('fieldNote').hidden);
+  await senseCheck("U9130 开局护墙完整，不告警", (T,$) => { T.startGame(); T.skipIntro(); T.stopSpawn(); T.extraHudRefreshNow(); const s = T.baseWallNow(); const ok = s.total >= 6 && s.left === s.total && $('fieldNote').hidden && !T.baseAlertNow(); T.quit(); return ok || JSON.stringify(s); });
+  await senseCheck("U9131 写明剩余块数与总数", T => T.baseWallAlertTextNow(4, 6) === '基地护墙受损 · 剩 4/6' && T.baseWallAlertTextNow(11, 12) === '基地护墙受损 · 剩 11/12');
+  await senseCheck("U9132 完整不告警，剩 1 块仍报数，全毁单独提示", T => T.baseWallAlertTextNow(6, 6) === '' && T.baseWallAlertTextNow(1, 6) === '基地护墙受损 · 剩 1/6' && T.baseWallAlertTextNow(0, 6) === '基地护墙全毁 · 基地已暴露' && T.baseWallAlertTextNow(0, 1) === '基地护墙全毁 · 基地已暴露');
+  await senseCheck("U9133 非整数、负数或超过总数的块数不告警", T => [[NaN, 6], ['4', 6], [-1, 6], [7, 6], [1.5, 6], [3, 0], [3, null]].every(a => T.baseWallAlertTextNow(a[0], a[1]) === ''));
+  await senseCheck("U9134 真实击穿护墙：逐块报数并闪框，全毁提示基地暴露", (T,$) => {
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.extraHudRefreshNow();
+      const s0 = T.baseWallNow(), quiet = $('fieldNote').hidden && !T.baseAlertNow();
+      const hit = T.hitTileNow(12, 22); T.extraHudRefreshNow();
+      const s1 = T.baseWallNow(), note = $('fieldNote'), text1 = note.textContent;
+      const one = hit === true && s1.left === s0.total - 1 && !note.hidden && text1 === T.baseWallAlertTextNow(s1.left, s1.total) && note.dataset.kind === 'warn' && T.baseAlertNow();
+      for (let y = 14; y <= 23; y++) for (let x = 11; x <= 13; x++) if (T.tileAt(x, y) === 1) T.hitTileNow(x, y);
+      T.extraHudRefreshNow();
+      const text2 = note.textContent, all = T.baseWallNow().left === 0 && text2 === '基地护墙全毁 · 基地已暴露';
+      T.quit();
+      return (quiet && one && all && !T.baseAlertNow()) || JSON.stringify({ quiet, one, all, s0, s1, text1, text2 });
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
