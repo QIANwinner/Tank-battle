@@ -16,22 +16,31 @@ test('failed writes stay pending, latest values win, retry restores consistency'
   assert.throws(() => store.setItem('coins', 5));
   assert.throws(() => store.setItem('skins', '["gold"]'));
   assert.equal(store.pendingCount(), 2);
+  assert.deepEqual(store.status(), { pending: 2, writes: 0, lastSavedAt: null });
   failed = false; assert.equal(store.retry(), true);
   assert.equal(data.get('coins'), '5'); assert.equal(data.get('skins'), '["gold"]');
+  const receipt = store.status();
+  assert.equal(receipt.writes, 2); assert.equal(receipt.pending, 0); assert.ok(Number.isFinite(receipt.lastSavedAt));
+  assert.equal(store.retry(), true); assert.deepEqual(store.status(), receipt);
   failed = true; assert.throws(() => store.removeItem('coins'));
   failed = false; store.retry(); assert.equal(data.has('coins'), false);
 });
+// The service worker's current release cache is versioned (tank-battle-v<ver>); derive it
+// from sw.js so this test stays correct as the app version advances instead of hardcoding
+// a stale cache name (e.g. v101 from the v1.0.x era) that the SW now rightly deletes as old.
+const SW_SRC = fs.readFileSync(path.join(root, 'sw.js'), 'utf8');
+const SW_CACHE = (SW_SRC.match(/const\s+CACHE\s*=\s*'([^']+)'/) || [])[1] || 'tank-battle-v101';
 function worker(fetch) {
   const handlers = {}, removed = [], cached = new Map();
   const context = { URL, Response, AbortController, setTimeout, clearTimeout,
     fetch, self: { location: { origin: 'https://game.test' }, clients: { claim() {} },
       skipWaiting() {}, addEventListener(k,v) { handlers[k] = v; } },
-    caches: { async keys() { return ['other-app', 'tank-battle-old', 'tank-battle-v101']; },
+    caches: { async keys() { return ['other-app', 'tank-battle-old', SW_CACHE]; },
       async delete(k) { removed.push(k); }, async open() { return {
         async addAll() {}, async match(k) { return cached.get(typeof k === 'string' ? k : k.url); }
       }; } }
   };
-  vm.runInNewContext(fs.readFileSync(path.join(root, 'sw.js'), 'utf8'), context);
+  vm.runInNewContext(SW_SRC, context);
   return { handlers, removed, cached, context };
 }
 test('activation preserves caches belonging to other apps', async () => {

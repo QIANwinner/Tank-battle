@@ -2272,7 +2272,7 @@ async function main() {
 
   // ===== U513~U518: 本局最高连击 HUD(v0.6.0) =====
   try {
-    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('maxComboWrap'),txt:document.getElementById('maxComboNum')?document.getElementById('maxComboNum').textContent:null,a:T.maxComboTextNow(12),b:T.maxComboTextNow(12345),c:T.maxComboTextNow(-3),s:T.maxComboStatNow()});})()"));
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.extraHudRefreshNow();return JSON.stringify({dom:!!document.getElementById('maxComboWrap'),txt:document.getElementById('maxComboNum')?document.getElementById('maxComboNum').textContent:null,a:T.maxComboTextNow(12),b:T.maxComboTextNow(12345),c:T.maxComboTextNow(-3),s:T.maxComboStatNow()});})()"));
     t('U513 峰值 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
     t('U514 峰值初值为 ×0', o.txt === '×0', String(o.txt));
     t('U515 普通峰值格式', o.a === '×12', o.a);
@@ -2308,13 +2308,13 @@ async function main() {
 
   // ===== U531~U536: 金币流水(v0.6.3) =====
   try {
-    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('coinLogText'),a:T.coinLogTextNow([]),b:T.coinLogTextNow([{n:50,label:'击杀'},{n:200,label:'过关'}]),c:T.coinLogTextNow([{n:-80,label:'复活'}]),d:T.coinLogPushNow(12345,'测试'),e:T.coinLogLenNow(),f:T.coinLogDomNow()});})()"));
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;const before=T.coinLogLenNow(),d=T.coinLogPushNow(12345,'测试');T.extraHudRefreshNow();return JSON.stringify({dom:!!document.getElementById('coinLogText'),a:T.coinLogTextNow([]),b:T.coinLogTextNow([{n:50,label:'击杀'},{n:200,label:'过关'}]),c:T.coinLogTextNow([{n:-80,label:'复活'}]),before,d,e:T.coinLogLenNow(),f:T.coinLogDomNow()});})()"));
     t('U531 流水面板已加入设置页', o.dom === true, JSON.stringify(o));
     t('U532 空流水显示占位', o.a === '暂无记录', o.a);
     t('U533 多笔按序拼接', o.b === '+50 击杀 · +200 过关', o.b);
     t('U534 支出显示负号', o.c === '-80 复活', o.c);
-    t('U535 入账返回长度', o.d === 1 && o.e === 1, String(o.d)+'/'+String(o.e));
-    t('U536 大额千分位进入 DOM', typeof o.f === 'string', String(o.f));
+    t('U535 入账返回长度', o.d === Math.min(8, o.before + 1) && o.e === o.d, String(o.d)+'/'+String(o.e));
+    t('U536 大额千分位进入 DOM', o.f.startsWith('+12,345 测试'), String(o.f));
   } catch(e){ for(let k=531;k<=536;k++) t('U'+k+' 金币流水',false,e.message); }
 
 
@@ -2400,7 +2400,7 @@ async function main() {
 
   // ===== U573~U578: 连击计时进度条(v0.6.10) =====
   try {
-    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('comboBarWrap'),fill:!!document.getElementById('comboBarFill'),bar:T.comboBarNow(),w:(document.getElementById('comboBarFill')||{}).style?document.getElementById('comboBarFill').style.width:null});})()"));
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;T.comboWindowNow();T.startGame();T.extraHudRefreshNow();return JSON.stringify({dom:!!document.getElementById('comboBarWrap'),fill:!!document.getElementById('comboBarFill'),bar:T.comboBarNow(),w:(document.getElementById('comboBarFill')||{}).style?document.getElementById('comboBarFill').style.width:null});})()"));
     t('U573 进度条 DOM 已加入', o.dom === true && o.fill === true, JSON.stringify(o));
     t('U574 无连击初值 0%', o.bar.max === 0 && o.bar.pct === 0 && o.w === '0%', JSON.stringify(o));
     const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({p:T.comboPctNow(5,10),a:T.comboPctNow(10,10),b:T.comboPctNow(0,10),c:T.comboPctNow(-3,10)});})()"));
@@ -2659,8 +2659,14 @@ async function main() {
     t('U683 正常格式 45秒/1分30秒/62分5秒', o2.a === '45 秒' && o2.b === '1 分 30 秒' && o2.c === '62 分 5 秒', JSON.stringify(o2));
     const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.playTimeTextNow(-5),b:T.playTimeTextNow(NaN),c:T.playTimeTextNow('x')});})()"));
     t('U684 非法输入兜底 0 秒', o4.a === '0 秒' && o4.b === '0 秒' && o4.c === '0 秒', JSON.stringify(o4));
-    const o5 = JSON.parse(await ev("(async () => { const T = window.__tbTest; T.startGame(); T.skipIntro(); await new Promise(r => setTimeout(r, 1200)); const dom = T.timePillDomNow(); return JSON.stringify({ dom }); })()"));
-    t('U685 实时计时(1 秒后 ≥1 秒)', parseInt(o5.dom) >= 1, JSON.stringify(o5));
+    const o5 = await ev(`(async () => {
+      const T = window.__tbTest; T.startGame(); T.skipIntro();
+      const deadline = performance.now() + 8000;
+      while (performance.now() < deadline && !(T.playSecRunNow() >= 1 && parseInt(T.timePillDomNow(), 10) >= 1))
+        await new Promise(resolve => setTimeout(resolve, 50));
+      return { dom:T.timePillDomNow(), seconds:T.playSecRunNow() };
+    })()`);
+    t('U685 游戏时钟和实时 HUD 均达到 1 秒', o5.seconds >= 1 && parseInt(o5.dom, 10) >= 1, JSON.stringify(o5));
     const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const dom=T.timePillDomNow();const fn=T.playTimeTextNow(T.playSecRunNow());return JSON.stringify({dom,fn});})()"));
     t('U686 DOM 与函数一致', o6.dom === o6.fn, JSON.stringify(o6));
   } catch(e){ for(let k=681;k<=686;k++) t('U'+k+' 时长pill',false,e.message); }
@@ -23807,6 +23813,1869 @@ async function main() {
     const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={sg3:T.tgDeathSegsNow(3),sg5:T.tgDeathSegsNow(5),s:T.tgDeathNow(),dom:(function(){const e=document.querySelector('#tgDeathWrap .tgv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
     t("U8636 DOM 与函数一致（阶梯段位可算 + 数据源可用 + DOM 值可写）", o5.sg3.length === 5 && o5.sg3[0] === true && o5.sg3[1] === true && o5.sg3[2] === true && o5.sg3[3] === false && o5.sg3[4] === false && o5.sg5[0] === true && o5.sg5[4] === true && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8631 阵亡强度 抛异常", false, String(e)); t("U8632 阵亡强度 抛异常", false, String(e)); t("U8633 阵亡强度 抛异常", false, String(e)); t("U8634 阵亡强度 抛异常", false, String(e)); t("U8635 阵亡强度 抛异常", false, String(e)); t("U8636 阵亡强度 抛异常", false, String(e)); }
+
+
+  // ===== U8637~U8642: 得分冲刺(v1.1.129) =====
+  try {
+    const up = true;
+    const L = [100,400,1200,3000];
+    const expInitCls = up ? 'g-bad' : 'g-good';
+    const expInitDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const expNormCls = up ? 'g-warn' : 'g-good';
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('djScoreWrap'),up:!!document.querySelector('#djScoreWrap .djup i'),dn:!!document.querySelector('#djScoreWrap .djdn i'),v:!!document.querySelector('#djScoreWrap .djv'),s:T.djScoreStateNow(250,[100,400,1200,3000],true)};return JSON.stringify(r);})()"));
+    t("U8637 得分冲刺 DOM 已加入 HUD（双冲刺条 + 值元素 + 函数可用）", o.dom === true && o.up === true && o.dn === true && o.v === true && o.s.ok === true && o.s.tier === 2 && o.s.next.delta > 0 && o.s.prev.buffer > 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.djScoreStateNow(0,[100,400,1200,3000],true)};return JSON.stringify(r);})()"));
+    t("U8638 初值 得分冲刺（0 → L1·低，距上一档 = t1，无掉落缓冲，最差级颜色）", o1.s.ok === true && o1.s.tier === 1 && Math.abs(o1.s.next.delta - 100) < 1e-6 && o1.s.next.need === 100 && o1.s.prev.buffer === 0 && o1.s.prev.drop === null && o1.s.cls === expInitCls && o1.s.danger === expInitDanger && o1.s.txt.indexOf('L1·低·↑') === 0 && o1.s.txt.length > 7 && o1.s.next.pct === 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.djScoreStateNow(250,[100,400,1200,3000],true)};return JSON.stringify(r);})()"));
+    t("U8639 正常值 得分冲刺（中段 → L2 双界：↑有差、↓有缓冲、进度 ~0.5、颜色按方向动态）", o2.s.ok === true && o2.s.tier === 2 && o2.s.next.delta > 0 && o2.s.next.delta < 400 && o2.s.prev.buffer > 0 && o2.s.prev.buffer < (400 - 100) && Math.abs(o2.s.next.pct - 0.5) < 0.001 && o2.s.cls === expNormCls && o2.s.danger === false && o2.s.txt.indexOf('L2·↑') === 0 && o2.s.txt.indexOf('↓') > 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.djScoreStateNow(100,[100,400,1200,3000],true),b:T.djScoreStateNow(400,[100,400,1200,3000],true),c:T.djScoreStateNow(1200,[100,400,1200,3000],true),d:T.djScoreStateNow(3000,[100,400,1200,3000],true),e:T.djScoreStateNow(2999.999,[100,400,1200,3000],true),f:T.djScoreStateNow(50,[100,400,1200,3000],true)};return JSON.stringify(r);})()"));
+    t("U8640 边界 得分冲刺（四阈值定档 + 顶/底界正确 + 最差/最好色反转）", o3.a.tier === 2 && o3.a.prev.buffer === 0 && Math.abs(o3.a.next.delta - (400 - 100)) < 1e-6 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.d.next.delta === 0 && o3.d.next.need === null && o3.d.txt === 'L5·顶' && o3.e.tier === 4 && o3.f.tier === 1 && Math.abs(o3.f.next.delta - (100 * 0.5)) < 1e-6 && o3.f.prev.buffer === 0 && o3.f.cls === expInitCls && o3.f.danger === expInitDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.djScoreStateNow(null,[100,400,1200,3000],true),b:T.djScoreStateNow(NaN,[100,400,1200,3000],true),c:T.djScoreStateNow(-5,[100,400,1200,3000],true),d:T.djScoreStateNow([1],[100,400,1200,3000],true),e:T.djScoreStateNow(5,[1,2,3],true),f:T.djScoreStateNow(5,[2,2,8,20],true),g:T.djScoreStateNow(5,[0,8,20,50],true),h:T.djScoreStateNow(5,[2,8,20,NaN],true)};return JSON.stringify(r);})()"));
+    t("U8641 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={nxt:T.djNextAt(100,[100,400,1200,3000]),top:T.djNextAt(3000,[100,400,1200,3000]),prv:T.djPrevAt(3000,[100,400,1200,3000]),bot:T.djPrevAt(0,[100,400,1200,3000]),s:T.djScoreNow(),dom:(function(){const e=document.querySelector('#djScoreWrap .djv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8642 DOM 与函数一致（上/下界可算 + 数据源可用 + DOM 值可写）", Math.abs(o5.nxt - 400) < 1e-6 && o5.top === null && Math.abs(o5.prv - 3000) < 1e-6 && o5.bot === null && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8637 得分冲刺 抛异常", false, String(e)); t("U8638 得分冲刺 抛异常", false, String(e)); t("U8639 得分冲刺 抛异常", false, String(e)); t("U8640 得分冲刺 抛异常", false, String(e)); t("U8641 得分冲刺 抛异常", false, String(e)); t("U8642 得分冲刺 抛异常", false, String(e)); }
+
+
+  // ===== U8643~U8648: 金币冲刺(v1.1.130) =====
+  try {
+    const up = true;
+    const L = [2,8,20,50];
+    const expInitCls = up ? 'g-bad' : 'g-good';
+    const expInitDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const expNormCls = up ? 'g-warn' : 'g-good';
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('djCoinWrap'),up:!!document.querySelector('#djCoinWrap .djup i'),dn:!!document.querySelector('#djCoinWrap .djdn i'),v:!!document.querySelector('#djCoinWrap .djv'),s:T.djCoinStateNow(5,[2,8,20,50],true)};return JSON.stringify(r);})()"));
+    t("U8643 金币冲刺 DOM 已加入 HUD（双冲刺条 + 值元素 + 函数可用）", o.dom === true && o.up === true && o.dn === true && o.v === true && o.s.ok === true && o.s.tier === 2 && o.s.next.delta > 0 && o.s.prev.buffer > 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.djCoinStateNow(0,[2,8,20,50],true)};return JSON.stringify(r);})()"));
+    t("U8644 初值 金币冲刺（0 → L1·低，距上一档 = t1，无掉落缓冲，最差级颜色）", o1.s.ok === true && o1.s.tier === 1 && Math.abs(o1.s.next.delta - 2) < 1e-6 && o1.s.next.need === 2 && o1.s.prev.buffer === 0 && o1.s.prev.drop === null && o1.s.cls === expInitCls && o1.s.danger === expInitDanger && o1.s.txt.indexOf('L1·低·↑') === 0 && o1.s.txt.length >= 7 && o1.s.next.pct === 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.djCoinStateNow(5,[2,8,20,50],true)};return JSON.stringify(r);})()"));
+    t("U8645 正常值 金币冲刺（中段 → L2 双界：↑有差、↓有缓冲、进度 ~0.5、颜色按方向动态）", o2.s.ok === true && o2.s.tier === 2 && o2.s.next.delta > 0 && o2.s.next.delta < 8 && o2.s.prev.buffer > 0 && o2.s.prev.buffer < (8 - 2) && Math.abs(o2.s.next.pct - 0.5) < 0.001 && o2.s.cls === expNormCls && o2.s.danger === false && o2.s.txt.indexOf('L2·↑') === 0 && o2.s.txt.indexOf('↓') > 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.djCoinStateNow(2,[2,8,20,50],true),b:T.djCoinStateNow(8,[2,8,20,50],true),c:T.djCoinStateNow(20,[2,8,20,50],true),d:T.djCoinStateNow(50,[2,8,20,50],true),e:T.djCoinStateNow(49.999,[2,8,20,50],true),f:T.djCoinStateNow(1,[2,8,20,50],true)};return JSON.stringify(r);})()"));
+    t("U8646 边界 金币冲刺（四阈值定档 + 顶/底界正确 + 最差/最好色反转）", o3.a.tier === 2 && o3.a.prev.buffer === 0 && Math.abs(o3.a.next.delta - (8 - 2)) < 1e-6 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.d.next.delta === 0 && o3.d.next.need === null && o3.d.txt === 'L5·顶' && o3.e.tier === 4 && o3.f.tier === 1 && Math.abs(o3.f.next.delta - (2 * 0.5)) < 1e-6 && o3.f.prev.buffer === 0 && o3.f.cls === expInitCls && o3.f.danger === expInitDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.djCoinStateNow(null,[2,8,20,50],true),b:T.djCoinStateNow(NaN,[2,8,20,50],true),c:T.djCoinStateNow(-5,[2,8,20,50],true),d:T.djCoinStateNow([1],[2,8,20,50],true),e:T.djCoinStateNow(5,[1,2,3],true),f:T.djCoinStateNow(5,[2,2,8,20],true),g:T.djCoinStateNow(5,[0,8,20,50],true),h:T.djCoinStateNow(5,[2,8,20,NaN],true)};return JSON.stringify(r);})()"));
+    t("U8647 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={nxt:T.djNextAt(2,[2,8,20,50]),top:T.djNextAt(50,[2,8,20,50]),prv:T.djPrevAt(50,[2,8,20,50]),bot:T.djPrevAt(0,[2,8,20,50]),s:T.djCoinNow(),dom:(function(){const e=document.querySelector('#djCoinWrap .djv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8648 DOM 与函数一致（上/下界可算 + 数据源可用 + DOM 值可写）", Math.abs(o5.nxt - 8) < 1e-6 && o5.top === null && Math.abs(o5.prv - 50) < 1e-6 && o5.bot === null && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8643 金币冲刺 抛异常", false, String(e)); t("U8644 金币冲刺 抛异常", false, String(e)); t("U8645 金币冲刺 抛异常", false, String(e)); t("U8646 金币冲刺 抛异常", false, String(e)); t("U8647 金币冲刺 抛异常", false, String(e)); t("U8648 金币冲刺 抛异常", false, String(e)); }
+
+
+  // ===== U8649~U8654: 击杀冲刺(v1.1.131) =====
+  try {
+    const up = true;
+    const L = [0.2,0.5,1.2,2.5];
+    const expInitCls = up ? 'g-bad' : 'g-good';
+    const expInitDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const expNormCls = up ? 'g-warn' : 'g-good';
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('djKillWrap'),up:!!document.querySelector('#djKillWrap .djup i'),dn:!!document.querySelector('#djKillWrap .djdn i'),v:!!document.querySelector('#djKillWrap .djv'),s:T.djKillStateNow(0.35,[0.2,0.5,1.2,2.5],true)};return JSON.stringify(r);})()"));
+    t("U8649 击杀冲刺 DOM 已加入 HUD（双冲刺条 + 值元素 + 函数可用）", o.dom === true && o.up === true && o.dn === true && o.v === true && o.s.ok === true && o.s.tier === 2 && o.s.next.delta > 0 && o.s.prev.buffer > 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.djKillStateNow(0,[0.2,0.5,1.2,2.5],true)};return JSON.stringify(r);})()"));
+    t("U8650 初值 击杀冲刺（0 → L1·低，距上一档 = t1，无掉落缓冲，最差级颜色）", o1.s.ok === true && o1.s.tier === 1 && Math.abs(o1.s.next.delta - 0.2) < 1e-6 && o1.s.next.need === 0.2 && o1.s.prev.buffer === 0 && o1.s.prev.drop === null && o1.s.cls === expInitCls && o1.s.danger === expInitDanger && o1.s.txt.indexOf('L1·低·↑') === 0 && o1.s.txt.length >= 7 && o1.s.next.pct === 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.djKillStateNow(0.35,[0.2,0.5,1.2,2.5],true)};return JSON.stringify(r);})()"));
+    t("U8651 正常值 击杀冲刺（中段 → L2 双界：↑有差、↓有缓冲、进度 ~0.5、颜色按方向动态）", o2.s.ok === true && o2.s.tier === 2 && o2.s.next.delta > 0 && o2.s.next.delta < 0.5 && o2.s.prev.buffer > 0 && o2.s.prev.buffer < (0.5 - 0.2) && Math.abs(o2.s.next.pct - 0.5) < 0.001 && o2.s.cls === expNormCls && o2.s.danger === false && o2.s.txt.indexOf('L2·↑') === 0 && o2.s.txt.indexOf('↓') > 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.djKillStateNow(0.2,[0.2,0.5,1.2,2.5],true),b:T.djKillStateNow(0.5,[0.2,0.5,1.2,2.5],true),c:T.djKillStateNow(1.2,[0.2,0.5,1.2,2.5],true),d:T.djKillStateNow(2.5,[0.2,0.5,1.2,2.5],true),e:T.djKillStateNow(2.499,[0.2,0.5,1.2,2.5],true),f:T.djKillStateNow(0.1,[0.2,0.5,1.2,2.5],true)};return JSON.stringify(r);})()"));
+    t("U8652 边界 击杀冲刺（四阈值定档 + 顶/底界正确 + 最差/最好色反转）", o3.a.tier === 2 && o3.a.prev.buffer === 0 && Math.abs(o3.a.next.delta - (0.5 - 0.2)) < 1e-6 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.d.next.delta === 0 && o3.d.next.need === null && o3.d.txt === 'L5·顶' && o3.e.tier === 4 && o3.f.tier === 1 && Math.abs(o3.f.next.delta - (0.2 * 0.5)) < 1e-6 && o3.f.prev.buffer === 0 && o3.f.cls === expInitCls && o3.f.danger === expInitDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.djKillStateNow(null,[0.2,0.5,1.2,2.5],true),b:T.djKillStateNow(NaN,[0.2,0.5,1.2,2.5],true),c:T.djKillStateNow(-5,[0.2,0.5,1.2,2.5],true),d:T.djKillStateNow([1],[0.2,0.5,1.2,2.5],true),e:T.djKillStateNow(5,[1,2,3],true),f:T.djKillStateNow(5,[2,2,8,20],true),g:T.djKillStateNow(5,[0,8,20,50],true),h:T.djKillStateNow(5,[2,8,20,NaN],true)};return JSON.stringify(r);})()"));
+    t("U8653 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={nxt:T.djNextAt(0.2,[0.2,0.5,1.2,2.5]),top:T.djNextAt(2.5,[0.2,0.5,1.2,2.5]),prv:T.djPrevAt(2.5,[0.2,0.5,1.2,2.5]),bot:T.djPrevAt(0,[0.2,0.5,1.2,2.5]),s:T.djKillNow(),dom:(function(){const e=document.querySelector('#djKillWrap .djv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8654 DOM 与函数一致（上/下界可算 + 数据源可用 + DOM 值可写）", Math.abs(o5.nxt - 0.5) < 1e-6 && o5.top === null && Math.abs(o5.prv - 2.5) < 1e-6 && o5.bot === null && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8649 击杀冲刺 抛异常", false, String(e)); t("U8650 击杀冲刺 抛异常", false, String(e)); t("U8651 击杀冲刺 抛异常", false, String(e)); t("U8652 击杀冲刺 抛异常", false, String(e)); t("U8653 击杀冲刺 抛异常", false, String(e)); t("U8654 击杀冲刺 抛异常", false, String(e)); }
+
+
+  // ===== U8655~U8660: 弹幕冲刺(v1.1.132) =====
+  try {
+    const up = true;
+    const L = [1,3,6,12];
+    const expInitCls = up ? 'g-bad' : 'g-good';
+    const expInitDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const expNormCls = up ? 'g-warn' : 'g-good';
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('djShotWrap'),up:!!document.querySelector('#djShotWrap .djup i'),dn:!!document.querySelector('#djShotWrap .djdn i'),v:!!document.querySelector('#djShotWrap .djv'),s:T.djShotStateNow(2,[1,3,6,12],true)};return JSON.stringify(r);})()"));
+    t("U8655 弹幕冲刺 DOM 已加入 HUD（双冲刺条 + 值元素 + 函数可用）", o.dom === true && o.up === true && o.dn === true && o.v === true && o.s.ok === true && o.s.tier === 2 && o.s.next.delta > 0 && o.s.prev.buffer > 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.djShotStateNow(0,[1,3,6,12],true)};return JSON.stringify(r);})()"));
+    t("U8656 初值 弹幕冲刺（0 → L1·低，距上一档 = t1，无掉落缓冲，最差级颜色）", o1.s.ok === true && o1.s.tier === 1 && Math.abs(o1.s.next.delta - 1) < 1e-6 && o1.s.next.need === 1 && o1.s.prev.buffer === 0 && o1.s.prev.drop === null && o1.s.cls === expInitCls && o1.s.danger === expInitDanger && o1.s.txt.indexOf('L1·低·↑') === 0 && o1.s.txt.length >= 7 && o1.s.next.pct === 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.djShotStateNow(2,[1,3,6,12],true)};return JSON.stringify(r);})()"));
+    t("U8657 正常值 弹幕冲刺（中段 → L2 双界：↑有差、↓有缓冲、进度 ~0.5、颜色按方向动态）", o2.s.ok === true && o2.s.tier === 2 && o2.s.next.delta > 0 && o2.s.next.delta < 3 && o2.s.prev.buffer > 0 && o2.s.prev.buffer < (3 - 1) && Math.abs(o2.s.next.pct - 0.5) < 0.001 && o2.s.cls === expNormCls && o2.s.danger === false && o2.s.txt.indexOf('L2·↑') === 0 && o2.s.txt.indexOf('↓') > 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.djShotStateNow(1,[1,3,6,12],true),b:T.djShotStateNow(3,[1,3,6,12],true),c:T.djShotStateNow(6,[1,3,6,12],true),d:T.djShotStateNow(12,[1,3,6,12],true),e:T.djShotStateNow(11.999,[1,3,6,12],true),f:T.djShotStateNow(0.5,[1,3,6,12],true)};return JSON.stringify(r);})()"));
+    t("U8658 边界 弹幕冲刺（四阈值定档 + 顶/底界正确 + 最差/最好色反转）", o3.a.tier === 2 && o3.a.prev.buffer === 0 && Math.abs(o3.a.next.delta - (3 - 1)) < 1e-6 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.d.next.delta === 0 && o3.d.next.need === null && o3.d.txt === 'L5·顶' && o3.e.tier === 4 && o3.f.tier === 1 && Math.abs(o3.f.next.delta - (1 * 0.5)) < 1e-6 && o3.f.prev.buffer === 0 && o3.f.cls === expInitCls && o3.f.danger === expInitDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.djShotStateNow(null,[1,3,6,12],true),b:T.djShotStateNow(NaN,[1,3,6,12],true),c:T.djShotStateNow(-5,[1,3,6,12],true),d:T.djShotStateNow([1],[1,3,6,12],true),e:T.djShotStateNow(5,[1,2,3],true),f:T.djShotStateNow(5,[2,2,8,20],true),g:T.djShotStateNow(5,[0,8,20,50],true),h:T.djShotStateNow(5,[2,8,20,NaN],true)};return JSON.stringify(r);})()"));
+    t("U8659 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={nxt:T.djNextAt(1,[1,3,6,12]),top:T.djNextAt(12,[1,3,6,12]),prv:T.djPrevAt(12,[1,3,6,12]),bot:T.djPrevAt(0,[1,3,6,12]),s:T.djShotNow(),dom:(function(){const e=document.querySelector('#djShotWrap .djv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8660 DOM 与函数一致（上/下界可算 + 数据源可用 + DOM 值可写）", Math.abs(o5.nxt - 3) < 1e-6 && o5.top === null && Math.abs(o5.prv - 12) < 1e-6 && o5.bot === null && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8655 弹幕冲刺 抛异常", false, String(e)); t("U8656 弹幕冲刺 抛异常", false, String(e)); t("U8657 弹幕冲刺 抛异常", false, String(e)); t("U8658 弹幕冲刺 抛异常", false, String(e)); t("U8659 弹幕冲刺 抛异常", false, String(e)); t("U8660 弹幕冲刺 抛异常", false, String(e)); }
+
+
+  // ===== U8661~U8666: 连击冲刺(v1.1.133) =====
+  try {
+    const up = true;
+    const L = [0.2,0.4,0.7,1];
+    const expInitCls = up ? 'g-bad' : 'g-good';
+    const expInitDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const expNormCls = up ? 'g-warn' : 'g-good';
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('djComboWrap'),up:!!document.querySelector('#djComboWrap .djup i'),dn:!!document.querySelector('#djComboWrap .djdn i'),v:!!document.querySelector('#djComboWrap .djv'),s:T.djComboStateNow(0.30000000000000004,[0.2,0.4,0.7,1],true)};return JSON.stringify(r);})()"));
+    t("U8661 连击冲刺 DOM 已加入 HUD（双冲刺条 + 值元素 + 函数可用）", o.dom === true && o.up === true && o.dn === true && o.v === true && o.s.ok === true && o.s.tier === 2 && o.s.next.delta > 0 && o.s.prev.buffer > 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.djComboStateNow(0,[0.2,0.4,0.7,1],true)};return JSON.stringify(r);})()"));
+    t("U8662 初值 连击冲刺（0 → L1·低，距上一档 = t1，无掉落缓冲，最差级颜色）", o1.s.ok === true && o1.s.tier === 1 && Math.abs(o1.s.next.delta - 0.2) < 1e-6 && o1.s.next.need === 0.2 && o1.s.prev.buffer === 0 && o1.s.prev.drop === null && o1.s.cls === expInitCls && o1.s.danger === expInitDanger && o1.s.txt.indexOf('L1·低·↑') === 0 && o1.s.txt.length >= 7 && o1.s.next.pct === 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.djComboStateNow(0.30000000000000004,[0.2,0.4,0.7,1],true)};return JSON.stringify(r);})()"));
+    t("U8663 正常值 连击冲刺（中段 → L2 双界：↑有差、↓有缓冲、进度 ~0.5、颜色按方向动态）", o2.s.ok === true && o2.s.tier === 2 && o2.s.next.delta > 0 && o2.s.next.delta < 0.4 && o2.s.prev.buffer > 0 && o2.s.prev.buffer < (0.4 - 0.2) && Math.abs(o2.s.next.pct - 0.5) < 0.001 && o2.s.cls === expNormCls && o2.s.danger === false && o2.s.txt.indexOf('L2·↑') === 0 && o2.s.txt.indexOf('↓') > 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.djComboStateNow(0.2,[0.2,0.4,0.7,1],true),b:T.djComboStateNow(0.4,[0.2,0.4,0.7,1],true),c:T.djComboStateNow(0.7,[0.2,0.4,0.7,1],true),d:T.djComboStateNow(1,[0.2,0.4,0.7,1],true),e:T.djComboStateNow(0.999,[0.2,0.4,0.7,1],true),f:T.djComboStateNow(0.1,[0.2,0.4,0.7,1],true)};return JSON.stringify(r);})()"));
+    t("U8664 边界 连击冲刺（四阈值定档 + 顶/底界正确 + 最差/最好色反转）", o3.a.tier === 2 && o3.a.prev.buffer === 0 && Math.abs(o3.a.next.delta - (0.4 - 0.2)) < 1e-6 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.d.next.delta === 0 && o3.d.next.need === null && o3.d.txt === 'L5·顶' && o3.e.tier === 4 && o3.f.tier === 1 && Math.abs(o3.f.next.delta - (0.2 * 0.5)) < 1e-6 && o3.f.prev.buffer === 0 && o3.f.cls === expInitCls && o3.f.danger === expInitDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.djComboStateNow(null,[0.2,0.4,0.7,1],true),b:T.djComboStateNow(NaN,[0.2,0.4,0.7,1],true),c:T.djComboStateNow(-5,[0.2,0.4,0.7,1],true),d:T.djComboStateNow([1],[0.2,0.4,0.7,1],true),e:T.djComboStateNow(5,[1,2,3],true),f:T.djComboStateNow(5,[2,2,8,20],true),g:T.djComboStateNow(5,[0,8,20,50],true),h:T.djComboStateNow(5,[2,8,20,NaN],true)};return JSON.stringify(r);})()"));
+    t("U8665 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={nxt:T.djNextAt(0.2,[0.2,0.4,0.7,1]),top:T.djNextAt(1,[0.2,0.4,0.7,1]),prv:T.djPrevAt(1,[0.2,0.4,0.7,1]),bot:T.djPrevAt(0,[0.2,0.4,0.7,1]),s:T.djComboNow(),dom:(function(){const e=document.querySelector('#djComboWrap .djv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8666 DOM 与函数一致（上/下界可算 + 数据源可用 + DOM 值可写）", Math.abs(o5.nxt - 0.4) < 1e-6 && o5.top === null && Math.abs(o5.prv - 1) < 1e-6 && o5.bot === null && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8661 连击冲刺 抛异常", false, String(e)); t("U8662 连击冲刺 抛异常", false, String(e)); t("U8663 连击冲刺 抛异常", false, String(e)); t("U8664 连击冲刺 抛异常", false, String(e)); t("U8665 连击冲刺 抛异常", false, String(e)); t("U8666 连击冲刺 抛异常", false, String(e)); }
+
+
+  // ===== U8667~U8672: 伤害冲刺(v1.1.134) =====
+  try {
+    const up = true;
+    const L = [50,200,600,1500];
+    const expInitCls = up ? 'g-bad' : 'g-good';
+    const expInitDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const expNormCls = up ? 'g-warn' : 'g-good';
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('djDmgWrap'),up:!!document.querySelector('#djDmgWrap .djup i'),dn:!!document.querySelector('#djDmgWrap .djdn i'),v:!!document.querySelector('#djDmgWrap .djv'),s:T.djDmgStateNow(125,[50,200,600,1500],true)};return JSON.stringify(r);})()"));
+    t("U8667 伤害冲刺 DOM 已加入 HUD（双冲刺条 + 值元素 + 函数可用）", o.dom === true && o.up === true && o.dn === true && o.v === true && o.s.ok === true && o.s.tier === 2 && o.s.next.delta > 0 && o.s.prev.buffer > 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.djDmgStateNow(0,[50,200,600,1500],true)};return JSON.stringify(r);})()"));
+    t("U8668 初值 伤害冲刺（0 → L1·低，距上一档 = t1，无掉落缓冲，最差级颜色）", o1.s.ok === true && o1.s.tier === 1 && Math.abs(o1.s.next.delta - 50) < 1e-6 && o1.s.next.need === 50 && o1.s.prev.buffer === 0 && o1.s.prev.drop === null && o1.s.cls === expInitCls && o1.s.danger === expInitDanger && o1.s.txt.indexOf('L1·低·↑') === 0 && o1.s.txt.length >= 7 && o1.s.next.pct === 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.djDmgStateNow(125,[50,200,600,1500],true)};return JSON.stringify(r);})()"));
+    t("U8669 正常值 伤害冲刺（中段 → L2 双界：↑有差、↓有缓冲、进度 ~0.5、颜色按方向动态）", o2.s.ok === true && o2.s.tier === 2 && o2.s.next.delta > 0 && o2.s.next.delta < 200 && o2.s.prev.buffer > 0 && o2.s.prev.buffer < (200 - 50) && Math.abs(o2.s.next.pct - 0.5) < 0.001 && o2.s.cls === expNormCls && o2.s.danger === false && o2.s.txt.indexOf('L2·↑') === 0 && o2.s.txt.indexOf('↓') > 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.djDmgStateNow(50,[50,200,600,1500],true),b:T.djDmgStateNow(200,[50,200,600,1500],true),c:T.djDmgStateNow(600,[50,200,600,1500],true),d:T.djDmgStateNow(1500,[50,200,600,1500],true),e:T.djDmgStateNow(1499.999,[50,200,600,1500],true),f:T.djDmgStateNow(25,[50,200,600,1500],true)};return JSON.stringify(r);})()"));
+    t("U8670 边界 伤害冲刺（四阈值定档 + 顶/底界正确 + 最差/最好色反转）", o3.a.tier === 2 && o3.a.prev.buffer === 0 && Math.abs(o3.a.next.delta - (200 - 50)) < 1e-6 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.d.next.delta === 0 && o3.d.next.need === null && o3.d.txt === 'L5·顶' && o3.e.tier === 4 && o3.f.tier === 1 && Math.abs(o3.f.next.delta - (50 * 0.5)) < 1e-6 && o3.f.prev.buffer === 0 && o3.f.cls === expInitCls && o3.f.danger === expInitDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.djDmgStateNow(null,[50,200,600,1500],true),b:T.djDmgStateNow(NaN,[50,200,600,1500],true),c:T.djDmgStateNow(-5,[50,200,600,1500],true),d:T.djDmgStateNow([1],[50,200,600,1500],true),e:T.djDmgStateNow(5,[1,2,3],true),f:T.djDmgStateNow(5,[2,2,8,20],true),g:T.djDmgStateNow(5,[0,8,20,50],true),h:T.djDmgStateNow(5,[2,8,20,NaN],true)};return JSON.stringify(r);})()"));
+    t("U8671 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={nxt:T.djNextAt(50,[50,200,600,1500]),top:T.djNextAt(1500,[50,200,600,1500]),prv:T.djPrevAt(1500,[50,200,600,1500]),bot:T.djPrevAt(0,[50,200,600,1500]),s:T.djDmgNow(),dom:(function(){const e=document.querySelector('#djDmgWrap .djv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8672 DOM 与函数一致（上/下界可算 + 数据源可用 + DOM 值可写）", Math.abs(o5.nxt - 200) < 1e-6 && o5.top === null && Math.abs(o5.prv - 1500) < 1e-6 && o5.bot === null && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8667 伤害冲刺 抛异常", false, String(e)); t("U8668 伤害冲刺 抛异常", false, String(e)); t("U8669 伤害冲刺 抛异常", false, String(e)); t("U8670 伤害冲刺 抛异常", false, String(e)); t("U8671 伤害冲刺 抛异常", false, String(e)); t("U8672 伤害冲刺 抛异常", false, String(e)); }
+
+
+  // ===== U8673~U8678: 受击冲刺(v1.1.135) =====
+  try {
+    const up = false;
+    const L = [0.05,0.15,0.4,0.8];
+    const expInitCls = up ? 'g-bad' : 'g-good';
+    const expInitDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const expNormCls = up ? 'g-warn' : 'g-good';
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('djHurtWrap'),up:!!document.querySelector('#djHurtWrap .djup i'),dn:!!document.querySelector('#djHurtWrap .djdn i'),v:!!document.querySelector('#djHurtWrap .djv'),s:T.djHurtStateNow(0.1,[0.05,0.15,0.4,0.8],false)};return JSON.stringify(r);})()"));
+    t("U8673 受击冲刺 DOM 已加入 HUD（双冲刺条 + 值元素 + 函数可用）", o.dom === true && o.up === true && o.dn === true && o.v === true && o.s.ok === true && o.s.tier === 2 && o.s.next.delta > 0 && o.s.prev.buffer > 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.djHurtStateNow(0,[0.05,0.15,0.4,0.8],false)};return JSON.stringify(r);})()"));
+    t("U8674 初值 受击冲刺（0 → L1·低，距上一档 = t1，无掉落缓冲，最差级颜色）", o1.s.ok === true && o1.s.tier === 1 && Math.abs(o1.s.next.delta - 0.05) < 1e-6 && o1.s.next.need === 0.05 && o1.s.prev.buffer === 0 && o1.s.prev.drop === null && o1.s.cls === expInitCls && o1.s.danger === expInitDanger && o1.s.txt.indexOf('L1·低·↑') === 0 && o1.s.txt.length >= 7 && o1.s.next.pct === 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.djHurtStateNow(0.1,[0.05,0.15,0.4,0.8],false)};return JSON.stringify(r);})()"));
+    t("U8675 正常值 受击冲刺（中段 → L2 双界：↑有差、↓有缓冲、进度 ~0.5、颜色按方向动态）", o2.s.ok === true && o2.s.tier === 2 && o2.s.next.delta > 0 && o2.s.next.delta < 0.15 && o2.s.prev.buffer > 0 && o2.s.prev.buffer < (0.15 - 0.05) && Math.abs(o2.s.next.pct - 0.5) < 0.001 && o2.s.cls === expNormCls && o2.s.danger === false && o2.s.txt.indexOf('L2·↑') === 0 && o2.s.txt.indexOf('↓') > 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.djHurtStateNow(0.05,[0.05,0.15,0.4,0.8],false),b:T.djHurtStateNow(0.15,[0.05,0.15,0.4,0.8],false),c:T.djHurtStateNow(0.4,[0.05,0.15,0.4,0.8],false),d:T.djHurtStateNow(0.8,[0.05,0.15,0.4,0.8],false),e:T.djHurtStateNow(0.799,[0.05,0.15,0.4,0.8],false),f:T.djHurtStateNow(0.025,[0.05,0.15,0.4,0.8],false)};return JSON.stringify(r);})()"));
+    t("U8676 边界 受击冲刺（四阈值定档 + 顶/底界正确 + 最差/最好色反转）", o3.a.tier === 2 && o3.a.prev.buffer === 0 && Math.abs(o3.a.next.delta - (0.15 - 0.05)) < 1e-6 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.d.next.delta === 0 && o3.d.next.need === null && o3.d.txt === 'L5·顶' && o3.e.tier === 4 && o3.f.tier === 1 && Math.abs(o3.f.next.delta - (0.05 * 0.5)) < 1e-6 && o3.f.prev.buffer === 0 && o3.f.cls === expInitCls && o3.f.danger === expInitDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.djHurtStateNow(null,[0.05,0.15,0.4,0.8],false),b:T.djHurtStateNow(NaN,[0.05,0.15,0.4,0.8],false),c:T.djHurtStateNow(-5,[0.05,0.15,0.4,0.8],false),d:T.djHurtStateNow([1],[0.05,0.15,0.4,0.8],false),e:T.djHurtStateNow(5,[1,2,3],false),f:T.djHurtStateNow(5,[2,2,8,20],false),g:T.djHurtStateNow(5,[0,8,20,50],false),h:T.djHurtStateNow(5,[2,8,20,NaN],false)};return JSON.stringify(r);})()"));
+    t("U8677 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={nxt:T.djNextAt(0.05,[0.05,0.15,0.4,0.8]),top:T.djNextAt(0.8,[0.05,0.15,0.4,0.8]),prv:T.djPrevAt(0.8,[0.05,0.15,0.4,0.8]),bot:T.djPrevAt(0,[0.05,0.15,0.4,0.8]),s:T.djHurtNow(),dom:(function(){const e=document.querySelector('#djHurtWrap .djv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8678 DOM 与函数一致（上/下界可算 + 数据源可用 + DOM 值可写）", Math.abs(o5.nxt - 0.15) < 1e-6 && o5.top === null && Math.abs(o5.prv - 0.8) < 1e-6 && o5.bot === null && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8673 受击冲刺 抛异常", false, String(e)); t("U8674 受击冲刺 抛异常", false, String(e)); t("U8675 受击冲刺 抛异常", false, String(e)); t("U8676 受击冲刺 抛异常", false, String(e)); t("U8677 受击冲刺 抛异常", false, String(e)); t("U8678 受击冲刺 抛异常", false, String(e)); }
+
+
+  // ===== U8679~U8684: 阵亡冲刺(v1.1.136) =====
+  try {
+    const up = false;
+    const L = [1,2,3,4];
+    const expInitCls = up ? 'g-bad' : 'g-good';
+    const expInitDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const expNormCls = up ? 'g-warn' : 'g-good';
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('djDeathWrap'),up:!!document.querySelector('#djDeathWrap .djup i'),dn:!!document.querySelector('#djDeathWrap .djdn i'),v:!!document.querySelector('#djDeathWrap .djv'),s:T.djDeathStateNow(1.5,[1,2,3,4],false)};return JSON.stringify(r);})()"));
+    t("U8679 阵亡冲刺 DOM 已加入 HUD（双冲刺条 + 值元素 + 函数可用）", o.dom === true && o.up === true && o.dn === true && o.v === true && o.s.ok === true && o.s.tier === 2 && o.s.next.delta > 0 && o.s.prev.buffer > 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.djDeathStateNow(0,[1,2,3,4],false)};return JSON.stringify(r);})()"));
+    t("U8680 初值 阵亡冲刺（0 → L1·低，距上一档 = t1，无掉落缓冲，最差级颜色）", o1.s.ok === true && o1.s.tier === 1 && Math.abs(o1.s.next.delta - 1) < 1e-6 && o1.s.next.need === 1 && o1.s.prev.buffer === 0 && o1.s.prev.drop === null && o1.s.cls === expInitCls && o1.s.danger === expInitDanger && o1.s.txt.indexOf('L1·低·↑') === 0 && o1.s.txt.length >= 7 && o1.s.next.pct === 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.djDeathStateNow(1.5,[1,2,3,4],false)};return JSON.stringify(r);})()"));
+    t("U8681 正常值 阵亡冲刺（中段 → L2 双界：↑有差、↓有缓冲、进度 ~0.5、颜色按方向动态）", o2.s.ok === true && o2.s.tier === 2 && o2.s.next.delta > 0 && o2.s.next.delta < 2 && o2.s.prev.buffer > 0 && o2.s.prev.buffer < (2 - 1) && Math.abs(o2.s.next.pct - 0.5) < 0.001 && o2.s.cls === expNormCls && o2.s.danger === false && o2.s.txt.indexOf('L2·↑') === 0 && o2.s.txt.indexOf('↓') > 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.djDeathStateNow(1,[1,2,3,4],false),b:T.djDeathStateNow(2,[1,2,3,4],false),c:T.djDeathStateNow(3,[1,2,3,4],false),d:T.djDeathStateNow(4,[1,2,3,4],false),e:T.djDeathStateNow(3.999,[1,2,3,4],false),f:T.djDeathStateNow(0.5,[1,2,3,4],false)};return JSON.stringify(r);})()"));
+    t("U8682 边界 阵亡冲刺（四阈值定档 + 顶/底界正确 + 最差/最好色反转）", o3.a.tier === 2 && o3.a.prev.buffer === 0 && Math.abs(o3.a.next.delta - (2 - 1)) < 1e-6 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.d.next.delta === 0 && o3.d.next.need === null && o3.d.txt === 'L5·顶' && o3.e.tier === 4 && o3.f.tier === 1 && Math.abs(o3.f.next.delta - (1 * 0.5)) < 1e-6 && o3.f.prev.buffer === 0 && o3.f.cls === expInitCls && o3.f.danger === expInitDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.djDeathStateNow(null,[1,2,3,4],false),b:T.djDeathStateNow(NaN,[1,2,3,4],false),c:T.djDeathStateNow(-5,[1,2,3,4],false),d:T.djDeathStateNow([1],[1,2,3,4],false),e:T.djDeathStateNow(5,[1,2,3],false),f:T.djDeathStateNow(5,[2,2,8,20],false),g:T.djDeathStateNow(5,[0,8,20,50],false),h:T.djDeathStateNow(5,[2,8,20,NaN],false)};return JSON.stringify(r);})()"));
+    t("U8683 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={nxt:T.djNextAt(1,[1,2,3,4]),top:T.djNextAt(4,[1,2,3,4]),prv:T.djPrevAt(4,[1,2,3,4]),bot:T.djPrevAt(0,[1,2,3,4]),s:T.djDeathNow(),dom:(function(){const e=document.querySelector('#djDeathWrap .djv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8684 DOM 与函数一致（上/下界可算 + 数据源可用 + DOM 值可写）", Math.abs(o5.nxt - 2) < 1e-6 && o5.top === null && Math.abs(o5.prv - 4) < 1e-6 && o5.bot === null && o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8679 阵亡冲刺 抛异常", false, String(e)); t("U8680 阵亡冲刺 抛异常", false, String(e)); t("U8681 阵亡冲刺 抛异常", false, String(e)); t("U8682 阵亡冲刺 抛异常", false, String(e)); t("U8683 阵亡冲刺 抛异常", false, String(e)); t("U8684 阵亡冲刺 抛异常", false, String(e)); }
+
+
+  // ===== U8685~U8690: 命中率(v1.1.137) =====
+  try {
+    const up = true;
+    const L = [30,50,70,90];
+    const expLowCls = up ? 'g-bad' : 'g-good';
+    const expLowDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const expNormCls = up ? 'g-warn' : 'g-warn';
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('dzAccWrap'),bar:!!document.querySelector('#dzAccWrap .dzbar i'),v:!!document.querySelector('#dzAccWrap .dzv'),s:T.dzAccStateNow(60,[30,50,70,90],true,'x')};return JSON.stringify(r);})()"));
+    t("U8685 命中率 DOM 已加入 HUD（单进度条 + 值元素 + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.s.ok === true && o.s.tier === 3 && o.s.pct > 0 && o.s.pct < 1 && o.s.txt.indexOf('x') > 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzAccStateNow(15,[30,50,70,90],true,'x')};return JSON.stringify(r);})()"));
+    t("U8686 初值 命中率（低值 → L1 档，无危险或危险按方向、分级色按方向动态）", o1.s.ok === true && o1.s.tier === 1 && o1.s.pct === 0 && o1.s.cls === expLowCls && o1.s.danger === expLowDanger && o1.s.txt.length >= 3, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzAccStateNow(40,[30,50,70,90],true,'x')};return JSON.stringify(r);})()"));
+    t("U8687 正常值 命中率（中段 → L2 档，进度 ~0.5，文案含值）", o2.s.ok === true && o2.s.tier === 2 && Math.abs(o2.s.pct - 0.5) < 0.001 && o2.s.txt.indexOf('x') > 0 && o2.s.danger === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzAccStateNow(30,[30,50,70,90],true,'x'),b:T.dzAccStateNow(50,[30,50,70,90],true,'x'),c:T.dzAccStateNow(70,[30,50,70,90],true,'x'),d:T.dzAccStateNow(90,[30,50,70,90],true,'x'),e:T.dzAccStateNow(89.999,[30,50,70,90],true,'x'),f:T.dzAccStateNow(15,[30,50,70,90],true,'x')};return JSON.stringify(r);})()"));
+    t("U8688 边界 命中率（四阈值定档 + 顶/底界正确 + 最好/最差色反转）", o3.a.tier === 2 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.d.pct === 1 && o3.e.tier === 4 && o3.f.tier === 1 && o3.f.pct === 0 && o3.f.cls === expLowCls && o3.f.danger === expLowDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzAccStateNow(null,[30,50,70,90],true,'x'),b:T.dzAccStateNow(NaN,[30,50,70,90],true,'x'),c:T.dzAccStateNow(-5,[30,50,70,90],true,'x'),d:T.dzAccStateNow([1],[30,50,70,90],true,'x'),e:T.dzAccStateNow(5,[1,2,3],true,'x'),f:T.dzAccStateNow(5,[2,2,8,20],true,'x'),g:T.dzAccStateNow(5,[0,8,20,50],true,'x'),h:T.dzAccStateNow(5,[2,8,20,NaN],true,'x')};return JSON.stringify(r);})()"));
+    t("U8689 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzAccNow(),dom:(function(){const e=document.querySelector('#dzAccWrap .dzv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8690 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8685 命中率 抛异常", false, String(e)); t("U8686 命中率 抛异常", false, String(e)); t("U8687 命中率 抛异常", false, String(e)); t("U8688 命中率 抛异常", false, String(e)); t("U8689 命中率 抛异常", false, String(e)); t("U8690 命中率 抛异常", false, String(e)); }
+
+
+  // ===== U8691~U8696: 生存时长(v1.1.138) =====
+  try {
+    const up = true;
+    const L = [60,180,360,600];
+    const expLowCls = up ? 'g-bad' : 'g-good';
+    const expLowDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const expNormCls = up ? 'g-warn' : 'g-warn';
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('dzTimeWrap'),bar:!!document.querySelector('#dzTimeWrap .dzbar i'),v:!!document.querySelector('#dzTimeWrap .dzv'),s:T.dzTimeStateNow(270,[60,180,360,600],true,'x')};return JSON.stringify(r);})()"));
+    t("U8691 生存时长 DOM 已加入 HUD（单进度条 + 值元素 + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.s.ok === true && o.s.tier === 3 && o.s.pct > 0 && o.s.pct < 1 && o.s.txt.indexOf('x') > 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzTimeStateNow(30,[60,180,360,600],true,'x')};return JSON.stringify(r);})()"));
+    t("U8692 初值 生存时长（低值 → L1 档，无危险或危险按方向、分级色按方向动态）", o1.s.ok === true && o1.s.tier === 1 && o1.s.pct === 0 && o1.s.cls === expLowCls && o1.s.danger === expLowDanger && o1.s.txt.length >= 3, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzTimeStateNow(120,[60,180,360,600],true,'x')};return JSON.stringify(r);})()"));
+    t("U8693 正常值 生存时长（中段 → L2 档，进度 ~0.5，文案含值）", o2.s.ok === true && o2.s.tier === 2 && Math.abs(o2.s.pct - 0.5) < 0.001 && o2.s.txt.indexOf('x') > 0 && o2.s.danger === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzTimeStateNow(60,[60,180,360,600],true,'x'),b:T.dzTimeStateNow(180,[60,180,360,600],true,'x'),c:T.dzTimeStateNow(360,[60,180,360,600],true,'x'),d:T.dzTimeStateNow(600,[60,180,360,600],true,'x'),e:T.dzTimeStateNow(599.999,[60,180,360,600],true,'x'),f:T.dzTimeStateNow(30,[60,180,360,600],true,'x')};return JSON.stringify(r);})()"));
+    t("U8694 边界 生存时长（四阈值定档 + 顶/底界正确 + 最好/最差色反转）", o3.a.tier === 2 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.d.pct === 1 && o3.e.tier === 4 && o3.f.tier === 1 && o3.f.pct === 0 && o3.f.cls === expLowCls && o3.f.danger === expLowDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzTimeStateNow(null,[60,180,360,600],true,'x'),b:T.dzTimeStateNow(NaN,[60,180,360,600],true,'x'),c:T.dzTimeStateNow(-5,[60,180,360,600],true,'x'),d:T.dzTimeStateNow([1],[60,180,360,600],true,'x'),e:T.dzTimeStateNow(5,[1,2,3],true,'x'),f:T.dzTimeStateNow(5,[2,2,8,20],true,'x'),g:T.dzTimeStateNow(5,[0,8,20,50],true,'x'),h:T.dzTimeStateNow(5,[2,8,20,NaN],true,'x')};return JSON.stringify(r);})()"));
+    t("U8695 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzTimeNow(),dom:(function(){const e=document.querySelector('#dzTimeWrap .dzv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8696 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8691 生存时长 抛异常", false, String(e)); t("U8692 生存时长 抛异常", false, String(e)); t("U8693 生存时长 抛异常", false, String(e)); t("U8694 生存时长 抛异常", false, String(e)); t("U8695 生存时长 抛异常", false, String(e)); t("U8696 生存时长 抛异常", false, String(e)); }
+
+
+  // ===== U8697~U8702: 波次推进(v1.1.139) =====
+  try {
+    const up = true;
+    const L = [25,50,75,95];
+    const expLowCls = up ? 'g-bad' : 'g-good';
+    const expLowDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const expNormCls = up ? 'g-warn' : 'g-warn';
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('dzWaveWrap'),bar:!!document.querySelector('#dzWaveWrap .dzbar i'),v:!!document.querySelector('#dzWaveWrap .dzv'),s:T.dzWaveStateNow(62.5,[25,50,75,95],true,'x')};return JSON.stringify(r);})()"));
+    t("U8697 波次推进 DOM 已加入 HUD（单进度条 + 值元素 + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.s.ok === true && o.s.tier === 3 && o.s.pct > 0 && o.s.pct < 1 && o.s.txt.indexOf('x') > 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzWaveStateNow(12.5,[25,50,75,95],true,'x')};return JSON.stringify(r);})()"));
+    t("U8698 初值 波次推进（低值 → L1 档，无危险或危险按方向、分级色按方向动态）", o1.s.ok === true && o1.s.tier === 1 && o1.s.pct === 0 && o1.s.cls === expLowCls && o1.s.danger === expLowDanger && o1.s.txt.length >= 3, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzWaveStateNow(37.5,[25,50,75,95],true,'x')};return JSON.stringify(r);})()"));
+    t("U8699 正常值 波次推进（中段 → L2 档，进度 ~0.5，文案含值）", o2.s.ok === true && o2.s.tier === 2 && Math.abs(o2.s.pct - 0.5) < 0.001 && o2.s.txt.indexOf('x') > 0 && o2.s.danger === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzWaveStateNow(25,[25,50,75,95],true,'x'),b:T.dzWaveStateNow(50,[25,50,75,95],true,'x'),c:T.dzWaveStateNow(75,[25,50,75,95],true,'x'),d:T.dzWaveStateNow(95,[25,50,75,95],true,'x'),e:T.dzWaveStateNow(94.999,[25,50,75,95],true,'x'),f:T.dzWaveStateNow(12.5,[25,50,75,95],true,'x')};return JSON.stringify(r);})()"));
+    t("U8700 边界 波次推进（四阈值定档 + 顶/底界正确 + 最好/最差色反转）", o3.a.tier === 2 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.d.pct === 1 && o3.e.tier === 4 && o3.f.tier === 1 && o3.f.pct === 0 && o3.f.cls === expLowCls && o3.f.danger === expLowDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzWaveStateNow(null,[25,50,75,95],true,'x'),b:T.dzWaveStateNow(NaN,[25,50,75,95],true,'x'),c:T.dzWaveStateNow(-5,[25,50,75,95],true,'x'),d:T.dzWaveStateNow([1],[25,50,75,95],true,'x'),e:T.dzWaveStateNow(5,[1,2,3],true,'x'),f:T.dzWaveStateNow(5,[2,2,8,20],true,'x'),g:T.dzWaveStateNow(5,[0,8,20,50],true,'x'),h:T.dzWaveStateNow(5,[2,8,20,NaN],true,'x')};return JSON.stringify(r);})()"));
+    t("U8701 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzWaveNow(),dom:(function(){const e=document.querySelector('#dzWaveWrap .dzv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8702 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8697 波次推进 抛异常", false, String(e)); t("U8698 波次推进 抛异常", false, String(e)); t("U8699 波次推进 抛异常", false, String(e)); t("U8700 波次推进 抛异常", false, String(e)); t("U8701 波次推进 抛异常", false, String(e)); t("U8702 波次推进 抛异常", false, String(e)); }
+
+
+  // ===== U8703~U8708: Boss阶段(v1.1.140) =====
+  try {
+    const up = true;
+    const L = [25,50,75,90];
+    const expLowCls = up ? 'g-bad' : 'g-good';
+    const expLowDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const expNormCls = up ? 'g-warn' : 'g-warn';
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('dzBossPhaseWrap'),bar:!!document.querySelector('#dzBossPhaseWrap .dzbar i'),v:!!document.querySelector('#dzBossPhaseWrap .dzv'),s:T.dzBossPhaseStateNow(62.5,[25,50,75,90],true,'x')};return JSON.stringify(r);})()"));
+    t("U8703 Boss阶段 DOM 已加入 HUD（单进度条 + 值元素 + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.s.ok === true && o.s.tier === 3 && o.s.pct > 0 && o.s.pct < 1 && o.s.txt.indexOf('x') > 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzBossPhaseStateNow(12.5,[25,50,75,90],true,'x')};return JSON.stringify(r);})()"));
+    t("U8704 初值 Boss阶段（低值 → L1 档，无危险或危险按方向、分级色按方向动态）", o1.s.ok === true && o1.s.tier === 1 && o1.s.pct === 0 && o1.s.cls === expLowCls && o1.s.danger === expLowDanger && o1.s.txt.length >= 3, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzBossPhaseStateNow(37.5,[25,50,75,90],true,'x')};return JSON.stringify(r);})()"));
+    t("U8705 正常值 Boss阶段（中段 → L2 档，进度 ~0.5，文案含值）", o2.s.ok === true && o2.s.tier === 2 && Math.abs(o2.s.pct - 0.5) < 0.001 && o2.s.txt.indexOf('x') > 0 && o2.s.danger === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzBossPhaseStateNow(25,[25,50,75,90],true,'x'),b:T.dzBossPhaseStateNow(50,[25,50,75,90],true,'x'),c:T.dzBossPhaseStateNow(75,[25,50,75,90],true,'x'),d:T.dzBossPhaseStateNow(90,[25,50,75,90],true,'x'),e:T.dzBossPhaseStateNow(89.999,[25,50,75,90],true,'x'),f:T.dzBossPhaseStateNow(12.5,[25,50,75,90],true,'x')};return JSON.stringify(r);})()"));
+    t("U8706 边界 Boss阶段（四阈值定档 + 顶/底界正确 + 最好/最差色反转）", o3.a.tier === 2 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.d.pct === 1 && o3.e.tier === 4 && o3.f.tier === 1 && o3.f.pct === 0 && o3.f.cls === expLowCls && o3.f.danger === expLowDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzBossPhaseStateNow(null,[25,50,75,90],true,'x'),b:T.dzBossPhaseStateNow(NaN,[25,50,75,90],true,'x'),c:T.dzBossPhaseStateNow(-5,[25,50,75,90],true,'x'),d:T.dzBossPhaseStateNow([1],[25,50,75,90],true,'x'),e:T.dzBossPhaseStateNow(5,[1,2,3],true,'x'),f:T.dzBossPhaseStateNow(5,[2,2,8,20],true,'x'),g:T.dzBossPhaseStateNow(5,[0,8,20,50],true,'x'),h:T.dzBossPhaseStateNow(5,[2,8,20,NaN],true,'x')};return JSON.stringify(r);})()"));
+    t("U8707 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzBossPhaseNow(),dom:(function(){const e=document.querySelector('#dzBossPhaseWrap .dzv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8708 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8703 Boss阶段 抛异常", false, String(e)); t("U8704 Boss阶段 抛异常", false, String(e)); t("U8705 Boss阶段 抛异常", false, String(e)); t("U8706 Boss阶段 抛异常", false, String(e)); t("U8707 Boss阶段 抛异常", false, String(e)); t("U8708 Boss阶段 抛异常", false, String(e)); }
+
+
+  // ===== U8709~U8714: 输出受击比(v1.1.141) =====
+  try {
+    const up = true;
+    const L = [10,30,80,200];
+    const expLowCls = up ? 'g-bad' : 'g-good';
+    const expLowDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const expNormCls = up ? 'g-warn' : 'g-warn';
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('dzTradeWrap'),bar:!!document.querySelector('#dzTradeWrap .dzbar i'),v:!!document.querySelector('#dzTradeWrap .dzv'),s:T.dzTradeStateNow(55,[10,30,80,200],true,'x')};return JSON.stringify(r);})()"));
+    t("U8709 输出受击比 DOM 已加入 HUD（单进度条 + 值元素 + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.s.ok === true && o.s.tier === 3 && o.s.pct > 0 && o.s.pct < 1 && o.s.txt.indexOf('x') > 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzTradeStateNow(5,[10,30,80,200],true,'x')};return JSON.stringify(r);})()"));
+    t("U8710 初值 输出受击比（低值 → L1 档，无危险或危险按方向、分级色按方向动态）", o1.s.ok === true && o1.s.tier === 1 && o1.s.pct === 0 && o1.s.cls === expLowCls && o1.s.danger === expLowDanger && o1.s.txt.length >= 3, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzTradeStateNow(20,[10,30,80,200],true,'x')};return JSON.stringify(r);})()"));
+    t("U8711 正常值 输出受击比（中段 → L2 档，进度 ~0.5，文案含值）", o2.s.ok === true && o2.s.tier === 2 && Math.abs(o2.s.pct - 0.5) < 0.001 && o2.s.txt.indexOf('x') > 0 && o2.s.danger === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzTradeStateNow(10,[10,30,80,200],true,'x'),b:T.dzTradeStateNow(30,[10,30,80,200],true,'x'),c:T.dzTradeStateNow(80,[10,30,80,200],true,'x'),d:T.dzTradeStateNow(200,[10,30,80,200],true,'x'),e:T.dzTradeStateNow(199.999,[10,30,80,200],true,'x'),f:T.dzTradeStateNow(5,[10,30,80,200],true,'x')};return JSON.stringify(r);})()"));
+    t("U8712 边界 输出受击比（四阈值定档 + 顶/底界正确 + 最好/最差色反转）", o3.a.tier === 2 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.d.pct === 1 && o3.e.tier === 4 && o3.f.tier === 1 && o3.f.pct === 0 && o3.f.cls === expLowCls && o3.f.danger === expLowDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzTradeStateNow(null,[10,30,80,200],true,'x'),b:T.dzTradeStateNow(NaN,[10,30,80,200],true,'x'),c:T.dzTradeStateNow(-5,[10,30,80,200],true,'x'),d:T.dzTradeStateNow([1],[10,30,80,200],true,'x'),e:T.dzTradeStateNow(5,[1,2,3],true,'x'),f:T.dzTradeStateNow(5,[2,2,8,20],true,'x'),g:T.dzTradeStateNow(5,[0,8,20,50],true,'x'),h:T.dzTradeStateNow(5,[2,8,20,NaN],true,'x')};return JSON.stringify(r);})()"));
+    t("U8713 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzTradeNow(),dom:(function(){const e=document.querySelector('#dzTradeWrap .dzv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8714 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8709 输出受击比 抛异常", false, String(e)); t("U8710 输出受击比 抛异常", false, String(e)); t("U8711 输出受击比 抛异常", false, String(e)); t("U8712 输出受击比 抛异常", false, String(e)); t("U8713 输出受击比 抛异常", false, String(e)); t("U8714 输出受击比 抛异常", false, String(e)); }
+
+
+  // ===== U8715~U8720: 清场预计(v1.1.142) =====
+  try {
+    const up = false;
+    const L = [3,8,20,60];
+    const expLowCls = up ? 'g-bad' : 'g-good';
+    const expLowDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const expNormCls = up ? 'g-warn' : 'g-warn';
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('dzClearWrap'),bar:!!document.querySelector('#dzClearWrap .dzbar i'),v:!!document.querySelector('#dzClearWrap .dzv'),s:T.dzClearStateNow(14,[3,8,20,60],false,'x')};return JSON.stringify(r);})()"));
+    t("U8715 清场预计 DOM 已加入 HUD（单进度条 + 值元素 + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.s.ok === true && o.s.tier === 3 && o.s.pct > 0 && o.s.pct < 1 && o.s.txt.indexOf('x') > 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzClearStateNow(1.5,[3,8,20,60],false,'x')};return JSON.stringify(r);})()"));
+    t("U8716 初值 清场预计（低值 → L1 档，无危险或危险按方向、分级色按方向动态）", o1.s.ok === true && o1.s.tier === 1 && o1.s.pct === 0 && o1.s.cls === expLowCls && o1.s.danger === expLowDanger && o1.s.txt.length >= 3, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzClearStateNow(5.5,[3,8,20,60],false,'x')};return JSON.stringify(r);})()"));
+    t("U8717 正常值 清场预计（中段 → L2 档，进度 ~0.5，文案含值）", o2.s.ok === true && o2.s.tier === 2 && Math.abs(o2.s.pct - 0.5) < 0.001 && o2.s.txt.indexOf('x') > 0 && o2.s.danger === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzClearStateNow(3,[3,8,20,60],false,'x'),b:T.dzClearStateNow(8,[3,8,20,60],false,'x'),c:T.dzClearStateNow(20,[3,8,20,60],false,'x'),d:T.dzClearStateNow(60,[3,8,20,60],false,'x'),e:T.dzClearStateNow(59.999,[3,8,20,60],false,'x'),f:T.dzClearStateNow(1.5,[3,8,20,60],false,'x')};return JSON.stringify(r);})()"));
+    t("U8718 边界 清场预计（四阈值定档 + 顶/底界正确 + 最好/最差色反转）", o3.a.tier === 2 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.d.pct === 1 && o3.e.tier === 4 && o3.f.tier === 1 && o3.f.pct === 0 && o3.f.cls === expLowCls && o3.f.danger === expLowDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzClearStateNow(null,[3,8,20,60],false,'x'),b:T.dzClearStateNow(NaN,[3,8,20,60],false,'x'),c:T.dzClearStateNow(-5,[3,8,20,60],false,'x'),d:T.dzClearStateNow([1],[3,8,20,60],false,'x'),e:T.dzClearStateNow(5,[1,2,3],false,'x'),f:T.dzClearStateNow(5,[2,2,8,20],false,'x'),g:T.dzClearStateNow(5,[0,8,20,50],false,'x'),h:T.dzClearStateNow(5,[2,8,20,NaN],false,'x')};return JSON.stringify(r);})()"));
+    t("U8719 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzClearNow(),dom:(function(){const e=document.querySelector('#dzClearWrap .dzv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8720 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8715 清场预计 抛异常", false, String(e)); t("U8716 清场预计 抛异常", false, String(e)); t("U8717 清场预计 抛异常", false, String(e)); t("U8718 清场预计 抛异常", false, String(e)); t("U8719 清场预计 抛异常", false, String(e)); t("U8720 清场预计 抛异常", false, String(e)); }
+
+
+  // ===== U8721~U8726: 经济效率(v1.1.143) =====
+  try {
+    const up = true;
+    const L = [1,3,8,20];
+    const expLowCls = up ? 'g-bad' : 'g-good';
+    const expLowDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const expNormCls = up ? 'g-warn' : 'g-warn';
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('dzEconWrap'),bar:!!document.querySelector('#dzEconWrap .dzbar i'),v:!!document.querySelector('#dzEconWrap .dzv'),s:T.dzEconStateNow(5.5,[1,3,8,20],true,'x')};return JSON.stringify(r);})()"));
+    t("U8721 经济效率 DOM 已加入 HUD（单进度条 + 值元素 + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.s.ok === true && o.s.tier === 3 && o.s.pct > 0 && o.s.pct < 1 && o.s.txt.indexOf('x') > 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzEconStateNow(0.5,[1,3,8,20],true,'x')};return JSON.stringify(r);})()"));
+    t("U8722 初值 经济效率（低值 → L1 档，无危险或危险按方向、分级色按方向动态）", o1.s.ok === true && o1.s.tier === 1 && o1.s.pct === 0 && o1.s.cls === expLowCls && o1.s.danger === expLowDanger && o1.s.txt.length >= 3, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzEconStateNow(2,[1,3,8,20],true,'x')};return JSON.stringify(r);})()"));
+    t("U8723 正常值 经济效率（中段 → L2 档，进度 ~0.5，文案含值）", o2.s.ok === true && o2.s.tier === 2 && Math.abs(o2.s.pct - 0.5) < 0.001 && o2.s.txt.indexOf('x') > 0 && o2.s.danger === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzEconStateNow(1,[1,3,8,20],true,'x'),b:T.dzEconStateNow(3,[1,3,8,20],true,'x'),c:T.dzEconStateNow(8,[1,3,8,20],true,'x'),d:T.dzEconStateNow(20,[1,3,8,20],true,'x'),e:T.dzEconStateNow(19.999,[1,3,8,20],true,'x'),f:T.dzEconStateNow(0.5,[1,3,8,20],true,'x')};return JSON.stringify(r);})()"));
+    t("U8724 边界 经济效率（四阈值定档 + 顶/底界正确 + 最好/最差色反转）", o3.a.tier === 2 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.d.pct === 1 && o3.e.tier === 4 && o3.f.tier === 1 && o3.f.pct === 0 && o3.f.cls === expLowCls && o3.f.danger === expLowDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzEconStateNow(null,[1,3,8,20],true,'x'),b:T.dzEconStateNow(NaN,[1,3,8,20],true,'x'),c:T.dzEconStateNow(-5,[1,3,8,20],true,'x'),d:T.dzEconStateNow([1],[1,3,8,20],true,'x'),e:T.dzEconStateNow(5,[1,2,3],true,'x'),f:T.dzEconStateNow(5,[2,2,8,20],true,'x'),g:T.dzEconStateNow(5,[0,8,20,50],true,'x'),h:T.dzEconStateNow(5,[2,8,20,NaN],true,'x')};return JSON.stringify(r);})()"));
+    t("U8725 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzEconNow(),dom:(function(){const e=document.querySelector('#dzEconWrap .dzv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8726 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8721 经济效率 抛异常", false, String(e)); t("U8722 经济效率 抛异常", false, String(e)); t("U8723 经济效率 抛异常", false, String(e)); t("U8724 经济效率 抛异常", false, String(e)); t("U8725 经济效率 抛异常", false, String(e)); t("U8726 经济效率 抛异常", false, String(e)); }
+
+
+  // ===== U8727~U8732: 生命续航(v1.1.144) =====
+  try {
+    const up = true;
+    const L = [30,90,240,600];
+    const expLowCls = up ? 'g-bad' : 'g-good';
+    const expLowDanger = up ? true : false;
+    const expTopCls = up ? 'g-good' : 'g-bad';
+    const expTopDanger = up ? false : true;
+    const expNormCls = up ? 'g-warn' : 'g-warn';
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('dzHpWrap'),bar:!!document.querySelector('#dzHpWrap .dzbar i'),v:!!document.querySelector('#dzHpWrap .dzv'),s:T.dzHpStateNow(165,[30,90,240,600],true,'x')};return JSON.stringify(r);})()"));
+    t("U8727 生命续航 DOM 已加入 HUD（单进度条 + 值元素 + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.s.ok === true && o.s.tier === 3 && o.s.pct > 0 && o.s.pct < 1 && o.s.txt.indexOf('x') > 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzHpStateNow(15,[30,90,240,600],true,'x')};return JSON.stringify(r);})()"));
+    t("U8728 初值 生命续航（低值 → L1 档，无危险或危险按方向、分级色按方向动态）", o1.s.ok === true && o1.s.tier === 1 && o1.s.pct === 0 && o1.s.cls === expLowCls && o1.s.danger === expLowDanger && o1.s.txt.length >= 3, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzHpStateNow(60,[30,90,240,600],true,'x')};return JSON.stringify(r);})()"));
+    t("U8729 正常值 生命续航（中段 → L2 档，进度 ~0.5，文案含值）", o2.s.ok === true && o2.s.tier === 2 && Math.abs(o2.s.pct - 0.5) < 0.001 && o2.s.txt.indexOf('x') > 0 && o2.s.danger === false, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzHpStateNow(30,[30,90,240,600],true,'x'),b:T.dzHpStateNow(90,[30,90,240,600],true,'x'),c:T.dzHpStateNow(240,[30,90,240,600],true,'x'),d:T.dzHpStateNow(600,[30,90,240,600],true,'x'),e:T.dzHpStateNow(599.999,[30,90,240,600],true,'x'),f:T.dzHpStateNow(15,[30,90,240,600],true,'x')};return JSON.stringify(r);})()"));
+    t("U8730 边界 生命续航（四阈值定档 + 顶/底界正确 + 最好/最差色反转）", o3.a.tier === 2 && o3.b.tier === 3 && o3.c.tier === 4 && o3.d.tier === 5 && o3.d.pct === 1 && o3.e.tier === 4 && o3.f.tier === 1 && o3.f.pct === 0 && o3.f.cls === expLowCls && o3.f.danger === expLowDanger && o3.d.cls === expTopCls && o3.d.danger === expTopDanger, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.dzHpStateNow(null,[30,90,240,600],true,'x'),b:T.dzHpStateNow(NaN,[30,90,240,600],true,'x'),c:T.dzHpStateNow(-5,[30,90,240,600],true,'x'),d:T.dzHpStateNow([1],[30,90,240,600],true,'x'),e:T.dzHpStateNow(5,[1,2,3],true,'x'),f:T.dzHpStateNow(5,[2,2,8,20],true,'x'),g:T.dzHpStateNow(5,[0,8,20,50],true,'x'),h:T.dzHpStateNow(5,[2,8,20,NaN],true,'x')};return JSON.stringify(r);})()"));
+    t("U8731 非法 null/NaN/负值/数组/阶梯长度/非升序/非正/NaN → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.dzHpNow(),dom:(function(){const e=document.querySelector('#dzHpWrap .dzv');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8732 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8727 生命续航 抛异常", false, String(e)); t("U8728 生命续航 抛异常", false, String(e)); t("U8729 生命续航 抛异常", false, String(e)); t("U8730 生命续航 抛异常", false, String(e)); t("U8731 生命续航 抛异常", false, String(e)); t("U8732 生命续航 抛异常", false, String(e)); }
+
+
+  // ===== U8733~U8738: 击杀里程碑(v1.1.145) =====
+  try {
+    const L = [10,25,50,100];
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('mwKillsWrap'),bar:!!document.querySelector('#mwKillsWrap .mwbar i'),v:!!document.querySelector('#mwKillsWrap .mwt'),d:!!document.querySelector('#mwKillsWrap .mwdone'),toast:!!document.getElementById('mwToast'),s:T.mwKillsStateNow(17.5,[10,25,50,100],[false,false,false,false],'击杀')};return JSON.stringify(r);})()"));
+    t("U8733 击杀里程碑 里程碑 DOM 已加入（进度条 + 值 + 达成勾 + 共享 toast + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.d === true && o.toast === true && o.s.ok === true && o.s.hit === true && o.s.idx === 0 && o.s.txt.indexOf('击杀') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwKillsStateNow(0,[10,25,50,100],[false,false,false,false],'击杀')};return JSON.stringify(r);})()"));
+    t("U8734 初值 击杀里程碑（0 → 未达成，下一档为 L1，文案含标签）", o1.s.ok === true && o1.s.hit === false && o1.s.idx === -1 && o1.s.t === null && o1.s.next === L[0] && o1.s.txt.indexOf('击杀') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwKillsStateNow(17.5,[10,25,50,100],[false,false,false,false],'击杀')};return JSON.stringify(r);})()"));
+    t("U8735 正常值 击杀里程碑（中段跨过 L1 → 命中第 1 档，值 = L1）", o2.s.ok === true && o2.s.hit === true && o2.s.idx === 0 && o2.s.t === L[0] && o2.s.txt === '击杀 ' + L[0], JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwKillsStateNow(9.999,[10,25,50,100],[false,false,false,false],'击杀'),b:T.mwKillsStateNow(10,[10,25,50,100],[false,false,false,false],'击杀'),c:T.mwKillsStateNow(25,[10,25,50,100],[true,false,false,false],'击杀'),d:T.mwKillsStateNow(100,[10,25,50,100],[true,true,true,false],'击杀'),e:T.mwKillsStateNow(100,[10,25,50,100],[true,true,true,true],'击杀'),f:T.mwKillsStateNow(5,[10,25,50,100],[false,false,false,false],'击杀')};return JSON.stringify(r);})()"));
+    t("U8736 边界 击杀里程碑（阈值下方不中/恰在阈值中/逐档推进/全达成不中）", o3.a.hit === false && o3.a.next === L[0] && o3.b.hit === true && o3.b.idx === 0 && o3.c.hit === true && o3.c.idx === 1 && o3.c.t === L[1] && o3.d.hit === true && o3.d.idx === 3 && o3.d.t === L[3] && o3.e.hit === false && o3.e.next === null && o3.f.hit === false && o3.f.next === L[0], JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwKillsStateNow(null,[10,25,50,100],[false,false,false,false],'击杀'),b:T.mwKillsStateNow(NaN,[10,25,50,100],[false,false,false,false],'击杀'),c:T.mwKillsStateNow(-5,[10,25,50,100],[false,false,false,false],'击杀'),d:T.mwKillsStateNow([1],[10,25,50,100],[false,false,false,false],'击杀'),e:T.mwKillsStateNow(5,[], [false,false,false,false],'击杀'),f:T.mwKillsStateNow(5,[5,5,8,20],[false,false,false,false],'击杀'),g:T.mwKillsStateNow(5,[0,8,20,50],[false,false,false,false],'击杀'),h:T.mwKillsStateNow(5,[5,8,20,NaN],[false,false,false,false],'击杀'),i:T.mwKillsStateNow(5,[10,25,50,100],[true],'击杀')};return JSON.stringify(r);})()"));
+    t("U8737 非法 null/NaN/负值/数组/空阶梯/非升序/非正/NaN/done 长度 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwKillsNow(),dom:(function(){const e=document.querySelector('#mwKillsWrap .mwt');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8738 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8733 击杀里程碑 抛异常", false, String(e)); t("U8734 击杀里程碑 抛异常", false, String(e)); t("U8735 击杀里程碑 抛异常", false, String(e)); t("U8736 击杀里程碑 抛异常", false, String(e)); t("U8737 击杀里程碑 抛异常", false, String(e)); t("U8738 击杀里程碑 抛异常", false, String(e)); }
+
+
+  // ===== U8739~U8744: 连杀里程碑(v1.1.146) =====
+  try {
+    const L = [3,5,8,12];
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('mwComboWrap'),bar:!!document.querySelector('#mwComboWrap .mwbar i'),v:!!document.querySelector('#mwComboWrap .mwt'),d:!!document.querySelector('#mwComboWrap .mwdone'),toast:!!document.getElementById('mwToast'),s:T.mwComboStateNow(4,[3,5,8,12],[false,false,false,false],'连杀')};return JSON.stringify(r);})()"));
+    t("U8739 连杀里程碑 里程碑 DOM 已加入（进度条 + 值 + 达成勾 + 共享 toast + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.d === true && o.toast === true && o.s.ok === true && o.s.hit === true && o.s.idx === 0 && o.s.txt.indexOf('连杀') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwComboStateNow(0,[3,5,8,12],[false,false,false,false],'连杀')};return JSON.stringify(r);})()"));
+    t("U8740 初值 连杀里程碑（0 → 未达成，下一档为 L1，文案含标签）", o1.s.ok === true && o1.s.hit === false && o1.s.idx === -1 && o1.s.t === null && o1.s.next === L[0] && o1.s.txt.indexOf('连杀') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwComboStateNow(4,[3,5,8,12],[false,false,false,false],'连杀')};return JSON.stringify(r);})()"));
+    t("U8741 正常值 连杀里程碑（中段跨过 L1 → 命中第 1 档，值 = L1）", o2.s.ok === true && o2.s.hit === true && o2.s.idx === 0 && o2.s.t === L[0] && o2.s.txt === '连杀 ' + L[0], JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwComboStateNow(2.999,[3,5,8,12],[false,false,false,false],'连杀'),b:T.mwComboStateNow(3,[3,5,8,12],[false,false,false,false],'连杀'),c:T.mwComboStateNow(5,[3,5,8,12],[true,false,false,false],'连杀'),d:T.mwComboStateNow(12,[3,5,8,12],[true,true,true,false],'连杀'),e:T.mwComboStateNow(12,[3,5,8,12],[true,true,true,true],'连杀'),f:T.mwComboStateNow(1.5,[3,5,8,12],[false,false,false,false],'连杀')};return JSON.stringify(r);})()"));
+    t("U8742 边界 连杀里程碑（阈值下方不中/恰在阈值中/逐档推进/全达成不中）", o3.a.hit === false && o3.a.next === L[0] && o3.b.hit === true && o3.b.idx === 0 && o3.c.hit === true && o3.c.idx === 1 && o3.c.t === L[1] && o3.d.hit === true && o3.d.idx === 3 && o3.d.t === L[3] && o3.e.hit === false && o3.e.next === null && o3.f.hit === false && o3.f.next === L[0], JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwComboStateNow(null,[3,5,8,12],[false,false,false,false],'连杀'),b:T.mwComboStateNow(NaN,[3,5,8,12],[false,false,false,false],'连杀'),c:T.mwComboStateNow(-5,[3,5,8,12],[false,false,false,false],'连杀'),d:T.mwComboStateNow([1],[3,5,8,12],[false,false,false,false],'连杀'),e:T.mwComboStateNow(5,[], [false,false,false,false],'连杀'),f:T.mwComboStateNow(5,[5,5,8,20],[false,false,false,false],'连杀'),g:T.mwComboStateNow(5,[0,8,20,50],[false,false,false,false],'连杀'),h:T.mwComboStateNow(5,[5,8,20,NaN],[false,false,false,false],'连杀'),i:T.mwComboStateNow(5,[3,5,8,12],[true],'连杀')};return JSON.stringify(r);})()"));
+    t("U8743 非法 null/NaN/负值/数组/空阶梯/非升序/非正/NaN/done 长度 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwComboNow(),dom:(function(){const e=document.querySelector('#mwComboWrap .mwt');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8744 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8739 连杀里程碑 抛异常", false, String(e)); t("U8740 连杀里程碑 抛异常", false, String(e)); t("U8741 连杀里程碑 抛异常", false, String(e)); t("U8742 连杀里程碑 抛异常", false, String(e)); t("U8743 连杀里程碑 抛异常", false, String(e)); t("U8744 连杀里程碑 抛异常", false, String(e)); }
+
+
+  // ===== U8745~U8750: 波次里程碑(v1.1.147) =====
+  try {
+    const L = [3,5,10,20];
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('mwWaveWrap'),bar:!!document.querySelector('#mwWaveWrap .mwbar i'),v:!!document.querySelector('#mwWaveWrap .mwt'),d:!!document.querySelector('#mwWaveWrap .mwdone'),toast:!!document.getElementById('mwToast'),s:T.mwWaveStateNow(4,[3,5,10,20],[false,false,false,false],'波次')};return JSON.stringify(r);})()"));
+    t("U8745 波次里程碑 里程碑 DOM 已加入（进度条 + 值 + 达成勾 + 共享 toast + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.d === true && o.toast === true && o.s.ok === true && o.s.hit === true && o.s.idx === 0 && o.s.txt.indexOf('波次') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwWaveStateNow(0,[3,5,10,20],[false,false,false,false],'波次')};return JSON.stringify(r);})()"));
+    t("U8746 初值 波次里程碑（0 → 未达成，下一档为 L1，文案含标签）", o1.s.ok === true && o1.s.hit === false && o1.s.idx === -1 && o1.s.t === null && o1.s.next === L[0] && o1.s.txt.indexOf('波次') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwWaveStateNow(4,[3,5,10,20],[false,false,false,false],'波次')};return JSON.stringify(r);})()"));
+    t("U8747 正常值 波次里程碑（中段跨过 L1 → 命中第 1 档，值 = L1）", o2.s.ok === true && o2.s.hit === true && o2.s.idx === 0 && o2.s.t === L[0] && o2.s.txt === '波次 ' + L[0], JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwWaveStateNow(2.999,[3,5,10,20],[false,false,false,false],'波次'),b:T.mwWaveStateNow(3,[3,5,10,20],[false,false,false,false],'波次'),c:T.mwWaveStateNow(5,[3,5,10,20],[true,false,false,false],'波次'),d:T.mwWaveStateNow(20,[3,5,10,20],[true,true,true,false],'波次'),e:T.mwWaveStateNow(20,[3,5,10,20],[true,true,true,true],'波次'),f:T.mwWaveStateNow(1.5,[3,5,10,20],[false,false,false,false],'波次')};return JSON.stringify(r);})()"));
+    t("U8748 边界 波次里程碑（阈值下方不中/恰在阈值中/逐档推进/全达成不中）", o3.a.hit === false && o3.a.next === L[0] && o3.b.hit === true && o3.b.idx === 0 && o3.c.hit === true && o3.c.idx === 1 && o3.c.t === L[1] && o3.d.hit === true && o3.d.idx === 3 && o3.d.t === L[3] && o3.e.hit === false && o3.e.next === null && o3.f.hit === false && o3.f.next === L[0], JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwWaveStateNow(null,[3,5,10,20],[false,false,false,false],'波次'),b:T.mwWaveStateNow(NaN,[3,5,10,20],[false,false,false,false],'波次'),c:T.mwWaveStateNow(-5,[3,5,10,20],[false,false,false,false],'波次'),d:T.mwWaveStateNow([1],[3,5,10,20],[false,false,false,false],'波次'),e:T.mwWaveStateNow(5,[], [false,false,false,false],'波次'),f:T.mwWaveStateNow(5,[5,5,8,20],[false,false,false,false],'波次'),g:T.mwWaveStateNow(5,[0,8,20,50],[false,false,false,false],'波次'),h:T.mwWaveStateNow(5,[5,8,20,NaN],[false,false,false,false],'波次'),i:T.mwWaveStateNow(5,[3,5,10,20],[true],'波次')};return JSON.stringify(r);})()"));
+    t("U8749 非法 null/NaN/负值/数组/空阶梯/非升序/非正/NaN/done 长度 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwWaveNow(),dom:(function(){const e=document.querySelector('#mwWaveWrap .mwt');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8750 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8745 波次里程碑 抛异常", false, String(e)); t("U8746 波次里程碑 抛异常", false, String(e)); t("U8747 波次里程碑 抛异常", false, String(e)); t("U8748 波次里程碑 抛异常", false, String(e)); t("U8749 波次里程碑 抛异常", false, String(e)); t("U8750 波次里程碑 抛异常", false, String(e)); }
+
+
+  // ===== U8751~U8756: 金币里程碑(v1.1.148) =====
+  try {
+    const L = [100,500,1000,2000];
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('mwCoinWrap'),bar:!!document.querySelector('#mwCoinWrap .mwbar i'),v:!!document.querySelector('#mwCoinWrap .mwt'),d:!!document.querySelector('#mwCoinWrap .mwdone'),toast:!!document.getElementById('mwToast'),s:T.mwCoinStateNow(300,[100,500,1000,2000],[false,false,false,false],'金币')};return JSON.stringify(r);})()"));
+    t("U8751 金币里程碑 里程碑 DOM 已加入（进度条 + 值 + 达成勾 + 共享 toast + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.d === true && o.toast === true && o.s.ok === true && o.s.hit === true && o.s.idx === 0 && o.s.txt.indexOf('金币') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwCoinStateNow(0,[100,500,1000,2000],[false,false,false,false],'金币')};return JSON.stringify(r);})()"));
+    t("U8752 初值 金币里程碑（0 → 未达成，下一档为 L1，文案含标签）", o1.s.ok === true && o1.s.hit === false && o1.s.idx === -1 && o1.s.t === null && o1.s.next === L[0] && o1.s.txt.indexOf('金币') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwCoinStateNow(300,[100,500,1000,2000],[false,false,false,false],'金币')};return JSON.stringify(r);})()"));
+    t("U8753 正常值 金币里程碑（中段跨过 L1 → 命中第 1 档，值 = L1）", o2.s.ok === true && o2.s.hit === true && o2.s.idx === 0 && o2.s.t === L[0] && o2.s.txt === '金币 ' + L[0], JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwCoinStateNow(99.999,[100,500,1000,2000],[false,false,false,false],'金币'),b:T.mwCoinStateNow(100,[100,500,1000,2000],[false,false,false,false],'金币'),c:T.mwCoinStateNow(500,[100,500,1000,2000],[true,false,false,false],'金币'),d:T.mwCoinStateNow(2000,[100,500,1000,2000],[true,true,true,false],'金币'),e:T.mwCoinStateNow(2000,[100,500,1000,2000],[true,true,true,true],'金币'),f:T.mwCoinStateNow(50,[100,500,1000,2000],[false,false,false,false],'金币')};return JSON.stringify(r);})()"));
+    t("U8754 边界 金币里程碑（阈值下方不中/恰在阈值中/逐档推进/全达成不中）", o3.a.hit === false && o3.a.next === L[0] && o3.b.hit === true && o3.b.idx === 0 && o3.c.hit === true && o3.c.idx === 1 && o3.c.t === L[1] && o3.d.hit === true && o3.d.idx === 3 && o3.d.t === L[3] && o3.e.hit === false && o3.e.next === null && o3.f.hit === false && o3.f.next === L[0], JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwCoinStateNow(null,[100,500,1000,2000],[false,false,false,false],'金币'),b:T.mwCoinStateNow(NaN,[100,500,1000,2000],[false,false,false,false],'金币'),c:T.mwCoinStateNow(-5,[100,500,1000,2000],[false,false,false,false],'金币'),d:T.mwCoinStateNow([1],[100,500,1000,2000],[false,false,false,false],'金币'),e:T.mwCoinStateNow(5,[], [false,false,false,false],'金币'),f:T.mwCoinStateNow(5,[5,5,8,20],[false,false,false,false],'金币'),g:T.mwCoinStateNow(5,[0,8,20,50],[false,false,false,false],'金币'),h:T.mwCoinStateNow(5,[5,8,20,NaN],[false,false,false,false],'金币'),i:T.mwCoinStateNow(5,[100,500,1000,2000],[true],'金币')};return JSON.stringify(r);})()"));
+    t("U8755 非法 null/NaN/负值/数组/空阶梯/非升序/非正/NaN/done 长度 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwCoinNow(),dom:(function(){const e=document.querySelector('#mwCoinWrap .mwt');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8756 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8751 金币里程碑 抛异常", false, String(e)); t("U8752 金币里程碑 抛异常", false, String(e)); t("U8753 金币里程碑 抛异常", false, String(e)); t("U8754 金币里程碑 抛异常", false, String(e)); t("U8755 金币里程碑 抛异常", false, String(e)); t("U8756 金币里程碑 抛异常", false, String(e)); }
+
+
+  // ===== U8757~U8762: 伤害里程碑(v1.1.149) =====
+  try {
+    const L = [500,2000,5000,10000];
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('mwDmgWrap'),bar:!!document.querySelector('#mwDmgWrap .mwbar i'),v:!!document.querySelector('#mwDmgWrap .mwt'),d:!!document.querySelector('#mwDmgWrap .mwdone'),toast:!!document.getElementById('mwToast'),s:T.mwDmgStateNow(1250,[500,2000,5000,10000],[false,false,false,false],'伤害')};return JSON.stringify(r);})()"));
+    t("U8757 伤害里程碑 里程碑 DOM 已加入（进度条 + 值 + 达成勾 + 共享 toast + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.d === true && o.toast === true && o.s.ok === true && o.s.hit === true && o.s.idx === 0 && o.s.txt.indexOf('伤害') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwDmgStateNow(0,[500,2000,5000,10000],[false,false,false,false],'伤害')};return JSON.stringify(r);})()"));
+    t("U8758 初值 伤害里程碑（0 → 未达成，下一档为 L1，文案含标签）", o1.s.ok === true && o1.s.hit === false && o1.s.idx === -1 && o1.s.t === null && o1.s.next === L[0] && o1.s.txt.indexOf('伤害') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwDmgStateNow(1250,[500,2000,5000,10000],[false,false,false,false],'伤害')};return JSON.stringify(r);})()"));
+    t("U8759 正常值 伤害里程碑（中段跨过 L1 → 命中第 1 档，值 = L1）", o2.s.ok === true && o2.s.hit === true && o2.s.idx === 0 && o2.s.t === L[0] && o2.s.txt === '伤害 ' + L[0], JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwDmgStateNow(499.999,[500,2000,5000,10000],[false,false,false,false],'伤害'),b:T.mwDmgStateNow(500,[500,2000,5000,10000],[false,false,false,false],'伤害'),c:T.mwDmgStateNow(2000,[500,2000,5000,10000],[true,false,false,false],'伤害'),d:T.mwDmgStateNow(10000,[500,2000,5000,10000],[true,true,true,false],'伤害'),e:T.mwDmgStateNow(10000,[500,2000,5000,10000],[true,true,true,true],'伤害'),f:T.mwDmgStateNow(250,[500,2000,5000,10000],[false,false,false,false],'伤害')};return JSON.stringify(r);})()"));
+    t("U8760 边界 伤害里程碑（阈值下方不中/恰在阈值中/逐档推进/全达成不中）", o3.a.hit === false && o3.a.next === L[0] && o3.b.hit === true && o3.b.idx === 0 && o3.c.hit === true && o3.c.idx === 1 && o3.c.t === L[1] && o3.d.hit === true && o3.d.idx === 3 && o3.d.t === L[3] && o3.e.hit === false && o3.e.next === null && o3.f.hit === false && o3.f.next === L[0], JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwDmgStateNow(null,[500,2000,5000,10000],[false,false,false,false],'伤害'),b:T.mwDmgStateNow(NaN,[500,2000,5000,10000],[false,false,false,false],'伤害'),c:T.mwDmgStateNow(-5,[500,2000,5000,10000],[false,false,false,false],'伤害'),d:T.mwDmgStateNow([1],[500,2000,5000,10000],[false,false,false,false],'伤害'),e:T.mwDmgStateNow(5,[], [false,false,false,false],'伤害'),f:T.mwDmgStateNow(5,[5,5,8,20],[false,false,false,false],'伤害'),g:T.mwDmgStateNow(5,[0,8,20,50],[false,false,false,false],'伤害'),h:T.mwDmgStateNow(5,[5,8,20,NaN],[false,false,false,false],'伤害'),i:T.mwDmgStateNow(5,[500,2000,5000,10000],[true],'伤害')};return JSON.stringify(r);})()"));
+    t("U8761 非法 null/NaN/负值/数组/空阶梯/非升序/非正/NaN/done 长度 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwDmgNow(),dom:(function(){const e=document.querySelector('#mwDmgWrap .mwt');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8762 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8757 伤害里程碑 抛异常", false, String(e)); t("U8758 伤害里程碑 抛异常", false, String(e)); t("U8759 伤害里程碑 抛异常", false, String(e)); t("U8760 伤害里程碑 抛异常", false, String(e)); t("U8761 伤害里程碑 抛异常", false, String(e)); t("U8762 伤害里程碑 抛异常", false, String(e)); }
+
+
+  // ===== U8763~U8768: 存活里程碑(v1.1.150) =====
+  try {
+    const L = [60,120,300,600];
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('mwSurvWrap'),bar:!!document.querySelector('#mwSurvWrap .mwbar i'),v:!!document.querySelector('#mwSurvWrap .mwt'),d:!!document.querySelector('#mwSurvWrap .mwdone'),toast:!!document.getElementById('mwToast'),s:T.mwSurvStateNow(90,[60,120,300,600],[false,false,false,false],'存活')};return JSON.stringify(r);})()"));
+    t("U8763 存活里程碑 里程碑 DOM 已加入（进度条 + 值 + 达成勾 + 共享 toast + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.d === true && o.toast === true && o.s.ok === true && o.s.hit === true && o.s.idx === 0 && o.s.txt.indexOf('存活') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwSurvStateNow(0,[60,120,300,600],[false,false,false,false],'存活')};return JSON.stringify(r);})()"));
+    t("U8764 初值 存活里程碑（0 → 未达成，下一档为 L1，文案含标签）", o1.s.ok === true && o1.s.hit === false && o1.s.idx === -1 && o1.s.t === null && o1.s.next === L[0] && o1.s.txt.indexOf('存活') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwSurvStateNow(90,[60,120,300,600],[false,false,false,false],'存活')};return JSON.stringify(r);})()"));
+    t("U8765 正常值 存活里程碑（中段跨过 L1 → 命中第 1 档，值 = L1）", o2.s.ok === true && o2.s.hit === true && o2.s.idx === 0 && o2.s.t === L[0] && o2.s.txt === '存活 ' + L[0], JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwSurvStateNow(59.999,[60,120,300,600],[false,false,false,false],'存活'),b:T.mwSurvStateNow(60,[60,120,300,600],[false,false,false,false],'存活'),c:T.mwSurvStateNow(120,[60,120,300,600],[true,false,false,false],'存活'),d:T.mwSurvStateNow(600,[60,120,300,600],[true,true,true,false],'存活'),e:T.mwSurvStateNow(600,[60,120,300,600],[true,true,true,true],'存活'),f:T.mwSurvStateNow(30,[60,120,300,600],[false,false,false,false],'存活')};return JSON.stringify(r);})()"));
+    t("U8766 边界 存活里程碑（阈值下方不中/恰在阈值中/逐档推进/全达成不中）", o3.a.hit === false && o3.a.next === L[0] && o3.b.hit === true && o3.b.idx === 0 && o3.c.hit === true && o3.c.idx === 1 && o3.c.t === L[1] && o3.d.hit === true && o3.d.idx === 3 && o3.d.t === L[3] && o3.e.hit === false && o3.e.next === null && o3.f.hit === false && o3.f.next === L[0], JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwSurvStateNow(null,[60,120,300,600],[false,false,false,false],'存活'),b:T.mwSurvStateNow(NaN,[60,120,300,600],[false,false,false,false],'存活'),c:T.mwSurvStateNow(-5,[60,120,300,600],[false,false,false,false],'存活'),d:T.mwSurvStateNow([1],[60,120,300,600],[false,false,false,false],'存活'),e:T.mwSurvStateNow(5,[], [false,false,false,false],'存活'),f:T.mwSurvStateNow(5,[5,5,8,20],[false,false,false,false],'存活'),g:T.mwSurvStateNow(5,[0,8,20,50],[false,false,false,false],'存活'),h:T.mwSurvStateNow(5,[5,8,20,NaN],[false,false,false,false],'存活'),i:T.mwSurvStateNow(5,[60,120,300,600],[true],'存活')};return JSON.stringify(r);})()"));
+    t("U8767 非法 null/NaN/负值/数组/空阶梯/非升序/非正/NaN/done 长度 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwSurvNow(),dom:(function(){const e=document.querySelector('#mwSurvWrap .mwt');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8768 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8763 存活里程碑 抛异常", false, String(e)); t("U8764 存活里程碑 抛异常", false, String(e)); t("U8765 存活里程碑 抛异常", false, String(e)); t("U8766 存活里程碑 抛异常", false, String(e)); t("U8767 存活里程碑 抛异常", false, String(e)); t("U8768 存活里程碑 抛异常", false, String(e)); }
+
+
+  // ===== U8769~U8774: 受击里程碑(v1.1.151) =====
+  try {
+    const L = [5,15,40,80];
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('mwHurtWrap'),bar:!!document.querySelector('#mwHurtWrap .mwbar i'),v:!!document.querySelector('#mwHurtWrap .mwt'),d:!!document.querySelector('#mwHurtWrap .mwdone'),toast:!!document.getElementById('mwToast'),s:T.mwHurtStateNow(10,[5,15,40,80],[false,false,false,false],'受击')};return JSON.stringify(r);})()"));
+    t("U8769 受击里程碑 里程碑 DOM 已加入（进度条 + 值 + 达成勾 + 共享 toast + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.d === true && o.toast === true && o.s.ok === true && o.s.hit === true && o.s.idx === 0 && o.s.txt.indexOf('受击') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwHurtStateNow(0,[5,15,40,80],[false,false,false,false],'受击')};return JSON.stringify(r);})()"));
+    t("U8770 初值 受击里程碑（0 → 未达成，下一档为 L1，文案含标签）", o1.s.ok === true && o1.s.hit === false && o1.s.idx === -1 && o1.s.t === null && o1.s.next === L[0] && o1.s.txt.indexOf('受击') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwHurtStateNow(10,[5,15,40,80],[false,false,false,false],'受击')};return JSON.stringify(r);})()"));
+    t("U8771 正常值 受击里程碑（中段跨过 L1 → 命中第 1 档，值 = L1）", o2.s.ok === true && o2.s.hit === true && o2.s.idx === 0 && o2.s.t === L[0] && o2.s.txt === '受击 ' + L[0], JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwHurtStateNow(4.999,[5,15,40,80],[false,false,false,false],'受击'),b:T.mwHurtStateNow(5,[5,15,40,80],[false,false,false,false],'受击'),c:T.mwHurtStateNow(15,[5,15,40,80],[true,false,false,false],'受击'),d:T.mwHurtStateNow(80,[5,15,40,80],[true,true,true,false],'受击'),e:T.mwHurtStateNow(80,[5,15,40,80],[true,true,true,true],'受击'),f:T.mwHurtStateNow(2.5,[5,15,40,80],[false,false,false,false],'受击')};return JSON.stringify(r);})()"));
+    t("U8772 边界 受击里程碑（阈值下方不中/恰在阈值中/逐档推进/全达成不中）", o3.a.hit === false && o3.a.next === L[0] && o3.b.hit === true && o3.b.idx === 0 && o3.c.hit === true && o3.c.idx === 1 && o3.c.t === L[1] && o3.d.hit === true && o3.d.idx === 3 && o3.d.t === L[3] && o3.e.hit === false && o3.e.next === null && o3.f.hit === false && o3.f.next === L[0], JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwHurtStateNow(null,[5,15,40,80],[false,false,false,false],'受击'),b:T.mwHurtStateNow(NaN,[5,15,40,80],[false,false,false,false],'受击'),c:T.mwHurtStateNow(-5,[5,15,40,80],[false,false,false,false],'受击'),d:T.mwHurtStateNow([1],[5,15,40,80],[false,false,false,false],'受击'),e:T.mwHurtStateNow(5,[], [false,false,false,false],'受击'),f:T.mwHurtStateNow(5,[5,5,8,20],[false,false,false,false],'受击'),g:T.mwHurtStateNow(5,[0,8,20,50],[false,false,false,false],'受击'),h:T.mwHurtStateNow(5,[5,8,20,NaN],[false,false,false,false],'受击'),i:T.mwHurtStateNow(5,[5,15,40,80],[true],'受击')};return JSON.stringify(r);})()"));
+    t("U8773 非法 null/NaN/负值/数组/空阶梯/非升序/非正/NaN/done 长度 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwHurtNow(),dom:(function(){const e=document.querySelector('#mwHurtWrap .mwt');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8774 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8769 受击里程碑 抛异常", false, String(e)); t("U8770 受击里程碑 抛异常", false, String(e)); t("U8771 受击里程碑 抛异常", false, String(e)); t("U8772 受击里程碑 抛异常", false, String(e)); t("U8773 受击里程碑 抛异常", false, String(e)); t("U8774 受击里程碑 抛异常", false, String(e)); }
+
+
+  // ===== U8775~U8780: 分数里程碑(v1.1.152) =====
+  try {
+    const L = [1000,5000,20000,50000];
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('mwScoreWrap'),bar:!!document.querySelector('#mwScoreWrap .mwbar i'),v:!!document.querySelector('#mwScoreWrap .mwt'),d:!!document.querySelector('#mwScoreWrap .mwdone'),toast:!!document.getElementById('mwToast'),s:T.mwScoreStateNow(3000,[1000,5000,20000,50000],[false,false,false,false],'分数')};return JSON.stringify(r);})()"));
+    t("U8775 分数里程碑 里程碑 DOM 已加入（进度条 + 值 + 达成勾 + 共享 toast + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.d === true && o.toast === true && o.s.ok === true && o.s.hit === true && o.s.idx === 0 && o.s.txt.indexOf('分数') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwScoreStateNow(0,[1000,5000,20000,50000],[false,false,false,false],'分数')};return JSON.stringify(r);})()"));
+    t("U8776 初值 分数里程碑（0 → 未达成，下一档为 L1，文案含标签）", o1.s.ok === true && o1.s.hit === false && o1.s.idx === -1 && o1.s.t === null && o1.s.next === L[0] && o1.s.txt.indexOf('分数') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwScoreStateNow(3000,[1000,5000,20000,50000],[false,false,false,false],'分数')};return JSON.stringify(r);})()"));
+    t("U8777 正常值 分数里程碑（中段跨过 L1 → 命中第 1 档，值 = L1）", o2.s.ok === true && o2.s.hit === true && o2.s.idx === 0 && o2.s.t === L[0] && o2.s.txt === '分数 ' + L[0], JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwScoreStateNow(999.999,[1000,5000,20000,50000],[false,false,false,false],'分数'),b:T.mwScoreStateNow(1000,[1000,5000,20000,50000],[false,false,false,false],'分数'),c:T.mwScoreStateNow(5000,[1000,5000,20000,50000],[true,false,false,false],'分数'),d:T.mwScoreStateNow(50000,[1000,5000,20000,50000],[true,true,true,false],'分数'),e:T.mwScoreStateNow(50000,[1000,5000,20000,50000],[true,true,true,true],'分数'),f:T.mwScoreStateNow(500,[1000,5000,20000,50000],[false,false,false,false],'分数')};return JSON.stringify(r);})()"));
+    t("U8778 边界 分数里程碑（阈值下方不中/恰在阈值中/逐档推进/全达成不中）", o3.a.hit === false && o3.a.next === L[0] && o3.b.hit === true && o3.b.idx === 0 && o3.c.hit === true && o3.c.idx === 1 && o3.c.t === L[1] && o3.d.hit === true && o3.d.idx === 3 && o3.d.t === L[3] && o3.e.hit === false && o3.e.next === null && o3.f.hit === false && o3.f.next === L[0], JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.mwScoreStateNow(null,[1000,5000,20000,50000],[false,false,false,false],'分数'),b:T.mwScoreStateNow(NaN,[1000,5000,20000,50000],[false,false,false,false],'分数'),c:T.mwScoreStateNow(-5,[1000,5000,20000,50000],[false,false,false,false],'分数'),d:T.mwScoreStateNow([1],[1000,5000,20000,50000],[false,false,false,false],'分数'),e:T.mwScoreStateNow(5,[], [false,false,false,false],'分数'),f:T.mwScoreStateNow(5,[5,5,8,20],[false,false,false,false],'分数'),g:T.mwScoreStateNow(5,[0,8,20,50],[false,false,false,false],'分数'),h:T.mwScoreStateNow(5,[5,8,20,NaN],[false,false,false,false],'分数'),i:T.mwScoreStateNow(5,[1000,5000,20000,50000],[true],'分数')};return JSON.stringify(r);})()"));
+    t("U8779 非法 null/NaN/负值/数组/空阶梯/非升序/非正/NaN/done 长度 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.mwScoreNow(),dom:(function(){const e=document.querySelector('#mwScoreWrap .mwt');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8780 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8775 分数里程碑 抛异常", false, String(e)); t("U8776 分数里程碑 抛异常", false, String(e)); t("U8777 分数里程碑 抛异常", false, String(e)); t("U8778 分数里程碑 抛异常", false, String(e)); t("U8779 分数里程碑 抛异常", false, String(e)); t("U8780 分数里程碑 抛异常", false, String(e)); }
+
+
+  // ===== U8781~U8786: 敌群警戒(v1.1.153) =====
+  try {
+    const L = [6,10]; const HH = ["场上平静","敌人增多","清场：敌人过多"]; const G = false;
+    const __expLv = (v, l1, l2, g) => g ? (v >= l1 ? 0 : (v >= l2 ? 1 : 2)) : (v < l1 ? 0 : (v < l2 ? 1 : 2));
+    const __expCls = (lv) => lv === 2 ? 'g-bad' : (lv === 1 ? 'g-warn' : 'g-good');
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('ocEnemyWrap'),bar:!!document.querySelector('#ocEnemyWrap .obar i'),val:!!document.querySelector('#ocEnemyWrap .oval'),s:T.ocEnemyStateNow(0,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多'])};return JSON.stringify(r);})()"));
+    t("U8781 敌群警戒 警戒芯片 DOM 已加入（三态条 + 文案 + 函数可用）", o.dom === true && o.bar === true && o.val === true && o.s.ok === true && o.s.lv === 0 && o.s.txt.indexOf('敌群') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocEnemyStateNow(0,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多'])};return JSON.stringify(r);})()"));
+    t("U8782 初值 敌群警戒（val=0 → 按 good 方向取健康/告警档，文案含标签）", o1.s.ok === true && o1.s.lv === (G ? 2 : 0) && o1.s.txt.indexOf('敌群') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocEnemyStateNow(0,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多']),b:T.ocEnemyStateNow(6,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多'])};return JSON.stringify(r);})()"));
+    t("U8783 正常值 敌群警戒（健康值→lv0 稳定 / 中档值→lv1 留意）", o2.a.ok === true && o2.a.lv === 0 && o2.b.ok === true && o2.b.lv === 1 && o2.a.pct === 15 && o2.b.pct === 55, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r=[T.ocEnemyStateNow(0,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多']).lv,T.ocEnemyStateNow(9.999,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多']).lv,T.ocEnemyStateNow(10,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多']).lv,T.ocEnemyStateNow(8,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多']).lv,T.ocEnemyStateNow(5.999,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多']).lv,T.ocEnemyStateNow(6,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多']).lv,T.ocEnemyStateNow(56,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多']).lv];return JSON.stringify(r);})()"));
+    const expVals = [0,9.999,10,8,5.999,6,56];
+    let bOk = true;
+    for (let i = 0; i < expVals.length; i++) { if (o3[i] !== __expLv(expVals[i], L[0], L[1], G)) bOk = false; }
+    t("U8784 边界 敌群警戒（阈值上下/跨越逐个核对 lv）", bOk && o3.length === expVals.length, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocEnemyStateNow(null,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多']),b:T.ocEnemyStateNow(NaN,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多']),c:T.ocEnemyStateNow(-5,6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多']),d:T.ocEnemyStateNow([1],6,10,'敌群',false,['场上平静','敌人增多','清场：敌人过多']),e:T.ocEnemyStateNow(5,null,2,'敌群',false,['场上平静','敌人增多','清场：敌人过多']),f:T.ocEnemyStateNow(5,2,3,'敌群',false,[1,2]),g:T.ocEnemyStateNow(5,10,6,'敌群',false,['场上平静','敌人增多','清场：敌人过多']),h:T.ocEnemyStateNow(5,NaN,8,'敌群',false,['场上平静','敌人增多','清场：敌人过多']),i:T.ocEnemyStateNow(5,-3,8,'敌群',false,['场上平静','敌人增多','清场：敌人过多'])};return JSON.stringify(r);})()"));
+    t("U8785 非法 null/NaN/负值/数组/阈值无效/坏hints/方向错/NaN/负阈值 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocEnemyNow(),dom:(function(){const e=document.querySelector('#ocEnemyWrap .oval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8786 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8781 敌群警戒 抛异常", false, String(e)); t("U8782 敌群警戒 抛异常", false, String(e)); t("U8783 敌群警戒 抛异常", false, String(e)); t("U8784 敌群警戒 抛异常", false, String(e)); t("U8785 敌群警戒 抛异常", false, String(e)); t("U8786 敌群警戒 抛异常", false, String(e)); }
+
+
+  // ===== U8787~U8792: 弹幕警戒(v1.1.154) =====
+  try {
+    const L = [18,30]; const HH = ["弹幕稀疏","弹幕渐密","规避：弹幕过密"]; const G = false;
+    const __expLv = (v, l1, l2, g) => g ? (v >= l1 ? 0 : (v >= l2 ? 1 : 2)) : (v < l1 ? 0 : (v < l2 ? 1 : 2));
+    const __expCls = (lv) => lv === 2 ? 'g-bad' : (lv === 1 ? 'g-warn' : 'g-good');
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('ocBulletWrap'),bar:!!document.querySelector('#ocBulletWrap .obar i'),val:!!document.querySelector('#ocBulletWrap .oval'),s:T.ocBulletStateNow(0,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密'])};return JSON.stringify(r);})()"));
+    t("U8787 弹幕警戒 警戒芯片 DOM 已加入（三态条 + 文案 + 函数可用）", o.dom === true && o.bar === true && o.val === true && o.s.ok === true && o.s.lv === 0 && o.s.txt.indexOf('弹幕') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocBulletStateNow(0,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密'])};return JSON.stringify(r);})()"));
+    t("U8788 初值 弹幕警戒（val=0 → 按 good 方向取健康/告警档，文案含标签）", o1.s.ok === true && o1.s.lv === (G ? 2 : 0) && o1.s.txt.indexOf('弹幕') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocBulletStateNow(0,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']),b:T.ocBulletStateNow(18,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密'])};return JSON.stringify(r);})()"));
+    t("U8789 正常值 弹幕警戒（健康值→lv0 稳定 / 中档值→lv1 留意）", o2.a.ok === true && o2.a.lv === 0 && o2.b.ok === true && o2.b.lv === 1 && o2.a.pct === 15 && o2.b.pct === 55, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r=[T.ocBulletStateNow(0,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']).lv,T.ocBulletStateNow(29.999,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']).lv,T.ocBulletStateNow(30,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']).lv,T.ocBulletStateNow(24,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']).lv,T.ocBulletStateNow(17.999,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']).lv,T.ocBulletStateNow(18,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']).lv,T.ocBulletStateNow(68,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']).lv];return JSON.stringify(r);})()"));
+    const expVals = [0,29.999,30,24,17.999,18,68];
+    let bOk = true;
+    for (let i = 0; i < expVals.length; i++) { if (o3[i] !== __expLv(expVals[i], L[0], L[1], G)) bOk = false; }
+    t("U8790 边界 弹幕警戒（阈值上下/跨越逐个核对 lv）", bOk && o3.length === expVals.length, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocBulletStateNow(null,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']),b:T.ocBulletStateNow(NaN,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']),c:T.ocBulletStateNow(-5,18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']),d:T.ocBulletStateNow([1],18,30,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']),e:T.ocBulletStateNow(5,null,2,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']),f:T.ocBulletStateNow(5,2,3,'弹幕',false,[1,2]),g:T.ocBulletStateNow(5,30,18,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']),h:T.ocBulletStateNow(5,NaN,8,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密']),i:T.ocBulletStateNow(5,-3,8,'弹幕',false,['弹幕稀疏','弹幕渐密','规避：弹幕过密'])};return JSON.stringify(r);})()"));
+    t("U8791 非法 null/NaN/负值/数组/阈值无效/坏hints/方向错/NaN/负阈值 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocBulletNow(),dom:(function(){const e=document.querySelector('#ocBulletWrap .oval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8792 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8787 弹幕警戒 抛异常", false, String(e)); t("U8788 弹幕警戒 抛异常", false, String(e)); t("U8789 弹幕警戒 抛异常", false, String(e)); t("U8790 弹幕警戒 抛异常", false, String(e)); t("U8791 弹幕警戒 抛异常", false, String(e)); t("U8792 弹幕警戒 抛异常", false, String(e)); }
+
+
+  // ===== U8793~U8798: 血线警戒(v1.1.155) =====
+  try {
+    const L = [3,1]; const HH = ["血量充足","留意：血量偏低","保命：仅剩 1 命"]; const G = true;
+    const __expLv = (v, l1, l2, g) => g ? (v >= l1 ? 0 : (v >= l2 ? 1 : 2)) : (v < l1 ? 0 : (v < l2 ? 1 : 2));
+    const __expCls = (lv) => lv === 2 ? 'g-bad' : (lv === 1 ? 'g-warn' : 'g-good');
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('ocLifeWrap'),bar:!!document.querySelector('#ocLifeWrap .obar i'),val:!!document.querySelector('#ocLifeWrap .oval'),s:T.ocLifeStateNow(3,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命'])};return JSON.stringify(r);})()"));
+    t("U8793 血线警戒 警戒芯片 DOM 已加入（三态条 + 文案 + 函数可用）", o.dom === true && o.bar === true && o.val === true && o.s.ok === true && o.s.lv === 0 && o.s.txt.indexOf('血线') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocLifeStateNow(0,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命'])};return JSON.stringify(r);})()"));
+    t("U8794 初值 血线警戒（val=0 → 按 good 方向取健康/告警档，文案含标签）", o1.s.ok === true && o1.s.lv === (G ? 2 : 0) && o1.s.txt.indexOf('血线') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocLifeStateNow(3,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']),b:T.ocLifeStateNow(1,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命'])};return JSON.stringify(r);})()"));
+    t("U8795 正常值 血线警戒（健康值→lv0 稳定 / 中档值→lv1 留意）", o2.a.ok === true && o2.a.lv === 0 && o2.b.ok === true && o2.b.lv === 1 && o2.a.pct === 15 && o2.b.pct === 55, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r=[T.ocLifeStateNow(0,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']).lv,T.ocLifeStateNow(0.999,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']).lv,T.ocLifeStateNow(1,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']).lv,T.ocLifeStateNow(2,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']).lv,T.ocLifeStateNow(2.999,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']).lv,T.ocLifeStateNow(3,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']).lv,T.ocLifeStateNow(53,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']).lv];return JSON.stringify(r);})()"));
+    const expVals = [0,0.999,1,2,2.999,3,53];
+    let bOk = true;
+    for (let i = 0; i < expVals.length; i++) { if (o3[i] !== __expLv(expVals[i], L[0], L[1], G)) bOk = false; }
+    t("U8796 边界 血线警戒（阈值上下/跨越逐个核对 lv）", bOk && o3.length === expVals.length, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocLifeStateNow(null,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']),b:T.ocLifeStateNow(NaN,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']),c:T.ocLifeStateNow(-5,3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']),d:T.ocLifeStateNow([1],3,1,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']),e:T.ocLifeStateNow(5,null,2,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']),f:T.ocLifeStateNow(5,2,3,'血线',true,[1,2]),g:T.ocLifeStateNow(5,1,3,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']),h:T.ocLifeStateNow(5,NaN,8,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命']),i:T.ocLifeStateNow(5,-3,8,'血线',true,['血量充足','留意：血量偏低','保命：仅剩 1 命'])};return JSON.stringify(r);})()"));
+    t("U8797 非法 null/NaN/负值/数组/阈值无效/坏hints/方向错/NaN/负阈值 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocLifeNow(),dom:(function(){const e=document.querySelector('#ocLifeWrap .oval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8798 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8793 血线警戒 抛异常", false, String(e)); t("U8794 血线警戒 抛异常", false, String(e)); t("U8795 血线警戒 抛异常", false, String(e)); t("U8796 血线警戒 抛异常", false, String(e)); t("U8797 血线警戒 抛异常", false, String(e)); t("U8798 血线警戒 抛异常", false, String(e)); }
+
+
+  // ===== U8799~U8804: 受击警戒(v1.1.156) =====
+  try {
+    const L = [10,20]; const HH = ["受击少","受击渐多","护盾：受击频繁"]; const G = false;
+    const __expLv = (v, l1, l2, g) => g ? (v >= l1 ? 0 : (v >= l2 ? 1 : 2)) : (v < l1 ? 0 : (v < l2 ? 1 : 2));
+    const __expCls = (lv) => lv === 2 ? 'g-bad' : (lv === 1 ? 'g-warn' : 'g-good');
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('ocHurtWrap'),bar:!!document.querySelector('#ocHurtWrap .obar i'),val:!!document.querySelector('#ocHurtWrap .oval'),s:T.ocHurtStateNow(0,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁'])};return JSON.stringify(r);})()"));
+    t("U8799 受击警戒 警戒芯片 DOM 已加入（三态条 + 文案 + 函数可用）", o.dom === true && o.bar === true && o.val === true && o.s.ok === true && o.s.lv === 0 && o.s.txt.indexOf('受击') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocHurtStateNow(0,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁'])};return JSON.stringify(r);})()"));
+    t("U8800 初值 受击警戒（val=0 → 按 good 方向取健康/告警档，文案含标签）", o1.s.ok === true && o1.s.lv === (G ? 2 : 0) && o1.s.txt.indexOf('受击') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocHurtStateNow(0,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁']),b:T.ocHurtStateNow(10,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁'])};return JSON.stringify(r);})()"));
+    t("U8801 正常值 受击警戒（健康值→lv0 稳定 / 中档值→lv1 留意）", o2.a.ok === true && o2.a.lv === 0 && o2.b.ok === true && o2.b.lv === 1 && o2.a.pct === 15 && o2.b.pct === 55, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r=[T.ocHurtStateNow(0,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁']).lv,T.ocHurtStateNow(19.999,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁']).lv,T.ocHurtStateNow(20,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁']).lv,T.ocHurtStateNow(15,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁']).lv,T.ocHurtStateNow(9.999,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁']).lv,T.ocHurtStateNow(10,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁']).lv,T.ocHurtStateNow(60,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁']).lv];return JSON.stringify(r);})()"));
+    const expVals = [0,19.999,20,15,9.999,10,60];
+    let bOk = true;
+    for (let i = 0; i < expVals.length; i++) { if (o3[i] !== __expLv(expVals[i], L[0], L[1], G)) bOk = false; }
+    t("U8802 边界 受击警戒（阈值上下/跨越逐个核对 lv）", bOk && o3.length === expVals.length, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocHurtStateNow(null,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁']),b:T.ocHurtStateNow(NaN,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁']),c:T.ocHurtStateNow(-5,10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁']),d:T.ocHurtStateNow([1],10,20,'受击',false,['受击少','受击渐多','护盾：受击频繁']),e:T.ocHurtStateNow(5,null,2,'受击',false,['受击少','受击渐多','护盾：受击频繁']),f:T.ocHurtStateNow(5,2,3,'受击',false,[1,2]),g:T.ocHurtStateNow(5,20,10,'受击',false,['受击少','受击渐多','护盾：受击频繁']),h:T.ocHurtStateNow(5,NaN,8,'受击',false,['受击少','受击渐多','护盾：受击频繁']),i:T.ocHurtStateNow(5,-3,8,'受击',false,['受击少','受击渐多','护盾：受击频繁'])};return JSON.stringify(r);})()"));
+    t("U8803 非法 null/NaN/负值/数组/阈值无效/坏hints/方向错/NaN/负阈值 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocHurtNow(),dom:(function(){const e=document.querySelector('#ocHurtWrap .oval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8804 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8799 受击警戒 抛异常", false, String(e)); t("U8800 受击警戒 抛异常", false, String(e)); t("U8801 受击警戒 抛异常", false, String(e)); t("U8802 受击警戒 抛异常", false, String(e)); t("U8803 受击警戒 抛异常", false, String(e)); t("U8804 受击警戒 抛异常", false, String(e)); }
+
+
+  // ===== U8805~U8810: 连击警戒(v1.1.157) =====
+  try {
+    const L = [5,2]; const HH = ["连击火热","留意：连击渐起","连击未起"]; const G = true;
+    const __expLv = (v, l1, l2, g) => g ? (v >= l1 ? 0 : (v >= l2 ? 1 : 2)) : (v < l1 ? 0 : (v < l2 ? 1 : 2));
+    const __expCls = (lv) => lv === 2 ? 'g-bad' : (lv === 1 ? 'g-warn' : 'g-good');
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('ocComboWrap'),bar:!!document.querySelector('#ocComboWrap .obar i'),val:!!document.querySelector('#ocComboWrap .oval'),s:T.ocComboStateNow(5,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起'])};return JSON.stringify(r);})()"));
+    t("U8805 连击警戒 警戒芯片 DOM 已加入（三态条 + 文案 + 函数可用）", o.dom === true && o.bar === true && o.val === true && o.s.ok === true && o.s.lv === 0 && o.s.txt.indexOf('连击') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocComboStateNow(0,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起'])};return JSON.stringify(r);})()"));
+    t("U8806 初值 连击警戒（val=0 → 按 good 方向取健康/告警档，文案含标签）", o1.s.ok === true && o1.s.lv === (G ? 2 : 0) && o1.s.txt.indexOf('连击') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocComboStateNow(5,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起']),b:T.ocComboStateNow(2,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起'])};return JSON.stringify(r);})()"));
+    t("U8807 正常值 连击警戒（健康值→lv0 稳定 / 中档值→lv1 留意）", o2.a.ok === true && o2.a.lv === 0 && o2.b.ok === true && o2.b.lv === 1 && o2.a.pct === 15 && o2.b.pct === 55, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r=[T.ocComboStateNow(0,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起']).lv,T.ocComboStateNow(1.999,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起']).lv,T.ocComboStateNow(2,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起']).lv,T.ocComboStateNow(3.5,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起']).lv,T.ocComboStateNow(4.999,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起']).lv,T.ocComboStateNow(5,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起']).lv,T.ocComboStateNow(55,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起']).lv];return JSON.stringify(r);})()"));
+    const expVals = [0,1.999,2,3.5,4.999,5,55];
+    let bOk = true;
+    for (let i = 0; i < expVals.length; i++) { if (o3[i] !== __expLv(expVals[i], L[0], L[1], G)) bOk = false; }
+    t("U8808 边界 连击警戒（阈值上下/跨越逐个核对 lv）", bOk && o3.length === expVals.length, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocComboStateNow(null,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起']),b:T.ocComboStateNow(NaN,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起']),c:T.ocComboStateNow(-5,5,2,'连击',true,['连击火热','留意：连击渐起','连击未起']),d:T.ocComboStateNow([1],5,2,'连击',true,['连击火热','留意：连击渐起','连击未起']),e:T.ocComboStateNow(5,null,2,'连击',true,['连击火热','留意：连击渐起','连击未起']),f:T.ocComboStateNow(5,2,3,'连击',true,[1,2]),g:T.ocComboStateNow(5,2,5,'连击',true,['连击火热','留意：连击渐起','连击未起']),h:T.ocComboStateNow(5,NaN,8,'连击',true,['连击火热','留意：连击渐起','连击未起']),i:T.ocComboStateNow(5,-3,8,'连击',true,['连击火热','留意：连击渐起','连击未起'])};return JSON.stringify(r);})()"));
+    t("U8809 非法 null/NaN/负值/数组/阈值无效/坏hints/方向错/NaN/负阈值 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocComboNow(),dom:(function(){const e=document.querySelector('#ocComboWrap .oval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8810 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8805 连击警戒 抛异常", false, String(e)); t("U8806 连击警戒 抛异常", false, String(e)); t("U8807 连击警戒 抛异常", false, String(e)); t("U8808 连击警戒 抛异常", false, String(e)); t("U8809 连击警戒 抛异常", false, String(e)); t("U8810 连击警戒 抛异常", false, String(e)); }
+
+
+  // ===== U8811~U8816: 补给警戒(v1.1.158) =====
+  try {
+    const L = [5,2]; const HH = ["补给充足","留意：补给渐多","找补给"]; const G = true;
+    const __expLv = (v, l1, l2, g) => g ? (v >= l1 ? 0 : (v >= l2 ? 1 : 2)) : (v < l1 ? 0 : (v < l2 ? 1 : 2));
+    const __expCls = (lv) => lv === 2 ? 'g-bad' : (lv === 1 ? 'g-warn' : 'g-good');
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('ocPickWrap'),bar:!!document.querySelector('#ocPickWrap .obar i'),val:!!document.querySelector('#ocPickWrap .oval'),s:T.ocPickStateNow(5,5,2,'补给',true,['补给充足','留意：补给渐多','找补给'])};return JSON.stringify(r);})()"));
+    t("U8811 补给警戒 警戒芯片 DOM 已加入（三态条 + 文案 + 函数可用）", o.dom === true && o.bar === true && o.val === true && o.s.ok === true && o.s.lv === 0 && o.s.txt.indexOf('补给') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocPickStateNow(0,5,2,'补给',true,['补给充足','留意：补给渐多','找补给'])};return JSON.stringify(r);})()"));
+    t("U8812 初值 补给警戒（val=0 → 按 good 方向取健康/告警档，文案含标签）", o1.s.ok === true && o1.s.lv === (G ? 2 : 0) && o1.s.txt.indexOf('补给') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocPickStateNow(5,5,2,'补给',true,['补给充足','留意：补给渐多','找补给']),b:T.ocPickStateNow(2,5,2,'补给',true,['补给充足','留意：补给渐多','找补给'])};return JSON.stringify(r);})()"));
+    t("U8813 正常值 补给警戒（健康值→lv0 稳定 / 中档值→lv1 留意）", o2.a.ok === true && o2.a.lv === 0 && o2.b.ok === true && o2.b.lv === 1 && o2.a.pct === 15 && o2.b.pct === 55, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r=[T.ocPickStateNow(0,5,2,'补给',true,['补给充足','留意：补给渐多','找补给']).lv,T.ocPickStateNow(1.999,5,2,'补给',true,['补给充足','留意：补给渐多','找补给']).lv,T.ocPickStateNow(2,5,2,'补给',true,['补给充足','留意：补给渐多','找补给']).lv,T.ocPickStateNow(3.5,5,2,'补给',true,['补给充足','留意：补给渐多','找补给']).lv,T.ocPickStateNow(4.999,5,2,'补给',true,['补给充足','留意：补给渐多','找补给']).lv,T.ocPickStateNow(5,5,2,'补给',true,['补给充足','留意：补给渐多','找补给']).lv,T.ocPickStateNow(55,5,2,'补给',true,['补给充足','留意：补给渐多','找补给']).lv];return JSON.stringify(r);})()"));
+    const expVals = [0,1.999,2,3.5,4.999,5,55];
+    let bOk = true;
+    for (let i = 0; i < expVals.length; i++) { if (o3[i] !== __expLv(expVals[i], L[0], L[1], G)) bOk = false; }
+    t("U8814 边界 补给警戒（阈值上下/跨越逐个核对 lv）", bOk && o3.length === expVals.length, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocPickStateNow(null,5,2,'补给',true,['补给充足','留意：补给渐多','找补给']),b:T.ocPickStateNow(NaN,5,2,'补给',true,['补给充足','留意：补给渐多','找补给']),c:T.ocPickStateNow(-5,5,2,'补给',true,['补给充足','留意：补给渐多','找补给']),d:T.ocPickStateNow([1],5,2,'补给',true,['补给充足','留意：补给渐多','找补给']),e:T.ocPickStateNow(5,null,2,'补给',true,['补给充足','留意：补给渐多','找补给']),f:T.ocPickStateNow(5,2,3,'补给',true,[1,2]),g:T.ocPickStateNow(5,2,5,'补给',true,['补给充足','留意：补给渐多','找补给']),h:T.ocPickStateNow(5,NaN,8,'补给',true,['补给充足','留意：补给渐多','找补给']),i:T.ocPickStateNow(5,-3,8,'补给',true,['补给充足','留意：补给渐多','找补给'])};return JSON.stringify(r);})()"));
+    t("U8815 非法 null/NaN/负值/数组/阈值无效/坏hints/方向错/NaN/负阈值 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocPickNow(),dom:(function(){const e=document.querySelector('#ocPickWrap .oval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8816 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8811 补给警戒 抛异常", false, String(e)); t("U8812 补给警戒 抛异常", false, String(e)); t("U8813 补给警戒 抛异常", false, String(e)); t("U8814 补给警戒 抛异常", false, String(e)); t("U8815 补给警戒 抛异常", false, String(e)); t("U8816 补给警戒 抛异常", false, String(e)); }
+
+
+  // ===== U8817~U8822: 波次警戒(v1.1.159) =====
+  try {
+    const L = [7,4]; const HH = ["接近尾声","留意：推进中","起步阶段"]; const G = true;
+    const __expLv = (v, l1, l2, g) => g ? (v >= l1 ? 0 : (v >= l2 ? 1 : 2)) : (v < l1 ? 0 : (v < l2 ? 1 : 2));
+    const __expCls = (lv) => lv === 2 ? 'g-bad' : (lv === 1 ? 'g-warn' : 'g-good');
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('ocWaveWrap'),bar:!!document.querySelector('#ocWaveWrap .obar i'),val:!!document.querySelector('#ocWaveWrap .oval'),s:T.ocWaveStateNow(7,7,4,'波次',true,['接近尾声','留意：推进中','起步阶段'])};return JSON.stringify(r);})()"));
+    t("U8817 波次警戒 警戒芯片 DOM 已加入（三态条 + 文案 + 函数可用）", o.dom === true && o.bar === true && o.val === true && o.s.ok === true && o.s.lv === 0 && o.s.txt.indexOf('波次') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocWaveStateNow(0,7,4,'波次',true,['接近尾声','留意：推进中','起步阶段'])};return JSON.stringify(r);})()"));
+    t("U8818 初值 波次警戒（val=0 → 按 good 方向取健康/告警档，文案含标签）", o1.s.ok === true && o1.s.lv === (G ? 2 : 0) && o1.s.txt.indexOf('波次') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocWaveStateNow(7,7,4,'波次',true,['接近尾声','留意：推进中','起步阶段']),b:T.ocWaveStateNow(4,7,4,'波次',true,['接近尾声','留意：推进中','起步阶段'])};return JSON.stringify(r);})()"));
+    t("U8819 正常值 波次警戒（健康值→lv0 稳定 / 中档值→lv1 留意）", o2.a.ok === true && o2.a.lv === 0 && o2.b.ok === true && o2.b.lv === 1 && o2.a.pct === 15 && o2.b.pct === 55, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r=[T.ocWaveStateNow(0,7,4,'波次',true,['接近尾声','留意：推进中','起步阶段']).lv,T.ocWaveStateNow(3.999,7,4,'波次',true,['接近尾声','留意：推进中','起步阶段']).lv,T.ocWaveStateNow(4,7,4,'波次',true,['接近尾声','留意：推进中','起步阶段']).lv,T.ocWaveStateNow(5.5,7,4,'波次',true,['接近尾声','留意：推进中','起步阶段']).lv,T.ocWaveStateNow(6.999,7,4,'波次',true,['接近尾声','留意：推进中','起步阶段']).lv,T.ocWaveStateNow(7,7,4,'波次',true,['接近尾声','留意：推进中','起步阶段']).lv,T.ocWaveStateNow(57,7,4,'波次',true,['接近尾声','留意：推进中','起步阶段']).lv];return JSON.stringify(r);})()"));
+    const expVals = [0,3.999,4,5.5,6.999,7,57];
+    let bOk = true;
+    for (let i = 0; i < expVals.length; i++) { if (o3[i] !== __expLv(expVals[i], L[0], L[1], G)) bOk = false; }
+    t("U8820 边界 波次警戒（阈值上下/跨越逐个核对 lv）", bOk && o3.length === expVals.length, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocWaveStateNow(null,7,4,'波次',true,['接近尾声','留意：推进中','起步阶段']),b:T.ocWaveStateNow(NaN,7,4,'波次',true,['接近尾声','留意：推进中','起步阶段']),c:T.ocWaveStateNow(-5,7,4,'波次',true,['接近尾声','留意：推进中','起步阶段']),d:T.ocWaveStateNow([1],7,4,'波次',true,['接近尾声','留意：推进中','起步阶段']),e:T.ocWaveStateNow(5,null,2,'波次',true,['接近尾声','留意：推进中','起步阶段']),f:T.ocWaveStateNow(5,2,3,'波次',true,[1,2]),g:T.ocWaveStateNow(5,4,7,'波次',true,['接近尾声','留意：推进中','起步阶段']),h:T.ocWaveStateNow(5,NaN,8,'波次',true,['接近尾声','留意：推进中','起步阶段']),i:T.ocWaveStateNow(5,-3,8,'波次',true,['接近尾声','留意：推进中','起步阶段'])};return JSON.stringify(r);})()"));
+    t("U8821 非法 null/NaN/负值/数组/阈值无效/坏hints/方向错/NaN/负阈值 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocWaveNow(),dom:(function(){const e=document.querySelector('#ocWaveWrap .oval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8822 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8817 波次警戒 抛异常", false, String(e)); t("U8818 波次警戒 抛异常", false, String(e)); t("U8819 波次警戒 抛异常", false, String(e)); t("U8820 波次警戒 抛异常", false, String(e)); t("U8821 波次警戒 抛异常", false, String(e)); t("U8822 波次警戒 抛异常", false, String(e)); }
+
+
+  // ===== U8823~U8828: 时长警戒(v1.1.160) =====
+  try {
+    const L = [180,60]; const HH = ["稳定发挥","留意：时长渐长","开局阶段"]; const G = true;
+    const __expLv = (v, l1, l2, g) => g ? (v >= l1 ? 0 : (v >= l2 ? 1 : 2)) : (v < l1 ? 0 : (v < l2 ? 1 : 2));
+    const __expCls = (lv) => lv === 2 ? 'g-bad' : (lv === 1 ? 'g-warn' : 'g-good');
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('ocTimeWrap'),bar:!!document.querySelector('#ocTimeWrap .obar i'),val:!!document.querySelector('#ocTimeWrap .oval'),s:T.ocTimeStateNow(180,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段'])};return JSON.stringify(r);})()"));
+    t("U8823 时长警戒 警戒芯片 DOM 已加入（三态条 + 文案 + 函数可用）", o.dom === true && o.bar === true && o.val === true && o.s.ok === true && o.s.lv === 0 && o.s.txt.indexOf('时长') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocTimeStateNow(0,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段'])};return JSON.stringify(r);})()"));
+    t("U8824 初值 时长警戒（val=0 → 按 good 方向取健康/告警档，文案含标签）", o1.s.ok === true && o1.s.lv === (G ? 2 : 0) && o1.s.txt.indexOf('时长') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocTimeStateNow(180,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']),b:T.ocTimeStateNow(60,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段'])};return JSON.stringify(r);})()"));
+    t("U8825 正常值 时长警戒（健康值→lv0 稳定 / 中档值→lv1 留意）", o2.a.ok === true && o2.a.lv === 0 && o2.b.ok === true && o2.b.lv === 1 && o2.a.pct === 15 && o2.b.pct === 55, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r=[T.ocTimeStateNow(0,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']).lv,T.ocTimeStateNow(59.999,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']).lv,T.ocTimeStateNow(60,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']).lv,T.ocTimeStateNow(120,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']).lv,T.ocTimeStateNow(179.999,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']).lv,T.ocTimeStateNow(180,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']).lv,T.ocTimeStateNow(230,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']).lv];return JSON.stringify(r);})()"));
+    const expVals = [0,59.999,60,120,179.999,180,230];
+    let bOk = true;
+    for (let i = 0; i < expVals.length; i++) { if (o3[i] !== __expLv(expVals[i], L[0], L[1], G)) bOk = false; }
+    t("U8826 边界 时长警戒（阈值上下/跨越逐个核对 lv）", bOk && o3.length === expVals.length, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.ocTimeStateNow(null,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']),b:T.ocTimeStateNow(NaN,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']),c:T.ocTimeStateNow(-5,180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']),d:T.ocTimeStateNow([1],180,60,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']),e:T.ocTimeStateNow(5,null,2,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']),f:T.ocTimeStateNow(5,2,3,'时长',true,[1,2]),g:T.ocTimeStateNow(5,60,180,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']),h:T.ocTimeStateNow(5,NaN,8,'时长',true,['稳定发挥','留意：时长渐长','开局阶段']),i:T.ocTimeStateNow(5,-3,8,'时长',true,['稳定发挥','留意：时长渐长','开局阶段'])};return JSON.stringify(r);})()"));
+    t("U8827 非法 null/NaN/负值/数组/阈值无效/坏hints/方向错/NaN/负阈值 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.ocTimeNow(),dom:(function(){const e=document.querySelector('#ocTimeWrap .oval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8828 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8823 时长警戒 抛异常", false, String(e)); t("U8824 时长警戒 抛异常", false, String(e)); t("U8825 时长警戒 抛异常", false, String(e)); t("U8826 时长警戒 抛异常", false, String(e)); t("U8827 时长警戒 抛异常", false, String(e)); t("U8828 时长警戒 抛异常", false, String(e)); }
+
+
+  // ===== U8829~U8834: 战绩预见(v1.1.161) =====
+  try {
+    const G = true;
+    const __expCls = (pct, g) => g ? (pct >= 70 ? 'g-good' : (pct >= 40 ? 'g-warn' : 'g-bad')) : (pct < 30 ? 'g-good' : (pct < 60 ? 'g-warn' : 'g-bad'));
+    const __expDan = (pct, g) => g ? (pct < 25) : (pct >= 70);
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('wzScoreWrap'),bar:!!document.querySelector('#wzScoreWrap .wbar i'),val:!!document.querySelector('#wzScoreWrap .wval'),s:T.wzCalcStateNow(0,0,100,'破纪录','分',true,'已破纪录!')};return JSON.stringify(r);})()"));
+    t("U8829 战绩预见 预见条 DOM 已加入（条 + 文案 + 函数可用）", o.dom === true && o.bar === true && o.val === true && o.s.ok === true && o.s.pct === 0 && o.s.reached === false && o.s.txt.indexOf("破纪录") >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.wzCalcStateNow(0,0,100,'破纪录','分',true,'已破纪录!')};return JSON.stringify(r);})()"));
+    t("U8830 初值 战绩预见（cur=0 → pct 0 未达，文案含标签，着色按 good 方向）", o1.s.ok === true && o1.s.pct === 0 && o1.s.reached === false && o1.s.txt.indexOf("破纪录") >= 0 && o1.s.cls === __expCls(0, G) && o1.s.danger === __expDan(0, G), JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzCalcStateNow(50,1,100,'破纪录','分',true,'已破纪录!'),b:T.wzCalcStateNow(80,1,100,'破纪录','分',true,'已破纪录!')};return JSON.stringify(r);})()"));
+    t("U8831 正常值 战绩预见（50%→pct50 / 80%→pct80，着色按 good 方向）", o2.a.ok === true && o2.a.pct === 50 && o2.b.ok === true && o2.b.pct === 80 && o2.a.cls === __expCls(50, G) && o2.b.cls === __expCls(80, G), JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzCalcStateNow(100,1,100,'破纪录','分',true,'已破纪录!'),b:T.wzCalcStateNow(99.999,1,100,'破纪录','分',true,'已破纪录!')};return JSON.stringify(r);})()"));
+    t("U8832 边界 战绩预见（cur=target→已达 / target-ε→未达）", o3.a.ok === true && o3.a.reached === true && o3.a.pct === 100 && o3.a.txt.indexOf("已破纪录!") >= 0 && o3.b.ok === true && o3.b.reached === false, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzCalcStateNow(null,1,100,'破纪录','分',true,'已破纪录!'),b:T.wzCalcStateNow(NaN,1,100,'破纪录','分',true,'已破纪录!'),c:T.wzCalcStateNow(-5,1,100,'破纪录','分',true,'已破纪录!'),d:T.wzCalcStateNow(5,-1,100,'破纪录','分',true,'已破纪录!'),e:T.wzCalcStateNow(5,1,0,'破纪录','分',true,'已破纪录!'),f:T.wzCalcStateNow(5,1,-3,'破纪录','分',true,'已破纪录!'),g:T.wzCalcStateNow(5,1,[2],'破纪录','分',true,'已破纪录!'),h:T.wzCalcStateNow(5,1,100,'','分',true,'已破纪录!')};return JSON.stringify(r);})()"));
+    t("U8833 非法 null/NaN/负值/负速率/target≤0/数组/空标签 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.wzScoreNow(),dom:(function(){const e=document.querySelector('#wzScoreWrap .wval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8834 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8829 战绩预见 抛异常", false, String(e)); t("U8830 战绩预见 抛异常", false, String(e)); t("U8831 战绩预见 抛异常", false, String(e)); t("U8832 战绩预见 抛异常", false, String(e)); t("U8833 战绩预见 抛异常", false, String(e)); t("U8834 战绩预见 抛异常", false, String(e)); }
+
+
+  // ===== U8835~U8840: 波次预见(v1.1.162) =====
+  try {
+    const G = true;
+    const __expCls = (pct, g) => g ? (pct >= 70 ? 'g-good' : (pct >= 40 ? 'g-warn' : 'g-bad')) : (pct < 30 ? 'g-good' : (pct < 60 ? 'g-warn' : 'g-bad'));
+    const __expDan = (pct, g) => g ? (pct < 25) : (pct >= 70);
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('wzWaveWrap'),bar:!!document.querySelector('#wzWaveWrap .wbar i'),val:!!document.querySelector('#wzWaveWrap .wval'),s:T.wzCalcStateNow(0,0,100,'通关','关',true,'已通关')};return JSON.stringify(r);})()"));
+    t("U8835 波次预见 预见条 DOM 已加入（条 + 文案 + 函数可用）", o.dom === true && o.bar === true && o.val === true && o.s.ok === true && o.s.pct === 0 && o.s.reached === false && o.s.txt.indexOf("通关") >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.wzCalcStateNow(0,0,100,'通关','关',true,'已通关')};return JSON.stringify(r);})()"));
+    t("U8836 初值 波次预见（cur=0 → pct 0 未达，文案含标签，着色按 good 方向）", o1.s.ok === true && o1.s.pct === 0 && o1.s.reached === false && o1.s.txt.indexOf("通关") >= 0 && o1.s.cls === __expCls(0, G) && o1.s.danger === __expDan(0, G), JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzCalcStateNow(50,1,100,'通关','关',true,'已通关'),b:T.wzCalcStateNow(80,1,100,'通关','关',true,'已通关')};return JSON.stringify(r);})()"));
+    t("U8837 正常值 波次预见（50%→pct50 / 80%→pct80，着色按 good 方向）", o2.a.ok === true && o2.a.pct === 50 && o2.b.ok === true && o2.b.pct === 80 && o2.a.cls === __expCls(50, G) && o2.b.cls === __expCls(80, G), JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzCalcStateNow(100,1,100,'通关','关',true,'已通关'),b:T.wzCalcStateNow(99.999,1,100,'通关','关',true,'已通关')};return JSON.stringify(r);})()"));
+    t("U8838 边界 波次预见（cur=target→已达 / target-ε→未达）", o3.a.ok === true && o3.a.reached === true && o3.a.pct === 100 && o3.a.txt.indexOf("已通关") >= 0 && o3.b.ok === true && o3.b.reached === false, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzCalcStateNow(null,1,100,'通关','关',true,'已通关'),b:T.wzCalcStateNow(NaN,1,100,'通关','关',true,'已通关'),c:T.wzCalcStateNow(-5,1,100,'通关','关',true,'已通关'),d:T.wzCalcStateNow(5,-1,100,'通关','关',true,'已通关'),e:T.wzCalcStateNow(5,1,0,'通关','关',true,'已通关'),f:T.wzCalcStateNow(5,1,-3,'通关','关',true,'已通关'),g:T.wzCalcStateNow(5,1,[2],'通关','关',true,'已通关'),h:T.wzCalcStateNow(5,1,100,'','关',true,'已通关')};return JSON.stringify(r);})()"));
+    t("U8839 非法 null/NaN/负值/负速率/target≤0/数组/空标签 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.wzWaveNow(),dom:(function(){const e=document.querySelector('#wzWaveWrap .wval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8840 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8835 波次预见 抛异常", false, String(e)); t("U8836 波次预见 抛异常", false, String(e)); t("U8837 波次预见 抛异常", false, String(e)); t("U8838 波次预见 抛异常", false, String(e)); t("U8839 波次预见 抛异常", false, String(e)); t("U8840 波次预见 抛异常", false, String(e)); }
+
+
+  // ===== U8841~U8846: 连击预见(v1.1.163) =====
+  try {
+    const G = true;
+    const __expCls = (pct, g) => g ? (pct >= 70 ? 'g-good' : (pct >= 40 ? 'g-warn' : 'g-bad')) : (pct < 30 ? 'g-good' : (pct < 60 ? 'g-warn' : 'g-bad'));
+    const __expDan = (pct, g) => g ? (pct < 25) : (pct >= 70);
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('wzComboWrap'),bar:!!document.querySelector('#wzComboWrap .wbar i'),val:!!document.querySelector('#wzComboWrap .wval'),s:T.wzCalcStateNow(0,0,100,'连击','连',true,'连击封顶')};return JSON.stringify(r);})()"));
+    t("U8841 连击预见 预见条 DOM 已加入（条 + 文案 + 函数可用）", o.dom === true && o.bar === true && o.val === true && o.s.ok === true && o.s.pct === 0 && o.s.reached === false && o.s.txt.indexOf("连击") >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.wzCalcStateNow(0,0,100,'连击','连',true,'连击封顶')};return JSON.stringify(r);})()"));
+    t("U8842 初值 连击预见（cur=0 → pct 0 未达，文案含标签，着色按 good 方向）", o1.s.ok === true && o1.s.pct === 0 && o1.s.reached === false && o1.s.txt.indexOf("连击") >= 0 && o1.s.cls === __expCls(0, G) && o1.s.danger === __expDan(0, G), JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzCalcStateNow(50,1,100,'连击','连',true,'连击封顶'),b:T.wzCalcStateNow(80,1,100,'连击','连',true,'连击封顶')};return JSON.stringify(r);})()"));
+    t("U8843 正常值 连击预见（50%→pct50 / 80%→pct80，着色按 good 方向）", o2.a.ok === true && o2.a.pct === 50 && o2.b.ok === true && o2.b.pct === 80 && o2.a.cls === __expCls(50, G) && o2.b.cls === __expCls(80, G), JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzCalcStateNow(100,1,100,'连击','连',true,'连击封顶'),b:T.wzCalcStateNow(99.999,1,100,'连击','连',true,'连击封顶')};return JSON.stringify(r);})()"));
+    t("U8844 边界 连击预见（cur=target→已达 / target-ε→未达）", o3.a.ok === true && o3.a.reached === true && o3.a.pct === 100 && o3.a.txt.indexOf("连击封顶") >= 0 && o3.b.ok === true && o3.b.reached === false, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzCalcStateNow(null,1,100,'连击','连',true,'连击封顶'),b:T.wzCalcStateNow(NaN,1,100,'连击','连',true,'连击封顶'),c:T.wzCalcStateNow(-5,1,100,'连击','连',true,'连击封顶'),d:T.wzCalcStateNow(5,-1,100,'连击','连',true,'连击封顶'),e:T.wzCalcStateNow(5,1,0,'连击','连',true,'连击封顶'),f:T.wzCalcStateNow(5,1,-3,'连击','连',true,'连击封顶'),g:T.wzCalcStateNow(5,1,[2],'连击','连',true,'连击封顶'),h:T.wzCalcStateNow(5,1,100,'','连',true,'连击封顶')};return JSON.stringify(r);})()"));
+    t("U8845 非法 null/NaN/负值/负速率/target≤0/数组/空标签 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.wzComboNow(),dom:(function(){const e=document.querySelector('#wzComboWrap .wval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8846 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8841 连击预见 抛异常", false, String(e)); t("U8842 连击预见 抛异常", false, String(e)); t("U8843 连击预见 抛异常", false, String(e)); t("U8844 连击预见 抛异常", false, String(e)); t("U8845 连击预见 抛异常", false, String(e)); t("U8846 连击预见 抛异常", false, String(e)); }
+
+
+  // ===== U8847~U8852: 升级预见(v1.1.164) =====
+  try {
+    const G = true;
+    const __expCls = (pct, g) => g ? (pct >= 70 ? 'g-good' : (pct >= 40 ? 'g-warn' : 'g-bad')) : (pct < 30 ? 'g-good' : (pct < 60 ? 'g-warn' : 'g-bad'));
+    const __expDan = (pct, g) => g ? (pct < 25) : (pct >= 70);
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('wzUpgWrap'),bar:!!document.querySelector('#wzUpgWrap .wbar i'),val:!!document.querySelector('#wzUpgWrap .wval'),s:T.wzCalcStateNow(0,0,100,'升级','金',true,'已满级')};return JSON.stringify(r);})()"));
+    t("U8847 升级预见 预见条 DOM 已加入（条 + 文案 + 函数可用）", o.dom === true && o.bar === true && o.val === true && o.s.ok === true && o.s.pct === 0 && o.s.reached === false && o.s.txt.indexOf("升级") >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.wzCalcStateNow(0,0,100,'升级','金',true,'已满级')};return JSON.stringify(r);})()"));
+    t("U8848 初值 升级预见（cur=0 → pct 0 未达，文案含标签，着色按 good 方向）", o1.s.ok === true && o1.s.pct === 0 && o1.s.reached === false && o1.s.txt.indexOf("升级") >= 0 && o1.s.cls === __expCls(0, G) && o1.s.danger === __expDan(0, G), JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzCalcStateNow(50,1,100,'升级','金',true,'已满级'),b:T.wzCalcStateNow(80,1,100,'升级','金',true,'已满级')};return JSON.stringify(r);})()"));
+    t("U8849 正常值 升级预见（50%→pct50 / 80%→pct80，着色按 good 方向）", o2.a.ok === true && o2.a.pct === 50 && o2.b.ok === true && o2.b.pct === 80 && o2.a.cls === __expCls(50, G) && o2.b.cls === __expCls(80, G), JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzCalcStateNow(100,1,100,'升级','金',true,'已满级'),b:T.wzCalcStateNow(99.999,1,100,'升级','金',true,'已满级')};return JSON.stringify(r);})()"));
+    t("U8850 边界 升级预见（cur=target→已达 / target-ε→未达）", o3.a.ok === true && o3.a.reached === true && o3.a.pct === 100 && o3.a.txt.indexOf("已满级") >= 0 && o3.b.ok === true && o3.b.reached === false, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzCalcStateNow(null,1,100,'升级','金',true,'已满级'),b:T.wzCalcStateNow(NaN,1,100,'升级','金',true,'已满级'),c:T.wzCalcStateNow(-5,1,100,'升级','金',true,'已满级'),d:T.wzCalcStateNow(5,-1,100,'升级','金',true,'已满级'),e:T.wzCalcStateNow(5,1,0,'升级','金',true,'已满级'),f:T.wzCalcStateNow(5,1,-3,'升级','金',true,'已满级'),g:T.wzCalcStateNow(5,1,[2],'升级','金',true,'已满级'),h:T.wzCalcStateNow(5,1,100,'','金',true,'已满级')};return JSON.stringify(r);})()"));
+    t("U8851 非法 null/NaN/负值/负速率/target≤0/数组/空标签 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.wzUpgNow(),dom:(function(){const e=document.querySelector('#wzUpgWrap .wval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8852 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8847 升级预见 抛异常", false, String(e)); t("U8848 升级预见 抛异常", false, String(e)); t("U8849 升级预见 抛异常", false, String(e)); t("U8850 升级预见 抛异常", false, String(e)); t("U8851 升级预见 抛异常", false, String(e)); t("U8852 升级预见 抛异常", false, String(e)); }
+
+
+  // ===== U8853~U8858: Boss预见(v1.1.165) =====
+  try {
+    const G = true;
+    const __expCls = (pct, g) => g ? (pct >= 70 ? 'g-good' : (pct >= 40 ? 'g-warn' : 'g-bad')) : (pct < 30 ? 'g-good' : (pct < 60 ? 'g-warn' : 'g-bad'));
+    const __expDan = (pct, g) => g ? (pct < 25) : (pct >= 70);
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('wzBossWrap'),bar:!!document.querySelector('#wzBossWrap .wbar i'),val:!!document.querySelector('#wzBossWrap .wval'),s:T.wzCalcStateNow(0,0,100,'BOSS','关',true,'BOSS 战中')};return JSON.stringify(r);})()"));
+    t("U8853 Boss预见 预见条 DOM 已加入（条 + 文案 + 函数可用）", o.dom === true && o.bar === true && o.val === true && o.s.ok === true && o.s.pct === 0 && o.s.reached === false && o.s.txt.indexOf("BOSS") >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.wzCalcStateNow(0,0,100,'BOSS','关',true,'BOSS 战中')};return JSON.stringify(r);})()"));
+    t("U8854 初值 Boss预见（cur=0 → pct 0 未达，文案含标签，着色按 good 方向）", o1.s.ok === true && o1.s.pct === 0 && o1.s.reached === false && o1.s.txt.indexOf("BOSS") >= 0 && o1.s.cls === __expCls(0, G) && o1.s.danger === __expDan(0, G), JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzCalcStateNow(50,1,100,'BOSS','关',true,'BOSS 战中'),b:T.wzCalcStateNow(80,1,100,'BOSS','关',true,'BOSS 战中')};return JSON.stringify(r);})()"));
+    t("U8855 正常值 Boss预见（50%→pct50 / 80%→pct80，着色按 good 方向）", o2.a.ok === true && o2.a.pct === 50 && o2.b.ok === true && o2.b.pct === 80 && o2.a.cls === __expCls(50, G) && o2.b.cls === __expCls(80, G), JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzCalcStateNow(100,1,100,'BOSS','关',true,'BOSS 战中'),b:T.wzCalcStateNow(99.999,1,100,'BOSS','关',true,'BOSS 战中')};return JSON.stringify(r);})()"));
+    t("U8856 边界 Boss预见（cur=target→已达 / target-ε→未达）", o3.a.ok === true && o3.a.reached === true && o3.a.pct === 100 && o3.a.txt.indexOf("BOSS 战中") >= 0 && o3.b.ok === true && o3.b.reached === false, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzCalcStateNow(null,1,100,'BOSS','关',true,'BOSS 战中'),b:T.wzCalcStateNow(NaN,1,100,'BOSS','关',true,'BOSS 战中'),c:T.wzCalcStateNow(-5,1,100,'BOSS','关',true,'BOSS 战中'),d:T.wzCalcStateNow(5,-1,100,'BOSS','关',true,'BOSS 战中'),e:T.wzCalcStateNow(5,1,0,'BOSS','关',true,'BOSS 战中'),f:T.wzCalcStateNow(5,1,-3,'BOSS','关',true,'BOSS 战中'),g:T.wzCalcStateNow(5,1,[2],'BOSS','关',true,'BOSS 战中'),h:T.wzCalcStateNow(5,1,100,'','关',true,'BOSS 战中')};return JSON.stringify(r);})()"));
+    t("U8857 非法 null/NaN/负值/负速率/target≤0/数组/空标签 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.wzBossNow(),dom:(function(){const e=document.querySelector('#wzBossWrap .wval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8858 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8853 Boss预见 抛异常", false, String(e)); t("U8854 Boss预见 抛异常", false, String(e)); t("U8855 Boss预见 抛异常", false, String(e)); t("U8856 Boss预见 抛异常", false, String(e)); t("U8857 Boss预见 抛异常", false, String(e)); t("U8858 Boss预见 抛异常", false, String(e)); }
+
+
+  // ===== U8859~U8864: 补给预见(v1.1.166) =====
+  try {
+    const G = true;
+    const __expCls = (pct, g) => g ? (pct >= 70 ? 'g-good' : (pct >= 40 ? 'g-warn' : 'g-bad')) : (pct < 30 ? 'g-good' : (pct < 60 ? 'g-warn' : 'g-bad'));
+    const __expDan = (pct, g) => g ? (pct < 25) : (pct >= 70);
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('wzPickWrap'),bar:!!document.querySelector('#wzPickWrap .wbar i'),val:!!document.querySelector('#wzPickWrap .wval'),s:T.wzCalcStateNow(0,0,100,'补给','个',true,'拾取中')};return JSON.stringify(r);})()"));
+    t("U8859 补给预见 预见条 DOM 已加入（条 + 文案 + 函数可用）", o.dom === true && o.bar === true && o.val === true && o.s.ok === true && o.s.pct === 0 && o.s.reached === false && o.s.txt.indexOf("补给") >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.wzCalcStateNow(0,0,100,'补给','个',true,'拾取中')};return JSON.stringify(r);})()"));
+    t("U8860 初值 补给预见（cur=0 → pct 0 未达，文案含标签，着色按 good 方向）", o1.s.ok === true && o1.s.pct === 0 && o1.s.reached === false && o1.s.txt.indexOf("补给") >= 0 && o1.s.cls === __expCls(0, G) && o1.s.danger === __expDan(0, G), JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzCalcStateNow(50,1,100,'补给','个',true,'拾取中'),b:T.wzCalcStateNow(80,1,100,'补给','个',true,'拾取中')};return JSON.stringify(r);})()"));
+    t("U8861 正常值 补给预见（50%→pct50 / 80%→pct80，着色按 good 方向）", o2.a.ok === true && o2.a.pct === 50 && o2.b.ok === true && o2.b.pct === 80 && o2.a.cls === __expCls(50, G) && o2.b.cls === __expCls(80, G), JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzCalcStateNow(100,1,100,'补给','个',true,'拾取中'),b:T.wzCalcStateNow(99.999,1,100,'补给','个',true,'拾取中')};return JSON.stringify(r);})()"));
+    t("U8862 边界 补给预见（cur=target→已达 / target-ε→未达）", o3.a.ok === true && o3.a.reached === true && o3.a.pct === 100 && o3.a.txt.indexOf("拾取中") >= 0 && o3.b.ok === true && o3.b.reached === false, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzCalcStateNow(null,1,100,'补给','个',true,'拾取中'),b:T.wzCalcStateNow(NaN,1,100,'补给','个',true,'拾取中'),c:T.wzCalcStateNow(-5,1,100,'补给','个',true,'拾取中'),d:T.wzCalcStateNow(5,-1,100,'补给','个',true,'拾取中'),e:T.wzCalcStateNow(5,1,0,'补给','个',true,'拾取中'),f:T.wzCalcStateNow(5,1,-3,'补给','个',true,'拾取中'),g:T.wzCalcStateNow(5,1,[2],'补给','个',true,'拾取中'),h:T.wzCalcStateNow(5,1,100,'','个',true,'拾取中')};return JSON.stringify(r);})()"));
+    t("U8863 非法 null/NaN/负值/负速率/target≤0/数组/空标签 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.wzPickNow(),dom:(function(){const e=document.querySelector('#wzPickWrap .wval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8864 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8859 补给预见 抛异常", false, String(e)); t("U8860 补给预见 抛异常", false, String(e)); t("U8861 补给预见 抛异常", false, String(e)); t("U8862 补给预见 抛异常", false, String(e)); t("U8863 补给预见 抛异常", false, String(e)); t("U8864 补给预见 抛异常", false, String(e)); }
+
+
+  // ===== U8865~U8870: 受击预见(v1.1.167) =====
+  try {
+    const G = false;
+    const __expCls = (pct, g) => g ? (pct >= 70 ? 'g-good' : (pct >= 40 ? 'g-warn' : 'g-bad')) : (pct < 30 ? 'g-good' : (pct < 60 ? 'g-warn' : 'g-bad'));
+    const __expDan = (pct, g) => g ? (pct < 25) : (pct >= 70);
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('wzHurtWrap'),bar:!!document.querySelector('#wzHurtWrap .wbar i'),val:!!document.querySelector('#wzHurtWrap .wval'),s:T.wzCalcStateNow(0,0,100,'受击','次',false,'受击过量!')};return JSON.stringify(r);})()"));
+    t("U8865 受击预见 预见条 DOM 已加入（条 + 文案 + 函数可用）", o.dom === true && o.bar === true && o.val === true && o.s.ok === true && o.s.pct === 0 && o.s.reached === false && o.s.txt.indexOf("受击") >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.wzCalcStateNow(0,0,100,'受击','次',false,'受击过量!')};return JSON.stringify(r);})()"));
+    t("U8866 初值 受击预见（cur=0 → pct 0 未达，文案含标签，着色按 good 方向）", o1.s.ok === true && o1.s.pct === 0 && o1.s.reached === false && o1.s.txt.indexOf("受击") >= 0 && o1.s.cls === __expCls(0, G) && o1.s.danger === __expDan(0, G), JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzCalcStateNow(50,1,100,'受击','次',false,'受击过量!'),b:T.wzCalcStateNow(80,1,100,'受击','次',false,'受击过量!')};return JSON.stringify(r);})()"));
+    t("U8867 正常值 受击预见（50%→pct50 / 80%→pct80，着色按 good 方向）", o2.a.ok === true && o2.a.pct === 50 && o2.b.ok === true && o2.b.pct === 80 && o2.a.cls === __expCls(50, G) && o2.b.cls === __expCls(80, G), JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzCalcStateNow(100,1,100,'受击','次',false,'受击过量!'),b:T.wzCalcStateNow(99.999,1,100,'受击','次',false,'受击过量!')};return JSON.stringify(r);})()"));
+    t("U8868 边界 受击预见（cur=target→已达 / target-ε→未达）", o3.a.ok === true && o3.a.reached === true && o3.a.pct === 100 && o3.a.txt.indexOf("受击过量!") >= 0 && o3.b.ok === true && o3.b.reached === false, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzCalcStateNow(null,1,100,'受击','次',false,'受击过量!'),b:T.wzCalcStateNow(NaN,1,100,'受击','次',false,'受击过量!'),c:T.wzCalcStateNow(-5,1,100,'受击','次',false,'受击过量!'),d:T.wzCalcStateNow(5,-1,100,'受击','次',false,'受击过量!'),e:T.wzCalcStateNow(5,1,0,'受击','次',false,'受击过量!'),f:T.wzCalcStateNow(5,1,-3,'受击','次',false,'受击过量!'),g:T.wzCalcStateNow(5,1,[2],'受击','次',false,'受击过量!'),h:T.wzCalcStateNow(5,1,100,'','次',false,'受击过量!')};return JSON.stringify(r);})()"));
+    t("U8869 非法 null/NaN/负值/负速率/target≤0/数组/空标签 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.wzHurtNow(),dom:(function(){const e=document.querySelector('#wzHurtWrap .wval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8870 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8865 受击预见 抛异常", false, String(e)); t("U8866 受击预见 抛异常", false, String(e)); t("U8867 受击预见 抛异常", false, String(e)); t("U8868 受击预见 抛异常", false, String(e)); t("U8869 受击预见 抛异常", false, String(e)); t("U8870 受击预见 抛异常", false, String(e)); }
+
+
+  // ===== U8871~U8876: 生存预见(v1.1.168) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('wzSurvWrap'),bar:!!document.querySelector('#wzSurvWrap .wbar i'),val:!!document.querySelector('#wzSurvWrap .wval'),s:T.wzSurvStateNow(3,0.1,'生存')};return JSON.stringify(r);})()"));
+    t("U8871 生存预见 预见条 DOM 已加入（条 + 文案 + 函数可用）", o.dom === true && o.bar === true && o.val === true && o.s.ok === true && o.s.pct > 0 && o.s.reached === false && o.s.txt.indexOf('生存') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.wzSurvStateNow(3,0,'生存')};return JSON.stringify(r);})()"));
+    t("U8872 初值 生存预见（hurtRate=0 → 无伤·生存无限）", o1.s.ok === true && o1.s.pct === 100 && o1.s.reached === false && o1.s.txt.indexOf('生存') >= 0 && o1.s.cls === 'g-good' && o1.s.danger === false, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzSurvStateNow(3,0.1,'生存'),b:T.wzSurvStateNow(5,0.1,'生存')};return JSON.stringify(r);})()"));
+    t("U8873 正常值 生存预见（3命@0.1/s → 30s；5命@0.1/s → 50s，更长更健康）", o2.a.ok === true && o2.a.eta.indexOf('30') >= 0 && o2.b.ok === true && o2.b.eta.indexOf('50') >= 0 && o2.b.pct > o2.a.pct && o2.b.cls !== 'g-bad', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzSurvStateNow(0,0.1,'生存'),b:T.wzSurvStateNow(-1,0.1,'生存')};return JSON.stringify(r);})()"));
+    t("U8874 边界 生存预见（lives=0 → 已阵亡 / 负值 → 非法退化 '—'）", o3.a.ok === true && o3.a.reached === true && o3.a.txt.indexOf('已阵亡') >= 0 && o3.b.ok === false && o3.b.reached === false && o3.b.txt === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.wzSurvStateNow(null,0.1,'生存'),b:T.wzSurvStateNow(NaN,0.1,'生存'),c:T.wzSurvStateNow(3,-1,'生存'),d:T.wzSurvStateNow(3,0.1,''),e:T.wzSurvStateNow(3,NaN,'生存')};return JSON.stringify(r);})()"));
+    t("U8875 非法 null/NaN/负速率/空标签/NaN速率 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.wzSurvNow(),dom:(function(){const e=document.querySelector('#wzSurvWrap .wval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8876 DOM 与函数一致（数据源可用 + DOM 文案可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8871 生存预见 抛异常", false, String(e)); t("U8872 生存预见 抛异常", false, String(e)); t("U8873 生存预见 抛异常", false, String(e)); t("U8874 生存预见 抛异常", false, String(e)); t("U8875 生存预见 抛异常", false, String(e)); t("U8876 生存预见 抛异常", false, String(e)); }
+
+
+  // ===== U8877~U8882: 性能引擎(v1.1.169) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('perfHzWrap'),wval:!!document.querySelector('#perfHzWrap .wval'),plan:typeof T.perfPlanNow==='function',scale:typeof T.perfScaleNow==='function',hz:typeof T.perfDetectHzNow==='function',badge:typeof T.perfBadgeNow==='function'};return JSON.stringify(r);})()"));
+    t("U8877 性能引擎 徽章 DOM + 引擎函数可用", o.dom === true && o.wval === true && o.plan === true && o.scale === true && o.hz === true && o.badge === true, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfScaleNow(60,60),b:T.perfScaleNow(120,120),c:T.perfScaleNow(144,144),d:T.perfScaleNow(60,0)};return JSON.stringify(r);})()"));
+    t("U8878 自动档阈值按 Hz 缩放（60Hz→{42,54} / 120Hz→{84,108} / 144Hz→{101,130} / Hz=0→60 兜底）", o1.a.low === 42 && o1.a.high === 54 && o1.b.low === 84 && o1.b.high === 108 && o1.c.low === 101 && o1.c.high === 130 && o1.d.low === 42 && o1.d.high === 54, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfPlanNow(0,120,10,120),b:T.perfPlanNow(1,90,15,120),c:T.perfPlanNow(2,60,10,120)};return JSON.stringify(r);})()"));
+    t("U8879 渲染计划正常（高/中/低档：辉光开关·限帧·DPR·粒子·标签）", o2.a.glow === true && o2.a.renderHz === 120 && o2.a.dpr === 2 && o2.a.label === '高' && o2.b.glow === true && o2.b.renderHz === 90 && o2.b.dpr === 1.5 && o2.b.label === '中' && o2.c.glow === false && o2.c.renderHz === 60 && o2.c.dpr === 1 && o2.c.label === '低', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfPlanNow(0,120,20,120),b:T.perfPlanNow(0,120,41,120),c:T.perfPlanNow(1,120,30,120),d:T.perfPlanNow(0,60,10,120)};return JSON.stringify(r);})()"));
+    t("U8880 辉光预算边界（20弹满辉光 / 41弹关辉光·过载 / 30弹预算20 / 低帧强制关辉光）", o3.a.glow === true && o3.a.glowBudget === 40 && o3.b.glow === false && o3.b.glowBudget === 0 && o3.b.overloaded === true && o3.c.glowBudget === 20 && o3.d.glow === false && o3.d.overloaded === false, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfPlanNow(null,120,10,120),b:T.perfPlanNow(-1,120,10,120),c:T.perfPlanNow(NaN,120,10,120),d:T.perfPlanNow(0,120,-5,120),e:T.perfPlanNow(0,120,10,0),f:T.perfPlanNow(0,120,10,1000)};return JSON.stringify(r);})()"));
+    t("U8881 非法 tier/null/NaN/负弹/Hz=0/Hz超上限 → 中档兜底 + 上限 240Hz", o4.a.label === '中' && o4.a.dpr === 1.5 && o4.b.label === '中' && o4.c.label === '中' && o4.d.glow === true && o4.d.glowBudget === 40 && o4.e.hz === 60 && o4.e.renderHz === 60 && o4.f.hz === 240 && o4.f.glow === false, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfDetectHzNow([8.33,8.33,8.33]),b:T.perfDetectHzNow([16.7,16.7,16.7]),c:T.perfDetectHzNow([3]),d:T.perfDetectHzNow(null),e:T.perfBadgeNow(T.perfPlanNow(0,120,10,120),120),dom:(function(){const e=document.querySelector('#perfHzWrap .wval');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8882 Hz 检测 + 徽章文案 + DOM 一致性", o5.a === 120 && o5.b === 60 && o5.c === 60 && o5.d === 60 && o5.e.indexOf('120Hz') === 0 && o5.e.indexOf('高画质') >= 0 && o5.e.indexOf('辉光') >= 0 && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8877 性能引擎 抛异常", false, String(e)); t("U8878 性能引擎 抛异常", false, String(e)); t("U8879 性能引擎 抛异常", false, String(e)); t("U8880 性能引擎 抛异常", false, String(e)); t("U8881 性能引擎 抛异常", false, String(e)); t("U8882 性能引擎 抛异常", false, String(e)); }
+
+
+  // ===== U8883~U8888: 性能中心(v1.1.170) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('perfMonWrap'),body:!!document.querySelector('#perfMonWrap .perfMonBody'),opt:!!document.getElementById('perfMonOptBtn'),seg:!!document.getElementById('perfMonSeg'),read:typeof T.perfMonReadNow==='function',fmt:typeof T.perfMonFmtNow==='function',alert:typeof T.perfMonAlertNow==='function',level:typeof T.perfMonLevelNow==='function',toggle:typeof T.perfMonToggleNow==='function',one:typeof T.perfMonOneClickNow==='function'};return JSON.stringify(r);})()"));
+    t("U8883 性能中心 面板 DOM + 引擎函数可用", o.dom === true && o.body === true && o.opt === true && o.seg === true && o.read === true && o.fmt === true && o.alert === true && o.level === true && o.toggle === true && o.one === true, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfMonLevelNow(8),b:T.perfMonLevelNow(20),c:T.perfMonLevelNow(40),d:T.perfMonLevelNow(16.7),e:T.perfMonLevelNow(25),f:T.perfMonLevelNow(25.1)};return JSON.stringify(r);})()"));
+    t("U8884 帧耗时分级正常（8ms流畅 / 20ms较卡 / 40ms卡顿 / 16.7界畅 / 25界卡 / 25.1卡）", o1.a === 'ok' && o1.b === 'warn' && o1.c === 'bad' && o1.d === 'ok' && o1.e === 'warn' && o1.f === 'bad', JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfMonAlertNow({frameMs:8}),b:T.perfMonAlertNow({frameMs:20}),c:T.perfMonAlertNow({frameMs:40})};return JSON.stringify(r);})()"));
+    t("U8885 状态告警正常（流畅/较卡/卡顿 → 文案+建议）", o2.a.cls === 'g-good' && o2.a.txt === '流畅' && o2.a.hint === '' && o2.b.cls === 'g-warn' && o2.b.txt === '较卡' && o2.b.hint === '建议调低画质' && o2.c.cls === 'g-bad' && o2.c.txt === '卡顿' && o2.c.hint === '点击一键优化', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfMonFmtNow({fps:120,frameMs:8.3,hz:120,tier:0,glow:true,quality:'auto'}),b:T.perfMonFmtNow({fps:60,frameMs:16.7,hz:60,tier:2,glow:false,quality:'low'}),c:T.perfMonFmtNow({})};return JSON.stringify(r);})()"));
+    t("U8886 监控行格式化正常（7 行：帧率/帧耗时/刷新/渲染档/辉光/画质/状态）", o3.a[0][0] === '帧率' && o3.a[0][1] === '120 fps' && o3.a[1][1] === '8.3 ms' && o3.a[2][1] === '120 Hz' && o3.a[3][1] === '高档' && o3.a[4][1] === '开' && o3.a[5][1] === 'auto' && o3.a[6][1] === '流畅' && o3.b[0][1] === '60 fps' && o3.b[3][1] === '低档' && o3.b[4][1] === '关' && o3.b[5][1] === 'low' && o3.b[6][1] === '流畅' && o3.c[0][1] === '—' && o3.c[3][1] === '—' && o3.c[4][1] === '—', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfMonLevelNow(null),b:T.perfMonLevelNow(-5),c:T.perfMonLevelNow(NaN),d:T.perfMonLevelNow(Infinity),e:T.perfMonAlertNow(null),f:T.perfMonFmtNow({fps:-1,frameMs:NaN,tier:9,glow:null})};return JSON.stringify(r);})()"));
+    t("U8887 非法输入（null/负/NaN/Infinity → 不误报流畅；空状态行全占位）", o4.a === 'ok' && o4.b === 'ok' && o4.c === 'ok' && o4.d === 'ok' && o4.e.cls === 'g-good' && o4.e.txt === '流畅' && o4.f[0][1] === '—' && o4.f[1][1] === '—' && o4.f[3][1] === '—' && o4.f[4][1] === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={};const el=document.getElementById('perfMonWrap');r.toggleOn=T.perfMonToggleNow(true);r.visOn=el?!el.classList.contains('pm-hidden'):false;r.rows=el?(el.querySelector('.perfMonBody')||{}).childElementCount||0:0;r.segOn=T.perfMonSegNow();r.toggleOff=T.perfMonToggleNow(false);r.visOff=el?!el.classList.contains('pm-hidden'):true;r.one=typeof T.perfMonOneClickNow==='function';return JSON.stringify(r);})()"));
+    t("U8888 面板开关 + DOM 一致性（开→可见 7 行 seg=1 / 关→隐藏）", o5.toggleOn === true && o5.visOn === true && o5.rows >= 5 && o5.segOn === '1' && o5.toggleOff === false && o5.visOff === false && o5.one === true, JSON.stringify(o5));
+  } catch (e) { t("U8883 性能中心 抛异常", false, String(e)); t("U8884 性能中心 抛异常", false, String(e)); t("U8885 性能中心 抛异常", false, String(e)); t("U8886 性能中心 抛异常", false, String(e)); t("U8887 性能中心 抛异常", false, String(e)); t("U8888 性能中心 抛异常", false, String(e)); }
+
+
+  // ===== U8889~U8894: 帧时自适应引擎(v1.1.171) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={wrap:!!document.getElementById('perfGovWrap'),trend:!!document.getElementById('perfGovTrend'),box:!!document.getElementById('perfGovTrendBox'),seg:!!document.getElementById('perfGovSeg'),frame:typeof T.perfGovFrameMsNow==='function',budget:typeof T.perfGovBudgetNow==='function',step:typeof T.perfGovStepNow==='function',scale:typeof T.perfGovScaleNow==='function',badge:typeof T.perfGovBadgeNow==='function',glow:typeof T.perfGovGlowNow==='function',toggle:typeof T.perfGovToggleNow==='function'};return JSON.stringify(r);})()"));
+    t("U8889 帧时自适应引擎 徽章/趋势图/设置 DOM + 引擎函数可用", o.wrap === true && o.trend === true && o.box === true && o.seg === true && o.frame === true && o.budget === true && o.step === true && o.scale === true && o.badge === true && o.glow === true && o.toggle === true, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfGovBudgetNow(60),b:T.perfGovBudgetNow(120),c:T.perfGovBudgetNow(144),d:T.perfGovStepNow(20,15,0),e:T.perfGovStepNow(10,15,1),f:T.perfGovStepNow(13,15,1)};return JSON.stringify(r);})()"));
+    t("U8890 帧时预算 + 单步决策正常（60→15 / 120→8 / 144→8；超预算升 1 级 / 低于预算降 1 级 / 中间不变）", o1.a === 15 && o1.b === 8 && o1.c === 8 && o1.d.level === 1 && o1.d.dir === 1 && o1.e.level === 0 && o1.e.dir === -1 && o1.f.level === 1 && o1.f.dir === 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfGovScaleNow(0,0),b:T.perfGovScaleNow(1,0),c:T.perfGovScaleNow(2,0),d:T.perfGovScaleNow(3,2)};return JSON.stringify(r);})()"));
+    t("U8891 自适应覆盖层正常（稳定 1 粒子辉光 / 轻载 0.5 / 中载 0.3 关辉光 / 重载 0.2 关辉光 DPR1 限帧60）", o2.a.particles === 1 && o2.a.glow === true && o2.b.particles === 0.5 && o2.b.glow === true && o2.c.particles === 0.3 && o2.c.glow === false && o2.d.particles === 0.2 && o2.d.glow === false && o2.d.dpr === 1 && o2.d.renderHz === 60, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfGovStepNow(20,15,3),b:T.perfGovStepNow(10,15,0),c:T.perfGovBudgetNow(0),d:T.perfGovBudgetNow(NaN),e:T.perfGovScaleNow(0,9)};return JSON.stringify(r);})()"));
+    t("U8892 边界（level3 超预算仍钳 3 / level0 低预算仍钳 0 / Hz=0→16.7 兜底 / NaN→16.7 / tier9 钳 2）", o3.a.level === 3 && o3.a.dir === 1 && o3.b.level === 0 && o3.b.dir === -1 && o3.c === 16.7 && o3.d === 16.7 && o3.e.dpr === 1 && o3.e.renderHz === 60, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfGovStepNow(null,15,1),b:T.perfGovStepNow(NaN,15,1),c:T.perfGovStepNow(20,NaN,1),d:T.perfGovScaleNow(-1,0),e:T.perfGovBadgeNow(0,null,null)};return JSON.stringify(r);})()"));
+    t("U8893 非法输入（null/NaN 帧时或预算 → 不升降级；负 level 钳 0；空数据徽章占位）", o4.a.dir === 0 && o4.a.level === 1 && o4.b.dir === 0 && o4.c.dir === 0 && o4.d.particles === 1 && o4.e.indexOf('—') >= 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={};r.toggleOn=T.perfGovToggleNow(true);r.visOn=(function(){const e=document.getElementById('perfGovWrap');return e?!e.classList.contains('m-hide'):false;})();r.trendVis=(function(){const e=document.getElementById('perfGovTrendBox');return e?!e.classList.contains('pgov-hidden'):false;})();r.segOn=T.perfGovSegNow();r.glow=T.perfGovGlowNow();r.toggleOff=T.perfGovToggleNow(false);r.visOff=(function(){const e=document.getElementById('perfGovWrap');return e?!e.classList.contains('m-hide'):true;})();r.segOff=T.perfGovSegNow();return JSON.stringify(r);})()"));
+    t("U8894 开关 + DOM 一致性（开→徽章可见/趋势图可见/seg=1；关→隐藏/seg=0）", o5.toggleOn === true && o5.visOn === true && o5.trendVis === true && o5.segOn === '1' && o5.glow === true && o5.toggleOff === false && o5.visOff === false && o5.segOff === '0', JSON.stringify(o5));
+  } catch (e) { t("U8889 帧时自适应引擎 抛异常", false, String(e)); t("U8890 帧时自适应引擎 抛异常", false, String(e)); t("U8891 帧时自适应引擎 抛异常", false, String(e)); t("U8892 帧时自适应引擎 抛异常", false, String(e)); t("U8893 帧时自适应引擎 抛异常", false, String(e)); t("U8894 帧时自适应引擎 抛异常", false, String(e)); }
+
+
+  // ===== U8895~U8900: 子弹对象池 + 性能健康报告(v1.1.172) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={pill:!!document.getElementById('perfHealthWrap'),spawn:typeof T.perfPoolSpawnNow==='function',recycle:typeof T.perfPoolRecycleNow==='function',stat:typeof T.perfPoolStatNow==='function',live:typeof T.perfPoolLiveNow==='function',card:typeof T.perfPoolCardNow==='function',lvl:typeof T.perfHealthLevelNow==='function',lbl:typeof T.perfHealthLabelNow==='function',p95:typeof T.perfHealthP95Now==='function',now:typeof T.perfHealthNowNow==='function'};return JSON.stringify(r);})()"));
+    t("U8895 子弹对象池 + 性能健康报告 健康徽章 DOM + 池/健康引擎函数可用", o.pill === true && o.spawn === true && o.recycle === true && o.stat === true && o.live === true && o.card === true && o.lvl === true && o.lbl === true && o.p95 === true && o.now === true, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfHealthLevelNow(8,12,0),b:T.perfHealthLevelNow(17,20,3),c:T.perfHealthLevelNow(22,30,20),d:T.perfHealthLevelNow(40,60,50),e:T.perfHealthLabelNow('poor')};return JSON.stringify(r);})()"));
+    t("U8896 健康分级正常值（avg8/p95_12→great；17/20→good；22/30→ok；40/60→poor）+ 分级文案", o1.a === 'great' && o1.b === 'good' && o1.c === 'ok' && o1.d === 'poor' && o1.e.t === '卡顿' && o1.e.c === '#ff2d55', JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfHealthP95Now([16.6,16.7,16.8,16.9,17]),b:T.perfHealthP95Now([16,16,16]),c:T.perfHealthP95Now([1,2,3,4,5,6,7,8,9,10,11]),d:T.perfHealthNowNow()};return JSON.stringify(r);})()"));
+    t("U8897 P95 取样正常 + 整局快照结构（5 元素取末位 17 / 3 元素取 16 / 11 元素取第 10 位 11 / 快照 level 合法）", o2.a === 17 && o2.b === 16 && o2.c === 11 && typeof o2.d === 'object' && o2.d.frames >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={};r.b0=T.perfPoolStatNow().live;r.id0=T.perfPoolStatNow().idle;r.ob=T.perfPoolSpawnNow(10,10,4,2,3,{},0,false);r.pushed=!!r.ob;r.live1=T.perfPoolStatNow().live;r.delta=r.live1-r.b0;r.ob.dead=true;r.freed=T.perfPoolRecycleNow();r.live2=T.perfPoolStatNow().live;r.down=r.live2<r.live1;r.poolGrew=T.perfPoolStatNow().idle>=r.id0;r.card=T.perfPoolCardNow();r.cardType=typeof r.card;return JSON.stringify(r);})()"));
+    t("U8898 子弹池闭环（spawn→live+1；dead→recycle 至少归还 1 个、live 下降、池内增长、卡片为字符串）", o3.pushed === true && o3.delta === 1 && o3.freed >= 1 && o3.down === true && o3.poolGrew === true && o3.cardType === 'string', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.perfHealthLevelNow(null,null,null),b:T.perfHealthLevelNow(NaN,20,0),c:T.perfHealthLevelNow(20,NaN,0),d:T.perfHealthP95Now(null),e:T.perfHealthP95Now([NaN,0,-5]),f:T.perfHealthLabelNow('nope')};return JSON.stringify(r);})()"));
+    t("U8899 非法输入（null/NaN 均值或 P95 → 兜底 ok；null 数组 / 全非正数 → P95 0；未知评级 → 一般）", o4.a === 'ok' && o4.b === 'ok' && o4.c === 'ok' && o4.d === 0 && o4.e === 0 && o4.f.t === '一般' && o4.f.c === '#f39c12', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={};r.st=T.perfPoolStatNow();r.h=T.perfHealthNowNow();r.same=r.st.live===T.perfPoolLiveNow();r.rateOk=r.st.rate>=0&&r.st.rate<=100&&Number.isInteger(r.st.rate);r.hOk=r.h.frames>=0&&r.h.avg>=0&&['great','good','ok','poor'].indexOf(r.h.level)>=0;r.lbl=T.perfHealthLabelNow(r.h.level);r.lblOk=!!r.lbl.t&&!!r.lbl.c;r.hud=T.perfHealthHudUpdateNow();r.pill=(function(){const e=document.getElementById('perfHealthWrap');return e?e.classList.contains('m-hide'):null;})();return JSON.stringify(r);})()"));
+    t("U8900 真实状态一致性（stat.live===bullets.length；rate 0..100 整数；快照 level 四态；文案对象完整）", o5.same === true && o5.rateOk === true && o5.hOk === true && o5.lblOk === true && (o5.pill === null || typeof o5.pill === 'boolean'), JSON.stringify(o5));
+  } catch (e) { t("U8895 子弹对象池 + 性能健康报告 抛异常", false, String(e)); t("U8896 子弹对象池 + 性能健康报告 抛异常", false, String(e)); t("U8897 子弹对象池 + 性能健康报告 抛异常", false, String(e)); t("U8898 子弹对象池 + 性能健康报告 抛异常", false, String(e)); t("U8899 子弹对象池 + 性能健康报告 抛异常", false, String(e)); t("U8900 子弹对象池 + 性能健康报告 抛异常", false, String(e)); }
+
+
+  // ===== U8901~U8906: 敌军规模态势(v1.1.173) =====
+  try {
+    const L = [4,8,15,25];
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('bsEnemyWrap'),bar:!!document.querySelector('#bsEnemyWrap .bsbar i'),v:!!document.querySelector('#bsEnemyWrap .bst'),d:!!document.querySelector('#bsEnemyWrap .bsd'),toast:!!document.getElementById('bsToast'),card:(T.bsCardHtml()||'').indexOf('战场态势达成')>=0,s:T.bsEnemyStateNow(6,[4,8,15,25],[false,false,false,false],'敌军')};return JSON.stringify(r);})()"));
+    t("U8901 敌军规模态势 态势 pill 已加入（进度条 + 值 + 达成勾 + 共享 toast + 结算卡 + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.d === true && o.toast === true && o.card === true && o.s.ok === true && o.s.hit === true && o.s.idx === 0 && o.s.txt.indexOf('敌军') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsEnemyStateNow(0,[4,8,15,25],[false,false,false,false],'敌军')};return JSON.stringify(r);})()"));
+    t("U8902 初值 敌军规模态势（0 → 未达成，下一档为 L1，文案含标签）", o1.s.ok === true && o1.s.hit === false && o1.s.idx === -1 && o1.s.t === null && o1.s.next === L[0] && o1.s.txt.indexOf('敌军') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsEnemyStateNow(6,[4,8,15,25],[false,false,false,false],'敌军')};return JSON.stringify(r);})()"));
+    t("U8903 正常值 敌军规模态势（中段跨过 L1 → 命中第 1 档，值 = L1）", o2.s.ok === true && o2.s.hit === true && o2.s.idx === 0 && o2.s.t === L[0] && o2.s.txt === '敌军 ' + L[0], JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.bsEnemyStateNow(3.999,[4,8,15,25],[false,false,false,false],'敌军'),b:T.bsEnemyStateNow(4,[4,8,15,25],[false,false,false,false],'敌军'),c:T.bsEnemyStateNow(8,[4,8,15,25],[true,false,false,false],'敌军'),d:T.bsEnemyStateNow(25,[4,8,15,25],[true,true,true,false],'敌军'),e:T.bsEnemyStateNow(25,[4,8,15,25],[true,true,true,true],'敌军'),f:T.bsEnemyStateNow(2,[4,8,15,25],[false,false,false,false],'敌军')};return JSON.stringify(r);})()"));
+    t("U8904 边界 敌军规模态势（阈值下方不中/恰在阈值中/逐档推进/全达成不中）", o3.a.hit === false && o3.a.next === L[0] && o3.b.hit === true && o3.b.idx === 0 && o3.c.hit === true && o3.c.idx === 1 && o3.c.t === L[1] && o3.d.hit === true && o3.d.idx === 3 && o3.d.t === L[3] && o3.e.hit === false && o3.e.next === null && o3.f.hit === false && o3.f.next === L[0], JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.bsEnemyStateNow(null,[4,8,15,25],[false,false,false,false],'敌军'),b:T.bsEnemyStateNow(NaN,[4,8,15,25],[false,false,false,false],'敌军'),c:T.bsEnemyStateNow(-5,[4,8,15,25],[false,false,false,false],'敌军'),d:T.bsEnemyStateNow([1],[4,8,15,25],[false,false,false,false],'敌军'),e:T.bsEnemyStateNow(5,[], [false,false,false,false],'敌军'),f:T.bsEnemyStateNow(5,[5,5,8,20],[false,false,false,false],'敌军'),g:T.bsEnemyStateNow(5,[0,8,20,50],[false,false,false,false],'敌军'),h:T.bsEnemyStateNow(5,[5,8,20,NaN],[false,false,false,false],'敌军'),i:T.bsEnemyStateNow(5,[4,8,15,25],[true],'敌军')};return JSON.stringify(r);})()"));
+    t("U8905 非法 null/NaN/负值/数组/空阶梯/非升序/非正/NaN/done 长度 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsEnemyNow(),dom:(function(){const e=document.querySelector('#bsEnemyWrap .bst');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8906 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8901 敌军规模态势 抛异常", false, String(e)); t("U8902 敌军规模态势 抛异常", false, String(e)); t("U8903 敌军规模态势 抛异常", false, String(e)); t("U8904 敌军规模态势 抛异常", false, String(e)); t("U8905 敌军规模态势 抛异常", false, String(e)); t("U8906 敌军规模态势 抛异常", false, String(e)); }
+
+
+  // ===== U8907~U8912: 火力密度态势(v1.1.174) =====
+  try {
+    const L = [10,20,40,70];
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('bsBulletWrap'),bar:!!document.querySelector('#bsBulletWrap .bsbar i'),v:!!document.querySelector('#bsBulletWrap .bst'),d:!!document.querySelector('#bsBulletWrap .bsd'),toast:!!document.getElementById('bsToast'),card:(T.bsCardHtml()||'').indexOf('战场态势达成')>=0,s:T.bsBulletStateNow(15,[10,20,40,70],[false,false,false,false],'火力')};return JSON.stringify(r);})()"));
+    t("U8907 火力密度态势 态势 pill 已加入（进度条 + 值 + 达成勾 + 共享 toast + 结算卡 + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.d === true && o.toast === true && o.card === true && o.s.ok === true && o.s.hit === true && o.s.idx === 0 && o.s.txt.indexOf('火力') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsBulletStateNow(0,[10,20,40,70],[false,false,false,false],'火力')};return JSON.stringify(r);})()"));
+    t("U8908 初值 火力密度态势（0 → 未达成，下一档为 L1，文案含标签）", o1.s.ok === true && o1.s.hit === false && o1.s.idx === -1 && o1.s.t === null && o1.s.next === L[0] && o1.s.txt.indexOf('火力') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsBulletStateNow(15,[10,20,40,70],[false,false,false,false],'火力')};return JSON.stringify(r);})()"));
+    t("U8909 正常值 火力密度态势（中段跨过 L1 → 命中第 1 档，值 = L1）", o2.s.ok === true && o2.s.hit === true && o2.s.idx === 0 && o2.s.t === L[0] && o2.s.txt === '火力 ' + L[0], JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.bsBulletStateNow(9.999,[10,20,40,70],[false,false,false,false],'火力'),b:T.bsBulletStateNow(10,[10,20,40,70],[false,false,false,false],'火力'),c:T.bsBulletStateNow(20,[10,20,40,70],[true,false,false,false],'火力'),d:T.bsBulletStateNow(70,[10,20,40,70],[true,true,true,false],'火力'),e:T.bsBulletStateNow(70,[10,20,40,70],[true,true,true,true],'火力'),f:T.bsBulletStateNow(5,[10,20,40,70],[false,false,false,false],'火力')};return JSON.stringify(r);})()"));
+    t("U8910 边界 火力密度态势（阈值下方不中/恰在阈值中/逐档推进/全达成不中）", o3.a.hit === false && o3.a.next === L[0] && o3.b.hit === true && o3.b.idx === 0 && o3.c.hit === true && o3.c.idx === 1 && o3.c.t === L[1] && o3.d.hit === true && o3.d.idx === 3 && o3.d.t === L[3] && o3.e.hit === false && o3.e.next === null && o3.f.hit === false && o3.f.next === L[0], JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.bsBulletStateNow(null,[10,20,40,70],[false,false,false,false],'火力'),b:T.bsBulletStateNow(NaN,[10,20,40,70],[false,false,false,false],'火力'),c:T.bsBulletStateNow(-5,[10,20,40,70],[false,false,false,false],'火力'),d:T.bsBulletStateNow([1],[10,20,40,70],[false,false,false,false],'火力'),e:T.bsBulletStateNow(5,[], [false,false,false,false],'火力'),f:T.bsBulletStateNow(5,[5,5,8,20],[false,false,false,false],'火力'),g:T.bsBulletStateNow(5,[0,8,20,50],[false,false,false,false],'火力'),h:T.bsBulletStateNow(5,[5,8,20,NaN],[false,false,false,false],'火力'),i:T.bsBulletStateNow(5,[10,20,40,70],[true],'火力')};return JSON.stringify(r);})()"));
+    t("U8911 非法 null/NaN/负值/数组/空阶梯/非升序/非正/NaN/done 长度 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsBulletNow(),dom:(function(){const e=document.querySelector('#bsBulletWrap .bst');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8912 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8907 火力密度态势 抛异常", false, String(e)); t("U8908 火力密度态势 抛异常", false, String(e)); t("U8909 火力密度态势 抛异常", false, String(e)); t("U8910 火力密度态势 抛异常", false, String(e)); t("U8911 火力密度态势 抛异常", false, String(e)); t("U8912 火力密度态势 抛异常", false, String(e)); }
+
+
+  // ===== U8913~U8918: 爆炸密度态势(v1.1.175) =====
+  try {
+    const L = [30,60,100,180];
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('bsPartWrap'),bar:!!document.querySelector('#bsPartWrap .bsbar i'),v:!!document.querySelector('#bsPartWrap .bst'),d:!!document.querySelector('#bsPartWrap .bsd'),toast:!!document.getElementById('bsToast'),card:(T.bsCardHtml()||'').indexOf('战场态势达成')>=0,s:T.bsPartStateNow(45,[30,60,100,180],[false,false,false,false],'爆炸')};return JSON.stringify(r);})()"));
+    t("U8913 爆炸密度态势 态势 pill 已加入（进度条 + 值 + 达成勾 + 共享 toast + 结算卡 + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.d === true && o.toast === true && o.card === true && o.s.ok === true && o.s.hit === true && o.s.idx === 0 && o.s.txt.indexOf('爆炸') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsPartStateNow(0,[30,60,100,180],[false,false,false,false],'爆炸')};return JSON.stringify(r);})()"));
+    t("U8914 初值 爆炸密度态势（0 → 未达成，下一档为 L1，文案含标签）", o1.s.ok === true && o1.s.hit === false && o1.s.idx === -1 && o1.s.t === null && o1.s.next === L[0] && o1.s.txt.indexOf('爆炸') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsPartStateNow(45,[30,60,100,180],[false,false,false,false],'爆炸')};return JSON.stringify(r);})()"));
+    t("U8915 正常值 爆炸密度态势（中段跨过 L1 → 命中第 1 档，值 = L1）", o2.s.ok === true && o2.s.hit === true && o2.s.idx === 0 && o2.s.t === L[0] && o2.s.txt === '爆炸 ' + L[0], JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.bsPartStateNow(29.999,[30,60,100,180],[false,false,false,false],'爆炸'),b:T.bsPartStateNow(30,[30,60,100,180],[false,false,false,false],'爆炸'),c:T.bsPartStateNow(60,[30,60,100,180],[true,false,false,false],'爆炸'),d:T.bsPartStateNow(180,[30,60,100,180],[true,true,true,false],'爆炸'),e:T.bsPartStateNow(180,[30,60,100,180],[true,true,true,true],'爆炸'),f:T.bsPartStateNow(15,[30,60,100,180],[false,false,false,false],'爆炸')};return JSON.stringify(r);})()"));
+    t("U8916 边界 爆炸密度态势（阈值下方不中/恰在阈值中/逐档推进/全达成不中）", o3.a.hit === false && o3.a.next === L[0] && o3.b.hit === true && o3.b.idx === 0 && o3.c.hit === true && o3.c.idx === 1 && o3.c.t === L[1] && o3.d.hit === true && o3.d.idx === 3 && o3.d.t === L[3] && o3.e.hit === false && o3.e.next === null && o3.f.hit === false && o3.f.next === L[0], JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.bsPartStateNow(null,[30,60,100,180],[false,false,false,false],'爆炸'),b:T.bsPartStateNow(NaN,[30,60,100,180],[false,false,false,false],'爆炸'),c:T.bsPartStateNow(-5,[30,60,100,180],[false,false,false,false],'爆炸'),d:T.bsPartStateNow([1],[30,60,100,180],[false,false,false,false],'爆炸'),e:T.bsPartStateNow(5,[], [false,false,false,false],'爆炸'),f:T.bsPartStateNow(5,[5,5,8,20],[false,false,false,false],'爆炸'),g:T.bsPartStateNow(5,[0,8,20,50],[false,false,false,false],'爆炸'),h:T.bsPartStateNow(5,[5,8,20,NaN],[false,false,false,false],'爆炸'),i:T.bsPartStateNow(5,[30,60,100,180],[true],'爆炸')};return JSON.stringify(r);})()"));
+    t("U8917 非法 null/NaN/负值/数组/空阶梯/非升序/非正/NaN/done 长度 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsPartNow(),dom:(function(){const e=document.querySelector('#bsPartWrap .bst');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8918 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8913 爆炸密度态势 抛异常", false, String(e)); t("U8914 爆炸密度态势 抛异常", false, String(e)); t("U8915 爆炸密度态势 抛异常", false, String(e)); t("U8916 爆炸密度态势 抛异常", false, String(e)); t("U8917 爆炸密度态势 抛异常", false, String(e)); t("U8918 爆炸密度态势 抛异常", false, String(e)); }
+
+
+  // ===== U8919~U8924: 火力节奏态势(v1.1.176) =====
+  try {
+    const L = [20,60,120,240];
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('bsDpsWrap'),bar:!!document.querySelector('#bsDpsWrap .bsbar i'),v:!!document.querySelector('#bsDpsWrap .bst'),d:!!document.querySelector('#bsDpsWrap .bsd'),toast:!!document.getElementById('bsToast'),card:(T.bsCardHtml()||'').indexOf('战场态势达成')>=0,s:T.bsDpsStateNow(40,[20,60,120,240],[false,false,false,false],'节奏')};return JSON.stringify(r);})()"));
+    t("U8919 火力节奏态势 态势 pill 已加入（进度条 + 值 + 达成勾 + 共享 toast + 结算卡 + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.d === true && o.toast === true && o.card === true && o.s.ok === true && o.s.hit === true && o.s.idx === 0 && o.s.txt.indexOf('节奏') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsDpsStateNow(0,[20,60,120,240],[false,false,false,false],'节奏')};return JSON.stringify(r);})()"));
+    t("U8920 初值 火力节奏态势（0 → 未达成，下一档为 L1，文案含标签）", o1.s.ok === true && o1.s.hit === false && o1.s.idx === -1 && o1.s.t === null && o1.s.next === L[0] && o1.s.txt.indexOf('节奏') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsDpsStateNow(40,[20,60,120,240],[false,false,false,false],'节奏')};return JSON.stringify(r);})()"));
+    t("U8921 正常值 火力节奏态势（中段跨过 L1 → 命中第 1 档，值 = L1）", o2.s.ok === true && o2.s.hit === true && o2.s.idx === 0 && o2.s.t === L[0] && o2.s.txt === '节奏 ' + L[0], JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.bsDpsStateNow(19.999,[20,60,120,240],[false,false,false,false],'节奏'),b:T.bsDpsStateNow(20,[20,60,120,240],[false,false,false,false],'节奏'),c:T.bsDpsStateNow(60,[20,60,120,240],[true,false,false,false],'节奏'),d:T.bsDpsStateNow(240,[20,60,120,240],[true,true,true,false],'节奏'),e:T.bsDpsStateNow(240,[20,60,120,240],[true,true,true,true],'节奏'),f:T.bsDpsStateNow(10,[20,60,120,240],[false,false,false,false],'节奏')};return JSON.stringify(r);})()"));
+    t("U8922 边界 火力节奏态势（阈值下方不中/恰在阈值中/逐档推进/全达成不中）", o3.a.hit === false && o3.a.next === L[0] && o3.b.hit === true && o3.b.idx === 0 && o3.c.hit === true && o3.c.idx === 1 && o3.c.t === L[1] && o3.d.hit === true && o3.d.idx === 3 && o3.d.t === L[3] && o3.e.hit === false && o3.e.next === null && o3.f.hit === false && o3.f.next === L[0], JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.bsDpsStateNow(null,[20,60,120,240],[false,false,false,false],'节奏'),b:T.bsDpsStateNow(NaN,[20,60,120,240],[false,false,false,false],'节奏'),c:T.bsDpsStateNow(-5,[20,60,120,240],[false,false,false,false],'节奏'),d:T.bsDpsStateNow([1],[20,60,120,240],[false,false,false,false],'节奏'),e:T.bsDpsStateNow(5,[], [false,false,false,false],'节奏'),f:T.bsDpsStateNow(5,[5,5,8,20],[false,false,false,false],'节奏'),g:T.bsDpsStateNow(5,[0,8,20,50],[false,false,false,false],'节奏'),h:T.bsDpsStateNow(5,[5,8,20,NaN],[false,false,false,false],'节奏'),i:T.bsDpsStateNow(5,[20,60,120,240],[true],'节奏')};return JSON.stringify(r);})()"));
+    t("U8923 非法 null/NaN/负值/数组/空阶梯/非升序/非正/NaN/done 长度 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsDpsNow(),dom:(function(){const e=document.querySelector('#bsDpsWrap .bst');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8924 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8919 火力节奏态势 抛异常", false, String(e)); t("U8920 火力节奏态势 抛异常", false, String(e)); t("U8921 火力节奏态势 抛异常", false, String(e)); t("U8922 火力节奏态势 抛异常", false, String(e)); t("U8923 火力节奏态势 抛异常", false, String(e)); t("U8924 火力节奏态势 抛异常", false, String(e)); }
+
+
+  // ===== U8925~U8930: 击杀效率态势(v1.1.177) =====
+  try {
+    const L = [1,3,6,12];
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('bsEffWrap'),bar:!!document.querySelector('#bsEffWrap .bsbar i'),v:!!document.querySelector('#bsEffWrap .bst'),d:!!document.querySelector('#bsEffWrap .bsd'),toast:!!document.getElementById('bsToast'),card:(T.bsCardHtml()||'').indexOf('战场态势达成')>=0,s:T.bsEffStateNow(2,[1,3,6,12],[false,false,false,false],'效率')};return JSON.stringify(r);})()"));
+    t("U8925 击杀效率态势 态势 pill 已加入（进度条 + 值 + 达成勾 + 共享 toast + 结算卡 + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.d === true && o.toast === true && o.card === true && o.s.ok === true && o.s.hit === true && o.s.idx === 0 && o.s.txt.indexOf('效率') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsEffStateNow(0,[1,3,6,12],[false,false,false,false],'效率')};return JSON.stringify(r);})()"));
+    t("U8926 初值 击杀效率态势（0 → 未达成，下一档为 L1，文案含标签）", o1.s.ok === true && o1.s.hit === false && o1.s.idx === -1 && o1.s.t === null && o1.s.next === L[0] && o1.s.txt.indexOf('效率') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsEffStateNow(2,[1,3,6,12],[false,false,false,false],'效率')};return JSON.stringify(r);})()"));
+    t("U8927 正常值 击杀效率态势（中段跨过 L1 → 命中第 1 档，值 = L1）", o2.s.ok === true && o2.s.hit === true && o2.s.idx === 0 && o2.s.t === L[0] && o2.s.txt === '效率 ' + L[0], JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.bsEffStateNow(0.999,[1,3,6,12],[false,false,false,false],'效率'),b:T.bsEffStateNow(1,[1,3,6,12],[false,false,false,false],'效率'),c:T.bsEffStateNow(3,[1,3,6,12],[true,false,false,false],'效率'),d:T.bsEffStateNow(12,[1,3,6,12],[true,true,true,false],'效率'),e:T.bsEffStateNow(12,[1,3,6,12],[true,true,true,true],'效率'),f:T.bsEffStateNow(0.5,[1,3,6,12],[false,false,false,false],'效率')};return JSON.stringify(r);})()"));
+    t("U8928 边界 击杀效率态势（阈值下方不中/恰在阈值中/逐档推进/全达成不中）", o3.a.hit === false && o3.a.next === L[0] && o3.b.hit === true && o3.b.idx === 0 && o3.c.hit === true && o3.c.idx === 1 && o3.c.t === L[1] && o3.d.hit === true && o3.d.idx === 3 && o3.d.t === L[3] && o3.e.hit === false && o3.e.next === null && o3.f.hit === false && o3.f.next === L[0], JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.bsEffStateNow(null,[1,3,6,12],[false,false,false,false],'效率'),b:T.bsEffStateNow(NaN,[1,3,6,12],[false,false,false,false],'效率'),c:T.bsEffStateNow(-5,[1,3,6,12],[false,false,false,false],'效率'),d:T.bsEffStateNow([1],[1,3,6,12],[false,false,false,false],'效率'),e:T.bsEffStateNow(5,[], [false,false,false,false],'效率'),f:T.bsEffStateNow(5,[5,5,8,20],[false,false,false,false],'效率'),g:T.bsEffStateNow(5,[0,8,20,50],[false,false,false,false],'效率'),h:T.bsEffStateNow(5,[5,8,20,NaN],[false,false,false,false],'效率'),i:T.bsEffStateNow(5,[1,3,6,12],[true],'效率')};return JSON.stringify(r);})()"));
+    t("U8929 非法 null/NaN/负值/数组/空阶梯/非升序/非正/NaN/done 长度 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsEffNow(),dom:(function(){const e=document.querySelector('#bsEffWrap .bst');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8930 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8925 击杀效率态势 抛异常", false, String(e)); t("U8926 击杀效率态势 抛异常", false, String(e)); t("U8927 击杀效率态势 抛异常", false, String(e)); t("U8928 击杀效率态势 抛异常", false, String(e)); t("U8929 击杀效率态势 抛异常", false, String(e)); t("U8930 击杀效率态势 抛异常", false, String(e)); }
+
+
+  // ===== U8931~U8936: 连杀热度态势(v1.1.178) =====
+  try {
+    const L = [3,6,10,16];
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('bsComboWrap'),bar:!!document.querySelector('#bsComboWrap .bsbar i'),v:!!document.querySelector('#bsComboWrap .bst'),d:!!document.querySelector('#bsComboWrap .bsd'),toast:!!document.getElementById('bsToast'),card:(T.bsCardHtml()||'').indexOf('战场态势达成')>=0,s:T.bsComboStateNow(4.5,[3,6,10,16],[false,false,false,false],'热度')};return JSON.stringify(r);})()"));
+    t("U8931 连杀热度态势 态势 pill 已加入（进度条 + 值 + 达成勾 + 共享 toast + 结算卡 + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.d === true && o.toast === true && o.card === true && o.s.ok === true && o.s.hit === true && o.s.idx === 0 && o.s.txt.indexOf('热度') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsComboStateNow(0,[3,6,10,16],[false,false,false,false],'热度')};return JSON.stringify(r);})()"));
+    t("U8932 初值 连杀热度态势（0 → 未达成，下一档为 L1，文案含标签）", o1.s.ok === true && o1.s.hit === false && o1.s.idx === -1 && o1.s.t === null && o1.s.next === L[0] && o1.s.txt.indexOf('热度') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsComboStateNow(4.5,[3,6,10,16],[false,false,false,false],'热度')};return JSON.stringify(r);})()"));
+    t("U8933 正常值 连杀热度态势（中段跨过 L1 → 命中第 1 档，值 = L1）", o2.s.ok === true && o2.s.hit === true && o2.s.idx === 0 && o2.s.t === L[0] && o2.s.txt === '热度 ' + L[0], JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.bsComboStateNow(2.999,[3,6,10,16],[false,false,false,false],'热度'),b:T.bsComboStateNow(3,[3,6,10,16],[false,false,false,false],'热度'),c:T.bsComboStateNow(6,[3,6,10,16],[true,false,false,false],'热度'),d:T.bsComboStateNow(16,[3,6,10,16],[true,true,true,false],'热度'),e:T.bsComboStateNow(16,[3,6,10,16],[true,true,true,true],'热度'),f:T.bsComboStateNow(1.5,[3,6,10,16],[false,false,false,false],'热度')};return JSON.stringify(r);})()"));
+    t("U8934 边界 连杀热度态势（阈值下方不中/恰在阈值中/逐档推进/全达成不中）", o3.a.hit === false && o3.a.next === L[0] && o3.b.hit === true && o3.b.idx === 0 && o3.c.hit === true && o3.c.idx === 1 && o3.c.t === L[1] && o3.d.hit === true && o3.d.idx === 3 && o3.d.t === L[3] && o3.e.hit === false && o3.e.next === null && o3.f.hit === false && o3.f.next === L[0], JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.bsComboStateNow(null,[3,6,10,16],[false,false,false,false],'热度'),b:T.bsComboStateNow(NaN,[3,6,10,16],[false,false,false,false],'热度'),c:T.bsComboStateNow(-5,[3,6,10,16],[false,false,false,false],'热度'),d:T.bsComboStateNow([1],[3,6,10,16],[false,false,false,false],'热度'),e:T.bsComboStateNow(5,[], [false,false,false,false],'热度'),f:T.bsComboStateNow(5,[5,5,8,20],[false,false,false,false],'热度'),g:T.bsComboStateNow(5,[0,8,20,50],[false,false,false,false],'热度'),h:T.bsComboStateNow(5,[5,8,20,NaN],[false,false,false,false],'热度'),i:T.bsComboStateNow(5,[3,6,10,16],[true],'热度')};return JSON.stringify(r);})()"));
+    t("U8935 非法 null/NaN/负值/数组/空阶梯/非升序/非正/NaN/done 长度 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsComboNow(),dom:(function(){const e=document.querySelector('#bsComboWrap .bst');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8936 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8931 连杀热度态势 抛异常", false, String(e)); t("U8932 连杀热度态势 抛异常", false, String(e)); t("U8933 连杀热度态势 抛异常", false, String(e)); t("U8934 连杀热度态势 抛异常", false, String(e)); t("U8935 连杀热度态势 抛异常", false, String(e)); t("U8936 连杀热度态势 抛异常", false, String(e)); }
+
+
+  // ===== U8937~U8942: 波次推进态势(v1.1.179) =====
+  try {
+    const L = [5,10,20,40];
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('bsWaveWrap'),bar:!!document.querySelector('#bsWaveWrap .bsbar i'),v:!!document.querySelector('#bsWaveWrap .bst'),d:!!document.querySelector('#bsWaveWrap .bsd'),toast:!!document.getElementById('bsToast'),card:(T.bsCardHtml()||'').indexOf('战场态势达成')>=0,s:T.bsWaveStateNow(7.5,[5,10,20,40],[false,false,false,false],'推进')};return JSON.stringify(r);})()"));
+    t("U8937 波次推进态势 态势 pill 已加入（进度条 + 值 + 达成勾 + 共享 toast + 结算卡 + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.d === true && o.toast === true && o.card === true && o.s.ok === true && o.s.hit === true && o.s.idx === 0 && o.s.txt.indexOf('推进') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsWaveStateNow(0,[5,10,20,40],[false,false,false,false],'推进')};return JSON.stringify(r);})()"));
+    t("U8938 初值 波次推进态势（0 → 未达成，下一档为 L1，文案含标签）", o1.s.ok === true && o1.s.hit === false && o1.s.idx === -1 && o1.s.t === null && o1.s.next === L[0] && o1.s.txt.indexOf('推进') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsWaveStateNow(7.5,[5,10,20,40],[false,false,false,false],'推进')};return JSON.stringify(r);})()"));
+    t("U8939 正常值 波次推进态势（中段跨过 L1 → 命中第 1 档，值 = L1）", o2.s.ok === true && o2.s.hit === true && o2.s.idx === 0 && o2.s.t === L[0] && o2.s.txt === '推进 ' + L[0], JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.bsWaveStateNow(4.999,[5,10,20,40],[false,false,false,false],'推进'),b:T.bsWaveStateNow(5,[5,10,20,40],[false,false,false,false],'推进'),c:T.bsWaveStateNow(10,[5,10,20,40],[true,false,false,false],'推进'),d:T.bsWaveStateNow(40,[5,10,20,40],[true,true,true,false],'推进'),e:T.bsWaveStateNow(40,[5,10,20,40],[true,true,true,true],'推进'),f:T.bsWaveStateNow(2.5,[5,10,20,40],[false,false,false,false],'推进')};return JSON.stringify(r);})()"));
+    t("U8940 边界 波次推进态势（阈值下方不中/恰在阈值中/逐档推进/全达成不中）", o3.a.hit === false && o3.a.next === L[0] && o3.b.hit === true && o3.b.idx === 0 && o3.c.hit === true && o3.c.idx === 1 && o3.c.t === L[1] && o3.d.hit === true && o3.d.idx === 3 && o3.d.t === L[3] && o3.e.hit === false && o3.e.next === null && o3.f.hit === false && o3.f.next === L[0], JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.bsWaveStateNow(null,[5,10,20,40],[false,false,false,false],'推进'),b:T.bsWaveStateNow(NaN,[5,10,20,40],[false,false,false,false],'推进'),c:T.bsWaveStateNow(-5,[5,10,20,40],[false,false,false,false],'推进'),d:T.bsWaveStateNow([1],[5,10,20,40],[false,false,false,false],'推进'),e:T.bsWaveStateNow(5,[], [false,false,false,false],'推进'),f:T.bsWaveStateNow(5,[5,5,8,20],[false,false,false,false],'推进'),g:T.bsWaveStateNow(5,[0,8,20,50],[false,false,false,false],'推进'),h:T.bsWaveStateNow(5,[5,8,20,NaN],[false,false,false,false],'推进'),i:T.bsWaveStateNow(5,[5,10,20,40],[true],'推进')};return JSON.stringify(r);})()"));
+    t("U8941 非法 null/NaN/负值/数组/空阶梯/非升序/非正/NaN/done 长度 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsWaveNow(),dom:(function(){const e=document.querySelector('#bsWaveWrap .bst');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8942 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8937 波次推进态势 抛异常", false, String(e)); t("U8938 波次推进态势 抛异常", false, String(e)); t("U8939 波次推进态势 抛异常", false, String(e)); t("U8940 波次推进态势 抛异常", false, String(e)); t("U8941 波次推进态势 抛异常", false, String(e)); t("U8942 波次推进态势 抛异常", false, String(e)); }
+
+
+  // ===== U8943~U8948: 战场危险态势(v1.1.180) =====
+  try {
+    const L = [5,15,40,80];
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('bsHurtWrap'),bar:!!document.querySelector('#bsHurtWrap .bsbar i'),v:!!document.querySelector('#bsHurtWrap .bst'),d:!!document.querySelector('#bsHurtWrap .bsd'),toast:!!document.getElementById('bsToast'),card:(T.bsCardHtml()||'').indexOf('战场态势达成')>=0,s:T.bsHurtStateNow(10,[5,15,40,80],[false,false,false,false],'危险')};return JSON.stringify(r);})()"));
+    t("U8943 战场危险态势 态势 pill 已加入（进度条 + 值 + 达成勾 + 共享 toast + 结算卡 + 函数可用）", o.dom === true && o.bar === true && o.v === true && o.d === true && o.toast === true && o.card === true && o.s.ok === true && o.s.hit === true && o.s.idx === 0 && o.s.txt.indexOf('危险') >= 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsHurtStateNow(0,[5,15,40,80],[false,false,false,false],'危险')};return JSON.stringify(r);})()"));
+    t("U8944 初值 战场危险态势（0 → 未达成，下一档为 L1，文案含标签）", o1.s.ok === true && o1.s.hit === false && o1.s.idx === -1 && o1.s.t === null && o1.s.next === L[0] && o1.s.txt.indexOf('危险') >= 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsHurtStateNow(10,[5,15,40,80],[false,false,false,false],'危险')};return JSON.stringify(r);})()"));
+    t("U8945 正常值 战场危险态势（中段跨过 L1 → 命中第 1 档，值 = L1）", o2.s.ok === true && o2.s.hit === true && o2.s.idx === 0 && o2.s.t === L[0] && o2.s.txt === '危险 ' + L[0], JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.bsHurtStateNow(4.999,[5,15,40,80],[false,false,false,false],'危险'),b:T.bsHurtStateNow(5,[5,15,40,80],[false,false,false,false],'危险'),c:T.bsHurtStateNow(15,[5,15,40,80],[true,false,false,false],'危险'),d:T.bsHurtStateNow(80,[5,15,40,80],[true,true,true,false],'危险'),e:T.bsHurtStateNow(80,[5,15,40,80],[true,true,true,true],'危险'),f:T.bsHurtStateNow(2.5,[5,15,40,80],[false,false,false,false],'危险')};return JSON.stringify(r);})()"));
+    t("U8946 边界 战场危险态势（阈值下方不中/恰在阈值中/逐档推进/全达成不中）", o3.a.hit === false && o3.a.next === L[0] && o3.b.hit === true && o3.b.idx === 0 && o3.c.hit === true && o3.c.idx === 1 && o3.c.t === L[1] && o3.d.hit === true && o3.d.idx === 3 && o3.d.t === L[3] && o3.e.hit === false && o3.e.next === null && o3.f.hit === false && o3.f.next === L[0], JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.bsHurtStateNow(null,[5,15,40,80],[false,false,false,false],'危险'),b:T.bsHurtStateNow(NaN,[5,15,40,80],[false,false,false,false],'危险'),c:T.bsHurtStateNow(-5,[5,15,40,80],[false,false,false,false],'危险'),d:T.bsHurtStateNow([1],[5,15,40,80],[false,false,false,false],'危险'),e:T.bsHurtStateNow(5,[], [false,false,false,false],'危险'),f:T.bsHurtStateNow(5,[5,5,8,20],[false,false,false,false],'危险'),g:T.bsHurtStateNow(5,[0,8,20,50],[false,false,false,false],'危险'),h:T.bsHurtStateNow(5,[5,8,20,NaN],[false,false,false,false],'危险'),i:T.bsHurtStateNow(5,[5,15,40,80],[true],'危险')};return JSON.stringify(r);})()"));
+    t("U8947 非法 null/NaN/负值/数组/空阶梯/非升序/非正/NaN/done 长度 → 退化 '—'", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—' && o4.c.ok === false && o4.c.txt === '—' && o4.d.ok === false && o4.d.txt === '—' && o4.e.ok === false && o4.e.txt === '—' && o4.f.ok === false && o4.f.txt === '—' && o4.g.ok === false && o4.g.txt === '—' && o4.h.ok === false && o4.h.txt === '—' && o4.i.ok === false && o4.i.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.bsHurtNow(),dom:(function(){const e=document.querySelector('#bsHurtWrap .bst');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8948 DOM 与函数一致（数据源可用 + DOM 值可写）", o5.s.ok === true && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8943 战场危险态势 抛异常", false, String(e)); t("U8944 战场危险态势 抛异常", false, String(e)); t("U8945 战场危险态势 抛异常", false, String(e)); t("U8946 战场危险态势 抛异常", false, String(e)); t("U8947 战场危险态势 抛异常", false, String(e)); t("U8948 战场危险态势 抛异常", false, String(e)); }
+
+
+  // ===== U8949~U8954: 阵存压缩引擎(v1.1.181) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('smCompactWrap'),cnt:!!document.querySelector('#smCompactWrap .smn'),card:(T.smCardHtml()||'').indexOf('流畅度')>=0,s:T.smCompactStateNow([1,2],function(x){return true;})};return JSON.stringify(r);})()"));
+    t("U8949 阵存压缩 pill 已加入（计数 + 结算卡 + 纯函数可用，全存活压缩保留）", o.dom === true && o.cnt === true && o.card === true && o.s.ok === true && o.s.kept === 2 && o.s.removed === 0, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.smCompactStateNow([],function(x){return true;})};return JSON.stringify(r);})()"));
+    t("U8950 初值 空数组压缩（kept 0 / removed 0）", o1.s.ok === true && o1.s.kept === 0 && o1.s.removed === 0, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={};const arr=[1,2,3,4,5];const res=T.smCompactStateNow(arr,function(x){return x%2===0;});r={kept:res.kept,removed:res.removed,len:arr.length,first:arr[0],second:arr[1]};return JSON.stringify(r);})()"));
+    t("U8951 正常值 偶数组压缩（kept 2 / removed 3，顺序保留 [2,4]）", o2.kept === 2 && o2.removed === 3 && o2.len === 2 && o2.first === 2 && o2.second === 4, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smCompactStateNow([1,2,3],function(){return false;}),b:(function(){const q=[1,2,3];const s=T.smCompactStateNow(q,function(){return true;});return {kept:s.kept,removed:s.removed,len:q.length};})(),c:(function(){const q=[7];const s=T.smCompactStateNow(q,function(x){return x>0;});return {kept:s.kept,removed:s.removed,len:q.length};})()};return JSON.stringify(r);})()"));
+    t("U8952 边界 全灭 kept0 / 全活 kept3 / 单元素 kept1", o3.a.kept === 0 && o3.a.removed === 3 && o3.b.kept === 3 && o3.b.removed === 0 && o3.b.len === 3 && o3.c.kept === 1 && o3.c.removed === 0 && o3.c.len === 1, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smCompactStateNow(null,function(){return true;}),b:T.smCompactStateNow('x',function(){return true;}),c:T.smCompactStateNow({},function(){return true;}),d:T.smCompactStateNow(5,function(){return true;}),e:(function(){const q=[1,2];const s=T.smCompactStateNow(q,null);return {ok:s.ok,kept:s.kept,len:q.length};})()};return JSON.stringify(r);})()"));
+    t("U8953 非法 null/字符串/对象/数字 → 退化；alive 非函数 → 全部保留", o4.a.ok === false && o4.b.ok === false && o4.c.ok === false && o4.d.ok === false && o4.e.ok === true && o4.e.kept === 2 && o4.e.len === 2, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.smCompactStat(),dom:(function(){const e=document.querySelector('#smCompactWrap .smn');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8954 DOM 与函数一致（统计对象含敌/文/波 + DOM 可写）", o5.s.enemies >= 0 && o5.s.texts >= 0 && o5.s.waves >= 0 && o5.s.stut >= 0 && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8949 阵存压缩引擎 抛异常", false, String(e)); t("U8950 阵存压缩引擎 抛异常", false, String(e)); t("U8951 阵存压缩引擎 抛异常", false, String(e)); t("U8952 阵存压缩引擎 抛异常", false, String(e)); t("U8953 阵存压缩引擎 抛异常", false, String(e)); t("U8954 阵存压缩引擎 抛异常", false, String(e)); }
+
+
+  // ===== U8955~U8960: 帧时仪表(v1.1.182) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('smFrameWrap'),f:!!document.querySelector('#smFrameWrap .smf'),s:T.smFrameStateNow(1016.7,1000)};return JSON.stringify(r);})()"));
+    t("U8955 帧时 pill 已加入（值位 + 函数可用，16.7ms → 流畅）", o.dom === true && o.f === true && o.s.ok === true && o.s.rate === '流畅' && o.s.ms > 16.5 && o.s.ms < 16.9, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smFrameStateNow(NaN,NaN),b:T.smFrameStateNow(1000,1000)};return JSON.stringify(r);})()"));
+    t("U8956 初值 非法时间戳/Δt=0 → 退化", o1.a.ok === false && o1.a.txt === '—' && o1.b.ok === false && o1.b.txt === '—', JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.smFrameStateNow(1016.7,1000)};return JSON.stringify(r);})()"));
+    t("U8957 正常值 16.7ms → ~59.9FPS 流畅（txt 含 FPS）", o2.s.ok === true && o2.s.fps > 59 && o2.s.fps < 61 && o2.s.rate === '流畅' && o2.s.txt.indexOf('FPS') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smFrameStateNow(1025,1000),b:T.smFrameStateNow(1033.4,1000),c:T.smFrameStateNow(1050,1000),d:T.smFrameStateNow(1060,1000)};return JSON.stringify(r);})()"));
+    t("U8958 边界 25ms→40FPS正常 / 33.4ms→29.9FPS吃力 / 50ms→20FPS吃力 / 60ms→16.7FPS卡顿", o3.a.ok === true && o3.a.rate === '正常' && o3.b.rate === '吃力' && o3.c.rate === '吃力' && o3.d.rate === '卡顿', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smFrameStateNow(null,undefined),b:T.smFrameStateNow(1000,1016.7)};return JSON.stringify(r);})()"));
+    t("U8959 非法 null/undefined/负 Δt → 退化", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false && o4.b.txt === '—', JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={now:T.smFrameNow(),dom:(function(){const e=document.querySelector('#smFrameWrap .smf');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8960 DOM 与函数一致（帧状态可读 + DOM 可写）", (o5.now.ok === true || o5.now.ok === false) && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8955 帧时仪表 抛异常", false, String(e)); t("U8956 帧时仪表 抛异常", false, String(e)); t("U8957 帧时仪表 抛异常", false, String(e)); t("U8958 帧时仪表 抛异常", false, String(e)); t("U8959 帧时仪表 抛异常", false, String(e)); t("U8960 帧时仪表 抛异常", false, String(e)); }
+
+
+  // ===== U8961~U8966: 帧预算分级(v1.1.183) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('smBudgetWrap'),bar:!!document.querySelector('#smBudgetWrap .smbar i'),s:T.smBudgetStateNow(8)};return JSON.stringify(r);})()"));
+    t("U8961 渲染负载 pill 已加入（进度条 + 函数可用，8ms → 轻）", o.dom === true && o.bar === true && o.s.ok === true && o.s.level === '轻', JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smBudgetStateNow(-1),b:T.smBudgetStateNow(NaN)};return JSON.stringify(r);})()"));
+    t("U8962 初值 负值/NaN → 退化", o1.a.ok === false && o1.a.txt === '—' && o1.b.ok === false && o1.b.txt === '—', JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smBudgetStateNow(8),b:T.smBudgetStateNow(12),c:T.smBudgetStateNow(15)};return JSON.stringify(r);})()"));
+    t("U8963 正常值 8ms轻 / 12ms中 / 15ms重（pct 递增）", o2.a.level === '轻' && o2.b.level === '中' && o2.c.level === '重' && o2.a.pct < o2.b.pct && o2.b.pct < o2.c.pct, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smBudgetStateNow(8.349),b:T.smBudgetStateNow(8.35),c:T.smBudgetStateNow(13.359),d:T.smBudgetStateNow(13.36)};return JSON.stringify(r);})()"));
+    t("U8964 边界 8.349轻 / 8.35中 / 13.359中 / 13.36重", o3.a.level === '轻' && o3.b.level === '中' && o3.c.level === '中' && o3.d.level === '重', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smBudgetStateNow(-1),b:T.smBudgetStateNow(NaN),c:T.smBudgetStateNow('x')};return JSON.stringify(r);})()"));
+    t("U8965 非法 负值/NaN/字符串 → 退化", o4.a.ok === false && o4.b.ok === false && o4.c.ok === false, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={n:T.smBudgetNow(),dom:(function(){const e=document.querySelector('#smBudgetWrap .smf');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8966 DOM 与函数一致（渲染耗时可读 + DOM 可写）", isFinite(o5.n) && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8961 帧预算分级 抛异常", false, String(e)); t("U8962 帧预算分级 抛异常", false, String(e)); t("U8963 帧预算分级 抛异常", false, String(e)); t("U8964 帧预算分级 抛异常", false, String(e)); t("U8965 帧预算分级 抛异常", false, String(e)); t("U8966 帧预算分级 抛异常", false, String(e)); }
+
+
+  // ===== U8967~U8972: 卡顿侦测(v1.1.184) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('smStutWrap'),cnt:!!document.querySelector('#smStutWrap .smn'),toast:!!document.getElementById('smToast'),s:T.smStutterStateNow(16.7,16.7)};return JSON.stringify(r);})()"));
+    t("U8967 卡顿 pill 已加入（计数 + 卡顿 toast + 函数可用，16.7ms → 不卡顿）", o.dom === true && o.cnt === true && o.toast === true && o.s.ok === true && o.s.stutter === false, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smStutterStateNow(0,16.7),b:T.smStutterStateNow(-5,16.7)};return JSON.stringify(r);})()"));
+    t("U8968 初值 0/负值 → 退化", o1.a.ok === false && o1.a.stutter === false && o1.b.ok === false && o1.b.stutter === false, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smStutterStateNow(16.7,16.7),b:T.smStutterStateNow(25.1,16.7)};return JSON.stringify(r);})()"));
+    t("U8969 正常值 16.7ms不卡 / 25.1ms卡（1.5x）", o2.a.stutter === false && o2.a.ratio < 1.5 && o2.b.stutter === true && o2.b.ratio >= 1.5, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smStutterStateNow(24.9,16.7),b:T.smStutterStateNow(25.05,16.7),c:T.smStutterStateNow(33.4,16.7),d:T.smStutterStateNow(16.7,20)};return JSON.stringify(r);})()"));
+    t("U8970 边界 24.9不卡 / 25.05卡 / 33.4卡(2x) / 自定义预算20时不卡", o3.a.stutter === false && o3.b.stutter === true && o3.c.stutter === true && o3.c.ratio > 1.9 && o3.d.stutter === false && o3.d.ratio < 1, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smStutterStateNow(0,16.7),b:T.smStutterStateNow(NaN,16.7)};return JSON.stringify(r);})()"));
+    t("U8971 非法 0/NaN → 退化", o4.a.ok === false && o4.b.ok === false, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={n:T.smStutterNow(),dom:(function(){const e=document.querySelector('#smStutWrap .smn');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8972 DOM 与函数一致（卡顿计数可读 + DOM 可写）", typeof o5.n === 'number' && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8967 卡顿侦测 抛异常", false, String(e)); t("U8968 卡顿侦测 抛异常", false, String(e)); t("U8969 卡顿侦测 抛异常", false, String(e)); t("U8970 卡顿侦测 抛异常", false, String(e)); t("U8971 卡顿侦测 抛异常", false, String(e)); t("U8972 卡顿侦测 抛异常", false, String(e)); }
+
+
+  // ===== U8973~U8978: 粒子桶复用(v1.1.185) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('smBucketWrap'),cnt:!!document.querySelector('#smBucketWrap .smn'),s:(function(){const mp=new Map();const bk=T.smBucketPutNow(mp,'k','red',0.5,{x:1},1);return {rects:bk.rects.length,size:mp.size};})()};return JSON.stringify(r);})()"));
+    t("U8973 桶复用 pill 已加入（计数 + 函数可用，首插新建桶）", o.dom === true && o.cnt === true && o.s.rects === 1 && o.s.size === 1, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r=(function(){const mp=new Map();const bk=T.smBucketPutNow(mp,'k','red',0.5,{x:1},1);return {rects:bk.rects.length,size:mp.size,has:mp.has('k')};})();return JSON.stringify(r);})()"));
+    t("U8974 初值 空桶首插（新建 1 桶 / 1 粒子 / key 命中）", o1.rects === 1 && o1.size === 1 && o1.has === true, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r=(function(){const mp=new Map();const b1=T.smBucketPutNow(mp,'k','red',0.5,{x:1},1);const b2=T.smBucketPutNow(mp,'k','red',0.5,{x:2},1);return {rects:b2.rects.length,same:b1===b2,size:mp.size};})();return JSON.stringify(r);})()"));
+    t("U8975 正常值 同帧同 key 二次插入（复用同对象 + rects 2）", o2.rects === 2 && o2.same === true && o2.size === 1, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r=(function(){const mp=new Map();const b1=T.smBucketPutNow(mp,'k','red',0.5,{x:1},1);const b2=T.smBucketPutNow(mp,'k','red',0.5,{x:2},2);return {rects:b2.rects.length,same:b1===b2,size:mp.size};})();return JSON.stringify(r);})()"));
+    t("U8976 边界 跨帧同 key（帧令牌重置 rects + 复用对象）", o3.rects === 1 && o3.same === true && o3.size === 1, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smBucketPutNow({},'k','red',0.5,{x:1},1),b:(function(){const mp=new Map();const bk=T.smBucketPutNow(mp,'k','red',0.5,{x:1},NaN);return {rects:bk.rects.length,frame:bk.frame};})()};return JSON.stringify(r);})()"));
+    t("U8977 非法 非 Map → null；frame NaN → 按 0 帧新建", o4.a === null && o4.b.rects === 1 && o4.b.frame === 0, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.smBucketStatNow(),dom:(function(){const e=document.querySelector('#smBucketWrap .smn');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8978 DOM 与函数一致（建/复用计数可读 + DOM 可写）", o5.s.created >= 0 && o5.s.reused >= 0 && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8973 粒子桶复用 抛异常", false, String(e)); t("U8974 粒子桶复用 抛异常", false, String(e)); t("U8975 粒子桶复用 抛异常", false, String(e)); t("U8976 粒子桶复用 抛异常", false, String(e)); t("U8977 粒子桶复用 抛异常", false, String(e)); t("U8978 粒子桶复用 抛异常", false, String(e)); }
+
+
+  // ===== U8979~U8984: 输入响应仪表(v1.1.186) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('smInputWrap'),cnt:!!document.querySelector('#smInputWrap .smn'),s:T.smInputStateNow(1000,1016.7)};return JSON.stringify(r);})()"));
+    t("U8979 输入 pill 已加入（值位 + 函数可用，16.7ms 延迟）", o.dom === true && o.cnt === true && o.s.ok === true && o.s.ms > 16.5 && o.s.ms < 16.9, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smInputStateNow(NaN,NaN),b:T.smInputStateNow(null,100)};return JSON.stringify(r);})()"));
+    t("U8980 初值 NaN/null → 退化", o1.a.ok === false && o1.a.txt === '—' && o1.b.ok === false && o1.b.txt === '—', JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.smInputStateNow(1000,1016.7)};return JSON.stringify(r);})()"));
+    t("U8981 正常值 1000→1016.7 → 16.7ms（txt 含 ms）", o2.s.ok === true && o2.s.ms > 16.5 && o2.s.ms < 16.9 && o2.s.txt.indexOf('ms') >= 0, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smInputStateNow(1000,1000),b:T.smInputStateNow(1000,1000.5)};return JSON.stringify(r);})()"));
+    t("U8982 边界 0ms 合法 / 0.5ms 合法", o3.a.ok === true && o3.a.ms === 0 && o3.b.ok === true && o3.b.ms > 0 && o3.b.ms < 1, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smInputStateNow(1016.7,1000),b:T.smInputStateNow(100,NaN)};return JSON.stringify(r);})()"));
+    t("U8983 非法 负延迟/NaN → 退化", o4.a.ok === false && o4.a.txt === '—' && o4.b.ok === false, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={n:T.smInputNow(),dom:(function(){const e=document.querySelector('#smInputWrap .smn');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
+    t("U8984 DOM 与函数一致（输入延迟可读 + DOM 可写）", typeof o5.n === 'number' && o5.dom === 'TEST', JSON.stringify(o5));
+  } catch (e) { t("U8979 输入响应仪表 抛异常", false, String(e)); t("U8980 输入响应仪表 抛异常", false, String(e)); t("U8981 输入响应仪表 抛异常", false, String(e)); t("U8982 输入响应仪表 抛异常", false, String(e)); t("U8983 输入响应仪表 抛异常", false, String(e)); t("U8984 输入响应仪表 抛异常", false, String(e)); }
+
+
+  // ===== U8985~U8990: 帧时趋势图(v1.1.187) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('smTrendWrap'),spark:document.querySelector('#smTrendWrap .smspark')?document.querySelector('#smTrendWrap .smspark').children.length:0,s:T.smTrendStateNow([],5)};return JSON.stringify(r);})()"));
+    t("U8985 趋势 pill 已加入（48 根 sparkline 条 + 函数可用，首值入队）", o.dom === true && o.spark === 48 && o.s.ok === true && o.s.arr.length === 1 && o.s.arr[0] === 5, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.smTrendStateNow([],5)};return JSON.stringify(r);})()"));
+    t("U8986 初值 空序列入队（[5]）", o1.s.ok === true && o1.s.arr.length === 1 && o1.s.arr[0] === 5, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.smTrendStateNow([1,2,3],4)};return JSON.stringify(r);})()"));
+    t("U8987 正常值 顺序追加（[1,2,3,4]）", o2.s.ok === true && o2.s.arr.length === 4 && o2.s.arr[3] === 4 && o2.s.arr[0] === 1, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r=(function(){const big=[];for(let i=0;i<48;i++)big.push(i);const s=T.smTrendStateNow(big,99);return {len:s.arr.length,first:s.arr[0],last:s.arr[s.arr.length-1]};})();return JSON.stringify(r);})()"));
+    t("U8988 边界 超 48 截断（长度恒 48，丢最旧留最新）", o3.len === 48 && o3.first === 1 && o3.last === 99, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smTrendStateNow([],NaN),b:T.smTrendStateNow(null,5)};return JSON.stringify(r);})()"));
+    t("U8989 非法 NaN 值退化 / 非数组入队可建（null → [5]）", o4.a.ok === false && o4.a.arr.length === 0 && o4.b.ok === true && o4.b.arr.length === 1 && o4.b.arr[0] === 5, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.smTrendSeries(),n:(function(){const e=document.querySelector('#smTrendWrap .smspark');return e?e.children.length:0;})()};return JSON.stringify(r);})()"));
+    t("U8990 DOM 与函数一致（序列可读 + sparkline 48 条在 DOM）", Array.isArray(o5.s) && o5.n === 48, JSON.stringify(o5));
+  } catch (e) { t("U8985 帧时趋势图 抛异常", false, String(e)); t("U8986 帧时趋势图 抛异常", false, String(e)); t("U8987 帧时趋势图 抛异常", false, String(e)); t("U8988 帧时趋势图 抛异常", false, String(e)); t("U8989 帧时趋势图 抛异常", false, String(e)); t("U8990 帧时趋势图 抛异常", false, String(e)); }
+
+
+  // ===== U8991~U8996: 流畅度总结卡(v1.1.188) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('smSumWrap'),card:(T.smCardHtml()||'').indexOf('流畅度')>=0,s:T.smSummaryStateNow({avgFps:60,stut:0})};return JSON.stringify(r);})()"));
+    t("U8991 评级 pill 已加入 + 结算卡含流畅度 + 函数可用（60FPS/0卡 → 极佳）", o.dom === true && o.card === true && o.s.ok === true && o.s.rating === '极佳', JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smSummaryStateNow(null),b:T.smSummaryStateNow({})};return JSON.stringify(r);})()"));
+    t("U8992 初值 null/空对象 → 退化", o1.a.ok === false && o1.a.rating === '—' && o1.b.ok === false && o1.b.rating === '—', JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smSummaryStateNow({avgFps:60,stut:0}),b:T.smSummaryStateNow({avgFps:50,stut:0}),c:T.smSummaryStateNow({avgFps:35,stut:0}),d:T.smSummaryStateNow({avgFps:20,stut:0})};return JSON.stringify(r);})()"));
+    t("U8993 正常值 60→极佳 / 50→良好 / 35→一般 / 20→吃力", o2.a.rating === '极佳' && o2.b.rating === '良好' && o2.c.rating === '一般' && o2.d.rating === '吃力', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smSummaryStateNow({avgFps:55,stut:3}),b:T.smSummaryStateNow({avgFps:55,stut:4}),c:T.smSummaryStateNow({avgFps:45,stut:0}),d:T.smSummaryStateNow({avgFps:30,stut:0}),e:T.smSummaryStateNow({avgFps:29.9,stut:0})};return JSON.stringify(r);})()"));
+    t("U8994 边界 55FPS/3卡→极佳 / 55FPS/4卡→良好 / 45→良好 / 30→一般 / 29.9→吃力", o3.a.rating === '极佳' && o3.b.rating === '良好' && o3.c.rating === '良好' && o3.d.rating === '一般' && o3.e.rating === '吃力', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smSummaryStateNow({avgFps:0,stut:0}),b:T.smSummaryStateNow({avgFps:NaN,stut:0}),c:T.smSummaryStateNow('x')};return JSON.stringify(r);})()"));
+    t("U8995 非法 0FPS/NaN/字符串 → 退化", o4.a.ok === false && o4.b.ok === false && o4.c.ok === false, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={n:T.smSummaryNow(),dom:(function(){const e=document.querySelector('#smSumWrap .smn');return e?e.textContent:null;})()};return JSON.stringify(r);})()"));
+    t("U8996 DOM 与函数一致（均 FPS 可读 + DOM 为合法评级）", o5.n.avgFps >= 0 && o5.n.stut >= 0 && (o5.dom === null || ['极佳','良好','一般','吃力','—'].indexOf(o5.dom) >= 0), JSON.stringify(o5));
+  } catch (e) { t("U8991 流畅度总结卡 抛异常", false, String(e)); t("U8992 流畅度总结卡 抛异常", false, String(e)); t("U8993 流畅度总结卡 抛异常", false, String(e)); t("U8994 流畅度总结卡 抛异常", false, String(e)); t("U8995 流畅度总结卡 抛异常", false, String(e)); t("U8996 流畅度总结卡 抛异常", false, String(e)); }
+
+
+  async function senseCheck(name, probe) {
+    const r = await client.send('Runtime.evaluate', {
+      expression: '(' + probe.toString() + ')(window.__tbTest, id => document.getElementById(id))',
+      returnByValue: true, awaitPromise: true
+    });
+    const value = r.result?.result?.value;
+    t(name, value === true, r.result?.exceptionDetails?.exception?.description || String(value));
+  }
+
+  // U8997–U9002: 战场声效字幕
+  await senseCheck("U8997 字幕位于战场内", (T,$) => $('sfxVizWrap').parentElement === $('frame') && typeof T.sfxVizTextNow === 'function');
+  await senseCheck("U8998 新一局没有上一局的字幕", (T,$) => { T.startGame(); return $('sfxVizWrap').hidden && T.sfxVizCountNow() === 0; });
+  await senseCheck("U8999 区分命中与拾取", T => T.sfxVizTextNow('hit',200) === '命中' && T.sfxVizTextNow('pickup',200) === '拾取');
+  await senseCheck("U9000 从零时刻显示，到期即隐藏", T => T.sfxVizTextNow('boom',0) === '爆炸' && T.sfxVizTextNow('boom',800) === '');
+  await senseCheck("U9001 无效声效与时间不产生字幕", T => !T.sfxVizTextNow('toString',0) && !T.sfxVizTextNow('boss',NaN) && !T.sfxVizTextNow('hit',-1));
+  await senseCheck("U9002 真实 Boss 事件在静音下仍有字幕，暂停时消失", (T,$) => {
+      const wasMuted = T.lsGet('tank-battle-muted') === '1';
+      if (!wasMuted) $('muteBtn').click();
+      try {
+        T.forceSpawnBoss(); T.kill();
+        const visible = !$('sfxVizWrap').hidden && $('sfxVizWrap').textContent === T.sfxVizTextNow('boss',0);
+        $('pauseBtn').click(); return visible && $('sfxVizWrap').hidden;
+      } finally { if (!wasMuted) $('muteBtn').click(); T.quit(); }
+    });
+
+
+  // U9003–U9008: 配乐播放铭牌
+  await senseCheck("U9003 设置包含配乐铭牌", (T,$) => $('settings').contains($('bgmLiveVal')));
+  await senseCheck("U9004 关闭曲目无速度", T => T.bgmLiveTextNow('off',false,1,true) === '关闭');
+  await senseCheck("U9005 Boss 曲显示实际节拍", T => T.bgmLiveTextNow('boss',false,0.8,true) === 'Boss · 150 BPM');
+  await senseCheck("U9006 零音量或等待音频不会宣称播放", T => T.bgmLiveTextNow('rush',false,0,true) === '紧迫 · 静音' && T.bgmLiveTextNow('calm',false,1,false) === '宁静 · 等待音频');
+  await senseCheck("U9007 不接受越界音量或非曲目属性", T => T.bgmLiveTextNow('boss',false,NaN,true) === '音量未知' && T.bgmLiveTextNow('constructor',false,1,true) === '关闭');
+  await senseCheck("U9008 调节音乐音量即时刷新所选曲目", (T,$) => {
+      const mode = T.bgmModeNow(), vol = T.bgmVolNow();
+      try { T.setBgmNow('boss'); T.setBgmVol(0); return $('bgmLiveVal').textContent === T.bgmLiveTextNow('boss',false,0,true); }
+      finally { T.setBgmVol(vol); T.setBgmNow(mode); }
+    });
+
+
+  // U9009–U9014: 自动保存回执
+  await senseCheck("U9009 存档窗口内有写入回执", (T,$) => $('saveBox').contains($('saveStampVal')));
+  await senseCheck("U9010 新会话不虚报保存", T => T.saveStampTextNow({pending:0,writes:0,lastSavedAt:null}) === '本页尚无写入');
+  await senseCheck("U9011 成功写入使用当地时分秒", T => T.saveStampTextNow({pending:0,writes:2,lastSavedAt:new Date(2020,0,2,3,4,5).getTime()}) === '已保存 03:04:05');
+  await senseCheck("U9012 待写优先，时间戳零有效", T => T.saveStampTextNow({pending:1,writes:3,lastSavedAt:0}) === '1 项待保存' && T.saveStampTextNow({pending:0,writes:1,lastSavedAt:0}).startsWith('已保存 '));
+  await senseCheck("U9013 非法计数和时间不会显示成功", T => [null,{pending:-1,writes:1},{pending:0,writes:1,lastSavedAt:null}].every(s => T.saveStampTextNow(s) === '保存状态未知'));
+  await senseCheck("U9014 模拟配额不足至重试：DOM 只反映真正落盘的写入", (T,$) => {
+      T.openSaveNow();
+      const old = Storage.prototype.setItem, before = T.saveStampNow();
+      let blocked;
+      try {
+        Storage.prototype.setItem = () => { throw new DOMException('quota','QuotaExceededError'); };
+        T.setCoinsNow(31);
+        blocked = $('saveStampVal').textContent === '1 项待保存' && T.saveStampNow().writes === before.writes;
+      } finally { Storage.prototype.setItem = old; }
+      $('saveWarning').querySelector('button').click();
+      const after = T.saveStampNow(), shown = $('saveStampVal').textContent; $('btnSaveClose').click();
+      return blocked && after.writes === before.writes + 1 && after.pending === 0 && shown === T.saveStampTextNow(after);
+    });
+
+
+  // U9015–U9020: 失焦回归提示
+  await senseCheck("U9015 暂停层含回归提示", (T,$) => $('overlay').contains($('focusBackWrap')));
+  await senseCheck("U9016 手动暂停不属于离场", (T,$) => { T.startGame(); $('pauseBtn').click(); return T.focusBackCountNow() === 0 && $('focusBackWrap').hidden; });
+  await senseCheck("U9017 正常离场时长", T => T.focusBackTextNow(100,3550) === '离开 3 秒，战局仍已暂停');
+  await senseCheck("U9018 同一时刻与整分钟", T => T.focusBackTextNow(0,0).includes('不到 1 秒') && T.focusBackTextNow(0,60000).includes('1 分 0 秒'));
+  await senseCheck("U9019 倒退时钟与无效时间不产生时长", T => !T.focusBackTextNow(5,4) && !T.focusBackTextNow(null,100) && !T.focusBackTextNow(0,NaN));
+  await senseCheck("U9020 真实失焦/回归只记一次，仍须玩家继续", (T,$) => {
+      T.startGame(); window.dispatchEvent(new Event('blur')); window.dispatchEvent(new Event('blur'));
+      window.dispatchEvent(new Event('focus')); window.dispatchEvent(new Event('focus'));
+      const note = $('focusBackWrap'), ok = !note.hidden && note.textContent.includes('仍已暂停') && T.focusBackCountNow() === 1 && !$('overlay').classList.contains('hide');
+      $('btnPlay').click(); const resumed = note.hidden && $('overlay').classList.contains('hide'); T.quit();
+      return ok && resumed;
+    });
+
+
+  // U9021–U9026: 暂停增益时刻表
+  await senseCheck("U9021 增益表在暂停层内", (T,$) => $('overlay').contains($('buffStackVal')));
+  await senseCheck("U9022 无增益时不虚报效果", T => T.buffStackTextNow({shield:0}) === '无生效增益');
+  await senseCheck("U9023 短效果先于长效果", T => T.buffStackTextNow({rapid:4.1,double:2,shield:3}) === '双管 2 秒 / 护盾 3 秒 / 速射 5 秒');
+  await senseCheck("U9024 小于一秒仍在生效，恰好到零退出", T => T.buffStackTextNow({magnet:0.01,freeze:0}) === '磁暴 1 秒');
+  await senseCheck("U9025 忽略非有限计时和非增益字段", T => T.buffStackTextNow(null) === '增益状态未知' && T.buffStackTextNow({rapid:Infinity,freeze:-1,boss:3}) === '无生效增益');
+  await senseCheck("U9026 真实暂停读到护盾帧数和磁暴秒数", (T,$) => {
+      T.startGame(); T.invul(120); T.setMagnetStorm(3); $('pauseBtn').click();
+      const text = $('buffStackVal').textContent;
+      const ok = !$('buffStackWrap').hidden && text === T.buffStackTextNow(T.buffStackCurrentNow()) && text.includes('护盾 2 秒') && text.includes('磁暴 3 秒');
+      T.quit(); return ok && $('buffStackWrap').hidden;
+    });
+
+
+  // U9027–U9032: 调音渐入保护
+  await senseCheck("U9027 设置包含渐入反馈", (T,$) => $('settings').contains($('volGuardVal')));
+  await senseCheck("U9028 未改变目标无需渐入", T => T.volGuardValueNow(T.volGuardPlanNow(0.5,0.5,0),0) === 0.5);
+  await senseCheck("U9029 升音量在半程达到中间增益", T => Math.abs(T.volGuardValueNow(T.volGuardPlanNow(0,1,0),0.12) - 0.5) < 0.0001);
+  await senseCheck("U9030 起点、终点和静音边界", T => { const p=T.volGuardPlanNow(0,1,1); return T.volGuardValueNow(p,0)===0 && T.volGuardValueNow(p,2)===1 && T.volGuardValueNow(T.volGuardPlanNow(1,0,0),0)===0; });
+  await senseCheck("U9031 非法增益不会产生调度计划", T => !T.volGuardPlanNow(-1,0,0) && !T.volGuardPlanNow(0,Infinity,0) && !T.volGuardPlanNow(0,1,NaN));
+  await senseCheck("U9032 音频采样验证渐入和静音，滑杆与存档保留目标值", async (T,$) => {
+      const ctx = new OfflineAudioContext(2,4096,16000), tone = ctx.createConstantSource();
+      const merger = ctx.createChannelMerger(2); merger.connect(ctx.destination);
+      for (const [ch, from, to] of [[0,0,1],[1,1,0]]) {
+        const bus = ctx.createGain(); tone.connect(bus); bus.connect(merger,0,ch);
+        T.volGuardScheduleNow(bus.gain,from,T.volGuardPlanNow(from,to,0),0,0);
+      }
+      tone.start(); const buf = await ctx.startRendering();
+      const up = buf.getChannelData(0), down = buf.getChannelData(1);
+      const envelope = up[0] < 0.01 && Math.abs(up[1920]-0.5) < 0.02 && up[4000] > 0.99 && down.every(v => Math.abs(v) < 0.001);
+      const old = T.sfxVolNow(), muted = T.lsGet('tank-battle-muted') === '1';
+      if (muted) $('muteBtn').click();
+      try {
+        T.setSfxVol(0); T.setSfxVol(1);
+        const label = $('volGuardVal').textContent, target = T.sfxVolNow(), saved = T.lsGet('tank-battle-sfx'), slider = $('sfxSlider').value;
+        T.setSfxVol(0);
+        return envelope && label === '音效 100% · 渐入' && target === 1 && saved === '1' && slider === '100' && $('volGuardVal').textContent === '音效 0% · 即时';
+      } finally { T.setSfxVol(old); if (muted) $('muteBtn').click(); }
+    });
+
+
+  // U9033–U9038: 存档只读体检
+  await senseCheck("U9033 存档页含可操作的检查按钮与结果", (T,$) => $('saveBox').contains($('saveHealthBtn')) && $('saveHealthVal').tagName === 'OUTPUT');
+  await senseCheck("U9034 空存档不视为损坏", T => T.saveHealthTextNow({},0) === '尚无已保存记录');
+  await senseCheck("U9035 识别多类有效数据", T => T.saveHealthTextNow({coins:'42',skins:'["classic"]',stars:'{"2":3}',career:'{"games":1}'},0) === '已检查 4 类，格式正常');
+  await senseCheck("U9036 零余额有效，排队不等于已落盘", T => T.saveHealthTextNow({coins:'0',stars:'{}'},1) === '已检查 2 类，格式正常 · 1 项待保存');
+  await senseCheck("U9037 损坏、结构错误与不可读分开报告", T => T.saveHealthTextNow({skins:'{',stars:'[]'},0) === '格式异常：皮肤、星级' && T.saveHealthTextNow(null,0) === '无法读取本地记录');
+  await senseCheck("U9038 玩家点击检查能定位损坏且绝不改写原数据", (T,$) => {
+      T.openSaveNow(); const k='tank-battle-stars', old=localStorage.getItem(k);
+      try {
+        localStorage.setItem(k,'{broken'); const before=T.saveStampNow().writes;
+        $('saveHealthBtn').click();
+        return $('saveHealthVal').textContent.includes('星级') && localStorage.getItem(k)==='{broken' && T.saveStampNow().writes===before;
+      } finally { if(old===null) localStorage.removeItem(k); else localStorage.setItem(k,old); $('btnSaveClose').click(); }
+    });
+
+
+  // U9039–U9044: 战后感知回顾
+  await senseCheck("U9039 结算层含感知回顾卡", (T,$) => $('overlay').contains($('senseDashWrap')) && $('senseDashWrap').contains($('senseDashVal')));
+  await senseCheck("U9040 零事件是有效战报", T => T.senseDashTextNow({sounds:0,returns:0,writes:0,pending:0}) === '声音 0 次 · 切回 0 次 · 成功写入 0 次 · 无待写项');
+  await senseCheck("U9041 战报列出实际计数而非主观评级", T => T.senseDashTextNow({sounds:17,returns:2,writes:3,pending:0}) === '声音 17 次 · 切回 2 次 · 成功写入 3 次 · 无待写项');
+  await senseCheck("U9042 首项待写立即提示重试", T => T.senseDashTextNow({sounds:0,returns:0,writes:1,pending:1}).endsWith('1 项待保存，请重试'));
+  await senseCheck("U9043 未知或不合法计数不报成功", T => [null,{}, {sounds:-1,returns:0,writes:1,pending:0}].every(v => T.senseDashTextNow(v) === '本局记录不可用'));
+  await senseCheck("U9044 两局之间独立，真实结算卡与存档回执一致", (T,$) => {
+      T.startGame(); T.forceSpawnBoss(); T.setCoinsNow(29); T.showLevelIntro('第 1 关'); T.endGame(false);
+      const s=T.senseRoundNow(), card=$('senseDashWrap');
+      const ok=!card.hidden && getComputedStyle($('lvIntro')).display==='none' && s.sounds>0 && s.writes>0 && $('senseDashVal').textContent===T.senseDashTextNow(s);
+      T.quit(); T.startGame(); const fresh=T.senseRoundNow(); T.quit(); return ok && fresh.sounds===0 && fresh.returns===0 && card.hidden;
+    });
+
+  // U9045–U9050: cold start and frame-paced battle HUD
+  await senseCheck("U9045 菜单不刷新被遮住的战斗统计", async (T,$) => {
+    T.quit();
+    const el = $('fxText'), prior = el.textContent, next = T.hudScheduleNow().next;
+    try {
+      el.textContent = 'probe';
+      for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
+      return el.textContent === 'probe' && T.hudScheduleNow().next === next && getComputedStyle($('fxWrap')).display === 'none';
+    } finally { el.textContent = prior; }
+  });
+  await senseCheck("U9046 菜单按键设置无需等待战斗仪表", (T,$) => {
+    const old = T.customFireKeyNow(), btn = $('fireKeyBtn');
+    try { btn.click(); return old !== T.customFireKeyNow() && btn.textContent === T.fireKeySummaryNow(); }
+    finally { T.setCustomFireKeyNow(old); T.showOverlay('title'); }
+  });
+  await senseCheck("U9047 开局先显示正确的生命、关卡和分数", (T,$) => {
+    T.startGame();
+    return !$('hud').classList.contains('hud-covered') && T.hudScheduleNow().next === 0 &&
+      $('score').textContent === '0' && $('level').textContent === '1' &&
+      $('lives').querySelectorAll('span:not(.off)').length === T.livesNow();
+  });
+  await senseCheck("U9048 真实动画帧内至多推进一组，所有统计都会刷新", async (T,$) => {
+    T.startGame();
+    const {total} = T.hudScheduleNow(), seen = new Set(), el = $('cuUpgWrap');
+    delete el.dataset.fv;
+    let prev = T.hudScheduleNow().next;
+    const deadline = performance.now() + 5000;
+    while (seen.size < total && performance.now() < deadline) {
+      await new Promise(requestAnimationFrame);
+      const next = T.hudScheduleNow().next;
+      if (next !== prev) {
+        if (next !== (prev + 1) % total) return false;
+        seen.add(prev); prev = next;
+      }
+    }
+    return total > 1 && seen.size === total && !!el.dataset.fv && window.__tbErrCount === 0;
+  });
+  await senseCheck("U9049 重绘统计不伪造帧时或卡顿", T => {
+    const series = T.smTrendSeries().join(','), stutters = T.smStutterNow();
+    T.extraHudRefreshNow(); T.extraHudRefreshNow();
+    return !!series && T.smTrendSeries().join(',') === series && T.smStutterNow() === stutters;
+  });
+  await senseCheck("U9050 暂停冻结采样，继续时不把离开时间算成一帧", async (T,$) => {
+    $('pauseBtn').click();
+    const before = T.smTrendSeries().join(','), next = T.hudScheduleNow().next;
+    await new Promise(resolve => setTimeout(resolve, 250));
+    const frozen = $('hud').classList.contains('hud-covered') && T.smTrendSeries().join(',') === before && T.hudScheduleNow().next === next;
+    $('btnPlay').click(); await new Promise(requestAnimationFrame);
+    const resumed = $('overlay').classList.contains('hide') && T.smTrendSeries().join(',') === before;
+    T.quit(); return frozen && resumed;
+  });
+
+  // U9051–U9056: 120 Hz frame budget — off-screen readouts, cached sprites, no render cap
+  await senseCheck("U9051 屏外读数留在 DOM 但不参与渲染，主读数照常显示", async (T,$) => {
+    T.startGame(); T.skipIntro();
+    const box = document.querySelector('.hudReadouts'), pill = $('smCompactWrap');
+    const end = performance.now() + 2000;
+    while (!box.classList.contains('offscreen') && performance.now() < end) await new Promise(requestAnimationFrame);
+    return box.getBoundingClientRect().left >= innerWidth && box.classList.contains('offscreen') && box.contains(pill) &&
+      !pill.checkVisibility() && $('score').checkVisibility();
+  });
+  await senseCheck("U9052 被跳过的读数仍随刷新更新数值", (T,$) => {
+    const el = $('runShotsVal'), before = el.textContent;
+    T.addStat('shots', 7); T.extraHudRefreshNow();
+    return !!el.closest('.hudReadouts.offscreen') && el.textContent !== before && el.textContent.includes('7');
+  });
+  await senseCheck("U9053 读数区进入视口即恢复渲染，移出后再次跳过", async (T,$) => {
+    const box = document.querySelector('.hudReadouts'), pill = $('runShotsVal');
+    const settle = async skipped => {
+      const end = performance.now() + 2000;
+      while (box.classList.contains('offscreen') !== skipped && performance.now() < end) await new Promise(requestAnimationFrame);
+      return box.classList.contains('offscreen') === skipped;
+    };
+    try {
+      box.style.transform = 'translateX(' + (-box.getBoundingClientRect().left) + 'px)';
+      if (!(await settle(false) && pill.checkVisibility())) return false;
+    } finally { box.style.transform = ''; }
+    return await settle(true) && !pill.checkVisibility();
+  });
+  await senseCheck("U9054 同款坦克复用一张贴图且照常出画", (T,$) => {
+    T.startGame(); T.skipIntro(); T.forceClear(); T.clearMap();
+    for (let i = 0; i < 4; i++) T.spawnEnemyAt(60 + i * 60, 120, 'normal');
+    const base = T.renderCacheNow().tanks;
+    T.renderOnce(); const once = T.renderCacheNow().tanks; T.renderOnce();
+    const c = $('game'), k = c.width / 624;
+    const px = c.getContext('2d').getImageData(Math.round(71 * k) - 5, Math.round(131 * k) - 5, 10, 10).data;
+    let lit = 0; for (let i = 0; i < px.length; i += 4) if (px[i] + px[i + 1] + px[i + 2] > 150) lit++;
+    const again = T.renderCacheNow().tanks;
+    return (once >= 1 && once - base <= 2 && again === once && lit > 20) || JSON.stringify({ base, once, again, lit });
+  });
+  await senseCheck("U9055 飘字同文案复用贴图，移动时不再逐帧排字", (T,$) => {
+    T.addTextNow(200, 300, '+198 稳', '#39ff14'); T.addTextNow(260, 340, '+198 稳', '#39ff14');
+    const c = $('game'), ctx = c.getContext('2d'), fillText = ctx.fillText; let typeset = 0;
+    ctx.fillText = function (s, ...rest) { if (String(s).includes('+198')) typeset++; return fillText.call(this, s, ...rest); };
+    let once, twice;
+    try { T.renderOnce(); once = T.renderCacheNow().labels; T.renderOnce(); twice = T.renderCacheNow().labels; }
+    finally { delete ctx.fillText; }
+    const k = c.width / 624, px = ctx.getImageData(Math.round(180 * k), Math.round(292 * k), Math.round(40 * k), Math.round(16 * k)).data;
+    let green = 0; for (let i = 0; i < px.length; i += 4) if (px[i + 1] > 140 && px[i] < 140) green++;
+    return (typeset === 0 && once >= 1 && twice === once && green > 10) || JSON.stringify({ typeset, once, twice, green });
+  });
+  await senseCheck("U9056 掉帧不改判刷新率；自适应重载仍逐帧出画", async (T,$) => {
+    const hz = T.perfDetectHzNow([8.3, 8.4, 8.3, 16.7, 8.3, 25, 8.3, 8.3, 33.3, 8.3, 8.4]);
+    T.startGame(); T.skipIntro();
+    const ctx = $('game').getContext('2d'), drawImage = ctx.drawImage; let frames = 0, painted = false;
+    ctx.drawImage = function (...a) { painted = true; return drawImage.apply(this, a); };
+    try {
+      await new Promise(requestAnimationFrame);
+      for (let i = 0; i < 4; i++) {
+        T.perfGovForceNow(3); painted = false;
+        await new Promise(requestAnimationFrame);
+        if (painted) frames++;
+      }
+    } finally { delete ctx.drawImage; T.perfGovToggleNow(false); T.quit(); }
+    return hz === 120 && frames === 4;
+  });
+
+  // U9057–U9062: 大招冷却与就绪提示
+  await senseCheck("U9057 提示条位于战场内，默认隐藏", (T,$) => $('fieldNote').parentElement === $('frame') && $('fieldNote').hidden && typeof T.cooldownStepNow === 'function');
+  await senseCheck("U9058 新一局大招可用且没有残留提示", (T,$) => { T.startGame(); const ok = $('fieldNote').hidden && T.fieldNoteCountNow() === 0 && T.ultNow().ready; T.quit(); return ok; });
+  await senseCheck("U9059 60 帧只流逝 1 秒；键盘与触屏文案不同", T => { const s = T.cooldownStepNow(8, 60); return s.cd === 7 && !s.ready && T.ultReadyTextNow('ult', false) === '大招就绪 · 按 E' && T.ultReadyTextNow('hero', true) === '英雄技就绪'; });
+  await senseCheck("U9060 恰好归零只报一次就绪", T => { const a = T.cooldownStepNow(0.01, 1), b = T.cooldownStepNow(0, 1), c = T.cooldownStepNow(1, 60); return a.cd === 0 && a.ready && b.cd === 0 && !b.ready && c.cd === 0 && c.ready; });
+  await senseCheck("U9061 无效冷却和步长不触发就绪，未知技能无文案", T => { const a = T.cooldownStepNow(NaN, 1), b = T.cooldownStepNow(5, NaN), c = T.cooldownStepNow(5, -3); return a.cd === 0 && !a.ready && b.cd === 5 && !b.ready && c.cd === 5 && !c.ready && T.ultReadyTextNow('toString', false) === '' && T.fieldNoteWinsNow(NaN, 0, 0) === false; });
+  await senseCheck("U9062 真实释放后仍在冷却；归零时提示与文案一致，暂停即收起", async (T,$) => {
+      const raf = () => new Promise(requestAnimationFrame);
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+      T.fireUlt(); for (let i = 0; i < 12; i++) await raf();
+      const cooling = T.ultNow().cd > 7 && T.ultNow().cd < 8 && $('fieldNote').hidden;
+      T.setUltCd(0.05);
+      const end = performance.now() + 3000;
+      while ($('fieldNote').hidden && performance.now() < end) await raf();
+      const note = $('fieldNote'), shown = !note.hidden && note.textContent === T.ultReadyNoteNow('ult') && note.dataset.kind === 'good' && T.ultNow().ready;
+      $('pauseBtn').click(); const cleared = note.hidden; T.quit();
+      return (cooling && shown && cleared) || JSON.stringify({ cooling, shown, cleared, text: note.textContent });
+    });
+
+  // U9063–U9068: 连击收官提示
+  await senseCheck("U9063 提示条对读屏器可见", (T,$) => $('fieldNote').getAttribute('role') === 'status' && typeof T.comboEndTextNow === 'function');
+  await senseCheck("U9064 没有连击时不提示", async (T,$) => {
+      T.startGame(); T.skipIntro(); T.stopSpawn();
+      for (let i = 0; i < 6; i++) await new Promise(requestAnimationFrame);
+      const ok = $('fieldNote').hidden && T.comboEndTextNow(0, 0) === ''; T.quit(); return ok;
+    });
+  await senseCheck("U9065 报出连击数，本局最长另有标注", T => T.comboEndTextNow(4, 9) === '4 连击结束' && T.comboEndTextNow(9, 9) === '9 连击结束 · 本局最长');
+  await senseCheck("U9066 3 连击起报，5 连击起才标最长", T => T.comboEndTextNow(2, 2) === '' && T.comboEndTextNow(3, 3) === '3 连击结束' && T.comboEndTextNow(5, 5) === '5 连击结束 · 本局最长');
+  await senseCheck("U9067 非整数、负数或超过本局最长的连击不提示", T => [[NaN, 3], ['7', 7], [7, 3], [-1, 0], [3.5, 4], [4, null]].every(a => T.comboEndTextNow(a[0], a[1]) === ''));
+  await senseCheck("U9068 真实计时归零：提示与文案一致，连击清零", async (T,$) => {
+      const raf = () => new Promise(requestAnimationFrame);
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+      await raf(); T.comboExpireNow(6);
+      const end = performance.now() + 3000;
+      while ($('fieldNote').hidden && performance.now() < end) await raf();
+      const note = $('fieldNote'), ok = !note.hidden && note.textContent === T.comboEndTextNow(6, 6) && T.comboTimerNow() <= 0;
+      T.quit(); return (ok && note.hidden) || note.textContent;
+    });
+
+  // U9069–U9074: 破纪录瞬间
+  await senseCheck("U9069 提示条浮在战场上方，不挤占布局", (T,$) => getComputedStyle($('fieldNote')).position === 'absolute' && typeof T.recordPassTextNow === 'function');
+  await senseCheck("U9070 开局尚未破纪录", (T,$) => { T.startGame(); const ok = T.recordNotedNow() === false && $('fieldNote').hidden; T.quit(); return ok; });
+  await senseCheck("U9071 显示被超过的纪录，大数带千分位", T => T.recordPassTextNow(5200, 5000) === '新纪录 · 已超过 5000 分' && T.recordPassTextNow(12001, 12000) === '新纪录 · 已超过 12,000 分');
+  await senseCheck("U9072 平纪录不算破，多 1 分即算；没有纪录的首局不提示", T => T.recordPassTextNow(5000, 5000) === '' && T.recordPassTextNow(5001, 5000) !== '' && T.recordPassTextNow(900, 0) === '');
+  await senseCheck("U9073 非数值分数不提示", T => [[NaN, 100], [200, null], ['300', 100], [Infinity, 100], [200, -5]].every(a => T.recordPassTextNow(a[0], a[1]) === ''));
+  await senseCheck("U9074 真实得分越过纪录：只提示一次，新一局重新计", (T,$) => {
+      T.startGame(); T.skipIntro(); T.stopSpawn(); T.setBestAtStartNow(300);
+      T.setScore(250); T.extraHudRefreshNow();
+      const quiet = $('fieldNote').hidden && !T.recordNotedNow();
+      T.setScore(310); T.extraHudRefreshNow();
+      const note = $('fieldNote'), shown = !note.hidden && note.textContent === T.recordPassTextNow(310, 300) && T.recordNotedNow();
+      const count = T.fieldNoteCountNow(); T.setScore(900); T.extraHudRefreshNow();
+      const once = T.fieldNoteCountNow() === count;
+      T.quit(); T.startGame(); const fresh = !T.recordNotedNow(); T.quit();
+      return (quiet && shown && once && fresh) || JSON.stringify({ quiet, shown, once, fresh });
+    });
+
+  // U9075–U9080: 最后一个敌人
+  await senseCheck("U9075 菜单中没有定位目标", (T,$) => typeof T.lastEnemyTextNow === 'function' && T.lastEnemyMarkNow() === null && $('fieldNote').hidden);
+  await senseCheck("U9076 开局敌人尚未出完，不标记", (T,$) => { T.startGame(); const ok = T.lastEnemyMarkNow() === null && $('fieldNote').hidden; T.quit(); return ok; });
+  await senseCheck("U9077 普通关与 Boss 关文案不同", T => T.lastEnemyTextNow(1, 12, 12, false) === '只剩最后 1 个敌人' && T.lastEnemyTextNow(1, 12, 12, true) === '只剩 Boss');
+  await senseCheck("U9078 还有敌人待出场、场上不止一个或全关只有一个敌人时不提示", T => T.lastEnemyTextNow(1, 11, 12, false) === '' && T.lastEnemyTextNow(2, 12, 12, false) === '' && T.lastEnemyTextNow(0, 12, 12, false) === '' && T.lastEnemyTextNow(1, 1, 1, false) === '' && T.lastEnemyTextNow(1, 2, 2, false) !== '');
+  await senseCheck("U9079 非整数计数不提示", T => [[NaN, 12, 12], ['1', 12, 12], [1, 12.5, 12], [1, 12, null]].every(a => T.lastEnemyTextNow(a[0], a[1], a[2], false) === ''));
+  await senseCheck("U9080 真实战场：两个敌人无圈，只剩一个时出圈并提示", (T,$) => {
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap(); T.forceClear();
+      T.spawnEnemyAt(300, 300, 'normal'); T.spawnEnemyAt(480, 120, 'normal');
+      const c = $('game'), k = c.width / 624;
+      const yellow = () => {
+        T.renderOnce();
+        const px = c.getContext('2d').getImageData(Math.round(285 * k), Math.round(285 * k), Math.round(52 * k), Math.round(52 * k)).data;
+        let n = 0; for (let i = 0; i < px.length; i += 4) if (px[i] > 60 && px[i + 1] > 50 && px[i + 2] < px[i] * 0.6) n++;
+        return n;
+      };
+      T.extraHudRefreshNow();
+      const two = yellow(), none = T.lastEnemyMarkNow() === null && $('fieldNote').hidden;
+      T.forceClear(); T.spawnEnemyAt(300, 300, 'normal'); T.extraHudRefreshNow();
+      const one = yellow(), mark = T.lastEnemyMarkNow(), note = $('fieldNote');
+      const ok = none && one > two + 12 && mark && mark.x === 300 && !note.hidden && note.textContent === T.lastEnemyTextNow(1, 12, 12, false) && note.dataset.kind === 'warn';
+      T.quit(); return ok || JSON.stringify({ none, two, one, mark, text: note.textContent });
+    });
+
+  // U9081–U9086: 战败原因
+  await senseCheck("U9081 结算层含战败原因，菜单中隐藏", (T,$) => $('overlay').contains($('defeatCauseWrap')) && $('defeatCauseWrap').hidden);
+  await senseCheck("U9082 暂停不是战败", (T,$) => { T.startGame(); $('pauseBtn').click(); const ok = $('defeatCauseWrap').hidden; T.quit(); return ok; });
+  await senseCheck("U9083 写明击毁基地或坦克的敌人", T => T.defeatCauseTextNow({ target: 'base', how: 'shot', by: '狙击坦克' }) === '基地被狙击坦克的炮弹击毁' && T.defeatCauseTextNow({ target: 'tank', how: 'shot', by: 'Boss' }) === '坦克被 Boss 击毁，生命耗尽' && T.defeatCauseTextNow({ target: 'tank', how: 'blast', by: '' }) === '坦克被自爆坦克炸毁，生命耗尽');
+  await senseCheck("U9084 己方误伤单独说明；来源不明时不编造", T => T.defeatCauseTextNow({ target: 'base', how: 'self', by: '' }) === '基地被己方炮弹误毁' && T.defeatCauseTextNow({ target: 'base' }) === '基地被摧毁' && T.defeatCauseTextNow({ target: 'tank', how: '', by: '' }) === '生命耗尽' && T.defeatCauseTextNow({ target: 'base', how: 'shot', by: '' }) === '基地被敌方坦克的炮弹击毁');
+  await senseCheck("U9085 非对象或未知目标没有文案", T => [null, 'base', 7, [], { target: 'moon', how: 'shot' }].every(c => T.defeatCauseTextNow(c) === ''));
+  await senseCheck("U9086 真实敌弹击毁基地：结算卡与记录一致；胜利不显示", async (T,$) => {
+      const raf = () => new Promise(requestAnimationFrame);
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+      T.enemyShotAtBaseNow('sniper');
+      const end = performance.now() + 3000;
+      while ($('overlay').classList.contains('hide') && performance.now() < end) await raf();
+      const el = $('defeatCauseWrap'), cause = T.defeatCauseNow();
+      const lost = !el.hidden && el.textContent === T.defeatCauseTextNow(cause) && el.textContent === '基地被狙击坦克的炮弹击毁';
+      T.quit(); T.startGame(); T.endGame(true); const win = el.hidden; T.quit();
+      return (lost && win) || JSON.stringify({ lost, win, text: el.textContent, cause });
+    });
+
+  // U9087–U9092: 暂停战况摘要
+  await senseCheck("U9087 暂停层含战况摘要，菜单中隐藏", (T,$) => $('overlay').contains($('pauseBriefWrap')) && $('pauseBriefWrap').hidden);
+  await senseCheck("U9088 刚开局：全部敌人待出场，用时从 0:00 起", T => T.pauseBriefTextNow({ alive: 0, queued: 12, lives: 3, secs: 0 }) === '剩余敌人 12（场上 0 · 待出场 12） · 生命 3 · 本关用时 0:00');
+  await senseCheck("U9089 场上与待出场分开计数", T => T.pauseBriefTextNow({ alive: 3, queued: 5, lives: 2, secs: 83.7 }) === '剩余敌人 8（场上 3 · 待出场 5） · 生命 2 · 本关用时 1:23');
+  await senseCheck("U9090 清场和整分钟", T => T.pauseBriefTextNow({ alive: 0, queued: 0, lives: 1, secs: 59.99 }) === '敌人已肃清 · 生命 1 · 本关用时 0:59' && T.pauseBriefTextNow({ alive: 1, queued: 0, lives: 0, secs: 60 }).endsWith('生命 0 · 本关用时 1:00'));
+  await senseCheck("U9091 缺字段、负数或非数值不拼凑战况", T => [null, {}, { alive: -1, queued: 0, lives: 3, secs: 1 }, { alive: 1, queued: 0, lives: 3, secs: NaN }, { alive: '2', queued: 0, lives: 3, secs: 1 }].every(s => T.pauseBriefTextNow(s) === '战况不可用'));
+  await senseCheck("U9092 真实暂停：摘要与战场状态一致，继续后随暂停页收起", (T,$) => {
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.forceClear();
+      T.spawnEnemyAt(120, 120, 'normal'); T.spawnEnemyAt(240, 120, 'fast');
+      $('pauseBtn').click();
+      const el = $('pauseBriefWrap'), s = T.pauseBriefNow();
+      const ok = !el.hidden && s.alive === 2 && s.queued === 0 && el.textContent === T.pauseBriefTextNow(s) && el.textContent.startsWith('剩余敌人 2（场上 2 · 待出场 0）');
+      $('btnPlay').click(); const resumed = $('overlay').classList.contains('hide'); T.quit();
+      return (ok && resumed && el.hidden) || JSON.stringify({ ok, resumed, s, text: el.textContent });
+    });
+
+  // U9093–U9098: 本局强化清单
+  await senseCheck("U9093 暂停与结算层含强化清单，菜单中隐藏", (T,$) => $('overlay').contains($('upgListVal')) && $('upgListWrap').hidden);
+  await senseCheck("U9094 还没选过强化时如实说明", (T,$) => { T.startGame(); $('pauseBtn').click(); const ok = !$('upgListWrap').hidden && $('upgListVal').textContent === '尚未获得强化'; T.quit(); return ok; });
+  await senseCheck("U9095 列出名称与叠加层数", T => T.upgListTextNow({ rapid: 2, fortune: 1 }) === '🔥 快速装填 ×2 / 🍀 金运');
+  await senseCheck("U9096 按强化池顺序排列，单层不标倍数，0 层不列", T => T.upgListTextNow({ fortune: 1, speed: 0, rapid: 1 }) === '🔥 快速装填 / 🍀 金运');
+  await senseCheck("U9097 未知状态与无效层数不冒充强化", T => T.upgListTextNow(null) === '强化状态未知' && T.upgListTextNow([1]) === '强化状态未知' && T.upgListRawNow({ rapid: 1 }, null) === '强化状态未知' && T.upgListTextNow({ rapid: -1, ghost: 3, speed: 1.5 }) === '尚未获得强化');
+  await senseCheck("U9098 真实暂停与结算显示同一份清单，回菜单收起", (T,$) => {
+      T.startGame(); T.setUpgrades({ pierce: 1, hp: 3 }); $('pauseBtn').click();
+      const val = $('upgListVal'), want = T.upgListTextNow({ pierce: 1, hp: 3 });
+      const paused = !$('upgListWrap').hidden && val.textContent === want && want === '❤ 装甲强化 ×3 / 🔱 穿透弹头';
+      $('btnPlay').click(); T.endGame(false);
+      const over = !$('upgListWrap').hidden && val.textContent === want;
+      T.quit(); return (paused && over && $('upgListWrap').hidden) || JSON.stringify({ paused, over, text: val.textContent });
+    });
+
+  // U9099–U9104: 上一局对比
+  await senseCheck("U9099 结算层含上一局对比，菜单中隐藏", (T,$) => $('overlay').contains($('runDeltaWrap')) && $('runDeltaWrap').hidden);
+  await senseCheck("U9100 没有上一局时不显示对比", T => T.runDeltaTextNow({ score: 500, kills: 3, level: 2 }, null) === '');
+  await senseCheck("U9101 分别写出得分、击杀、关卡的差距", T => T.runDeltaTextNow({ score: 12800, kills: 9, level: 3 }, { score: 800, kills: 12, level: 2 }) === '比上一局：得分 +12,000 · 击杀 -3 · 关卡 +1');
+  await senseCheck("U9102 持平如实写明；无尽模式比较波次", T => T.runDeltaTextNow({ score: 0, kills: 0, level: 1 }, { score: 0, kills: 0, level: 1 }) === '比上一局：得分 持平 · 击杀 持平 · 关卡 持平' && T.runDeltaTextNow({ score: 5, kills: 1, level: 7, endless: true }, { score: 4, kills: 1, level: 9, endless: true }).endsWith('波次 -2'));
+  await senseCheck("U9103 模式不同或数据残缺不比较", T => T.runDeltaTextNow({ score: 5, kills: 1, level: 1, daily: true }, { score: 4, kills: 1, level: 1 }) === '' && [[{ score: NaN, kills: 1, level: 1 }, { score: 1, kills: 1, level: 1 }], [{ score: 1, kills: 1, level: 1 }, { score: 1, kills: -1, level: 1 }], ['x', { score: 1, kills: 1, level: 1 }], [{ score: 1, kills: 1 }, { score: 1, kills: 1, level: 1 }]].every(a => T.runDeltaTextNow(a[0], a[1]) === ''));
+  await senseCheck("U9104 真实连打两局：结算卡与两局快照一致，回菜单收起", (T,$) => {
+      T.startGame(); T.setScore(500); T.endGame(false); T.quit();
+      T.startGame(); T.kill(); T.setScore(800); T.endGame(false);
+      const el = $('runDeltaWrap'), pair = T.runPairNow();
+      const ok = !el.hidden && pair.prev.score === 500 && pair.cur.score === 800 && el.textContent === T.runDeltaTextNow(pair.cur, pair.prev) && el.textContent === '比上一局：得分 +300 · 击杀 +1 · 关卡 持平';
+      T.quit(); return (ok && el.hidden) || JSON.stringify({ text: el.textContent, pair });
+    });
+
+  // U9105–U9110: 道具效果回执
+  await senseCheck("U9105 飘字画在战场画布上，菜单中没有残留；顶栏状态提示保持单行", (T,$) => typeof T.pickupEffectTextNow === 'function' && !!$('game').getContext && Array.isArray(T.floatTextsNow()) && T.floatTextsNow().length === 0 && getComputedStyle($('dangerTip')).whiteSpace === 'nowrap' && $('dangerTip').getBoundingClientRect().height < 30);
+  await senseCheck("U9106 新一局没有增益，也没有飘字", T => { T.startGame(); const s = T.pickupStateNow(); const ok = s.lives === T.livesNow() && s.foes === 0 && s.rapid === 0 && s.double === 0 && s.freeze === 0 && T.floatTextsNow().length === 0; T.quit(); return ok || JSON.stringify(s); });
+  await senseCheck("U9107 写明实际效果：加命后的数量、增益秒数、轰炸命中数", T => { const a = { lives: 2, inv: 0, foes: 3, rapid: 0, double: 0, freeze: 0 }; return T.pickupEffectTextNow('life', a, { ...a, lives: 3 }) === '生命 +1 · 现有 3' && T.pickupEffectTextNow('rapid', a, { ...a, rapid: 8 }) === '快速弹 8 秒' && T.pickupEffectTextNow('shield', a, { ...a, inv: 180 }) === '护盾 3 秒' && T.pickupEffectTextNow('bomb', a, { ...a, foes: 0 }) === '轰炸命中 3 个敌人'; });
+  await senseCheck("U9108 白捡如实说明：生命已满、护盾未延长、轰炸落空；不足 1 秒按 1 秒", T => { const a = { lives: 5, inv: 300, foes: 0, rapid: 0, double: 0, freeze: 0 }; return T.pickupEffectTextNow('life', a, a) === '生命已满 · 未增加' && T.pickupEffectTextNow('shield', a, a) === '护盾未延长 · 无敌还剩 5 秒' && T.pickupEffectTextNow('bomb', a, a) === '轰炸落空 · 场上没有敌人' && T.pickupEffectTextNow('freeze', a, { ...a, freeze: 4.2 }) === '敌人冻结 5 秒' && T.pickupEffectTextNow('double', a, { ...a, double: 0.3 }) === '双管炮 1 秒'; });
+  await senseCheck("U9109 未知道具或残缺状态没有文案", T => { const a = { lives: 2, inv: 0, foes: 3, rapid: 0, double: 0, freeze: 0 }; return [['toString', a, a], ['ghost', a, a], [7, a, a], ['life', null, a], ['life', a, { ...a, lives: NaN }], ['bomb', { ...a, foes: -1 }, a], ['rapid', a, { ...a, rapid: '8' }], ['shield', a, 'x']].every(c => T.pickupEffectTextNow(c[0], c[1], c[2]) === ''); });
+  await senseCheck("U9110 真实拾取：满命白捡、缺命加命、轰炸报命中数，飘字与函数一致", (T,$) => {
+      T.startGame(); T.skipIntro(); T.stopSpawn();
+      T.setLives(5); const a = T.pickupStateNow(); T.pickupApplyNow('life'); const b = T.pickupStateNow();
+      const full = T.livesNow() === 5 && T.floatTextsNow().at(-1) === '生命已满 · 未增加' && T.floatTextsNow().at(-1) === T.pickupEffectTextNow('life', a, b);
+      T.setLives(2); T.pickupApplyNow('life');
+      const gain = T.livesNow() === 3 && T.floatTextsNow().at(-1) === '生命 +1 · 现有 3';
+      T.spawnEnemyAt(120, 120, 'normal'); T.spawnEnemyAt(240, 120, 'fast'); T.pickupApplyNow('bomb');
+      const bomb = T.floatTextsNow().at(-1) === '轰炸命中 2 个敌人';
+      const texts = T.floatTextsNow(); T.quit();
+      return (full && gain && bomb && T.floatTextsNow().length === 0) || JSON.stringify({ full, gain, bomb, texts });
+    });
+
+  // U9111–U9116: 道具消失倒计时
+  await senseCheck("U9111 倒计时环画在战场画布上，菜单中没有道具", (T,$) => { T.renderOnce(); return typeof T.powerupFadeNow === 'function' && !!$('game').getContext && T.powerups().length === 0 && T.powerupRingCountNow() === 0; });
+  await senseCheck("U9112 刚掉落的道具没有倒计时环", T => { T.startGame(); T.skipIntro(); T.stopSpawn(); T.powerupSpawn(300, 200, 'shield'); T.renderOnce(); const ok = T.powerups().length === 1 && T.powerupRingCountNow() === 0 && T.powerupsLostNow() === 0 && !T.powerupFadeNow(12).ring; T.quit(); return ok; });
+  await senseCheck("U9113 剩 2 秒时环走到一半；消失文案带道具名", T => { const f = T.powerupFadeNow(2); return f.ring && f.frac === 0.5 && !f.urgent && T.powerupLostTextNow('shield') === '护盾消失' && T.powerupLostTextNow('life') === '加命消失'; });
+  await senseCheck("U9114 4 秒起出环，1.5 秒起变红，归零即收", T => T.powerupFadeNow(4).ring && T.powerupFadeNow(4).frac === 1 && !T.powerupFadeNow(4.01).ring && T.powerupFadeNow(1.5).urgent && !T.powerupFadeNow(1.51).urgent && !T.powerupFadeNow(0).ring);
+  await senseCheck("U9115 无效寿命不出环，未知道具没有消失文案", T => [NaN, -1, '3', Infinity, null, undefined].every(v => { const f = T.powerupFadeNow(v); return !f.ring && f.frac === 0 && !f.urgent; }) && T.powerupLostTextNow('toString') === '' && T.powerupLostTextNow(3) === '');
+  await senseCheck("U9116 真实道具：快消失时画出白环，过期后原地飘字并计数", async (T,$) => {
+      const raf = () => new Promise(requestAnimationFrame);
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+      T.powerupSpawn(300, 200, 'shield');
+      const c = $('game'), k = c.width / 624;
+      const white = () => {
+        T.renderOnce();
+        const px = c.getContext('2d').getImageData(Math.round(282 * k), Math.round(182 * k), Math.round(36 * k), Math.round(36 * k)).data;
+        let n = 0; for (let i = 0; i < px.length; i += 4) if (px[i] > 80 && px[i + 1] > 80 && px[i + 2] > 80 && Math.abs(px[i] - px[i + 2]) < 50) n++;
+        return n;
+      };
+      const fresh = white(), none = T.powerupRingCountNow() === 0;
+      T.setPowerupLifeNow(3.5);
+      const ringed = white(), one = T.powerupRingCountNow() === 1;
+      T.setPowerupLifeNow(0.02);
+      const end = performance.now() + 3000;
+      while (T.powerups().length && performance.now() < end) await raf();
+      const texts = T.floatTextsNow();
+      const gone = T.powerups().length === 0 && T.powerupsLostNow() === 1 && texts.includes(T.powerupLostTextNow('shield'));
+      T.quit();
+      return (none && one && ringed > fresh + 8 && gone) || JSON.stringify({ none, one, fresh, ringed, gone, texts, k });
+    });
+
+  // U9117–U9122: 阵亡提示与重生点
+  await senseCheck("U9117 阵亡提示用战场提示条，菜单中没有重生点标记", (T,$) => typeof T.deathNoteTextNow === 'function' && T.respawnMarkNow() === null && $('fieldNote').hidden);
+  await senseCheck("U9118 坦克存活时不标重生点", (T,$) => { T.startGame(); const ok = T.respawnMarkNow() === null && T.respawnMarkStateNow(false, 3, 0) === false && $('fieldNote').hidden; T.quit(); return ok; });
+  await senseCheck("U9119 写明击毁者与剩余生命", T => T.deathNoteTextNow({ how: 'shot', by: '狙击坦克' }, 2) === '被狙击坦克击毁 · 剩余生命 2' && T.deathNoteTextNow({ how: 'blast', by: '' }, 1) === '被自爆坦克炸毁 · 剩余生命 1' && T.deathNoteTextNow({ how: 'laser', by: 'Boss' }, 3) === '被 Boss 激光击毁 · 剩余生命 3' && T.deathNoteTextNow({ how: 'shot', by: 'Boss' }, 2) === '被 Boss 击毁 · 剩余生命 2');
+  await senseCheck("U9120 最后一条命打光不提示；剩 1 条命仍提示；对抗模式不标重生点", T => T.deathNoteTextNow({ how: 'shot', by: '普通坦克' }, 0) === '' && T.deathNoteTextNow({ how: 'shot', by: '普通坦克' }, 1) !== '' && T.respawnMarkStateNow(true, 1, 0) === true && T.respawnMarkStateNow(true, 0, 0) === false && T.respawnMarkStateNow(true, 2, 2) === false);
+  await senseCheck("U9121 来源不明时不编造击毁者；无效生命数不提示", T => [null, 7, 'x', {}, { how: 'meteor', by: '陨石' }].every(h => T.deathNoteTextNow(h, 2) === '坦克被击毁 · 剩余生命 2') && T.deathNoteTextNow({ how: 'shot', by: '' }, 2) === '被敌方坦克击毁 · 剩余生命 2' && [NaN, '2', -1, 1.5, null].every(n => T.deathNoteTextNow({ how: 'shot', by: '狙击坦克' }, n) === '') && T.respawnMarkStateNow('yes', 2, 0) === false && T.respawnMarkStateNow(true, NaN, 0) === false);
+  await senseCheck("U9122 真实敌弹击毁坦克：提示与记录一致，重生点亮起，重生后收起", async (T,$) => {
+      const raf = () => new Promise(requestAnimationFrame);
+      T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap(); T.setLives(3); T.invul(0);
+      T.enemyShotAtPlayerNow('sniper');
+      let end = performance.now() + 3000;
+      while (T.livesNow() === 3 && performance.now() < end) await raf();
+      const note = $('fieldNote'), mark = T.respawnMarkNow(), text = note.textContent;
+      const died = T.livesNow() === 2 && !note.hidden && text === '被狙击坦克击毁 · 剩余生命 2' && text === T.deathNoteTextNow({ how: 'shot', by: '狙击坦克' }, 2) && note.dataset.kind === 'warn';
+      const marked = !!mark && mark.x === 252 && mark.y === 588;
+      end = performance.now() + 3000;
+      while (T.respawnMarkNow() && performance.now() < end) await raf();
+      const back = T.respawnMarkNow() === null && T.livesNow() === 2;
+      T.quit();
+      return (died && marked && back) || JSON.stringify({ died, marked, back, text, mark });
+    });
+
+  // U9123–U9128: 新敌人登场提示
+  await senseCheck("U9123 登场提示用战场提示条，菜单中没有箭头", (T,$) => typeof T.enemyIntroTextNow === 'function' && T.enemyIntroMarkNow() === null && $('fieldNote').getAttribute('role') === 'status');
+  await senseCheck("U9124 全新存档还没见过任何特殊敌人", T => { T.seenFoesResetNow(); return T.seenFoesNow().length === 0 && T.lsGet('tank-battle-seen-foes') === null && T.enemyIntroDueNow('fast', T.seenFoesNow()); });
+  await senseCheck("U9125 一句话说明新敌人的行为", T => T.enemyIntroTextNow('suicide') === '新敌人 · 自爆坦克：贴身自爆，别让它靠近' && T.enemyIntroTextNow('sniper') === '新敌人 · 狙击坦克：远距离压制，炮弹慢但准' && T.enemyIntroTextNow('engineer') === '新敌人 · 工兵坦克：直冲基地，专拆护墙');
+  await senseCheck("U9126 见过的不再提示，普通坦克从不提示", T => T.enemyIntroDueNow('fast', []) && !T.enemyIntroDueNow('fast', ['fast']) && T.enemyIntroDueNow('fast', ['sniper', 'armored']) && !T.enemyIntroDueNow('normal', []) && T.enemyIntroTextNow('normal') === '');
+  await senseCheck("U9127 未知类型与无效记录不提示", T => !T.enemyIntroDueNow('toString', []) && !T.enemyIntroDueNow('fast', null) && !T.enemyIntroDueNow('fast', 'fast') && !T.enemyIntroDueNow(7, []) && T.enemyIntroTextNow('toString') === '' && T.enemyIntroTextNow(null) === '');
+  await senseCheck("U9128 真实出兵：首次遇到才提示并标箭头，记录写入存档，再遇不重复", (T,$) => {
+      T.seenFoesResetNow();
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+      T.spawnFoeNow(120, 120, 'normal'); T.extraHudRefreshNow();
+      const plain = $('fieldNote').hidden && T.seenFoesNow().length === 0;
+      T.spawnFoeNow(240, 120, 'armored'); T.extraHudRefreshNow();
+      const note = $('fieldNote'), mark = T.enemyIntroMarkNow(), text = note.textContent;
+      const first = !note.hidden && text === T.enemyIntroTextNow('armored') && note.dataset.kind === 'warn' && !!mark && mark.type === 'armored' && mark.x === 240 && T.seenFoesNow().join() === 'armored';
+      const count = T.fieldNoteCountNow();
+      T.spawnFoeNow(360, 120, 'armored'); T.extraHudRefreshNow();
+      const once = T.fieldNoteCountNow() === count;
+      const saved = T.lsGet('tank-battle-seen-foes') === '["armored"]';
+      T.quit(); T.seenFoesResetNow();
+      return (plain && first && once && saved && T.enemyIntroMarkNow() === null) || JSON.stringify({ plain, first, once, saved, text, mark });
+    });
+
+  // U9129–U9134: 基地护墙告警
+  await senseCheck("U9129 护墙告警用战场提示条，菜单中基地不闪框", (T,$) => typeof T.baseWallAlertTextNow === 'function' && T.baseAlertNow() === false && $('fieldNote').hidden);
+  await senseCheck("U9130 开局护墙完整，不告警", (T,$) => { T.startGame(); T.skipIntro(); T.stopSpawn(); T.extraHudRefreshNow(); const s = T.baseWallNow(); const ok = s.total >= 6 && s.left === s.total && $('fieldNote').hidden && !T.baseAlertNow(); T.quit(); return ok || JSON.stringify(s); });
+  await senseCheck("U9131 写明剩余块数与总数", T => T.baseWallAlertTextNow(4, 6) === '基地护墙受损 · 剩 4/6' && T.baseWallAlertTextNow(11, 12) === '基地护墙受损 · 剩 11/12');
+  await senseCheck("U9132 完整不告警，剩 1 块仍报数，全毁单独提示", T => T.baseWallAlertTextNow(6, 6) === '' && T.baseWallAlertTextNow(1, 6) === '基地护墙受损 · 剩 1/6' && T.baseWallAlertTextNow(0, 6) === '基地护墙全毁 · 基地已暴露' && T.baseWallAlertTextNow(0, 1) === '基地护墙全毁 · 基地已暴露');
+  await senseCheck("U9133 非整数、负数或超过总数的块数不告警", T => [[NaN, 6], ['4', 6], [-1, 6], [7, 6], [1.5, 6], [3, 0], [3, null]].every(a => T.baseWallAlertTextNow(a[0], a[1]) === ''));
+  await senseCheck("U9134 真实击穿护墙：逐块报数并闪框，全毁提示基地暴露", (T,$) => {
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.extraHudRefreshNow();
+      const s0 = T.baseWallNow(), quiet = $('fieldNote').hidden && !T.baseAlertNow();
+      const hit = T.hitTileNow(12, 22); T.extraHudRefreshNow();
+      const s1 = T.baseWallNow(), note = $('fieldNote'), text1 = note.textContent;
+      const one = hit === true && s1.left === s0.total - 1 && !note.hidden && text1 === T.baseWallAlertTextNow(s1.left, s1.total) && note.dataset.kind === 'warn' && T.baseAlertNow();
+      for (let y = 14; y <= 23; y++) for (let x = 11; x <= 13; x++) if (T.tileAt(x, y) === 1) T.hitTileNow(x, y);
+      T.extraHudRefreshNow();
+      const text2 = note.textContent, all = T.baseWallNow().left === 0 && text2 === '基地护墙全毁 · 基地已暴露';
+      T.quit();
+      return (quiet && one && all && !T.baseAlertNow()) || JSON.stringify({ quiet, one, all, s0, s1, text1, text2 });
+    });
+
+  // U9135–U9140: 自爆范围圈
+  await senseCheck("U9135 范围圈画在战场画布上，菜单中没有圈", (T,$) => typeof T.blastRingAlphaNow === 'function' && !!$('game').getContext && Array.isArray(T.blastRingsNow()) && T.blastRingsNow().length === 0);
+  await senseCheck("U9136 场上没有自爆坦克时不画圈", T => { T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.spawnEnemyAt(300, 300, 'normal'); const ok = T.blastRingsNow().length === 0; T.quit(); return ok; });
+  await senseCheck("U9137 越近越清晰：范围内全显，中途半显", T => T.blastRingAlphaNow(20) === 1 && Math.abs(T.blastRingAlphaNow(98.4) - 0.625) < 1e-9 && T.blastRingAlphaNow(60) > T.blastRingAlphaNow(120));
+  await senseCheck("U9138 恰在爆炸半径上全显，6 格处刚好消失", T => T.blastRingAlphaNow(0) === 1 && T.blastRingAlphaNow(52.8) === 1 && T.blastRingAlphaNow(143.99) > 0.25 && T.blastRingAlphaNow(143.99) < 0.26 && T.blastRingAlphaNow(144) === 0);
+  await senseCheck("U9139 无效距离不画圈", T => [NaN, -1, '50', Infinity, null, undefined].every(v => T.blastRingAlphaNow(v) === 0));
+  await senseCheck("U9140 真实战场：远处无圈，靠近出橙圈，进入范围标为危险", (T,$) => {
+      T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap();
+      T.tp(300, 500); T.invul(99999);
+      T.spawnEnemyAt(300, 200, 'suicide');
+      const c = $('game'), k = c.width / 624;
+      const orange = () => {
+        T.renderOnce();
+        const px = c.getContext('2d').getImageData(Math.round(250 * k), Math.round(150 * k), Math.round(122 * k), Math.round(122 * k)).data;
+        let n = 0; for (let i = 0; i < px.length; i += 4) if (px[i] > 50 && px[i] > px[i + 1] * 1.7 && px[i + 2] < 90) n++;
+        return n;
+      };
+      const far = T.blastRingsNow().length, farPx = orange();
+      T.tp(300, 290); T.invul(99999);
+      const near = T.blastRingsNow(), nearPx = orange();
+      T.tp(300, 230); T.invul(99999);
+      const danger = T.blastRingsNow();
+      T.quit();
+      const ok = far === 0 && near.length === 1 && !near[0].danger && near[0].alpha > 0.25 && near[0].alpha < 1 && near[0].x === 311 && near[0].y === 211 && nearPx > farPx + 15 && danger.length === 1 && danger[0].danger && danger[0].alpha === 1;
+      return ok || JSON.stringify({ far, near, danger, farPx, nearPx, k });
+    });
+
+  // U9141–U9146: 狙击瞄准线
+  await senseCheck("U9141 瞄准线画在战场画布上，菜单中没有线", (T,$) => typeof T.sniperAimAlphaNow === 'function' && !!$('game').getContext && Array.isArray(T.sniperAimsNow()) && T.sniperAimsNow().length === 0);
+  await senseCheck("U9142 狙击手离开火还早时不亮线", T => { T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.spawnEnemyAt(300, 100, 'sniper'); const ok = T.sniperAimsNow().length === 0 && T.sniperAimAlphaNow(999) === 0; T.quit(); return ok; });
+  await senseCheck("U9143 越临近开火越亮", T => Math.abs(T.sniperAimAlphaNow(15) - 0.575) < 1e-9 && T.sniperAimAlphaNow(1) > T.sniperAimAlphaNow(29));
+  await senseCheck("U9144 开火前 30 帧起亮，开火瞬间熄灭", T => T.sniperAimAlphaNow(30) === 0.25 && T.sniperAimAlphaNow(30.01) === 0 && T.sniperAimAlphaNow(0) === 0 && T.sniperAimAlphaNow(0.001) > 0.89);
+  await senseCheck("U9145 无效计时不亮线，未知方向不延伸", T => { const p = T.sniperAimEndNow(100, 100, 9), q = T.sniperAimEndNow(100, 100, 'x'); return [NaN, -5, '10', Infinity, null, undefined].every(v => T.sniperAimAlphaNow(v) === 0) && p.x === 100 && p.y === 100 && q.x === 100 && q.y === 100; });
+  await senseCheck("U9146 真实狙击手：临开火亮红线，被墙截断，冻结时熄灭", (T,$) => {
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+      const e = T.spawnEnemyAt(300, 100, 'sniper'); e.dir = 4;
+      const idle = T.sniperAimsNow().length === 0;
+      e.shootTimer = 12;
+      const open = T.sniperAimsNow()[0];
+      const c = $('game'), k = c.width / 624;
+      const red = () => {
+        T.renderOnce();
+        const px = c.getContext('2d').getImageData(Math.round(305 * k), Math.round(130 * k), Math.round(12 * k), Math.round(100 * k)).data;
+        let n = 0; for (let i = 0; i < px.length; i += 4) if (px[i] > 45 && px[i] > px[i + 1] * 2 && px[i + 2] < 130) n++;
+        return n;
+      };
+      const lit = red();
+      T.setTile(12, 10, 2);
+      const walled = T.sniperAimsNow()[0];
+      T.setFreezeNow(3); const frozen = T.sniperAimsNow().length === 0; T.setFreezeNow(0);
+      e.shootTimer = 999; const dark = red();
+      T.quit();
+      const ok = idle && !!open && open.x1 === 311 && open.y1 === 111 && open.x2 === 311 && open.y2 > 560 && Math.abs(open.alpha - T.sniperAimAlphaNow(12)) < 1e-9 && !!walled && walled.y2 > 225 && walled.y2 < 240 && frozen && lit > dark + 12;
+      return ok || JSON.stringify({ idle, open, walled, frozen, lit, dark, k });
+    });
+
+  // U9147–U9152: 回场倒计时
+  await senseCheck("U9147 倒计时位于战场内，默认隐藏", (T,$) => $('resumeCount').parentElement === $('frame') && $('resumeCount').hidden && $('resumeCount').getAttribute('role') === 'timer' && typeof T.resumeBeatsNow === 'function');
+  await senseCheck("U9148 随手暂停立即继续，不加倒计时", (T,$) => { T.startGame(); $('pauseBtn').click(); const held = T.resumeStateNow().paused; $('btnPlay').click(); const s = T.resumeStateNow(); const ok = held && !s.counting && !s.paused && $('resumeCount').hidden; T.quit(); return ok || JSON.stringify(s); });
+  await senseCheck("U9149 久停回来数三拍，每拍 0.4 秒", T => T.resumeBeatsNow(5000) === 3 && T.resumeBeatTextNow(1200, 400) === '3' && T.resumeBeatTextNow(790, 400) === '2' && T.resumeBeatTextNow(1, 400) === '1');
+  await senseCheck("U9150 1.5 秒是分界；拍子恰好走完即结束", T => T.resumeBeatsNow(1499) === 0 && T.resumeBeatsNow(1500) === 3 && T.resumeBeatTextNow(400, 400) === '1' && T.resumeBeatTextNow(400.5, 400) === '2' && T.resumeBeatTextNow(0, 400) === '');
+  await senseCheck("U9151 无效时长不倒计时也不显示数字", T => [NaN, -1, '2000', Infinity, null, undefined].every(v => T.resumeBeatsNow(v) === 0) && [[NaN, 400], [500, 0], [500, -1], ['500', 400], [500, NaN]].every(a => T.resumeBeatTextNow(a[0], a[1]) === ''));
+  await senseCheck("U9152 真实久停：倒计时期间仍暂停，可按暂停取消，数完 3-2-1 才开打", async (T,$) => {
+      const el = $('resumeCount'), wait = ms => new Promise(r => setTimeout(r, ms));
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+      $('pauseBtn').click(); T.setPausedForNow(5000); $('btnPlay').click();
+      const s1 = T.resumeStateNow();
+      const counting = s1.counting && s1.paused && !el.hidden && el.textContent === '3' && $('overlay').classList.contains('hide');
+      $('pauseBtn').click();
+      const s2 = T.resumeStateNow();
+      const cancelled = !s2.counting && s2.paused && el.hidden && !$('overlay').classList.contains('hide');
+      $('btnPlay').click();
+      const seen = [], end = performance.now() + 4000;
+      while (T.resumeStateNow().counting && performance.now() < end) { if (seen.at(-1) !== el.textContent) seen.push(el.textContent); await wait(15); }
+      const s3 = T.resumeStateNow();
+      const resumed = !s3.counting && !s3.paused && el.hidden && seen.join('') === '321';
+      T.quit();
+      return (counting && cancelled && resumed) || JSON.stringify({ counting, cancelled, resumed, seen, s1, s2, s3 });
+    });
+
+  // U9153–U9158: 连杀播报归位
+  await senseCheck("U9153 连杀横幅只有一个，位于战场内提示条之后，默认隐藏", (T,$) => document.querySelectorAll('#streakBanner').length === 1 && $('streakBanner').parentElement === $('frame') && $('streakBanner').previousElementSibling === $('fieldNote') && $('streakBanner').hidden && getComputedStyle($('streakBanner')).position === 'absolute');
+  await senseCheck("U9154 新一局连杀从 0 起，不挂空横幅", (T,$) => { T.startGame(); const ok = T.killStreakNow() === 0 && $('streakBanner').hidden; T.quit(); return ok; });
+  await senseCheck("U9155 3、5、10、20 连杀是播报节点，10 以上如实报数", T => [3, 5, 10, 20, 30].every(n => T.streakMilestoneNow(n)) && T.streakLabelNow(20) === '💥 20 连杀！恐怖如斯' && T.streakLabelNow(5) === '⚡ 5 连杀！手感火热');
+  await senseCheck("U9156 节点之间不播报", T => [0, 1, 2, 4, 6, 9, 11, 15, 19, 21].every(n => !T.streakMilestoneNow(n)) && T.streakLabelNow(2) === '');
+  await senseCheck("U9157 非整数与无效连杀数不播报", T => [NaN, '3', 3.5, -3, null, undefined, Infinity].every(n => T.streakMilestoneNow(n) === false));
+  await senseCheck("U9158 真实击杀：第 3 杀弹出、约 2 秒后自动收起，坦克被击毁后连杀归零", async (T,$) => {
+      const b = $('streakBanner'), wait = ms => new Promise(r => setTimeout(r, ms));
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+      T.kill(); T.kill();
+      const two = T.killStreakNow() === 2 && b.hidden;
+      T.kill();
+      const three = T.killStreakNow() === 3 && !b.hidden && b.textContent === T.streakLabelNow(3);
+      T.kill();
+      const four = T.killStreakNow() === 4 && !b.hidden && b.textContent === T.streakLabelNow(3);
+      let end = performance.now() + 4000;
+      while (!b.hidden && performance.now() < end) await wait(50);
+      const faded = b.hidden;
+      T.setLives(3); T.invul(0); T.enemyShotAtPlayerNow('normal');
+      end = performance.now() + 3000;
+      while (T.livesNow() === 3 && performance.now() < end) await wait(20);
+      const reset = T.livesNow() === 2 && T.killStreakNow() === 0;
+      T.quit();
+      return (two && three && four && faded && reset && b.hidden) || JSON.stringify({ two, three, four, faded, reset, text: b.textContent });
+    });
+
+  // U9159–U9164: 顶部提示自动收起
+  await senseCheck("U9159 三个顶部提示都在，菜单中没有一个亮着", (T,$) => typeof T.topToastHoldNow === 'function' && ['mw', 'bs', 'sm'].every(k => !!$(k + 'Toast') && !$(k + 'Toast').classList.contains(k + '-fade')));
+  await senseCheck("U9160 新一局开始时顶部干净，不带上一局的提示", (T,$) => { T.startGame(); T.topToastShowNow('mw', '击杀 10'); T.quit(); T.startGame(); const ok = ['mw', 'bs', 'sm'].every(k => !$(k + 'Toast').classList.contains(k + '-fade')); T.quit(); return ok; });
+  await senseCheck("U9161 里程碑约 2.2 秒、态势 1.8 秒、卡顿 1.5 秒后收起", T => T.topToastHoldNow('mw') === 2200 && T.topToastHoldNow('bs') === 1800 && T.topToastHoldNow('sm') === 1500);
+  await senseCheck("U9162 空文案不弹；卡顿提示只在打开帧率显示时弹", (T,$) => T.topToastShowNow('mw', '') === false && !$('mwToast').classList.contains('mw-fade') && T.stutterToastOnNow(true) === true && T.stutterToastOnNow(false) === false);
+  await senseCheck("U9163 未知提示类型和非文本内容不弹", T => [null, 'xx', 'toString', 7, undefined].every(k => T.topToastHoldNow(k) === 0) && T.topToastShowNow('toString', '击杀 10') === false && T.topToastShowNow('mw', 5) === false && T.topToastShowNow('bs', null) === false && T.stutterToastOnNow('1') === false && T.stutterToastOnNow(1) === false);
+  await senseCheck("U9164 真实弹出：里程碑自动收起；卡顿提示随帧率开关；暂停即清空", async (T,$) => {
+      const wait = ms => new Promise(r => setTimeout(r, ms));
+      const mw = $('mwToast'), bs = $('bsToast'), sm = $('smToast');
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+      const shown = T.topToastShowNow('mw', '击杀 10') === true && mw.classList.contains('mw-fade') && mw.textContent === '击杀 10';
+      T.fpsToggleNow(false); const quiet = T.stutterToastNow('⚡ 卡顿 40ms') === false;
+      T.fpsToggleNow(true); const loud = T.stutterToastNow('⚡ 卡顿 40ms') === true && sm.textContent === '⚡ 卡顿 40ms';
+      T.fpsToggleNow(false);
+      const end = performance.now() + 4000;
+      while ((mw.classList.contains('mw-fade') || sm.classList.contains('sm-fade')) && performance.now() < end) await wait(50);
+      const faded = !mw.classList.contains('mw-fade') && !sm.classList.contains('sm-fade');
+      T.topToastShowNow('bs', '效率 3'); const up = bs.classList.contains('bs-fade');
+      $('pauseBtn').click(); const cleared = !bs.classList.contains('bs-fade');
+      T.quit();
+      return (shown && quiet && loud && faded && up && cleared) || JSON.stringify({ shown, quiet, loud, faded, up, cleared });
+    });
 
   chrome.kill(); killTree(chrome.pid);
 

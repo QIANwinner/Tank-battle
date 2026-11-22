@@ -1,9 +1,10 @@
 /* Storage writes are retried in insertion order; failures remain visible. */
 (function (root) {
   'use strict';
-  function create(getStorage, notify) {
+  function create(getStorage, notify, onStatus) {
     const pending = new Map();
-    let warning;
+    let warning, lastSavedAt = null, writes = 0;
+    const status = () => ({ pending: pending.size, writes, lastSavedAt });
     function render() {
       if (notify) { notify(pending.size); return; }
       if (!root.document || !document.body) return;
@@ -20,14 +21,18 @@
       warning.hidden = false;
     }
     function retry() {
+      const hadWork = pending.size > 0;
       try {
         const store = getStorage();
         for (const [key, value] of pending) {
           if (value === null) store.removeItem(key); else store.setItem(key, value);
           pending.delete(key);
+          writes++; lastSavedAt = Date.now();
         }
       } catch (_) { /* Keep unsaved operations for the next attempt. */ }
-      render(); return pending.size === 0;
+      render();
+      if (hadWork && onStatus) onStatus(status());
+      return pending.size === 0;
     }
     function write(key, value) {
       pending.set(String(key), value);
@@ -40,7 +45,7 @@
       });
     }
     return { setItem: (k, v) => write(k, String(v)), removeItem: k => write(k, null),
-      retry, pendingCount: () => pending.size };
+      retry, status, pendingCount: () => pending.size };
   }
   root.TankStorage = { create };
   if (typeof module !== 'undefined') module.exports = { create };

@@ -1,14 +1,16 @@
 // tb_cdp_test.js — 通过原生 CDP（Chrome DevTools Protocol）驱动无头 Chrome 跑回归测试
-// 用法: node tb_cdp_test.js [url]
+// 用法: node tb_cdp_test.js [url] [截图路径]；默认写入系统临时目录
 // 依赖: Node >= 21 (global WebSocket)
 const { spawn } = require('child_process');
 const fs = require('fs');
 const http = require('http');
+const os = require('os');
+const path = require('path');
 
 const CHROME = process.env.TB_CHROME || 'C:/Users/21889/.agent-browser/browsers/chrome-win64/chrome.exe';
 const URL = process.argv[2] || 'http://127.0.0.1:8124/index.html?test=1';
 const PORT = Number(process.env.TB_CDP_PORT || 9333);
-const SHOT = process.argv[3] || 'shot.png';
+const SHOT = process.argv[3] || process.env.TB_SHOT || path.join(os.tmpdir(), `tb-main-${process.pid}-${Date.now()}.png`);
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 // 终止整个 Chrome 进程树(Windows: taskkill /T /F;否则 chrome.kill() 只杀父进程,子进程残留占端口造成跨轮污染)
