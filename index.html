@@ -1835,7 +1835,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.211</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.212</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -5744,6 +5744,7 @@
       for (const cell of treeTiles) ctx.drawImage(treeStamp, cell.x, cell.y, treeStamp.width / treeScale, treeStamp.height / treeScale);
     }
     drawLastEnemyMark();
+    drawBlastRings();
     drawBaseAlert();
     drawEnemyIntroMark();
     drawRespawnMark();
@@ -23874,6 +23875,33 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     ctx.strokeRect(BASE.x * TILE - TILE - 2, BASE.y * TILE - TILE - 2, TILE * 3 + 4, TILE * 2 + 4);
     ctx.restore();
   }
+  const BLAST_R = 2.2 * TILE, BLAST_FAR = 6 * TILE;
+  function blastRingAlpha(dist) {
+    if (!Number.isFinite(dist) || dist < 0 || dist >= BLAST_FAR) return 0;
+    if (dist <= BLAST_R) return 1;
+    return 1 - 0.75 * (dist - BLAST_R) / (BLAST_FAR - BLAST_R);
+  }
+  function blastRings() {
+    const out = [];
+    if (!running || !player || player.dead) return out;
+    const px = player.x + TANK_SIZE / 2, py = player.y + TANK_SIZE / 2;
+    for (const e of enemies) {
+      if (e.dead || e.type !== 'suicide') continue;
+      const x = e.x + e.size / 2, y = e.y + e.size / 2, dist = Math.hypot(px - x, py - y), alpha = blastRingAlpha(dist);
+      if (alpha > 0) out.push({ x, y, r: BLAST_R, alpha, danger: dist < BLAST_R });
+    }
+    return out;
+  }
+  function drawBlastRings() {
+    for (const b of blastRings()) {
+      ctx.save();
+      if (b.danger) { ctx.fillStyle = 'rgba(255,45,85,0.16)'; ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.fill(); }
+      ctx.globalAlpha = b.alpha;
+      ctx.strokeStyle = b.danger ? '#ff2d55' : '#ff6b35'; ctx.lineWidth = 2; ctx.setLineDash([6, 5]);
+      ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
+    }
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -25822,7 +25850,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.211', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.212', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -28288,6 +28316,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       deathNoteTextNow: deathNoteText, respawnMarkStateNow: respawnMarkState, respawnMarkNow: respawnMark, enemyShotAtPlayerNow: type => { if (!player) return false; perfPoolSpawn(player.x + TANK_SIZE / 2 - 2, player.y - 10, 4, 4, BULLET_SPEED, { isPlayer: false, isBoss: false, type }, 0, false); return true; },
       enemyIntroTextNow: enemyIntroText, enemyIntroDueNow: enemyIntroDue, seenFoesNow: () => seenFoes.slice(), seenFoesResetNow: () => { seenFoes = []; introPending = []; introMark = null; try { saveStore.removeItem(LS_SEEN_FOES); } catch (e) {} return true; }, spawnFoeNow: (x, y, type) => { spawnEnemy(x, y, type); return enemies.length; }, enemyIntroMarkNow: () => { const e = enemyIntroTarget(); return e ? { type: e.type, x: e.x, y: e.y } : null; },
       baseWallAlertTextNow: baseWallAlertText, baseWallNow: baseWallState, baseAlertNow: baseAlertOn, hitTileNow: (gx, gy) => damageTile(gx * TILE + 1, gy * TILE + 1),
+      blastRingAlphaNow: blastRingAlpha, blastRingsNow: blastRings,
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

@@ -25548,6 +25548,33 @@ async function main() {
       return (quiet && one && all && !T.baseAlertNow()) || JSON.stringify({ quiet, one, all, s0, s1, text1, text2 });
     });
 
+  // U9135–U9140: 自爆范围圈
+  await senseCheck("U9135 范围圈画在战场画布上，菜单中没有圈", (T,$) => typeof T.blastRingAlphaNow === 'function' && !!$('game').getContext && Array.isArray(T.blastRingsNow()) && T.blastRingsNow().length === 0);
+  await senseCheck("U9136 场上没有自爆坦克时不画圈", T => { T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.spawnEnemyAt(300, 300, 'normal'); const ok = T.blastRingsNow().length === 0; T.quit(); return ok; });
+  await senseCheck("U9137 越近越清晰：范围内全显，中途半显", T => T.blastRingAlphaNow(20) === 1 && Math.abs(T.blastRingAlphaNow(98.4) - 0.625) < 1e-9 && T.blastRingAlphaNow(60) > T.blastRingAlphaNow(120));
+  await senseCheck("U9138 恰在爆炸半径上全显，6 格处刚好消失", T => T.blastRingAlphaNow(0) === 1 && T.blastRingAlphaNow(52.8) === 1 && T.blastRingAlphaNow(143.99) > 0.25 && T.blastRingAlphaNow(143.99) < 0.26 && T.blastRingAlphaNow(144) === 0);
+  await senseCheck("U9139 无效距离不画圈", T => [NaN, -1, '50', Infinity, null, undefined].every(v => T.blastRingAlphaNow(v) === 0));
+  await senseCheck("U9140 真实战场：远处无圈，靠近出橙圈，进入范围标为危险", (T,$) => {
+      T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap();
+      T.tp(300, 500); T.invul(99999);
+      T.spawnEnemyAt(300, 200, 'suicide');
+      const c = $('game'), k = c.width / 624;
+      const orange = () => {
+        T.renderOnce();
+        const px = c.getContext('2d').getImageData(Math.round(250 * k), Math.round(150 * k), Math.round(122 * k), Math.round(122 * k)).data;
+        let n = 0; for (let i = 0; i < px.length; i += 4) if (px[i] > 50 && px[i] > px[i + 1] * 1.7 && px[i + 2] < 90) n++;
+        return n;
+      };
+      const far = T.blastRingsNow().length, farPx = orange();
+      T.tp(300, 290); T.invul(99999);
+      const near = T.blastRingsNow(), nearPx = orange();
+      T.tp(300, 230); T.invul(99999);
+      const danger = T.blastRingsNow();
+      T.quit();
+      const ok = far === 0 && near.length === 1 && !near[0].danger && near[0].alpha > 0.25 && near[0].alpha < 1 && near[0].x === 311 && near[0].y === 211 && nearPx > farPx + 15 && danger.length === 1 && danger[0].danger && danger[0].alpha === 1;
+      return ok || JSON.stringify({ far, near, danger, farPx, nearPx, k });
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
