@@ -1835,7 +1835,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.206</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.207</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -4968,7 +4968,7 @@
     sfxPickup();
     vibe(10);
     const def = POWERUP_DEF[type];
-    if (player) addText(player.x + TANK_SIZE / 2, player.y - 6, def.label, def.color);
+    const pickBefore = pickupState();
     switch (type) {
       case 'shield': player.spawnInv = Math.max(player.spawnInv || 0, 180); break;
       case 'rapid':  fx.rapid = 8; break;
@@ -4977,6 +4977,7 @@
       case 'freeze': fx.freeze = 5; break;
       case 'bomb':   bombEnemies(); break;
     }
+    if (player) addText(clamp(player.x + TANK_SIZE / 2, 84, W - 84), player.y - 6, pickupEffectText(type, pickBefore, pickupState()) || def.label, def.color);
     runPowerups++;
     runPickupKindsAdd(type);
     pushPickup(type);
@@ -23732,6 +23733,25 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const part = (label, a, b) => label + ' ' + (a === b ? '持平' : (a > b ? '+' : '-') + fmtNum(Math.abs(a - b)));
     return '比上一局：' + part('得分', cur.score, prev.score) + ' · ' + part('击杀', cur.kills, prev.kills) + ' · ' + part(cur.endless ? '波次' : '关卡', cur.level, prev.level);
   }
+  function pickupState() {
+    let foes = 0;
+    for (const e of enemies) if (!e.dead) foes++;
+    return { lives, inv: player ? Math.max(0, player.spawnInv || 0) : 0, foes, rapid: Math.max(0, fx.rapid), double: Math.max(0, fx.double), freeze: Math.max(0, fx.freeze) };
+  }
+  function pickupEffectText(type, a, b) {
+    const ok = s => !!s && typeof s === 'object' && [s.lives, s.inv, s.foes, s.rapid, s.double, s.freeze].every(v => Number.isFinite(v) && v >= 0);
+    if (typeof type !== 'string' || !Object.hasOwn(POWERUP_DEF, type) || !ok(a) || !ok(b)) return '';
+    const secs = v => Math.ceil(v) + ' 秒';
+    switch (type) {
+      case 'life': return b.lives > a.lives ? '生命 +1 · 现有 ' + b.lives : '生命已满 · 未增加';
+      case 'shield': return b.inv > a.inv ? '护盾 ' + secs(b.inv / 60) : '护盾未延长 · 无敌还剩 ' + secs(b.inv / 60);
+      case 'rapid': return '快速弹 ' + secs(b.rapid);
+      case 'double': return '双管炮 ' + secs(b.double);
+      case 'freeze': return '敌人冻结 ' + secs(b.freeze);
+      case 'bomb': return a.foes > 0 ? '轰炸命中 ' + a.foes + ' 个敌人' : '轰炸落空 · 场上没有敌人';
+    }
+    return '';
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -25677,7 +25697,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.206', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.207', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -28138,6 +28158,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       pauseBriefTextNow: pauseBriefText, pauseBriefNow: pauseBriefState,
       upgListTextNow: o => upgListText(o, UPGRADE_POOL), upgListRawNow: upgListText,
       runDeltaTextNow: runDeltaText, runPairNow: () => ({ cur: lastRun, prev: prevRun }),
+      pickupEffectTextNow: pickupEffectText, pickupStateNow: pickupState, pickupApplyNow: type => applyPowerup(type), floatTextsNow: () => texts.map(t => t.str),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

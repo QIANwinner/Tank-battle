@@ -25438,6 +25438,24 @@ async function main() {
       T.quit(); return (ok && el.hidden) || JSON.stringify({ text: el.textContent, pair });
     });
 
+  // U9105–U9110: 道具效果回执
+  await senseCheck("U9105 飘字画在战场画布上，菜单中没有残留；顶栏状态提示保持单行", (T,$) => typeof T.pickupEffectTextNow === 'function' && !!$('game').getContext && Array.isArray(T.floatTextsNow()) && T.floatTextsNow().length === 0 && getComputedStyle($('dangerTip')).whiteSpace === 'nowrap' && $('dangerTip').getBoundingClientRect().height < 30);
+  await senseCheck("U9106 新一局没有增益，也没有飘字", T => { T.startGame(); const s = T.pickupStateNow(); const ok = s.lives === T.livesNow() && s.foes === 0 && s.rapid === 0 && s.double === 0 && s.freeze === 0 && T.floatTextsNow().length === 0; T.quit(); return ok || JSON.stringify(s); });
+  await senseCheck("U9107 写明实际效果：加命后的数量、增益秒数、轰炸命中数", T => { const a = { lives: 2, inv: 0, foes: 3, rapid: 0, double: 0, freeze: 0 }; return T.pickupEffectTextNow('life', a, { ...a, lives: 3 }) === '生命 +1 · 现有 3' && T.pickupEffectTextNow('rapid', a, { ...a, rapid: 8 }) === '快速弹 8 秒' && T.pickupEffectTextNow('shield', a, { ...a, inv: 180 }) === '护盾 3 秒' && T.pickupEffectTextNow('bomb', a, { ...a, foes: 0 }) === '轰炸命中 3 个敌人'; });
+  await senseCheck("U9108 白捡如实说明：生命已满、护盾未延长、轰炸落空；不足 1 秒按 1 秒", T => { const a = { lives: 5, inv: 300, foes: 0, rapid: 0, double: 0, freeze: 0 }; return T.pickupEffectTextNow('life', a, a) === '生命已满 · 未增加' && T.pickupEffectTextNow('shield', a, a) === '护盾未延长 · 无敌还剩 5 秒' && T.pickupEffectTextNow('bomb', a, a) === '轰炸落空 · 场上没有敌人' && T.pickupEffectTextNow('freeze', a, { ...a, freeze: 4.2 }) === '敌人冻结 5 秒' && T.pickupEffectTextNow('double', a, { ...a, double: 0.3 }) === '双管炮 1 秒'; });
+  await senseCheck("U9109 未知道具或残缺状态没有文案", T => { const a = { lives: 2, inv: 0, foes: 3, rapid: 0, double: 0, freeze: 0 }; return [['toString', a, a], ['ghost', a, a], [7, a, a], ['life', null, a], ['life', a, { ...a, lives: NaN }], ['bomb', { ...a, foes: -1 }, a], ['rapid', a, { ...a, rapid: '8' }], ['shield', a, 'x']].every(c => T.pickupEffectTextNow(c[0], c[1], c[2]) === ''); });
+  await senseCheck("U9110 真实拾取：满命白捡、缺命加命、轰炸报命中数，飘字与函数一致", (T,$) => {
+      T.startGame(); T.skipIntro(); T.stopSpawn();
+      T.setLives(5); const a = T.pickupStateNow(); T.pickupApplyNow('life'); const b = T.pickupStateNow();
+      const full = T.livesNow() === 5 && T.floatTextsNow().at(-1) === '生命已满 · 未增加' && T.floatTextsNow().at(-1) === T.pickupEffectTextNow('life', a, b);
+      T.setLives(2); T.pickupApplyNow('life');
+      const gain = T.livesNow() === 3 && T.floatTextsNow().at(-1) === '生命 +1 · 现有 3';
+      T.spawnEnemyAt(120, 120, 'normal'); T.spawnEnemyAt(240, 120, 'fast'); T.pickupApplyNow('bomb');
+      const bomb = T.floatTextsNow().at(-1) === '轰炸命中 2 个敌人';
+      const texts = T.floatTextsNow(); T.quit();
+      return (full && gain && bomb && T.floatTextsNow().length === 0) || JSON.stringify({ full, gain, bomb, texts });
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
