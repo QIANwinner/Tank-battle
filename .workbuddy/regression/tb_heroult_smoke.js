@@ -25575,6 +25575,35 @@ async function main() {
       return ok || JSON.stringify({ far, near, danger, farPx, nearPx, k });
     });
 
+  // U9141–U9146: 狙击瞄准线
+  await senseCheck("U9141 瞄准线画在战场画布上，菜单中没有线", (T,$) => typeof T.sniperAimAlphaNow === 'function' && !!$('game').getContext && Array.isArray(T.sniperAimsNow()) && T.sniperAimsNow().length === 0);
+  await senseCheck("U9142 狙击手离开火还早时不亮线", T => { T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.spawnEnemyAt(300, 100, 'sniper'); const ok = T.sniperAimsNow().length === 0 && T.sniperAimAlphaNow(999) === 0; T.quit(); return ok; });
+  await senseCheck("U9143 越临近开火越亮", T => Math.abs(T.sniperAimAlphaNow(15) - 0.575) < 1e-9 && T.sniperAimAlphaNow(1) > T.sniperAimAlphaNow(29));
+  await senseCheck("U9144 开火前 30 帧起亮，开火瞬间熄灭", T => T.sniperAimAlphaNow(30) === 0.25 && T.sniperAimAlphaNow(30.01) === 0 && T.sniperAimAlphaNow(0) === 0 && T.sniperAimAlphaNow(0.001) > 0.89);
+  await senseCheck("U9145 无效计时不亮线，未知方向不延伸", T => { const p = T.sniperAimEndNow(100, 100, 9), q = T.sniperAimEndNow(100, 100, 'x'); return [NaN, -5, '10', Infinity, null, undefined].every(v => T.sniperAimAlphaNow(v) === 0) && p.x === 100 && p.y === 100 && q.x === 100 && q.y === 100; });
+  await senseCheck("U9146 真实狙击手：临开火亮红线，被墙截断，冻结时熄灭", (T,$) => {
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+      const e = T.spawnEnemyAt(300, 100, 'sniper'); e.dir = 4;
+      const idle = T.sniperAimsNow().length === 0;
+      e.shootTimer = 12;
+      const open = T.sniperAimsNow()[0];
+      const c = $('game'), k = c.width / 624;
+      const red = () => {
+        T.renderOnce();
+        const px = c.getContext('2d').getImageData(Math.round(305 * k), Math.round(130 * k), Math.round(12 * k), Math.round(100 * k)).data;
+        let n = 0; for (let i = 0; i < px.length; i += 4) if (px[i] > 45 && px[i] > px[i + 1] * 2 && px[i + 2] < 130) n++;
+        return n;
+      };
+      const lit = red();
+      T.setTile(12, 10, 2);
+      const walled = T.sniperAimsNow()[0];
+      T.setFreezeNow(3); const frozen = T.sniperAimsNow().length === 0; T.setFreezeNow(0);
+      e.shootTimer = 999; const dark = red();
+      T.quit();
+      const ok = idle && !!open && open.x1 === 311 && open.y1 === 111 && open.x2 === 311 && open.y2 > 560 && Math.abs(open.alpha - T.sniperAimAlphaNow(12)) < 1e-9 && !!walled && walled.y2 > 225 && walled.y2 < 240 && frozen && lit > dark + 12;
+      return ok || JSON.stringify({ idle, open, walled, frozen, lit, dark, k });
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
