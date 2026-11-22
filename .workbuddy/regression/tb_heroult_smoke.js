@@ -25351,6 +25351,30 @@ async function main() {
       return (quiet && shown && once && fresh) || JSON.stringify({ quiet, shown, once, fresh });
     });
 
+  // U9075–U9080: 最后一个敌人
+  await senseCheck("U9075 菜单中没有定位目标", (T,$) => typeof T.lastEnemyTextNow === 'function' && T.lastEnemyMarkNow() === null && $('fieldNote').hidden);
+  await senseCheck("U9076 开局敌人尚未出完，不标记", (T,$) => { T.startGame(); const ok = T.lastEnemyMarkNow() === null && $('fieldNote').hidden; T.quit(); return ok; });
+  await senseCheck("U9077 普通关与 Boss 关文案不同", T => T.lastEnemyTextNow(1, 12, 12, false) === '只剩最后 1 个敌人' && T.lastEnemyTextNow(1, 12, 12, true) === '只剩 Boss');
+  await senseCheck("U9078 还有敌人待出场、场上不止一个或全关只有一个敌人时不提示", T => T.lastEnemyTextNow(1, 11, 12, false) === '' && T.lastEnemyTextNow(2, 12, 12, false) === '' && T.lastEnemyTextNow(0, 12, 12, false) === '' && T.lastEnemyTextNow(1, 1, 1, false) === '' && T.lastEnemyTextNow(1, 2, 2, false) !== '');
+  await senseCheck("U9079 非整数计数不提示", T => [[NaN, 12, 12], ['1', 12, 12], [1, 12.5, 12], [1, 12, null]].every(a => T.lastEnemyTextNow(a[0], a[1], a[2], false) === ''));
+  await senseCheck("U9080 真实战场：两个敌人无圈，只剩一个时出圈并提示", (T,$) => {
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap(); T.forceClear();
+      T.spawnEnemyAt(300, 300, 'normal'); T.spawnEnemyAt(480, 120, 'normal');
+      const c = $('game'), k = c.width / 624;
+      const yellow = () => {
+        T.renderOnce();
+        const px = c.getContext('2d').getImageData(Math.round(285 * k), Math.round(285 * k), Math.round(52 * k), Math.round(52 * k)).data;
+        let n = 0; for (let i = 0; i < px.length; i += 4) if (px[i] > 110 && px[i + 1] > 100 && px[i + 2] < 90) n++;
+        return n;
+      };
+      T.extraHudRefreshNow();
+      const two = yellow(), none = T.lastEnemyMarkNow() === null && $('fieldNote').hidden;
+      T.forceClear(); T.spawnEnemyAt(300, 300, 'normal'); T.extraHudRefreshNow();
+      const one = yellow(), mark = T.lastEnemyMarkNow(), note = $('fieldNote');
+      const ok = none && two === 0 && one > 20 && mark && mark.x === 300 && !note.hidden && note.textContent === T.lastEnemyTextNow(1, 12, 12, false) && note.dataset.kind === 'warn';
+      T.quit(); return ok || JSON.stringify({ none, two, one, mark, text: note.textContent });
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
