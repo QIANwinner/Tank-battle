@@ -25424,6 +25424,20 @@ async function main() {
       T.quit(); return (paused && over && $('upgListWrap').hidden) || JSON.stringify({ paused, over, text: val.textContent });
     });
 
+  // U9099–U9104: 上一局对比
+  await senseCheck("U9099 结算层含上一局对比，菜单中隐藏", (T,$) => $('overlay').contains($('runDeltaWrap')) && $('runDeltaWrap').hidden);
+  await senseCheck("U9100 没有上一局时不显示对比", T => T.runDeltaTextNow({ score: 500, kills: 3, level: 2 }, null) === '');
+  await senseCheck("U9101 分别写出得分、击杀、关卡的差距", T => T.runDeltaTextNow({ score: 12800, kills: 9, level: 3 }, { score: 800, kills: 12, level: 2 }) === '比上一局：得分 +12,000 · 击杀 -3 · 关卡 +1');
+  await senseCheck("U9102 持平如实写明；无尽模式比较波次", T => T.runDeltaTextNow({ score: 0, kills: 0, level: 1 }, { score: 0, kills: 0, level: 1 }) === '比上一局：得分 持平 · 击杀 持平 · 关卡 持平' && T.runDeltaTextNow({ score: 5, kills: 1, level: 7, endless: true }, { score: 4, kills: 1, level: 9, endless: true }).endsWith('波次 -2'));
+  await senseCheck("U9103 模式不同或数据残缺不比较", T => T.runDeltaTextNow({ score: 5, kills: 1, level: 1, daily: true }, { score: 4, kills: 1, level: 1 }) === '' && [[{ score: NaN, kills: 1, level: 1 }, { score: 1, kills: 1, level: 1 }], [{ score: 1, kills: 1, level: 1 }, { score: 1, kills: -1, level: 1 }], ['x', { score: 1, kills: 1, level: 1 }], [{ score: 1, kills: 1 }, { score: 1, kills: 1, level: 1 }]].every(a => T.runDeltaTextNow(a[0], a[1]) === ''));
+  await senseCheck("U9104 真实连打两局：结算卡与两局快照一致，回菜单收起", (T,$) => {
+      T.startGame(); T.setScore(500); T.endGame(false); T.quit();
+      T.startGame(); T.kill(); T.setScore(800); T.endGame(false);
+      const el = $('runDeltaWrap'), pair = T.runPairNow();
+      const ok = !el.hidden && pair.prev.score === 500 && pair.cur.score === 800 && el.textContent === T.runDeltaTextNow(pair.cur, pair.prev) && el.textContent === '比上一局：得分 +300 · 击杀 +1 · 关卡 持平';
+      T.quit(); return (ok && el.hidden) || JSON.stringify({ text: el.textContent, pair });
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

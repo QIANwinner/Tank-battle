@@ -1484,6 +1484,7 @@
     <p id="ovSub">守住基地 · 消灭敌军 · 点开即玩</p>
     <div id="lastRunCard"></div>
     <div id="ovStats"></div>
+    <p id="runDeltaWrap" class="senseNote" hidden></p>
     <div class="senseNote" id="upgListWrap" hidden><b>本局强化</b> <span id="upgListVal">尚未获得强化</span></div>
     <p id="pauseBriefWrap" class="senseNote" hidden></p>
     <p id="defeatCauseWrap" class="senseNote" role="status" hidden></p>
@@ -1834,7 +1835,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.205</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.206</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -23723,6 +23724,14 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     }
     return parts.join(' / ') || '尚未获得强化';
   }
+  let prevRun = null, runSnapTaken = false;
+  function runDeltaText(cur, prev) {
+    const valid = r => r && typeof r === 'object' && [r.score, r.kills, r.level].every(v => Number.isFinite(v) && v >= 0);
+    if (!valid(cur) || !valid(prev)) return '';
+    if (!!cur.daily !== !!prev.daily || !!cur.timed !== !!prev.timed || !!cur.endless !== !!prev.endless) return '';
+    const part = (label, a, b) => label + ' ' + (a === b ? '持平' : (a > b ? '+' : '-') + fmtNum(Math.abs(a - b)));
+    return '比上一局：' + part('得分', cur.score, prev.score) + ' · ' + part('击杀', cur.kills, prev.kills) + ' · ' + part(cur.endless ? '波次' : '关卡', cur.level, prev.level);
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -23750,6 +23759,9 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   function showOverlay(kind) {
     $('hud').classList.add('hud-covered');
     overlayKind = kind;
+    const deltaEl = document.getElementById('runDeltaWrap');
+    const deltaText = kind === 'over' && multiMode === 0 ? runDeltaText(lastRun, prevRun) : '';
+    deltaEl.hidden = !deltaText; deltaEl.textContent = deltaText;
     const upgPanel = document.getElementById('upgListWrap');
     upgPanel.hidden = kind === 'title' || multiMode === 2;
     if (!upgPanel.hidden) document.getElementById('upgListVal').textContent = upgListText(upgrades, UPGRADE_POOL);
@@ -23891,6 +23903,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (startLv && startLv > 1) level = Math.min(startLv | 0, 999);
     // —— v0.2.5 战绩档案：本局计时清零 ——
     playSecRun = 0;
+    runSnapTaken = false;
     defeatCause = null; lastHit = null;
     lastEnemyNoted = false;
     recordNoted = false;
@@ -24021,6 +24034,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     // —— v0.2.7 生涯累计成就（依赖 recordGame 已更新 career） ——
     checkCareerAch();
     // —— v0.2.6 战绩图：捕获本局快照（供战绩档案「生成战绩图」复用） ——
+    if (!runSnapTaken) { prevRun = lastRun; runSnapTaken = true; }
     lastRun = {
       score: score, level: level,
       kills: stat.kills, maxCombo: stat.maxCombo,
@@ -25663,7 +25677,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.205', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.206', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -28123,6 +28137,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       defeatCauseTextNow: defeatCauseText, defeatCauseNow: currentDefeatCause, enemyShotAtBaseNow: type => perfPoolSpawn(BASE.x * TILE + TILE / 2 - 2, BASE.y * TILE - 8, 4, 4, BULLET_SPEED, { isPlayer: false, isBoss: false, type }, 0, false),
       pauseBriefTextNow: pauseBriefText, pauseBriefNow: pauseBriefState,
       upgListTextNow: o => upgListText(o, UPGRADE_POOL), upgListRawNow: upgListText,
+      runDeltaTextNow: runDeltaText, runPairNow: () => ({ cur: lastRun, prev: prevRun }),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
