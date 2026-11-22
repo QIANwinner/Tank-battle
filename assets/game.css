@@ -8125,4 +8125,7 @@ html.compact-hud #hud .m-hide { display:none !important; }
   #smStutWrap.sm-hit { animation: smPulse .5s ease-in-out infinite alternate; }
   @keyframes smPulse { from { opacity:.55; } to { opacity:1; } }
   #smToast { position:fixed; top:80px; left:50%; transform:translateX(-50%); z-index:9998; background:rgba(40,10,10,.94); border:1px solid #f44336; color:#ff6b6b; font-size:14px; font-weight:700; padding:7px 18px; border-radius:20px; pointer-events:none; opacity:0; transition:opacity .25s ease, transform .25s ease; box-shadow:0 4px 18px rgba(0,0,0,.45); }
+  #sfxVizWrap { position:absolute; left:8px; bottom:8px; z-index:2; pointer-events:none; padding:3px 9px; background:#071521ed; color:#ddfaff; border-left:3px solid var(--cyan); border-radius:2px; font-size:12px; font-weight:700; }
+  #sfxVizWrap[data-cue="boss"] { border-color:#ffb454; color:#ffdb9b; }
+  #sfxVizWrap[hidden] { display:none; }
   #smToast.sm-fade { opacity:1; transform:translateX(-50%) translateY(2px); }

@@ -25025,6 +25025,32 @@ async function main() {
     t("U8996 DOM 与函数一致（均 FPS 可读 + DOM 为合法评级）", o5.n.avgFps >= 0 && o5.n.stut >= 0 && (o5.dom === null || ['极佳','良好','一般','吃力','—'].indexOf(o5.dom) >= 0), JSON.stringify(o5));
   } catch (e) { t("U8991 流畅度总结卡 抛异常", false, String(e)); t("U8992 流畅度总结卡 抛异常", false, String(e)); t("U8993 流畅度总结卡 抛异常", false, String(e)); t("U8994 流畅度总结卡 抛异常", false, String(e)); t("U8995 流畅度总结卡 抛异常", false, String(e)); t("U8996 流畅度总结卡 抛异常", false, String(e)); }
 
+
+  async function senseCheck(name, probe) {
+    const r = await client.send('Runtime.evaluate', {
+      expression: '(' + probe.toString() + ')(window.__tbTest, id => document.getElementById(id))',
+      returnByValue: true, awaitPromise: true
+    });
+    const value = r.result?.result?.value;
+    t(name, value === true, r.result?.exceptionDetails?.exception?.description || String(value));
+  }
+
+  // U8997–U9002: 战场声效字幕
+  await senseCheck("U8997 字幕位于战场内", (T,$) => $('sfxVizWrap').parentElement === $('frame') && typeof T.sfxVizTextNow === 'function');
+  await senseCheck("U8998 新一局没有上一局的字幕", (T,$) => { T.startGame(); return $('sfxVizWrap').hidden && T.sfxVizCountNow() === 0; });
+  await senseCheck("U8999 区分命中与拾取", T => T.sfxVizTextNow('hit',200) === '命中' && T.sfxVizTextNow('pickup',200) === '拾取');
+  await senseCheck("U9000 从零时刻显示，到期即隐藏", T => T.sfxVizTextNow('boom',0) === '爆炸' && T.sfxVizTextNow('boom',800) === '');
+  await senseCheck("U9001 无效声效与时间不产生字幕", T => !T.sfxVizTextNow('toString',0) && !T.sfxVizTextNow('boss',NaN) && !T.sfxVizTextNow('hit',-1));
+  await senseCheck("U9002 真实 Boss 事件在静音下仍有字幕，暂停时消失", (T,$) => {
+      const wasMuted = T.lsGet('tank-battle-muted') === '1';
+      if (!wasMuted) $('muteBtn').click();
+      try {
+        T.forceSpawnBoss(); T.kill();
+        const visible = !$('sfxVizWrap').hidden && $('sfxVizWrap').textContent === T.sfxVizTextNow('boss',0);
+        $('pauseBtn').click(); return visible && $('sfxVizWrap').hidden;
+      } finally { if (!wasMuted) $('muteBtn').click(); T.quit(); }
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
