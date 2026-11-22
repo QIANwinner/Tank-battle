@@ -11,7 +11,7 @@ const os = require('os');
 const REPO = process.argv[2] || 'QIANwinner/Tank-battle';
 const BRANCH = process.argv[3] || 'main';
 const CUSTOM_MSG = process.argv[4];
-const REPO_DIR = 'C:/Users/21889/Desktop/开源项目/Tank-battle';
+const REPO_DIR = path.resolve(__dirname, '..', '..');
 const STATE_FILE = path.join(REPO_DIR, '.workbuddy', 'remote_sync.json');
 
 // gh.exe 常不在 PATH(本机安装于 Program Files/GitHub CLI);且代理 3428 常返 502,
@@ -112,7 +112,10 @@ function git(args) {
   gh(`-X PATCH repos/${REPO}/git/refs/heads/${BRANCH}`, JSON.stringify({ sha: commit.sha, force: false }));
   console.log('remote commit:', commit.sha, '(parent ' + remoteHead.slice(0, 10) + ')');
 
-  git('update-ref refs/remotes/origin/' + BRANCH + ' ' + localHead);   // 追踪引用对齐本地(状态显示用)
-  fs.writeFileSync(STATE_FILE, JSON.stringify({ remoteSha: commit.sha, tree: tree.sha, localHead, at: new Date().toISOString() }, null, 2));
+  // API-generated commits may not exist locally. Leave origin/* to git fetch.
+  const confirmed = JSON.parse(gh(`repos/${REPO}/git/ref/heads/${BRANCH}`)).object.sha;
+  const confirmedTree = JSON.parse(gh(`repos/${REPO}/git/commits/${confirmed}`)).tree.sha;
+  if (confirmedTree !== localTree) throw new Error('远程分支在同步期间变动，未确认目标树');
+  fs.writeFileSync(STATE_FILE, JSON.stringify({ remoteSha: confirmed, tree: confirmedTree, localHead, at: new Date().toISOString() }, null, 2));
   console.log('SYNC OK: 远程树 == 本地树', tree.sha.slice(0, 10));
 })().catch(e => { console.error('ERR:', e.message); process.exit(1); });

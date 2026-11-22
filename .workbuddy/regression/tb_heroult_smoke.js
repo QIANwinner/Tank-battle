@@ -25163,6 +25163,20 @@ async function main() {
       } finally { if(old===null) localStorage.removeItem(k); else localStorage.setItem(k,old); $('btnSaveClose').click(); }
     });
 
+
+  // U9039–U9044: 战后感知回顾
+  await senseCheck("U9039 结算层含感知回顾卡", (T,$) => $('overlay').contains($('senseDashWrap')) && $('senseDashWrap').contains($('senseDashVal')));
+  await senseCheck("U9040 零事件是有效战报", T => T.senseDashTextNow({sounds:0,returns:0,writes:0,pending:0}) === '声音 0 次 · 切回 0 次 · 成功写入 0 次 · 无待写项');
+  await senseCheck("U9041 战报列出实际计数而非主观评级", T => T.senseDashTextNow({sounds:17,returns:2,writes:3,pending:0}) === '声音 17 次 · 切回 2 次 · 成功写入 3 次 · 无待写项');
+  await senseCheck("U9042 首项待写立即提示重试", T => T.senseDashTextNow({sounds:0,returns:0,writes:1,pending:1}).endsWith('1 项待保存，请重试'));
+  await senseCheck("U9043 未知或不合法计数不报成功", T => [null,{}, {sounds:-1,returns:0,writes:1,pending:0}].every(v => T.senseDashTextNow(v) === '本局记录不可用'));
+  await senseCheck("U9044 两局之间独立，真实结算卡与存档回执一致", (T,$) => {
+      T.startGame(); T.forceSpawnBoss(); T.setCoinsNow(29); T.showLevelIntro('第 1 关'); T.endGame(false);
+      const s=T.senseRoundNow(), card=$('senseDashWrap');
+      const ok=!card.hidden && getComputedStyle($('lvIntro')).display==='none' && s.sounds>0 && s.writes>0 && $('senseDashVal').textContent===T.senseDashTextNow(s);
+      T.quit(); T.startGame(); const fresh=T.senseRoundNow(); T.quit(); return ok && fresh.sounds===0 && fresh.returns===0 && card.hidden;
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
