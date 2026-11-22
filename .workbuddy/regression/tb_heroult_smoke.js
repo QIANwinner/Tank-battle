@@ -25294,6 +25294,25 @@ async function main() {
     return hz === 120 && frames === 4;
   });
 
+  // U9057–U9062: 大招冷却与就绪提示
+  await senseCheck("U9057 提示条位于战场内，默认隐藏", (T,$) => $('fieldNote').parentElement === $('frame') && $('fieldNote').hidden && typeof T.cooldownStepNow === 'function');
+  await senseCheck("U9058 新一局大招可用且没有残留提示", (T,$) => { T.startGame(); const ok = $('fieldNote').hidden && T.fieldNoteCountNow() === 0 && T.ultNow().ready; T.quit(); return ok; });
+  await senseCheck("U9059 60 帧只流逝 1 秒；键盘与触屏文案不同", T => { const s = T.cooldownStepNow(8, 60); return s.cd === 7 && !s.ready && T.ultReadyTextNow('ult', false) === '大招就绪 · 按 E' && T.ultReadyTextNow('hero', true) === '英雄技就绪'; });
+  await senseCheck("U9060 恰好归零只报一次就绪", T => { const a = T.cooldownStepNow(0.01, 1), b = T.cooldownStepNow(0, 1), c = T.cooldownStepNow(1, 60); return a.cd === 0 && a.ready && b.cd === 0 && !b.ready && c.cd === 0 && c.ready; });
+  await senseCheck("U9061 无效冷却和步长不触发就绪，未知技能无文案", T => { const a = T.cooldownStepNow(NaN, 1), b = T.cooldownStepNow(5, NaN), c = T.cooldownStepNow(5, -3); return a.cd === 0 && !a.ready && b.cd === 5 && !b.ready && c.cd === 5 && !c.ready && T.ultReadyTextNow('toString', false) === '' && T.fieldNoteWinsNow(NaN, 0, 0) === false; });
+  await senseCheck("U9062 真实释放后仍在冷却；归零时提示与文案一致，暂停即收起", async (T,$) => {
+      const raf = () => new Promise(requestAnimationFrame);
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+      T.fireUlt(); for (let i = 0; i < 12; i++) await raf();
+      const cooling = T.ultNow().cd > 7 && T.ultNow().cd < 8 && $('fieldNote').hidden;
+      T.setUltCd(0.05);
+      const end = performance.now() + 3000;
+      while ($('fieldNote').hidden && performance.now() < end) await raf();
+      const note = $('fieldNote'), shown = !note.hidden && note.textContent === T.ultReadyNoteNow('ult') && note.dataset.kind === 'good' && T.ultNow().ready;
+      $('pauseBtn').click(); const cleared = note.hidden; T.quit();
+      return (cooling && shown && cleared) || JSON.stringify({ cooling, shown, cleared, text: note.textContent });
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
