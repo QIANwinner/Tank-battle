@@ -1835,7 +1835,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.208</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.209</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -4745,6 +4745,7 @@
     spawnParticles(p.x + TANK_SIZE / 2, p.y + TANK_SIZE / 2, p.color, 18);
     shake = 10;
     if (isP2) lives2--; else lives--;
+    if (!isP2 && multiMode !== 2) fieldNoteShow(deathNoteText(lastHit, lives), 'warn', 2200, 2);
     updateHud();
     setTimeout(() => {
       if (!running || gameOver) return;
@@ -4766,6 +4767,7 @@
       } else {
         player = makePlayer(SPAWN.x, SPAWN.y, '#002FA7');
         player.spawnInv = 120;
+        lastHit = null;
       }
       updateHud();
     }, 700);
@@ -5741,6 +5743,7 @@
       for (const cell of treeTiles) ctx.drawImage(treeStamp, cell.x, cell.y, treeStamp.width / treeScale, treeStamp.height / treeScale);
     }
     drawLastEnemyMark();
+    drawRespawnMark();
 
     // 道具
     powerupRingCount = 0;
@@ -23772,6 +23775,29 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     ctx.beginPath(); ctx.arc(p.x + 8, p.y + 8, 14, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * fade.frac); ctx.stroke();
     ctx.restore();
   }
+  function deathNoteText(hit, left) {
+    if (!Number.isSafeInteger(left) || left < 1) return '';
+    const src = hit && typeof hit === 'object' ? hit : {};
+    const who = typeof src.by !== 'string' || !src.by ? '敌方坦克' : src.by === 'Boss' ? ' Boss ' : src.by;
+    const cause = src.how === 'blast' ? '被自爆坦克炸毁' : src.how === 'laser' ? '被 Boss 激光击毁' : src.how === 'shot' ? '被' + who + '击毁' : '坦克被击毁';
+    return cause + ' · 剩余生命 ' + left;
+  }
+  function respawnMarkState(dead, left, mode) {
+    return dead === true && Number.isSafeInteger(left) && left >= 1 && mode !== 2;
+  }
+  function respawnMark() {
+    if (!running || gameOver || !player || !respawnMarkState(player.dead, lives, multiMode)) return null;
+    return { x: SPAWN.x * TILE + TILE / 2, y: SPAWN.y * TILE + TILE / 2 };
+  }
+  function drawRespawnMark() {
+    const m = respawnMark();
+    if (!m) return;
+    const pulse = reduced() ? 0.5 : 0.5 + 0.5 * Math.sin(animTime / 90);
+    ctx.save();
+    ctx.strokeStyle = '#00f0ff'; ctx.lineWidth = 2; ctx.globalAlpha = 0.55 + 0.4 * pulse; ctx.setLineDash([5, 4]);
+    ctx.beginPath(); ctx.arc(m.x, m.y, 15 + 3 * pulse, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -25718,7 +25744,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.208', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.209', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -28181,6 +28207,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       runDeltaTextNow: runDeltaText, runPairNow: () => ({ cur: lastRun, prev: prevRun }),
       pickupEffectTextNow: pickupEffectText, pickupStateNow: pickupState, pickupApplyNow: type => applyPowerup(type), floatTextsNow: () => texts.map(t => t.str),
       powerupFadeNow: powerupFade, powerupLostTextNow: powerupLostText, powerupRingCountNow: () => powerupRingCount, powerupsLostNow: () => powerupsLost, setPowerupLifeNow: v => { for (const p of powerups) p.life = v; return powerups.length; },
+      deathNoteTextNow: deathNoteText, respawnMarkStateNow: respawnMarkState, respawnMarkNow: respawnMark, enemyShotAtPlayerNow: type => { if (!player) return false; perfPoolSpawn(player.x + TANK_SIZE / 2 - 2, player.y - 10, 4, 4, BULLET_SPEED, { isPlayer: false, isBoss: false, type }, 0, false); return true; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

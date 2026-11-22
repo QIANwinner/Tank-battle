@@ -25485,6 +25485,28 @@ async function main() {
       return (none && one && ringed > fresh + 8 && gone) || JSON.stringify({ none, one, fresh, ringed, gone, texts, k });
     });
 
+  // U9117–U9122: 阵亡提示与重生点
+  await senseCheck("U9117 阵亡提示用战场提示条，菜单中没有重生点标记", (T,$) => typeof T.deathNoteTextNow === 'function' && T.respawnMarkNow() === null && $('fieldNote').hidden);
+  await senseCheck("U9118 坦克存活时不标重生点", (T,$) => { T.startGame(); const ok = T.respawnMarkNow() === null && T.respawnMarkStateNow(false, 3, 0) === false && $('fieldNote').hidden; T.quit(); return ok; });
+  await senseCheck("U9119 写明击毁者与剩余生命", T => T.deathNoteTextNow({ how: 'shot', by: '狙击坦克' }, 2) === '被狙击坦克击毁 · 剩余生命 2' && T.deathNoteTextNow({ how: 'blast', by: '' }, 1) === '被自爆坦克炸毁 · 剩余生命 1' && T.deathNoteTextNow({ how: 'laser', by: 'Boss' }, 3) === '被 Boss 激光击毁 · 剩余生命 3' && T.deathNoteTextNow({ how: 'shot', by: 'Boss' }, 2) === '被 Boss 击毁 · 剩余生命 2');
+  await senseCheck("U9120 最后一条命打光不提示；剩 1 条命仍提示；对抗模式不标重生点", T => T.deathNoteTextNow({ how: 'shot', by: '普通坦克' }, 0) === '' && T.deathNoteTextNow({ how: 'shot', by: '普通坦克' }, 1) !== '' && T.respawnMarkStateNow(true, 1, 0) === true && T.respawnMarkStateNow(true, 0, 0) === false && T.respawnMarkStateNow(true, 2, 2) === false);
+  await senseCheck("U9121 来源不明时不编造击毁者；无效生命数不提示", T => [null, 7, 'x', {}, { how: 'meteor', by: '陨石' }].every(h => T.deathNoteTextNow(h, 2) === '坦克被击毁 · 剩余生命 2') && T.deathNoteTextNow({ how: 'shot', by: '' }, 2) === '被敌方坦克击毁 · 剩余生命 2' && [NaN, '2', -1, 1.5, null].every(n => T.deathNoteTextNow({ how: 'shot', by: '狙击坦克' }, n) === '') && T.respawnMarkStateNow('yes', 2, 0) === false && T.respawnMarkStateNow(true, NaN, 0) === false);
+  await senseCheck("U9122 真实敌弹击毁坦克：提示与记录一致，重生点亮起，重生后收起", async (T,$) => {
+      const raf = () => new Promise(requestAnimationFrame);
+      T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap(); T.setLives(3); T.invul(0);
+      T.enemyShotAtPlayerNow('sniper');
+      let end = performance.now() + 3000;
+      while (T.livesNow() === 3 && performance.now() < end) await raf();
+      const note = $('fieldNote'), mark = T.respawnMarkNow(), text = note.textContent;
+      const died = T.livesNow() === 2 && !note.hidden && text === '被狙击坦克击毁 · 剩余生命 2' && text === T.deathNoteTextNow({ how: 'shot', by: '狙击坦克' }, 2) && note.dataset.kind === 'warn';
+      const marked = !!mark && mark.x === 252 && mark.y === 588;
+      end = performance.now() + 3000;
+      while (T.respawnMarkNow() && performance.now() < end) await raf();
+      const back = T.respawnMarkNow() === null && T.livesNow() === 2;
+      T.quit();
+      return (died && marked && back) || JSON.stringify({ died, marked, back, text, mark });
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
