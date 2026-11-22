@@ -25106,6 +25106,20 @@ async function main() {
       return ok && resumed;
     });
 
+
+  // U9021–U9026: 暂停增益时刻表
+  await senseCheck("U9021 增益表在暂停层内", (T,$) => $('overlay').contains($('buffStackVal')));
+  await senseCheck("U9022 无增益时不虚报效果", T => T.buffStackTextNow({shield:0}) === '无生效增益');
+  await senseCheck("U9023 短效果先于长效果", T => T.buffStackTextNow({rapid:4.1,double:2,shield:3}) === '双管 2 秒 / 护盾 3 秒 / 速射 5 秒');
+  await senseCheck("U9024 小于一秒仍在生效，恰好到零退出", T => T.buffStackTextNow({magnet:0.01,freeze:0}) === '磁暴 1 秒');
+  await senseCheck("U9025 忽略非有限计时和非增益字段", T => T.buffStackTextNow(null) === '增益状态未知' && T.buffStackTextNow({rapid:Infinity,freeze:-1,boss:3}) === '无生效增益');
+  await senseCheck("U9026 真实暂停读到护盾帧数和磁暴秒数", (T,$) => {
+      T.startGame(); T.invul(120); T.setMagnetStorm(3); $('pauseBtn').click();
+      const text = $('buffStackVal').textContent;
+      const ok = !$('buffStackWrap').hidden && text === T.buffStackTextNow(T.buffStackCurrentNow()) && text.includes('护盾 2 秒') && text.includes('磁暴 3 秒');
+      T.quit(); return ok && $('buffStackWrap').hidden;
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
