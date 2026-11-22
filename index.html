@@ -1554,6 +1554,7 @@
     </div>
     <div class="muteHint" id="muteHint">🔊 按 M 键一键静音</div>
     <div class="settings" id="settings">
+      <div class="senseReadout" id="volGuardWrap"><span>调音保护</span> <b id="volGuardVal">升音量渐入，降音量即时</b></div>
       <div class="senseReadout" id="bgmLiveWrap"><span>当前配乐</span> <b id="bgmLiveVal">关闭</b></div>
       <div class="setRow">
         <span class="setLabel">⚡ 帧时自适应<span class="hint">自动降载</span></span>
@@ -1826,7 +1827,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.193</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.194</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -3012,6 +3013,47 @@
     cueAt = now; cueKind = kind; cueEl.hidden = false;
   }
   let audioCtx = null;
+  let mixBus = null;
+  const mixPlans = { master:null, bgm:null, sfx:null };
+  const mixLabels = { master:'主音量', bgm:'音乐', sfx:'音效' };
+  function volGuardPlan(from, to, at) {
+    if (![from, to].every(v => Number.isFinite(v) && v >= 0 && v <= 1) || !Number.isFinite(at) || at < 0) return null;
+    return { from, to, at, end:at + (to > from ? 0.24 : 0) };
+  }
+  function volGuardValue(p, now) {
+    if (!p || !Number.isFinite(now)) return null;
+    if (p.end === p.at || now >= p.end) return p.to;
+    return p.from + (p.to - p.from) * Math.max(0, (now - p.at) / (p.end - p.at));
+  }
+  function scheduleMixGain(param, initial, p, now, t) {
+    param.cancelScheduledValues(t);
+    param.setValueAtTime(p ? volGuardValue(p, now) : initial, t);
+    if (p && p.end > now) param.linearRampToValueAtTime(p.to, t + p.end - now);
+  }
+  function syncMixGain(key, now) {
+    const initial = key === 'master' ? (muted ? 0 : masterVol) : key === 'sfx' ? sfxVol : bgmVol;
+    scheduleMixGain(mixBus[key].gain, initial, mixPlans[key], now, audioCtx.currentTime);
+  }
+  function mixDestination(key) {
+    if (!mixBus) {
+      mixBus = { master:audioCtx.createGain(), bgm:audioCtx.createGain(), sfx:audioCtx.createGain() };
+      mixBus.sfx.connect(mixBus.master); mixBus.bgm.connect(mixBus.master); mixBus.master.connect(audioCtx.destination);
+      const now = performance.now() / 1000;
+      for (const k of Object.keys(mixBus)) syncMixGain(k, now);
+    }
+    return mixBus[key];
+  }
+  function guardVolume(key, oldValue, target) {
+    if (oldValue === target) return;
+    const now = performance.now() / 1000, prev = mixPlans[key];
+    const p = volGuardPlan(prev ? volGuardValue(prev, now) : oldValue, target, now);
+    if (!p) return;
+    // Lowering the requested volume caps the audible value immediately, even mid-ramp.
+    if (target < oldValue) { p.from = Math.min(p.from, target); p.end = p.from < target ? now + 0.24 : now; }
+    mixPlans[key] = p;
+    if (mixBus) syncMixGain(key, now);
+    document.getElementById('volGuardVal').textContent = mixLabels[key] + ' ' + Math.round(target * 100) + '% · ' + (p.end > now ? '渐入' : '即时');
+  }
   function ensureAudio() {
     try {
       if (!audioCtx) {
@@ -3033,9 +3075,9 @@
       const o = audioCtx.createOscillator();
       const g = audioCtx.createGain();
       o.type = type; o.frequency.value = freq;
-      g.gain.setValueAtTime(vol * masterVol * sfxVol, t);
+      g.gain.setValueAtTime(vol, t);
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      o.connect(g); g.connect(audioCtx.destination);
+      o.connect(g); g.connect(mixDestination('sfx'));
       o.start(t); o.stop(t + dur);
     } catch (e) { /* 忽略音频错误 */ }
   }
@@ -3065,9 +3107,9 @@
       f.frequency.setValueAtTime(fFrom, t);
       f.frequency.exponentialRampToValueAtTime(Math.max(40, fTo), t + dur);
       const g = audioCtx.createGain();
-      g.gain.setValueAtTime(vol * masterVol * sfxVol, t);
+      g.gain.setValueAtTime(vol, t);
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      src.connect(f); f.connect(g); g.connect(audioCtx.destination);
+      src.connect(f); f.connect(g); g.connect(mixDestination('sfx'));
       src.start(t); src.stop(t + dur + 0.02);
     } catch (e) { /* 忽略 */ }
   }
@@ -3083,9 +3125,9 @@
       o.type = type;
       o.frequency.setValueAtTime(from, t);
       o.frequency.exponentialRampToValueAtTime(Math.max(20, to), t + dur);
-      g.gain.setValueAtTime(vol * masterVol * sfxVol, t);
+      g.gain.setValueAtTime(vol, t);
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      o.connect(g); g.connect(audioCtx.destination);
+      o.connect(g); g.connect(mixDestination('sfx'));
       o.start(t); o.stop(t + dur + 0.02);
     } catch (e) { /* 忽略 */ }
   }
@@ -3220,9 +3262,9 @@
     const g = audioCtx.createGain();
     o.type = type; o.frequency.value = freq;
     g.gain.setValueAtTime(0.0001, time);
-    g.gain.linearRampToValueAtTime(vol * masterVol * bgmVol, time + 0.012);
+    g.gain.linearRampToValueAtTime(vol, time + 0.012);
     g.gain.exponentialRampToValueAtTime(0.0001, time + dur);
-    o.connect(g); g.connect(audioCtx.destination);
+    o.connect(g); g.connect(mixDestination('bgm'));
     o.start(time); o.stop(time + dur + 0.03);
   }
   // —— v0.2.9 自动曲目决策：Boss 战 / 无尽高波次 / 暂停 / 结束 的动态切换 ——
@@ -24210,6 +24252,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
 
   function toggleMute() {
     muted = !muted;
+    guardVolume('master', muted ? masterVol : 0, muted ? 0 : masterVol);
     try { saveStore.setItem(LS_MUTE, muted ? '1' : '0'); } catch (e) { /* 忽略 */ }
     applyMuteLabel();
     applyVolUI();
@@ -24245,7 +24288,10 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (volIcon) volIcon.textContent = volIconText(muted, p);
   }
   function setMasterVol(v) {
+    if (!Number.isFinite(v)) return;
+    const old = masterVol;
     masterVol = Math.min(1, Math.max(0, v));
+    guardVolume('master', muted ? 0 : old, muted ? 0 : masterVol);
     try { saveStore.setItem(LS_VOL, String(masterVol)); } catch (e) { /* 忽略 */ }
     applyVolUI();
     if (!muted && masterVol > 0) sfxPickup();
@@ -24385,13 +24431,19 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     return c;
   }
   function setBgmVol(v) {
+    if (!Number.isFinite(v)) return;
+    const old = bgmVol;
     bgmVol = Math.min(1, Math.max(0, v));
+    guardVolume('bgm', old, bgmVol);
     try { saveStore.setItem(LS_BGM, String(bgmVol)); } catch (e) { /* 忽略 */ }
     applySettingsUI();
     if (!muted && bgmVol > 0) sfxPickup();
   }
   function setSfxVol(v) {
+    if (!Number.isFinite(v)) return;
+    const old = sfxVol;
     sfxVol = Math.min(1, Math.max(0, v));
+    guardVolume('sfx', old, sfxVol);
     try { saveStore.setItem(LS_SFX, String(sfxVol)); } catch (e) { /* 忽略 */ }
     applySettingsUI();
     if (!muted && sfxVol > 0) sfxPickup();
@@ -25316,7 +25368,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.193', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.194', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -27763,6 +27815,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       saveStampTextNow: saveStampText, saveStampNow: saveStore.status,
       focusBackTextNow: focusBackText, focusBackCountNow: () => awayReturns,
       buffStackTextNow: buffStackText, buffStackCurrentNow: activeBuffTimers,
+      volGuardPlanNow: volGuardPlan, volGuardValueNow: volGuardValue, volGuardScheduleNow: scheduleMixGain,
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

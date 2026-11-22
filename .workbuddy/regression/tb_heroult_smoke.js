@@ -25120,6 +25120,33 @@ async function main() {
       T.quit(); return ok && $('buffStackWrap').hidden;
     });
 
+
+  // U9027–U9032: 调音渐入保护
+  await senseCheck("U9027 设置包含渐入反馈", (T,$) => $('settings').contains($('volGuardVal')));
+  await senseCheck("U9028 未改变目标无需渐入", T => T.volGuardValueNow(T.volGuardPlanNow(0.5,0.5,0),0) === 0.5);
+  await senseCheck("U9029 升音量在半程达到中间增益", T => Math.abs(T.volGuardValueNow(T.volGuardPlanNow(0,1,0),0.12) - 0.5) < 0.0001);
+  await senseCheck("U9030 起点、终点和静音边界", T => { const p=T.volGuardPlanNow(0,1,1); return T.volGuardValueNow(p,0)===0 && T.volGuardValueNow(p,2)===1 && T.volGuardValueNow(T.volGuardPlanNow(1,0,0),0)===0; });
+  await senseCheck("U9031 非法增益不会产生调度计划", T => !T.volGuardPlanNow(-1,0,0) && !T.volGuardPlanNow(0,Infinity,0) && !T.volGuardPlanNow(0,1,NaN));
+  await senseCheck("U9032 音频采样验证渐入和静音，滑杆与存档保留目标值", async (T,$) => {
+      const ctx = new OfflineAudioContext(2,4096,16000), tone = ctx.createConstantSource();
+      const merger = ctx.createChannelMerger(2); merger.connect(ctx.destination);
+      for (const [ch, from, to] of [[0,0,1],[1,1,0]]) {
+        const bus = ctx.createGain(); tone.connect(bus); bus.connect(merger,0,ch);
+        T.volGuardScheduleNow(bus.gain,from,T.volGuardPlanNow(from,to,0),0,0);
+      }
+      tone.start(); const buf = await ctx.startRendering();
+      const up = buf.getChannelData(0), down = buf.getChannelData(1);
+      const envelope = up[0] < 0.01 && Math.abs(up[1920]-0.5) < 0.02 && up[4000] > 0.99 && down.every(v => Math.abs(v) < 0.001);
+      const old = T.sfxVolNow(), muted = T.lsGet('tank-battle-muted') === '1';
+      if (muted) $('muteBtn').click();
+      try {
+        T.setSfxVol(0); T.setSfxVol(1);
+        const label = $('volGuardVal').textContent, target = T.sfxVolNow(), saved = T.lsGet('tank-battle-sfx'), slider = $('sfxSlider').value;
+        T.setSfxVol(0);
+        return envelope && label === '音效 100% · 渐入' && target === 1 && saved === '1' && slider === '100' && $('volGuardVal').textContent === '音效 0% · 即时';
+      } finally { T.setSfxVol(old); if (muted) $('muteBtn').click(); }
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
