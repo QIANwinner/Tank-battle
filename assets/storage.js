@@ -45,6 +45,7 @@
       });
     }
     return { setItem: (k, v) => write(k, String(v)), removeItem: k => write(k, null),
+      getItem: k => { try { return getStorage().getItem(String(k)); } catch (_) { return null; } },
       retry, status, pendingCount: () => pending.size };
   }
   root.TankStorage = { create };
