@@ -1484,6 +1484,7 @@
     <p id="ovSub">守住基地 · 消灭敌军 · 点开即玩</p>
     <div id="lastRunCard"></div>
     <div id="ovStats"></div>
+    <p id="defeatCauseWrap" class="senseNote" role="status" hidden></p>
     <section class="senseNote" id="senseDashWrap" hidden><b>本局感知回顾</b><p id="senseDashVal"></p></section>
     <div class="senseNote" id="buffStackWrap" hidden><b>增益时刻表</b> <span id="buffStackVal">无生效增益</span></div>
     <p id="focusBackWrap" class="senseNote" role="status" hidden></p>
@@ -1831,7 +1832,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.202</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.203</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -4170,7 +4171,7 @@
           if (sx >= player.x - L.thick && sx <= player.x + TANK_SIZE + L.thick &&
               sy >= player.y - L.thick && sy <= player.y + TANK_SIZE + L.thick) { hit = true; break; }
         }
-        if (hit) { L.hitDone = true; killPlayer(); }
+        if (hit) { L.hitDone = true; lastHit = { how: 'laser', by: 'Boss' }; killPlayer(); }
       }
       if (L.t >= L.dur) lasers.splice(i, 1);
     }
@@ -4304,7 +4305,7 @@
     for (const p of [player, player2]) {
       if (p && !p.dead && !(p.spawnInv > 0)) {
         const d = Math.hypot(p.x + TANK_SIZE / 2 - cx, p.y + TANK_SIZE / 2 - cy);
-        if (d < 2.2 * TILE) killPlayer(p);
+        if (d < 2.2 * TILE) { lastHit = { how: 'blast', by: '' }; killPlayer(p); }
       }
     }
     // —— v0.3.2 自爆冲击波波及僚机（扣 2 血） ——
@@ -4449,6 +4450,7 @@
         const bx = BASE.x * TILE, by = BASE.y * TILE;
         if (cx >= bx && cx <= bx + TILE && cy >= by && cy <= by + TILE) {
           baseAlive = false;
+          defeatCause = { target: 'base', how: b.owner.isPlayer ? 'self' : 'shot', by: shooterLabel(b.owner) };
           b.dead = true; sfxBoom();
           hurtFlash = 1; vibe([90, 50, 90]);
           spawnParticles(bx + TILE / 2, by + TILE / 2, '#ff2d55', 20);
@@ -4498,6 +4500,7 @@
           if (!p || p.dead || p.spawnInv > 0) continue;
           if (cx >= p.x && cx <= p.x + TANK_SIZE && cy >= p.y && cy <= p.y + TANK_SIZE) {
             stkRecord(b, p);
+            lastHit = { how: 'shot', by: shooterLabel(b.owner) };
             b.dead = true; killPlayer(p); return;
           }
         }
@@ -23683,6 +23686,21 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     ctx.beginPath(); ctx.arc(e.x + e.size / 2, e.y + e.size / 2, e.size * 0.75 + 3 * pulse, 0, Math.PI * 2); ctx.stroke();
     ctx.restore();
   }
+  let defeatCause = null, lastHit = null;
+  function shooterLabel(o) {
+    return !o ? '' : o.isBoss ? 'Boss' : Object.hasOwn(ENEMY_TYPES, o.type) ? ENEMY_TYPES[o.type].label + '坦克' : '';
+  }
+  function defeatCauseText(c) {
+    if (!c || typeof c !== 'object') return '';
+    const who = typeof c.by !== 'string' || !c.by ? '敌方坦克' : c.by === 'Boss' ? ' Boss ' : c.by;
+    if (c.target === 'base') return c.how === 'self' ? '基地被己方炮弹误毁' : c.how === 'shot' ? '基地被' + who + '的炮弹击毁' : '基地被摧毁';
+    if (c.target === 'tank') return c.how === 'blast' ? '坦克被自爆坦克炸毁，生命耗尽' : c.how === 'laser' ? '坦克被 Boss 激光击毁，生命耗尽' : c.how === 'shot' ? '坦克被' + who + '击毁，生命耗尽' : '生命耗尽';
+    return '';
+  }
+  function currentDefeatCause() {
+    if (!baseAlive) return defeatCause || { target: 'base' };
+    return { target: 'tank', how: lastHit ? lastHit.how : '', by: lastHit ? lastHit.by : '' };
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -23710,6 +23728,9 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   function showOverlay(kind) {
     $('hud').classList.add('hud-covered');
     overlayKind = kind;
+    const causeEl = document.getElementById('defeatCauseWrap');
+    const causeText = kind === 'over' && !won && multiMode !== 2 ? defeatCauseText(currentDefeatCause()) : '';
+    causeEl.hidden = !causeText; causeEl.textContent = causeText;
     fieldNoteClear();
     const recap = document.getElementById('senseDashWrap');
     recap.hidden = kind !== 'over';
@@ -23842,6 +23863,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (startLv && startLv > 1) level = Math.min(startLv | 0, 999);
     // —— v0.2.5 战绩档案：本局计时清零 ——
     playSecRun = 0;
+    defeatCause = null; lastHit = null;
     lastEnemyNoted = false;
     recordNoted = false;
     fieldNoteCount = 0; fieldNoteClear();
@@ -24033,6 +24055,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (coins < cost) { showToast(insufficientMsg('🪙 金币', coins, cost)); beep(180, 0.12, 'square', 0.05); return; }
     coins -= cost; saveCoins(); updateCoinHud();
     reviveCount++;
+    defeatCause = null; lastHit = null;
     // 重建基地 + 护墙 + 清除周边威胁
     baseAlive = true;
     rebuildBaseWalls();
@@ -25612,7 +25635,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.202', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.203', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -28069,6 +28092,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       comboEndTextNow: comboEndText, comboExpireNow: n => { combo = n; if (n > stat.maxCombo) stat.maxCombo = n; comboTimer = 0.001; },
       recordPassTextNow: recordPassText, recordNotedNow: () => recordNoted, setBestAtStartNow: n => { bestAtStart = n; recordNoted = false; },
       lastEnemyTextNow: lastEnemyText, lastEnemyMarkNow: () => { const e = lastEnemyTarget(); return e ? { x: e.x, y: e.y, size: e.size } : null; },
+      defeatCauseTextNow: defeatCauseText, defeatCauseNow: currentDefeatCause, enemyShotAtBaseNow: type => perfPoolSpawn(BASE.x * TILE + TILE / 2 - 2, BASE.y * TILE - 8, 4, 4, BULLET_SPEED, { isPlayer: false, isBoss: false, type }, 0, false),
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

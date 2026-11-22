@@ -25375,6 +25375,24 @@ async function main() {
       T.quit(); return ok || JSON.stringify({ none, two, one, mark, text: note.textContent });
     });
 
+  // U9081–U9086: 战败原因
+  await senseCheck("U9081 结算层含战败原因，菜单中隐藏", (T,$) => $('overlay').contains($('defeatCauseWrap')) && $('defeatCauseWrap').hidden);
+  await senseCheck("U9082 暂停不是战败", (T,$) => { T.startGame(); $('pauseBtn').click(); const ok = $('defeatCauseWrap').hidden; T.quit(); return ok; });
+  await senseCheck("U9083 写明击毁基地或坦克的敌人", T => T.defeatCauseTextNow({ target: 'base', how: 'shot', by: '狙击坦克' }) === '基地被狙击坦克的炮弹击毁' && T.defeatCauseTextNow({ target: 'tank', how: 'shot', by: 'Boss' }) === '坦克被 Boss 击毁，生命耗尽' && T.defeatCauseTextNow({ target: 'tank', how: 'blast', by: '' }) === '坦克被自爆坦克炸毁，生命耗尽');
+  await senseCheck("U9084 己方误伤单独说明；来源不明时不编造", T => T.defeatCauseTextNow({ target: 'base', how: 'self', by: '' }) === '基地被己方炮弹误毁' && T.defeatCauseTextNow({ target: 'base' }) === '基地被摧毁' && T.defeatCauseTextNow({ target: 'tank', how: '', by: '' }) === '生命耗尽' && T.defeatCauseTextNow({ target: 'base', how: 'shot', by: '' }) === '基地被敌方坦克的炮弹击毁');
+  await senseCheck("U9085 非对象或未知目标没有文案", T => [null, 'base', 7, [], { target: 'moon', how: 'shot' }].every(c => T.defeatCauseTextNow(c) === ''));
+  await senseCheck("U9086 真实敌弹击毁基地：结算卡与记录一致；胜利不显示", async (T,$) => {
+      const raf = () => new Promise(requestAnimationFrame);
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+      T.enemyShotAtBaseNow('sniper');
+      const end = performance.now() + 3000;
+      while ($('overlay').classList.contains('hide') && performance.now() < end) await raf();
+      const el = $('defeatCauseWrap'), cause = T.defeatCauseNow();
+      const lost = !el.hidden && el.textContent === T.defeatCauseTextNow(cause) && el.textContent === '基地被狙击坦克的炮弹击毁';
+      T.quit(); T.startGame(); T.endGame(true); const win = el.hidden; T.quit();
+      return (lost && win) || JSON.stringify({ lost, win, text: el.textContent, cause });
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

@@ -8149,3 +8149,4 @@ html.compact-hud #hud .m-hide { display:none !important; }
   #fieldNote[data-kind="good"] { border-color:#39ff14; color:#d4ffc9; }
   #fieldNote[data-kind="warn"] { border-color:#ffe600; color:#fff3a6; }
   #fieldNote[hidden] { display:none; }
+  #defeatCauseWrap { border-left-color:#ff2d55; color:#ffd0d8; }
