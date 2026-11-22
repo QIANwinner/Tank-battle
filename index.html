@@ -1482,6 +1482,7 @@
     <p id="ovSub">守住基地 · 消灭敌军 · 点开即玩</p>
     <div id="lastRunCard"></div>
     <div id="ovStats"></div>
+    <p id="focusBackWrap" class="senseNote" role="status" hidden></p>
     <div class="diffRow" id="diffRow">
       <span class="diffLabel">难度</span>
       <div class="seg" id="diffSeg">
@@ -1824,7 +1825,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.191</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.192</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -5106,7 +5107,7 @@
     lasers = [];                 // —— v0.2.5 Boss 多样化：换关清空激光 ——
     baseAlive = true;
     fx = { rapid: 0, double: 0, freeze: 0 };
-    combo = 0; comboTimer = 0;
+    combo = 0; comboTimer = 0; comboWindowMax = 0;
     bossHp = 0; bossMaxHp = 0;
     generateMap();
     if (lives > 0 && (!player || player.dead)) {
@@ -23454,6 +23455,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
 
   function showOverlay(kind) {
     overlayKind = kind;
+    if (kind !== 'paused') clearAwayNote();
     clearSoundCue();
     // —— v0.3.1 每日签到：主菜单首次进入且今日未签 → 提醒一次 ——
     if (kind === 'title' && !signinReminded && !signinNow().done) {
@@ -23557,7 +23559,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const nw = $('nextWaveTip'); if (nw) { nw.textContent = nextWavePreview(level, endlessMode); nw.classList.remove('m-hide'); }
     }
   }
-  function hideOverlay() { overlay.classList.add('hide'); }
+  function hideOverlay() { clearAwayNote(); overlay.classList.add('hide'); }
 
   // ===== 控制 =====
   function start(mode, startLv) {
@@ -23572,6 +23574,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (startLv && startLv > 1) level = Math.min(startLv | 0, 999);
     // —— v0.2.5 战绩档案：本局计时清零 ——
     playSecRun = 0;
+    awayReturns = 0; clearAwayNote();
     cueCount = 0; clearSoundCue();
     smReset();
     bsRoundReset();
@@ -25111,7 +25114,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   function quitToMenu() {
     player = null; bullets = []; enemies = []; recycleParticles(); texts = []; powerups = [];
     ultWaves = []; ultFlash = 0;      // v0.2.7 近战大招特效清理
-    score = 0; lives = 3; level = 1; combo = 0; comboTimer = 0;
+    score = 0; lives = 3; level = 1; combo = 0; comboTimer = 0; comboWindowMax = 0;
     running = false; paused = false; gameOver = false; won = false;
     bossLevel = false; bossHp = 0; bossMaxHp = 0;
     // —— v0.2.5 Boss 多样化：退出回菜单重置轮换与激光 ——
@@ -25298,7 +25301,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.191', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.192', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -25560,13 +25563,30 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   });
   window.addEventListener('keyup', (e) => { keys[e.key] = false; });
 
+  let awaySince = null, awayReturns = 0;
+  function focusBackText(left, back) {
+    if (!Number.isFinite(left) || !Number.isFinite(back) || left < 0 || back < left) return '';
+    const sec = Math.floor((back - left) / 1000);
+    return '离开' + (sec === 0 ? '不到 1 秒' : sec < 60 ? ' ' + sec + ' 秒' : ' ' + Math.floor(sec / 60) + ' 分 ' + sec % 60 + ' 秒') + '，战局仍已暂停';
+  }
+  function clearAwayNote() {
+    awaySince = null;
+    document.getElementById('focusBackWrap').hidden = true;
+  }
+  function returnFromAway() {
+    if (document.hidden || !paused || awaySince === null) return;
+    const text = focusBackText(awaySince, Date.now()); awaySince = null; awayReturns++;
+    const el = document.getElementById('focusBackWrap');
+    el.textContent = text || '战局仍已暂停'; el.hidden = false;
+  }
+  window.addEventListener('focus', returnFromAway);
   function loseFocus() {
     keys = {};
     releaseTouch();
-    if (running && !paused && !gameOver) togglePause();
+    if (running && !paused && !gameOver) { awaySince = Date.now(); togglePause(); }
   }
   window.addEventListener('blur', loseFocus);
-  document.addEventListener('visibilitychange', () => { if (document.hidden) loseFocus(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) loseFocus(); else returnFromAway(); });
 
   // ===== 触屏输入：左摇杆八方向走位 + 右开火 =====
   // STICK_KEYS[i] = 八方向 i 对应要按下的方向键（斜向按两键，与键盘 W+D 同理）
@@ -27726,6 +27746,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       sfxVizTextNow: sfxVizText, sfxVizCountNow: () => cueCount,
       bgmLiveTextNow: bgmLiveText,
       saveStampTextNow: saveStampText, saveStampNow: saveStore.status,
+      focusBackTextNow: focusBackText, focusBackCountNow: () => awayReturns,
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

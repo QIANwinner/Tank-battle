@@ -2272,7 +2272,7 @@ async function main() {
 
   // ===== U513~U518: 本局最高连击 HUD(v0.6.0) =====
   try {
-    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('maxComboWrap'),txt:document.getElementById('maxComboNum')?document.getElementById('maxComboNum').textContent:null,a:T.maxComboTextNow(12),b:T.maxComboTextNow(12345),c:T.maxComboTextNow(-3),s:T.maxComboStatNow()});})()"));
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;T.startGame();T.extraHudRefreshNow();return JSON.stringify({dom:!!document.getElementById('maxComboWrap'),txt:document.getElementById('maxComboNum')?document.getElementById('maxComboNum').textContent:null,a:T.maxComboTextNow(12),b:T.maxComboTextNow(12345),c:T.maxComboTextNow(-3),s:T.maxComboStatNow()});})()"));
     t('U513 峰值 pill 已加入 HUD', o.dom === true, JSON.stringify(o));
     t('U514 峰值初值为 ×0', o.txt === '×0', String(o.txt));
     t('U515 普通峰值格式', o.a === '×12', o.a);
@@ -2308,13 +2308,13 @@ async function main() {
 
   // ===== U531~U536: 金币流水(v0.6.3) =====
   try {
-    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('coinLogText'),a:T.coinLogTextNow([]),b:T.coinLogTextNow([{n:50,label:'击杀'},{n:200,label:'过关'}]),c:T.coinLogTextNow([{n:-80,label:'复活'}]),d:T.coinLogPushNow(12345,'测试'),e:T.coinLogLenNow(),f:T.coinLogDomNow()});})()"));
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;const before=T.coinLogLenNow(),d=T.coinLogPushNow(12345,'测试');T.extraHudRefreshNow();return JSON.stringify({dom:!!document.getElementById('coinLogText'),a:T.coinLogTextNow([]),b:T.coinLogTextNow([{n:50,label:'击杀'},{n:200,label:'过关'}]),c:T.coinLogTextNow([{n:-80,label:'复活'}]),before,d,e:T.coinLogLenNow(),f:T.coinLogDomNow()});})()"));
     t('U531 流水面板已加入设置页', o.dom === true, JSON.stringify(o));
     t('U532 空流水显示占位', o.a === '暂无记录', o.a);
     t('U533 多笔按序拼接', o.b === '+50 击杀 · +200 过关', o.b);
     t('U534 支出显示负号', o.c === '-80 复活', o.c);
-    t('U535 入账返回长度', o.d === 1 && o.e === 1, String(o.d)+'/'+String(o.e));
-    t('U536 大额千分位进入 DOM', typeof o.f === 'string', String(o.f));
+    t('U535 入账返回长度', o.d === Math.min(8, o.before + 1) && o.e === o.d, String(o.d)+'/'+String(o.e));
+    t('U536 大额千分位进入 DOM', o.f.startsWith('+12,345 测试'), String(o.f));
   } catch(e){ for(let k=531;k<=536;k++) t('U'+k+' 金币流水',false,e.message); }
 
 
@@ -2400,7 +2400,7 @@ async function main() {
 
   // ===== U573~U578: 连击计时进度条(v0.6.10) =====
   try {
-    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('comboBarWrap'),fill:!!document.getElementById('comboBarFill'),bar:T.comboBarNow(),w:(document.getElementById('comboBarFill')||{}).style?document.getElementById('comboBarFill').style.width:null});})()"));
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;T.comboWindowNow();T.startGame();T.extraHudRefreshNow();return JSON.stringify({dom:!!document.getElementById('comboBarWrap'),fill:!!document.getElementById('comboBarFill'),bar:T.comboBarNow(),w:(document.getElementById('comboBarFill')||{}).style?document.getElementById('comboBarFill').style.width:null});})()"));
     t('U573 进度条 DOM 已加入', o.dom === true && o.fill === true, JSON.stringify(o));
     t('U574 无连击初值 0%', o.bar.max === 0 && o.bar.pct === 0 && o.w === '0%', JSON.stringify(o));
     const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({p:T.comboPctNow(5,10),a:T.comboPctNow(10,10),b:T.comboPctNow(0,10),c:T.comboPctNow(-3,10)});})()"));
@@ -2659,8 +2659,14 @@ async function main() {
     t('U683 正常格式 45秒/1分30秒/62分5秒', o2.a === '45 秒' && o2.b === '1 分 30 秒' && o2.c === '62 分 5 秒', JSON.stringify(o2));
     const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.playTimeTextNow(-5),b:T.playTimeTextNow(NaN),c:T.playTimeTextNow('x')});})()"));
     t('U684 非法输入兜底 0 秒', o4.a === '0 秒' && o4.b === '0 秒' && o4.c === '0 秒', JSON.stringify(o4));
-    const o5 = JSON.parse(await ev("(async () => { const T = window.__tbTest; T.startGame(); T.skipIntro(); await new Promise(r => setTimeout(r, 1200)); const dom = T.timePillDomNow(); return JSON.stringify({ dom }); })()"));
-    t('U685 实时计时(1 秒后 ≥1 秒)', parseInt(o5.dom) >= 1, JSON.stringify(o5));
+    const o5 = await ev(`(async () => {
+      const T = window.__tbTest; T.startGame(); T.skipIntro();
+      const deadline = performance.now() + 8000;
+      while (performance.now() < deadline && !(T.playSecRunNow() >= 1 && parseInt(T.timePillDomNow(), 10) >= 1))
+        await new Promise(resolve => setTimeout(resolve, 50));
+      return { dom:T.timePillDomNow(), seconds:T.playSecRunNow() };
+    })()`);
+    t('U685 游戏时钟和实时 HUD 均达到 1 秒', o5.seconds >= 1 && parseInt(o5.dom, 10) >= 1, JSON.stringify(o5));
     const o6 = JSON.parse(await ev("(function(){const T=window.__tbTest;const dom=T.timePillDomNow();const fn=T.playTimeTextNow(T.playSecRunNow());return JSON.stringify({dom,fn});})()"));
     t('U686 DOM 与函数一致', o6.dom === o6.fn, JSON.stringify(o6));
   } catch(e){ for(let k=681;k<=686;k++) t('U'+k+' 时长pill',false,e.message); }
@@ -25083,6 +25089,21 @@ async function main() {
       $('saveWarning').querySelector('button').click();
       const after = T.saveStampNow(), shown = $('saveStampVal').textContent; $('btnSaveClose').click();
       return blocked && after.writes === before.writes + 1 && after.pending === 0 && shown === T.saveStampTextNow(after);
+    });
+
+
+  // U9015–U9020: 失焦回归提示
+  await senseCheck("U9015 暂停层含回归提示", (T,$) => $('overlay').contains($('focusBackWrap')));
+  await senseCheck("U9016 手动暂停不属于离场", (T,$) => { T.startGame(); $('pauseBtn').click(); return T.focusBackCountNow() === 0 && $('focusBackWrap').hidden; });
+  await senseCheck("U9017 正常离场时长", T => T.focusBackTextNow(100,3550) === '离开 3 秒，战局仍已暂停');
+  await senseCheck("U9018 同一时刻与整分钟", T => T.focusBackTextNow(0,0).includes('不到 1 秒') && T.focusBackTextNow(0,60000).includes('1 分 0 秒'));
+  await senseCheck("U9019 倒退时钟与无效时间不产生时长", T => !T.focusBackTextNow(5,4) && !T.focusBackTextNow(null,100) && !T.focusBackTextNow(0,NaN));
+  await senseCheck("U9020 真实失焦/回归只记一次，仍须玩家继续", (T,$) => {
+      T.startGame(); window.dispatchEvent(new Event('blur')); window.dispatchEvent(new Event('blur'));
+      window.dispatchEvent(new Event('focus')); window.dispatchEvent(new Event('focus'));
+      const note = $('focusBackWrap'), ok = !note.hidden && note.textContent.includes('仍已暂停') && T.focusBackCountNow() === 1 && !$('overlay').classList.contains('hide');
+      $('btnPlay').click(); const resumed = note.hidden && $('overlay').classList.contains('hide'); T.quit();
+      return ok && resumed;
     });
 
   chrome.kill(); killTree(chrome.pid);
