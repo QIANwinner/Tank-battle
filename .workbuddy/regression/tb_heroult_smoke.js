@@ -25393,6 +25393,22 @@ async function main() {
       return (lost && win) || JSON.stringify({ lost, win, text: el.textContent, cause });
     });
 
+  // U9087–U9092: 暂停战况摘要
+  await senseCheck("U9087 暂停层含战况摘要，菜单中隐藏", (T,$) => $('overlay').contains($('pauseBriefWrap')) && $('pauseBriefWrap').hidden);
+  await senseCheck("U9088 刚开局：全部敌人待出场，用时从 0:00 起", T => T.pauseBriefTextNow({ alive: 0, queued: 12, lives: 3, secs: 0 }) === '剩余敌人 12（场上 0 · 待出场 12） · 生命 3 · 本关用时 0:00');
+  await senseCheck("U9089 场上与待出场分开计数", T => T.pauseBriefTextNow({ alive: 3, queued: 5, lives: 2, secs: 83.7 }) === '剩余敌人 8（场上 3 · 待出场 5） · 生命 2 · 本关用时 1:23');
+  await senseCheck("U9090 清场和整分钟", T => T.pauseBriefTextNow({ alive: 0, queued: 0, lives: 1, secs: 59.99 }) === '敌人已肃清 · 生命 1 · 本关用时 0:59' && T.pauseBriefTextNow({ alive: 1, queued: 0, lives: 0, secs: 60 }).endsWith('生命 0 · 本关用时 1:00'));
+  await senseCheck("U9091 缺字段、负数或非数值不拼凑战况", T => [null, {}, { alive: -1, queued: 0, lives: 3, secs: 1 }, { alive: 1, queued: 0, lives: 3, secs: NaN }, { alive: '2', queued: 0, lives: 3, secs: 1 }].every(s => T.pauseBriefTextNow(s) === '战况不可用'));
+  await senseCheck("U9092 真实暂停：摘要与战场状态一致，继续后随暂停页收起", (T,$) => {
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.forceClear();
+      T.spawnEnemyAt(120, 120, 'normal'); T.spawnEnemyAt(240, 120, 'fast');
+      $('pauseBtn').click();
+      const el = $('pauseBriefWrap'), s = T.pauseBriefNow();
+      const ok = !el.hidden && s.alive === 2 && s.queued === 0 && el.textContent === T.pauseBriefTextNow(s) && el.textContent.startsWith('剩余敌人 2（场上 2 · 待出场 0）');
+      $('btnPlay').click(); const resumed = $('overlay').classList.contains('hide'); T.quit();
+      return (ok && resumed && el.hidden) || JSON.stringify({ ok, resumed, s, text: el.textContent });
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
