@@ -25147,6 +25147,22 @@ async function main() {
       } finally { T.setSfxVol(old); if (muted) $('muteBtn').click(); }
     });
 
+
+  // U9033–U9038: 存档只读体检
+  await senseCheck("U9033 存档页含可操作的检查按钮与结果", (T,$) => $('saveBox').contains($('saveHealthBtn')) && $('saveHealthVal').tagName === 'OUTPUT');
+  await senseCheck("U9034 空存档不视为损坏", T => T.saveHealthTextNow({},0) === '尚无已保存记录');
+  await senseCheck("U9035 识别多类有效数据", T => T.saveHealthTextNow({coins:'42',skins:'["classic"]',stars:'{"2":3}',career:'{"games":1}'},0) === '已检查 4 类，格式正常');
+  await senseCheck("U9036 零余额有效，排队不等于已落盘", T => T.saveHealthTextNow({coins:'0',stars:'{}'},1) === '已检查 2 类，格式正常 · 1 项待保存');
+  await senseCheck("U9037 损坏、结构错误与不可读分开报告", T => T.saveHealthTextNow({skins:'{',stars:'[]'},0) === '格式异常：皮肤、星级' && T.saveHealthTextNow(null,0) === '无法读取本地记录');
+  await senseCheck("U9038 玩家点击检查能定位损坏且绝不改写原数据", (T,$) => {
+      T.openSaveNow(); const k='tank-battle-stars', old=localStorage.getItem(k);
+      try {
+        localStorage.setItem(k,'{broken'); const before=T.saveStampNow().writes;
+        $('saveHealthBtn').click();
+        return $('saveHealthVal').textContent.includes('星级') && localStorage.getItem(k)==='{broken' && T.saveStampNow().writes===before;
+      } finally { if(old===null) localStorage.removeItem(k); else localStorage.setItem(k,old); $('btnSaveClose').click(); }
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
