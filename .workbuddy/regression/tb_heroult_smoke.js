@@ -25313,6 +25313,26 @@ async function main() {
       return (cooling && shown && cleared) || JSON.stringify({ cooling, shown, cleared, text: note.textContent });
     });
 
+  // U9063–U9068: 连击收官提示
+  await senseCheck("U9063 提示条对读屏器可见", (T,$) => $('fieldNote').getAttribute('role') === 'status' && typeof T.comboEndTextNow === 'function');
+  await senseCheck("U9064 没有连击时不提示", async (T,$) => {
+      T.startGame(); T.skipIntro(); T.stopSpawn();
+      for (let i = 0; i < 6; i++) await new Promise(requestAnimationFrame);
+      const ok = $('fieldNote').hidden && T.comboEndTextNow(0, 0) === ''; T.quit(); return ok;
+    });
+  await senseCheck("U9065 报出连击数，本局最长另有标注", T => T.comboEndTextNow(4, 9) === '4 连击结束' && T.comboEndTextNow(9, 9) === '9 连击结束 · 本局最长');
+  await senseCheck("U9066 3 连击起报，5 连击起才标最长", T => T.comboEndTextNow(2, 2) === '' && T.comboEndTextNow(3, 3) === '3 连击结束' && T.comboEndTextNow(5, 5) === '5 连击结束 · 本局最长');
+  await senseCheck("U9067 非整数、负数或超过本局最长的连击不提示", T => [[NaN, 3], ['7', 7], [7, 3], [-1, 0], [3.5, 4], [4, null]].every(a => T.comboEndTextNow(a[0], a[1]) === ''));
+  await senseCheck("U9068 真实计时归零：提示与文案一致，连击清零", async (T,$) => {
+      const raf = () => new Promise(requestAnimationFrame);
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+      await raf(); T.comboExpireNow(6);
+      const end = performance.now() + 3000;
+      while ($('fieldNote').hidden && performance.now() < end) await raf();
+      const note = $('fieldNote'), ok = !note.hidden && note.textContent === T.comboEndTextNow(6, 6) && T.comboTimerNow() <= 0;
+      T.quit(); return (ok && note.hidden) || note.textContent;
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

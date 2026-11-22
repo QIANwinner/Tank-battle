@@ -1831,7 +1831,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.199</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.200</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -5329,7 +5329,7 @@
     if (magnetStorm > 0) magnetStorm = stormDecay(magnetStorm, dt);
     if (fx.double > 0) fx.double -= dt;
     if (fx.freeze > 0) fx.freeze -= dt;
-    if (comboTimer > 0) { comboTimer -= dt; if (comboTimer <= 0) combo = 0; }
+    if (comboTimer > 0) { comboTimer -= dt; if (comboTimer <= 0) { fieldNoteShow(comboEndText(combo, stat.maxCombo), 'info', 1600, 1); combo = 0; } }
     if (hurtFlash > 0) hurtFlash = decay(hurtFlash, dt, 2.2);
     if (bossWarn > 0) bossWarn -= dt;
 
@@ -23647,6 +23647,10 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (!name) return '';
     return name + '就绪' + (touch ? '' : ' · 按 ' + (kind === 'ult' ? 'E' : 'B'));
   }
+  function comboEndText(n, best) {
+    if (!Number.isSafeInteger(n) || !Number.isSafeInteger(best) || n < 3 || best < n) return '';
+    return n + ' 连击结束' + (n === best && n >= 5 ? ' · 本局最长' : '');
+  }
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -25574,7 +25578,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.199', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.200', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -28028,6 +28032,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       saveHealthTextNow: saveHealthText,
       senseDashTextNow: senseDashText, senseRoundNow: senseRoundSnapshot,
       cooldownStepNow: cooldownStep, ultReadyTextNow: ultReadyText, ultReadyNoteNow: kind => ultReadyText(kind, isTouch), fieldNoteWinsNow: fieldNoteWins, fieldNoteCountNow: () => fieldNoteCount,
+      comboEndTextNow: comboEndText, comboExpireNow: n => { combo = n; if (n > stat.maxCombo) stat.maxCombo = n; comboTimer = 0.001; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,
