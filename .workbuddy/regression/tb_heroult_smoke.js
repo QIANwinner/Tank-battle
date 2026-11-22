@@ -25051,6 +25051,19 @@ async function main() {
       } finally { if (!wasMuted) $('muteBtn').click(); T.quit(); }
     });
 
+
+  // U9003–U9008: 配乐播放铭牌
+  await senseCheck("U9003 设置包含配乐铭牌", (T,$) => $('settings').contains($('bgmLiveVal')));
+  await senseCheck("U9004 关闭曲目无速度", T => T.bgmLiveTextNow('off',false,1,true) === '关闭');
+  await senseCheck("U9005 Boss 曲显示实际节拍", T => T.bgmLiveTextNow('boss',false,0.8,true) === 'Boss · 150 BPM');
+  await senseCheck("U9006 零音量或等待音频不会宣称播放", T => T.bgmLiveTextNow('rush',false,0,true) === '紧迫 · 静音' && T.bgmLiveTextNow('calm',false,1,false) === '宁静 · 等待音频');
+  await senseCheck("U9007 不接受越界音量或非曲目属性", T => T.bgmLiveTextNow('boss',false,NaN,true) === '音量未知' && T.bgmLiveTextNow('constructor',false,1,true) === '关闭');
+  await senseCheck("U9008 调节音乐音量即时刷新所选曲目", (T,$) => {
+      const mode = T.bgmModeNow(), vol = T.bgmVolNow();
+      try { T.setBgmNow('boss'); T.setBgmVol(0); return $('bgmLiveVal').textContent === T.bgmLiveTextNow('boss',false,0,true); }
+      finally { T.setBgmVol(vol); T.setBgmNow(mode); }
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
