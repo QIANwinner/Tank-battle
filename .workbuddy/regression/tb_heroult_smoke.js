@@ -25604,6 +25604,30 @@ async function main() {
       return ok || JSON.stringify({ idle, open, walled, frozen, lit, dark, k });
     });
 
+  // U9147–U9152: 回场倒计时
+  await senseCheck("U9147 倒计时位于战场内，默认隐藏", (T,$) => $('resumeCount').parentElement === $('frame') && $('resumeCount').hidden && $('resumeCount').getAttribute('role') === 'timer' && typeof T.resumeBeatsNow === 'function');
+  await senseCheck("U9148 随手暂停立即继续，不加倒计时", (T,$) => { T.startGame(); $('pauseBtn').click(); const held = T.resumeStateNow().paused; $('btnPlay').click(); const s = T.resumeStateNow(); const ok = held && !s.counting && !s.paused && $('resumeCount').hidden; T.quit(); return ok || JSON.stringify(s); });
+  await senseCheck("U9149 久停回来数三拍，每拍 0.4 秒", T => T.resumeBeatsNow(5000) === 3 && T.resumeBeatTextNow(1200, 400) === '3' && T.resumeBeatTextNow(790, 400) === '2' && T.resumeBeatTextNow(1, 400) === '1');
+  await senseCheck("U9150 1.5 秒是分界；拍子恰好走完即结束", T => T.resumeBeatsNow(1499) === 0 && T.resumeBeatsNow(1500) === 3 && T.resumeBeatTextNow(400, 400) === '1' && T.resumeBeatTextNow(400.5, 400) === '2' && T.resumeBeatTextNow(0, 400) === '');
+  await senseCheck("U9151 无效时长不倒计时也不显示数字", T => [NaN, -1, '2000', Infinity, null, undefined].every(v => T.resumeBeatsNow(v) === 0) && [[NaN, 400], [500, 0], [500, -1], ['500', 400], [500, NaN]].every(a => T.resumeBeatTextNow(a[0], a[1]) === ''));
+  await senseCheck("U9152 真实久停：倒计时期间仍暂停，可按暂停取消，数完 3-2-1 才开打", async (T,$) => {
+      const el = $('resumeCount'), wait = ms => new Promise(r => setTimeout(r, ms));
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+      $('pauseBtn').click(); T.setPausedForNow(5000); $('btnPlay').click();
+      const s1 = T.resumeStateNow();
+      const counting = s1.counting && s1.paused && !el.hidden && el.textContent === '3' && $('overlay').classList.contains('hide');
+      $('pauseBtn').click();
+      const s2 = T.resumeStateNow();
+      const cancelled = !s2.counting && s2.paused && el.hidden && !$('overlay').classList.contains('hide');
+      $('btnPlay').click();
+      const seen = [], end = performance.now() + 4000;
+      while (T.resumeStateNow().counting && performance.now() < end) { if (seen.at(-1) !== el.textContent) seen.push(el.textContent); await wait(15); }
+      const s3 = T.resumeStateNow();
+      const resumed = !s3.counting && !s3.paused && el.hidden && seen.join('') === '321';
+      T.quit();
+      return (counting && cancelled && resumed) || JSON.stringify({ counting, cancelled, resumed, seen, s1, s2, s3 });
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
