@@ -25456,6 +25456,35 @@ async function main() {
       return (full && gain && bomb && T.floatTextsNow().length === 0) || JSON.stringify({ full, gain, bomb, texts });
     });
 
+  // U9111–U9116: 道具消失倒计时
+  await senseCheck("U9111 倒计时环画在战场画布上，菜单中没有道具", (T,$) => { T.renderOnce(); return typeof T.powerupFadeNow === 'function' && !!$('game').getContext && T.powerups().length === 0 && T.powerupRingCountNow() === 0; });
+  await senseCheck("U9112 刚掉落的道具没有倒计时环", T => { T.startGame(); T.skipIntro(); T.stopSpawn(); T.powerupSpawn(300, 200, 'shield'); T.renderOnce(); const ok = T.powerups().length === 1 && T.powerupRingCountNow() === 0 && T.powerupsLostNow() === 0 && !T.powerupFadeNow(12).ring; T.quit(); return ok; });
+  await senseCheck("U9113 剩 2 秒时环走到一半；消失文案带道具名", T => { const f = T.powerupFadeNow(2); return f.ring && f.frac === 0.5 && !f.urgent && T.powerupLostTextNow('shield') === '护盾消失' && T.powerupLostTextNow('life') === '加命消失'; });
+  await senseCheck("U9114 4 秒起出环，1.5 秒起变红，归零即收", T => T.powerupFadeNow(4).ring && T.powerupFadeNow(4).frac === 1 && !T.powerupFadeNow(4.01).ring && T.powerupFadeNow(1.5).urgent && !T.powerupFadeNow(1.51).urgent && !T.powerupFadeNow(0).ring);
+  await senseCheck("U9115 无效寿命不出环，未知道具没有消失文案", T => [NaN, -1, '3', Infinity, null, undefined].every(v => { const f = T.powerupFadeNow(v); return !f.ring && f.frac === 0 && !f.urgent; }) && T.powerupLostTextNow('toString') === '' && T.powerupLostTextNow(3) === '');
+  await senseCheck("U9116 真实道具：快消失时画出白环，过期后原地飘字并计数", async (T,$) => {
+      const raf = () => new Promise(requestAnimationFrame);
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+      T.powerupSpawn(300, 200, 'shield');
+      const c = $('game'), k = c.width / 624;
+      const white = () => {
+        T.renderOnce();
+        const px = c.getContext('2d').getImageData(Math.round(282 * k), Math.round(182 * k), Math.round(36 * k), Math.round(36 * k)).data;
+        let n = 0; for (let i = 0; i < px.length; i += 4) if (px[i] > 80 && px[i + 1] > 80 && px[i + 2] > 80 && Math.abs(px[i] - px[i + 2]) < 50) n++;
+        return n;
+      };
+      const fresh = white(), none = T.powerupRingCountNow() === 0;
+      T.setPowerupLifeNow(3.5);
+      const ringed = white(), one = T.powerupRingCountNow() === 1;
+      T.setPowerupLifeNow(0.02);
+      const end = performance.now() + 3000;
+      while (T.powerups().length && performance.now() < end) await raf();
+      const texts = T.floatTextsNow();
+      const gone = T.powerups().length === 0 && T.powerupsLostNow() === 1 && texts.includes(T.powerupLostTextNow('shield'));
+      T.quit();
+      return (none && one && ringed > fresh + 8 && gone) || JSON.stringify({ none, one, fresh, ringed, gone, texts, k });
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
