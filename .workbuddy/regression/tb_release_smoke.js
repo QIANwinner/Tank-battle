@@ -3,6 +3,8 @@
 const { spawn } = require('child_process');
 const fs = require('fs');
 const http = require('http');
+const os = require('os');
+const path = require('path');
 
 const CHROME = process.env.TB_CHROME || 'C:/Users/21889/.agent-browser/browsers/chrome-win64/chrome.exe';
 const URL = process.argv[2] || 'http://127.0.0.1:8124/index.html?test=1';
@@ -152,7 +154,11 @@ async function main() {
     assert.equal(metrics.errors,0);
     console.log('PERFORMANCE (headless baseline, not a device guarantee): '+JSON.stringify(metrics));
     const shot=await client.send('Page.captureScreenshot',{format:'png'});
-    if(shot.result?.data) fs.writeFileSync(process.env.TB_SHOT || 'release-smoke.png',Buffer.from(shot.result.data,'base64'));
+    if(shot.result?.data) {
+      const out = process.env.TB_SHOT || path.join(os.tmpdir(), `tb-release-${process.pid}-${Date.now()}.png`);
+      fs.writeFileSync(out, Buffer.from(shot.result.data,'base64'));
+      console.log('screenshot saved:', out);
+    }
   } finally { chrome.kill(); }
 }
 main().then(()=>process.exit(0)).catch(e=>{console.error(e);process.exit(1);});

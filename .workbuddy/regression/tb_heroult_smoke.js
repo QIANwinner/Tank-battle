@@ -24958,40 +24958,6 @@ async function main() {
   } catch (e) { t("U8967 卡顿侦测 抛异常", false, String(e)); t("U8968 卡顿侦测 抛异常", false, String(e)); t("U8969 卡顿侦测 抛异常", false, String(e)); t("U8970 卡顿侦测 抛异常", false, String(e)); t("U8971 卡顿侦测 抛异常", false, String(e)); t("U8972 卡顿侦测 抛异常", false, String(e)); }
 
 
-  // ===== U8985~U8990: 帧时趋势图(v1.1.187) =====
-  try {
-    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('smTrendWrap'),spark:document.querySelector('#smTrendWrap .smspark')?document.querySelector('#smTrendWrap .smspark').children.length:0,s:T.smTrendStateNow([],5)};return JSON.stringify(r);})()"));
-    t("U8985 趋势 pill 已加入（48 根 sparkline 条 + 函数可用，首值入队）", o.dom === true && o.spark === 48 && o.s.ok === true && o.s.arr.length === 1 && o.s.arr[0] === 5, JSON.stringify(o));
-    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.smTrendStateNow([],5)};return JSON.stringify(r);})()"));
-    t("U8986 初值 空序列入队（[5]）", o1.s.ok === true && o1.s.arr.length === 1 && o1.s.arr[0] === 5, JSON.stringify(o1));
-    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.smTrendStateNow([1,2,3],4)};return JSON.stringify(r);})()"));
-    t("U8987 正常值 顺序追加（[1,2,3,4]）", o2.s.ok === true && o2.s.arr.length === 4 && o2.s.arr[3] === 4 && o2.s.arr[0] === 1, JSON.stringify(o2));
-    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r=(function(){const big=[];for(let i=0;i<48;i++)big.push(i);const s=T.smTrendStateNow(big,99);return {len:s.arr.length,first:s.arr[0],last:s.arr[s.arr.length-1]};})();return JSON.stringify(r);})()"));
-    t("U8988 边界 超 48 截断（长度恒 48，丢最旧留最新）", o3.len === 48 && o3.first === 1 && o3.last === 99, JSON.stringify(o3));
-    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smTrendStateNow([],NaN),b:T.smTrendStateNow(null,5)};return JSON.stringify(r);})()"));
-    t("U8989 非法 NaN 值退化 / 非数组入队可建（null → [5]）", o4.a.ok === false && o4.a.arr.length === 0 && o4.b.ok === true && o4.b.arr.length === 1 && o4.b.arr[0] === 5, JSON.stringify(o4));
-    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.smTrendSeries(),n:(function(){const e=document.querySelector('#smTrendWrap .smspark');return e?e.children.length:0;})()};return JSON.stringify(r);})()"));
-    t("U8990 DOM 与函数一致（序列可读 + sparkline 48 条在 DOM）", Array.isArray(o5.s) && o5.n === 48, JSON.stringify(o5));
-  } catch (e) { t("U8985 帧时趋势图 抛异常", false, String(e)); t("U8986 帧时趋势图 抛异常", false, String(e)); t("U8987 帧时趋势图 抛异常", false, String(e)); t("U8988 帧时趋势图 抛异常", false, String(e)); t("U8989 帧时趋势图 抛异常", false, String(e)); t("U8990 帧时趋势图 抛异常", false, String(e)); }
-
-
-  // ===== U8991~U8996: 流畅度总结卡(v1.1.188) =====
-  try {
-    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('smSumWrap'),card:(T.smCardHtml()||'').indexOf('流畅度')>=0,s:T.smSummaryStateNow({avgFps:60,stut:0})};return JSON.stringify(r);})()"));
-    t("U8991 评级 pill 已加入 + 结算卡含流畅度 + 函数可用（60FPS/0卡 → 极佳）", o.dom === true && o.card === true && o.s.ok === true && o.s.rating === '极佳', JSON.stringify(o));
-    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smSummaryStateNow(null),b:T.smSummaryStateNow({})};return JSON.stringify(r);})()"));
-    t("U8992 初值 null/空对象 → 退化", o1.a.ok === false && o1.a.rating === '—' && o1.b.ok === false && o1.b.rating === '—', JSON.stringify(o1));
-    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smSummaryStateNow({avgFps:60,stut:0}),b:T.smSummaryStateNow({avgFps:50,stut:0}),c:T.smSummaryStateNow({avgFps:35,stut:0}),d:T.smSummaryStateNow({avgFps:20,stut:0})};return JSON.stringify(r);})()"));
-    t("U8993 正常值 60→极佳 / 50→良好 / 35→一般 / 20→吃力", o2.a.rating === '极佳' && o2.b.rating === '良好' && o2.c.rating === '一般' && o2.d.rating === '吃力', JSON.stringify(o2));
-    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smSummaryStateNow({avgFps:55,stut:3}),b:T.smSummaryStateNow({avgFps:55,stut:4}),c:T.smSummaryStateNow({avgFps:45,stut:0}),d:T.smSummaryStateNow({avgFps:30,stut:0}),e:T.smSummaryStateNow({avgFps:29.9,stut:0})};return JSON.stringify(r);})()"));
-    t("U8994 边界 55FPS/3卡→极佳 / 55FPS/4卡→良好 / 45→良好 / 30→一般 / 29.9→吃力", o3.a.rating === '极佳' && o3.b.rating === '良好' && o3.c.rating === '良好' && o3.d.rating === '一般' && o3.e.rating === '吃力', JSON.stringify(o3));
-    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smSummaryStateNow({avgFps:0,stut:0}),b:T.smSummaryStateNow({avgFps:NaN,stut:0}),c:T.smSummaryStateNow('x')};return JSON.stringify(r);})()"));
-    t("U8995 非法 0FPS/NaN/字符串 → 退化", o4.a.ok === false && o4.b.ok === false && o4.c.ok === false, JSON.stringify(o4));
-    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={n:T.smSummaryNow(),dom:(function(){const e=document.querySelector('#smSumWrap .smn');return e?e.textContent:null;})()};return JSON.stringify(r);})()"));
-    t("U8996 DOM 与函数一致（均 FPS 可读 + DOM 为合法评级）", o5.n.avgFps >= 0 && o5.n.stut >= 0 && (o5.dom === null || ['极佳','良好','一般','吃力','—'].indexOf(o5.dom) >= 0), JSON.stringify(o5));
-  } catch (e) { t("U8991 流畅度总结卡 抛异常", false, String(e)); t("U8992 流畅度总结卡 抛异常", false, String(e)); t("U8993 流畅度总结卡 抛异常", false, String(e)); t("U8994 流畅度总结卡 抛异常", false, String(e)); t("U8995 流畅度总结卡 抛异常", false, String(e)); t("U8996 流畅度总结卡 抛异常", false, String(e)); }
-
-
   // ===== U8973~U8978: 粒子桶复用(v1.1.185) =====
   try {
     const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('smBucketWrap'),cnt:!!document.querySelector('#smBucketWrap .smn'),s:(function(){const mp=new Map();const bk=T.smBucketPutNow(mp,'k','red',0.5,{x:1},1);return {rects:bk.rects.length,size:mp.size};})()};return JSON.stringify(r);})()"));
@@ -25024,6 +24990,40 @@ async function main() {
     const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={n:T.smInputNow(),dom:(function(){const e=document.querySelector('#smInputWrap .smn');if(!e)return null;e.textContent='TEST';return e.textContent;})()};return JSON.stringify(r);})()"));
     t("U8984 DOM 与函数一致（输入延迟可读 + DOM 可写）", typeof o5.n === 'number' && o5.dom === 'TEST', JSON.stringify(o5));
   } catch (e) { t("U8979 输入响应仪表 抛异常", false, String(e)); t("U8980 输入响应仪表 抛异常", false, String(e)); t("U8981 输入响应仪表 抛异常", false, String(e)); t("U8982 输入响应仪表 抛异常", false, String(e)); t("U8983 输入响应仪表 抛异常", false, String(e)); t("U8984 输入响应仪表 抛异常", false, String(e)); }
+
+
+  // ===== U8985~U8990: 帧时趋势图(v1.1.187) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('smTrendWrap'),spark:document.querySelector('#smTrendWrap .smspark')?document.querySelector('#smTrendWrap .smspark').children.length:0,s:T.smTrendStateNow([],5)};return JSON.stringify(r);})()"));
+    t("U8985 趋势 pill 已加入（48 根 sparkline 条 + 函数可用，首值入队）", o.dom === true && o.spark === 48 && o.s.ok === true && o.s.arr.length === 1 && o.s.arr[0] === 5, JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.smTrendStateNow([],5)};return JSON.stringify(r);})()"));
+    t("U8986 初值 空序列入队（[5]）", o1.s.ok === true && o1.s.arr.length === 1 && o1.s.arr[0] === 5, JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.smTrendStateNow([1,2,3],4)};return JSON.stringify(r);})()"));
+    t("U8987 正常值 顺序追加（[1,2,3,4]）", o2.s.ok === true && o2.s.arr.length === 4 && o2.s.arr[3] === 4 && o2.s.arr[0] === 1, JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r=(function(){const big=[];for(let i=0;i<48;i++)big.push(i);const s=T.smTrendStateNow(big,99);return {len:s.arr.length,first:s.arr[0],last:s.arr[s.arr.length-1]};})();return JSON.stringify(r);})()"));
+    t("U8988 边界 超 48 截断（长度恒 48，丢最旧留最新）", o3.len === 48 && o3.first === 1 && o3.last === 99, JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smTrendStateNow([],NaN),b:T.smTrendStateNow(null,5)};return JSON.stringify(r);})()"));
+    t("U8989 非法 NaN 值退化 / 非数组入队可建（null → [5]）", o4.a.ok === false && o4.a.arr.length === 0 && o4.b.ok === true && o4.b.arr.length === 1 && o4.b.arr[0] === 5, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={s:T.smTrendSeries(),n:(function(){const e=document.querySelector('#smTrendWrap .smspark');return e?e.children.length:0;})()};return JSON.stringify(r);})()"));
+    t("U8990 DOM 与函数一致（序列可读 + sparkline 48 条在 DOM）", Array.isArray(o5.s) && o5.n === 48, JSON.stringify(o5));
+  } catch (e) { t("U8985 帧时趋势图 抛异常", false, String(e)); t("U8986 帧时趋势图 抛异常", false, String(e)); t("U8987 帧时趋势图 抛异常", false, String(e)); t("U8988 帧时趋势图 抛异常", false, String(e)); t("U8989 帧时趋势图 抛异常", false, String(e)); t("U8990 帧时趋势图 抛异常", false, String(e)); }
+
+
+  // ===== U8991~U8996: 流畅度总结卡(v1.1.188) =====
+  try {
+    const o = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={dom:!!document.getElementById('smSumWrap'),card:(T.smCardHtml()||'').indexOf('流畅度')>=0,s:T.smSummaryStateNow({avgFps:60,stut:0})};return JSON.stringify(r);})()"));
+    t("U8991 评级 pill 已加入 + 结算卡含流畅度 + 函数可用（60FPS/0卡 → 极佳）", o.dom === true && o.card === true && o.s.ok === true && o.s.rating === '极佳', JSON.stringify(o));
+    const o1 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smSummaryStateNow(null),b:T.smSummaryStateNow({})};return JSON.stringify(r);})()"));
+    t("U8992 初值 null/空对象 → 退化", o1.a.ok === false && o1.a.rating === '—' && o1.b.ok === false && o1.b.rating === '—', JSON.stringify(o1));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smSummaryStateNow({avgFps:60,stut:0}),b:T.smSummaryStateNow({avgFps:50,stut:0}),c:T.smSummaryStateNow({avgFps:35,stut:0}),d:T.smSummaryStateNow({avgFps:20,stut:0})};return JSON.stringify(r);})()"));
+    t("U8993 正常值 60→极佳 / 50→良好 / 35→一般 / 20→吃力", o2.a.rating === '极佳' && o2.b.rating === '良好' && o2.c.rating === '一般' && o2.d.rating === '吃力', JSON.stringify(o2));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smSummaryStateNow({avgFps:55,stut:3}),b:T.smSummaryStateNow({avgFps:55,stut:4}),c:T.smSummaryStateNow({avgFps:45,stut:0}),d:T.smSummaryStateNow({avgFps:30,stut:0}),e:T.smSummaryStateNow({avgFps:29.9,stut:0})};return JSON.stringify(r);})()"));
+    t("U8994 边界 55FPS/3卡→极佳 / 55FPS/4卡→良好 / 45→良好 / 30→一般 / 29.9→吃力", o3.a.rating === '极佳' && o3.b.rating === '良好' && o3.c.rating === '良好' && o3.d.rating === '一般' && o3.e.rating === '吃力', JSON.stringify(o3));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={a:T.smSummaryStateNow({avgFps:0,stut:0}),b:T.smSummaryStateNow({avgFps:NaN,stut:0}),c:T.smSummaryStateNow('x')};return JSON.stringify(r);})()"));
+    t("U8995 非法 0FPS/NaN/字符串 → 退化", o4.a.ok === false && o4.b.ok === false && o4.c.ok === false, JSON.stringify(o4));
+    const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;let r={n:T.smSummaryNow(),dom:(function(){const e=document.querySelector('#smSumWrap .smn');return e?e.textContent:null;})()};return JSON.stringify(r);})()"));
+    t("U8996 DOM 与函数一致（均 FPS 可读 + DOM 为合法评级）", o5.n.avgFps >= 0 && o5.n.stut >= 0 && (o5.dom === null || ['极佳','良好','一般','吃力','—'].indexOf(o5.dom) >= 0), JSON.stringify(o5));
+  } catch (e) { t("U8991 流畅度总结卡 抛异常", false, String(e)); t("U8992 流畅度总结卡 抛异常", false, String(e)); t("U8993 流畅度总结卡 抛异常", false, String(e)); t("U8994 流畅度总结卡 抛异常", false, String(e)); t("U8995 流畅度总结卡 抛异常", false, String(e)); t("U8996 流畅度总结卡 抛异常", false, String(e)); }
 
   chrome.kill(); killTree(chrome.pid);
 

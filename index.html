@@ -1426,11 +1426,10 @@
     <div class="pill m-hide" id="smFrameWrap"><span class="k">⚡</span><span class="tgl">帧率</span><span class="smf">--</span></div>
     <div class="pill m-hide" id="smBudgetWrap"><span class="k">🎯</span><span class="tgl">渲染</span><span class="smbar"><i></i></span><span class="smf">--</span></div>
     <div class="pill m-hide" id="smStutWrap"><span class="k">🛑</span><span class="tgl">卡顿</span><span class="smn">0</span></div>
-    <div class="pill m-hide" id="smTrendWrap"><span class="k">📈</span><span class="tgl">帧时</span><span class="smspark"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="smf">--</span></div>
-    <div class="pill m-hide" id="smSumWrap"><span class="k">🏅</span><span class="tgl">评级</span><span class="smn">--</span></div>
-    <div class="pill m-hide" id="smStutWrap"><span class="k">🛑</span><span class="tgl">卡顿</span><span class="smn">0</span></div>
     <div class="pill m-hide" id="smBucketWrap"><span class="k">🧊</span><span class="tgl">桶复用</span><span class="smn">0</span></div>
     <div class="pill m-hide" id="smInputWrap"><span class="k">🎮</span><span class="tgl">输入</span><span class="smn">--</span></div>
+    <div class="pill m-hide" id="smTrendWrap"><span class="k">📈</span><span class="tgl">帧时</span><span class="smspark"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="smf">--</span></div>
+    <div class="pill m-hide" id="smSumWrap"><span class="k">🏅</span><span class="tgl">评级</span><span class="smn">--</span></div>
     <div id="lives"></div>
     <div id="lives2"></div>
     <div class="hbtns">
@@ -5222,7 +5221,7 @@
     if (ultFlash > 0) ultFlash -= dt;
     if (ultWaves.length) {
       for (const w of ultWaves) { w.r += w.maxR * 4 * dt; w.alpha -= 3 * dt; }
-      ultWaves = ultWaves.filter(w => w.alpha > 0);
+      smStat.waves += smCompact(ultWaves, w => w.alpha > 0).removed;
     }
 
     updatePlayer(k);
@@ -5235,7 +5234,7 @@
     updatePowerups(dt);
 
     perfPoolRecycle();
-    enemies = enemies.filter(e => !e.dead);
+    smStat.enemies += smCompact(enemies, e => !e.dead).removed;
 
     updateSpawning(k);
 
@@ -5296,7 +5295,7 @@
     updateParticles(dt, k);   // v0.3.15 池化推进+回收（原地压缩，替代 filter 每帧分配）
 
     texts.forEach(t => { t.y -= 0.55 * k; t.life -= dt; });
-    texts = texts.filter(t => t.life > 0);
+    smStat.texts += smCompact(texts, t => t.life > 0).removed;
 
     if (player && player.spawnInv > 0) player.spawnInv -= k;
     if (shake > 0) shake -= k;
@@ -8042,11 +8041,10 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     { const n = performance.now(); const f = smFrame(n, smPrevNow); if (f.ok) smPrevNow = n; smLastFrame = f; const e = document.querySelector('#smFrameWrap .smf'); if (e) e.textContent = f.ok ? f.txt : '--'; }
     { const b = smBudget(smLastRenderMs); const w = document.getElementById('smBudgetWrap'); if (w) { w.classList.toggle('sm-mid', b.ok && b.level === '中'); w.classList.toggle('sm-hvy', b.ok && b.level === '重'); const bar = w.querySelector('.smbar i'); if (bar) bar.style.width = (b.ok ? b.pct * 100 : 0) + '%'; const t = w.querySelector('.smf'); if (t) t.textContent = b.ok ? b.txt : '--'; } }
     { if (smLastFrame.ok && smLastFrame.ms >= 16.7 * 1.5) { const nw = performance.now(); if (nw - smStutLast > 1200) { smStutLast = nw; smStat.stut++; smToastShow('⚡ 卡顿 ' + Math.round(smLastFrame.ms) + 'ms'); } } const e = document.querySelector('#smStutWrap .smn'); if (e) e.textContent = smStat.stut; const w = document.getElementById('smStutWrap'); if (w) w.classList.toggle('sm-hit', smStat.stut > 0); }
-    { if (smLastFrame.ok) { smSeries = smTrend(smSeries, smLastFrame.ms).arr; const sp = document.querySelector('#smTrendWrap .smspark'); if (sp) { const mx = Math.max.apply(null, smSeries.concat([16.7])); const bars = sp.children; for (let i = 0; i < bars.length; i++) { const v = smSeries[i] || 0; bars[i].style.height = Math.max(1, Math.round(v / mx * 12)) + 'px'; } } const t = document.querySelector('#smTrendWrap .smf'); if (t) t.textContent = Math.round(smLastFrame.ms) + 'ms'; } }
-    { const avg = smLastFrame.ok ? smLastFrame.fps : 0; const s = smSummary({ avgFps: avg, stut: smStat.stut }); const e = document.querySelector('#smSumWrap .smn'); if (e && e.textContent !== s.rating) e.textContent = s.ok ? s.rating : '--'; }
-    { if (smLastFrame.ok && smLastFrame.ms >= 16.7 * 1.5) { const nw = performance.now(); if (nw - smStutLast > 1200) { smStutLast = nw; smStat.stut++; smToastShow('⚡ 卡顿 ' + Math.round(smLastFrame.ms) + 'ms'); } } const e = document.querySelector('#smStutWrap .smn'); if (e) e.textContent = smStat.stut; const w = document.getElementById('smStutWrap'); if (w) w.classList.toggle('sm-hit', smStat.stut > 0); }
     { const e = document.querySelector('#smBucketWrap .smn'); if (e) e.textContent = smStat.reused; }
     { if (smKeyMark > 0) { const im = performance.now() - smKeyMark; if (im > 0 && im < 500) { smInputMs = im; smKeyMark = 0; } } const e = document.querySelector('#smInputWrap .smn'); if (e) e.textContent = smInputMs > 0 ? Math.round(smInputMs) + 'ms' : '--'; }
+    { if (smLastFrame.ok) { smSeries = smTrend(smSeries, smLastFrame.ms).arr; const sp = document.querySelector('#smTrendWrap .smspark'); if (sp) { const mx = Math.max.apply(null, smSeries.concat([16.7])); const bars = sp.children; for (let i = 0; i < bars.length; i++) { const v = smSeries[i] || 0; bars[i].style.height = Math.max(1, Math.round(v / mx * 12)) + 'px'; } } const t = document.querySelector('#smTrendWrap .smf'); if (t) t.textContent = Math.round(smLastFrame.ms) + 'ms'; } }
+    { const avg = smLastFrame.ok ? smLastFrame.fps : 0; const s = smSummary({ avgFps: avg, stut: smStat.stut }); const e = document.querySelector('#smSumWrap .smn'); if (e && e.textContent !== s.rating) e.textContent = s.ok ? s.rating : '--'; }
     // __EXTRA_HUD__
     {
     const mc = $('maxComboNum'); if (mc) mc.textContent = maxComboText(stat.maxCombo);
@@ -23368,11 +23366,10 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // 帧时仪表（v1.1.182 一百零八辑：sm 机制已在 v1.1.181 引入）
   // 帧预算分级（v1.1.183 一百零八辑：sm 机制已在 v1.1.181 引入）
   // 卡顿侦测（v1.1.184 一百零八辑：sm 机制已在 v1.1.181 引入）
-  // 帧时趋势图（v1.1.187 一百零八辑：sm 机制已在 v1.1.181 引入）
-  // 流畅度总结卡（v1.1.188 一百零八辑：sm 机制已在 v1.1.181 引入）
-  // 卡顿侦测（v1.1.184 一百零八辑：sm 机制已在 v1.1.181 引入）
   // 粒子桶复用（v1.1.185 一百零八辑：sm 机制已在 v1.1.181 引入）
   // 输入响应仪表（v1.1.186 一百零八辑：sm 机制已在 v1.1.181 引入）
+  // 帧时趋势图（v1.1.187 一百零八辑：sm 机制已在 v1.1.181 引入）
+  // 流畅度总结卡（v1.1.188 一百零八辑：sm 机制已在 v1.1.181 引入）
   function insufficientMsg(kind, have, need, label) {
     return kind + '不足 · 还差 ' + Math.max(0, need - have) + (label ? ' · ' + label : '') + '（需 ' + need + '）';
   }
@@ -27659,11 +27656,10 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       smFrameStateNow: (n, l) => smFrame(n, l), smFrameNow: () => smLastFrame, smFrameDom: () => { const e = document.querySelector('#smFrameWrap .smf'); return e ? e.textContent : null; },
       smBudgetStateNow: (m) => smBudget(m), smBudgetNow: () => smLastRenderMs, smBudgetDom: () => { const e = document.querySelector('#smBudgetWrap .smf'); return e ? e.textContent : null; },
       smStutterStateNow: (m, b) => smStutter(m, b), smStutterNow: () => smStat.stut, smStutterDom: () => { const e = document.querySelector('#smStutWrap .smn'); return e ? e.textContent : null; },
-      smTrendStateNow: (s, v) => smTrend(s, v), smTrendSeries: () => smSeries.slice(), smTrendDom: () => { const e = document.querySelector('#smTrendWrap .smspark'); return e ? e.children.length : 0; },
-      smSummaryStateNow: (s) => smSummary(s), smSummaryNow: () => ({ avgFps: smLastFrame.ok ? smLastFrame.fps : 0, stut: smStat.stut }), smSummaryDom: () => { const e = document.querySelector('#smSumWrap .smn'); return e ? e.textContent : null; },
-      smStutterStateNow: (m, b) => smStutter(m, b), smStutterNow: () => smStat.stut, smStutterDom: () => { const e = document.querySelector('#smStutWrap .smn'); return e ? e.textContent : null; },
       smBucketPutNow: (mp, k, c, al, p, f) => smBucketPut(mp, k, c, al, p, f), smBucketStatNow: () => ({ created: smStat.created, reused: smStat.reused }), smBucketDom: () => { const e = document.querySelector('#smBucketWrap .smn'); return e ? e.textContent : null; },
       smInputStateNow: (a, b) => smInput(a, b), smInputNow: () => smInputMs, smInputDom: () => { const e = document.querySelector('#smInputWrap .smn'); return e ? e.textContent : null; },
+      smTrendStateNow: (s, v) => smTrend(s, v), smTrendSeries: () => smSeries.slice(), smTrendDom: () => { const e = document.querySelector('#smTrendWrap .smspark'); return e ? e.children.length : 0; },
+      smSummaryStateNow: (s) => smSummary(s), smSummaryNow: () => ({ avgFps: smLastFrame.ok ? smLastFrame.fps : 0, stut: smStat.stut }), smSummaryDom: () => { const e = document.querySelector('#smSumWrap .smn'); return e ? e.textContent : null; },
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

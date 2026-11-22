@@ -16,7 +16,7 @@ node .workbuddy/regression/tb_cdp_test.js
 node .workbuddy/regression/tb_release_smoke.js
 ```
 
-完整套件见 `.github/workflows/ci.yml`。新增浏览器流程会检查养成备份往返、刷新后恢复、保存失败提示与重试、精简 HUD，并输出固定日期种子 20261113 的每日模式 180 帧 p50/p95/max 帧间隔。TB_SHOT 可指定输出截图路径。
+完整套件见 `.github/workflows/ci.yml`。新增浏览器流程会检查养成备份往返、刷新后恢复、保存失败提示与重试、精简 HUD，并输出固定日期种子 20261113 的每日模式 180 帧 p50/p95/max 帧间隔。主回归与发布冒烟默认把截图写到系统临时目录并打印路径，不覆盖 README 的战斗截图。可用 `TB_SHOT` 指定输出文件；主回归的第二个命令行参数优先于该变量。
 
 比较性能时应固定 Chrome 版本、窗口尺寸、画质、存档和机器负载。脚本不是压力关卡或手机帧率保证；后续平衡测试应记录固定操作下的通关时长、受伤次数及金币收入。
 
