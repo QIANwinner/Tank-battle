@@ -25409,6 +25409,21 @@ async function main() {
       return (ok && resumed && el.hidden) || JSON.stringify({ ok, resumed, s, text: el.textContent });
     });
 
+  // U9093–U9098: 本局强化清单
+  await senseCheck("U9093 暂停与结算层含强化清单，菜单中隐藏", (T,$) => $('overlay').contains($('upgListVal')) && $('upgListWrap').hidden);
+  await senseCheck("U9094 还没选过强化时如实说明", (T,$) => { T.startGame(); $('pauseBtn').click(); const ok = !$('upgListWrap').hidden && $('upgListVal').textContent === '尚未获得强化'; T.quit(); return ok; });
+  await senseCheck("U9095 列出名称与叠加层数", T => T.upgListTextNow({ rapid: 2, fortune: 1 }) === '🔥 快速装填 ×2 / 🍀 金运');
+  await senseCheck("U9096 按强化池顺序排列，单层不标倍数，0 层不列", T => T.upgListTextNow({ fortune: 1, speed: 0, rapid: 1 }) === '🔥 快速装填 / 🍀 金运');
+  await senseCheck("U9097 未知状态与无效层数不冒充强化", T => T.upgListTextNow(null) === '强化状态未知' && T.upgListTextNow([1]) === '强化状态未知' && T.upgListRawNow({ rapid: 1 }, null) === '强化状态未知' && T.upgListTextNow({ rapid: -1, ghost: 3, speed: 1.5 }) === '尚未获得强化');
+  await senseCheck("U9098 真实暂停与结算显示同一份清单，回菜单收起", (T,$) => {
+      T.startGame(); T.setUpgrades({ pierce: 1, hp: 3 }); $('pauseBtn').click();
+      const val = $('upgListVal'), want = T.upgListTextNow({ pierce: 1, hp: 3 });
+      const paused = !$('upgListWrap').hidden && val.textContent === want && want === '❤ 装甲强化 ×3 / 🔱 穿透弹头';
+      $('btnPlay').click(); T.endGame(false);
+      const over = !$('upgListWrap').hidden && val.textContent === want;
+      T.quit(); return (paused && over && $('upgListWrap').hidden) || JSON.stringify({ paused, over, text: val.textContent });
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
