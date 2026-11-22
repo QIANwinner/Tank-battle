@@ -25507,6 +25507,28 @@ async function main() {
       return (died && marked && back) || JSON.stringify({ died, marked, back, text, mark });
     });
 
+  // U9123–U9128: 新敌人登场提示
+  await senseCheck("U9123 登场提示用战场提示条，菜单中没有箭头", (T,$) => typeof T.enemyIntroTextNow === 'function' && T.enemyIntroMarkNow() === null && $('fieldNote').getAttribute('role') === 'status');
+  await senseCheck("U9124 全新存档还没见过任何特殊敌人", T => { T.seenFoesResetNow(); return T.seenFoesNow().length === 0 && T.lsGet('tank-battle-seen-foes') === null && T.enemyIntroDueNow('fast', T.seenFoesNow()); });
+  await senseCheck("U9125 一句话说明新敌人的行为", T => T.enemyIntroTextNow('suicide') === '新敌人 · 自爆坦克：贴身自爆，别让它靠近' && T.enemyIntroTextNow('sniper') === '新敌人 · 狙击坦克：远距离压制，炮弹慢但准' && T.enemyIntroTextNow('engineer') === '新敌人 · 工兵坦克：直冲基地，专拆护墙');
+  await senseCheck("U9126 见过的不再提示，普通坦克从不提示", T => T.enemyIntroDueNow('fast', []) && !T.enemyIntroDueNow('fast', ['fast']) && T.enemyIntroDueNow('fast', ['sniper', 'armored']) && !T.enemyIntroDueNow('normal', []) && T.enemyIntroTextNow('normal') === '');
+  await senseCheck("U9127 未知类型与无效记录不提示", T => !T.enemyIntroDueNow('toString', []) && !T.enemyIntroDueNow('fast', null) && !T.enemyIntroDueNow('fast', 'fast') && !T.enemyIntroDueNow(7, []) && T.enemyIntroTextNow('toString') === '' && T.enemyIntroTextNow(null) === '');
+  await senseCheck("U9128 真实出兵：首次遇到才提示并标箭头，记录写入存档，再遇不重复", (T,$) => {
+      T.seenFoesResetNow();
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+      T.spawnFoeNow(120, 120, 'normal'); T.extraHudRefreshNow();
+      const plain = $('fieldNote').hidden && T.seenFoesNow().length === 0;
+      T.spawnFoeNow(240, 120, 'armored'); T.extraHudRefreshNow();
+      const note = $('fieldNote'), mark = T.enemyIntroMarkNow(), text = note.textContent;
+      const first = !note.hidden && text === T.enemyIntroTextNow('armored') && note.dataset.kind === 'warn' && !!mark && mark.type === 'armored' && mark.x === 240 && T.seenFoesNow().join() === 'armored';
+      const count = T.fieldNoteCountNow();
+      T.spawnFoeNow(360, 120, 'armored'); T.extraHudRefreshNow();
+      const once = T.fieldNoteCountNow() === count;
+      const saved = T.lsGet('tank-battle-seen-foes') === '["armored"]';
+      T.quit(); T.seenFoesResetNow();
+      return (plain && first && once && saved && T.enemyIntroMarkNow() === null) || JSON.stringify({ plain, first, once, saved, text, mark });
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
