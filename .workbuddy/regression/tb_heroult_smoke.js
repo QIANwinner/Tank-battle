@@ -25333,6 +25333,24 @@ async function main() {
       T.quit(); return (ok && note.hidden) || note.textContent;
     });
 
+  // U9069–U9074: 破纪录瞬间
+  await senseCheck("U9069 提示条浮在战场上方，不挤占布局", (T,$) => getComputedStyle($('fieldNote')).position === 'absolute' && typeof T.recordPassTextNow === 'function');
+  await senseCheck("U9070 开局尚未破纪录", (T,$) => { T.startGame(); const ok = T.recordNotedNow() === false && $('fieldNote').hidden; T.quit(); return ok; });
+  await senseCheck("U9071 显示被超过的纪录，大数带千分位", T => T.recordPassTextNow(5200, 5000) === '新纪录 · 已超过 5000 分' && T.recordPassTextNow(12001, 12000) === '新纪录 · 已超过 12,000 分');
+  await senseCheck("U9072 平纪录不算破，多 1 分即算；没有纪录的首局不提示", T => T.recordPassTextNow(5000, 5000) === '' && T.recordPassTextNow(5001, 5000) !== '' && T.recordPassTextNow(900, 0) === '');
+  await senseCheck("U9073 非数值分数不提示", T => [[NaN, 100], [200, null], ['300', 100], [Infinity, 100], [200, -5]].every(a => T.recordPassTextNow(a[0], a[1]) === ''));
+  await senseCheck("U9074 真实得分越过纪录：只提示一次，新一局重新计", (T,$) => {
+      T.startGame(); T.skipIntro(); T.stopSpawn(); T.setBestAtStartNow(300);
+      T.setScore(250); T.extraHudRefreshNow();
+      const quiet = $('fieldNote').hidden && !T.recordNotedNow();
+      T.setScore(310); T.extraHudRefreshNow();
+      const note = $('fieldNote'), shown = !note.hidden && note.textContent === T.recordPassTextNow(310, 300) && T.recordNotedNow();
+      const count = T.fieldNoteCountNow(); T.setScore(900); T.extraHudRefreshNow();
+      const once = T.fieldNoteCountNow() === count;
+      T.quit(); T.startGame(); const fresh = !T.recordNotedNow(); T.quit();
+      return (quiet && shown && once && fresh) || JSON.stringify({ quiet, shown, once, fresh });
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
