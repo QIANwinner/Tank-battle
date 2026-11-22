@@ -16,8 +16,12 @@ test('failed writes stay pending, latest values win, retry restores consistency'
   assert.throws(() => store.setItem('coins', 5));
   assert.throws(() => store.setItem('skins', '["gold"]'));
   assert.equal(store.pendingCount(), 2);
+  assert.deepEqual(store.status(), { pending: 2, writes: 0, lastSavedAt: null });
   failed = false; assert.equal(store.retry(), true);
   assert.equal(data.get('coins'), '5'); assert.equal(data.get('skins'), '["gold"]');
+  const receipt = store.status();
+  assert.equal(receipt.writes, 2); assert.equal(receipt.pending, 0); assert.ok(Number.isFinite(receipt.lastSavedAt));
+  assert.equal(store.retry(), true); assert.deepEqual(store.status(), receipt);
   failed = true; assert.throws(() => store.removeItem('coins'));
   failed = false; store.retry(); assert.equal(data.has('coins'), false);
 });

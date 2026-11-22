@@ -1798,6 +1798,7 @@
       <div class="achTitle">💾 存档</div>
       <button class="achClose" id="btnSaveClose" aria-label="关闭">✕</button>
     </div>
+    <div class="senseReadout saveReceipt" id="saveStampWrap"><span>写入回执</span> <b id="saveStampVal">本页尚无写入</b></div>
     <div class="saveBody" id="saveBody"></div>
   </div>
 
@@ -1823,7 +1824,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.190</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.191</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -1915,7 +1916,21 @@
     reportErr(r ? (r.message || String(r)) : '未处理的 Promise 拒绝');
   });
 
-  const saveStore = window.TankStorage.create(() => window.localStorage);
+  const saveStore = window.TankStorage.create(() => window.localStorage, null, renderSaveStamp);
+  function saveStampText(s) {
+    if (!s || !Number.isSafeInteger(s.pending) || s.pending < 0 || !Number.isSafeInteger(s.writes) || s.writes < 0) return '保存状态未知';
+    if (s.pending) return s.pending + ' 项待保存';
+    if (!s.writes) return '本页尚无写入';
+    const d = new Date(s.lastSavedAt);
+    if (!Number.isFinite(s.lastSavedAt) || !Number.isFinite(d.getTime())) return '保存状态未知';
+    return '已保存 ' + [d.getHours(), d.getMinutes(), d.getSeconds()].map(n => String(n).padStart(2, '0')).join(':');
+  }
+  function renderSaveStamp(s) {
+    const box = document.getElementById('saveBox');
+    if (!box.classList.contains('show')) return;
+    const el = document.getElementById('saveStampVal'), text = saveStampText(s);
+    if (el.textContent !== text) el.textContent = text;
+  }
 
   // ===== 常量 =====
   const TILE = 24;                 // 每格像素
@@ -24494,6 +24509,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   function openSaveBox(mode) {
     if (!saveBox || !saveBody) return;
     saveBox.classList.add('show');
+    renderSaveStamp(saveStore.status());
     const isExp = mode === 'export';
     saveBody.innerHTML =
       (isExp
@@ -25282,7 +25298,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.190', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.191', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -27709,6 +27725,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       smSummaryStateNow: (s) => smSummary(s), smSummaryNow: () => ({ avgFps: smLastFrame.ok ? smLastFrame.fps : 0, stut: smStat.stut }), smSummaryDom: () => { const e = document.querySelector('#smSumWrap .smn'); return e ? e.textContent : null; },
       sfxVizTextNow: sfxVizText, sfxVizCountNow: () => cueCount,
       bgmLiveTextNow: bgmLiveText,
+      saveStampTextNow: saveStampText, saveStampNow: saveStore.status,
       buySkinNow: (id) => buySkin(id),
       // —— v0.3.10 成就宠物币进度验证 ——
       achPetStats,

@@ -25064,6 +25064,27 @@ async function main() {
       finally { T.setBgmVol(vol); T.setBgmNow(mode); }
     });
 
+
+  // U9009–U9014: 自动保存回执
+  await senseCheck("U9009 存档窗口内有写入回执", (T,$) => $('saveBox').contains($('saveStampVal')));
+  await senseCheck("U9010 新会话不虚报保存", T => T.saveStampTextNow({pending:0,writes:0,lastSavedAt:null}) === '本页尚无写入');
+  await senseCheck("U9011 成功写入使用当地时分秒", T => T.saveStampTextNow({pending:0,writes:2,lastSavedAt:new Date(2020,0,2,3,4,5).getTime()}) === '已保存 03:04:05');
+  await senseCheck("U9012 待写优先，时间戳零有效", T => T.saveStampTextNow({pending:1,writes:3,lastSavedAt:0}) === '1 项待保存' && T.saveStampTextNow({pending:0,writes:1,lastSavedAt:0}).startsWith('已保存 '));
+  await senseCheck("U9013 非法计数和时间不会显示成功", T => [null,{pending:-1,writes:1},{pending:0,writes:1,lastSavedAt:null}].every(s => T.saveStampTextNow(s) === '保存状态未知'));
+  await senseCheck("U9014 模拟配额不足至重试：DOM 只反映真正落盘的写入", (T,$) => {
+      T.openSaveNow();
+      const old = Storage.prototype.setItem, before = T.saveStampNow();
+      let blocked;
+      try {
+        Storage.prototype.setItem = () => { throw new DOMException('quota','QuotaExceededError'); };
+        T.setCoinsNow(31);
+        blocked = $('saveStampVal').textContent === '1 项待保存' && T.saveStampNow().writes === before.writes;
+      } finally { Storage.prototype.setItem = old; }
+      $('saveWarning').querySelector('button').click();
+      const after = T.saveStampNow(), shown = $('saveStampVal').textContent; $('btnSaveClose').click();
+      return blocked && after.writes === before.writes + 1 && after.pending === 0 && shown === T.saveStampTextNow(after);
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
