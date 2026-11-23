@@ -25696,6 +25696,22 @@ async function main() {
       return ok || JSON.stringify({ texts, s: T.buffStateNow(), ends: T.buffEndsNow() });
     });
 
+  // U9171–U9176: 出生保护圈
+  await senseCheck("U9171 保护圈画在战场画布上，菜单中没有圈", (T,$) => { const c0 = T.spawnGuardCountNow(); T.renderOnce(); return typeof T.spawnGuardStateNow === 'function' && !!$('game').getContext && T.spawnGuardCountNow() === c0; });
+  await senseCheck("U9172 新局 2 秒保护：环走到五分之二", T => { const s = T.spawnGuardStateNow(120); return s.on && s.secs === 2 && Math.abs(s.frac - 0.4) < 1e-9; });
+  await senseCheck("U9173 满 5 秒环转满，更长的护盾也只画满圈但秒数照写", T => { const a = T.spawnGuardStateNow(300), b = T.spawnGuardStateNow(420); return a.frac === 1 && a.secs === 5 && b.frac === 1 && b.secs === 7; });
+  await senseCheck("U9174 无敌归零即收圈", T => { const s = T.spawnGuardStateNow(0); return !s.on && s.secs === 0 && s.frac === 0 && !T.spawnGuardStateNow(-30).on; });
+  await senseCheck("U9175 无效帧数不出圈", T => [NaN, '120', null, undefined, Infinity, -0.5].every(v => { const s = T.spawnGuardStateNow(v); return !s.on && s.secs === 0 && s.frac === 0; }));
+  await senseCheck("U9176 真实重生：保护圈亮起，无敌结束后收起", T => {
+      T.startGame(); T.skipIntro(); T.stopSpawn(); T.invul(180);
+      const c0 = T.spawnGuardCountNow(); T.renderOnce();
+      const on = T.spawnGuardCountNow() === c0 + 1 && T.playerInvNow() > 0;
+      T.invul(0); T.renderOnce();
+      const off = T.spawnGuardCountNow() === c0 + 1;
+      T.quit();
+      return (on && off) || JSON.stringify({ on, off, inv: T.playerInvNow() });
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
