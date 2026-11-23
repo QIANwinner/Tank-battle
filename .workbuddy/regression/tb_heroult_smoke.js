@@ -25712,6 +25712,22 @@ async function main() {
       return (on && off) || JSON.stringify({ on, off, inv: T.playerInvNow() });
     });
 
+  // U9177–U9182: 剩余敌情徽标
+  await senseCheck("U9177 徽标画在战场画布上，菜单中没有敌情", (T,$) => { const c0 = T.foesBadgeCountNow(); T.renderOnce(); return typeof T.foesLeftStateNow === 'function' && !!$('game').getContext && T.foesBadgeCountNow() === c0; });
+  await senseCheck("U9178 待出场加存活一起算", T => { const s = T.foesLeftStateNow(10, 5, 2, 0); return s.show && s.n === 7 && s.txt === '敌 剩 7' && !s.danger; });
+  await senseCheck("U9179 只剩 3 个变红，清完即收", T => T.foesLeftStateNow(10, 9, 2, 0).danger && T.foesLeftStateNow(10, 9, 2, 0).txt === '敌 剩 3' && !T.foesLeftStateNow(10, 10, 0, 0).show && !T.foesLeftStateNow(0, 0, 0, 0).show);
+  await senseCheck("U9180 计数不能为负，对抗模式不显示", T => { const s = T.foesLeftStateNow(5, 6, 0, 0); return s.n === 0 && !s.show && !T.foesLeftStateNow(10, 5, 2, 2).show; });
+  await senseCheck("U9181 无效计数不显示", T => [[NaN, 5, 2, 0], [10, 'x', 2, 0], [10, 5, null, 0], [10, 5, 2, '1']].every(a => !T.foesLeftStateNow(a[0], a[1], a[2], a[3]).show));
+  await senseCheck("U9182 真实对局：徽标亮出且数字与函数一致", T => {
+      T.startGame(); T.skipIntro(); T.stopSpawn(); T.spawnEnemyAt(120, 120, 'normal');
+      const t = T.foesTotalsNow();
+      const c0 = T.foesBadgeCountNow(); T.renderOnce();
+      const s = T.foesLeftStateNow(t.total, t.spawned, t.alive, 0);
+      const ok = s.show && T.foesBadgeCountNow() === c0 + 1;
+      T.quit();
+      return ok || JSON.stringify({ t, s, c0, now: T.foesBadgeCountNow() });
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
