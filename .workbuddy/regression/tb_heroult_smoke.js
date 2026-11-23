@@ -25342,7 +25342,7 @@ async function main() {
   await senseCheck("U9073 非数值分数不提示", T => [[NaN, 100], [200, null], ['300', 100], [Infinity, 100], [200, -5]].every(a => T.recordPassTextNow(a[0], a[1]) === ''));
   await senseCheck("U9074 真实得分越过纪录：只提示一次，新一局重新计", (T,$) => {
       T.startGame(); T.skipIntro(); T.stopSpawn(); T.setBestAtStartNow(300);
-      T.setScore(250); T.extraHudRefreshNow();
+      T.setScore(200); T.extraHudRefreshNow();   // —— v1.1.232 起八成即有「还差 N 分」预告，安静区须低于八成 ——
       const quiet = $('fieldNote').hidden && !T.recordNotedNow();
       T.setScore(310); T.extraHudRefreshNow();
       const note = $('fieldNote'), shown = !note.hidden && note.textContent === T.recordPassTextNow(310, 300) && T.recordNotedNow();
@@ -25927,6 +25927,14 @@ async function main() {
   await senseCheck("U9246 空血按零画，越界钳满", T => { const a = T.foeHpStateNow(0, 3), b = T.foeHpStateNow(9, 3); return a && a.pct === 0 && b && b.pct === 1; });
   await senseCheck("U9247 无效血量不画条", T => [NaN, '2', null, undefined].every(v => T.foeHpStateNow(v, 3) === null) && T.foeHpStateNow(2, 0) === null && T.foeHpStateNow(-1, 3) === null && T.foeHpStateNow(2, NaN) === null);
   await senseCheck("U9248 真实精英敌：头顶亮血条，打掉一截看得见", (T,$) => { T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); const e = T.spawnEnemyAt(300, 100, 'elite'); const c0 = T.foeHpDrawsNow(); T.renderOnce(); const drew = T.foeHpDrawsNow() === c0 + 1; const s = T.foeHpStateNow(e.hp - 1, e.maxHp); T.quit(); return (drew && s && s.pct < 1) || JSON.stringify({ drew, s }); });
+
+  // U9249–U9254: 接近最高分预告
+  await senseCheck("U9249 预告函数与提示条钩子就位", (T,$) => typeof T.bestGapTextNow === 'function' && typeof T.recordNearNow === 'function' && !!$('fieldNote'));
+  await senseCheck("U9250 八成起报差距，写出还差几分", T => T.bestGapTextNow(85, 100) === '距最高分还差 15 分' && T.bestGapTextNow(80, 100) === '距最高分还差 20 分');
+  await senseCheck("U9251 不到八成不报，已破纪录不报，无纪录不报", T => T.bestGapTextNow(79.9, 100) === '' && T.bestGapTextNow(100, 100) === '' && T.bestGapTextNow(120, 0) === '');
+  await senseCheck("U9252 无效分数或纪录不报", T => [NaN, 'x', null].every(v => T.bestGapTextNow(v, 100) === '') && T.bestGapTextNow(85, NaN) === '' && T.bestGapTextNow(85, -10) === '');
+  await senseCheck("U9253 大额差距按存档同款千分位格式化", T => T.bestGapTextNow(81000, 100000) === '距最高分还差 19,000 分' && T.bestGapTextNow(9000, 10000) === '距最高分还差 1000 分');
+  await senseCheck("U9254 真实对局：爬到八成预告一次，不再重复", async (T,$) => { const raf = () => new Promise(requestAnimationFrame); T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.setBestAtStartNow(100); T.addScore(85); const end = performance.now() + 1500; while ($('fieldNote').textContent !== '距最高分还差 15 分' && performance.now() < end) await raf(); const noted = $('fieldNote').textContent === '距最高分还差 15 分' && T.recordNearNow() === true; T.addScore(1); await new Promise(r => setTimeout(r, 100)); const once = T.recordNearNow() === true; T.quit(); return (noted && once) || JSON.stringify({ noted, once, note: $('fieldNote').textContent }); });
 
   chrome.kill(); killTree(chrome.pid);
 
