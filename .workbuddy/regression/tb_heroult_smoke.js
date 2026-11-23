@@ -25677,6 +25677,25 @@ async function main() {
       return (shown && quiet && loud && faded && up && cleared) || JSON.stringify({ shown, quiet, loud, faded, up, cleared });
     });
 
+  // U9165–U9170: 增益到期提示
+  await senseCheck("U9165 增益条与结束回执就位，菜单中没有残留", (T,$) => typeof T.buffUrgencyNow === 'function' && typeof T.buffEndTextNow === 'function' && !!$('game').getContext && Array.isArray(T.floatTextsNow()) && T.floatTextsNow().length === 0);
+  await senseCheck("U9166 新一局没有增益，结束计数为零", T => { T.startGame(); const s = T.buffStateNow(); const ok = s.rapid === 0 && s.double === 0 && s.freeze === 0 && s.magnet === 0 && T.buffEndsNow() === 0; T.quit(); return ok || JSON.stringify(s); });
+  await senseCheck("U9167 2 秒起闪烁、5 秒内算临期、5 秒以上正常", T => T.buffUrgencyNow(8) === 0 && T.buffUrgencyNow(5) === 1 && T.buffUrgencyNow(4.9) === 1 && T.buffUrgencyNow(2) === 2 && T.buffUrgencyNow(0.5) === 2 && T.buffEndTextNow('rapid') === '快速弹结束' && T.buffEndTextNow('magnet') === '磁暴结束' && T.buffEndTextNow('shield') === '护盾结束');
+  await senseCheck("U9168 恰好 5 秒不闪、恰好 2 秒起闪、归零即收", T => T.buffUrgencyNow(5.01) === 0 && T.buffUrgencyNow(2.01) === 1 && T.buffUrgencyNow(0) === 0 && T.buffUrgencyNow(-1) === 0);
+  await senseCheck("U9169 无效秒数不闪，未知道具没有结束文案", T => [NaN, 'x', null, undefined, Infinity].every(v => T.buffUrgencyNow(v) === 0) && ['toString', 'ghost', 7, null].every(k => T.buffEndTextNow(k) === '') && T.buffEndNow('ghost') === false && T.setBuffNow('ghost', 1) === false);
+  await senseCheck("U9170 真实增益到期：飘字报出结束，磁暴计入状态条", async T => {
+      const raf = () => new Promise(requestAnimationFrame);
+      T.startGame(); T.skipIntro(); T.invul(0); T.stopSpawn();
+      const c0 = T.buffEndsNow();
+      T.setBuffNow('rapid', 0.03); T.setBuffNow('magnet', 2);
+      const end = performance.now() + 2000;
+      while (T.buffStateNow().rapid > 0 && performance.now() < end) await raf();
+      const texts = T.floatTextsNow();
+      const ok = T.buffEndsNow() === c0 + 1 && texts.includes('快速弹结束') && T.buffStateNow().rapid <= 0 && T.buffStateNow().magnet > 0;
+      T.quit();
+      return ok || JSON.stringify({ texts, s: T.buffStateNow(), ends: T.buffEndsNow() });
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
