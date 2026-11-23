@@ -25591,7 +25591,7 @@ async function main() {
       const c = $('game'), k = c.width / 624;
       const red = () => {
         T.renderOnce();
-        const px = c.getContext('2d').getImageData(Math.round(305 * k), Math.round(130 * k), Math.round(12 * k), Math.round(100 * k)).data;
+        const px = c.getContext('2d').getImageData(Math.round(305 * k), Math.round(170 * k), Math.round(12 * k), Math.round(60 * k)).data;
         let n = 0; for (let i = 0; i < px.length; i += 4) if (px[i] > 45 && px[i] > px[i + 1] * 2 && px[i + 2] < 130) n++;
         return n;
       };
@@ -25809,6 +25809,83 @@ async function main() {
       const big = T.timeBigCountNow() === c0 + 1;
       T.quit();
       return (noted && big) || JSON.stringify({ noted, big, note: $('fieldNote').textContent });
+    });
+
+  // U9213–U9218: 过关心跳防线（v1.1.226）
+  await senseCheck("U9213 全链路：清场→结算→广告→强化→第 2 关敌人刷新", async (T,$) => {
+      const raf = () => new Promise(requestAnimationFrame);
+      T.startGame(); T.skipIntro(); T.invul(99999);
+      T.forceClear();
+      let end = performance.now() + 4000;
+      while (!T.lvResultNow().show && performance.now() < end) await raf();
+      if (!T.lvResultNow().show) return 'no-result';
+      $('btnLvNext').click();
+      await new Promise(r => setTimeout(r, 250));
+      const adBtns = [...document.querySelectorAll('#adBox button')];
+      if (T.adState().pending && adBtns.length) adBtns[0].click();
+      await new Promise(r => setTimeout(r, 250));
+      const cards = [...document.querySelectorAll('#upgradeBox .upCard')].filter(c => c.style.display !== 'none');
+      if (!cards.length || !T.adState().upgradeOpen) return 'no-upgrade';
+      cards[0].click();
+      end = performance.now() + 6000;
+      while (performance.now() < end) { const f = T.foesTotalsNow(); if (T.levelNow() >= 2 && f.alive > 0) break; await raf(); }
+      const f = T.foesTotalsNow(), ok = T.levelNow() === 2 && f.alive > 0 && T.pausedNow() === false;
+      T.quit();
+      return ok || JSON.stringify({ lv: T.levelNow(), f });
+    });
+  await senseCheck("U9214 过关闸门：触发即落锁，下一关开启时复位", async (T,$) => {
+      const raf = () => new Promise(requestAnimationFrame);
+      T.startGame(); T.skipIntro(); T.invul(99999);
+      const before = T.lvClearDoneNow();
+      T.forceClear();
+      const end = performance.now() + 3000;
+      while (!T.lvResultNow().show && performance.now() < end) await raf();
+      const locked = T.lvClearDoneNow() === true;
+      T.advanceLevelNow();
+      const resetEnd = performance.now() + 4000;
+      while (T.lvClearDoneNow() !== false && performance.now() < resetEnd) await raf();
+      const reset = T.lvClearDoneNow() === false;
+      T.quit();
+      return (before === false && locked && reset) || JSON.stringify({ before, locked, reset });
+    });
+  await senseCheck("U9215 强化面板开着时按 P/暂停不生效", (T,$) => {
+      T.startGame(); T.skipIntro(); T.offerUpgradesSafeNow();
+      const open = T.adState().upgradeOpen === true;
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'p' }));
+      const stillFree = T.pausedNow() === false;
+      T.chooseUpgrade('rapid');
+      T.quit();
+      return (open && stillFree) || JSON.stringify({ open, stillFree });
+    });
+  await senseCheck("U9216 强化面板开着时切窗不埋隐形暂停层", (T,$) => {
+      T.startGame(); T.skipIntro(); T.offerUpgradesSafeNow();
+      window.dispatchEvent(new Event('blur'));
+      const ok = T.pausedNow() === false && $('overlay').classList.contains('hide');
+      T.chooseUpgrade('rapid');
+      T.quit();
+      return ok || JSON.stringify({ paused: T.pausedNow(), hidden: $('overlay').classList.contains('hide') });
+    });
+  await senseCheck("U9217 残留的暂停被过关推进清掉", (T,$) => {
+      T.startGame(); T.skipIntro();
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'p' }));
+      const paused = T.pausedNow() === true;
+      T.advanceLevelNow();
+      const cleared = T.pausedNow() === false;
+      T.quit();
+      return (paused && cleared) || JSON.stringify({ paused, cleared });
+    });
+  await senseCheck("U9218 过关奖励只发一次，不随帧刷分", async (T,$) => {
+      const raf = () => new Promise(requestAnimationFrame);
+      T.startGame(); T.skipIntro(); T.invul(99999);
+      T.forceClear();
+      const end = performance.now() + 3000;
+      while (!T.lvResultNow().show && performance.now() < end) await raf();
+      const s1 = T.scoreNow();
+      const hold = performance.now() + 600;
+      while (performance.now() < hold) await raf();
+      const s2 = T.scoreNow();
+      T.quit();
+      return (s1 > 0 && s2 === s1) || JSON.stringify({ s1, s2 });
     });
 
   chrome.kill(); killTree(chrome.pid);
