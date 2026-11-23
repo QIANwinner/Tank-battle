@@ -25920,6 +25920,14 @@ async function main() {
   await senseCheck("U9241 真实冻结：敌人头顶亮标记，解冻即收", (T,$) => { T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); const e = T.spawnEnemyAt(300, 100, 'normal'); const c0 = T.frozenMarkDrawsNow(); e.freezeT = 120; T.renderOnce(); const on = T.frozenMarkDrawsNow() === c0 + 1; e.freezeT = 0; const c1 = T.frozenMarkDrawsNow(); T.renderOnce(); const off = T.frozenMarkDrawsNow() === c1; T.quit(); return (on && off) || JSON.stringify({ on, off }); });
   await senseCheck("U9242 阵亡敌人不带标记", (T,$) => { T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); const e = T.spawnEnemyAt(300, 100, 'normal'); e.freezeT = 120; e.dead = true; const c0 = T.frozenMarkDrawsNow(); T.renderOnce(); const ok = T.frozenMarkDrawsNow() === c0; T.quit(); return ok; });
 
+  // U9243–U9248: 多血敌人血条
+  await senseCheck("U9243 敌人血条画在战场画布上，菜单中没有", (T,$) => { const c0 = T.foeHpDrawsNow(); T.renderOnce(); return typeof T.foeHpStateNow === 'function' && !!$('game').getContext && T.foeHpDrawsNow() === c0; });
+  await senseCheck("U9244 三血敌人满血出整条，一炮死的敌不画", T => { const s = T.foeHpStateNow(3, 3); return s && s.pct === 1 && s.low === false && T.foeHpStateNow(1, 1) === null; });
+  await senseCheck("U9245 残血四成以下变红", T => { const s = T.foeHpStateNow(1, 3); return s && s.low === true && Math.abs(s.pct - 1 / 3) < 1e-9 && T.foeHpStateNow(2, 3).low === false; });
+  await senseCheck("U9246 空血按零画，越界钳满", T => { const a = T.foeHpStateNow(0, 3), b = T.foeHpStateNow(9, 3); return a && a.pct === 0 && b && b.pct === 1; });
+  await senseCheck("U9247 无效血量不画条", T => [NaN, '2', null, undefined].every(v => T.foeHpStateNow(v, 3) === null) && T.foeHpStateNow(2, 0) === null && T.foeHpStateNow(-1, 3) === null && T.foeHpStateNow(2, NaN) === null);
+  await senseCheck("U9248 真实精英敌：头顶亮血条，打掉一截看得见", (T,$) => { T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); const e = T.spawnEnemyAt(300, 100, 'elite'); const c0 = T.foeHpDrawsNow(); T.renderOnce(); const drew = T.foeHpDrawsNow() === c0 + 1; const s = T.foeHpStateNow(e.hp - 1, e.maxHp); T.quit(); return (drew && s && s.pct < 1) || JSON.stringify({ drew, s }); });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
