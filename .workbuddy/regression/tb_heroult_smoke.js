@@ -25912,6 +25912,14 @@ async function main() {
   await senseCheck("U9235 真实开局亮出本关目标", (T,$) => { T.startGame(); const d = T.lvStarGoalDomNow(); const ok = d && d.hidden === false && d.text.includes('87秒内'); T.quit(); return ok || JSON.stringify(d); });
   await senseCheck("U9236 过关后目标文案刷新到下一关", (T,$) => { T.startGame(); T.advanceLevelNow(); const d = T.lvStarGoalDomNow(); const ok = d && d.text.includes('99秒内'); T.quit(); return ok || JSON.stringify(d); });
 
+  // U9237–U9242: 冻结敌人标记
+  await senseCheck("U9237 冻结标记画在战场画布上，菜单中没有", (T,$) => { const c0 = T.frozenMarkDrawsNow(); T.renderOnce(); return typeof T.frozenMarkStateNow === 'function' && !!$('game').getContext && T.frozenMarkDrawsNow() === c0; });
+  await senseCheck("U9238 冻结计时为正才标记", T => T.frozenMarkStateNow(60) === true && T.frozenMarkStateNow(0.5) === true);
+  await senseCheck("U9239 归零与负值不标记", T => T.frozenMarkStateNow(0) === false && T.frozenMarkStateNow(-10) === false);
+  await senseCheck("U9240 无效计时不标记", T => [NaN, '60', null, undefined, Infinity].every(v => T.frozenMarkStateNow(v) === false));
+  await senseCheck("U9241 真实冻结：敌人头顶亮标记，解冻即收", (T,$) => { T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); const e = T.spawnEnemyAt(300, 100, 'normal'); const c0 = T.frozenMarkDrawsNow(); e.freezeT = 120; T.renderOnce(); const on = T.frozenMarkDrawsNow() === c0 + 1; e.freezeT = 0; const c1 = T.frozenMarkDrawsNow(); T.renderOnce(); const off = T.frozenMarkDrawsNow() === c1; T.quit(); return (on && off) || JSON.stringify({ on, off }); });
+  await senseCheck("U9242 阵亡敌人不带标记", (T,$) => { T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); const e = T.spawnEnemyAt(300, 100, 'normal'); e.freezeT = 120; e.dead = true; const c0 = T.frozenMarkDrawsNow(); T.renderOnce(); const ok = T.frozenMarkDrawsNow() === c0; T.quit(); return ok; });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
