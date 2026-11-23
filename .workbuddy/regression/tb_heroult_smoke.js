@@ -25774,6 +25774,23 @@ async function main() {
   await senseCheck("U9199 无效输入不抛异常，返回布尔", (T,$) => T.readoutOpenNow('x') === true && T.readoutOpenNow(0) === false && T.readoutOpenNow(null) === false && !$('hud').classList.contains('readout-open') && T.readoutStateNow() === false);
   await senseCheck("U9200 真实点击：☰ 按钮来回切换并保持一致", (T,$) => { const b = $('readoutToggle'); b.click(); const on = $('hud').classList.contains('readout-open') && b.classList.contains('on') && T.readoutStateNow() === true; b.click(); const off = !$('hud').classList.contains('readout-open') && !b.classList.contains('on') && T.readoutStateNow() === false; return on && off; });
 
+  // U9201–U9206: 濒危脉冲
+  await senseCheck("U9201 红框画在战场画布上，菜单中没有警告", (T,$) => { const c0 = T.lastLifeDrawsNow(); T.renderOnce(); return typeof T.lastLifeStateNow === 'function' && !!$('game').getContext && T.lastLifeDrawsNow() === c0 && $('fieldNote').hidden; });
+  await senseCheck("U9202 多条命或命数不对不警告", T => !T.lastLifeStateNow(3, false, 0).on && !T.lastLifeStateNow(0, false, 0).on && !T.lastLifeStateNow(2, false, 0).on && T.lastLifeStateNow(1, false, 0).on);
+  await senseCheck("U9203 阵亡和对抗模式不触发", T => !T.lastLifeStateNow(1, true, 0).on && !T.lastLifeStateNow(1, false, 2).on && T.lastLifeStateNow(1, false, 0).warn === '⚠ 最后一命 · 守住基地');
+  await senseCheck("U9204 恰好 1 条命才亮", T => T.lastLifeStateNow(1.0, false, 0).on && !T.lastLifeStateNow(1.5, false, 0).on);
+  await senseCheck("U9205 无效命数不警告", T => [NaN, '1', null, undefined, Infinity].every(v => !T.lastLifeStateNow(v, false, 0).on));
+  await senseCheck("U9206 真实掉到最后一命：红框亮起且提示一次，补命后可再提醒", (T,$) => {
+      T.startGame(); T.skipIntro(); T.stopSpawn(); T.setLives(3);
+      const c0 = T.lastLifeDrawsNow();
+      T.setLives(1); T.renderOnce();
+      const on = T.lastLifeDrawsNow() === c0 + 1 && T.lastLifeNotedNow() === true && $('fieldNote').textContent === '⚠ 最后一命 · 守住基地';
+      T.setLives(3); T.renderOnce();
+      const off = !T.lastLifeNotedNow();
+      T.quit();
+      return (on && off) || JSON.stringify({ on, off, draws: T.lastLifeDrawsNow() });
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
