@@ -25235,7 +25235,8 @@ async function main() {
     const box = document.querySelector('.hudReadouts'), pill = $('smCompactWrap');
     const end = performance.now() + 2000;
     while (!box.classList.contains('offscreen') && performance.now() < end) await new Promise(requestAnimationFrame);
-    return box.getBoundingClientRect().left >= innerWidth && box.classList.contains('offscreen') && box.contains(pill) &&
+    // v1.1.223 起读数默认折叠成 display:none，几何上不再伸出右缘；契约保留：留在 DOM + offscreen 跳过渲染
+    return box.classList.contains('offscreen') && box.contains(pill) &&
       !pill.checkVisibility() && $('score').checkVisibility();
   });
   await senseCheck("U9052 被跳过的读数仍随刷新更新数值", (T,$) => {
@@ -25251,9 +25252,9 @@ async function main() {
       return box.classList.contains('offscreen') === skipped;
     };
     try {
-      box.style.transform = 'translateX(' + (-box.getBoundingClientRect().left) + 'px)';
+      T.readoutOpenNow(true);   // v1.1.223：展开读数区进入视口
       if (!(await settle(false) && pill.checkVisibility())) return false;
-    } finally { box.style.transform = ''; }
+    } finally { T.readoutOpenNow(false); }   // 收起即移出视口
     return await settle(true) && !pill.checkVisibility();
   });
   await senseCheck("U9054 同款坦克复用一张贴图且照常出画", (T,$) => {
@@ -25764,6 +25765,14 @@ async function main() {
       T.quit();
       return ok || JSON.stringify({ s, dom: T.mwComboDomNow() });
     });
+
+  // U9195–U9200: 顶栏读数折叠
+  await senseCheck("U9195 读数按钮就位，默认收成一行", (T,$) => { const ro = document.querySelector('.hudReadouts'); return !!$('readoutToggle') && !!ro && !$('hud').classList.contains('readout-open') && getComputedStyle(ro).display === 'none'; });
+  await senseCheck("U9196 点开即铺开成网格，读数真的能看见", (T,$) => { T.readoutOpenNow(true); const ro = document.querySelector('.hudReadouts'); const ok = $('hud').classList.contains('readout-open') && getComputedStyle(ro).display !== 'none' && getComputedStyle(ro).flexWrap === 'wrap'; T.readoutOpenNow(false); return ok; });
+  await senseCheck("U9197 展开选择写入存档，收起也写入", (T,$) => { T.readoutOpenNow(true); const a = localStorage.getItem('tank-battle-readout-open') === '1'; T.readoutOpenNow(false); const b = localStorage.getItem('tank-battle-readout-open') === '0'; return a && b && !$('hud').classList.contains('readout-open'); });
+  await senseCheck("U9198 非法存档值按收起处理", T => { try { localStorage.setItem('tank-battle-readout-open', 'x'); } catch (e) {} const ok = T.readoutPrefNow() === false; try { localStorage.removeItem('tank-battle-readout-open'); } catch (e) {} return ok; });
+  await senseCheck("U9199 无效输入不抛异常，返回布尔", (T,$) => T.readoutOpenNow('x') === true && T.readoutOpenNow(0) === false && T.readoutOpenNow(null) === false && !$('hud').classList.contains('readout-open') && T.readoutStateNow() === false);
+  await senseCheck("U9200 真实点击：☰ 按钮来回切换并保持一致", (T,$) => { const b = $('readoutToggle'); b.click(); const on = $('hud').classList.contains('readout-open') && b.classList.contains('on') && T.readoutStateNow() === true; b.click(); const off = !$('hud').classList.contains('readout-open') && !b.classList.contains('on') && T.readoutStateNow() === false; return on && off; });
 
   chrome.kill(); killTree(chrome.pid);
 
