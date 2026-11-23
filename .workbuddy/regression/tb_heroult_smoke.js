@@ -25745,6 +25745,26 @@ async function main() {
       return (on && off) || JSON.stringify({ on, off });
     });
 
+  // U9189–U9194: 播报口径统一
+  await senseCheck("U9189 里程碑条标签已改为连击", (T,$) => { const t = $('mwComboWrap').querySelector('.tgl'); return typeof T.milestoneUnitNow === 'function' && t && t.textContent === '连击'; });
+  await senseCheck("U9190 连击里程碑文案写连击，连杀横幅仍写连杀", T => T.milestoneUnitNow('combo') === '连击' && T.streakLabelNow(3).indexOf('连杀') >= 0 && T.mwComboNow().txt.indexOf('连击') === 0);
+  await senseCheck("U9191 各里程碑单位各司其职", T => T.milestoneUnitNow('kills') === '击杀' && T.milestoneUnitNow('combo') === '连击' && T.milestoneUnitNow('wave') === '波次' && T.milestoneUnitNow('score') === '分数');
+  await senseCheck("U9192 未知单位不编造", T => ['toString', 'ghost', 7, null, undefined, ''].every(k => T.milestoneUnitNow(k) === ''));
+  await senseCheck("U9193 将断提示也归到连击", T => T.comboBreakAlertTextNow(3, 1.5).indexOf('连击') >= 0 && T.comboBreakAlertTextNow(3, 3) === '');
+  await senseCheck("U9194 真实 3 连击：里程碑以「连击」口径播报", async (T,$) => {
+      const raf = () => new Promise(requestAnimationFrame);
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+      T.setComboNow(3, 5, 5);
+      const end = performance.now() + 1500;
+      let s;
+      while (performance.now() < end) { s = T.mwComboNow(); if (s.v === 3 && s.next === 5) break; await raf(); }
+      // 命中那一拍 next 还是 3，要等提交后的下一拍才变 5；mwToast 单行可能被其他里程碑覆盖，以里程碑条 DOM 与函数状态为准
+      for (let i = 0; i < 30 && T.mwComboDomNow() !== '3/5'; i++) await raf();
+      const ok = s.v === 3 && s.next === 5 && s.txt.indexOf('连击') === 0 && s.count >= 1 && T.mwComboDomNow() === '3/5';
+      T.quit();
+      return ok || JSON.stringify({ s, dom: T.mwComboDomNow() });
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
