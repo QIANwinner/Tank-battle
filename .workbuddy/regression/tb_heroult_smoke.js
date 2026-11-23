@@ -25728,6 +25728,23 @@ async function main() {
       return ok || JSON.stringify({ t, s, c0, now: T.foesBadgeCountNow() });
     });
 
+  // U9183–U9188: 连击窗口弧
+  await senseCheck("U9183 连击弧画在战场画布上，菜单中没有弧", (T,$) => { const c0 = T.comboArcCountNow(); T.renderOnce(); return typeof T.comboArcStateNow === 'function' && !!$('game').getContext && T.comboArcCountNow() === c0; });
+  await senseCheck("U9184 不足 2 连击不出弧", T => !T.comboArcStateNow(0, 3, 5).on && !T.comboArcStateNow(1, 3, 5).on && T.comboArcStateNow(2, 3, 5).on);
+  await senseCheck("U9185 弧长就是窗口剩余比例，快断变红", T => { const s = T.comboArcStateNow(3, 2.5, 5); return s.on && s.pct === 0.5 && !s.warn && T.comboArcStateNow(3, 1.7, 5).warn; });
+  await senseCheck("U9186 窗口越界按满圈画，35% 是变红分界", T => T.comboArcStateNow(2, 8, 5).pct === 1 && !T.comboArcStateNow(2, 8, 5).warn && T.comboArcStateNow(2, 1.76, 5).warn === false && T.comboArcStateNow(2, 1.75, 5).warn === true);
+  await senseCheck("U9187 无效连击、计时或窗口不出弧", T => [[NaN, 3, 5], [2, 0, 5], [2, -1, 5], [2, 3, 0], [2, 3, -5], ['2', 3, 5], [2, '3', 5], [2, 3, 'x']].every(a => !T.comboArcStateNow(a[0], a[1], a[2]).on));
+  await senseCheck("U9188 真实连击：2 连击出弧，窗口归零弧收", T => {
+      T.startGame(); T.skipIntro(); T.stopSpawn();
+      T.setComboNow(3, 2.5, 5);
+      const c0 = T.comboArcCountNow(); T.renderOnce();
+      const on = T.comboArcCountNow() === c0 + 1;
+      T.setComboNow(0, 0, 0); T.renderOnce();
+      const off = T.comboArcCountNow() === c0 + 1;
+      T.quit();
+      return (on && off) || JSON.stringify({ on, off });
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
