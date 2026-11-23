@@ -25896,6 +25896,14 @@ async function main() {
   await senseCheck("U9223 真实开火写入冷却上限并画出弧", (T,$) => { T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); const c0 = T.fireCdDrawsNow(); T.fireOnce(); const cd = T.fireRhythmCdNow(); T.renderOnce(); const drew = T.fireCdDrawsNow() === c0 + 1; T.quit(); return (cd > 0 && drew) || JSON.stringify({ cd, drew }); });
   await senseCheck("U9224 冷却走完弧自动收起", async T => { const raf = () => new Promise(requestAnimationFrame); T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.fireOnce(); const end = performance.now() + 2500; while (T.fireRhythmCdNow() > 0 && performance.now() < end) await raf(); const c0 = T.fireCdDrawsNow(); T.renderOnce(); const ok = T.fireRhythmCdNow() <= 0 && T.fireCdDrawsNow() === c0; T.quit(); return ok || JSON.stringify({ cd: T.fireRhythmCdNow(), drew: T.fireCdDrawsNow() - c0 }); });
 
+  // U9225–U9230: 受击方向红弧
+  await senseCheck("U9225 方向弧画在战场画布上，菜单中没有", (T,$) => { const c0 = T.hurtEdgeDrawsNow(); T.renderOnce(); return typeof T.hurtEdgeOfNow === 'function' && !!$('game').getContext && T.hurtEdgeDrawsNow() === c0; });
+  await senseCheck("U9226 正向四边映射：子弹来向即闪边", T => T.hurtEdgeOfNow(4) === 'top' && T.hurtEdgeOfNow(0) === 'bottom' && T.hurtEdgeOfNow(2) === 'left' && T.hurtEdgeOfNow(6) === 'right');
+  await senseCheck("U9227 斜向归入主边", T => T.hurtEdgeOfNow(1) === 'left' && T.hurtEdgeOfNow(3) === 'top' && T.hurtEdgeOfNow(5) === 'right' && T.hurtEdgeOfNow(7) === 'bottom');
+  await senseCheck("U9228 无效方向不标边", T => [NaN, -1, 8, '4', null, 0.5, Infinity].every(v => T.hurtEdgeOfNow(v) === ''));
+  await senseCheck("U9229 受击闪红时才画弧", (T,$) => { T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); const c0 = T.hurtEdgeDrawsNow(); T.hurtEdgeTestNow(4, 0); T.renderOnce(); const noFlash = T.hurtEdgeDrawsNow() === c0; T.hurtEdgeTestNow(4, 1); T.renderOnce(); const drew = T.hurtEdgeDrawsNow() === c0 + 1; T.quit(); return (noFlash && drew) || JSON.stringify({ noFlash, drew }); });
+  await senseCheck("U9230 新一局不带上一局的受击方向", T => { T.startGame(); T.hurtEdgeTestNow(2, 0.5); T.quit(); T.startGame(); const ok = T.hurtEdgeNow() === ''; T.quit(); return ok; });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
