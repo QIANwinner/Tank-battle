@@ -25904,6 +25904,14 @@ async function main() {
   await senseCheck("U9229 受击闪红时才画弧", (T,$) => { T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); const c0 = T.hurtEdgeDrawsNow(); T.hurtEdgeTestNow(4, 0); T.renderOnce(); const noFlash = T.hurtEdgeDrawsNow() === c0; T.hurtEdgeTestNow(4, 1); T.renderOnce(); const drew = T.hurtEdgeDrawsNow() === c0 + 1; T.quit(); return (noFlash && drew) || JSON.stringify({ noFlash, drew }); });
   await senseCheck("U9230 新一局不带上一局的受击方向", T => { T.startGame(); T.hurtEdgeTestNow(2, 0.5); T.quit(); T.startGame(); const ok = T.hurtEdgeNow() === ''; T.quit(); return ok; });
 
+  // U9231–U9236: 本关星级目标
+  await senseCheck("U9231 星级目标元素就位且随关卡文案联动", (T,$) => typeof T.starGoalTextNow === 'function' && !!$('lvStarGoal') && typeof T.lvStarGoalDomNow() === 'object');
+  await senseCheck("U9232 第 1 关写出三项条件与 87 秒线", T => T.starGoalTextNow(1) === '⭐ 无伤通关 · ⭐ 终局≥2命 · ⭐ 87秒内');
+  await senseCheck("U9233 时限随关卡放宽：第 10 关 195 秒", T => T.starGoalTextNow(10).includes('195秒内') && T.starGoalTextNow(99).includes('1263秒内'));
+  await senseCheck("U9234 无效关卡号不出文案", T => [0, -1, 'x', NaN, null, undefined, 1000, Infinity].every(v => T.starGoalTextNow(v) === ''));
+  await senseCheck("U9235 真实开局亮出本关目标", (T,$) => { T.startGame(); const d = T.lvStarGoalDomNow(); const ok = d && d.hidden === false && d.text.includes('87秒内'); T.quit(); return ok || JSON.stringify(d); });
+  await senseCheck("U9236 过关后目标文案刷新到下一关", (T,$) => { T.startGame(); T.advanceLevelNow(); const d = T.lvStarGoalDomNow(); const ok = d && d.text.includes('99秒内'); T.quit(); return ok || JSON.stringify(d); });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
