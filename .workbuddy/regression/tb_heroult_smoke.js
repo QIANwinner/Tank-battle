@@ -25888,6 +25888,14 @@ async function main() {
       return (s1 > 0 && s2 === s1) || JSON.stringify({ s1, s2 });
     });
 
+  // U9219–U9224: 开火装填弧
+  await senseCheck("U9219 装填弧画在战场画布上，菜单中没有", (T,$) => { const c0 = T.fireCdDrawsNow(); T.renderOnce(); return typeof T.fireCdPctNow === 'function' && !!$('game').getContext && T.fireCdDrawsNow() === c0; });
+  await senseCheck("U9220 冷却过半走半圈，就绪不出弧", T => Math.abs(T.fireCdPctNow(7, 14) - 0.5) < 1e-9 && T.fireCdPctNow(0, 14) === -1 && T.fireCdPctNow(-3, 14) === -1);
+  await senseCheck("U9221 满冷却走满圈，超出钳到满", T => T.fireCdPctNow(14, 14) === 1 && T.fireCdPctNow(99, 14) === 1);
+  await senseCheck("U9222 无效冷却或上限不出弧", T => [NaN, '7', null, undefined, Infinity].every(v => T.fireCdPctNow(v, 14) === -1) && T.fireCdPctNow(5, 0) === -1 && T.fireCdPctNow(5, -2) === -1 && T.fireCdPctNow(5, NaN) === -1);
+  await senseCheck("U9223 真实开火写入冷却上限并画出弧", (T,$) => { T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); const c0 = T.fireCdDrawsNow(); T.fireOnce(); const cd = T.fireRhythmCdNow(); T.renderOnce(); const drew = T.fireCdDrawsNow() === c0 + 1; T.quit(); return (cd > 0 && drew) || JSON.stringify({ cd, drew }); });
+  await senseCheck("U9224 冷却走完弧自动收起", async T => { const raf = () => new Promise(requestAnimationFrame); T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.fireOnce(); const end = performance.now() + 2500; while (T.fireRhythmCdNow() > 0 && performance.now() < end) await raf(); const c0 = T.fireCdDrawsNow(); T.renderOnce(); const ok = T.fireRhythmCdNow() <= 0 && T.fireCdDrawsNow() === c0; T.quit(); return ok || JSON.stringify({ cd: T.fireRhythmCdNow(), drew: T.fireCdDrawsNow() - c0 }); });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
