@@ -25936,6 +25936,14 @@ async function main() {
   await senseCheck("U9253 大额差距按存档同款千分位格式化", T => T.bestGapTextNow(81000, 100000) === '距最高分还差 19,000 分' && T.bestGapTextNow(9000, 10000) === '距最高分还差 1000 分');
   await senseCheck("U9254 真实对局：爬到八成预告一次，不再重复", async (T,$) => { const raf = () => new Promise(requestAnimationFrame); T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.setBestAtStartNow(100); T.addScore(85); const end = performance.now() + 1500; while ($('fieldNote').textContent !== '距最高分还差 15 分' && performance.now() < end) await raf(); const noted = $('fieldNote').textContent === '距最高分还差 15 分' && T.recordNearNow() === true; T.addScore(1); await new Promise(r => setTimeout(r, 100)); const once = T.recordNearNow() === true; T.quit(); return (noted && once) || JSON.stringify({ noted, once, note: $('fieldNote').textContent }); });
 
+  // U9255–U9260: 每日词条开局提示
+  await senseCheck("U9255 词条文案函数与提示条就位", (T,$) => typeof T.dailyModLineNow === 'function' && typeof T.dailyModNamesNow === 'function' && !!$('fieldNote'));
+  await senseCheck("U9256 两条三条都如实列出", T => T.dailyModLineNow(['弹雨', '暴走']) === '今日词条 · 弹雨 · 暴走' && T.dailyModLineNow(['a', 'b', 'c']) === '今日词条 · a · b · c');
+  await senseCheck("U9257 空列表不出文案", T => T.dailyModLineNow([]) === '' && T.dailyModLineNow(['  ', '']) === '');
+  await senseCheck("U9258 非列表输入不出文案", T => ['x', 7, null, undefined, NaN, {}].every(v => T.dailyModLineNow(v) === ''));
+  await senseCheck("U9259 混入无效项只留有效名", T => T.dailyModLineNow(['', null, ' 急速 ', 3]) === '今日词条 · 急速');
+  await senseCheck("U9260 真实每日局：开局亮出词条提示，普通局没有", async (T,$) => { const raf = () => new Promise(requestAnimationFrame); T.startMode('daily'); T.skipIntro(); const end = performance.now() + 1500; while (!$('fieldNote').textContent.includes('今日词条') && performance.now() < end) await raf(); const names = T.dailyModNamesNow(); const shown = $('fieldNote').textContent.includes('今日词条') && names.length >= 2 && names.length <= 3; T.quit(); T.startGame(); await raf(); const clean = T.dailyModNamesNow().length === 0 && ($('fieldNote').hidden || !$('fieldNote').textContent.includes('今日词条')); T.quit(); return (shown && clean) || JSON.stringify({ shown, clean, names, note: $('fieldNote').textContent }); });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
