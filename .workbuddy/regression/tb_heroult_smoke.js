@@ -25791,6 +25791,26 @@ async function main() {
       return (on && off) || JSON.stringify({ on, off, draws: T.lastLifeDrawsNow() });
     });
 
+  // U9207–U9212: 限时冲刺告警
+  await senseCheck("U9207 大倒数画在战场画布上，菜单中没有", (T,$) => { const c0 = T.timeBigCountNow(); T.renderOnce(); return typeof T.timeWarnNoteNow === 'function' && typeof T.timeBigNumNow === 'function' && !!$('game').getContext && T.timeBigCountNow() === c0; });
+  await senseCheck("U9208 限时局从 120 秒起，非限时不报数", T => { T.startMode('timed'); const s = T.timedState(); const ok = s.timedMode === true && s.timeLeft === 120 && T.timeBigNumNow(s.timeLeft, true) === 0; T.quit(); return ok || JSON.stringify(s); });
+  await senseCheck("U9209 跨过 30 秒与 10 秒各报一次", T => T.timeWarnNoteNow(29.9, 30.1) === '⏱ 剩余 30 秒' && T.timeWarnNoteNow(9.9, 10.1) === '⏱ 最后 10 秒' && T.timeWarnNoteNow(20, 21) === '');
+  await senseCheck("U9210 最后 5 秒出大数字，3 秒内变红", T => T.timeBigNumNow(4.2, true) === 5 && T.timeBigNumNow(3, true) === 3 && T.timeBigNumNow(5.1, true) === 0 && T.timeBigNumNow(0, true) === 0);
+  await senseCheck("U9211 已在阈内不重复报；无效时间不报", T => T.timeWarnNoteNow(29, 29.5) === '' && T.timeWarnNoteNow(30, 30) === '' && [NaN, 'x', null].every(v => T.timeWarnNoteNow(v, 31) === '' && T.timeWarnNoteNow(29, v) === '') && T.timeBigNumNow(3, false) === 0 && [NaN, '3', null].every(v => T.timeBigNumNow(v, true) === 0));
+  await senseCheck("U9212 真实限时：跨过 30 秒弹提示，剩 4 秒亮大倒数", async (T,$) => {
+      const raf = () => new Promise(requestAnimationFrame);
+      T.startMode('timed'); T.skipIntro(); T.invul(99999); T.stopSpawn();
+      T.setTimeLeftNow(30.5);
+      const end = performance.now() + 1500;
+      while ($('fieldNote').textContent !== '⏱ 剩余 30 秒' && performance.now() < end) await raf();
+      const noted = $('fieldNote').textContent === '⏱ 剩余 30 秒';
+      T.setTimeLeftNow(4);
+      const c0 = T.timeBigCountNow(); T.renderOnce();
+      const big = T.timeBigCountNow() === c0 + 1;
+      T.quit();
+      return (noted && big) || JSON.stringify({ noted, big, note: $('fieldNote').textContent });
+    });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
