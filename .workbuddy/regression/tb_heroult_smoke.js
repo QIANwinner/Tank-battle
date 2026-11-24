@@ -27761,6 +27761,30 @@ async function main() {
     return (cd3 > cd1 && cd1 > 0) || JSON.stringify({ cd1, cd3 });
   });
 
+  // U9473–U9475: 精英击破播报
+  await senseCheck("U9473 击毁精英弹专属播报", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(312, 150, 'normal'); await Z(60); T.kill(); await Z(80);   // 先消耗「初战告捷」成就 toast
+    T.spawnFoeNow(312, 150, 'elite'); await Z(60);
+    T.kill(); await Z(60);
+    const hit = T.floatTextsNow().some(s => /精英击破/.test(s));
+    T.quit();
+    return (hit === true) || JSON.stringify({ texts: T.floatTextsNow().slice(-4) });
+  });
+  await senseCheck("U9474 击毁普通敌不弹精英播报", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(312, 150, 'normal'); await Z(60);
+    T.kill(); await Z(60);
+    const hit = T.floatTextsNow().some(s => /精英击破/.test(s));
+    T.quit();
+    return (hit === false) || JSON.stringify({ texts: T.floatTextsNow().slice(-4) });
+  });
+  await senseCheck("U9475 精英型在类型表中存在", async (T,$) => {
+    return (T.enemyGoldNow({ isBoss: false, type: 'elite' }) > 0) || 'elite missing';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
