@@ -28974,6 +28974,37 @@ async function main() {
     return has || JSON.stringify(T.floatTextsNow());
   });
 
+  // U9626–U9628: 百发百中
+  await senseCheck("U9626 高命中得精准徽记", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.lvAccSetNow(10, 10);
+    T.showLvResultNow();
+    const t = T.lvPerfTextNow();
+    const has = t.indexOf('🎯') >= 0 || t.indexOf('百发百中') >= 0;
+    T.quit();
+    return has || JSON.stringify({ t });
+  });
+  await senseCheck("U9627 低命中无徽记", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.lvAccSetNow(10, 5);
+    T.showLvResultNow();
+    const t = T.lvPerfTextNow();
+    const has = t.indexOf('百发百中') >= 0;
+    T.quit();
+    return !has || JSON.stringify({ t });
+  });
+  await senseCheck("U9628 真实命中计入统计", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const pp = T.r18posNow();
+    T.spawnFoeNow(pp.px - 20, pp.py - 96, 'normal');
+    T.fireOnce();
+    await Z(800);
+    const a = T.lvAccNow();
+    T.quit();
+    return (a.s >= 1 && a.h >= 1) || JSON.stringify(a);
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
