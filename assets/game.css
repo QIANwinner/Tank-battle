@@ -8167,3 +8167,67 @@ html.compact-hud #hud .m-hide { display:none !important; }
 
 .shopItem .siEff { display: block; font-size: 10px; line-height: 1.4; color: #7fd8ff; letter-spacing: .5px; min-height: 14px; }
 
+/* ---------- v1.2.3 每日任务面板 ---------- */
+#btnMissions { position: relative; }
+#btnMissions .msnDot {
+  position: absolute; top: -4px; right: -4px; width: 12px; height: 12px;
+  border-radius: 50%; background: #ff4757; border: 2px solid #0a0f1e;
+  display: none; box-shadow: 0 0 8px rgba(255, 71, 87, .8);
+}
+#btnMissions .msnDot.show { display: block; }
+#missionBox {
+  position: fixed; inset: 0; z-index: 46;
+  display: none; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: rgba(2, 4, 12, 0.92);
+  padding: 16px;
+}
+#missionBox.show { display: flex; }
+#missionBox .msnHead {
+  width: min(92vw, 420px);
+  display: flex; align-items: center; gap: 10px;
+  padding: 13px 16px;
+  background: linear-gradient(180deg, rgba(0, 45, 60, 0.5), rgba(10, 20, 50, 0.6));
+  border: 1px solid rgba(0, 240, 255, 0.45); border-bottom: none;
+  border-radius: 14px 14px 0 0;
+}
+#missionBox .msnTitle { flex: 1; color: #00f0ff; font-size: 15px; font-weight: 800; letter-spacing: 2px; }
+#missionBox .msnSub { color: #9fdce8; font-size: 11px; font-weight: 700; letter-spacing: 1px; }
+#missionBox .msnClose {
+  width: 26px; height: 26px; border-radius: 8px; cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(0, 0, 0, 0.3);
+  color: #bfe4ff; font-size: 13px; line-height: 1;
+  -webkit-appearance: none; appearance: none;
+}
+#missionBox .msnBody {
+  width: min(92vw, 420px);
+  display: flex; flex-direction: column; gap: 10px;
+  padding: 14px 16px 18px;
+  background: rgba(4, 8, 18, 0.85);
+  border: 1px solid rgba(0, 240, 255, 0.35); border-radius: 0 0 14px 14px;
+}
+#missionBox .msnCard {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+#missionBox .msnCard.done { border-color: rgba(0, 240, 255, 0.55); background: rgba(0, 240, 255, 0.07); }
+#missionBox .msnCard.claimed { opacity: 0.62; }
+#missionBox .msnIcon { font-size: 22px; line-height: 1; }
+#missionBox .msnInfo { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+#missionBox .msnName { color: #dff4ff; font-size: 13px; font-weight: 800; }
+#missionBox .msnBarWrap { height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.1); overflow: hidden; }
+#missionBox .msnBarFill { height: 100%; background: linear-gradient(90deg, #00c8e0, #00f0ff); transition: width 0.3s; }
+#missionBox .msnCard.done .msnBarFill { background: linear-gradient(90deg, #ffd250, #ffe066); }
+#missionBox .msnProg { color: #8ea0b8; font-size: 10px; font-weight: 700; font-variant-numeric: tabular-nums; }
+#missionBox .msnClaim {
+  padding: 8px 12px; border-radius: 10px; cursor: pointer; white-space: nowrap;
+  border: 1px solid rgba(255, 230, 0, 0.6);
+  background: linear-gradient(180deg, #ffd250, #f5a623);
+  color: #2a1c00; font-size: 12px; font-weight: 900;
+  -webkit-appearance: none; appearance: none;
+}
+#missionBox .msnClaim:disabled { opacity: 0.4; cursor: default; filter: grayscale(0.6); background: rgba(255, 255, 255, 0.08); color: #9fb2c8; border-color: rgba(255, 255, 255, 0.2); }
+#missionBox .msnHint { text-align: center; color: #8ea0b8; font-size: 11px; letter-spacing: 0.5px; }
+

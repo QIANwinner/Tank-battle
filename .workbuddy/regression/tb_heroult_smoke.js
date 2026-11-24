@@ -26100,6 +26100,63 @@ async function main() {
     return fresh || JSON.stringify({ b });
   });
 
+
+  // U9285–U9290: 每日任务面板+红点徽标
+  await senseCheck("U9285 菜单按钮与面板存在,开关联动", (T,$) => {
+    const btn = !!$('btnMissions') && $('btnMissions').textContent.includes('每日任务');
+    const opened = T.missionOpenNow() === true && $('missionBox').classList.contains('show');
+    const closed = T.missionCloseNow() === true && !$('missionBox').classList.contains('show');
+    return (btn && opened && closed) || JSON.stringify({ btn, opened, closed });
+  });
+  await senseCheck("U9286 面板渲染3张卡+副标题+进度格式", (T,$) => {
+    T.setDailySeed(20301230); T.missionResetNow();
+    T.missionOpenNow();
+    const d = T.msnDomNow();
+    const cards = T.msnCardInfoNow();
+    const ok = d.cards === 3 && d.sub.includes('每日') && cards.every(c => c.name.length > 0 && /^\d+\/\d+ · 奖励 \d+/.test(c.prog) && /^\d+%$/.test(c.w));
+    T.missionCloseNow(); T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ d, cards });
+  });
+  await senseCheck("U9287 完成任务卡高亮+领取按钮可点", (T,$) => {
+    T.setDailySeed(20301231); const st = T.missionResetNow();
+    T.missionBumpNow(st.items[0].type, st.items[0].target, false);
+    T.missionOpenNow();
+    const d = T.msnDomNow(); const cards = T.msnCardInfoNow();
+    const ok = d.claims === 1 && cards[0].done && !cards[0].claimed;
+    T.missionCloseNow(); T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ d, cards });
+  });
+  await senseCheck("U9288 DOM点击领取发金币+卡变已领取", (T,$) => {
+    T.setDailySeed(20310101); const st = T.missionResetNow();
+    T.missionBumpNow(st.items[0].type, st.items[0].target, false);
+    T.missionOpenNow();
+    const c0 = T.coinsNow();
+    const clicked = T.msnClaimClickNow(0);
+    const paid = T.coinsNow() === c0 + st.items[0].reward;
+    const cards = T.msnCardInfoNow();
+    const ok = clicked && paid && cards[0].claimed;
+    T.missionCloseNow(); T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ clicked, paid, card: cards[0] });
+  });
+  await senseCheck("U9289 红点:可领出现/领完消失", (T,$) => {
+    T.setDailySeed(20310102); const st = T.missionResetNow();
+    const off0 = T.msnDotNow() === false;
+    T.missionBumpNow(st.items[0].type, st.items[0].target, false);
+    const on = T.msnDotNow() === true;
+    T.missionClaimNow(0);
+    const off1 = T.msnDotNow() === false;
+    T.setDailySeed(0); T.missionResetNow();
+    return (off0 && on && off1) || JSON.stringify({ off0, on, off1 });
+  });
+  await senseCheck("U9290 全部完成提示明天再来", (T,$) => {
+    T.setDailySeed(20310103); const st = T.missionResetNow();
+    st.items.forEach(m => T.missionBumpNow(m.type, m.target, false));
+    T.missionOpenNow();
+    const hint = T.msnDomNow().hint;
+    T.missionCloseNow(); T.setDailySeed(0); T.missionResetNow();
+    return (hint.includes('全部完成') && hint.includes('明天')) || JSON.stringify({ hint });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
