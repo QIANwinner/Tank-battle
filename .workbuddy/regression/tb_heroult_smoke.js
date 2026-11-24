@@ -28360,6 +28360,22 @@ async function main() {
     return same || 'still spawned';
   });
 
+  // U9551–U9553: 明日词条预告
+  await senseCheck("U9551 词条函数确定性返回2-3条", async (T,$) => {
+    const a = T.dailyModsForNow(20260216), b = T.dailyModsForNow(20260216);
+    return (a.length >= 2 && a.length <= 3 && a.join('|') === b.join('|')) || JSON.stringify(a);
+  });
+  await senseCheck("U9552 不同种子词条不同", async (T,$) => {
+    const a = T.dailyModsForNow(20260216), b = T.dailyModsForNow(20260217), c = T.dailyModsForNow(20260218);
+    const set = new Set([a.join('|'), b.join('|'), c.join('|')]);
+    return set.size >= 2 || 'all same';
+  });
+  await senseCheck("U9553 预告区渲染明日词条", async (T,$) => {
+    const t = T.tmrModsDomNow();
+    const exp = '🔮 明日词条 · ' + T.tmrModsNow().split('/').join(' / ');
+    return (!!t && t.indexOf('明日词条') >= 0) || ('t:' + t + ' exp:' + exp);
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
