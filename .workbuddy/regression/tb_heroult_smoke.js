@@ -27633,6 +27633,25 @@ async function main() {
     return (w === true) || JSON.stringify({ w });
   });
 
+  // U9458–U9460: 宠物币兑金币
+  await senseCheck("U9458 兑换 1🐾 得 ≥120🪙", async (T,$) => {
+    T.setPetCoins(3);
+    const p0 = T.petCoins(), c0 = T.coinsNow();
+    const got = T.petToCoinNow(1);
+    const ok = (got >= 120 && T.petCoins() === p0 - 1 && T.coinsNow() - c0 === got);
+    T.setPetCoins(0);
+    return ok || JSON.stringify({ got, pd: T.petCoins() - p0, cd: T.coinsNow() - c0 });
+  });
+  await senseCheck("U9459 宠物币不足兑换返回 0", async (T,$) => {
+    T.setPetCoins(0);
+    const got = T.petToCoinNow(1);
+    return (got === 0 && T.petCoins() === 0) || JSON.stringify({ got });
+  });
+  await senseCheck("U9460 商店内兑换按钮存在", async (T,$) => {
+    const btn = document.getElementById('xchgBtn');
+    return (!!btn && /120/.test(btn.textContent)) || 'no xchgBtn';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
