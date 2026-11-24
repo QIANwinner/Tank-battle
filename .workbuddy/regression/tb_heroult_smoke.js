@@ -27836,6 +27836,32 @@ async function main() {
     return (perf.gold === 45 && /速通/.test(perf.lbl || '') && /完美/.test(perf.lbl || '')) || JSON.stringify(perf);
   });
 
+  // U9482–U9484: 险胜徽章
+  await senseCheck("U9482 残血过关徽章 +1", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setTookHitNow(true); T.setLivesNow(1);
+    const c0 = T.clutchNow();
+    T.showLvResultNow();
+    const c1 = T.clutchNow();
+    T.closeUpgrade(); T.quit();
+    return (c1 === c0 + 1) || JSON.stringify({ c0, c1 });
+  });
+  await senseCheck("U9483 满血过关不加徽章", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setTookHitNow(false); T.setLivesNow(3);
+    const c0 = T.clutchNow();
+    T.showLvResultNow();
+    const c1 = T.clutchNow();
+    T.closeUpgrade(); T.quit();
+    return (c1 === c0) || JSON.stringify({ c0, c1 });
+  });
+  await senseCheck("U9484 徽章档位持久化可读写", async (T,$) => {
+    T.setClutchNow(7);
+    const v = T.clutchNow();
+    T.setClutchNow(0);
+    return (v === 7) || JSON.stringify({ v });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
