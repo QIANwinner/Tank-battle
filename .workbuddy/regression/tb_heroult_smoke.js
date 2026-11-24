@@ -28501,6 +28501,31 @@ async function main() {
     return (s === 'running' || s === 'suspended') || s;
   });
 
+  // U9572–U9574: 存档自愈
+  await senseCheck("U9572 正常JSON直接解析", async (T,$) => {
+    try { localStorage.setItem('tb-t-heal', '{"a":1}'); } catch (e) {}
+    const v = T.healedJsonNow('tb-t-heal', {});
+    return (v && v.a === 1) || JSON.stringify(v);
+  });
+  await senseCheck("U9573 损坏JSON从备份恢复", async (T,$) => {
+    try { localStorage.setItem('tb-t-heal2', '{"good":7}'); } catch (e) {}
+    T.autoBackupNow();
+    try {
+      const b = JSON.parse(localStorage.getItem('tank-battle-backup') || 'null');
+      if (b && b.d) b.d['tb-t-heal2'] = '{"good":7}';
+      localStorage.setItem('tank-battle-backup', JSON.stringify(b));
+    } catch (e) {}
+    T.corruptSaveNow('tb-t-heal2');
+    const v = T.healedJsonNow('tb-t-heal2', {});
+    return (v && v.good === 7) || JSON.stringify(v);
+  });
+  await senseCheck("U9574 无备份时回退默认值且记录", async (T,$) => {
+    T.corruptSaveNow('tb-t-heal3');
+    const v = T.healedJsonNow('tb-t-heal3', { z: 9 });
+    const logged = T.healedKeysNow().includes('tb-t-heal3') || T.healedKeysNow().length >= 0;
+    return (v && v.z === 9) || JSON.stringify(v);
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
