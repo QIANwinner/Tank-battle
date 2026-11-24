@@ -28421,6 +28421,34 @@ async function main() {
     return (lv1 === lv0 + 2) || JSON.stringify({ lv0, lv1 });
   });
 
+  // U9560–U9562: 僚机陷墙自救
+  await senseCheck("U9560 僚机陷墙被拉回通行格", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setWingAliveNow(true);
+    const w0 = T.wingPosNow();
+    T.setWingPosNow(0, 0);
+    let moved = false;
+    for (let i = 0; i < 40; i++) { if (T.unstickWingNow()) { moved = true; break; } }
+    const w1 = T.wingPosNow();
+    T.quit();
+    return (moved && (w1.x !== 0 || w1.y !== 0)) || JSON.stringify({ w0, w1, moved });
+  });
+  await senseCheck("U9561 正常僚机不被误移", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setWingAliveNow(true);
+    const w0 = T.wingPosNow();
+    const r = T.unstickWingNow();
+    T.quit();
+    return (r === false && w0 && w0.x > 0) || JSON.stringify({ r, w0 });
+  });
+  await senseCheck("U9562 无僚机时看门狗安全跳过", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setWingAliveNow(false);
+    const r = T.unstickWingNow();
+    T.quit();
+    return r === null || JSON.stringify(r);
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
