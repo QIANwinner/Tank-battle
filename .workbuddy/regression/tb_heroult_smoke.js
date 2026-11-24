@@ -27617,6 +27617,22 @@ async function main() {
     return (p1 - p0 === 0) || JSON.stringify({ d: p1 - p0 });
   });
 
+  // U9455–U9457: 周末双倍击毁金
+  await senseCheck("U9455 覆盖开/关：击毁金 ×1.5 / 还原", async (T,$) => {
+    T.setWeekendNow(false); const g0 = T.enemyGoldNow({ isBoss: false, type: 'normal' });
+    T.setWeekendNow(true);  const g1 = T.enemyGoldNow({ isBoss: false, type: 'normal' });
+    T.setWeekendNow(null);
+    return (g1 >= Math.round(g0 * 1.4) && g1 <= Math.round(g0 * 1.6) && g0 >= 1) || JSON.stringify({ g0, g1 });
+  });
+  await senseCheck("U9456 测试模式默认关闭周末加成", async (T,$) => {
+    T.setWeekendNow(null);
+    return (T.weekendNow() === false) || JSON.stringify({ w: T.weekendNow() });
+  });
+  await senseCheck("U9457 覆盖后周末标志可读", async (T,$) => {
+    T.setWeekendNow(true); const w = T.weekendNow(); T.setWeekendNow(null);
+    return (w === true) || JSON.stringify({ w });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
