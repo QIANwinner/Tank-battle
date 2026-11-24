@@ -26254,6 +26254,35 @@ async function main() {
     return h.borderTopLeftRadius !== '0px' && body.borderBottomLeftRadius !== '0px' || JSON.stringify({ h: h.borderTopLeftRadius, b: body.borderBottomLeftRadius });
   });
 
+
+  // U9303–U9308: 液态玻璃·控件微交互
+  await senseCheck("U9303 菜单按钮弹性缓动", (T,$) => {
+    const tf = getComputedStyle($('btnShop')).transitionTimingFunction;
+    return tf.includes('cubic-bezier') || JSON.stringify({ tf });
+  });
+  await senseCheck("U9304 按钮高光扫过伪元素存在", (T,$) => {
+    const ps = getComputedStyle($('btnShop'), '::after');
+    return ps.content !== 'none' && (ps.backgroundImage || '').includes('linear-gradient') || JSON.stringify({ c: ps.content, bg: (ps.backgroundImage || '').slice(0, 50) });
+  });
+  await senseCheck("U9305 任务卡 transform 过渡", (T,$) => {
+    T.missionOpenNow();
+    const tp = getComputedStyle(document.querySelector('#msnBody .msnCard')).transitionProperty;
+    T.missionCloseNow();
+    return tp.includes('transform') || JSON.stringify({ tp });
+  });
+  await senseCheck("U9306 focus-visible 光圈规则", (T,$) => {
+    const txt = [...document.styleSheets].flatMap(s => { try { return [...s.cssRules]; } catch (e) { return []; } }).map(r => r.cssText).join('\n');
+    return txt.includes(':focus-visible') && txt.includes('rgba(0, 240, 255, 0.35)') || 'missing';
+  });
+  await senseCheck("U9307 active 回弹 scale(.96) 规则", (T,$) => {
+    const txt = [...document.styleSheets].flatMap(s => { try { return [...s.cssRules]; } catch (e) { return []; } }).map(r => r.cssText).join('\n');
+    return txt.includes('scale(0.96)') || 'missing';
+  });
+  await senseCheck("U9308 hover sheen 位移规则", (T,$) => {
+    const txt = [...document.styleSheets].flatMap(s => { try { return [...s.cssRules]; } catch (e) { return []; } }).map(r => r.cssText).join('\n');
+    return txt.includes(':hover::after') && txt.includes('left: 130%') || 'missing';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

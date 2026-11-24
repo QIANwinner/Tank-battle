@@ -8247,3 +8247,39 @@ html.compact-hud #hud .m-hide { display:none !important; }
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 -1px 0 rgba(0, 0, 0, 0.25);
 }
 
+/* ---------- v1.2.6 液态玻璃·控件微交互 ---------- */
+.modeGrid button, .toolGrid button, .auxRow button, .pauseRow button,
+.signinBtn, .msnClaim, .carReport, .edBtn, .lvNext, .adClaim, .miloBtn,
+#saveBox .saveRow button, .msnTab {
+  position: relative; overflow: hidden;
+  transition: transform .18s cubic-bezier(.34, 1.56, .64, 1), box-shadow .22s ease, filter .18s ease, background .2s ease, border-color .2s ease;
+}
+.modeGrid button:hover, .toolGrid button:hover, .auxRow button:hover, .pauseRow button:hover,
+.signinBtn:hover, .msnClaim:hover, .carReport:hover, .edBtn:hover, .lvNext:hover, .adClaim:hover, .miloBtn:hover {
+  transform: translateY(-2px); filter: brightness(1.12);
+}
+.modeGrid button:active, .toolGrid button:active, .auxRow button:active, .pauseRow button:active,
+.signinBtn:active, .msnClaim:active, .carReport:active, .edBtn:active, .lvNext:active, .adClaim:active, .miloBtn:active {
+  transform: translateY(0) scale(0.96); transition-duration: .06s;
+}
+.modeGrid button:focus-visible, .toolGrid button:focus-visible, .auxRow button:focus-visible, .pauseRow button:focus-visible,
+.signinBtn:focus-visible, .msnClaim:focus-visible, .carReport:focus-visible, .edBtn:focus-visible, .lvNext:focus-visible, .adClaim:focus-visible, .miloBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.35), 0 0 20px rgba(0, 240, 255, 0.3);
+}
+.modeGrid button::after, .toolGrid button::after, .signinBtn::after, .msnClaim::after, .adClaim::after, .lvNext::after {
+  content: ''; position: absolute; top: 0; left: -80%;
+  width: 55%; height: 100%;
+  background: linear-gradient(105deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: skewX(-18deg); transition: left .5s ease;
+  pointer-events: none;
+}
+.modeGrid button:hover::after, .toolGrid button:hover::after, .signinBtn:hover::after, .msnClaim:hover::after, .adClaim:hover::after, .lvNext:hover::after { left: 130%; }
+.shopItem, .msnCard, .achItem, .lvCard, #upgradeBox .upCard, .edTile, .sDay {
+  transition: transform .18s cubic-bezier(.34, 1.56, .64, 1), box-shadow .22s ease, border-color .2s ease;
+}
+.shopItem:hover, .msnCard:hover, .achItem:hover, .lvCard:hover, #upgradeBox .upCard:hover, .edTile:hover, .sDay:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(120, 200, 255, 0.25);
+}
+
