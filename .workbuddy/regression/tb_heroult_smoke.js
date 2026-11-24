@@ -25235,7 +25235,8 @@ async function main() {
     const box = document.querySelector('.hudReadouts'), pill = $('smCompactWrap');
     const end = performance.now() + 2000;
     while (!box.classList.contains('offscreen') && performance.now() < end) await new Promise(requestAnimationFrame);
-    return box.getBoundingClientRect().left >= innerWidth && box.classList.contains('offscreen') && box.contains(pill) &&
+    // v1.1.223 起读数默认折叠成 display:none，几何上不再伸出右缘；契约保留：留在 DOM + offscreen 跳过渲染
+    return box.classList.contains('offscreen') && box.contains(pill) &&
       !pill.checkVisibility() && $('score').checkVisibility();
   });
   await senseCheck("U9052 被跳过的读数仍随刷新更新数值", (T,$) => {
@@ -25251,9 +25252,9 @@ async function main() {
       return box.classList.contains('offscreen') === skipped;
     };
     try {
-      box.style.transform = 'translateX(' + (-box.getBoundingClientRect().left) + 'px)';
+      T.readoutOpenNow(true);   // v1.1.223：展开读数区进入视口
       if (!(await settle(false) && pill.checkVisibility())) return false;
-    } finally { box.style.transform = ''; }
+    } finally { T.readoutOpenNow(false); }   // 收起即移出视口
     return await settle(true) && !pill.checkVisibility();
   });
   await senseCheck("U9054 同款坦克复用一张贴图且照常出画", (T,$) => {
@@ -25341,7 +25342,7 @@ async function main() {
   await senseCheck("U9073 非数值分数不提示", T => [[NaN, 100], [200, null], ['300', 100], [Infinity, 100], [200, -5]].every(a => T.recordPassTextNow(a[0], a[1]) === ''));
   await senseCheck("U9074 真实得分越过纪录：只提示一次，新一局重新计", (T,$) => {
       T.startGame(); T.skipIntro(); T.stopSpawn(); T.setBestAtStartNow(300);
-      T.setScore(250); T.extraHudRefreshNow();
+      T.setScore(200); T.extraHudRefreshNow();   // —— v1.1.232 起八成即有「还差 N 分」预告，安静区须低于八成 ——
       const quiet = $('fieldNote').hidden && !T.recordNotedNow();
       T.setScore(310); T.extraHudRefreshNow();
       const note = $('fieldNote'), shown = !note.hidden && note.textContent === T.recordPassTextNow(310, 300) && T.recordNotedNow();
@@ -25590,7 +25591,7 @@ async function main() {
       const c = $('game'), k = c.width / 624;
       const red = () => {
         T.renderOnce();
-        const px = c.getContext('2d').getImageData(Math.round(305 * k), Math.round(130 * k), Math.round(12 * k), Math.round(100 * k)).data;
+        const px = c.getContext('2d').getImageData(Math.round(305 * k), Math.round(170 * k), Math.round(12 * k), Math.round(60 * k)).data;
         let n = 0; for (let i = 0; i < px.length; i += 4) if (px[i] > 45 && px[i] > px[i + 1] * 2 && px[i + 2] < 130) n++;
         return n;
       };
@@ -25676,6 +25677,272 @@ async function main() {
       T.quit();
       return (shown && quiet && loud && faded && up && cleared) || JSON.stringify({ shown, quiet, loud, faded, up, cleared });
     });
+
+  // U9165–U9170: 增益到期提示
+  await senseCheck("U9165 增益条与结束回执就位，菜单中没有残留", (T,$) => typeof T.buffUrgencyNow === 'function' && typeof T.buffEndTextNow === 'function' && !!$('game').getContext && Array.isArray(T.floatTextsNow()) && T.floatTextsNow().length === 0);
+  await senseCheck("U9166 新一局没有增益，结束计数为零", T => { T.startGame(); const s = T.buffStateNow(); const ok = s.rapid === 0 && s.double === 0 && s.freeze === 0 && s.magnet === 0 && T.buffEndsNow() === 0; T.quit(); return ok || JSON.stringify(s); });
+  await senseCheck("U9167 2 秒起闪烁、5 秒内算临期、5 秒以上正常", T => T.buffUrgencyNow(8) === 0 && T.buffUrgencyNow(5) === 1 && T.buffUrgencyNow(4.9) === 1 && T.buffUrgencyNow(2) === 2 && T.buffUrgencyNow(0.5) === 2 && T.buffEndTextNow('rapid') === '快速弹结束' && T.buffEndTextNow('magnet') === '磁暴结束' && T.buffEndTextNow('shield') === '护盾结束');
+  await senseCheck("U9168 恰好 5 秒不闪、恰好 2 秒起闪、归零即收", T => T.buffUrgencyNow(5.01) === 0 && T.buffUrgencyNow(2.01) === 1 && T.buffUrgencyNow(0) === 0 && T.buffUrgencyNow(-1) === 0);
+  await senseCheck("U9169 无效秒数不闪，未知道具没有结束文案", T => [NaN, 'x', null, undefined, Infinity].every(v => T.buffUrgencyNow(v) === 0) && ['toString', 'ghost', 7, null].every(k => T.buffEndTextNow(k) === '') && T.buffEndNow('ghost') === false && T.setBuffNow('ghost', 1) === false);
+  await senseCheck("U9170 真实增益到期：飘字报出结束，磁暴计入状态条", async T => {
+      const raf = () => new Promise(requestAnimationFrame);
+      T.startGame(); T.skipIntro(); T.invul(0); T.stopSpawn();
+      const c0 = T.buffEndsNow();
+      T.setBuffNow('rapid', 0.03); T.setBuffNow('magnet', 2);
+      const end = performance.now() + 2000;
+      while (T.buffStateNow().rapid > 0 && performance.now() < end) await raf();
+      const texts = T.floatTextsNow();
+      const ok = T.buffEndsNow() === c0 + 1 && texts.includes('快速弹结束') && T.buffStateNow().rapid <= 0 && T.buffStateNow().magnet > 0;
+      T.quit();
+      return ok || JSON.stringify({ texts, s: T.buffStateNow(), ends: T.buffEndsNow() });
+    });
+
+  // U9171–U9176: 出生保护圈
+  await senseCheck("U9171 保护圈画在战场画布上，菜单中没有圈", (T,$) => { const c0 = T.spawnGuardCountNow(); T.renderOnce(); return typeof T.spawnGuardStateNow === 'function' && !!$('game').getContext && T.spawnGuardCountNow() === c0; });
+  await senseCheck("U9172 新局 2 秒保护：环走到五分之二", T => { const s = T.spawnGuardStateNow(120); return s.on && s.secs === 2 && Math.abs(s.frac - 0.4) < 1e-9; });
+  await senseCheck("U9173 满 5 秒环转满，更长的护盾也只画满圈但秒数照写", T => { const a = T.spawnGuardStateNow(300), b = T.spawnGuardStateNow(420); return a.frac === 1 && a.secs === 5 && b.frac === 1 && b.secs === 7; });
+  await senseCheck("U9174 无敌归零即收圈", T => { const s = T.spawnGuardStateNow(0); return !s.on && s.secs === 0 && s.frac === 0 && !T.spawnGuardStateNow(-30).on; });
+  await senseCheck("U9175 无效帧数不出圈", T => [NaN, '120', null, undefined, Infinity, -0.5].every(v => { const s = T.spawnGuardStateNow(v); return !s.on && s.secs === 0 && s.frac === 0; }));
+  await senseCheck("U9176 真实重生：保护圈亮起，无敌结束后收起", T => {
+      T.startGame(); T.skipIntro(); T.stopSpawn(); T.invul(180);
+      const c0 = T.spawnGuardCountNow(); T.renderOnce();
+      const on = T.spawnGuardCountNow() === c0 + 1 && T.playerInvNow() > 0;
+      T.invul(0); T.renderOnce();
+      const off = T.spawnGuardCountNow() === c0 + 1;
+      T.quit();
+      return (on && off) || JSON.stringify({ on, off, inv: T.playerInvNow() });
+    });
+
+  // U9177–U9182: 剩余敌情徽标
+  await senseCheck("U9177 徽标画在战场画布上，菜单中没有敌情", (T,$) => { const c0 = T.foesBadgeCountNow(); T.renderOnce(); return typeof T.foesLeftStateNow === 'function' && !!$('game').getContext && T.foesBadgeCountNow() === c0; });
+  await senseCheck("U9178 待出场加存活一起算", T => { const s = T.foesLeftStateNow(10, 5, 2, 0); return s.show && s.n === 7 && s.txt === '敌 剩 7' && !s.danger; });
+  await senseCheck("U9179 只剩 3 个变红，清完即收", T => T.foesLeftStateNow(10, 9, 2, 0).danger && T.foesLeftStateNow(10, 9, 2, 0).txt === '敌 剩 3' && !T.foesLeftStateNow(10, 10, 0, 0).show && !T.foesLeftStateNow(0, 0, 0, 0).show);
+  await senseCheck("U9180 计数不能为负，对抗模式不显示", T => { const s = T.foesLeftStateNow(5, 6, 0, 0); return s.n === 0 && !s.show && !T.foesLeftStateNow(10, 5, 2, 2).show; });
+  await senseCheck("U9181 无效计数不显示", T => [[NaN, 5, 2, 0], [10, 'x', 2, 0], [10, 5, null, 0], [10, 5, 2, '1']].every(a => !T.foesLeftStateNow(a[0], a[1], a[2], a[3]).show));
+  await senseCheck("U9182 真实对局：徽标亮出且数字与函数一致", T => {
+      T.startGame(); T.skipIntro(); T.stopSpawn(); T.spawnEnemyAt(120, 120, 'normal');
+      const t = T.foesTotalsNow();
+      const c0 = T.foesBadgeCountNow(); T.renderOnce();
+      const s = T.foesLeftStateNow(t.total, t.spawned, t.alive, 0);
+      const ok = s.show && T.foesBadgeCountNow() === c0 + 1;
+      T.quit();
+      return ok || JSON.stringify({ t, s, c0, now: T.foesBadgeCountNow() });
+    });
+
+  // U9183–U9188: 连击窗口弧
+  await senseCheck("U9183 连击弧画在战场画布上，菜单中没有弧", (T,$) => { const c0 = T.comboArcCountNow(); T.renderOnce(); return typeof T.comboArcStateNow === 'function' && !!$('game').getContext && T.comboArcCountNow() === c0; });
+  await senseCheck("U9184 不足 2 连击不出弧", T => !T.comboArcStateNow(0, 3, 5).on && !T.comboArcStateNow(1, 3, 5).on && T.comboArcStateNow(2, 3, 5).on);
+  await senseCheck("U9185 弧长就是窗口剩余比例，快断变红", T => { const s = T.comboArcStateNow(3, 2.5, 5); return s.on && s.pct === 0.5 && !s.warn && T.comboArcStateNow(3, 1.7, 5).warn; });
+  await senseCheck("U9186 窗口越界按满圈画，35% 是变红分界", T => T.comboArcStateNow(2, 8, 5).pct === 1 && !T.comboArcStateNow(2, 8, 5).warn && T.comboArcStateNow(2, 1.76, 5).warn === false && T.comboArcStateNow(2, 1.75, 5).warn === true);
+  await senseCheck("U9187 无效连击、计时或窗口不出弧", T => [[NaN, 3, 5], [2, 0, 5], [2, -1, 5], [2, 3, 0], [2, 3, -5], ['2', 3, 5], [2, '3', 5], [2, 3, 'x']].every(a => !T.comboArcStateNow(a[0], a[1], a[2]).on));
+  await senseCheck("U9188 真实连击：2 连击出弧，窗口归零弧收", T => {
+      T.startGame(); T.skipIntro(); T.stopSpawn();
+      T.setComboNow(3, 2.5, 5);
+      const c0 = T.comboArcCountNow(); T.renderOnce();
+      const on = T.comboArcCountNow() === c0 + 1;
+      T.setComboNow(0, 0, 0); T.renderOnce();
+      const off = T.comboArcCountNow() === c0 + 1;
+      T.quit();
+      return (on && off) || JSON.stringify({ on, off });
+    });
+
+  // U9189–U9194: 播报口径统一
+  await senseCheck("U9189 里程碑条标签已改为连击", (T,$) => { const t = $('mwComboWrap').querySelector('.tgl'); return typeof T.milestoneUnitNow === 'function' && t && t.textContent === '连击'; });
+  await senseCheck("U9190 连击里程碑文案写连击，连杀横幅仍写连杀", T => T.milestoneUnitNow('combo') === '连击' && T.streakLabelNow(3).indexOf('连杀') >= 0 && T.mwComboNow().txt.indexOf('连击') === 0);
+  await senseCheck("U9191 各里程碑单位各司其职", T => T.milestoneUnitNow('kills') === '击杀' && T.milestoneUnitNow('combo') === '连击' && T.milestoneUnitNow('wave') === '波次' && T.milestoneUnitNow('score') === '分数');
+  await senseCheck("U9192 未知单位不编造", T => ['toString', 'ghost', 7, null, undefined, ''].every(k => T.milestoneUnitNow(k) === ''));
+  await senseCheck("U9193 将断提示也归到连击", T => T.comboBreakAlertTextNow(3, 1.5).indexOf('连击') >= 0 && T.comboBreakAlertTextNow(3, 3) === '');
+  await senseCheck("U9194 真实 3 连击：里程碑以「连击」口径播报", async (T,$) => {
+      const raf = () => new Promise(requestAnimationFrame);
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+      T.setComboNow(3, 5, 5);
+      const end = performance.now() + 1500;
+      let s;
+      while (performance.now() < end) { s = T.mwComboNow(); if (s.v === 3 && s.next === 5) break; await raf(); }
+      // 命中那一拍 next 还是 3，要等提交后的下一拍才变 5；mwToast 单行可能被其他里程碑覆盖，以里程碑条 DOM 与函数状态为准
+      for (let i = 0; i < 30 && T.mwComboDomNow() !== '3/5'; i++) await raf();
+      const ok = s.v === 3 && s.next === 5 && s.txt.indexOf('连击') === 0 && s.count >= 1 && T.mwComboDomNow() === '3/5';
+      T.quit();
+      return ok || JSON.stringify({ s, dom: T.mwComboDomNow() });
+    });
+
+  // U9195–U9200: 顶栏读数折叠
+  await senseCheck("U9195 读数按钮就位，默认收成一行", (T,$) => { const ro = document.querySelector('.hudReadouts'); return !!$('readoutToggle') && !!ro && !$('hud').classList.contains('readout-open') && getComputedStyle(ro).display === 'none'; });
+  await senseCheck("U9196 点开即铺开成网格，读数真的能看见", (T,$) => { T.readoutOpenNow(true); const ro = document.querySelector('.hudReadouts'); const ok = $('hud').classList.contains('readout-open') && getComputedStyle(ro).display !== 'none' && getComputedStyle(ro).flexWrap === 'wrap'; T.readoutOpenNow(false); return ok; });
+  await senseCheck("U9197 展开选择写入存档，收起也写入", (T,$) => { T.readoutOpenNow(true); const a = localStorage.getItem('tank-battle-readout-open') === '1'; T.readoutOpenNow(false); const b = localStorage.getItem('tank-battle-readout-open') === '0'; return a && b && !$('hud').classList.contains('readout-open'); });
+  await senseCheck("U9198 非法存档值按收起处理", T => { try { localStorage.setItem('tank-battle-readout-open', 'x'); } catch (e) {} const ok = T.readoutPrefNow() === false; try { localStorage.removeItem('tank-battle-readout-open'); } catch (e) {} return ok; });
+  await senseCheck("U9199 无效输入不抛异常，返回布尔", (T,$) => T.readoutOpenNow('x') === true && T.readoutOpenNow(0) === false && T.readoutOpenNow(null) === false && !$('hud').classList.contains('readout-open') && T.readoutStateNow() === false);
+  await senseCheck("U9200 真实点击：☰ 按钮来回切换并保持一致", (T,$) => { const b = $('readoutToggle'); b.click(); const on = $('hud').classList.contains('readout-open') && b.classList.contains('on') && T.readoutStateNow() === true; b.click(); const off = !$('hud').classList.contains('readout-open') && !b.classList.contains('on') && T.readoutStateNow() === false; return on && off; });
+
+  // U9201–U9206: 濒危脉冲
+  await senseCheck("U9201 红框画在战场画布上，菜单中没有警告", (T,$) => { const c0 = T.lastLifeDrawsNow(); T.renderOnce(); return typeof T.lastLifeStateNow === 'function' && !!$('game').getContext && T.lastLifeDrawsNow() === c0 && $('fieldNote').hidden; });
+  await senseCheck("U9202 多条命或命数不对不警告", T => !T.lastLifeStateNow(3, false, 0).on && !T.lastLifeStateNow(0, false, 0).on && !T.lastLifeStateNow(2, false, 0).on && T.lastLifeStateNow(1, false, 0).on);
+  await senseCheck("U9203 阵亡和对抗模式不触发", T => !T.lastLifeStateNow(1, true, 0).on && !T.lastLifeStateNow(1, false, 2).on && T.lastLifeStateNow(1, false, 0).warn === '⚠ 最后一命 · 守住基地');
+  await senseCheck("U9204 恰好 1 条命才亮", T => T.lastLifeStateNow(1.0, false, 0).on && !T.lastLifeStateNow(1.5, false, 0).on);
+  await senseCheck("U9205 无效命数不警告", T => [NaN, '1', null, undefined, Infinity].every(v => !T.lastLifeStateNow(v, false, 0).on));
+  await senseCheck("U9206 真实掉到最后一命：红框亮起且提示一次，补命后可再提醒", (T,$) => {
+      T.startGame(); T.skipIntro(); T.stopSpawn(); T.setLives(3);
+      const c0 = T.lastLifeDrawsNow();
+      T.setLives(1); T.renderOnce();
+      const on = T.lastLifeDrawsNow() === c0 + 1 && T.lastLifeNotedNow() === true && $('fieldNote').textContent === '⚠ 最后一命 · 守住基地';
+      T.setLives(3); T.renderOnce();
+      const off = !T.lastLifeNotedNow();
+      T.quit();
+      return (on && off) || JSON.stringify({ on, off, draws: T.lastLifeDrawsNow() });
+    });
+
+  // U9207–U9212: 限时冲刺告警
+  await senseCheck("U9207 大倒数画在战场画布上，菜单中没有", (T,$) => { const c0 = T.timeBigCountNow(); T.renderOnce(); return typeof T.timeWarnNoteNow === 'function' && typeof T.timeBigNumNow === 'function' && !!$('game').getContext && T.timeBigCountNow() === c0; });
+  await senseCheck("U9208 限时局从 120 秒起，非限时不报数", T => { T.startMode('timed'); const s = T.timedState(); const ok = s.timedMode === true && s.timeLeft === 120 && T.timeBigNumNow(s.timeLeft, true) === 0; T.quit(); return ok || JSON.stringify(s); });
+  await senseCheck("U9209 跨过 30 秒与 10 秒各报一次", T => T.timeWarnNoteNow(29.9, 30.1) === '⏱ 剩余 30 秒' && T.timeWarnNoteNow(9.9, 10.1) === '⏱ 最后 10 秒' && T.timeWarnNoteNow(20, 21) === '');
+  await senseCheck("U9210 最后 5 秒出大数字，3 秒内变红", T => T.timeBigNumNow(4.2, true) === 5 && T.timeBigNumNow(3, true) === 3 && T.timeBigNumNow(5.1, true) === 0 && T.timeBigNumNow(0, true) === 0);
+  await senseCheck("U9211 已在阈内不重复报；无效时间不报", T => T.timeWarnNoteNow(29, 29.5) === '' && T.timeWarnNoteNow(30, 30) === '' && [NaN, 'x', null].every(v => T.timeWarnNoteNow(v, 31) === '' && T.timeWarnNoteNow(29, v) === '') && T.timeBigNumNow(3, false) === 0 && [NaN, '3', null].every(v => T.timeBigNumNow(v, true) === 0));
+  await senseCheck("U9212 真实限时：跨过 30 秒弹提示，剩 4 秒亮大倒数", async (T,$) => {
+      const raf = () => new Promise(requestAnimationFrame);
+      T.startMode('timed'); T.skipIntro(); T.invul(99999); T.stopSpawn();
+      T.setTimeLeftNow(30.5);
+      const end = performance.now() + 1500;
+      while ($('fieldNote').textContent !== '⏱ 剩余 30 秒' && performance.now() < end) await raf();
+      const noted = $('fieldNote').textContent === '⏱ 剩余 30 秒';
+      T.setTimeLeftNow(4);
+      const c0 = T.timeBigCountNow(); T.renderOnce();
+      const big = T.timeBigCountNow() === c0 + 1;
+      T.quit();
+      return (noted && big) || JSON.stringify({ noted, big, note: $('fieldNote').textContent });
+    });
+
+  // U9213–U9218: 过关心跳防线（v1.1.226）
+  await senseCheck("U9213 全链路：清场→结算→广告→强化→第 2 关敌人刷新", async (T,$) => {
+      const raf = () => new Promise(requestAnimationFrame);
+      T.startGame(); T.skipIntro(); T.invul(99999);
+      T.forceClear();
+      let end = performance.now() + 4000;
+      while (!T.lvResultNow().show && performance.now() < end) await raf();
+      if (!T.lvResultNow().show) return 'no-result';
+      $('btnLvNext').click();
+      await new Promise(r => setTimeout(r, 250));
+      const adBtns = [...document.querySelectorAll('#adBox button')];
+      if (T.adState().pending && adBtns.length) adBtns[0].click();
+      await new Promise(r => setTimeout(r, 250));
+      const cards = [...document.querySelectorAll('#upgradeBox .upCard')].filter(c => c.style.display !== 'none');
+      if (!cards.length || !T.adState().upgradeOpen) return 'no-upgrade';
+      cards[0].click();
+      end = performance.now() + 6000;
+      while (performance.now() < end) { const f = T.foesTotalsNow(); if (T.levelNow() >= 2 && f.alive > 0) break; await raf(); }
+      const f = T.foesTotalsNow(), ok = T.levelNow() === 2 && f.alive > 0 && T.pausedNow() === false;
+      T.quit();
+      return ok || JSON.stringify({ lv: T.levelNow(), f });
+    });
+  await senseCheck("U9214 过关闸门：触发即落锁，下一关开启时复位", async (T,$) => {
+      const raf = () => new Promise(requestAnimationFrame);
+      T.startGame(); T.skipIntro(); T.invul(99999);
+      const before = T.lvClearDoneNow();
+      T.forceClear();
+      const end = performance.now() + 3000;
+      while (!T.lvResultNow().show && performance.now() < end) await raf();
+      const locked = T.lvClearDoneNow() === true;
+      T.advanceLevelNow();
+      const resetEnd = performance.now() + 4000;
+      while (T.lvClearDoneNow() !== false && performance.now() < resetEnd) await raf();
+      const reset = T.lvClearDoneNow() === false;
+      T.quit();
+      return (before === false && locked && reset) || JSON.stringify({ before, locked, reset });
+    });
+  await senseCheck("U9215 强化面板开着时按 P/暂停不生效", (T,$) => {
+      T.startGame(); T.skipIntro(); T.offerUpgradesSafeNow();
+      const open = T.adState().upgradeOpen === true;
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'p' }));
+      const stillFree = T.pausedNow() === false;
+      T.chooseUpgrade('rapid');
+      T.quit();
+      return (open && stillFree) || JSON.stringify({ open, stillFree });
+    });
+  await senseCheck("U9216 强化面板开着时切窗不埋隐形暂停层", (T,$) => {
+      T.startGame(); T.skipIntro(); T.offerUpgradesSafeNow();
+      window.dispatchEvent(new Event('blur'));
+      const ok = T.pausedNow() === false && $('overlay').classList.contains('hide');
+      T.chooseUpgrade('rapid');
+      T.quit();
+      return ok || JSON.stringify({ paused: T.pausedNow(), hidden: $('overlay').classList.contains('hide') });
+    });
+  await senseCheck("U9217 残留的暂停被过关推进清掉", (T,$) => {
+      T.startGame(); T.skipIntro();
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'p' }));
+      const paused = T.pausedNow() === true;
+      T.advanceLevelNow();
+      const cleared = T.pausedNow() === false;
+      T.quit();
+      return (paused && cleared) || JSON.stringify({ paused, cleared });
+    });
+  await senseCheck("U9218 过关奖励只发一次，不随帧刷分", async (T,$) => {
+      const raf = () => new Promise(requestAnimationFrame);
+      T.startGame(); T.skipIntro(); T.invul(99999);
+      T.forceClear();
+      const end = performance.now() + 3000;
+      while (!T.lvResultNow().show && performance.now() < end) await raf();
+      const s1 = T.scoreNow();
+      const hold = performance.now() + 600;
+      while (performance.now() < hold) await raf();
+      const s2 = T.scoreNow();
+      T.quit();
+      return (s1 > 0 && s2 === s1) || JSON.stringify({ s1, s2 });
+    });
+
+  // U9219–U9224: 开火装填弧
+  await senseCheck("U9219 装填弧画在战场画布上，菜单中没有", (T,$) => { const c0 = T.fireCdDrawsNow(); T.renderOnce(); return typeof T.fireCdPctNow === 'function' && !!$('game').getContext && T.fireCdDrawsNow() === c0; });
+  await senseCheck("U9220 冷却过半走半圈，就绪不出弧", T => Math.abs(T.fireCdPctNow(7, 14) - 0.5) < 1e-9 && T.fireCdPctNow(0, 14) === -1 && T.fireCdPctNow(-3, 14) === -1);
+  await senseCheck("U9221 满冷却走满圈，超出钳到满", T => T.fireCdPctNow(14, 14) === 1 && T.fireCdPctNow(99, 14) === 1);
+  await senseCheck("U9222 无效冷却或上限不出弧", T => [NaN, '7', null, undefined, Infinity].every(v => T.fireCdPctNow(v, 14) === -1) && T.fireCdPctNow(5, 0) === -1 && T.fireCdPctNow(5, -2) === -1 && T.fireCdPctNow(5, NaN) === -1);
+  await senseCheck("U9223 真实开火写入冷却上限并画出弧", (T,$) => { T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); const c0 = T.fireCdDrawsNow(); T.fireOnce(); const cd = T.fireRhythmCdNow(); T.renderOnce(); const drew = T.fireCdDrawsNow() === c0 + 1; T.quit(); return (cd > 0 && drew) || JSON.stringify({ cd, drew }); });
+  await senseCheck("U9224 冷却走完弧自动收起", async T => { const raf = () => new Promise(requestAnimationFrame); T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.fireOnce(); const end = performance.now() + 2500; while (T.fireRhythmCdNow() > 0 && performance.now() < end) await raf(); const c0 = T.fireCdDrawsNow(); T.renderOnce(); const ok = T.fireRhythmCdNow() <= 0 && T.fireCdDrawsNow() === c0; T.quit(); return ok || JSON.stringify({ cd: T.fireRhythmCdNow(), drew: T.fireCdDrawsNow() - c0 }); });
+
+  // U9225–U9230: 受击方向红弧
+  await senseCheck("U9225 方向弧画在战场画布上，菜单中没有", (T,$) => { const c0 = T.hurtEdgeDrawsNow(); T.renderOnce(); return typeof T.hurtEdgeOfNow === 'function' && !!$('game').getContext && T.hurtEdgeDrawsNow() === c0; });
+  await senseCheck("U9226 正向四边映射：子弹来向即闪边", T => T.hurtEdgeOfNow(4) === 'top' && T.hurtEdgeOfNow(0) === 'bottom' && T.hurtEdgeOfNow(2) === 'left' && T.hurtEdgeOfNow(6) === 'right');
+  await senseCheck("U9227 斜向归入主边", T => T.hurtEdgeOfNow(1) === 'left' && T.hurtEdgeOfNow(3) === 'top' && T.hurtEdgeOfNow(5) === 'right' && T.hurtEdgeOfNow(7) === 'bottom');
+  await senseCheck("U9228 无效方向不标边", T => [NaN, -1, 8, '4', null, 0.5, Infinity].every(v => T.hurtEdgeOfNow(v) === ''));
+  await senseCheck("U9229 受击闪红时才画弧", (T,$) => { T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); const c0 = T.hurtEdgeDrawsNow(); T.hurtEdgeTestNow(4, 0); T.renderOnce(); const noFlash = T.hurtEdgeDrawsNow() === c0; T.hurtEdgeTestNow(4, 1); T.renderOnce(); const drew = T.hurtEdgeDrawsNow() === c0 + 1; T.quit(); return (noFlash && drew) || JSON.stringify({ noFlash, drew }); });
+  await senseCheck("U9230 新一局不带上一局的受击方向", T => { T.startGame(); T.hurtEdgeTestNow(2, 0.5); T.quit(); T.startGame(); const ok = T.hurtEdgeNow() === ''; T.quit(); return ok; });
+
+  // U9231–U9236: 本关星级目标
+  await senseCheck("U9231 星级目标元素就位且随关卡文案联动", (T,$) => typeof T.starGoalTextNow === 'function' && !!$('lvStarGoal') && typeof T.lvStarGoalDomNow() === 'object');
+  await senseCheck("U9232 第 1 关写出三项条件与 87 秒线", T => T.starGoalTextNow(1) === '⭐ 无伤通关 · ⭐ 终局≥2命 · ⭐ 87秒内');
+  await senseCheck("U9233 时限随关卡放宽：第 10 关 195 秒", T => T.starGoalTextNow(10).includes('195秒内') && T.starGoalTextNow(99).includes('1263秒内'));
+  await senseCheck("U9234 无效关卡号不出文案", T => [0, -1, 'x', NaN, null, undefined, 1000, Infinity].every(v => T.starGoalTextNow(v) === ''));
+  await senseCheck("U9235 真实开局亮出本关目标", (T,$) => { T.startGame(); const d = T.lvStarGoalDomNow(); const ok = d && d.hidden === false && d.text.includes('87秒内'); T.quit(); return ok || JSON.stringify(d); });
+  await senseCheck("U9236 过关后目标文案刷新到下一关", (T,$) => { T.startGame(); T.advanceLevelNow(); const d = T.lvStarGoalDomNow(); const ok = d && d.text.includes('99秒内'); T.quit(); return ok || JSON.stringify(d); });
+
+  // U9237–U9242: 冻结敌人标记
+  await senseCheck("U9237 冻结标记画在战场画布上，菜单中没有", (T,$) => { const c0 = T.frozenMarkDrawsNow(); T.renderOnce(); return typeof T.frozenMarkStateNow === 'function' && !!$('game').getContext && T.frozenMarkDrawsNow() === c0; });
+  await senseCheck("U9238 冻结计时为正才标记", T => T.frozenMarkStateNow(60) === true && T.frozenMarkStateNow(0.5) === true);
+  await senseCheck("U9239 归零与负值不标记", T => T.frozenMarkStateNow(0) === false && T.frozenMarkStateNow(-10) === false);
+  await senseCheck("U9240 无效计时不标记", T => [NaN, '60', null, undefined, Infinity].every(v => T.frozenMarkStateNow(v) === false));
+  await senseCheck("U9241 真实冻结：敌人头顶亮标记，解冻即收", (T,$) => { T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); const e = T.spawnEnemyAt(300, 100, 'normal'); const c0 = T.frozenMarkDrawsNow(); e.freezeT = 120; T.renderOnce(); const on = T.frozenMarkDrawsNow() === c0 + 1; e.freezeT = 0; const c1 = T.frozenMarkDrawsNow(); T.renderOnce(); const off = T.frozenMarkDrawsNow() === c1; T.quit(); return (on && off) || JSON.stringify({ on, off }); });
+  await senseCheck("U9242 阵亡敌人不带标记", (T,$) => { T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); const e = T.spawnEnemyAt(300, 100, 'normal'); e.freezeT = 120; e.dead = true; const c0 = T.frozenMarkDrawsNow(); T.renderOnce(); const ok = T.frozenMarkDrawsNow() === c0; T.quit(); return ok; });
+
+  // U9243–U9248: 多血敌人血条
+  await senseCheck("U9243 敌人血条画在战场画布上，菜单中没有", (T,$) => { const c0 = T.foeHpDrawsNow(); T.renderOnce(); return typeof T.foeHpStateNow === 'function' && !!$('game').getContext && T.foeHpDrawsNow() === c0; });
+  await senseCheck("U9244 三血敌人满血出整条，一炮死的敌不画", T => { const s = T.foeHpStateNow(3, 3); return s && s.pct === 1 && s.low === false && T.foeHpStateNow(1, 1) === null; });
+  await senseCheck("U9245 残血四成以下变红", T => { const s = T.foeHpStateNow(1, 3); return s && s.low === true && Math.abs(s.pct - 1 / 3) < 1e-9 && T.foeHpStateNow(2, 3).low === false; });
+  await senseCheck("U9246 空血按零画，越界钳满", T => { const a = T.foeHpStateNow(0, 3), b = T.foeHpStateNow(9, 3); return a && a.pct === 0 && b && b.pct === 1; });
+  await senseCheck("U9247 无效血量不画条", T => [NaN, '2', null, undefined].every(v => T.foeHpStateNow(v, 3) === null) && T.foeHpStateNow(2, 0) === null && T.foeHpStateNow(-1, 3) === null && T.foeHpStateNow(2, NaN) === null);
+  await senseCheck("U9248 真实精英敌：头顶亮血条，打掉一截看得见", (T,$) => { T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); const e = T.spawnEnemyAt(300, 100, 'elite'); const c0 = T.foeHpDrawsNow(); T.renderOnce(); const drew = T.foeHpDrawsNow() === c0 + 1; const s = T.foeHpStateNow(e.hp - 1, e.maxHp); T.quit(); return (drew && s && s.pct < 1) || JSON.stringify({ drew, s }); });
+
+  // U9249–U9254: 接近最高分预告
+  await senseCheck("U9249 预告函数与提示条钩子就位", (T,$) => typeof T.bestGapTextNow === 'function' && typeof T.recordNearNow === 'function' && !!$('fieldNote'));
+  await senseCheck("U9250 八成起报差距，写出还差几分", T => T.bestGapTextNow(85, 100) === '距最高分还差 15 分' && T.bestGapTextNow(80, 100) === '距最高分还差 20 分');
+  await senseCheck("U9251 不到八成不报，已破纪录不报，无纪录不报", T => T.bestGapTextNow(79.9, 100) === '' && T.bestGapTextNow(100, 100) === '' && T.bestGapTextNow(120, 0) === '');
+  await senseCheck("U9252 无效分数或纪录不报", T => [NaN, 'x', null].every(v => T.bestGapTextNow(v, 100) === '') && T.bestGapTextNow(85, NaN) === '' && T.bestGapTextNow(85, -10) === '');
+  await senseCheck("U9253 大额差距按存档同款千分位格式化", T => T.bestGapTextNow(81000, 100000) === '距最高分还差 19,000 分' && T.bestGapTextNow(9000, 10000) === '距最高分还差 1000 分');
+  await senseCheck("U9254 真实对局：爬到八成预告一次，不再重复", async (T,$) => { const raf = () => new Promise(requestAnimationFrame); T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.setBestAtStartNow(100); T.addScore(85); const end = performance.now() + 1500; while ($('fieldNote').textContent !== '距最高分还差 15 分' && performance.now() < end) await raf(); const noted = $('fieldNote').textContent === '距最高分还差 15 分' && T.recordNearNow() === true; T.addScore(1); await new Promise(r => setTimeout(r, 100)); const once = T.recordNearNow() === true; T.quit(); return (noted && once) || JSON.stringify({ noted, once, note: $('fieldNote').textContent }); });
+
+  // U9255–U9260: 每日词条开局提示
+  await senseCheck("U9255 词条文案函数与提示条就位", (T,$) => typeof T.dailyModLineNow === 'function' && typeof T.dailyModNamesNow === 'function' && !!$('fieldNote'));
+  await senseCheck("U9256 两条三条都如实列出", T => T.dailyModLineNow(['弹雨', '暴走']) === '今日词条 · 弹雨 · 暴走' && T.dailyModLineNow(['a', 'b', 'c']) === '今日词条 · a · b · c');
+  await senseCheck("U9257 空列表不出文案", T => T.dailyModLineNow([]) === '' && T.dailyModLineNow(['  ', '']) === '');
+  await senseCheck("U9258 非列表输入不出文案", T => ['x', 7, null, undefined, NaN, {}].every(v => T.dailyModLineNow(v) === ''));
+  await senseCheck("U9259 混入无效项只留有效名", T => T.dailyModLineNow(['', null, ' 急速 ', 3]) === '今日词条 · 急速');
+  await senseCheck("U9260 真实每日局：开局亮出词条提示，普通局没有", async (T,$) => { const raf = () => new Promise(requestAnimationFrame); T.startMode('daily'); T.skipIntro(); const end = performance.now() + 1500; while (!$('fieldNote').textContent.includes('今日词条') && performance.now() < end) await raf(); const names = T.dailyModNamesNow(); const shown = $('fieldNote').textContent.includes('今日词条') && names.length >= 2 && names.length <= 3; T.quit(); T.startGame(); await raf(); const clean = T.dailyModNamesNow().length === 0 && ($('fieldNote').hidden || !$('fieldNote').textContent.includes('今日词条')); T.quit(); return (shown && clean) || JSON.stringify({ shown, clean, names, note: $('fieldNote').textContent }); });
 
   chrome.kill(); killTree(chrome.pid);
 
