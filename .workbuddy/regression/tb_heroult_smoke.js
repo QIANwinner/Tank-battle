@@ -28064,6 +28064,35 @@ async function main() {
     return ok || 'v:' + T.bonusSpentNow();
   });
 
+  // U9512–U9514: 图鉴击杀分布
+  await senseCheck("U9512 3杀普通+1杀Boss分布条显示75%", async (T,$) => {
+    T.dexResetNow();
+    T.dexAddNow('normal'); T.dexAddNow('normal'); T.dexAddNow('normal'); T.dexAddNow('boss');
+    T.openDexNow();
+    const el = document.querySelector('#dexBody .dexTop');
+    const ok = !!el && el.textContent.indexOf('75%') >= 0;
+    document.getElementById('dexBox').classList.remove('show');
+    T.dexResetNow();
+    return ok || (el ? el.textContent : 'no dexTop');
+  });
+  await senseCheck("U9513 Boss计入分布并显示👑Boss", async (T,$) => {
+    T.dexResetNow();
+    T.dexAddNow('boss');
+    T.openDexNow();
+    const el = document.querySelector('#dexBody .dexTop');
+    const ok = !!el && el.textContent.indexOf('👑Boss') >= 0 && el.textContent.indexOf('100%') >= 0;
+    document.getElementById('dexBox').classList.remove('show');
+    T.dexResetNow();
+    return ok || (el ? el.textContent : 'no dexTop');
+  });
+  await senseCheck("U9514 空图鉴不渲染分布条", async (T,$) => {
+    T.dexResetNow();
+    T.openDexNow();
+    const el = document.querySelector('#dexBody .dexTop');
+    document.getElementById('dexBox').classList.remove('show');
+    return el === null || 'unexpected dexTop';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

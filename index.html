@@ -1868,7 +1868,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.56</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.57</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -26151,6 +26151,8 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const allSeen = dexSeenCount() >= DEX_KEYS_TOTAL;   // —— v1.2.41 ——
     $('dexSub').textContent = '已击毁 ' + total + ' 辆敌军坦克 · 击毁数跨局累计' + (allSeen ? ' · 🏅 已集齐' : '');
     let html = '';
+    const dTop = keys.concat('boss').map(k => [k, dexData.kills[k] || 0]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 3);   // —— v1.2.57 击杀分布 TOP3 ——
+    if (dTop.length && total > 0) html += '<div class="dexTop">📊 ' + dTop.map(x => (x[0] === 'boss' ? '👑Boss' : (ENEMY_TYPES[x[0]] || {}).label || x[0]) + ' ' + Math.round(x[1] / total * 100) + '%').join(' · ') + '</div>';
     const rows = keys.map(k => Object.assign({ key: k }, ENEMY_TYPES[k]));
     rows.push({ key: 'boss', label: 'Boss', speed: 0, hp: '多阶段', score: '1000×关', color: '#ff2d55' });
     for (const r of rows) {
@@ -27123,7 +27125,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.56', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.57', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
