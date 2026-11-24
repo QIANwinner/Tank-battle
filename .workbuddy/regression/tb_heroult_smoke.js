@@ -27810,6 +27810,32 @@ async function main() {
     return (n === 0) || JSON.stringify({ n });
   });
 
+  // U9479–U9481: 速通奖
+  await senseCheck("U9479 20秒速通：+15 且文案含速通", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setTookHitNow(true); T.setLivesNow(3); T.setLevelSecsNow(20);
+    T.showLvResultNow();
+    const perf = T.lvPerfNow();
+    T.closeUpgrade(); T.quit();
+    return (perf.fast === 15 && perf.gold === 15 && /速通/.test(perf.lbl || '')) || JSON.stringify(perf);
+  });
+  await senseCheck("U9480 60秒过关：无速通奖", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setTookHitNow(true); T.setLivesNow(3); T.setLevelSecsNow(60);
+    T.showLvResultNow();
+    const perf = T.lvPerfNow();
+    T.closeUpgrade(); T.quit();
+    return (perf.fast === 0 && perf.gold === 0 && perf.hidden === true) || JSON.stringify(perf);
+  });
+  await senseCheck("U9481 无伤速通叠满：完美+速通=45", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setTookHitNow(false); T.setLivesNow(3); T.setLevelSecsNow(15);
+    T.showLvResultNow();
+    const perf = T.lvPerfNow();
+    T.closeUpgrade(); T.quit();
+    return (perf.gold === 45 && /速通/.test(perf.lbl || '') && /完美/.test(perf.lbl || '')) || JSON.stringify(perf);
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
