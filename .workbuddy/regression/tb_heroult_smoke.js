@@ -27921,6 +27921,27 @@ async function main() {
     return (n === 1) || JSON.stringify({ n });
   });
 
+  // U9494–U9496: 金袋道具
+  await senseCheck("U9494 金袋进入道具池", async (T,$) => {
+    return T.powerupTypesNow().includes('gold') || 'no gold';
+  });
+  await senseCheck("U9495 拾取金袋金币 +25 起", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const c0 = T.coinsNow();
+    T.applyPowerupNow('gold');
+    const d = T.coinsNow() - c0;
+    T.quit();
+    return (d >= 25) || JSON.stringify({ d });
+  });
+  await senseCheck("U9496 金袋计入拾取统计", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const p0 = T.runPickupsNow ? T.runPickupsNow() : 0;
+    T.applyPowerupNow('gold');
+    const p1 = T.runPickupsNow ? T.runPickupsNow() : 1;
+    T.quit();
+    return (p1 === p0 + 1) || JSON.stringify({ p0, p1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
