@@ -64,6 +64,12 @@
 
 ## 🆕 更新日志
 
+### v1.1.235 · 2026-11-24
+**真·本周特惠（修复折扣横幅不生效）**
+- 修复玩家可见缺陷：商店「本周特惠 N 折」横幅是纯装饰，dealPrice 从未被调用，全部购买按原价扣款。现在 7 类商品（强化/基地/皮肤/宠物/英雄/僚机/抽奖）按周种子轮换真实打折（7 折起），横幅显示本周特惠品类；全部购买路径与价格显示走同一 dealApply，显示价=实扣价；顺带给 buyBonus 加异常价格防御。
+- ✅ 回归验证：主回归 169/169；专项 9216/9216（U9267–U9272）（无回归）
+- 📴 Service Worker 缓存版本更新至 **v11235**，游戏内版本 **V1.1.235**
+
 ### v1.1.234 · 2026-11-24
 **输入穿透防线 + 庆典弹层清理**
 - 修两个存量缺陷:① 输入框穿透——在关卡名(#edName)/存档码(#saveCode)里打字时,空格被 preventDefault 打不出来、方向键不能移光标、m/f/e/b 还触发游戏快捷键;新增 isTypingTarget 防线,输入框/下拉/可编辑区打字不再触发游戏按键。② 庆典弹层泄漏——milestoneOpen 只在 closeMilestone 复位,start()/quitToMenu() 均不清理,若庆典期间换局会残留冻结标记与礼花层;两处补上 closeMilestone(),与 v1.1.226 过关防线同口径。新增测试钩子 keysNow/mutedNow/typingTargetNow/milestoneOpenNow/milestoneShowNow。

@@ -1836,7 +1836,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.1.234</div>
+  <div id="mark">DESIGNED BY QIAN · V1.1.235</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -8726,7 +8726,17 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // —— v0.6.50 商店本周特惠提示(周序号%7 确定性折扣,纯展示不改价) ——
   function weekSeed(now) { const d = new Date(Number(now) || Date.now()); const y0 = new Date(d.getFullYear(), 0, 1); const wk = Math.floor((d - y0) / 86400000 / 7); return ((wk % 7) + 7) % 7; }
   function dealPrice(base, off) { return Math.max(1, Math.round((Number(base) || 0) * (100 - (Number(off) || 0) * 5) / 100)); }
-  function dealText(seed) { return '🛍 本周特惠 · 第' + (seed + 1) + '类商品 ' + (100 - seed * 5) + '折'; }
+  // —— v1.1.235 真·本周特惠:折扣按周种子落到 7 类商品,横幅写清品类 ——
+  const DEAL_CATS = ['强化', '基地', '皮肤', '宠物', '英雄', '僚机', '抽奖'];
+  function dealCat(seed) { const s = ((Math.floor(Number(seed)) || 0) % 7 + 7) % 7; return DEAL_CATS[s]; }
+  function dealOff(seed) { const s = ((Math.floor(Number(seed)) || 0) % 7 + 7) % 7; return s * 5; }
+  function dealApply(cat, base, seed) {
+    const b = Math.max(0, Math.floor(Number(base) || 0));
+    if (b <= 0) return 0;   // —— 免费商品不打折 ——
+    const s = seed === undefined ? weekSeed(Date.now()) : ((Math.floor(Number(seed)) || 0) % 7 + 7) % 7;
+    return dealCat(s) === String(cat) ? dealPrice(b, s) : b;
+  }
+  function dealText(seed) { return '🛍 本周特惠 · ' + dealCat(seed) + '类 ' + (100 - dealOff(seed)) + '折'; }
   // —— v0.6.51 羁绊激活条件 tooltip(显示当前激活羁绊的激活条件) ——
   function bondCondText(b) {
     if (!b || !b.hero || !b.pet) return '—';
@@ -24686,7 +24696,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       for (const def of BONUS_DEF) {
         const lv = bonus[def.id] || 0;
         const maxed = lv >= def.max;
-        const price = maxed ? 0 : def.price[lv];
+        const price = maxed ? 0 : dealApply('强化', def.price[lv]);   // —— v1.1.235 显示价=实扣价 ——
         const item = document.createElement('div');
         item.className = 'shopItem';
         item.innerHTML = v5ShopIconHtml(def.icon) +
@@ -24720,8 +24730,8 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
         item.innerHTML = v5SkinPrevHtml() +
           v5SkinNameHtml(sk.name, rarBadge) +
           v5SkinDescHtml(desc) +
-          '<span class="siMeta">' + v5SkinMeta(owned, equipped, sk.price) + '</span>' +
-          v5SkinBtnHtml(equipped, owned, sk.price);
+          '<span class="siMeta">' + v5SkinMeta(owned, equipped, dealApply('皮肤', sk.price)) + '</span>' +
+          v5SkinBtnHtml(equipped, owned, dealApply('皮肤', sk.price));
         const prev = item.querySelector('.siIcon canvas');
         if (prev) drawSkinPrev(prev, id);
         const btn = item.querySelector('.siBtn');
@@ -24777,7 +24787,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
         v5BaseNameRow(def.name, lvTxt) +
         '<span class="siDesc">' + desc + '</span>' +
       '</div>' + prev +
-      v5BaseBtnHtml(maxed, next.price);
+      v5BaseBtnHtml(maxed, dealApply('基地', next.price));
     const btn = item.querySelector('.siBtn');
     if (!maxed) btn.onclick = () => buyBaseLevel();
     return item;
@@ -24786,8 +24796,9 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const lv = baseLevel;
     if (lv >= BASE_LEVELS.length - 1) return;
     const next = BASE_LEVELS[lv + 1];
-    if (coins < next.price) { showToast(insufficientMsg('🪙 金币', coins, next.price)); beep(180, 0.12, 'square', 0.05); return; }
-    coins -= next.price; baseLevel = lv + 1;
+    const price = dealApply('基地', next.price);   // —— v1.1.235 基地类特惠周 ——
+    if (coins < price) { showToast(insufficientMsg('🪙 金币', coins, price)); beep(180, 0.12, 'square', 0.05); return; }
+    coins -= price; baseLevel = lv + 1;
     saveCoins(); saveBase();
     // 若在对局且基地存活，立即按新阵法补墙（不强拆）
     if (baseAlive && running && !gameOver) rebuildBaseWalls();
@@ -24800,7 +24811,9 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (!def) return;
     const lv = bonus[id] || 0;
     if (lv >= def.max) return;
-    const price = def.price[lv];
+    const rawPrice = def.price[lv];
+    if (!Number.isFinite(rawPrice)) return;   // —— v1.1.235 坏档防御:异常价格不买不扣 ——
+    const price = dealApply('强化', rawPrice);
     if (coins < price) { showToast(insufficientMsg('🪙 金币', coins, price)); beep(180, 0.12, 'square', 0.05); return; }
     coins -= price; bonus[id] = lv + 1; bonusSpent += price;   // v0.2.9 追踪强化累计投入
     saveCoins(); saveBonus(); saveBonusSpent(); renderShop(); updateCoinHud();
@@ -24810,8 +24823,9 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   function buySkin(id) {
     const sk = SKINS[id];
     if (!sk || ownedSkins.includes(id)) return;
-    if (coins < sk.price) { showToast(insufficientMsg('🪙 金币', coins, sk.price, v5QuotedName(sk.name))); beep(180, 0.12, 'square', 0.05); return; }
-    coins -= sk.price; ownedSkins.push(id); equippedSkin = id;
+    const price = dealApply('皮肤', sk.price);   // —— v1.1.235 皮肤类特惠周 ——
+    if (coins < price) { showToast(insufficientMsg('🪙 金币', coins, price, v5QuotedName(sk.name))); beep(180, 0.12, 'square', 0.05); return; }
+    coins -= price; ownedSkins.push(id); equippedSkin = id;
     saveCoins(); saveSkins(); saveSkin(); renderShop(); updateCoinHud();
     // —— v0.3.2 收藏家：拥有 15 款皮肤 ——
     if (ownedSkins.length >= 15) unlockAch('collector');
@@ -24840,8 +24854,8 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       item.innerHTML = '<span class="siIcon skinPrev"><canvas width="48" height="48"></canvas></span>' +
         v5WskinNameHtml(wsk.icon, wsk.name, rarBadge) +
         '<span class="siDesc">' + desc + '</span>' +
-        '<span class="siMeta">' + v5WskinMeta(owned, equipped, wsk.price) + '</span>' +
-        v5WskinBtnHtml(equipped, owned, wsk.price);
+        '<span class="siMeta">' + v5WskinMeta(owned, equipped, dealApply('僚机', wsk.price)) + '</span>' +
+        v5WskinBtnHtml(equipped, owned, dealApply('僚机', wsk.price));
       const prev = item.querySelector('.siIcon canvas');
       if (prev) drawSkinPrev(prev, id, true);
       const btn = item.querySelector('.siBtn');
@@ -24855,8 +24869,9 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   function buyWSkin(id) {
     const wsk = WINGMAN_SKINS[id];
     if (!wsk || ownedWSkins.includes(id)) return;
-    if (coins < wsk.price) { showToast(insufficientMsg('🪙 金币', coins, wsk.price)); beep(180, 0.12, 'square', 0.05); return; }
-    coins -= wsk.price; ownedWSkins.push(id); equippedWSkin = id;
+    const price = dealApply('僚机', wsk.price);   // —— v1.1.235 僚机类特惠周 ——
+    if (coins < price) { showToast(insufficientMsg('🪙 金币', coins, price)); beep(180, 0.12, 'square', 0.05); return; }
+    coins -= price; ownedWSkins.push(id); equippedWSkin = id;
     saveCoins(); saveWSkins(); saveWSkin(); renderShop(); updateCoinHud();
     showToast(wskinBuyMsg(wsk.icon, wsk.name, coins));
     sfxBuy();
@@ -24914,9 +24929,9 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       const bonds = PET_BONDS.filter(b => b.pet === def.id);
       const bondTip = bonds.length ? ' · ' + bonds.map(b => b.icon + ' 羁绊「' + b.name + '」:与英雄「' + HEROES[b.hero].name + '」同携生效(' + b.desc + ')').join(' · ') : '';
       let btnTxt, btnCls = '', action = null;
-      if (!owned) { btnTxt = v5PetBuyText(def.price); action = () => buyPet(def.id); }
+      if (!owned) { btnTxt = v5PetBuyText(dealApply('宠物', def.price)); action = () => buyPet(def.id); }
       else if (equipped) {
-        if (!maxed) { btnTxt = v5PetUpgradeText(PET_LV_PET[lv]); action = () => upgradePet(def.id); btnCls = 'owned'; }
+        if (!maxed) { btnTxt = v5PetUpgradeText(dealApply('宠物', PET_LV_PET[lv])); action = () => upgradePet(def.id); btnCls = 'owned'; }
         else { btnTxt = '已装备'; btnCls = 'equipped'; }
       } else { btnTxt = '装备'; btnCls = 'owned'; action = () => equipPet(def.id); }
       item.innerHTML = '<span class="siIcon">' + def.icon + '</span>' +
@@ -24932,8 +24947,9 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   function buyPet(id) {
     const def = PET_MAP[id];
     if (!def || ownedPets.includes(id)) return;
-    if (petCoins < def.price) { showToast(insufficientMsg('🐾 宠物币', petCoins, def.price, v5UnlockLabel(def.name))); beep(180, 0.12, 'square', 0.05); return; }
-    petCoins -= def.price;
+    const price = dealApply('宠物', def.price);   // —— v1.1.235 宠物类特惠周 ——
+    if (petCoins < price) { showToast(insufficientMsg('🐾 宠物币', petCoins, price, v5UnlockLabel(def.name))); beep(180, 0.12, 'square', 0.05); return; }
+    petCoins -= price;
     ownedPets.push(id); petLevels[id] = Math.max(1, petLevels[id] || 1);
     pet = { id, level: petLevels[id] };
     // —— v0.3.4 宠物经济成就：首购 / 集齐全家福 ——
@@ -24956,7 +24972,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const def = PET_MAP[id];
     const lv = Math.max(1, petLevels[id] || 1);
     if (lv >= def.maxLv) return;
-    const price = PET_LV_PET[lv];
+    const price = dealApply('宠物', PET_LV_PET[lv]);   // —— v1.1.235 宠物培养同享宠物类特惠 ——
     if (petCoins < price) { showToast(insufficientMsg('🐾 宠物币', petCoins, price)); beep(180, 0.12, 'square', 0.05); return; }
     petCoins -= price; petLevels[id] = lv + 1;
     if (pet && pet.id === id) pet.level = lv + 1;
@@ -24983,8 +24999,9 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     return GACHA_POOL[0];
   }
   function drawGacha() {
-    if (coins < GACHA_COST) { showToast(insufficientMsg('🪙 金币', coins, GACHA_COST, '抽奖')); beep(180, 0.12, 'square', 0.05); return null; }
-    coins -= GACHA_COST; gachaCount++;
+    const cost = dealApply('抽奖', GACHA_COST);   // —— v1.1.235 抽奖类特惠周 ——
+    if (coins < cost) { showToast(insufficientMsg('🪙 金币', coins, cost, '抽奖')); beep(180, 0.12, 'square', 0.05); return null; }
+    coins -= cost; gachaCount++;
     const win = pickGacha();
     let detail = '';
     if (win.coins) { coins += win.coins; detail = v5GachaCoinDetail(win.coins); }
@@ -24995,7 +25012,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
         bonus[d.id] = (bonus[d.id] || 0) + 1;
         detail = v5GachaBonusDetail(d.icon, d.name, bonus[d.id]);
         saveBonus();
-      } else { coins += GACHA_COST; detail = '⚡ 强化已全满级 → 返还成本'; }
+      } else { coins += cost; detail = '⚡ 强化已全满级 → 返还成本'; }
     }
     saveCoins(); saveGacha(); renderShop(); updateCoinHud();
     sfxPickup();
@@ -25037,14 +25054,15 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     shopBody.appendChild(gachaProbPanel());   // —— v0.6.15 概率公示 ——
     const gc = document.createElement('div');
     gc.className = 'gachaCard';
-    const afford = coins >= GACHA_COST;
+    const gachaCost = dealApply('抽奖', GACHA_COST);   // —— v1.1.235 显示价=实扣价 ——
+    const afford = coins >= gachaCost;
     gc.innerHTML = '<span class="gachaIcon">🎰</span>' +
       '<div class="gachaInfo">' +
         '<div class="gachaName">幸运抽奖箱</div>' +
-        '<div class="gachaDesc">' + v5GachaDescText(GACHA_COST) + '</div>' +
+        '<div class="gachaDesc">' + v5GachaDescText(gachaCost) + '</div>' +
         '<div class="gachaMeta">' + v5GachaMetaText(gachaCount, coins) + '</div>' +
       '</div>' +
-      v5GachaBtnHtml(afford, GACHA_COST);
+      v5GachaBtnHtml(afford, gachaCost);
     const btn = gc.querySelector('.gachaBtn');
     if (afford) btn.onclick = () => {
       const r = drawGacha();
@@ -25182,12 +25200,12 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       const owned = heroOwned(b.dataset.hero);
       b.classList.toggle('active', b.dataset.hero === hero);
       b.classList.toggle('locked', !owned);
-      b.textContent = heroSegText(def.icon, def.name, owned, def.price);
+      b.textContent = heroSegText(def.icon, def.name, owned, dealApply('英雄', def.price));
     }
   }
   function setHero(id) {
     if (!HEROES[id]) return false;
-    if (!heroOwned(id)) { showToast(heroLockedMsg(HEROES[id].name, HEROES[id].price, petCoins)); return false; }
+    if (!heroOwned(id)) { showToast(heroLockedMsg(HEROES[id].name, dealApply('英雄', HEROES[id].price), petCoins)); return false; }
     hero = id;
     saveHero();
     renderHeroSeg();
@@ -25201,8 +25219,9 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const def = HEROES[id];
     if (!def) return false;
     if (heroOwned(id)) return setHero(id);
-    if (petCoins < def.price) { showToast(insufficientMsg('🐾 宠物币', petCoins, def.price, v5HeroUnlockLabel(def.name))); beep(180, 0.12, 'square', 0.05); return false; }
-    petCoins -= def.price;
+    const price = dealApply('英雄', def.price);   // —— v1.1.235 英雄类特惠周 ——
+    if (petCoins < price) { showToast(insufficientMsg('🐾 宠物币', petCoins, price, v5HeroUnlockLabel(def.name))); beep(180, 0.12, 'square', 0.05); return false; }
+    petCoins -= price;
     ownedHeroes.push(id);
     savePetCoin(); saveHeroOwn();
     const ok = setHero(id);
@@ -26235,7 +26254,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.1.234', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.1.235', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -28964,6 +28983,17 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       setDailyCount: (n) => { dailyCount = Math.max(0, n | 0); try { saveStore.setItem('tank-battle-dailycount', String(dailyCount)); } catch (e) {} },
       advanceLevelNow: () => advanceLevel(),
       keysNow: () => Object.keys(keys).filter(k => keys[k]),
+      dealCatNow: (s) => dealCat(s),
+      dealOffNow: (s) => dealOff(s),
+      dealApplyNow: (c, b, s) => dealApply(c, b, s),
+      dealSeedNow: () => weekSeed(Date.now()),
+      bonusPriceNow: (id) => { const d = BONUS_DEF.find(x => x.id === id); if (!d) return null; const lv = bonus[id] || 0; return lv >= d.max ? null : dealApply('强化', d.price[lv]); },
+      skinPriceNow: (id) => (SKINS[id] ? dealApply('皮肤', SKINS[id].price) : null),
+      wskinPriceNow: (id) => (WINGMAN_SKINS[id] ? dealApply('僚机', WINGMAN_SKINS[id].price) : null),
+      petPriceNow: (id) => (PET_MAP[id] ? dealApply('宠物', PET_MAP[id].price) : null),
+      heroPriceNow: (id) => (HEROES[id] ? dealApply('英雄', HEROES[id].price) : null),
+      gachaCostNow: () => dealApply('抽奖', GACHA_COST),
+      buyBonusNow: (id) => { const before = coins; buyBonus(id); return before - coins; },
       mutedNow: () => muted,
       typingTargetNow: (t) => isTypingTarget(t),
       milestoneOpenNow: () => milestoneOpen,

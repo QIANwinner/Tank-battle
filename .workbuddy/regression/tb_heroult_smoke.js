@@ -25952,6 +25952,52 @@ async function main() {
   await senseCheck("U9265 退出菜单清理庆典", (T,$) => { T.startGame(); T.skipIntro(); T.triggerMilestone(); const open = T.milestoneOpenNow() && T.milestoneShowNow(); T.quit(); return (open && !T.milestoneOpenNow() && !T.milestoneShowNow()) || JSON.stringify({ open, o: T.milestoneOpenNow(), s: T.milestoneShowNow() }); });
   await senseCheck("U9266 开局清理庆典", (T,$) => { T.startGame(); T.skipIntro(); T.triggerMilestone(); T.startGame(); T.skipIntro(); const clean = !T.milestoneOpenNow() && !T.milestoneShowNow(); T.quit(); return clean; });
 
+  // U9267–U9272: 真·本周特惠
+  await senseCheck("U9267 特惠纯函数:品类/折扣/边界", (T,$) => {
+    const cats = [0,1,2,3,4,5,6].map(s => T.dealCatNow(s));
+    const uniq = new Set(cats).size === 7;
+    const on = T.dealApplyNow('强化', 100, 0) === 100 && T.dealApplyNow('抽奖', 100, 6) === 70 && T.dealApplyNow('基地', 200, 1) === 190;
+    const off = T.dealApplyNow('强化', 100, 1) === 100 && T.dealApplyNow('皮肤', 80, 3) === 80;
+    const bad = T.dealApplyNow('强化', 'x', 0) === 0 && T.dealApplyNow('强化', -5, 0) === 0 && T.dealApplyNow('皮肤', 0, 2) === 0 && T.dealApplyNow('强化', 100, 'a') === 100;
+    return (uniq && on && off && bad) || JSON.stringify({ cats, on, off, bad });
+  });
+  await senseCheck("U9268 特惠横幅写清本周品类与折扣", (T,$) => {
+    const seed = T.dealSeedNow();
+    const t = T.dealTextNow ? T.dealTextNow(seed) : '';
+    const ok = t.includes(T.dealCatNow(seed)) && t.includes((100 - T.dealOffNow(seed)) + '折');
+    return ok || t;
+  });
+  await senseCheck("U9269 显示价=实扣价:强化实付等于 dealApply", (T,$) => {
+    T.setBonus({}); T.setCoins(9999);
+    const p = T.bonusPriceNow('lifeup'), seed = T.dealSeedNow();
+    const expect = T.dealApplyNow('强化', 60, seed);   // lifeup price[0]=60
+    const spent = T.buyBonusNow('lifeup');
+    return (p === expect && spent === expect) || JSON.stringify({ p, spent, expect, cat: T.dealCatNow(seed) });
+  });
+  await senseCheck("U9270 抽奖价与 dealApply 一致", (T,$) => {
+    const cost = T.gachaCostNow(), seed = T.dealSeedNow();
+    const expect = T.dealApplyNow('抽奖', 500, seed);
+    const ok = cost === expect && (T.dealCatNow(seed) === '抽奖' ? cost < 500 : cost === 500);
+    return ok || JSON.stringify({ cost, expect, cat: T.dealCatNow(seed) });
+  });
+  await senseCheck("U9271 特惠品类购买真实打折(端到端)", (T,$) => {
+    const seed = T.dealSeedNow(), cat = T.dealCatNow(seed);
+    T.setBonus({}); T.setCoins(9999);
+    const p = T.bonusPriceNow('cd');
+    T.setCoins(p);
+    const spent = T.buyBonusNow('cd');
+    const expect = T.dealApplyNow('强化', 50, seed);   // cd price[0]=50
+    const lvNow = T.bonusPriceNow('cd');              // lv1 → 读 price[1]
+    return (spent === expect && lvNow === T.dealApplyNow('强化', 120, seed) && (cat === '强化' ? spent < 50 : spent === 50)) || JSON.stringify({ cat, spent, expect, lvNow });
+  });
+  await senseCheck("U9272 差 1 币买不到(特惠价边界)", (T,$) => {
+    T.setBonus({}); const p = T.bonusPriceNow('spd');
+    T.setCoins(p - 1); const c0 = T.coinsNow();
+    const spent = T.buyBonusNow('spd');
+    const stillLv0 = T.bonusPriceNow('spd') === p;    // 未买到 → 仍读 price[0]
+    return (spent === 0 && T.coinsNow() === c0 && stillLv0) || JSON.stringify({ spent, c0, now: T.coinsNow(), p });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
