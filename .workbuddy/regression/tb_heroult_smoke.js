@@ -28609,6 +28609,27 @@ async function main() {
     return (typeof r === 'object') || 'no ret';
   });
 
+  // U9584–U9586: 弹层全量兜底
+  await senseCheck("U9584 closeAll 清空所有show层", async (T,$) => {
+    T.openSigninNow ? T.openSigninNow() : document.getElementById('signinBox').classList.add('show');
+    T.msnOpenNow ? T.msnOpenNow('daily') : null;
+    const n0 = T.showCountNow();
+    const left = T.closeAllNow();
+    return (n0 >= 1 && left === 0) || JSON.stringify({ n0, left });
+  });
+  await senseCheck("U9585 开局后无残留show层", async (T,$) => {
+    document.getElementById('signinBox').classList.add('show');
+    document.getElementById('missionBox').classList.add('show');
+    T.startGame(); T.skipIntro();
+    const left = document.getElementById('signinBox').classList.contains('show') || document.getElementById('missionBox').classList.contains('show');
+    T.quit();
+    return left === false || 'panel still open';
+  });
+  await senseCheck("U9586 closeAll 可重复调用", async (T,$) => {
+    const a = T.closeAllNow(), b = T.closeAllNow();
+    return (a === 0 && b === 0) || JSON.stringify({ a, b });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
