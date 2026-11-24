@@ -805,7 +805,7 @@ async function main() {
     try {
       reset(); T.resetAch();
       const n = T.achCountNow();
-      t('T1 成就总数(v0.3.4 扩至 30 枚)', n.total === 30, 'total=' + n.total);
+      t('T1 成就总数(v1.2.58 扩至 32 枚)', n.total === 32, 'total=' + n.total);
     } catch (e) { t('T1 成就总数', false, e.message); }
 
     try {

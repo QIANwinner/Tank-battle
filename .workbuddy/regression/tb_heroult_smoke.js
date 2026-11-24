@@ -28093,6 +28093,26 @@ async function main() {
     return el === null || 'unexpected dexTop';
   });
 
+  // U9515–U9517: 游戏时长成就
+  await senseCheck("U9515 时长成就已注册", async (T,$) => {
+    const ids = T.achIdsNow();
+    return (ids.includes('play1h') && ids.includes('play5h')) || 'missing';
+  });
+  await senseCheck("U9516 playSec>=3600 解锁沙场老将", async (T,$) => {
+    T.setPlaySecNow(3600);
+    T.playtimeCheckNow();
+    const ok = T.achHas('play1h') === true;
+    T.setPlaySecNow(0);
+    return ok || 'not unlocked';
+  });
+  await senseCheck("U9517 playSec>=18000 解锁坦克之魂", async (T,$) => {
+    T.setPlaySecNow(18000);
+    T.playtimeCheckNow();
+    const ok = T.achHas('play5h') === true && T.achHas('play1h') === true;
+    T.setPlaySecNow(0);
+    return ok || 'not unlocked';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
