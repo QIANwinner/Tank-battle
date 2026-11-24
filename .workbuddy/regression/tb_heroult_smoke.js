@@ -26531,6 +26531,62 @@ async function main() {
     return (b.backdropFilter || '').includes('blur') || JSON.stringify({ bf: b.backdropFilter });
   });
 
+
+  // U9339–U9344: 暂停面板任务进度
+  await senseCheck("U9339 元素存在且非暂停隐藏", (T,$) => {
+    const p = T.pauseMsnNow();
+    return p && p.hidden === true || JSON.stringify({ p });
+  });
+  await senseCheck("U9340 暂停时显示3条进度", (T,$) => {
+    T.setDailySeed(20310211); T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'p' }));
+    const p = T.pauseMsnNow();
+    const cnt = p && (p.txt.split('　').length);
+    const ok = p && !p.hidden && cnt === 3 && p.txt.includes('/');
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ p, cnt });
+  });
+  await senseCheck("U9341 进度与引擎同步", (T,$) => {
+    T.setDailySeed(20310212); const st = T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    T.missionBumpNow(st.items[0].type, 6, false);
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'p' }));
+    const p = T.pauseMsnNow();
+    const ok = p && p.txt.includes('6/');
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ p });
+  });
+  await senseCheck("U9342 完成显示可领标记", (T,$) => {
+    T.setDailySeed(20310213); const st = T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    T.missionBumpNow(st.items[0].type, st.items[0].target, false);
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'p' }));
+    const p = T.pauseMsnNow();
+    const ok = p && p.txt.includes('·可领');
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ p });
+  });
+  await senseCheck("U9343 已领显示✓", (T,$) => {
+    T.setDailySeed(20310214); const st = T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    T.missionBumpNow(st.items[0].type, st.items[0].target, false);
+    T.missionClaimNow(0);
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'p' }));
+    const p = T.pauseMsnNow();
+    const ok = p && p.txt.includes('✓');
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ p });
+  });
+  await senseCheck("U9344 回主菜单隐藏", (T,$) => {
+    T.startGame(); T.skipIntro();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'p' }));
+    const shown = T.pauseMsnNow().hidden === false;
+    T.quit();
+    const gone = T.pauseMsnNow().hidden === true;
+    return (shown && gone) || JSON.stringify({ shown, gone });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
