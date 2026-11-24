@@ -28716,6 +28716,35 @@ async function main() {
     return true;
   });
 
+  // U9590–U9592: 履带动画
+  await senseCheck("U9590 treadMarks 周期为6且覆盖履带区", (T,$) => {
+    const a = T.treadMarksNow(0), b = T.treadMarksNow(6), c = T.treadMarksNow(12);
+    const same = JSON.stringify(a) === JSON.stringify(b) && JSON.stringify(b) === JSON.stringify(c);
+    const inRange = a.length >= 3 && a.every(y => y >= -9.5 && y < 10);
+    const shifted = JSON.stringify(a) !== JSON.stringify(T.treadMarksNow(3));
+    return (same && inRange && shifted) || JSON.stringify({ a, b });
+  });
+  await senseCheck("U9591 位移累计进入 treadAcc", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'd' }));
+    await new Promise(r => setTimeout(r, 350));
+    window.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }));
+    await new Promise(r => requestAnimationFrame(r));
+    const acc = T.treadAccNow();
+    T.quit();
+    return (acc > 5) || ('acc:' + acc);
+  });
+  await senseCheck("U9592 不移动时 treadAcc 不增", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    await new Promise(r => requestAnimationFrame(r));
+    await new Promise(r => requestAnimationFrame(r));
+    const a0 = T.treadAccNow();
+    await new Promise(r => requestAnimationFrame(r));
+    const a1 = T.treadAccNow();
+    T.quit();
+    return (a1 === a0) || JSON.stringify({ a0, a1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
