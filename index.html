@@ -77,6 +77,7 @@
     <div class="pill m-hide" id="ultCdWrap"><span class="k">💥</span><div id="ultCdBar"></div></div>
     <div class="pill m-hide" id="pickupLog"></div>
     <div class="pill m-hide"><span class="k">🎯</span><span class="v" id="hitRateVal"></span></div>
+    <div class="pill m-hide" id="contractWrap" hidden><span class="k">⚡</span><span class="v">契约 ×1.5</span></div>
     <div class="pill m-hide"><span class="k">⚔</span><span class="v" id="kpmVal"></span></div>
     <div class="pill m-hide"><span class="k">👑</span><span class="v" id="bossKillVal"></span></div>
     <div class="pill m-hide"><span class="k">🎚</span><span class="v" id="diffBadgeVal"></span></div>
@@ -1501,6 +1502,13 @@
         <button data-diff="hard">🔥 硬核</button>
       </div>
     </div>
+    <div class="diffRow" id="contractRow">
+      <span class="diffLabel">契约</span>
+      <div class="seg" id="contractSeg">
+        <button data-ct="0">🕊 常规</button>
+        <button data-ct="1">⚡ 契约 ×1.5</button>
+      </div>
+    </div>
     <div class="diffRow" id="heroRow">
       <span class="diffLabel">英雄</span>
       <div class="seg" id="heroSeg">
@@ -1848,7 +1856,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.14</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.19</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2247,6 +2255,7 @@
         contrastSeg = $('contrastSeg'), cbSeg = $('cbSeg'),
         randMapSeg = $('randMapSeg'),     // —— v0.2.9 随机地图开关 ——
         diffSeg = $('diffSeg'),
+        contractSeg = $('contractSeg'),
         heroSeg = $('heroSeg');           // —— v0.3.6 英雄选择 ——
 
   // ===== URL 参数：好友挑战 (?ch=分数-关卡) / 每日挑战 (?daily=1) =====
@@ -2315,15 +2324,30 @@
   // —— v0.2.3 难度选择：轻松 / 标准 / 硬核 ——
   const LS_DIFF = 'tank-battle-diff';
   let difficulty = 'normal';          // 'easy' | 'normal' | 'hard'
+  // —— v1.2.16 挑战契约：风险换收益（敌 spd/hp ×1.3，金币 ×1.5，得分 ×1.2） ——
+  const LS_CONTRACT = 'tank-battle-contract';
+  let contractMode = false;
+  try { contractMode = localStorage.getItem(LS_CONTRACT) === '1'; } catch (e) { /* 忽略 */ }
+  function contractMul(m) {
+    if (!contractMode || !m) return m;
+    return { spd: m.spd * 1.3, hp: m.hp * 1.3, reward: m.reward * 1.5, score: m.score * 1.2 };
+  }
+  function setContract(on) {
+    contractMode = !!on;
+    try { saveStore.setItem(LS_CONTRACT, contractMode ? '1' : '0'); } catch (e) { /* 忽略 */ }
+    applySettingsUI();
+    sfxPickup();
+  }
+  function contractNoteText(on) { return on ? '⚡ 契约生效 · 敌军 +30% · 金币 ×1.5' : ''; }
   try {
     const d = localStorage.getItem(LS_DIFF);
     if (d === 'easy' || d === 'normal' || d === 'hard') difficulty = d;
   } catch (e) { /* 忽略 */ }
   function diffMul() {
     // —— v0.2.4 硬核经济回调：奖励 0.85→1.0（得分 1.2 已作补偿），硬核不再金币劝退 ——
-    if (difficulty === 'easy') return { spd: 0.85, hp: 1, reward: 1.15, score: 1 };
-    if (difficulty === 'hard') return { spd: 1.18, hp: 1.3, reward: 1.0, score: 1.2 };
-    return { spd: 1, hp: 1, reward: 1, score: 1 };
+    if (difficulty === 'easy') return contractMul({ spd: 0.85, hp: 1, reward: 1.15, score: 1 });
+    if (difficulty === 'hard') return contractMul({ spd: 1.18, hp: 1.3, reward: 1.0, score: 1.2 });
+    return contractMul({ spd: 1, hp: 1, reward: 1, score: 1 });
   }
   // 画质档位决定 DPR 上限（高=2 / 中=1.5 / 低=1），像素量是最大性能杠杆
   // —— v0.2.1 自适应画质：auto 档监控实际 FPS，持续低帧自动降档、回升自动升档 ——
@@ -2738,6 +2762,7 @@
 
   // 连击 / 道具效果（秒计时）
   let combo = 0, comboTimer = 0;
+  let comboShield = true;                // —— v1.2.18 连击护盾：每局一枚 ——
   let comboWindowMax = 0;   // —— v0.6.10 连击窗口峰值（进度条分母） ——
   let fx = { rapid: 0, double: 0, freeze: 0 };
 
@@ -5419,7 +5444,7 @@
     if (magnetStorm > 0) { const m0 = magnetStorm; magnetStorm = stormDecay(magnetStorm, dt); if (m0 > 0 && magnetStorm <= 0) buffEndNote('magnet'); }
     if (fx.double > 0) { fx.double -= dt; if (fx.double <= 0) buffEndNote('double'); }
     if (fx.freeze > 0) { fx.freeze -= dt; if (fx.freeze <= 0) buffEndNote('freeze'); }
-    if (comboTimer > 0) { comboTimer -= dt; if (comboTimer <= 0) { fieldNoteShow(comboEndText(combo, stat.maxCombo), 'info', 1600, 1); combo = 0; } }
+    if (comboTimer > 0) { comboTimer -= dt; if (comboTimer <= 0) { if (comboShield && combo >= 3) { comboShield = false; comboTimer = 1.5; comboWindowMax = Math.max(comboWindowMax, 1.5); fieldNoteShow('🛡 连击护盾 · 宽限 1.5 秒', 'warn', 1600, 1); } else { fieldNoteShow(comboEndText(combo, stat.maxCombo), 'info', 1600, 1); combo = 0; } } }   // —— v1.2.18 连击护盾宽限 ——
     if (hurtFlash > 0) hurtFlash = decay(hurtFlash, dt, 2.2);
     if (bossWarn > 0) bossWarn -= dt;
 
@@ -9096,7 +9121,34 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     for (const a of ls) { if (!ul.has(a.id)) return a.name; }
     return '';
   }
-  function nextAchText(unlocked, list) {
+  // —— v1.2.19 可追踪成就进度：取最接近完成的未解锁项 ——
+  function achTrackState(st) {
+    const S = Object.assign({ kills: 0, coins: 0, boss: 0, wins: 0, stars: 0, daily: 0, lv: 1, wave: 0, skins: 0 }, st || {});
+    return [
+      { id: 'kills200', cur: S.kills, tgt: 200 }, { id: 'coins10k', cur: S.coins, tgt: 10000 },
+      { id: 'boss20', cur: S.boss, tgt: 20 }, { id: 'win50', cur: S.wins, tgt: 50 },
+      { id: 'star20', cur: S.stars, tgt: 20 }, { id: 'rich', cur: S.coins, tgt: 3000 },
+      { id: 'rich2', cur: S.coins, tgt: 10000 }, { id: 'daily3', cur: S.daily, tgt: 3 },
+      { id: 'milo20', cur: S.lv, tgt: 20 }, { id: 'milo40', cur: S.lv, tgt: 40 },
+      { id: 'endless10', cur: S.wave, tgt: 10 }, { id: 'endless30', cur: S.wave, tgt: 30 },
+      { id: 'endless50', cur: S.wave, tgt: 50 }, { id: 'collector', cur: S.skins, tgt: 15 }
+    ];
+  }
+  function nextAchProg(unlocked, list, st) {
+    const u = unlocked || new Set();
+    const S = st || { kills: career.kills, coins: coins, boss: career.bossKills, wins: career.wins, stars: career.totalStars, daily: dailyCount, lv: maxUnlocked, wave: bestWave, skins: ownedSkins.length };
+    let best = null;
+    for (const t of achTrackState(S)) {
+      if (u.has(t.id) || !Number.isFinite(t.cur) || !Number.isFinite(t.tgt) || t.tgt <= 0 || t.cur <= 0) continue;
+      const a = (list || []).find(x => x && x.id === t.id); if (!a) continue;
+      const pct = Math.min(99, Math.round(100 * t.cur / t.tgt));
+      if (!best || pct > best.pct) best = { a, cur: Math.min(t.cur, t.tgt), tgt: t.tgt, pct };
+    }
+    return best;
+  }
+  function nextAchText(unlocked, list, st) {
+    const p = nextAchProg(unlocked, list, st);
+    if (p) return '🏆 下一成就: ' + (p.a.icon ? p.a.icon + ' ' : '') + p.a.name + ' ' + p.cur + '/' + p.tgt + ' (' + p.pct + '%)';
     const n = nextAchName(unlocked, list);
     const tot = (list || []).length;
     const got = (unlocked || new Set()).size;
@@ -24194,6 +24246,11 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const pct = Math.min(1, t / max);
     return { on: true, pct, warn: pct <= 0.35 };
   }
+  // —— v1.2.18 护盾状态：就绪且连击在跑 → 画青色外环 ——
+  function comboShieldState(sh, c, t, max) {
+    const s = comboArcState(c, t, max);
+    return { ring: !!(sh && s.on), warn: s.warn };
+  }
   function drawComboArc(p) {
     const s = comboArcState(combo, comboTimer, comboWindowMax);
     if (!s.on || !p || p.dead) return;
@@ -24202,6 +24259,10 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     ctx.save(); ctx.shadowBlur = 0;
     ctx.strokeStyle = s.warn ? '#ff2d55' : '#ffe600'; ctx.lineWidth = 3; ctx.globalAlpha = 0.9;
     ctx.beginPath(); ctx.arc(cx, cy, 10, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * s.pct); ctx.stroke();
+    if (comboShieldState(comboShield, combo, comboTimer, comboWindowMax).ring) {
+      ctx.strokeStyle = 'rgba(0,240,255,.85)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(cx, cy, 13.5, 0, Math.PI * 2); ctx.stroke();
+    }
     ctx.restore();
   }
   function milestoneUnit(kind) {
@@ -24558,6 +24619,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     // 重置过关成长与每日词条
     upgrades = {}; upgTotal = 0;
     dailyMods = { _names: [], _descFull: '' };
+    comboShield = true;                  // —— v1.2.18 新局刷新护盾 ——
     hideUpgradeBox();
     // —— v1.1.226 过关防线：新局不带上一局的结算/广告弹层 ——
     lvResultPending = false; lvResult.classList.remove('show'); adPending = false; adBox.classList.remove('show'); lvClearDone = false;
@@ -24612,6 +24674,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     updateHeroUltHud();                // —— v0.3.7 初始化英雄大招按钮状态 ——
     startLevel();
     running = true;
+    luckyApply();   // —— v1.2.15 每日幸运：首局发一项增益 ——
     hideOverlay();
     if (typeof missionHudUpdate === 'function') missionHudUpdate();   // —— v1.2.8 局内任务小部件 ——
     pauseBtn.textContent = pauseBtnText();
@@ -24627,6 +24690,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     else if (multiMode === 2) introTxt = '⚔ 双人对抗';
     showLevelIntro(introTxt);
     updateTimerHud();
+    if (contractMode) fieldNoteShow(contractNoteText(true), 'warn', 2600, 1);   // —— v1.2.16 契约开局提示 ——
     if (dailyMode) {
       const d = new Date();
       showToast(dailyIntroMsg(d.getMonth() + 1, d.getDate()));
@@ -25262,6 +25326,11 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       for (const b of diffSeg.querySelectorAll('button'))
         b.classList.toggle('active', b.dataset.diff === difficulty);
     }
+    if (contractSeg) {
+      for (const b of contractSeg.querySelectorAll('button'))
+        b.classList.toggle('active', b.dataset.ct === (contractMode ? '1' : '0'));
+    }
+    const ctrW0 = $('contractWrap'); if (ctrW0) ctrW0.hidden = !contractMode;   // —— v1.2.16 契约徽标 ——
     if (settingsFullBtn) settingsFullBtn.textContent = fullscreenBtnText(isFullscreen());
   }
   function setDifficulty(d) {
@@ -25642,6 +25711,38 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (s && typeof s.last === 'string' && typeof s.streak === 'number') signinData = s;
   } catch (e) { /* 忽略 */ }
   function saveSignin() { try { saveStore.setItem(LS_SIGNIN, JSON.stringify(signinData)); } catch (e) { /* 忽略 */ } }
+  // —— v1.2.15 每日幸运开局：每天首局随机一项免费增益 ——
+  const LUCKY_DEFS = [
+    { id: 'rapid',  icon: '⚡', name: '快速装填', desc: '开局 8 秒双倍射速' },
+    { id: 'double', icon: '🔥', name: '双倍火力', desc: '开局 10 秒双倍火力' },
+    { id: 'shield', icon: '🛡', name: '强化护盾', desc: '出场无敌延长 2.5 秒' },
+    { id: 'gold',   icon: '🪙', name: '幸运金币', desc: '立得 40 金币' }
+  ];
+  const LS_LUCKY = 'tank-battle-lucky';
+  let luckyLastDay = 0;
+  try { luckyLastDay = Math.max(0, Math.floor(Number(localStorage.getItem(LS_LUCKY)) || 0)); } catch (e) { /* 忽略 */ }
+  let luckyOverride = null;
+  function luckyPick(day) {
+    const d = Math.floor(Number(day) || 0);
+    if (!isFinite(d) || d <= 0) return null;
+    const rr = mulberry32(((d ^ 0x5eed1cc) >>> 0) || 1);
+    return LUCKY_DEFS[Math.floor(rr() * LUCKY_DEFS.length) % LUCKY_DEFS.length];
+  }
+  function luckyApply() {
+    if (multiMode !== 0 || !running) return { granted: false, id: null };
+    const day = todayKey();
+    if (luckyLastDay === day) return { granted: false, id: null };
+    const p = luckyOverride ? LUCKY_DEFS.find(x => x.id === luckyOverride) : luckyPick(day);
+    luckyLastDay = day;
+    try { saveStore.setItem(LS_LUCKY, String(day)); } catch (e) { /* 忽略 */ }
+    if (!p) return { granted: false, id: null };
+    if (p.id === 'rapid') fx.rapid = 8;
+    else if (p.id === 'double') fx.double = 10;
+    else if (p.id === 'shield' && player && !player.dead) player.spawnInv = Math.max(player.spawnInv || 0, 150);
+    else if (p.id === 'gold') addGold(40);
+    setTimeout(() => showToast('🍀 今日幸运 · ' + p.icon + ' ' + p.name + ' · ' + p.desc), 1400);
+    return { granted: true, id: p.id };
+  }
   const dayKey = (off) => { const d = new Date(); d.setDate(d.getDate() + (off || 0)); return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate(); };
   const todayKey = () => dayKey(0);
   const signinReward = (day) => SIGNIN_REWARDS[(Math.max(1, day) - 1) % SIGNIN_REWARDS.length];
@@ -25739,6 +25840,16 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     return missionState;
   }
   function missionSave() { try { saveStore.setItem(LS_MISSIONS, JSON.stringify(missionState)); } catch (e) { /* 忽略 */ } }
+  // —— v1.2.17 任务连锁奖励：局内达成即时金币 ——
+  const MISSION_CHAIN = { daily: 30, weekly: 80 };
+  function missionChainBonus(n) {
+    if (!running || gameOver || !player || player.dead) return 0;
+    const v = Math.max(0, Math.floor(Number(n) || 0));
+    if (v <= 0) return 0;
+    const g = addGold(v);
+    if (g > 0) { addText(player.x + TILE / 2, player.y - 10, '🎯+' + g, '#ffd700'); sfxCoin(); }
+    return g;
+  }
   function missionBump(type, n, gauge) {
     if (!Object.hasOwn(MISSION_DEFS, type)) return null;
     const st = missionsNow(); const v = Math.max(0, Math.floor(Number(n) || 0));
@@ -25751,6 +25862,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (hit) {
       missionSave();
       showToast('🎯 任务达成：' + missionText(hit) + ' · 主菜单领取 +' + hit.reward + '🪙');
+      missionChainBonus(MISSION_CHAIN.daily);   // —— v1.2.17 局内连锁 +30🪙 ——
       if (typeof missionBadgeUpdate === 'function') missionBadgeUpdate();
     } else if (st.items.some(m => m.type === type)) missionSave();
     if (typeof missionHudUpdate === 'function') missionHudUpdate();   // —— v1.2.8 局内任务芯片实时刷新 ——
@@ -25893,6 +26005,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (hit) {
       wmissionSave();
       showToast('🌟 每周任务达成：' + wmissionText(hit) + ' · 主菜单领取 +' + hit.reward + '🐾');
+      missionChainBonus(MISSION_CHAIN.weekly);   // —— v1.2.17 局内连锁 +80🪙 ——
       if (typeof missionBadgeUpdate === 'function') missionBadgeUpdate();
     } else if (st.items.some(m => m.type === type)) wmissionSave();
     return hit;
@@ -26580,7 +26693,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.14', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.19', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -26785,6 +26898,9 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
 
   diffSeg.addEventListener('click', (e) => {
     const b = e.target.closest('button'); if (b) setDifficulty(b.dataset.diff);
+  });
+  if (contractSeg) contractSeg.addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (b) setContract(b.dataset.ct === '1');
   });
   // —— v0.3.6 英雄选择接线;v0.3.9 未购点击即走解锁流程 ——
   heroSeg.addEventListener('click', (e) => {
@@ -27685,7 +27801,9 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       powerupFieldNow: (n) => { const t = powerupFieldText(n); const el = document.getElementById('powerupFieldVal'); if (el) el.textContent = t; return t; },
       fxBarWidthNow: (f, mm) => fxBarWidth(f, mm || FX_MAX), fxBarDomNow: () => { const e = $('fxBarFill'); return e ? e.style.width : null; }, fxMaxNow: () => FX_MAX,
       fireKeySummaryNow: () => fireKeySummary(), setCustomFireKeyNow: (k) => setCustomFireKey(k), cycleFireKeyNow: () => cycleFireKey(), customFireKeyNow: () => customFireKey,
-      nextAchNameNow: (u, l) => nextAchName(u, l), nextAchTextNow: (u, l) => nextAchText(u, l), nextAchDomNow: () => { const e = $('nextAchTip'); return e ? e.textContent : null; },
+      nextAchNameNow: (u, l) => nextAchName(u, l), nextAchTextNow: (u, l) => nextAchText(u, l),
+      nextAchProgNow: (u, l, st) => nextAchProg(u, l, st), achTrackStateNow: (st) => achTrackState(st),
+      nextAchTextStNow: (u, l, st) => nextAchText(u, l, st), nextAchDomNow: () => { const e = $('nextAchTip'); return e ? e.textContent : null; },
       scoreRateTextNow: (s, t) => scoreRateText(s, t), scoreRateDomNow: () => { const e = $('scoreRateVal'); return e ? e.textContent : null; }, scoreNow: () => score, runSecNow: () => playSecRun,
       bossRunTextNow: (n) => bossRunText(n), bossRunDomNow: () => { const e = $('bossRunVal'); return e ? e.textContent : null; }, bossRunStatNow: () => stat.bossKills,
       comboAchBadgeNow: (n) => comboAchBadge(n), comboAchDomNow: () => { const e = $('comboAchVal'); return e ? e.textContent : null; }, comboAchMaxNow: () => stat.maxCombo,
@@ -29071,7 +29189,10 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       buffUrgencyNow: buffUrgency, buffEndTextNow: buffEndText, buffEndsNow: () => buffEnds, buffEndNow: k => buffEndNote(k), setBuffNow: (k, v) => { if (k === 'rapid') fx.rapid = v; else if (k === 'double') fx.double = v; else if (k === 'freeze') fx.freeze = v; else if (k === 'magnet') magnetStorm = v; else return false; return true; }, buffStateNow: () => ({ rapid: fx.rapid, double: fx.double, freeze: fx.freeze, magnet: magnetStorm }),
       spawnGuardStateNow: spawnGuardState, spawnGuardCountNow: () => spawnGuardCount,
       foesLeftStateNow: foesLeftState, foesBadgeCountNow: () => foesBadgeCount, foesTotalsNow: () => ({ total: enemiesTotal, spawned: enemiesSpawned, alive: enemies.length }),
-      comboArcStateNow: comboArcState, comboArcCountNow: () => comboArcCount, setComboNow: (c, t, m) => { combo = c; comboTimer = t; comboWindowMax = m; },
+      comboArcStateNow: comboArcState, comboArcCountNow: () => comboArcCount,
+      comboShieldNow: () => comboShield, setComboShieldNow: (v) => { comboShield = !!v; return comboShield; },
+      comboShieldStateNow: (sh, c, t, m) => comboShieldState(sh, c, t, m),
+      comboTimerObjNow: () => ({ combo, t: comboTimer, max: comboWindowMax }), setComboNow: (c, t, m) => { combo = c; comboTimer = t; comboWindowMax = m; },
       milestoneUnitNow: milestoneUnit,
       readoutOpenNow: o => readoutOpenSet(o), readoutPrefNow: readoutPrefGet, readoutStateNow: () => $('hud').classList.contains('readout-open'),
       lastLifeStateNow: lastLifeState, lastLifeDrawsNow: () => lastLifeDraws, lastLifeNotedNow: () => lastLifeNoted,
@@ -29351,10 +29472,21 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       missionCloseNow: () => { closeMissions(); return !$('missionBox').classList.contains('show'); },
       msnDomNow: () => ({ cards: document.querySelectorAll('#msnBody .msnCard').length, claims: document.querySelectorAll('#msnBody .msnClaim[data-i]').length, sub: ($('msnSub') || {}).textContent || '', hint: (document.querySelector('#msnBody .msnHint') || {}).textContent || '' }),
       msnDotNow: () => { const el = $('msnDot'); return el ? el.classList.contains('show') : null; },
+      luckyPickNow: (d) => luckyPick(d),
+      luckyApplyNow: (id) => { luckyOverride = id || null; const r = luckyApply(); luckyOverride = null; return r; },
+      luckyStateNow: () => ({ lastDay: luckyLastDay }),
+      luckyResetNow: () => { luckyLastDay = 0; try { localStorage.removeItem(LS_LUCKY); } catch (e) { /* 忽略 */ } return luckyLastDay; },
+      spawnInvNow: () => (player ? player.spawnInv : -1),
       msnCardInfoNow: () => [...document.querySelectorAll('#msnBody .msnCard')].map(c => ({ name: (c.querySelector('.msnName') || {}).textContent || '', prog: (c.querySelector('.msnProg') || {}).textContent || '', w: (c.querySelector('.msnBarFill') || { style: {} }).style.width || '', done: c.classList.contains('done'), claimed: c.classList.contains('claimed') })),
       msnClaimClickNow: (i) => { const b = document.querySelector('#msnBody .msnClaim[data-i="' + i + '"]'); if (b) b.click(); return !!b; },
       msnHudNow: () => { const el = $('msnHud'); return el ? { hidden: el.hidden, chips: [...el.querySelectorAll('.mhChip')].map(c => ({ t: c.textContent, done: c.classList.contains('done'), claimed: c.classList.contains('claimed') })) } : null; },
       panelOpenNow: () => panelOpen(),
+      contractNow: () => contractMode, setContractNow: (v) => { setContract(!!v); return contractMode; },
+      missionChainNow: (n) => missionChainBonus(n),
+      lastTextNow: () => (texts.length ? texts[texts.length - 1].str : ''),
+      contractDiffNow: () => diffMul(), contractNoteNow: (v) => contractNoteText(v),
+      contractPillNow: () => { const el = $('contractWrap'); return el ? { hidden: el.hidden, txt: el.textContent } : null; },
+      enemyGoldNow: (e) => enemyGold(e),
       pauseMsnNow: () => { const el = $('pauseMsnWrap'); return el ? { hidden: el.hidden, txt: ($('pauseMsnVal') || {}).textContent || '' } : null; },
       lvMsnRowNow: () => { const el = $('lvMsnRow'); return el ? { hidden: el.hidden, txt: ($('lvMsnVal') || {}).textContent || '' } : null; },
       missionRunSnapNow: () => missionRunSnap,

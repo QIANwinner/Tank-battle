@@ -25327,6 +25327,7 @@ async function main() {
   await senseCheck("U9068 真实计时归零：提示与文案一致，连击清零", async (T,$) => {
       const raf = () => new Promise(requestAnimationFrame);
       T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+      T.setComboShieldNow(false);   // —— v1.2.18 连击护盾会宽限一次，本测只看真归零 ——
       await raf(); T.comboExpireNow(6);
       const end = performance.now() + 3000;
       while ($('fieldNote').hidden && performance.now() < end) await raf();
@@ -26670,6 +26671,230 @@ async function main() {
     const r = T.lvMsnRowNow();
     T.setDailySeed(0); T.missionResetNow();
     return (r && r.hidden === true) || JSON.stringify({ r });
+  });
+
+
+  // U9357–U9362: 每日幸运开局
+  await senseCheck("U9357 luckyPick 种子确定且在定义内", (T,$) => {
+    const a = T.luckyPickNow(20311224), b = T.luckyPickNow(20311224), c = T.luckyPickNow(20311225);
+    const ids = ['rapid','double','shield','gold'];
+    return (a && b && a.id === b.id && ids.includes(a.id) && c && ids.includes(c.id)) || JSON.stringify({ a, b, c });
+  });
+  await senseCheck("U9358 非法种子容错不炸", (T,$) => {
+    const a = T.luckyPickNow(0), b2 = T.luckyPickNow('x'), c = T.luckyPickNow(-3), d = T.luckyPickNow(NaN);
+    return (a === null && b2 === null && c === null && d === null) || JSON.stringify({ a, b2, c, d });
+  });
+  await senseCheck("U9359 幸运装填真实生效 fx.rapid", (T,$) => {
+    T.startGame(); T.skipIntro(); T.luckyResetNow();
+    const r = T.luckyApplyNow('rapid');
+    const st = T.r65fxNow();
+    T.quit();
+    return (r.granted && r.id === 'rapid' && st && st.rapid > 0) || JSON.stringify({ r, st });
+  });
+  await senseCheck("U9360 幸运护盾提升 spawnInv", (T,$) => {
+    T.startGame(); T.skipIntro(); T.luckyResetNow();
+    const r = T.luckyApplyNow('shield');
+    const inv = T.spawnInvNow();
+    T.quit();
+    return (r.granted && r.id === 'shield' && inv >= 150) || JSON.stringify({ r, inv });
+  });
+  await senseCheck("U9361 幸运金币入账 +40", (T,$) => {
+    T.startGame(); T.skipIntro(); T.luckyResetNow();
+    const c0 = T.coinsNow();
+    const r = T.luckyApplyNow('gold');
+    const d = T.coinsNow() - c0;
+    T.quit();
+    return (r.granted && r.id === 'gold' && d >= 40) || JSON.stringify({ r, d });
+  });
+  await senseCheck("U9362 每日一次不重复发", (T,$) => {
+    T.startGame(); T.skipIntro(); T.luckyResetNow();
+    const r1 = T.luckyApplyNow('gold');
+    const r2 = T.luckyApplyNow('gold');
+    const day = T.luckyStateNow().lastDay > 0;
+    T.quit();
+    return (r1.granted && !r2.granted && day) || JSON.stringify({ r1, r2, day });
+  });
+
+
+  // U9363–U9368: 挑战契约
+  await senseCheck("U9363 契约切换且持久化", (T,$) => {
+    T.setContractNow(true);
+    const on = T.contractNow() === true;
+    const saved = localStorage.getItem('tank-battle-contract') === '1';
+    T.setContractNow(false);
+    const off = T.contractNow() === false && localStorage.getItem('tank-battle-contract') === '0';
+    return (on && saved && off) || JSON.stringify({ on, saved, off });
+  });
+  await senseCheck("U9364 契约倍率 spd/hp/reward/score", (T,$) => {
+    T.setContractNow(true); const m = T.contractDiffNow();
+    T.setContractNow(false); const n = T.contractDiffNow();
+    return (Math.abs(m.spd - 1.3) < 1e-6 && Math.abs(m.hp - 1.3) < 1e-6 && Math.abs(m.reward - 1.5) < 1e-6 && Math.abs(m.score - 1.2) < 1e-6 && n.spd === 1) || JSON.stringify({ m, n });
+  });
+  await senseCheck("U9365 契约叠硬核难度", (T,$) => {
+    T.setContractNow(true);
+    const d0 = T.contractDiffNow();
+    document.querySelector('#diffSeg button[data-diff="hard"]').click();
+    const dh = T.contractDiffNow();
+    document.querySelector('#diffSeg button[data-diff="normal"]').click();
+    T.setContractNow(false);
+    return (Math.abs(dh.spd - 1.18 * 1.3) < 1e-3 && Math.abs(dh.hp - 1.3 * 1.3) < 1e-3) || JSON.stringify({ d0, dh });
+  });
+  await senseCheck("U9366 契约 seg 点击切换", (T,$) => {
+    document.querySelector('#contractSeg button[data-ct="1"]').click();
+    const on = T.contractNow() === true && document.querySelector('#contractSeg button[data-ct="1"]').classList.contains('active');
+    document.querySelector('#contractSeg button[data-ct="0"]').click();
+    const off = T.contractNow() === false;
+    return (on && off) || JSON.stringify({ on, off });
+  });
+  await senseCheck("U9367 契约击杀金 ×1.5", (T,$) => {
+    T.setContractNow(true);
+    const g = T.enemyGoldNow ? T.enemyGoldNow({ isBoss: false, type: 'normal' }) : -1;
+    T.setContractNow(false);
+    const g0 = T.enemyGoldNow ? T.enemyGoldNow({ isBoss: false, type: 'normal' }) : -1;
+    return (g > 0 && g0 > 0 && g === Math.max(1, Math.round(g0 * 1.5))) || JSON.stringify({ g, g0 });
+  });
+  await senseCheck("U9368 契约徽标随开关显隐", (T,$) => {
+    T.setContractNow(true);
+    const on = T.contractPillNow();
+    T.setContractNow(false);
+    const off = T.contractPillNow();
+    return (on && on.hidden === false && on.txt.includes('契约') && off && off.hidden === true) || JSON.stringify({ on, off });
+  });
+
+
+  // U9369–U9374: 任务连锁奖励
+  await senseCheck("U9369 局内每日达成连锁 +30", (T,$) => {
+    T.setDailySeed(20311226); const st = T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    const c0 = T.coinsNow();
+    T.missionBumpNow(st.items[0].type, st.items[0].target, false);
+    const d = T.coinsNow() - c0;
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return (d >= 30) || JSON.stringify({ d });
+  });
+  await senseCheck("U9370 菜单态不发连锁", (T,$) => {
+    T.setDailySeed(20311227); const st = T.missionResetNow();
+    const c0 = T.coinsNow();
+    T.missionBumpNow(st.items[0].type, st.items[0].target, false);
+    const d = T.coinsNow() - c0;
+    T.setDailySeed(0); T.missionResetNow();
+    return (d === 0) || JSON.stringify({ d });
+  });
+  await senseCheck("U9371 局内每周达成连锁 +80", (T,$) => {
+    T.wmissionResetNow(); const st = T.wmissionsNow();
+    T.startGame(); T.skipIntro();
+    const c0 = T.coinsNow();
+    T.wmissionBumpNow(st.items[0].type, st.items[0].target, false);
+    const d = T.coinsNow() - c0;
+    T.quit(); T.wmissionResetNow();
+    return (d >= 80) || JSON.stringify({ d });
+  });
+  await senseCheck("U9372 连锁飘字 🎯+N", (T,$) => {
+    T.startGame(); T.skipIntro();
+    T.missionChainNow(30);
+    const t = T.lastTextNow();
+    T.quit();
+    return (t.includes('🎯') && t.includes('+') && +t.split('+')[1] > 0) || JSON.stringify({ t });
+  });
+  await senseCheck("U9373 连锁非法值容错", (T,$) => {
+    T.startGame(); T.skipIntro();
+    const c0 = T.coinsNow();
+    const a = T.missionChainNow(-5), b = T.missionChainNow('x'), c = T.missionChainNow(0);
+    const d = T.coinsNow() - c0;
+    T.quit();
+    return (a === 0 && b === 0 && c === 0 && d === 0) || JSON.stringify({ a, b, c, d });
+  });
+  await senseCheck("U9374 已达成不重复连锁", (T,$) => {
+    T.setDailySeed(20311228); const st = T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    T.missionBumpNow(st.items[0].type, st.items[0].target, false);
+    const c0 = T.coinsNow();
+    T.missionBumpNow(st.items[0].type, 0, false);   // 已完成项不再触发连锁
+    const d = T.coinsNow() - c0;
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return (d === 0) || JSON.stringify({ d });
+  });
+
+
+  // U9375–U9380: 连击护盾
+  await senseCheck("U9375 护盾宽限：归零续 1.5 秒", async (T,$) => {
+    T.startGame(); T.skipIntro();
+    T.setComboNow(5, 0.01, 5); T.setComboShieldNow(true);
+    await new Promise(r => setTimeout(r, 300));
+    const st = T.comboTimerObjNow();
+    const sh = T.comboShieldNow();
+    T.quit();
+    return (st.combo === 5 && sh === false && st.t > 0 && st.t <= 1.5) || JSON.stringify({ st, sh });
+  });
+  await senseCheck("U9376 连击不足 3 不触发", async (T,$) => {
+    T.startGame(); T.skipIntro();
+    T.setComboNow(2, 0.01, 5); T.setComboShieldNow(true);
+    await new Promise(r => setTimeout(r, 300));
+    const st = T.comboTimerObjNow();
+    const sh = T.comboShieldNow();
+    T.quit();
+    return (st.combo === 0 && sh === true) || JSON.stringify({ st, sh });
+  });
+  await senseCheck("U9377 护盾只宽限一次", async (T,$) => {
+    T.startGame(); T.skipIntro();
+    T.setComboNow(4, 0.01, 5); T.setComboShieldNow(true);
+    await new Promise(r => setTimeout(r, 300));
+    T.setComboNow(4, 0.01, 5);
+    await new Promise(r => setTimeout(r, 300));
+    const st = T.comboTimerObjNow();
+    T.quit();
+    return (st.combo === 0) || JSON.stringify({ st });
+  });
+  await senseCheck("U9378 新局护盾重置", (T,$) => {
+    T.startGame(); T.skipIntro(); T.setComboShieldNow(false); T.quit();
+    T.startGame(); T.skipIntro();
+    const sh = T.comboShieldNow();
+    T.quit();
+    return (sh === true) || JSON.stringify({ sh });
+  });
+  await senseCheck("U9379 comboShieldState 纯函数边界", (T,$) => {
+    const a = T.comboShieldStateNow(true, 3, 2, 5), b = T.comboShieldStateNow(false, 3, 2, 5), c = T.comboShieldStateNow(true, 0, 0, 0), d = T.comboShieldStateNow(true, 1, 2, 5);
+    return (a.ring === true && b.ring === false && c.ring === false && d.ring === false) || JSON.stringify({ a, b, c, d });
+  });
+  await senseCheck("U9380 真实对局护盾环入画", async (T,$) => {
+    T.startGame(); T.skipIntro();
+    T.setComboNow(3, 2, 5); T.setComboShieldNow(true);
+    const n0 = T.comboArcCountNow();
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    const drew = T.comboArcCountNow() > n0;
+    T.quit();
+    return drew || 'arc not drawn';
+  });
+
+
+  // U9381–U9386: 成就进度预告
+  await senseCheck("U9381 nextAchProg 取最高进度未解锁项", (T,$) => {
+    const p = T.nextAchProgNow(new Set(), [{ id: 'kills200', name: '杀戮机器', icon: '💥' }, { id: 'rich', name: '金库富翁', icon: '🏦' }], { kills: 176, coins: 100 });
+    return (p && p.a.id === 'kills200' && p.cur === 176 && p.tgt === 200 && p.pct === 88) || JSON.stringify({ p });
+  });
+  await senseCheck("U9382 已解锁项被跳过", (T,$) => {
+    const p = T.nextAchProgNow(new Set(['kills200']), [{ id: 'kills200', name: 'x' }, { id: 'rich', name: 'y', icon: '🏦' }], { kills: 199, coins: 2500 });
+    return (p && p.a.id === 'rich') || JSON.stringify({ p });
+  });
+  await senseCheck("U9383 全解锁回退全达成文案", (T,$) => {
+    const list = [{ id: 'kills200', name: 'x', icon: '💥' }];
+    const p = T.nextAchProgNow(new Set(['kills200']), list, { kills: 199 });
+    const t = T.nextAchTextNow(new Set(['kills200']), list);
+    return (p === null && t.includes('全部') && t.includes('达成')) || JSON.stringify({ p, t });
+  });
+  await senseCheck("U9384 零进度回退原名文案", (T,$) => {
+    const list = [{ id: 'first', name: '初战告捷' }, { id: 'rich', name: '金库富翁' }];
+    const t = T.nextAchTextStNow(new Set(), list, { kills: 0, coins: 0, boss: 0, wins: 0, stars: 0, daily: 0, lv: 1, wave: 0, skins: 0 });
+    return (t.includes('初战告捷') && t.indexOf('%') < 0) || JSON.stringify({ t });
+  });
+  await senseCheck("U9385 非法输入容错", (T,$) => {
+    const a = T.nextAchProgNow(null, null, null), b = T.nextAchProgNow(new Set(), [{ id: 'x' }], { kills: -5, coins: NaN });
+    return (a === null || typeof a === 'object') && (b === null) || JSON.stringify({ a, b });
+  });
+  await senseCheck("U9386 文案含真实进度格式", (T,$) => {
+    const t = T.nextAchTextNow(new Set(), [{ id: 'kills200', name: '杀戮机器', icon: '💥' }]);
+    const has = /🏆/.test(t);
+    return has || JSON.stringify({ t });
   });
 
   chrome.kill(); killTree(chrome.pid);
