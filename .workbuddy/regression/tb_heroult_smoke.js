@@ -27862,6 +27862,22 @@ async function main() {
     return (v === 7) || JSON.stringify({ v });
   });
 
+  // U9485–U9487: Boss 弱点提示
+  await senseCheck("U9485 Boss提示文案非空且含分隔", async (T,$) => {
+    const t = T.bossTipNow();
+    return (typeof t === 'string' && t.length > 2 && /·/.test(t)) || JSON.stringify({ t });
+  });
+  await senseCheck("U9486 提示含真实 Boss 名", async (T,$) => {
+    const t = T.bossTipNow();
+    return (/壁垒|猎手|分裂者/.test(t)) || JSON.stringify({ t });
+  });
+  await senseCheck("U9487 普通关不开 Boss 提示路径", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const lv = T.level ? T.level() : (T.state ? T.state().level : 1);
+    T.quit();
+    return ((lv % 5) !== 0) || JSON.stringify({ lv });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
