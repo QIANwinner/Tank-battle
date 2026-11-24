@@ -25947,8 +25947,8 @@ async function main() {
   // U9261–U9266: 输入穿透防线 + 庆典弹层清理
   await senseCheck("U9261 typingTargetNow 已暴露且 DOM 判定正确", (T,$) => typeof T.typingTargetNow === 'function' && T.typingTargetNow($('edName')) === true && T.typingTargetNow(document.body) === false && T.typingTargetNow(null) === false && T.typingTargetNow({ isContentEditable: true }) === true);
   await senseCheck("U9262 输入框打字不进 keys", (T,$) => { T.editorOpen(); const el = $('edName'); const before = T.keysNow().length; el.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', bubbles: true })); el.dispatchEvent(new KeyboardEvent('keydown', { key: 'w', bubbles: true })); const leak = T.keysNow().length - before; T.editorClose(); return leak === 0 || leak; });
-  await senseCheck("U9263 输入框空格/方向键不被吞", (T,$) => { T.editorOpen(); const el = $('edName'); const sp = new KeyboardEvent('keydown', { key: ' ', cancelable: true, bubbles: true }); el.dispatchEvent(sp); const ar = new KeyboardEvent('keydown', { key: 'ArrowLeft', cancelable: true, bubbles: true }); el.dispatchEvent(ar); const body = new KeyboardEvent('keydown', { key: ' ', cancelable: true, bubbles: true }); document.body.dispatchEvent(body); T.editorClose(); return (!sp.defaultPrevented && !ar.defaultPrevented && body.defaultPrevented) || JSON.stringify({ sp: sp.defaultPrevented, ar: ar.defaultPrevented, body: body.defaultPrevented }); });
-  await senseCheck("U9264 存档框打 m 不触发静音", (T,$) => { T.openSaveNow(); const el = $('saveCode'); const before = T.mutedNow(); el.dispatchEvent(new KeyboardEvent('keydown', { key: 'm', bubbles: true })); const same = T.mutedNow() === before; document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'm', bubbles: true })); const flipped = T.mutedNow() !== before; document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'm', bubbles: true })); const back = T.mutedNow() === before; $('saveBox').classList.remove('show'); return (same && flipped && back) || JSON.stringify({ same, flipped, back }); });
+  await senseCheck("U9263 输入框空格/方向键不被吞", (T,$) => { T.editorOpen(); const el = $('edName'); const sp = new KeyboardEvent('keydown', { key: ' ', cancelable: true, bubbles: true }); el.dispatchEvent(sp); const ar = new KeyboardEvent('keydown', { key: 'ArrowLeft', cancelable: true, bubbles: true }); el.dispatchEvent(ar); T.editorClose(); const body = new KeyboardEvent('keydown', { key: ' ', cancelable: true, bubbles: true }); document.body.dispatchEvent(body); return (!sp.defaultPrevented && !ar.defaultPrevented && body.defaultPrevented) || JSON.stringify({ sp: sp.defaultPrevented, ar: ar.defaultPrevented, body: body.defaultPrevented }); });
+  await senseCheck("U9264 存档框打 m 不触发静音", (T,$) => { T.openSaveNow(); const el = $('saveCode'); const before = T.mutedNow(); el.dispatchEvent(new KeyboardEvent('keydown', { key: 'm', bubbles: true })); const same = T.mutedNow() === before; $('saveBox').classList.remove('show'); document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'm', bubbles: true })); const flipped = T.mutedNow() !== before; document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'm', bubbles: true })); const back = T.mutedNow() === before; return (same && flipped && back) || JSON.stringify({ same, flipped, back }); });
   await senseCheck("U9265 退出菜单清理庆典", (T,$) => { T.startGame(); T.skipIntro(); T.triggerMilestone(); const open = T.milestoneOpenNow() && T.milestoneShowNow(); T.quit(); return (open && !T.milestoneOpenNow() && !T.milestoneShowNow()) || JSON.stringify({ open, o: T.milestoneOpenNow(), s: T.milestoneShowNow() }); });
   await senseCheck("U9266 开局清理庆典", (T,$) => { T.startGame(); T.skipIntro(); T.triggerMilestone(); T.startGame(); T.skipIntro(); const clean = !T.milestoneOpenNow() && !T.milestoneShowNow(); T.quit(); return clean; });
 
@@ -26139,7 +26139,8 @@ async function main() {
     return ok || JSON.stringify({ clicked, paid, card: cards[0] });
   });
   await senseCheck("U9289 红点:可领出现/领完消失", (T,$) => {
-    T.setDailySeed(20310102); const st = T.missionResetNow();
+    T.setDailySeed(20310102); const st = T.missionResetNow(); T.wmissionResetNow();   // —— v1.2.10 起红点同计周任务可领，先归零 ——
+    T.quit();   // 回菜单触发 missionBadgeUpdate 刷新红点
     const off0 = T.msnDotNow() === false;
     T.missionBumpNow(st.items[0].type, st.items[0].target, false);
     const on = T.msnDotNow() === true;
@@ -26218,6 +26219,457 @@ async function main() {
     const on = T.msnDotNow() === true;
     T.setDailySeed(0); T.missionResetNow();
     return on || JSON.stringify({ on });
+  });
+
+
+  // U9297–U9302: 液态玻璃·面板基底
+  await senseCheck("U9297 主要面板 backdrop blur", (T,$) => {
+    const cs = id => getComputedStyle($(id));
+    const ok = ['signinBody','msnBody','carBody','achBody'].every(id => (cs(id).backdropFilter || '').includes('blur'));
+    return ok || JSON.stringify({ a: cs('msnBody').backdropFilter });
+  });
+  await senseCheck("U9298 顶部高光内阴影+半透渐变", (T,$) => {
+    const h = getComputedStyle($('signinBox').querySelector('.signinHead'));
+    const ok = h.boxShadow.includes('inset') && (h.backgroundImage || '').includes('linear-gradient');
+    return ok || JSON.stringify({ bs: h.boxShadow.slice(0, 80), bg: (h.backgroundImage || '').slice(0, 60) });
+  });
+  await senseCheck("U9299 菜单分组卡玻璃化", (T,$) => {
+    const g = getComputedStyle($('groupTools'));
+    return (g.backdropFilter || '').includes('blur') && g.boxShadow !== 'none' || JSON.stringify({ bf: g.backdropFilter });
+  });
+  await senseCheck("U9300 结算/强化/广告卡玻璃化", (T,$) => {
+    const a = getComputedStyle(document.querySelector('#lvResult .lvCard'));
+    const b = getComputedStyle(document.querySelector('#upgradeBox .upCard'));
+    const c = getComputedStyle(document.querySelector('#adBox .adCard'));
+    const ok = [a, b, c].every(s => (s.backdropFilter || '').includes('blur'));
+    return ok || JSON.stringify({ a: a.backdropFilter, b: b.backdropFilter, c: c.backdropFilter });
+  });
+  await senseCheck("U9301 编辑器/里程碑玻璃化", (T,$) => {
+    const a = getComputedStyle(document.querySelector('#editorBox .edCard'));
+    const b = getComputedStyle(document.querySelector('#milestone .miloBody'));
+    return (a.backdropFilter || '').includes('blur') && (b.backdropFilter || '').includes('blur') || JSON.stringify({ a: a.backdropFilter, b: b.backdropFilter });
+  });
+  await senseCheck("U9302 圆角未被破坏", (T,$) => {
+    const h = getComputedStyle($('signinBox').querySelector('.signinHead'));
+    const body = getComputedStyle($('signinBody'));
+    return h.borderTopLeftRadius !== '0px' && body.borderBottomLeftRadius !== '0px' || JSON.stringify({ h: h.borderTopLeftRadius, b: body.borderBottomLeftRadius });
+  });
+
+
+  // U9303–U9308: 液态玻璃·控件微交互
+  await senseCheck("U9303 菜单按钮弹性缓动", (T,$) => {
+    const tf = getComputedStyle($('btnShop')).transitionTimingFunction;
+    return tf.includes('cubic-bezier') || JSON.stringify({ tf });
+  });
+  await senseCheck("U9304 按钮高光扫过伪元素存在", (T,$) => {
+    const ps = getComputedStyle($('btnShop'), '::after');
+    return ps.content !== 'none' && (ps.backgroundImage || '').includes('linear-gradient') || JSON.stringify({ c: ps.content, bg: (ps.backgroundImage || '').slice(0, 50) });
+  });
+  await senseCheck("U9305 任务卡 transform 过渡", (T,$) => {
+    T.missionOpenNow();
+    const tp = getComputedStyle(document.querySelector('#msnBody .msnCard')).transitionProperty;
+    T.missionCloseNow();
+    return tp.includes('transform') || JSON.stringify({ tp });
+  });
+  await senseCheck("U9306 focus-visible 光圈规则", (T,$) => {
+    const txt = [...document.styleSheets].flatMap(s => { try { return [...s.cssRules]; } catch (e) { return []; } }).map(r => r.cssText).join('\n');
+    return txt.includes(':focus-visible') && txt.includes('rgba(0, 240, 255, 0.35)') || 'missing';
+  });
+  await senseCheck("U9307 active 回弹 scale(.96) 规则", (T,$) => {
+    const txt = [...document.styleSheets].flatMap(s => { try { return [...s.cssRules]; } catch (e) { return []; } }).map(r => r.cssText).join('\n');
+    return txt.includes('scale(0.96)') || 'missing';
+  });
+  await senseCheck("U9308 hover sheen 位移规则", (T,$) => {
+    const txt = [...document.styleSheets].flatMap(s => { try { return [...s.cssRules]; } catch (e) { return []; } }).map(r => r.cssText).join('\n');
+    return txt.includes(':hover::after') && txt.includes('left: 130%') || 'missing';
+  });
+
+
+  // U9309–U9314: 任务重摇
+  await senseCheck("U9309 重摇扣50+未完成重置+标记", (T,$) => {
+    T.setDailySeed(20310201); const st = T.missionResetNow();
+    const t0 = st.items[0].type; T.missionBumpNow(t0, 5, false);
+    T.setCoins(500);
+    const r = T.missionRerollNow();
+    const s2 = T.missionsNow();
+    const ok = r.ok === true && T.coinsNow() === 450 && s2.rerolled === true && s2.items.filter(m => !m.done && !m.claimed).every(m => m.prog === 0);
+    T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ r, coins: T.coinsNow(), s2 });
+  });
+  await senseCheck("U9310 每日只能换一次", (T,$) => {
+    T.setDailySeed(20310202); T.missionResetNow(); T.setCoins(500);
+    T.missionRerollNow(); const r2 = T.missionRerollNow();
+    const ok = r2.ok === false && r2.why === 'used' && T.coinsNow() === 450;
+    T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ r2, coins: T.coinsNow() });
+  });
+  await senseCheck("U9311 币不足拒绝且不扣", (T,$) => {
+    T.setDailySeed(20310203); T.missionResetNow(); T.setCoins(30);
+    const r = T.missionRerollNow();
+    const ok = r.ok === false && r.why === 'coins' && T.coinsNow() === 30 && T.missionsNow().rerolled !== true;
+    T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ r });
+  });
+  await senseCheck("U9312 完成/已领项保留不动", (T,$) => {
+    T.setDailySeed(20310204); const st = T.missionResetNow();
+    const m0 = st.items[0];
+    T.missionBumpNow(m0.type, m0.target, false); T.missionClaimNow(0);
+    T.setCoins(500); T.missionRerollNow();
+    const s2 = T.missionsNow();
+    const kept = s2.items.some(m => m.type === m0.type && m.claimed === true);
+    const fresh = s2.items.filter(m => !m.claimed).every(m => m.prog === 0 && !m.done);
+    T.setDailySeed(0); T.missionResetNow();
+    return (kept && fresh && s2.items.length === 3) || JSON.stringify({ kept, fresh, items: s2.items });
+  });
+  await senseCheck("U9313 面板重摇按钮点击生效", (T,$) => {
+    T.setDailySeed(20310205); T.missionResetNow(); T.setCoins(500);
+    T.missionOpenNow();
+    const has = !!$('msnReroll');
+    T.msnRerollClickNow();
+    const used = T.missionsNow().rerolled === true && $('msnReroll') && $('msnReroll').disabled && $('msnReroll').textContent.includes('已换');
+    T.missionCloseNow(); T.setDailySeed(0); T.missionResetNow();
+    return (has && used) || JSON.stringify({ has, used, txt: $('msnReroll') && $('msnReroll').textContent });
+  });
+  await senseCheck("U9314 全部完成时无重摇按钮", (T,$) => {
+    T.setDailySeed(20310206); const st = T.missionResetNow();
+    st.items.forEach(m => T.missionBumpNow(m.type, m.target, false));
+    T.missionOpenNow();
+    const none = !$('msnReroll');
+    T.missionCloseNow(); T.setDailySeed(0); T.missionResetNow();
+    return none || 'reroll button still present';
+  });
+
+
+  // U9315–U9320: 局内任务小部件
+  await senseCheck("U9315 元素存在且菜单下隐藏", (T,$) => {
+    T.quit();
+    const h = T.msnHudNow();
+    return h && h.hidden === true || JSON.stringify({ h });
+  });
+  await senseCheck("U9316 开局显示3枚芯片", (T,$) => {
+    T.setDailySeed(20310207); T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    const h = T.msnHudNow();
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return (h && !h.hidden && h.chips.length === 3 && h.chips.every(c => c.t.includes('/'))) || JSON.stringify({ h });
+  });
+  await senseCheck("U9317 进度实时刷新", (T,$) => {
+    T.setDailySeed(20310208); const st = T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    const t0 = st.items[0].type;
+    T.missionBumpNow(t0, 4, false);
+    const h = T.msnHudNow();
+    const chip = h && h.chips[0];
+    const ok = chip && chip.t.includes('4/');
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ chip });
+  });
+  await senseCheck("U9318 完成芯片金色态", (T,$) => {
+    T.setDailySeed(20310209); const st = T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    T.missionBumpNow(st.items[0].type, st.items[0].target, false);
+    const h = T.msnHudNow();
+    const ok = h && h.chips[0] && h.chips[0].done === true;
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ chips: h && h.chips });
+  });
+  await senseCheck("U9319 退出后隐藏", (T,$) => {
+    T.startGame(); T.skipIntro();
+    const on = T.msnHudNow().hidden === false;
+    T.quit();
+    const off = T.msnHudNow().hidden === true;
+    return (on && off) || JSON.stringify({ on, off });
+  });
+  await senseCheck("U9320 芯片玻璃样式", (T,$) => {
+    T.startGame(); T.skipIntro();
+    const c = document.querySelector('#msnHud .mhChip');
+    const cs = c ? getComputedStyle(c) : null;
+    const ok = cs && cs.borderRadius !== '0px' && cs.fontVariantNumeric === 'tabular-nums';
+    T.quit();
+    return ok || JSON.stringify({ cs: cs && cs.borderRadius });
+  });
+
+
+  // U9321–U9326: 键盘弹层防线
+  await senseCheck("U9321 Esc 关任务面板", (T,$) => {
+    T.missionOpenNow();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    return !$('missionBox').classList.contains('show') || 'still open';
+  });
+  await senseCheck("U9322 Esc 逐层只关最上层", (T,$) => {
+    T.missionOpenNow(); T.openSigninNow ? T.openSigninNow() : $('signinBox').classList.add('show');
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    const l1 = $('signinBox').classList.contains('show') && !$('missionBox').classList.contains('show');
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    const l2 = !$('signinBox').classList.contains('show');
+    return (l1 && l2) || JSON.stringify({ l1, l2 });
+  });
+  await senseCheck("U9323 Esc 关商店与签到", (T,$) => {
+    $('shopBox').classList.add('show');
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    const shop = !$('shopBox').classList.contains('show');
+    $('signinBox').classList.add('show');
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    const sig = !$('signinBox').classList.contains('show');
+    return (shop && sig) || JSON.stringify({ shop, sig });
+  });
+  await senseCheck("U9324 面板开着 Enter 不进 keys", (T,$) => {
+    T.missionOpenNow();
+    const before = T.keysNow().length;
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    const leak = T.keysNow().length - before;
+    const open = T.panelOpenNow();
+    T.missionCloseNow();
+    return (leak === 0 && open) || JSON.stringify({ leak, open });
+  });
+  await senseCheck("U9325 面板开着 m 不触发静音", (T,$) => {
+    T.missionOpenNow();
+    const m0 = T.mutedNow();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'm' }));
+    const same = T.mutedNow() === m0;
+    T.missionCloseNow();
+    ['missionBox','signinBox','shopBox','saveBox','achBox','careerRepBox','careerBox','lvSelect','editorBox','milestone'].forEach(id => { const x = $(id); if (x) x.classList.remove('show'); });
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'm' }));
+    const flipped = T.mutedNow() !== m0;
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'm' }));
+    const back = T.mutedNow() === m0;
+    return (same && flipped && back) || JSON.stringify({ same, flipped, back });
+  });
+  await senseCheck("U9326 start 清理菜单弹层", (T,$) => {
+    T.missionOpenNow(); $('signinBox').classList.add('show');
+    T.startGame(); T.skipIntro();
+    const clean = !$('missionBox').classList.contains('show') && !$('signinBox').classList.contains('show') && !$('shopBox').classList.contains('show');
+    T.quit();
+    return clean || 'panels left open';
+  });
+
+
+  // U9327–U9332: 每周任务
+  await senseCheck("U9327 周种子确定/3条异类/目标奖励", (T,$) => {
+    const a = T.wmissionPickNow('2026-W48'), b = T.wmissionPickNow('2026-W48');
+    const det = JSON.stringify(a) === JSON.stringify(b);
+    const distinct = new Set(a.map(m => m.type)).size === 3;
+    const aligned = a.every(m => m.target > 0 && m.reward > 0);
+    const bad = T.wmissionPickNow('').length === 0;
+    return (det && a.length === 3 && distinct && aligned && bad) || JSON.stringify({ det, distinct, aligned, bad, a });
+  });
+  await senseCheck("U9328 每日事件引擎带动周任务", (T,$) => {
+    T.setWeekIsoNow('2026-W91'); const st = T.wmissionResetNow();
+    const t0 = st.items[0].type;
+    T.missionBumpNow(t0, 7, false);
+    const p = T.wmissionsNow().items[0].prog;
+    T.setWeekIsoNow(''); T.wmissionResetNow();
+    return p === 7 || JSON.stringify({ t0, p });
+  });
+  await senseCheck("U9329 周任务领取发宠物币一次", (T,$) => {
+    T.setWeekIsoNow('2026-W92'); const st = T.wmissionResetNow();
+    const m0 = st.items[0]; T.wmissionBumpNow(m0.type, m0.target, false);
+    const p0 = T.petCoins();
+    const r1 = T.wmissionClaimNow(0), r2 = T.wmissionClaimNow(0);
+    const paid = T.petCoins() === p0 + m0.reward;
+    T.setWeekIsoNow(''); T.wmissionResetNow();
+    return (r1 === m0.reward && r2 === 0 && paid) || JSON.stringify({ r1, r2, paid });
+  });
+  await senseCheck("U9330 跨周自动重生成", (T,$) => {
+    T.setWeekIsoNow('2026-W93'); const a = T.wmissionResetNow();
+    T.wmissionBumpNow(a.items[0].type, 3, false);
+    T.setWeekIsoNow('2026-W94'); const b = T.wmissionsNow();
+    const fresh = b.wk === '2026-W94' && b.items.every(m => m.prog === 0 && !m.done && !m.claimed);
+    T.setWeekIsoNow(''); T.wmissionResetNow();
+    return fresh || JSON.stringify({ b });
+  });
+  await senseCheck("U9331 面板页签切换渲染周任务", (T,$) => {
+    T.setWeekIsoNow('2026-W95'); T.wmissionResetNow();
+    T.missionOpenNow();
+    T.msnTabSetNow('weekly');
+    const cards = T.msnCardInfoNow();
+    const tabs = document.querySelectorAll('#msnBody .msnTab').length;
+    const ok = cards.length === 3 && tabs === 2 && cards.every(c => c.prog.includes('🐾')) && T.msnDomNow().sub.includes('周');
+    T.msnTabSetNow('daily'); T.missionCloseNow(); T.setWeekIsoNow(''); T.wmissionResetNow();
+    return ok || JSON.stringify({ cards, tabs });
+  });
+  await senseCheck("U9332 红点同时计周任务可领", (T,$) => {
+    T.setDailySeed(20310210); T.missionResetNow();
+    T.setWeekIsoNow('2026-W96'); const st = T.wmissionResetNow();
+    T.msnDotNow();
+    const off = T.missionBadgeNow ? T.missionBadgeNow() : null;
+    T.wmissionBumpNow(st.items[0].type, st.items[0].target, false);
+    T.missionOpenNow(); T.missionCloseNow();
+    const on = T.msnDotNow() === true;
+    T.setWeekIsoNow(''); T.wmissionResetNow(); T.setDailySeed(0); T.missionResetNow();
+    return on === true || JSON.stringify({ off, on });
+  });
+
+
+  // U9333–U9338: HUD 玻璃化
+  await senseCheck("U9333 读数胶囊 backdrop blur+阴影", (T,$) => {
+    const p = getComputedStyle(document.querySelector('.pill'));
+    return (p.backdropFilter || '').includes('blur') && p.boxShadow.includes('inset') || JSON.stringify({ bf: p.backdropFilter });
+  });
+  await senseCheck("U9334 读数胶囊半透渐变", (T,$) => {
+    const p = getComputedStyle(document.querySelector('.pill'));
+    return (p.backgroundImage || '').includes('linear-gradient') || JSON.stringify({ bg: p.backgroundImage });
+  });
+  await senseCheck("U9335 toast 玻璃化", (T,$) => {
+    const t = getComputedStyle($('toast'));
+    return (t.backdropFilter || '').includes('blur') && t.boxShadow.includes('inset') || JSON.stringify({ bf: t.backdropFilter, bs: t.boxShadow.slice(0, 60) });
+  });
+  await senseCheck("U9336 任务芯片玻璃化", (T,$) => {
+    T.startGame(); T.skipIntro();
+    const c = document.querySelector('#msnHud .mhChip');
+    const cs = c ? getComputedStyle(c) : null;
+    const ok = cs && (cs.backdropFilter || '').includes('blur') && (cs.backgroundImage || '').includes('linear-gradient');
+    T.quit();
+    return ok || JSON.stringify({ bf: cs && cs.backdropFilter });
+  });
+  await senseCheck("U9337 战场提示条玻璃化", (T,$) => {
+    const f = getComputedStyle($('fieldNote'));
+    return (f.backdropFilter || '').includes('blur') || JSON.stringify({ bf: f.backdropFilter });
+  });
+  await senseCheck("U9338 品牌标玻璃化", (T,$) => {
+    const b = getComputedStyle($('brandTag'));
+    return (b.backdropFilter || '').includes('blur') || JSON.stringify({ bf: b.backdropFilter });
+  });
+
+
+  // U9339–U9344: 暂停面板任务进度
+  await senseCheck("U9339 元素存在且非暂停隐藏", (T,$) => {
+    const p = T.pauseMsnNow();
+    return p && p.hidden === true || JSON.stringify({ p });
+  });
+  await senseCheck("U9340 暂停时显示3条进度", (T,$) => {
+    T.setDailySeed(20310211); T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'p' }));
+    const p = T.pauseMsnNow();
+    const cnt = p && (p.txt.split('　').length);
+    const ok = p && !p.hidden && cnt === 3 && p.txt.includes('/');
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ p, cnt });
+  });
+  await senseCheck("U9341 进度与引擎同步", (T,$) => {
+    T.setDailySeed(20310212); const st = T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    T.missionBumpNow(st.items[0].type, 6, false);
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'p' }));
+    const p = T.pauseMsnNow();
+    const ok = p && p.txt.includes('6/');
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ p });
+  });
+  await senseCheck("U9342 完成显示可领标记", (T,$) => {
+    T.setDailySeed(20310213); const st = T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    T.missionBumpNow(st.items[0].type, st.items[0].target, false);
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'p' }));
+    const p = T.pauseMsnNow();
+    const ok = p && p.txt.includes('·可领');
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ p });
+  });
+  await senseCheck("U9343 已领显示✓", (T,$) => {
+    T.setDailySeed(20310214); const st = T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    T.missionBumpNow(st.items[0].type, st.items[0].target, false);
+    T.missionClaimNow(0);
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'p' }));
+    const p = T.pauseMsnNow();
+    const ok = p && p.txt.includes('✓');
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ p });
+  });
+  await senseCheck("U9344 回主菜单隐藏", (T,$) => {
+    T.startGame(); T.skipIntro();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'p' }));
+    const shown = T.pauseMsnNow().hidden === false;
+    T.quit();
+    const gone = T.pauseMsnNow().hidden === true;
+    return (shown && gone) || JSON.stringify({ shown, gone });
+  });
+
+
+  // U9345–U9350: 菜单入场编排
+  await senseCheck("U9345 菜单分组入场动画", (T,$) => {
+    const g = getComputedStyle($('groupModes'));
+    return g.animationName === 'menuIn' || JSON.stringify({ n: g.animationName });
+  });
+  await senseCheck("U9346 工具按钮错峰延迟", (T,$) => {
+    const btns = document.querySelectorAll('#groupTools .toolGrid button');
+    const d2 = getComputedStyle(btns[1]).animationDelay;
+    return btns.length >= 2 && btns[0] && d2 !== '0s' || JSON.stringify({ n: btns.length, d2 });
+  });
+  await senseCheck("U9347 标题光晕呼吸动画", (T,$) => {
+    const t = getComputedStyle($('ovTitle'));
+    return t.animationName === 'titleBreath' || JSON.stringify({ n: t.animationName });
+  });
+  await senseCheck("U9348 menuIn 关键帧存在", (T,$) => {
+    const names = [...document.styleSheets].flatMap(s => { try { return [...s.cssRules]; } catch (e) { return []; } }).filter(r => r.type === 7).map(r => r.name);
+    return names.includes('menuIn') && names.includes('titleBreath') || JSON.stringify({ names: names.slice(-6) });
+  });
+  await senseCheck("U9349 分组延迟递增", (T,$) => {
+    const a = parseFloat(getComputedStyle($('groupModes')).animationDelay);
+    const b = parseFloat(getComputedStyle($('groupTools')).animationDelay);
+    const c = parseFloat(getComputedStyle($('groupAux')).animationDelay);
+    return (a === 0 && b > a && c > b) || JSON.stringify({ a, b, c });
+  });
+  await senseCheck("U9350 入场弹性缓动", (T,$) => {
+    const tf = getComputedStyle($('groupModes')).animationTimingFunction;
+    return tf.includes('cubic-bezier') || JSON.stringify({ tf });
+  });
+
+
+  // U9351–U9356: 结算任务小结
+  await senseCheck("U9351 结算任务行元素存在", (T,$) => {
+    const r = T.lvMsnRowNow();
+    return r && r.hidden === true || JSON.stringify({ r });
+  });
+  await senseCheck("U9352 无进展时保持隐藏", (T,$) => {
+    T.setDailySeed(20310215); T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    T.showLvResultNow();
+    const r = T.lvMsnRowNow();
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return (r && r.hidden === true) || JSON.stringify({ r });
+  });
+  await senseCheck("U9353 本局增量显示图标+N", (T,$) => {
+    T.setDailySeed(20310216); const st = T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    T.missionBumpNow(st.items[0].type, Math.max(1, st.items[0].target - 1), false);
+    T.showLvResultNow();
+    const r = T.lvMsnRowNow();
+    const ok = r && !r.hidden && /\+\d/.test(r.txt);
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ r });
+  });
+  await senseCheck("U9354 待领个数显示", (T,$) => {
+    T.setDailySeed(20310217); const st = T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    T.missionBumpNow(st.items[0].type, st.items[0].target, false);
+    T.showLvResultNow();
+    const r = T.lvMsnRowNow();
+    const ok = r && !r.hidden && r.txt.includes('待领');
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ r });
+  });
+  await senseCheck("U9355 快照随开局重置", (T,$) => {
+    T.setDailySeed(20310218); const st = T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    T.missionBumpNow(st.items[0].type, 5, false);
+    T.quit();
+    T.startGame(); T.skipIntro();
+    const snap = T.missionRunSnapNow();
+    T.showLvResultNow();
+    const r = T.lvMsnRowNow();
+    const ok = snap && snap[st.items[0].type] === 5 && r && r.hidden === true;
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ snap, r });
+  });
+  await senseCheck("U9356 快照缺失容错不炸", (T,$) => {
+    T.setDailySeed(20310219); T.missionResetNow();
+    T.showLvResultNow();
+    const r = T.lvMsnRowNow();
+    T.setDailySeed(0); T.missionResetNow();
+    return (r && r.hidden === true) || JSON.stringify({ r });
   });
 
   chrome.kill(); killTree(chrome.pid);

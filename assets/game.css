@@ -8231,3 +8231,141 @@ html.compact-hud #hud .m-hide { display:none !important; }
 #missionBox .msnClaim:disabled { opacity: 0.4; cursor: default; filter: grayscale(0.6); background: rgba(255, 255, 255, 0.08); color: #9fb2c8; border-color: rgba(255, 255, 255, 0.2); }
 #missionBox .msnHint { text-align: center; color: #8ea0b8; font-size: 11px; letter-spacing: 0.5px; }
 
+/* ---------- v1.2.5 液态玻璃·面板基底 ---------- */
+#signinBox .signinHead, #signinBox .signinBody,
+#missionBox .msnHead, #missionBox .msnBody,
+#shopBox .shopHead, #shopBox .shopBody,
+#achBox .achHead, #achBox .achBody,
+#careerBox .carHead, #careerBox .carBody,
+#careerRepBox .repCard, #lvSelect .lvHead, #lvSelect .lvGrid,
+#saveBox .saveBody, #editorBox .edCard,
+#lvResult .lvCard, #adBox .adCard, #milestone .miloBody,
+#upgradeBox .upCard, .menuGroup {
+  -webkit-backdrop-filter: blur(14px) saturate(1.5);
+  backdrop-filter: blur(14px) saturate(1.5);
+  background-image: linear-gradient(160deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.02) 45%, rgba(120, 170, 255, 0.07));
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 -1px 0 rgba(0, 0, 0, 0.25);
+}
+
+/* ---------- v1.2.6 液态玻璃·控件微交互 ---------- */
+.modeGrid button, .toolGrid button, .auxRow button, .pauseRow button,
+.signinBtn, .msnClaim, .carReport, .edBtn, .lvNext, .adClaim, .miloBtn,
+#saveBox .saveRow button, .msnTab {
+  position: relative; overflow: hidden;
+  transition: transform .18s cubic-bezier(.34, 1.56, .64, 1), box-shadow .22s ease, filter .18s ease, background .2s ease, border-color .2s ease;
+}
+.modeGrid button:hover, .toolGrid button:hover, .auxRow button:hover, .pauseRow button:hover,
+.signinBtn:hover, .msnClaim:hover, .carReport:hover, .edBtn:hover, .lvNext:hover, .adClaim:hover, .miloBtn:hover {
+  transform: translateY(-2px); filter: brightness(1.12);
+}
+.modeGrid button:active, .toolGrid button:active, .auxRow button:active, .pauseRow button:active,
+.signinBtn:active, .msnClaim:active, .carReport:active, .edBtn:active, .lvNext:active, .adClaim:active, .miloBtn:active {
+  transform: translateY(0) scale(0.96); transition-duration: .06s;
+}
+.modeGrid button:focus-visible, .toolGrid button:focus-visible, .auxRow button:focus-visible, .pauseRow button:focus-visible,
+.signinBtn:focus-visible, .msnClaim:focus-visible, .carReport:focus-visible, .edBtn:focus-visible, .lvNext:focus-visible, .adClaim:focus-visible, .miloBtn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.35), 0 0 20px rgba(0, 240, 255, 0.3);
+}
+.modeGrid button::after, .toolGrid button::after, .signinBtn::after, .msnClaim::after, .adClaim::after, .lvNext::after {
+  content: ''; position: absolute; top: 0; left: -80%;
+  width: 55%; height: 100%;
+  background: linear-gradient(105deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: skewX(-18deg); transition: left .5s ease;
+  pointer-events: none;
+}
+.modeGrid button:hover::after, .toolGrid button:hover::after, .signinBtn:hover::after, .msnClaim:hover::after, .adClaim:hover::after, .lvNext:hover::after { left: 130%; }
+.shopItem, .msnCard, .achItem, .lvCard, #upgradeBox .upCard, .edTile, .sDay {
+  transition: transform .18s cubic-bezier(.34, 1.56, .64, 1), box-shadow .22s ease, border-color .2s ease;
+}
+.shopItem:hover, .msnCard:hover, .achItem:hover, .lvCard:hover, #upgradeBox .upCard:hover, .edTile:hover, .sDay:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(120, 200, 255, 0.25);
+}
+
+/* ---------- v1.2.7 任务重摇按钮 ---------- */
+#missionBox .msnReroll {
+  width: 100%; padding: 9px 0; border-radius: 10px; cursor: pointer;
+  border: 1px solid rgba(0, 240, 255, 0.45);
+  background: linear-gradient(180deg, rgba(0, 60, 120, 0.4), rgba(0, 30, 70, 0.3));
+  color: #9fe8ff; font-size: 12px; font-weight: 800; letter-spacing: 1px;
+  -webkit-appearance: none; appearance: none;
+}
+#missionBox .msnReroll:disabled { opacity: 0.45; cursor: default; filter: grayscale(0.5); }
+
+/* ---------- v1.2.8 局内任务小部件 ---------- */
+#msnHud {
+  position: absolute; top: 30px; right: 8px; z-index: 15;
+  display: flex; flex-direction: column; gap: 4px;
+  pointer-events: none;
+}
+#msnHud .mhChip {
+  padding: 3px 9px; border-radius: 999px;
+  font-size: 10px; font-weight: 800; letter-spacing: 0.5px;
+  font-variant-numeric: tabular-nums; color: #cfe8ff;
+  background: rgba(4, 8, 20, 0.62);
+  border: 1px solid rgba(120, 190, 255, 0.28);
+}
+#msnHud .mhChip.done { color: #ffe066; border-color: rgba(255, 220, 90, 0.6); box-shadow: 0 0 8px rgba(255, 220, 90, 0.25); }
+#msnHud .mhChip.claimed { opacity: 0.55; }
+
+/* ---------- v1.2.10 任务页签 ---------- */
+#missionBox .msnTabs { display: flex; gap: 6px; }
+#missionBox .msnTab {
+  flex: 1; padding: 7px 0; border-radius: 9px; cursor: pointer;
+  font-size: 12px; font-weight: 800; letter-spacing: 1px;
+  border: 1px solid rgba(0, 240, 255, 0.28);
+  background: rgba(255, 255, 255, 0.05); color: #8ea0b8;
+  -webkit-appearance: none; appearance: none;
+}
+#missionBox .msnTab.on {
+  color: #062033; background: linear-gradient(180deg, #4de6ff, #00c8e0);
+  border-color: rgba(0, 240, 255, 0.7);
+}
+
+/* ---------- v1.2.11 战场 HUD 玻璃化 ---------- */
+.pill, #msnHud .mhChip, #toast, #fieldNote, #streakBanner, #brandTag {
+  -webkit-backdrop-filter: blur(10px) saturate(1.4);
+  backdrop-filter: blur(10px) saturate(1.4);
+}
+.pill {
+  background-image: linear-gradient(160deg, rgba(255, 255, 255, 0.10), rgba(20, 60, 140, 0.14));
+  border-color: rgba(160, 210, 255, 0.30);
+  box-shadow: 0 4px 14px rgba(0, 8, 24, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+#msnHud .mhChip {
+  background-image: linear-gradient(160deg, rgba(255, 255, 255, 0.10), rgba(20, 60, 140, 0.16));
+  box-shadow: 0 4px 12px rgba(0, 8, 24, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+#toast, #fieldNote, #streakBanner {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+
+/* ---------- v1.2.13 主菜单液态入场 ---------- */
+@keyframes menuIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+#overlay .menuGroup, #overlay .auxRow {
+  animation: menuIn .5s cubic-bezier(.22, 1, .36, 1) both;
+}
+#overlay #groupTools { animation-delay: .08s; }
+#overlay #groupAux { animation-delay: .16s; }
+#overlay .modeGrid button, #overlay .toolGrid button {
+  animation: menuIn .42s cubic-bezier(.22, 1, .36, 1) both;
+}
+#overlay .modeGrid button:nth-child(2) { animation-delay: .05s; }
+#overlay .modeGrid button:nth-child(3) { animation-delay: .10s; }
+#overlay .modeGrid button:nth-child(4) { animation-delay: .15s; }
+#overlay .toolGrid button:nth-child(2) { animation-delay: .05s; }
+#overlay .toolGrid button:nth-child(3) { animation-delay: .09s; }
+#overlay .toolGrid button:nth-child(4) { animation-delay: .13s; }
+#overlay .toolGrid button:nth-child(5) { animation-delay: .17s; }
+#overlay .toolGrid button:nth-child(6) { animation-delay: .21s; }
+#overlay .toolGrid button:nth-child(7) { animation-delay: .25s; }
+@keyframes titleBreath {
+  0%, 100% { text-shadow: 0 0 16px rgba(0, 240, 255, 0.32); }
+  50% { text-shadow: 0 0 32px rgba(0, 240, 255, 0.68), 0 0 64px rgba(0, 240, 255, 0.24); }
+}
+#ovTitle { animation: titleBreath 3.2s ease-in-out infinite; }
+
