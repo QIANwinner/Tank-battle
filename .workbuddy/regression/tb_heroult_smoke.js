@@ -28155,6 +28155,24 @@ async function main() {
     return (rows === h && rows > 0) || JSON.stringify({ rows, h });
   });
 
+  // U9524–U9526: 每日首抽半价
+  await senseCheck("U9524 非今日首抽价格低于原价", async (T,$) => {
+    T.setGachaDayNow('19990101');
+    const half = T.gachaTodayCostNow(), full = T.gachaFullCostNow();
+    return (half < full && half <= Math.ceil(full / 2)) || JSON.stringify({ half, full });
+  });
+  await senseCheck("U9525 抽完后恢复原价", async (T,$) => {
+    T.setGachaDayNow('19990101'); T.setCoinsNow(99999);
+    T.gachaNow();
+    const after = T.gachaTodayCostNow(), full = T.gachaFullCostNow();
+    return (after === full) || JSON.stringify({ after, full });
+  });
+  await senseCheck("U9526 首抽可用时卡片显示半价徽标", async (T,$) => {
+    T.setGachaDayNow('19990101');
+    const t = T.gachaMetaNow();
+    return (!!t && t.indexOf('今日首抽半价') >= 0) || ('t:' + t);
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

@@ -1295,9 +1295,10 @@ async function main() {
     try {
       const c0 = T.setCoinsNow(1000);
       const st0 = T.gachaState();
+      const gcost = T.gachaTodayCostNow ? T.gachaTodayCostNow() : 500;   // —— v1.2.61 每日首抽半价：实扣价动态读取 ——
       const r = T.gachaNow();
-      const ok = !!r && r.balance === c0 - 500 + (r.coins || 0) && st0.count + 1 === T.gachaState().count;
-      t('AC14 抽奖扣500+发放奖励', ok === true, JSON.stringify({ c0, label: r && r.label, balance: r && r.balance, count: T.gachaState().count }));
+      const ok = !!r && r.balance === c0 - gcost + (r.coins || 0) && st0.count + 1 === T.gachaState().count;
+      t('AC14 抽奖扣费+发放奖励', ok === true, JSON.stringify({ c0, gcost, label: r && r.label, balance: r && r.balance, count: T.gachaState().count }));
     } catch (e) { t('AC14 抽奖扣500+发放奖励', false, e.message); }
 
     try {
