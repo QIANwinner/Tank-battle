@@ -27996,6 +27996,27 @@ async function main() {
     return ok || JSON.stringify({ poor, done });
   });
 
+  // U9503–U9505: 任务完成历史
+  await senseCheck("U9503 领取任务写入历史首条", async (T,$) => {
+    const n0 = T.mhistNow().length;
+    T.mhistPushNow('🎯', '专项测试任务');
+    const h = T.mhistNow();
+    return (h.length === Math.min(6, n0 + 1) && h[0].n === '专项测试任务' && h[0].i === '🎯' && h[0].d.length === 4) || JSON.stringify(h[0]);
+  });
+  await senseCheck("U9504 历史环形上限6条最新在前", async (T,$) => {
+    for (let k = 0; k < 8; k++) T.mhistPushNow('🔥', '任务' + k);
+    const h = T.mhistNow();
+    const ok = h.length === 6 && h[0].n === '任务7' && h[5].n === '任务2';
+    return ok || JSON.stringify({ len: h.length, first: h[0] && h[0].n, last: h[5] && h[5].n });
+  });
+  await senseCheck("U9505 面板渲染历史行数与数据一致", async (T,$) => {
+    T.msnOpenNow('daily');
+    const rows = document.querySelectorAll('#msnBody .mhistRow').length;
+    const h = T.mhistNow().length;
+    document.getElementById('missionBox').classList.remove('show');
+    return (rows === h && rows > 0) || JSON.stringify({ rows, h });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
