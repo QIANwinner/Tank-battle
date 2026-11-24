@@ -27051,12 +27051,18 @@ async function main() {
   await senseCheck("U9399 近战大招 E 击退残血敌人绝不穿入 2x2 钢墙或水池死角", async (T,$) => {
     const Z = ms => new Promise(r => setTimeout(r, ms));
     document.querySelector('#randMapSeg [data-rand="0"]').click();
-    T.buyHeroNow('vanguard');   // 击退由近战先锋大招触发,先确保英雄正确
+    T.buyHeroNow('vanguard');   // 击退由近战先锋大招触发,币不足时退化为碰撞推挤(同样走 pushTankSafe 防墙路径)
     T.startAtLevel(8); T.skipIntro(); T.invul(99999); T.stopSpawn();
-    T.spawnFoeNow(96, 252, 'elite');
+    // 运行时自寻「右边 48px 是墙」的合法出生点，避开压墙格
+    let sx = -1, sy = -1;
+    for (let x = 48; x < 560 && sx < 0; x += 24)
+      for (let y = 48; y < 560; y += 24)
+        if (!T.isBlockedNow(x, y, 40) && T.isBlockedNow(x + 48, y, 40)) { sx = x; sy = y; break; }
+    if (sx < 0) { T.quit(); return 'no wall-adjacent spot'; }
+    T.spawnFoeNow(sx, sy, 'elite');
     const e = T.r18enNow().find(x => !x.dead);
     e.hp = 6; e.maxHp = 6;
-    T.tp(72, 252);
+    T.tp(sx - 26, sy);
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'e' }));
     window.dispatchEvent(new KeyboardEvent('keyup', { key: 'e' }));
     await Z(950);   // 出生点可能压墙线：留足脱困看门狗(~0.5s)+击退动画时间
@@ -28842,6 +28848,33 @@ async function main() {
     const ons = document.querySelectorAll('#lvResult .lvStars span.on').length;
     T.quit();
     return (ons >= 1 && ons <= 3) || ('ons:' + ons);
+  });
+
+  // U9614–U9616: 炮口焰光
+  await senseCheck("U9614 开火触发焰光计数", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const m0 = T.muzzleFxNow();
+    T.fireOnce();
+    const m1 = T.muzzleFxNow();
+    T.quit();
+    return (m1 > m0) || JSON.stringify({ m0, m1 });
+  });
+  await senseCheck("U9615 焰光粒子实际生成", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const p0 = T.partsLenNow();
+    T.fireOnce();
+    const p1 = T.partsLenNow();
+    T.quit();
+    return (p1 > p0) || JSON.stringify({ p0, p1 });
+  });
+  await senseCheck("U9616 冷却内重复开火不再生焰光", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.fireOnce();
+    const m0 = T.muzzleFxNow();
+    T.fireOnce();   // 冷却中
+    const m1 = T.muzzleFxNow();
+    T.quit();
+    return (m1 === m0) || JSON.stringify({ m0, m1 });
   });
 
   chrome.kill(); killTree(chrome.pid);
