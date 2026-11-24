@@ -27359,6 +27359,37 @@ async function main() {
     return off || JSON.stringify({ cls: $('lives') ? $('lives').className : null });
   });
 
+  // U9427–U9429: 结算行点亮（全行 lvIn / 延迟递增 / 重复弹窗重置）
+  await senseCheck("U9427 结算弹出后全部数据行带 lvIn 且延迟递增", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.showLvResultNow();
+    const rows = [...document.querySelectorAll('#lvResult .lvRow')];
+    const allIn = rows.every(r => r.classList.contains('lvIn'));
+    const delays = rows.map(r => parseFloat(r.style.animationDelay));
+    const asc = delays.every((d, i) => i === 0 || d > delays[i - 1]);
+    T.claimLvNow(); T.closeUpgrade(); T.quit();
+    return (allIn && asc && rows.length >= 5) || JSON.stringify({ allIn, asc, n: rows.length });
+  });
+  await senseCheck("U9428 隐藏行（任务进展未触发时）同样参与错峰动画", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.showLvResultNow();
+    const hidden = [...document.querySelectorAll('#lvResult .lvRow')].filter(r => r.hidden);
+    const ok = hidden.every(r => r.classList.contains('lvIn'));
+    T.claimLvNow(); T.closeUpgrade(); T.quit();
+    return ok || JSON.stringify({ hidden: hidden.length });
+  });
+  await senseCheck("U9429 再次弹出结算：动画类名重建（先摘后加）", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.showLvResultNow();
+    T.claimLvNow(); await Z(30); T.closeUpgrade();
+    T.showLvResultNow();
+    const rows = [...document.querySelectorAll('#lvResult .lvRow')];
+    const ok = rows.every(r => r.classList.contains('lvIn'));
+    T.claimLvNow(); T.closeUpgrade(); T.quit();
+    return ok || 'rows missing lvIn';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
