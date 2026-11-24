@@ -28526,6 +28526,34 @@ async function main() {
     return (v && v.z === 9) || JSON.stringify(v);
   });
 
+  // U9575–U9577: 僚机重生兜底
+  await senseCheck("U9575 正常重生不被堵", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setWingAliveNow(true);
+    T.respawnWingNow();
+    const b = T.wingBlockedNow();
+    T.quit();
+    return b === false || 'blocked';
+  });
+  await senseCheck("U9576 玩家脚下被堵时退出生点", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setWingAliveNow(true);
+    const p = T.playerPos ? T.playerPos() : null;
+    if (!p) { T.quit(); return 'no playerPos'; }
+    T.respawnWingNow();
+    const b = T.wingBlockedNow();
+    T.quit();
+    return b === false || 'still blocked';
+  });
+  await senseCheck("U9577 重生后僚机复活满血", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setWingAliveNow(true);
+    const w = T.respawnWingNow();
+    const p = T.wingPosNow();
+    T.quit();
+    return (!!w && p && p.dead === false) || JSON.stringify({ w, p });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
