@@ -28877,6 +28877,40 @@ async function main() {
     return (m1 === m0) || JSON.stringify({ m0, m1 });
   });
 
+  // U9617–U9619: 隐藏宝箱
+  await senseCheck("U9617 每关生成隐藏宝箱", (T,$) => {
+    document.querySelector('#randMapSeg [data-rand="0"]').click();
+    T.startAtLevel(3); T.skipIntro();
+    const n = T.chestNow().length;
+    T.quit();
+    return (n >= 1 && n <= 2) || JSON.stringify({ n });
+  });
+  await senseCheck("U9618 击破宝箱掉落道具", (T,$) => {
+    document.querySelector('#randMapSeg [data-rand="0"]').click();
+    T.startAtLevel(3); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const C = T.colsNow(), key = T.chestNow()[0];
+    const x = key % C, y = Math.floor(key / C);
+    const p0 = T.powerups().length, n0 = T.chestNow().length;
+    T.breakTileNow(x, y);
+    const p1 = T.powerups().length, left = T.chestNow().length;
+    T.quit();
+    return (p1 > p0 && left === n0 - 1) || JSON.stringify({ p0, p1, left, n0 });
+  });
+  await senseCheck("U9619 普通砖墙不掉道具", (T,$) => {
+    document.querySelector('#randMapSeg [data-rand="0"]').click();
+    T.startAtLevel(3); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const chest = new Set(T.chestNow()), C = T.colsNow();
+    let bx = -1, by = -1;
+    for (let y = 2; y < C - 2 && bx < 0; y++) for (let x = 2; x < C - 2; x++)
+      if (T.tileAtNow(x, y) === 1 && !chest.has(y * C + x)) { bx = x; by = y; break; }
+    if (bx < 0) { T.quit(); return 'no plain brick'; }
+    const p0 = T.powerups().length;
+    T.breakTileNow(bx, by);
+    const p1 = T.powerups().length;
+    T.quit();
+    return p1 === p0 || JSON.stringify({ p0, p1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
