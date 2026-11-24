@@ -27878,6 +27878,27 @@ async function main() {
     return ((lv % 5) !== 0) || JSON.stringify({ lv });
   });
 
+  // U9488–U9490: 成就进度条
+  await senseCheck("U9488 追踪数据源有未完成项", async (T,$) => {
+    const tr = T.achTrackStateNow({ kills: 5, coins: 100, boss: 0, wins: 0, stars: 0, daily: 0, lv: 1, wave: 0, skins: 0 });
+    const has = Array.isArray(tr) && tr.some(t => t.tgt > 0 && t.cur < t.tgt);
+    return has || JSON.stringify(tr && tr.length);
+  });
+  await senseCheck("U9489 打开成就墙出现 achProg 进度条", async (T,$) => {
+    T.setCareerKillsNow(120);
+    T.openAchNow();
+    const n = document.querySelectorAll('.achProg').length;
+    const em = document.querySelector('.achProg em');
+    const txt = em ? em.textContent : '';
+    T.closeAchNow(); T.setCareerKillsNow(0);
+    return (n > 0 && txt.includes('/')) || JSON.stringify({ n, txt });
+  });
+  await senseCheck("U9490 进度条数据 N/M 渲染正确", async (T,$) => {
+    const tr = T.achTrackStateNow({ kills: 120, coins: 0, boss: 0, wins: 0, stars: 0, daily: 0, lv: 1, wave: 0, skins: 0 });
+    const t = (tr || []).find(x => x.tgt > 0 && x.cur > 0 && x.cur < x.tgt);
+    return (!!t && t.cur <= t.tgt) || JSON.stringify({ len: tr && tr.length });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
