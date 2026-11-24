@@ -26587,6 +26587,36 @@ async function main() {
     return (shown && gone) || JSON.stringify({ shown, gone });
   });
 
+
+  // U9345–U9350: 菜单入场编排
+  await senseCheck("U9345 菜单分组入场动画", (T,$) => {
+    const g = getComputedStyle($('groupModes'));
+    return g.animationName === 'menuIn' || JSON.stringify({ n: g.animationName });
+  });
+  await senseCheck("U9346 工具按钮错峰延迟", (T,$) => {
+    const btns = document.querySelectorAll('#groupTools .toolGrid button');
+    const d2 = getComputedStyle(btns[1]).animationDelay;
+    return btns.length >= 2 && btns[0] && d2 !== '0s' || JSON.stringify({ n: btns.length, d2 });
+  });
+  await senseCheck("U9347 标题光晕呼吸动画", (T,$) => {
+    const t = getComputedStyle($('ovTitle'));
+    return t.animationName === 'titleBreath' || JSON.stringify({ n: t.animationName });
+  });
+  await senseCheck("U9348 menuIn 关键帧存在", (T,$) => {
+    const names = [...document.styleSheets].flatMap(s => { try { return [...s.cssRules]; } catch (e) { return []; } }).filter(r => r.type === 7).map(r => r.name);
+    return names.includes('menuIn') && names.includes('titleBreath') || JSON.stringify({ names: names.slice(-6) });
+  });
+  await senseCheck("U9349 分组延迟递增", (T,$) => {
+    const a = parseFloat(getComputedStyle($('groupModes')).animationDelay);
+    const b = parseFloat(getComputedStyle($('groupTools')).animationDelay);
+    const c = parseFloat(getComputedStyle($('groupAux')).animationDelay);
+    return (a === 0 && b > a && c > b) || JSON.stringify({ a, b, c });
+  });
+  await senseCheck("U9350 入场弹性缓动", (T,$) => {
+    const tf = getComputedStyle($('groupModes')).animationTimingFunction;
+    return tf.includes('cubic-bezier') || JSON.stringify({ tf });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
