@@ -26500,6 +26500,37 @@ async function main() {
     return on === true || JSON.stringify({ off, on });
   });
 
+
+  // U9333–U9338: HUD 玻璃化
+  await senseCheck("U9333 读数胶囊 backdrop blur+阴影", (T,$) => {
+    const p = getComputedStyle(document.querySelector('.pill'));
+    return (p.backdropFilter || '').includes('blur') && p.boxShadow.includes('inset') || JSON.stringify({ bf: p.backdropFilter });
+  });
+  await senseCheck("U9334 读数胶囊半透渐变", (T,$) => {
+    const p = getComputedStyle(document.querySelector('.pill'));
+    return (p.backgroundImage || '').includes('linear-gradient') || JSON.stringify({ bg: p.backgroundImage });
+  });
+  await senseCheck("U9335 toast 玻璃化", (T,$) => {
+    const t = getComputedStyle($('toast'));
+    return (t.backdropFilter || '').includes('blur') && t.boxShadow.includes('inset') || JSON.stringify({ bf: t.backdropFilter, bs: t.boxShadow.slice(0, 60) });
+  });
+  await senseCheck("U9336 任务芯片玻璃化", (T,$) => {
+    T.startGame(); T.skipIntro();
+    const c = document.querySelector('#msnHud .mhChip');
+    const cs = c ? getComputedStyle(c) : null;
+    const ok = cs && (cs.backdropFilter || '').includes('blur') && (cs.backgroundImage || '').includes('linear-gradient');
+    T.quit();
+    return ok || JSON.stringify({ bf: cs && cs.backdropFilter });
+  });
+  await senseCheck("U9337 战场提示条玻璃化", (T,$) => {
+    const f = getComputedStyle($('fieldNote'));
+    return (f.backdropFilter || '').includes('blur') || JSON.stringify({ bf: f.backdropFilter });
+  });
+  await senseCheck("U9338 品牌标玻璃化", (T,$) => {
+    const b = getComputedStyle($('brandTag'));
+    return (b.backdropFilter || '').includes('blur') || JSON.stringify({ bf: b.backdropFilter });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
