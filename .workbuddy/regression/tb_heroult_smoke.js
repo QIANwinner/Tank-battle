@@ -26866,6 +26866,37 @@ async function main() {
     return drew || 'arc not drawn';
   });
 
+
+  // U9381–U9386: 成就进度预告
+  await senseCheck("U9381 nextAchProg 取最高进度未解锁项", (T,$) => {
+    const p = T.nextAchProgNow(new Set(), [{ id: 'kills200', name: '杀戮机器', icon: '💥' }, { id: 'rich', name: '金库富翁', icon: '🏦' }], { kills: 176, coins: 100 });
+    return (p && p.a.id === 'kills200' && p.cur === 176 && p.tgt === 200 && p.pct === 88) || JSON.stringify({ p });
+  });
+  await senseCheck("U9382 已解锁项被跳过", (T,$) => {
+    const p = T.nextAchProgNow(new Set(['kills200']), [{ id: 'kills200', name: 'x' }, { id: 'rich', name: 'y', icon: '🏦' }], { kills: 199, coins: 2500 });
+    return (p && p.a.id === 'rich') || JSON.stringify({ p });
+  });
+  await senseCheck("U9383 全解锁回退全达成文案", (T,$) => {
+    const list = [{ id: 'kills200', name: 'x', icon: '💥' }];
+    const p = T.nextAchProgNow(new Set(['kills200']), list, { kills: 199 });
+    const t = T.nextAchTextNow(new Set(['kills200']), list);
+    return (p === null && t.includes('全部') && t.includes('达成')) || JSON.stringify({ p, t });
+  });
+  await senseCheck("U9384 零进度回退原名文案", (T,$) => {
+    const list = [{ id: 'first', name: '初战告捷' }, { id: 'rich', name: '金库富翁' }];
+    const t = T.nextAchTextStNow(new Set(), list, { kills: 0, coins: 0, boss: 0, wins: 0, stars: 0, daily: 0, lv: 1, wave: 0, skins: 0 });
+    return (t.includes('初战告捷') && t.indexOf('%') < 0) || JSON.stringify({ t });
+  });
+  await senseCheck("U9385 非法输入容错", (T,$) => {
+    const a = T.nextAchProgNow(null, null, null), b = T.nextAchProgNow(new Set(), [{ id: 'x' }], { kills: -5, coins: NaN });
+    return (a === null || typeof a === 'object') && (b === null) || JSON.stringify({ a, b });
+  });
+  await senseCheck("U9386 文案含真实进度格式", (T,$) => {
+    const t = T.nextAchTextNow(new Set(), [{ id: 'kills200', name: '杀戮机器', icon: '💥' }]);
+    const has = /🏆/.test(t);
+    return has || JSON.stringify({ t });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
