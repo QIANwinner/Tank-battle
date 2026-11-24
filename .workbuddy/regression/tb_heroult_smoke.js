@@ -26760,6 +26760,60 @@ async function main() {
     return (on && on.hidden === false && on.txt.includes('契约') && off && off.hidden === true) || JSON.stringify({ on, off });
   });
 
+
+  // U9369–U9374: 任务连锁奖励
+  await senseCheck("U9369 局内每日达成连锁 +30", (T,$) => {
+    T.setDailySeed(20311226); const st = T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    const c0 = T.coinsNow();
+    T.missionBumpNow(st.items[0].type, st.items[0].target, false);
+    const d = T.coinsNow() - c0;
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return (d >= 30) || JSON.stringify({ d });
+  });
+  await senseCheck("U9370 菜单态不发连锁", (T,$) => {
+    T.setDailySeed(20311227); const st = T.missionResetNow();
+    const c0 = T.coinsNow();
+    T.missionBumpNow(st.items[0].type, st.items[0].target, false);
+    const d = T.coinsNow() - c0;
+    T.setDailySeed(0); T.missionResetNow();
+    return (d === 0) || JSON.stringify({ d });
+  });
+  await senseCheck("U9371 局内每周达成连锁 +80", (T,$) => {
+    T.wmissionResetNow(); const st = T.wmissionsNow();
+    T.startGame(); T.skipIntro();
+    const c0 = T.coinsNow();
+    T.wmissionBumpNow(st.items[0].type, st.items[0].target, false);
+    const d = T.coinsNow() - c0;
+    T.quit(); T.wmissionResetNow();
+    return (d >= 80) || JSON.stringify({ d });
+  });
+  await senseCheck("U9372 连锁飘字 🎯+N", (T,$) => {
+    T.startGame(); T.skipIntro();
+    T.missionChainNow(30);
+    const t = T.lastTextNow();
+    T.quit();
+    return (t.includes('🎯') && t.includes('+') && +t.split('+')[1] > 0) || JSON.stringify({ t });
+  });
+  await senseCheck("U9373 连锁非法值容错", (T,$) => {
+    T.startGame(); T.skipIntro();
+    const c0 = T.coinsNow();
+    const a = T.missionChainNow(-5), b = T.missionChainNow('x'), c = T.missionChainNow(0);
+    const d = T.coinsNow() - c0;
+    T.quit();
+    return (a === 0 && b === 0 && c === 0 && d === 0) || JSON.stringify({ a, b, c, d });
+  });
+  await senseCheck("U9374 已达成不重复连锁", (T,$) => {
+    T.setDailySeed(20311228); const st = T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    T.missionBumpNow(st.items[0].type, st.items[0].target, false);
+    const c0 = T.coinsNow();
+    T.missionBumpNow(st.items[0].type, 0, false);   // 已完成项不再触发连锁
+    const d = T.coinsNow() - c0;
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return (d === 0) || JSON.stringify({ d });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
