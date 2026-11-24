@@ -28376,6 +28376,25 @@ async function main() {
     return (!!t && t.indexOf('明日词条') >= 0) || ('t:' + t + ' exp:' + exp);
   });
 
+  // U9554–U9556: 今日战绩
+  await senseCheck("U9554 今日统计累计", async (T,$) => {
+    T.todayAddNow('kills', 3); T.todayAddNow('coins', 50); T.todayAddNow('games', 1);
+    const t = T.todayStatsNow();
+    return (t.day === String(T.dayKeyNow ? T.dayKeyNow() : '') || t.day.length === 8) && t.kills >= 3 && t.coins >= 50 && t.games >= 1 || JSON.stringify(t);
+  });
+  await senseCheck("U9555 战绩条显示内容", async (T,$) => {
+    const c = T.todayChipNow();
+    const ok = !!c && c.show === true && c.txt.indexOf('今日') >= 0 && c.txt.indexOf('击杀') >= 0;
+    return ok || JSON.stringify(c);
+  });
+  await senseCheck("U9556 全零时战绩条隐藏", async (T,$) => {
+    T.todayResetNow();
+    const c0 = T.todayChipNow();
+    T.todayAddNow('kills', 1);
+    const c1 = T.todayChipNow();
+    return (c0 && c0.show === false && c1 && c1.show === true) || JSON.stringify({ c0, c1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

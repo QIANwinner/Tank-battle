@@ -1535,6 +1535,7 @@
       <!-- v0.3.19 每日挑战「今日英雄」推荐提示(随 btnDaily 显隐) -->
       <div id="dailyHeroTip" class="dailyTip"></div>
       <div id="dailyModIcons" class="dailyTip"></div>
+      <div id="todayChip" class="dailyTip"></div>
     </div>
     <!-- 内容与工具 -->
     <div class="menuGroup" id="groupTools">
@@ -1868,7 +1869,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.70</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.71</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2917,6 +2918,7 @@
   }
   function recordGame(win) {
     career.games++;
+    todayAdd('games', 1);   // —— v1.2.71 今日局数 ——
     career.kills += stat.kills;
     killMileGrant();   // —— v1.2.35 生涯击毁里程碑 ——
     career.playSec += Math.round(playSecRun);
@@ -4964,6 +4966,7 @@
     // —— v0.2.7 生涯统计：累计获得金币（recordGame 统一持久化） ——
     career.totalCoins += gain;
     runCoins += gain;
+    todayAdd('coins', gain);   // —— v1.2.71 今日金币 ——
     // —— v0.2.4 成就：金库余额达 3000 ——
     if (coins >= 3000) unlockAch('rich');
     // —— v0.3.2 金币大亨：余额达 10000 ——
@@ -5014,6 +5017,7 @@
   function onEnemyKilled(e) {
     sfxBoom();
     petReact('kill');   // —— v0.3.3 宠物击杀欢跳 ——
+    todayAdd('kills', 1);   // —— v1.2.71 今日击杀 ——
     hitStop = reduced() ? 0 : (e.isBoss ? 0.06 : 0.03);   // 击杀定格（减弱动效时关闭；Boss 用慢动作替代长定格）
     vibe(e.isBoss ? [60, 50, 130] : 15);
     spawnParticles(e.x + e.size / 2, e.y + e.size / 2, e.color, e.isBoss ? 48 : 16);
@@ -24821,6 +24825,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     btnDaily.style.display = (kind === 'title' && !dailyInvited) ? 'block' : 'none';
     const lrc = $('lastRunCard'); if (lrc && kind === 'title') lrc.innerHTML = lastRunCardHtml(lastRun);   // —— v0.6.22 最近一局卡片 ——
     updateDailyHeroTip();   // —— v0.3.19 每日挑战「今日英雄」推荐提示(随 btnDaily 显隐) ——
+    updateTodayChip();   // —— v1.2.71 今日战绩条 ——
     // v0.2.3 限时冲分入口：仅标题页且非 ?time= 直达时显示
     if (btnTimed) btnTimed.style.display = (kind === 'title' && !timedInvited) ? 'block' : 'none';
     // —— v0.2.6 无尽模式入口：仅标题页显示 ——
@@ -26191,6 +26196,22 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     lastPlaySet(tk);
     return false;
   }
+  const LS_TODAY = 'tank-battle-today';   // —— v1.2.71 今日战绩 ——
+  let todayData = { day: '', kills: 0, coins: 0, games: 0 };
+  try { const td = JSON.parse(saveStore.getItem(LS_TODAY) || 'null'); if (td && td.day === String(dayKey())) todayData = td; } catch (e) { /* 忽略 */ }
+  function todayAdd(k, v) {
+    const tk = String(dayKey());
+    if (todayData.day !== tk) todayData = { day: tk, kills: 0, coins: 0, games: 0 };
+    todayData[k] = (todayData[k] || 0) + v;
+    try { saveStore.setItem(LS_TODAY, JSON.stringify(todayData)); } catch (e) { /* 忽略 */ }
+  }
+  function updateTodayChip() {
+    const el = $('todayChip'); if (!el) return;
+    const t = todayData.day === String(dayKey()) ? todayData : { kills: 0, coins: 0, games: 0 };
+    const on = t.kills + t.coins + t.games > 0;
+    el.style.display = on ? 'block' : 'none';
+    if (on) el.innerHTML = '⚔ 今日 · 击杀 <b>' + t.kills + '</b> · 金币 <b>+' + t.coins + '</b> · 局数 <b>' + t.games + '</b>';
+  }
   const signinReward = (day) => SIGNIN_REWARDS[(Math.max(1, day) - 1) % SIGNIN_REWARDS.length];
   const signinNow = () => {
     const tk = String(todayKey());
@@ -27238,7 +27259,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.70', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.71', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -29984,6 +30005,9 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       bgmRushWaveNow: () => BGM_RUSH_WAVE,
       // —— v0.2.9 金币经济补全验证钩子（?test=1 暴露） ——
       gachaNow: () => drawGacha(),
+      todayStatsNow: () => ({ ...todayData }), todayAddNow: (k, v) => { todayAdd(k, v); return todayData; },
+      todayResetNow: () => { todayData = { day: String(dayKey()), kills: 0, coins: 0, games: 0 }; try { saveStore.setItem(LS_TODAY, JSON.stringify(todayData)); } catch (e) { /* 忽略 */ } return true; },
+      todayChipNow: () => { updateTodayChip(); const e = $('todayChip'); return e ? { txt: e.textContent, show: e.style.display !== 'none' } : null; },
       dailyModsForNow: (s) => dailyModsFor(s), tmrModsNow: () => dailyModsFor(dayKey(1)).join('/'),
       tmrModsDomNow: () => { updateDailyHeroTip(); const e = document.querySelector('#dailyModIcons .tmrMods'); return e ? e.textContent : null; },
       dmgNumNow: (x, y, v) => { dmgNum(x, y, v); return texts.length; }, setReducedNow: (v) => { reduceMotion = v; return reduced(); },
