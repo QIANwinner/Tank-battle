@@ -8373,3 +8373,7 @@ html.compact-hud #hud .m-hide { display:none !important; }
 #adBox .adSkip { margin-top: 6px; font-size: 12px; color: #9fb3d9; padding: 8px 18px; border: 1px solid rgba(159,179,217,.35); border-radius: 10px; background: rgba(159,179,217,.08); }
 #adBox .adSkip:hover { color: #e6eeff; border-color: rgba(230,238,255,.55); background: rgba(159,179,217,.16); }
 
+/* v1.2.21 通关结算卡片稳态（避免 .lvCard:hover 误伤结算框抖动）+ SW 更新条可点击 */
+#lvResult .lvCard:hover { transform: none; }
+.swBanner { cursor: pointer; }
+

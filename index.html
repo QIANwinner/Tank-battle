@@ -1856,7 +1856,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.20</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.21</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2828,6 +2828,7 @@
   let levelSecs = 0;                 // —— v0.2.6 本关用时（结算界面） ——
   let lvResultPending = false;       // —— v0.2.6 结算面板是否弹出 ——
   let lvClearDone = false;           // —— v1.1.226 过关一次性闸门：防异常重入刷分 ——
+  let lvClearWatchT = 0;             // —— v1.2.21 清场自愈看门狗帧计数 ——
   let lvStarsNow = 0;                // —— v0.2.6 本关评级星数 ——
   let levelKills = 0;                // —— v0.2.6 本关击杀数（结算界面） ——
   try {
@@ -3678,7 +3679,8 @@
     if (!inside(gx, gy) || map[gy][gx] !== TILE_PORTAL) return;
     const idx = portals.findIndex(p => p[0] === gx && p[1] === gy);
     if (idx < 0) return;
-    const other = portals[1 - idx];
+    const other = portals[idx ^ 1] || portals[(idx + 1) % portals.length];
+    if (!other) return;
     const ox = other[0] * TILE + (TILE - t.size) / 2;
     const oy = other[1] * TILE + (TILE - t.size) / 2;
     t.x = ox; t.y = oy;
@@ -4279,13 +4281,52 @@
     }
   }
 
+  // —— v1.2.21 安全推挤位移：分轴边界钳制 + 地形碰撞拦截，绝不把坦克推进钢墙/水池或推出画布外 ——
+  function pushTankSafe(t, dx, dy) {
+    if (!t) return;
+    const sz = t.size || TANK_SIZE;
+    if (dx !== 0 && isFinite(dx)) {
+      const nx = clamp(t.x + dx, TILE, W - TILE - sz);
+      if (!isBlocked(nx, t.y, sz)) t.x = nx;
+    }
+    if (dy !== 0 && isFinite(dy)) {
+      const ny = clamp(t.y + dy, TILE, H - TILE - sz);
+      if (!isBlocked(t.x, ny, sz)) t.y = ny;
+    }
+  }
+  // —— v1.2.21 敌人脱困看门狗：越出场地当帧拉回，陷入不可通行地形 18 帧自动移至最近空地 ——
+  function unstickEnemy(e) {
+    if (!e || e.dead || (e.isBoss && e.enterT > 0)) return false;
+    const sz = e.size || TANK_SIZE;
+    const out = !isFinite(e.x) || !isFinite(e.y) || e.x < TILE || e.y < TILE || e.x > W - TILE - sz || e.y > H - TILE - sz;
+    if (!out && !isBlocked(e.x, e.y, sz)) { e._stuckT = 0; return false; }
+    if (!out && (e._stuckT = (e._stuckT || 0) + 1) < 18) return false;
+    e._stuckT = 0;
+    const gx0 = clamp(Math.round((isFinite(e.x) ? e.x : TILE) / TILE), 1, COLS - 2);
+    const gy0 = clamp(Math.round((isFinite(e.y) ? e.y : TILE) / TILE), 1, ROWS - 2);
+    for (let r = 0; r <= 6; r++) {
+      for (let dy = -r; dy <= r; dy++) {
+        for (let dx = -r; dx <= r; dx++) {
+          if (Math.abs(dx) !== r && Math.abs(dy) !== r) continue;
+          const gx = gx0 + dx, gy = gy0 + dy;
+          if (gx < 1 || gy < 1 || gx >= COLS - 1 || gy >= ROWS - 1) continue;
+          const px = gx * TILE + (TILE - sz) / 2, py = gy * TILE + (TILE - sz) / 2;
+          if (!isBlocked(px, py, sz)) { e.x = px; e.y = py; return true; }
+        }
+      }
+    }
+    const sp = spawnPoints[0] || [TILE, TILE];
+    e.x = sp[0]; e.y = sp[1];
+    return true;
+  }
+
   function updateEnemy(e, k) {
     if (fx.freeze > 0) return;              // 冻结：不动不射
-    // v0.2.7 近战大招击退：短促爆发位移，期间不移动不射击
+    // v0.2.7 近战大招击退：短促爆发位移（v1.2.21 分步沿地形安全滑退，严禁穿进钢墙/水池死角）
     if (e.kbt > 0) {
       e.kbt -= k;
-      e.x = clamp(e.x + e.kbx * 5 * TILE * k, TILE, W - TILE - e.size);
-      e.y = clamp(e.y + e.kby * 5 * TILE * k, TILE, H - TILE - e.size);
+      const stepN = 6, sx = (e.kbx * 2.2 * TILE * k) / stepN, sy = (e.kby * 2.2 * TILE * k) / stepN;
+      for (let i = 0; i < stepN; i++) pushTankSafe(e, sx, sy);
       return;
     }
     if (e.freezeT > 0) { e.freezeT -= k; if (e.freezeT <= 0) e.freezeT = 0; return; }  // 冰冻子弹：单兵冻结中不动不射
@@ -5053,6 +5094,7 @@
         else spawnParticles(e.x + e.size / 2, e.y + e.size / 2, '#ff9f43', 12);
       } else {
         e.dead = true;
+        stat.kills++; levelKills++; missionBump('kills', 1);
         spawnParticles(e.x + TANK_SIZE / 2, e.y + TANK_SIZE / 2, '#ff9f43', 12);
         score += 50;
       }
@@ -5190,22 +5232,31 @@
       lvMsnEl.hidden = !gained;
       if (gained) $('lvMsnVal').textContent = gained;
     }
-    // 星级弹出动画（逐个点亮）
-    const stars = lvResult.querySelectorAll('.lvStars span');
-    stars.forEach((s, i) => { s.classList.remove('on'); void s.offsetWidth; if (i < lvStarsNow) s.classList.add('on'); });
-    // 记录最佳星级 + 解锁下一关
-    if (lvStarsNow > (levelStars[level] || 0)) {
-      // —— v0.2.7 生涯统计：仅累计本次新增星数 ——
-      career.totalStars += (lvStarsNow - (levelStars[level] || 0));
-      levelStars[level] = lvStarsNow; saveStars();
-      // —— v0.2.7 摘星大师：累计 20 星 ——
-      if (career.totalStars >= 20) unlockAch('star20');
-    }
-    // —— v0.3.2 闪电侠：单关 30 秒内通关 ——
-    if (levelSecs <= 30) unlockAch('speedster');
-    if (maxUnlocked < level + 1) { maxUnlocked = level + 1; saveMaxLv(); }
+    try {
+      // 星级弹出动画（逐个点亮）
+      const stars = lvResult.querySelectorAll('.lvStars span');
+      stars.forEach((s, i) => { s.classList.remove('on'); void s.offsetWidth; if (i < lvStarsNow) s.classList.add('on'); });
+      // 记录最佳星级 + 解锁下一关
+      if (lvStarsNow > (levelStars[level] || 0)) {
+        career.totalStars += (lvStarsNow - (levelStars[level] || 0));
+        levelStars[level] = lvStarsNow; saveStars();
+        if (career.totalStars >= 20) unlockAch('star20');
+      }
+      if (levelSecs <= 30) unlockAch('speedster');
+      if (maxUnlocked < level + 1) { maxUnlocked = level + 1; saveMaxLv(); }
+    } catch (e) { /* 非核心统计异常绝不阻塞过关弹窗 */ }
     lvResultPending = true;
     lvResult.classList.add('show');
+  }
+  // —— v1.2.21 过关弹窗保底拉起：弹窗失败则进下一关，进下一关仍失败则硬切新关，绝不空场死锁 ——
+  function showLvResultSafe() {
+    try { showLvResult(); } catch (e) { /* 忽略 */ }
+    if (!lvResultPending || !lvResult.classList.contains('show')) {
+      try { advanceLevel(); } catch (e2) { /* 忽略 */ }
+    }
+    if (!lvResultPending && !adPending && !upgradeOpen && !lvIntroNext) {
+      level++; lvClearDone = false; startLevel();
+    }
   }
   function claimLvResult() {
     if (!lvResultPending) return;
@@ -5261,7 +5312,8 @@
   function startLevel() {
     bossLevel = (level % 5 === 0);
     tookHitThisLevel = false;
-    lvClearDone = false;             // —— v1.1.226 每关重置过关闸门 ——
+    lvClearDone = false; lvClearWatchT = 0;   // —— v1.2.21 重置过关闸门与看门狗 ——
+    bossDeathT = 0; timeScale = 1;
     levelSecs = 0; levelKills = 0;      // —— v0.2.6 本关计时与击杀重置 ——
     enemiesSpawned = 0;
     // —— v0.2.6 无尽模式：敌人数量随波次递增（封顶 2.5x） ——
@@ -5502,7 +5554,7 @@
 
     updateSpawning(k);
 
-    // 玩家与敌人碰撞（v0.2.7 双人：P1/P2 各自推开）
+    // 玩家与敌人碰撞（v1.2.21 pushTankSafe 分轴防穿墙+防出界）
     for (const p of [player, player2]) {
       if (!p || p.dead) continue;
       for (const e of enemies) {
@@ -5512,14 +5564,14 @@
           const dx = p.x - e.x, dy = p.y - e.y;
           const len = Math.hypot(dx, dy) || 1;
           const push = 0.5 * k;
-          p.x += dx / len * push; p.y += dy / len * push;
-          e.x -= dx / len * push; e.y -= dy / len * push;
+          pushTankSafe(p, dx / len * push, dy / len * push);
+          pushTankSafe(e, -dx / len * push, -dy / len * push);
           if (p === player) clampPlayer(); else clampPlayer2();
           e.changeTimer = Math.min(e.changeTimer, 10);
         }
       }
     }
-    // —— v0.3.2 僚机与敌人碰撞推开（防止叠模） ——
+    // —— v0.3.2 僚机与敌人碰撞推开（v1.2.21 pushTankSafe 防把敌人推进钢墙/画布外） ——
     if (wingman && !wingman.dead) {
       for (const e of enemies) {
         if (e.dead) continue;
@@ -5528,22 +5580,21 @@
           const dx = wingman.x - e.x, dy = wingman.y - e.y;
           const len = Math.hypot(dx, dy) || 1;
           const push = 0.5 * k;
-          wingman.x += dx / len * push; wingman.y += dy / len * push;
-          e.x -= dx / len * push; e.y -= dy / len * push;
-          wingman.x = clamp(wingman.x, TILE, W - TILE - wingman.size);
-          wingman.y = clamp(wingman.y, TILE, H - TILE - wingman.size);
+          pushTankSafe(wingman, dx / len * push, dy / len * push);
+          pushTankSafe(e, -dx / len * push, -dy / len * push);
           e.changeTimer = Math.min(e.changeTimer, 10);
         }
       }
     }
+    // —— v1.2.21 存活敌人越界/陷墙脱困看门狗 ——
+    for (const e of enemies) unstickEnemy(e);
 
     if (!baseAlive) { endGame(false); return; }
 
     // 敌人全灭 → 过关奖励 + 关卡过渡（成就判定；Boss 需等死亡演出结束；强化面板弹出时不再重复触发）
     // —— v0.2.7 对抗模式：无敌人，跳过过关判定 ——
     if (multiMode !== 2 && running && !lvClearDone && !upgradeOpen && enemies.length === 0 && enemiesSpawned >= enemiesTotal && bossDeathT <= 0) {
-      // —— v1.1.226 过关防线：先落闸门再结算，任何异常都不许软锁本关 ——
-      lvClearDone = true;
+      lvClearDone = true; lvClearWatchT = 0;
       try {
         const bonus = 1000 + level * 200;
         score += bonus;
@@ -5552,15 +5603,18 @@
         if (!tookHitThisLevel) unlockAch('nohit');
         if (score >= 5000) unlockAch('score5k');
         sfxLevel();
-        // —— v0.2.6 过关结算界面：星级 + 额外金币，继续后再进三选一 ——
-        lvIntroNext = false;
-        showLvResult();
-        updateHud();
-      } catch (err) {
-        try { showToast('结算异常 · 已直接进入下一关'); } catch (e2) { /* 忽略 */ }
-        try { advanceLevel(); } catch (e2) { /* 忽略 */ }
-      }
+      } catch (err) { /* 奖励播报异常不阻塞过关结算 */ }
+      lvIntroNext = false;
+      showLvResultSafe();
+      try { updateHud(); } catch (e2) { /* 忽略 */ }
       return;
+    }
+    // —— v1.2.21 清场自愈看门狗：若全灭且无任何转换弹层打开持续 15 帧，自动补弹结算框 ——
+    if (multiMode !== 2 && running && !gameOver && enemies.length === 0 && enemiesSpawned >= enemiesTotal && bossDeathT <= 0 &&
+        lvClearDone && !lvResultPending && !adPending && !upgradeOpen && !milestoneOpen && !(lvIntroT > 0)) {
+      if (++lvClearWatchT >= 15) { lvClearWatchT = 0; showLvResultSafe(); return; }
+    } else {
+      lvClearWatchT = 0;
     }
 
     updateParticles(dt, k);   // v0.3.15 池化推进+回收（原地压缩，替代 filter 每帧分配）
@@ -24662,7 +24716,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     gameOver = false; paused = false; won = false;
     bestAtStart = best;
     lastLives = -1; lastCombo = -1; lastLives2 = -1;
-    hurtFlash = 0; hitStop = 0; bossWarn = 0;
+    hurtFlash = 0; hitStop = 0; bossWarn = 0; bossDeathT = 0; timeScale = 1; lvClearWatchT = 0;
     resetStat();
     achNew = [];
     ultWaves = []; ultFlash = 0;      // v0.2.7 近战大招特效清理
@@ -26537,7 +26591,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     lvResultPending = false; lvResult.classList.remove('show'); adBox.classList.remove('show'); lvClearDone = false;
     closeMilestone();   // —— v1.1.234 庆典弹层同样清出菜单 ——
     closeMissions(); closeSignin(); closeShop(); closeSaveBox(); closeAch(); closeCareerRep(); closeCareer(); closeLevelSelect(); closeEditor();   // —— v1.2.9 全部菜单弹层清出 ——
-    enemySpawnTimer = 0; lvIntroT = 0; lvIntroNext = false;
+    enemySpawnTimer = 0; lvIntroT = 0; lvIntroNext = false; bossDeathT = 0; timeScale = 1; lvClearWatchT = 0;
     lastLives = -1; lastCombo = -1; hitStop = 0;
     hideUpgradeBox();
     resetStat();
@@ -26710,7 +26764,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.20', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.21', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -26975,11 +27029,29 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (lvSelect.classList.contains('show')) { closeLevelSelect(); return; }
     if (editorBox.classList.contains('show')) { closeEditor(); return; }
     if (milestone.classList.contains('show')) { closeMilestone(); return; }
+    if (adPending) { skipAd(); return; }
+    if (upgradeOpen) { advanceLevel(); return; }
   });
 
   window.addEventListener('keydown', (e) => {
     if (isTypingTarget(e.target)) return;   // —— v1.1.234 打字不进 keys、不吞空格/方向键、不触发快捷键 ——
     if (panelOpen()) return;   // —— v1.2.9 弹层开着时快捷键不进游戏 ——
+    // —— v1.2.21 过关转换弹层键盘直达：Enter/空格继续结算，Enter 领内测金币，1/2/3 选强化卡 ——
+    if (lvResultPending) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); ensureAudio(); claimLvResult(); }
+      return;
+    }
+    if (adPending) {
+      if (e.key === 'Enter') { e.preventDefault(); ensureAudio(); claimAd(); }
+      return;
+    }
+    if (upgradeOpen) {
+      if (e.key === '1' || e.key === '2' || e.key === '3') {
+        const card = upgradeBox.querySelector('.upCard[data-i="' + (Number(e.key) - 1) + '"]:not(.locked)');
+        if (card) { e.preventDefault(); card.click(); }
+      }
+      return;
+    }
     keys[e.key] = true;
     smKeyMark = performance.now();
     if (e.key === 'p' || e.key === 'P') togglePause();
@@ -27335,6 +27407,13 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       spawnEBulletAt: (x, y, dir) => { perfPoolSpawn(x, y, 4, dir == null ? 4 : dir, BULLET_SPEED * 0.8, enemies.find(e => !e.dead) || { isPlayer: false }, 0, false); return bullets.length; },
       blockSpawnPoints: () => { let n = 0; for (const c of spawnPoints) { if (!c) continue; enemies.push({ x: c[0], y: c[1], size: TANK_SIZE, color: '#88aacc', type: 'normal', hp: 999, maxHp: 999, dead: false, freezeT: 1e9, hitFlash: 0, portalCd: 0, kbt: 0, changeTimer: 0 }); n++; } return n; },
       adResetNow: () => { adClaimed = false; adPending = false; if (adBox) adBox.classList.remove('show'); return true; },
+      // —— v1.2.21 清场防卡死验证钩子 ——
+      pushTankSafeNow: (t, dx, dy) => { pushTankSafe(t, dx, dy); return t ? { x: t.x, y: t.y } : null; },
+      unstickEnemyNow: (e) => unstickEnemy(e),
+      isBlockedNow: (x, y, sz) => isBlocked(x, y, sz || TANK_SIZE),
+      setLvClearDoneNow: (v) => { lvClearDone = !!v; lvClearWatchT = 0; return lvClearDone; },
+      lvKillCountNow: () => levelKills,
+      bombEnemiesNow: () => { bombEnemies(); return { kills: stat.kills, lvKills: levelKills }; },
       addStat: (k, v) => { stat[k] = (stat[k] || 0) + v; },
       // —— Boss 验证用 ——
       setBossHp: (n) => { const b = enemies.find(e => e.isBoss && !e.dead); if (b) b.hp = n; },
@@ -29755,11 +29834,24 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     };
   }
 
-  // ===== Service Worker：离线可玩（http/https 环境注册） =====
+  // ===== Service Worker：离线可玩 + 新版自动平滑接管 =====
+  const swBannerEl = document.getElementById('swBanner');
+  if (swBannerEl) swBannerEl.addEventListener('click', () => { try { location.reload(); } catch (e) {} });
   if ('serviceWorker' in navigator &&
       (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+    let swRefreshing = false;
+    try {
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (swRefreshing || __testMode || running) return;
+        swRefreshing = true;
+        try { location.reload(); } catch (e) {}
+      });
+    } catch (e) {}
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').then((reg) => { try { reg.addEventListener('updatefound', () => { swUpdateFound(); }); } catch (e) { /* 忽略 */ } }).catch(() => { /* 注册失败不影响游戏 */ });
+      navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then((reg) => {
+        try { const u = reg.update(); if (u && u.catch) u.catch(() => {}); } catch (e) {}
+        try { reg.addEventListener('updatefound', () => { swUpdateFound(); }); } catch (e) { /* 忽略 */ }
+      }).catch(() => { /* 注册失败不影响游戏 */ });
     });
   }
 })();

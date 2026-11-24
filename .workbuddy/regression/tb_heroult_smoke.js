@@ -26897,127 +26897,6 @@ async function main() {
     return has || JSON.stringify({ t });
   });
 
-
-  // U9387–U9395: 过关链软锁修复（转换期世界冻结 / 残弹防线 / 出生点看门狗）
-  await senseCheck("U9387 结算层期间世界冻结·残弹不伤基地", async (T,$) => {
-    const Z = ms => new Promise(r => setTimeout(r, ms));
-    T.setBonus({}); T.startGame(); T.skipIntro(); T.invul(99999);
-    for (let i = 0; i < 150 && !T.lvResultNow().show; i++) { let kk = 0; while (kk++ < 300 && (T.r18enNow() || []).some(e => !e.dead)) T.kill(); await Z(150); }
-    if (!T.lvResultNow().show) { T.quit(); return 'no lvResult'; }
-    const br = T.baseRectNow();
-    T.spawnEBulletAt(br.x + br.w / 2 - 2, br.y + 2, 4);
-    await Z(400);
-    const ok = T.baseAliveNow() === true && T.runningNow() === true && T.lvResultNow().show === true;
-    T.quit();
-    return ok || JSON.stringify({ base: T.baseAliveNow(), run: T.runningNow(), res: T.lvResultNow().show });
-  });
-  await senseCheck("U9388 对照组·无弹层时残弹确实毁基地（注入器有效）", async (T,$) => {
-    const Z = ms => new Promise(r => setTimeout(r, ms));
-    T.startGame(); T.skipIntro();
-    const br = T.baseRectNow();
-    T.spawnEBulletAt(br.x + br.w / 2 - 2, br.y + 2, 4);
-    for (let i = 0; i < 60 && T.baseAliveNow() === true; i++) await Z(60);
-    const dead = T.baseAliveNow() === false;
-    for (let i = 0; i < 120 && !T.gameOverNow(); i++) await Z(80);
-    const ok = dead && T.gameOverNow() === true;
-    T.quit();
-    return ok || JSON.stringify({ base: T.baseAliveNow(), go: T.gameOverNow() });
-  });
-  await senseCheck("U9389 广告层期间世界冻结·残弹不伤基地", async (T,$) => {
-    const Z = ms => new Promise(r => setTimeout(r, ms));
-    T.setBonus({}); T.startGame(); T.skipIntro(); T.invul(99999); T.adResetNow();
-    for (let i = 0; i < 150 && !T.lvResultNow().show; i++) { let kk = 0; while (kk++ < 300 && (T.r18enNow() || []).some(e => !e.dead)) T.kill(); await Z(150); }
-    if (!T.lvResultNow().show) { T.quit(); return 'no lvResult'; }
-    T.claimLvNow(); await Z(200);
-    if (!T.adState().pending) { T.quit(); return 'ad not pending: ' + JSON.stringify(T.adState()); }
-    const br = T.baseRectNow();
-    T.spawnEBulletAt(br.x + br.w / 2 - 2, br.y + 2, 4);
-    await Z(400);
-    const ok = T.baseAliveNow() === true && T.runningNow() === true && T.adState().pending === true;
-    T.quit();
-    return ok || JSON.stringify({ base: T.baseAliveNow(), run: T.runningNow(), ad: T.adState() });
-  });
-  await senseCheck("U9390 强化层期间世界冻结·残弹不伤基地", async (T,$) => {
-    const Z = ms => new Promise(r => setTimeout(r, ms));
-    T.setBonus({}); T.startGame(); T.skipIntro(); T.invul(99999); T.adResetNow();
-    for (let i = 0; i < 150 && !T.lvResultNow().show; i++) { let kk = 0; while (kk++ < 300 && (T.r18enNow() || []).some(e => !e.dead)) T.kill(); await Z(150); }
-    if (!T.lvResultNow().show) { T.quit(); return 'no lvResult'; }
-    T.claimLvNow(); await Z(150);
-    if (T.adState().pending) { document.getElementById('btnAdSkip').click(); await Z(200); }
-    if (!T.adState().upgradeOpen) { T.quit(); return 'upgrade not open: ' + JSON.stringify(T.adState()); }
-    const br = T.baseRectNow();
-    T.spawnEBulletAt(br.x + br.w / 2 - 2, br.y + 2, 4);
-    await Z(400);
-    const ok = T.baseAliveNow() === true && T.runningNow() === true && T.adState().upgradeOpen === true;
-    T.quit();
-    return ok || JSON.stringify({ base: T.baseAliveNow(), run: T.runningNow(), up: T.adState() });
-  });
-  await senseCheck("U9391 advanceLevel 强制恢复 running/gameOver", async (T,$) => {
-    T.startGame(); T.skipIntro();
-    T.endGame(false);
-    const wasDead = T.gameOverNow() === true && T.runningNow() === false;
-    T.advanceLevelNow();
-    const ok = wasDead && T.runningNow() === true && T.gameOverNow() === false && T.levelNow() === 2;
-    T.quit();
-    return ok || JSON.stringify({ wasDead, run: T.runningNow(), go: T.gameOverNow(), lv: T.levelNow() });
-  });
-  await senseCheck("U9392 出生点全堵看门狗强制补刷", async (T,$) => {
-    const Z = ms => new Promise(r => setTimeout(r, ms));
-    T.startGame(); T.skipIntro();
-    const n = T.blockSpawnPoints();
-    for (let i = 0; i < 140 && T.enemiesSpawnedNow() === 0; i++) await Z(80);
-    const ok = n >= 3 && T.enemiesSpawnedNow() >= 1;
-    T.quit();
-    return ok || JSON.stringify({ n, sp: T.enemiesSpawnedNow(), tot: T.enemiesTotalNow() });
-  });
-  await senseCheck("U9393 新关 spawnBlockT 归零", (T,$) => {
-    T.startGame(); T.skipIntro();
-    const ok = T.spawnBlockNow() === 0;
-    T.quit();
-    return ok || ('spawnBlockT=' + T.spawnBlockNow());
-  });
-  await senseCheck("U9394 端到端·残弹在飞仍进第 2 关且世界运转", async (T,$) => {
-    const Z = ms => new Promise(r => setTimeout(r, ms));
-    T.setBonus({}); T.startGame(); T.skipIntro(); T.invul(99999); T.adResetNow();
-    for (let i = 0; i < 150 && !T.lvResultNow().show; i++) { let kk = 0; while (kk++ < 300 && (T.r18enNow() || []).some(e => !e.dead)) T.kill(); await Z(150); }
-    if (!T.lvResultNow().show) { T.quit(); return 'no lvResult'; }
-    const br = T.baseRectNow();
-    T.spawnEBulletAt(br.x + br.w / 2 - 2, br.y + 2, 4);
-    await Z(350);
-    if (T.baseAliveNow() !== true) { T.quit(); return 'base died during result'; }
-    document.getElementById('btnLvNext').click(); await Z(180);
-    if (T.adState().pending) { document.getElementById('btnAdSkip').click(); await Z(180); }
-    if (!T.adState().upgradeOpen) { T.quit(); return 'no upgrade: ' + JSON.stringify(T.adState()); }
-    const card = document.querySelector('#upgradeBox .upCard:not(.locked)') || document.querySelector('#upgradeBox .upCard');
-    if (card) card.click(); else T.advanceLevelNow();
-    for (let i = 0; i < 80 && T.levelNow() !== 2; i++) await Z(80);
-    for (let i = 0; i < 120 && T.enemiesSpawnedNow() === 0; i++) await Z(100);
-    const ok = T.levelNow() === 2 && T.enemiesSpawnedNow() > 0 && T.runningNow() === true && T.gameOverNow() === false;
-    T.quit();
-    return ok || JSON.stringify({ lv: T.levelNow(), sp: T.enemiesSpawnedNow(), run: T.runningNow(), go: T.gameOverNow() });
-  });
-  await senseCheck("U9395 广告跳过链按钮化（可见可点）", (T,$) => {
-    const el = document.getElementById('btnAdSkip');
-    const s = getComputedStyle(el);
-    return (parseFloat(s.borderTopWidth) >= 1 && s.cursor === 'pointer' && parseFloat(s.paddingTop) >= 6) || JSON.stringify({ bw: s.borderTopWidth, cur: s.cursor, pad: s.paddingTop });
-  });
-  await senseCheck("U9396 绕过 claim 直进下一关：转换态全量清场", async (T,$) => {
-    const raf = () => new Promise(requestAnimationFrame);
-    T.setBonus({}); T.startGame(); T.skipIntro(); T.invul(99999);
-    T.forceClear();
-    const end = performance.now() + 3000;
-    while (!T.lvResultNow().show && performance.now() < end) await raf();
-    if (!T.lvResultNow().show) { T.quit(); return 'no lvResult'; }
-    T.advanceLevelNow();
-    const gone = T.lvResultNow().pending === false && !document.getElementById('lvResult').classList.contains('show');
-    const end2 = performance.now() + 5000;
-    while (T.lvClearDoneNow() !== false && performance.now() < end2) await raf();
-    const ok = gone && T.lvClearDoneNow() === false && T.levelNow() === 2 && T.runningNow() === true;
-    T.quit();
-    return ok || JSON.stringify({ gone, cd: T.lvClearDoneNow(), lv: T.levelNow(), run: T.runningNow() });
-  });
-
-
   // U9387–U9396: 过关链软锁修复（转换期世界冻结 / 残弹防线 / 出生点看门狗）
   await senseCheck("U9387 结算层期间世界冻结·残弹不伤基地", async (T,$) => {
     const Z = ms => new Promise(r => setTimeout(r, ms));
@@ -27135,6 +27014,128 @@ async function main() {
     const ok = gone && T.lvClearDoneNow() === false && T.levelNow() === 2 && T.runningNow() === true;
     T.quit();
     return ok || JSON.stringify({ gone, cd: T.lvClearDoneNow(), lv: T.levelNow(), run: T.runningNow() });
+  });
+
+
+  // U9397–U9406: 清场防卡死全链路（防推入钢墙出界 / 大招防穿墙 / 敌人脱困看门狗 / 清场自愈看门狗 / 键盘过关）
+  await senseCheck("U9397 贴墙持续顶撞敌人：敌人绝不进入外围钢墙或画布外，可被正常射杀清场", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(24, 24, 'normal');
+    const e = T.r18enNow().find(x => !x.dead);
+    T.tp(24, 36); T.keySet('w', true);
+    await Z(900);
+    T.keySet('w', false);
+    const inBounds = e.x >= 24 && e.y >= 24 && e.x <= 624 - 24 - 22 && e.y <= 624 - 24 - 22 && !T.isBlockedNow(e.x, e.y, e.size);
+    T.tp(e.x, Math.min(560, e.y + 72)); T.setDir(0);
+    for (let i = 0; i < 8 && !e.dead; i++) { T.fireOnce(); await Z(70); }
+    await Z(200);
+    const killed = !!e.dead;
+    T.quit();
+    return (inBounds && killed) || JSON.stringify({ inBounds, killed, ex: e.x, ey: e.y });
+  });
+  await senseCheck("U9398 pushTankSafe 分轴防穿墙且钳制在合法场地内", (T,$) => {
+    T.startGame(); T.skipIntro(); T.stopSpawn();
+    const dummy = { x: 24, y: 24, size: 22 };
+    T.pushTankSafeNow(dummy, -500, -500);
+    const ok1 = dummy.x === 24 && dummy.y === 24;
+    T.pushTankSafeNow(dummy, 9999, 9999);
+    const ok2 = dummy.x <= 624 - 24 - 22 && dummy.y <= 624 - 24 - 22 && !T.isBlockedNow(dummy.x, dummy.y, 22);
+    T.quit();
+    return (ok1 && ok2) || JSON.stringify({ ok1, ok2, dummy });
+  });
+  await senseCheck("U9399 近战大招 E 击退残血敌人绝不穿入 2x2 钢墙或水池死角", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    document.querySelector('#randMapSeg [data-rand="0"]').click();
+    T.startAtLevel(8); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(96, 252, 'elite');
+    const e = T.r18enNow().find(x => !x.dead);
+    e.hp = 6; e.maxHp = 6;
+    T.tp(72, 252);
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'e' }));
+    window.dispatchEvent(new KeyboardEvent('keyup', { key: 'e' }));
+    await Z(450);
+    const ok = !e.dead && !T.isBlockedNow(e.x, e.y, e.size) && e.x >= 24 && e.x <= 578;
+    T.quit();
+    return ok || JSON.stringify({ ex: e.x, ey: e.y, dead: e.dead, blocked: T.isBlockedNow(e.x, e.y, e.size) });
+  });
+  await senseCheck("U9400 越界敌人被脱困看门狗当帧拉回合法空地", async (T,$) => {
+    const raf = () => new Promise(requestAnimationFrame);
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(24, 24, 'normal');
+    const e = T.r18enNow().find(x => !x.dead);
+    e.x = -80; e.y = -80;
+    await raf(); await raf();
+    const ok = e.x >= 24 && e.y >= 24 && !T.isBlockedNow(e.x, e.y, e.size);
+    T.quit();
+    return ok || JSON.stringify({ ex: e.x, ey: e.y });
+  });
+  await senseCheck("U9401 陷在钢墙里的敌人 0.5 秒内自动脱困到可通行格", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    document.querySelector('#randMapSeg [data-rand="0"]').click();
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(132, 252, 'normal');
+    const e = T.r18enNow().find(x => !x.dead);
+    const initiallyBlocked = T.isBlockedNow(e.x, e.y, e.size);
+    await Z(600);
+    const freed = !T.isBlockedNow(e.x, e.y, e.size) && e.x >= 24 && e.y >= 24;
+    T.quit();
+    return (initiallyBlocked && freed) || JSON.stringify({ initiallyBlocked, freed, ex: e.x, ey: e.y });
+  });
+  await senseCheck("U9402 清场自愈看门狗：就算 lvClearDone 被意外锁死且无弹窗，0.5 秒内自动补弹出结算框", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999);
+    T.forceClear();
+    T.setLvClearDoneNow(true);
+    document.getElementById('lvResult').classList.remove('show');
+    await Z(600);
+    const ok = T.lvResultNow().show === true && T.lvResultNow().pending === true;
+    T.quit();
+    return ok || JSON.stringify(T.lvResultNow());
+  });
+  await senseCheck("U9403 全屏炸弹道具炸死敌人同步计入本关击杀与总击杀", (T,$) => {
+    T.startGame(); T.skipIntro(); T.stopSpawn();
+    const k0 = T.stat().kills, lk0 = T.lvKillCountNow();
+    T.spawnFoeNow(24, 24, 'normal');
+    T.spawnFoeNow(312, 24, 'normal');
+    const r = T.bombEnemiesNow();
+    const ok = r.kills === k0 + 2 && r.lvKills === lk0 + 2;
+    T.quit();
+    return ok || JSON.stringify({ k0, lk0, r });
+  });
+  await senseCheck("U9404 过关弹层全流程支持键盘操作：Enter继续结算 → Enter领金币 → 数字键1选强化 → 进第2关", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.setBonus({}); T.startGame(); T.skipIntro(); T.invul(99999); T.adResetNow();
+    T.forceClear();
+    for (let i = 0; i < 40 && !T.lvResultNow().show; i++) await Z(60);
+    if (!T.lvResultNow().show) { T.quit(); return 'no lvResult'; }
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
+    await Z(120);
+    if (!T.adState().pending) { T.quit(); return 'ad not pending'; }
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', cancelable: true }));
+    await Z(120);
+    if (!T.adState().upgradeOpen) { T.quit(); return 'upgrade not open'; }
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: '1', cancelable: true }));
+    await Z(150);
+    const ok = T.levelNow() === 2 && T.runningNow() === true;
+    T.quit();
+    return ok || JSON.stringify({ lv: T.levelNow(), run: T.runningNow() });
+  });
+  await senseCheck("U9405 结算弹窗卡片 hover 不位移抖动，SW 横幅具备点击手型", (T,$) => {
+    const cur = getComputedStyle(document.getElementById('swBanner')).cursor;
+    return cur === 'pointer' || ('cursor=' + cur);
+  });
+  await senseCheck("U9406 僚机贴墙围殴敌人时同样不把敌人推出场地，第 1 关顺利弹结算框", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.setWingman(true); T.startGame(); T.skipIntro(); T.invul(99999);
+    for (let i = 0; i < 160 && !T.lvResultNow().show; i++) {
+      let kk = 0;
+      while (kk++ < 50 && (T.r18enNow() || []).some(e => !e.dead)) T.kill();
+      await Z(100);
+    }
+    const ok = T.lvResultNow().show === true;
+    T.quit();
+    return ok || JSON.stringify(T.lvResultNow());
   });
 
   chrome.kill(); killTree(chrome.pid);
