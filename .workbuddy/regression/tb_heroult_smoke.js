@@ -25947,8 +25947,8 @@ async function main() {
   // U9261–U9266: 输入穿透防线 + 庆典弹层清理
   await senseCheck("U9261 typingTargetNow 已暴露且 DOM 判定正确", (T,$) => typeof T.typingTargetNow === 'function' && T.typingTargetNow($('edName')) === true && T.typingTargetNow(document.body) === false && T.typingTargetNow(null) === false && T.typingTargetNow({ isContentEditable: true }) === true);
   await senseCheck("U9262 输入框打字不进 keys", (T,$) => { T.editorOpen(); const el = $('edName'); const before = T.keysNow().length; el.dispatchEvent(new KeyboardEvent('keydown', { key: 'a', bubbles: true })); el.dispatchEvent(new KeyboardEvent('keydown', { key: 'w', bubbles: true })); const leak = T.keysNow().length - before; T.editorClose(); return leak === 0 || leak; });
-  await senseCheck("U9263 输入框空格/方向键不被吞", (T,$) => { T.editorOpen(); const el = $('edName'); const sp = new KeyboardEvent('keydown', { key: ' ', cancelable: true, bubbles: true }); el.dispatchEvent(sp); const ar = new KeyboardEvent('keydown', { key: 'ArrowLeft', cancelable: true, bubbles: true }); el.dispatchEvent(ar); const body = new KeyboardEvent('keydown', { key: ' ', cancelable: true, bubbles: true }); document.body.dispatchEvent(body); T.editorClose(); return (!sp.defaultPrevented && !ar.defaultPrevented && body.defaultPrevented) || JSON.stringify({ sp: sp.defaultPrevented, ar: ar.defaultPrevented, body: body.defaultPrevented }); });
-  await senseCheck("U9264 存档框打 m 不触发静音", (T,$) => { T.openSaveNow(); const el = $('saveCode'); const before = T.mutedNow(); el.dispatchEvent(new KeyboardEvent('keydown', { key: 'm', bubbles: true })); const same = T.mutedNow() === before; document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'm', bubbles: true })); const flipped = T.mutedNow() !== before; document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'm', bubbles: true })); const back = T.mutedNow() === before; $('saveBox').classList.remove('show'); return (same && flipped && back) || JSON.stringify({ same, flipped, back }); });
+  await senseCheck("U9263 输入框空格/方向键不被吞", (T,$) => { T.editorOpen(); const el = $('edName'); const sp = new KeyboardEvent('keydown', { key: ' ', cancelable: true, bubbles: true }); el.dispatchEvent(sp); const ar = new KeyboardEvent('keydown', { key: 'ArrowLeft', cancelable: true, bubbles: true }); el.dispatchEvent(ar); T.editorClose(); const body = new KeyboardEvent('keydown', { key: ' ', cancelable: true, bubbles: true }); document.body.dispatchEvent(body); return (!sp.defaultPrevented && !ar.defaultPrevented && body.defaultPrevented) || JSON.stringify({ sp: sp.defaultPrevented, ar: ar.defaultPrevented, body: body.defaultPrevented }); });
+  await senseCheck("U9264 存档框打 m 不触发静音", (T,$) => { T.openSaveNow(); const el = $('saveCode'); const before = T.mutedNow(); el.dispatchEvent(new KeyboardEvent('keydown', { key: 'm', bubbles: true })); const same = T.mutedNow() === before; $('saveBox').classList.remove('show'); document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'm', bubbles: true })); const flipped = T.mutedNow() !== before; document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'm', bubbles: true })); const back = T.mutedNow() === before; return (same && flipped && back) || JSON.stringify({ same, flipped, back }); });
   await senseCheck("U9265 退出菜单清理庆典", (T,$) => { T.startGame(); T.skipIntro(); T.triggerMilestone(); const open = T.milestoneOpenNow() && T.milestoneShowNow(); T.quit(); return (open && !T.milestoneOpenNow() && !T.milestoneShowNow()) || JSON.stringify({ open, o: T.milestoneOpenNow(), s: T.milestoneShowNow() }); });
   await senseCheck("U9266 开局清理庆典", (T,$) => { T.startGame(); T.skipIntro(); T.triggerMilestone(); T.startGame(); T.skipIntro(); const clean = !T.milestoneOpenNow() && !T.milestoneShowNow(); T.quit(); return clean; });
 
@@ -26386,6 +26386,60 @@ async function main() {
     const ok = cs && cs.borderRadius !== '0px' && cs.fontVariantNumeric === 'tabular-nums';
     T.quit();
     return ok || JSON.stringify({ cs: cs && cs.borderRadius });
+  });
+
+
+  // U9321–U9326: 键盘弹层防线
+  await senseCheck("U9321 Esc 关任务面板", (T,$) => {
+    T.missionOpenNow();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    return !$('missionBox').classList.contains('show') || 'still open';
+  });
+  await senseCheck("U9322 Esc 逐层只关最上层", (T,$) => {
+    T.missionOpenNow(); T.openSigninNow ? T.openSigninNow() : $('signinBox').classList.add('show');
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    const l1 = $('signinBox').classList.contains('show') && !$('missionBox').classList.contains('show');
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    const l2 = !$('signinBox').classList.contains('show');
+    return (l1 && l2) || JSON.stringify({ l1, l2 });
+  });
+  await senseCheck("U9323 Esc 关商店与签到", (T,$) => {
+    $('shopBox').classList.add('show');
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    const shop = !$('shopBox').classList.contains('show');
+    $('signinBox').classList.add('show');
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    const sig = !$('signinBox').classList.contains('show');
+    return (shop && sig) || JSON.stringify({ shop, sig });
+  });
+  await senseCheck("U9324 面板开着 Enter 不进 keys", (T,$) => {
+    T.missionOpenNow();
+    const before = T.keysNow().length;
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    const leak = T.keysNow().length - before;
+    const open = T.panelOpenNow();
+    T.missionCloseNow();
+    return (leak === 0 && open) || JSON.stringify({ leak, open });
+  });
+  await senseCheck("U9325 面板开着 m 不触发静音", (T,$) => {
+    T.missionOpenNow();
+    const m0 = T.mutedNow();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'm' }));
+    const same = T.mutedNow() === m0;
+    T.missionCloseNow();
+    ['missionBox','signinBox','shopBox','saveBox','achBox','careerRepBox','careerBox','lvSelect','editorBox','milestone'].forEach(id => { const x = $(id); if (x) x.classList.remove('show'); });
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'm' }));
+    const flipped = T.mutedNow() !== m0;
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'm' }));
+    const back = T.mutedNow() === m0;
+    return (same && flipped && back) || JSON.stringify({ same, flipped, back });
+  });
+  await senseCheck("U9326 start 清理菜单弹层", (T,$) => {
+    T.missionOpenNow(); $('signinBox').classList.add('show');
+    T.startGame(); T.skipIntro();
+    const clean = !$('missionBox').classList.contains('show') && !$('signinBox').classList.contains('show') && !$('shopBox').classList.contains('show');
+    T.quit();
+    return clean || 'panels left open';
   });
 
   chrome.kill(); killTree(chrome.pid);
