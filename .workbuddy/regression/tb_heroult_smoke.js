@@ -28293,6 +28293,32 @@ async function main() {
     return closed || 'still open';
   });
 
+  // U9542–U9544: 收藏皮肤
+  await senseCheck("U9542 收藏切换状态", async (T,$) => {
+    const r1 = T.favSkinTglNow('classic');
+    const on = T.favSkinNow().includes('classic');
+    const r2 = T.favSkinTglNow('classic');
+    const off = !T.favSkinNow().includes('classic');
+    return (r1 === true && on && r2 === false && off) || JSON.stringify({ r1, on, r2, off });
+  });
+  await senseCheck("U9543 收藏皮肤排序置顶", async (T,$) => {
+    const order = T.skinOrderNow();
+    if (!order.length) return 'no items';
+    const pick = order[order.length - 1];
+    T.favSkinSetNow(pick, true);
+    const order2 = T.skinOrderNow();
+    const ok = order2[0] === pick;
+    T.favSkinSetNow(pick, false);
+    return ok || JSON.stringify({ first: order2[0], pick });
+  });
+  await senseCheck("U9544 收藏星标DOM渲染", async (T,$) => {
+    T.favSkinSetNow('classic', true);
+    T.skinOrderNow();
+    const ok = !!document.querySelector('#shopBody .favStar.on');
+    T.favSkinSetNow('classic', false);
+    return ok || 'no star';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
