@@ -28395,6 +28395,32 @@ async function main() {
     return (c0 && c0.show === false && c1 && c1.show === true) || JSON.stringify({ c0, c1 });
   });
 
+  // U9557–U9559: 换关重入锁
+  await senseCheck("U9557 连续两次换关只进一关", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const lv0 = T.levelNow ? T.levelNow() : null;
+    T.advanceLevelNow(); const r2 = T.advanceLevelNow();
+    const lv1 = T.levelNow ? T.levelNow() : null;
+    T.quit();
+    return (lv0 !== null && lv1 === lv0 + 1) || JSON.stringify({ lv0, lv1, r2 });
+  });
+  await senseCheck("U9558 重入时锁为true", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.advanceLevelNow();
+    const lk = T.lvAdvLockNow();
+    T.setLvAdvLockNow(false);
+    T.quit();
+    return lk === true || 'lock off';
+  });
+  await senseCheck("U9559 手动释放锁后可再次换关", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const lv0 = T.levelNow();
+    T.advanceLevelNow(); T.setLvAdvLockNow(false); T.advanceLevelNow();
+    const lv1 = T.levelNow();
+    T.quit();
+    return (lv1 === lv0 + 2) || JSON.stringify({ lv0, lv1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
