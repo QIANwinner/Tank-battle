@@ -28017,6 +28017,34 @@ async function main() {
     return (rows === h && rows > 0) || JSON.stringify({ rows, h });
   });
 
+  // U9506–U9508: 周任务迷你条
+  await senseCheck("U9506 每日页签渲染迷你条 N/3", async (T,$) => {
+    T.msnOpenNow('daily');
+    const el = document.querySelector('#msnBody .wkMini span');
+    const ok = !!el && /本周 \d\/3/.test(el.textContent);
+    document.getElementById('missionBox').classList.remove('show');
+    return ok || ('missing wkMini');
+  });
+  await senseCheck("U9507 重置周任务后显示 0/3 且宽度0%", async (T,$) => {
+    T.wmissionResetNow();
+    T.msnOpenNow('daily');
+    const sp = document.querySelector('#msnBody .wkMini span');
+    const bar = document.querySelector('#msnBody .wkMini i b');
+    const ok = !!sp && sp.textContent.indexOf('0/3') >= 0 && !!bar && bar.style.width === '0%';
+    document.getElementById('missionBox').classList.remove('show');
+    return ok || JSON.stringify({ t: sp && sp.textContent, w: bar && bar.style.width });
+  });
+  await senseCheck("U9508 完成1条周任务后迷你条 1/3", async (T,$) => {
+    T.wmissionResetNow();
+    const w = T.wmissionsNow().items[0];
+    T.wmissionBumpNow ? T.wmissionBumpNow(w.type, w.target) : null;
+    T.msnOpenNow('daily');
+    const sp = document.querySelector('#msnBody .wkMini span');
+    const ok = !!sp && /[13]\/3/.test(sp.textContent);
+    document.getElementById('missionBox').classList.remove('show');
+    return ok || ('t:' + (sp && sp.textContent));
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
