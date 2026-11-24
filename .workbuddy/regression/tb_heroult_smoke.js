@@ -27390,6 +27390,47 @@ async function main() {
     return ok || 'rows missing lvIn';
   });
 
+  // U9430–U9432: 金币散落（精英必掉 / 磁吸拾取到账 / 换关清空）
+  await senseCheck("U9430 击毁精英必掉 2 枚金币", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(312, 150, 'elite');
+    await Z(60);
+    T.kill();
+    await Z(80);
+    const n = T.coinDropCountNow();
+    T.quit();
+    return (n >= 2) || JSON.stringify({ n });
+  });
+  await senseCheck("U9431 靠近金币自动磁吸拾取：+3🪙 即时到账", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(312, 150, 'elite');
+    await Z(60);
+    T.kill(); await Z(60);
+    const drops = T.coinDropsNow();
+    if (!drops.length) { T.quit(); return 'no drops'; }
+    const c0 = T.coinsNow();
+    T.tp(drops[0].x - 11, drops[0].y - 11);
+    await Z(400);
+    const gained = T.coinsNow() - c0;
+    T.quit();
+    return (gained >= 3) || JSON.stringify({ drops, gained });
+  });
+  await senseCheck("U9432 换关时散落金币清空", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(312, 150, 'elite');
+    await Z(60);
+    T.kill(); await Z(60);
+    const n0 = T.coinDropCountNow();
+    T.advanceLevelNow();
+    await Z(2000);   // advanceLevel 先播关卡介绍（lvIntroT≈1.5s），startLevel 才真正重建地图清场
+    const n1 = T.coinDropCountNow();
+    T.quit();
+    return (n0 > 0 && n1 === 0) || JSON.stringify({ n0, n1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
