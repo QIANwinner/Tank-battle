@@ -27464,6 +27464,249 @@ async function main() {
     return (pe === 'none') || JSON.stringify({ pe });
   });
 
+  // U9437–U9439: 缓速场道具
+  await senseCheck("U9437 缓速进入道具池且初始 fx.slow=0", async (T,$) => {
+    const list = T.powerupTypesNow();
+    const bs = T.buffStateNow();
+    return (list.includes('slow') && (bs.slow || 0) === 0) || JSON.stringify({ slow: list.includes('slow'), bs });
+  });
+  await senseCheck("U9438 拾取缓速置 fx.slow=6，setBuffNow 可清，文案正确", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.applyPowerupNow('slow');
+    const s1 = T.buffStateNow().slow;
+    const txt = T.buffEndTextNow('slow');
+    T.setBuffNow('slow', 0);
+    const s2 = T.buffStateNow().slow;
+    T.quit();
+    return (s1 === 6 && s2 === 0 && txt === '缓速结束') || JSON.stringify({ s1, s2, txt });
+  });
+  await senseCheck("U9439 setBuffNow 注入缓速可读回", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setBuffNow('slow', 5);
+    const v = T.buffStateNow().slow;
+    T.setBuffNow('slow', 0); T.quit();
+    return (v === 5) || JSON.stringify({ v });
+  });
+
+  // U9440–U9442: 僚机保全奖
+  await senseCheck("U9440 无僚机时表现奖励不含僚机保全", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setTookHitNow(false); T.setLivesNow(3);
+    T.showLvResultNow();
+    const perf = T.lvPerfNow();
+    T.closeUpgrade(); T.quit();
+    return (perf.wing === 0 && perf.gold === 30) || JSON.stringify(perf);
+  });
+  await senseCheck("U9441 僚机存活+无伤：+40 且文案含僚机保全", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setWingAliveNow(true); T.setTookHitNow(false); T.setLivesNow(3);
+    T.showLvResultNow();
+    const perf = T.lvPerfNow();
+    T.closeUpgrade(); T.quit();
+    return (perf.wing === 10 && perf.gold === 40 && /僚机保全/.test(perf.lbl || '')) || JSON.stringify(perf);
+  });
+  await senseCheck("U9442 掉过命且生命充足：仅僚机保全 +10", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setWingAliveNow(true); T.setTookHitNow(true); T.setLivesNow(3);
+    T.showLvResultNow();
+    const perf = T.lvPerfNow();
+    T.closeUpgrade(); T.quit();
+    return (perf.gold === 10 && /僚机保全/.test(perf.lbl || '')) || JSON.stringify(perf);
+  });
+
+  // U9443–U9445: 闪电战首杀奖
+  await senseCheck("U9443 开局首杀触发闪电战并加金币", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.setBlitzOvNow(true);
+    T.spawnFoeNow(312, 100, 'normal'); await Z(60);
+    const c0 = T.coinsNow();
+    T.kill(); await Z(60);
+    const d = T.coinsNow() - c0;
+    const flag = T.blitzNow();
+    T.quit();
+    return (flag === true && d >= 10) || JSON.stringify({ flag, d });
+  });
+  await senseCheck("U9444 闪电战只发一次：第二杀无追加", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.setBlitzOvNow(true);
+    T.spawnFoeNow(312, 100, 'normal'); T.spawnFoeNow(312, 400, 'normal'); await Z(60);
+    let c = T.coinsNow(); T.kill(); await Z(60);
+    const d1 = T.coinsNow() - c;
+    c = T.coinsNow(); T.kill(); await Z(60);
+    const d2 = T.coinsNow() - c;
+    T.quit();
+    return (d1 - d2 >= 10) || JSON.stringify({ d1, d2 });
+  });
+  await senseCheck("U9445 过关后闪电战标记复位", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.setBlitzOvNow(true);
+    T.spawnFoeNow(312, 100, 'normal'); await Z(60); T.kill(); await Z(60);
+    const before = T.blitzNow();
+    T.advanceLevelNow();   // 触发 lvIntro 过场→startLevel（约1.5s）
+    let after = T.blitzNow();
+    for (let i = 0; i < 30 && after; i++) { await Z(150); after = T.blitzNow(); }
+    T.setBlitzOvNow(null);
+    T.quit();
+    return (before === true && after === false) || JSON.stringify({ before, after });
+  });
+
+  // U9446–U9448: 生涯击毁里程碑
+  await senseCheck("U9446 killMileHit 纯函数边界正确", async (T,$) => {
+    const a = T.killMileHitNow(0, 600), b = T.killMileHitNow(500, 1600), c = T.killMileHitNow(0, 499), d = T.killMileHitNow(3000, 6500);
+    return (a === 500 && b === 1500 && c === 0 && d === 6000) || JSON.stringify({ a, b, c, d });
+  });
+  await senseCheck("U9447 跨越 500：发 +10 并落档", async (T,$) => {
+    T.setKillMileSeenNow(0); T.setCareerKillsNow(600);
+    const c0 = T.coinsNow();
+    const hit = T.killMileCheckNow();
+    const got = T.coinsNow() - c0, seen = T.killMileSeenNow();
+    T.setKillMileSeenNow(0); T.setCareerKillsNow(0);
+    return (hit === 500 && got === 10 && seen === 500) || JSON.stringify({ hit, got, seen });
+  });
+  await senseCheck("U9448 同档不重复发", async (T,$) => {
+    T.setKillMileSeenNow(500); T.setCareerKillsNow(600);
+    const hit = T.killMileCheckNow();
+    T.setKillMileSeenNow(0); T.setCareerKillsNow(0);
+    return (hit === 0) || JSON.stringify({ hit });
+  });
+
+  // U9449–U9451: 基地维修包
+  await senseCheck("U9449 维修进入道具池且基地墙计数可读", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const list = T.powerupTypesNow();
+    const full = T.baseWallsNow(), total = T.baseWallTotalNow();
+    T.quit();
+    return (list.includes('repair') && full === total && total > 0) || JSON.stringify({ has: list.includes('repair'), full, total });
+  });
+  await senseCheck("U9450 拆墙计数正确下降", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const f0 = T.baseWallsNow();
+    const broke = T.baseWallBreakNow(3);
+    const f1 = T.baseWallsNow();
+    T.quit();
+    return (broke === 3 && f1 === f0 - 3) || JSON.stringify({ broke, f0, f1 });
+  });
+  await senseCheck("U9451 拾取维修包重建全部护墙", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.baseWallBreakNow(3);
+    const mid = T.baseWallsNow();
+    T.applyPowerupNow('repair');
+    const after = T.baseWallsNow(), total = T.baseWallTotalNow();
+    T.quit();
+    return (after === total && mid === total - 3) || JSON.stringify({ mid, after, total });
+  });
+
+  // U9452–U9454: 图鉴集齐奖励
+  await senseCheck("U9452 重置后未集齐无奖励", async (T,$) => {
+    T.dexResetNow();
+    const seen = T.dexSeenNow(), rw = T.dexRewardedNow();
+    return (seen === 0 && rw === false) || JSON.stringify({ seen, rw });
+  });
+  await senseCheck("U9453 全部点亮发 +2🐾 并落档", async (T,$) => {
+    T.dexResetNow(); T.dexFillNow();
+    const p0 = T.petCoins();
+    const seen = T.dexAddNow('boss');
+    const p1 = T.petCoins(), rw = T.dexRewardedNow();
+    return (seen >= 8 && rw === true && p1 - p0 === 2) || JSON.stringify({ seen, rw, d: p1 - p0 });
+  });
+  await senseCheck("U9454 集齐后再击杀不重复发奖", async (T,$) => {
+    const p0 = T.petCoins();
+    T.dexAddNow('boss');
+    const p1 = T.petCoins();
+    T.dexResetNow();
+    return (p1 - p0 === 0) || JSON.stringify({ d: p1 - p0 });
+  });
+
+  // U9455–U9457: 周末双倍击毁金
+  await senseCheck("U9455 覆盖开/关：击毁金 ×1.5 / 还原", async (T,$) => {
+    T.setWeekendNow(false); const g0 = T.enemyGoldNow({ isBoss: false, type: 'normal' });
+    T.setWeekendNow(true);  const g1 = T.enemyGoldNow({ isBoss: false, type: 'normal' });
+    T.setWeekendNow(null);
+    return (g1 >= Math.round(g0 * 1.4) && g1 <= Math.round(g0 * 1.6) && g0 >= 1) || JSON.stringify({ g0, g1 });
+  });
+  await senseCheck("U9456 测试模式默认关闭周末加成", async (T,$) => {
+    T.setWeekendNow(null);
+    return (T.weekendNow() === false) || JSON.stringify({ w: T.weekendNow() });
+  });
+  await senseCheck("U9457 覆盖后周末标志可读", async (T,$) => {
+    T.setWeekendNow(true); const w = T.weekendNow(); T.setWeekendNow(null);
+    return (w === true) || JSON.stringify({ w });
+  });
+
+  // U9458–U9460: 宠物币兑金币
+  await senseCheck("U9458 兑换 1🐾 得 ≥120🪙", async (T,$) => {
+    T.setPetCoins(3);
+    const p0 = T.petCoins(), c0 = T.coinsNow();
+    const got = T.petToCoinNow(1);
+    const ok = (got >= 120 && T.petCoins() === p0 - 1 && T.coinsNow() - c0 === got);
+    T.setPetCoins(0);
+    return ok || JSON.stringify({ got, pd: T.petCoins() - p0, cd: T.coinsNow() - c0 });
+  });
+  await senseCheck("U9459 宠物币不足兑换返回 0", async (T,$) => {
+    T.setPetCoins(0);
+    const got = T.petToCoinNow(1);
+    return (got === 0 && T.petCoins() === 0) || JSON.stringify({ got });
+  });
+  await senseCheck("U9460 商店内兑换按钮存在", async (T,$) => {
+    const btn = document.getElementById('xchgBtn');
+    return (!!btn && /120/.test(btn.textContent)) || 'no xchgBtn';
+  });
+
+  // U9461–U9463: 商店数字键速购
+  await senseCheck("U9461 强化页按 1 购入首个强化", async (T,$) => {
+    T.setCoinsNow(9999); T.resetBonusNow(); T.setShopTab('bonus');
+    document.getElementById('shopBox').classList.add('show');
+    const lv0 = T.bonus().lifeup || 0;
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: '1' }));
+    const lv1 = T.bonus().lifeup || 0;
+    document.getElementById('shopBox').classList.remove('show');
+    T.resetBonusNow(); T.setCoinsNow(0);
+    return (lv1 === lv0 + 1) || JSON.stringify({ lv0, lv1 });
+  });
+  await senseCheck("U9462 非强化页签按键不触发购买", async (T,$) => {
+    T.setCoinsNow(9999); T.resetBonusNow(); T.setShopTab('pet');
+    document.getElementById('shopBox').classList.add('show');
+    const lv0 = T.bonus().lifeup || 0;
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: '1' }));
+    const lv1 = T.bonus().lifeup || 0;
+    document.getElementById('shopBox').classList.remove('show');
+    T.resetBonusNow(); T.setCoinsNow(0);
+    return (lv1 === lv0) || JSON.stringify({ lv0, lv1 });
+  });
+  await senseCheck("U9463 商店关闭时按键不生效", async (T,$) => {
+    T.setCoinsNow(9999); T.resetBonusNow();
+    const lv0 = T.bonus().lifeup || 0;
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: '1' }));
+    const lv1 = T.bonus().lifeup || 0;
+    T.resetBonusNow(); T.setCoinsNow(0);
+    return (lv1 === lv0) || JSON.stringify({ lv0, lv1 });
+  });
+
+  // U9464–U9466: 图鉴集齐横幅与金框
+  await senseCheck("U9464 未集齐：无横幅无「已集齐」", async (T,$) => {
+    T.dexResetNow(); T.openDexNow();
+    const sub = (document.getElementById('dexSub') || {}).textContent || '';
+    const bar = document.querySelector('.dexDoneBar');
+    const done = document.querySelectorAll('.dexRow.dexDone').length;
+    T.closeDexNow();
+    return (!/已集齐/.test(sub) && !bar && done === 0) || JSON.stringify({ sub, bar: !!bar, done });
+  });
+  await senseCheck("U9465 集齐后：副标题+横幅+金框行", async (T,$) => {
+    T.dexResetNow(); T.dexFillNow(); T.dexAddNow('boss'); T.openDexNow();
+    const sub = (document.getElementById('dexSub') || {}).textContent || '';
+    const bar = document.querySelector('.dexDoneBar');
+    const done = document.querySelectorAll('.dexRow.dexDone').length;
+    T.closeDexNow();
+    return (/已集齐/.test(sub) && !!bar && done >= 8) || JSON.stringify({ sub, bar: !!bar, done });
+  });
+  await senseCheck("U9466 重置后横幅消失", async (T,$) => {
+    T.dexResetNow(); T.openDexNow();
+    const bar = document.querySelector('.dexDoneBar');
+    const done = document.querySelectorAll('.dexRow.dexDone').length;
+    T.closeDexNow();
+    return (!bar && done === 0) || JSON.stringify({ bar: !!bar, done });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

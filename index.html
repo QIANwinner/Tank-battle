@@ -1868,7 +1868,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.31</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.41</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -1913,7 +1913,7 @@
   <div id="shopBox">
     <div class="shopHead">
       <div class="shopTitle">🛒 军械商店</div>
-      <div class="shopWallet">🪙 <b id="shopCoins">0</b> · 🐾 <b id="shopPetCoins">0</b></div>
+      <div class="shopWallet">🪙 <b id="shopCoins">0</b> · 🐾 <b id="shopPetCoins">0</b> <button id="xchgBtn" type="button" style="margin-left:8px;font-size:11px;padding:2px 8px;border-radius:8px;border:1px solid rgba(255,215,94,.5);background:rgba(255,215,94,.12);color:#ffd75e;cursor:pointer;">1🐾→120🪙</button></div>
       <button class="shopClose" id="btnShopClose" aria-label="关闭">✕</button>
     </div>
     <div class="petEarnHint">🐾 宠物币来源:<b>🏅成就</b> 1-3/枚(共65) · <b>📅签到</b> +1 · <b>🌊无尽</b> 每10波+1(羁绊激活×2) ｜ 消耗:宠物 · 英雄解锁</div>
@@ -2042,6 +2042,8 @@
     bomb:   { color: '#ff9f43', label: '炸弹' },
     pierce: { color: '#9fe870', label: '穿甲' },   // —— v1.2.23 穿甲弹 ——
     mine:   { color: '#ff5470', label: '地雷' },   // —— v1.2.26 感应地雷 ——
+    slow:   { color: '#8fd6ff', label: '缓速' },   // —— v1.2.32 缓速场 ——
+    repair: { color: '#7ee0c2', label: '维修' },   // —— v1.2.36 基地维修 ——
   };
   const POWERUP_LIST = Object.keys(POWERUP_DEF);
 
@@ -2498,6 +2500,12 @@
       if (wsq && WINGMAN_SKINS[wsq] && ownedWSkins.includes(wsq)) equippedWSkin = wsq;
     } catch (e) { /* 隐私模式 / 损坏数据：保持默认 */ }
   }
+  // —— v1.2.35 生涯击毁里程碑 ——
+  const KILL_MILES = [500, 1500, 3000, 6000, 12000];
+  function killMileSeen() { try { return Number(saveStore.getItem('tank-battle-killmile')) || 0; } catch (e) { return 0; } }
+  function killMileSeenSet(v) { try { saveStore.setItem('tank-battle-killmile', String(v)); } catch (e) {} }
+  function killMileHit(seen, kills) { let hit = 0; for (const t of KILL_MILES) if (kills >= t && seen < t) hit = t; return hit; }
+  function killMileGrant(force) { if (__testMode && !force) return 0; const km = killMileHit(killMileSeen(), career.kills); if (km <= 0) return 0; killMileSeenSet(km); const rw = Math.round(km / 50); coins += rw; saveCoins(); updateCoinHud(); try { showToast('🏅 生涯击毁突破 ' + km + ' 辆 · 奖励 +' + rw + '🪙'); } catch (e) { /* 忽略 */ } return km; }
   function saveCoins() { try { saveStore.setItem(LS_COINS, String(coins)); } catch (e) {} }
   function savePetCoin() { try { saveStore.setItem(LS_PETCOIN, String(petCoins)); } catch (e) {} }
   function saveBonus() { try { saveStore.setItem(LS_BONUS, JSON.stringify(bonus)); } catch (e) {} }
@@ -2782,7 +2790,7 @@
   let combo = 0, comboTimer = 0;
   let comboShield = true;                // —— v1.2.18 连击护盾：每局一枚 ——
   let comboWindowMax = 0;   // —— v0.6.10 连击窗口峰值（进度条分母） ——
-  let fx = { rapid: 0, double: 0, freeze: 0, pierce: 0 };   // —— v1.2.23 穿甲增益 ——
+  let fx = { rapid: 0, double: 0, freeze: 0, pierce: 0, slow: 0 };   // —— v1.2.23 穿甲增益 · v1.2.32 缓速 ——
 
   // 打击感 / 提示
   let hurtFlash = 0;   // 受击红边渐隐
@@ -2796,6 +2804,8 @@
   let lvIntroT = 0, lvIntroNext = false;   // 关卡过渡计时（秒）/ 结束后是否开新关
   let tookHitThisLevel = false;            // 本关是否掉过命（无伤成就）
   let lvPerfGold = 0, lvPerfKind = 'perf';   // —— v1.2.22 过关表现奖励 ——
+  let lvWingBonus = 0;                        // —— v1.2.33 僚机保全 ——
+  let blitzDone = false, blitzOv = null;    // —— v1.2.34 闪电战首杀（blitzOv: 测试覆盖）——
 
   // ===== 局内统计（战绩图 / 分享） =====
   let stat = { kills: 0, shots: 0, hits: 0, maxCombo: 0, bossKills: 0, deaths: 0 };
@@ -2883,6 +2893,7 @@
   function recordGame(win) {
     career.games++;
     career.kills += stat.kills;
+    killMileGrant();   // —— v1.2.35 生涯击毁里程碑 ——
     career.playSec += Math.round(playSecRun);
     // —— v0.2.7 生涯统计扩展：累计金币/星/Boss 击杀/死亡/命中/胜场/模式场次 ——
     career.bossKills += stat.bossKills;
@@ -4340,6 +4351,7 @@
 
   function updateEnemy(e, k) {
     if (fx.freeze > 0) return;              // 冻结：不动不射
+    if (fx.slow > 0) k *= 0.5;               // —— v1.2.32 缓速场：敌方半速 ——
     // v0.2.7 近战大招击退：短促爆发位移（v1.2.21 分步沿地形安全滑退，严禁穿进钢墙/水池死角）
     if (e.kbt > 0) {
       e.kbt -= k;
@@ -4893,9 +4905,13 @@
   }
 
   // ===== 金币 =====
+  // —— v1.2.38 周末双倍击毁金 ——
+  let weekendOv = null;   // null=按真实日期；true/false=测试覆盖
+  let wkToasted = false;  // 本次会话是否已提示
+  function weekendNow() { if (weekendOv !== null) return weekendOv; if (__testMode) return false; const d = new Date().getDay(); return d === 0 || d === 6; }
   function enemyGold(e) {
     const base = e.isBoss ? 60 + level * 10 : Math.round(ENEMY_TYPES[e.type].score / 10);
-    return Math.max(1, Math.round(base * diffMul().reward));
+    return Math.max(1, Math.round(base * diffMul().reward * (weekendNow() ? 1.5 : 1)));   // —— v1.2.38 周末双倍 ——
   }
   function addGold(n, x, y) {
     // 金运永久加成 +15%/级；金运强化 +30%/层；宠物招财猫 +10%/级（v0.3.2）
@@ -4965,6 +4981,7 @@
     dexAdd(e.isBoss ? 'boss' : e.type);   // —— v1.2.25 敌人图鉴击杀计数 ——
     killStreak++; streakFlash(killStreak);
     levelKills++;                                   // —— v0.2.6 本关击杀（结算界面） ——
+    if (!blitzDone && levelSecs <= 8 && (__testMode ? blitzOv === true : true)) { blitzDone = true; const bz = addGold(10); if (player) addText(clamp(player.x + TANK_SIZE / 2, 84, W - 84), player.y - 6, '⚡ 闪电战 +' + bz + '🪙', '#ffd75e'); }   // —— v1.2.34 ——
     if (e.isBoss) { stat.bossKills++; missionBump('boss', 1); }   // —— v1.2.2 每日任务 ——
     addKillScore(e);
     // 金币掉落：不同敌人金币不同，受金运加成
@@ -5184,6 +5201,8 @@
       case 'bomb':   bombEnemies(); break;
       case 'pierce': fx.pierce = 10; break;   // —— v1.2.23 穿甲弹 10s ——
       case 'mine':   plantMine(); break;   // —— v1.2.26 脚下布雷 ——
+      case 'slow':   fx.slow = 6; break;   // —— v1.2.32 缓速场 6s ——
+      case 'repair': rebuildBaseWalls(); break;   // —— v1.2.36 基地维修 ——
     }
     if (player) addText(clamp(player.x + TANK_SIZE / 2, 84, W - 84), player.y - 6, pickupEffectText(type, pickBefore, pickupState()) || def.label, def.color);
     runPowerups++;
@@ -5324,12 +5343,14 @@
     const starGold = lvStarsNow * 25;
     // —— v1.2.22 过关表现奖励：无伤完美 +30 / 残血险胜 +15 ——
     lvPerfGold = multiMode === 2 ? 0 : (!tookHitThisLevel ? 30 : (lives <= 1 ? 15 : 0));
-    lvPerfKind = !tookHitThisLevel ? 'perf' : 'close';
+    lvPerfKind = !tookHitThisLevel ? 'perf' : (lives <= 1 ? 'close' : 'none');
+    lvWingBonus = (wingman && !wingman.dead && multiMode !== 2) ? 10 : 0;   // —— v1.2.33 僚机全程护航 +10 ——
+    lvPerfGold += lvWingBonus;
     const lvPerfEl = $('lvPerfRow');
     if (lvPerfEl) {
       lvPerfEl.hidden = lvPerfGold <= 0;
       if (lvPerfGold > 0) {
-        $('lvPerfLbl').textContent = lvPerfKind === 'perf' ? '🏅 完美过关 · 全程无伤' : '🩸 险胜翻盘 · 残血坚守';
+        $('lvPerfLbl').textContent = (lvPerfKind === 'perf' ? '🏅 完美过关 · 全程无伤' : lvPerfKind === 'close' ? '🩸 险胜翻盘 · 残血坚守' : '') + (lvWingBonus > 0 ? (lvPerfKind === 'none' ? '' : ' + ') + '🛡 僚机保全' : '');
         $('lvPerfVal').textContent = '+' + lvPerfGold + ' 🪙';
       }
     }
@@ -5467,10 +5488,10 @@
   // ===== 关卡 / 敌人生成 =====
   function startLevel() {
     bossLevel = (level % 5 === 0);
-    tookHitThisLevel = false; lvPerfGold = 0;   // —— v1.2.22 新关清零表现奖励 ——
+    tookHitThisLevel = false; lvPerfGold = 0; lvWingBonus = 0;   // —— v1.2.22 新关清零表现奖励 · v1.2.33 ——
     lvClearDone = false; lvClearWatchT = 0;   // —— v1.2.21 重置过关闸门与看门狗 ——
     bossDeathT = 0; timeScale = 1;
-    levelSecs = 0; levelKills = 0;      // —— v0.2.6 本关计时与击杀重置 ——
+    levelSecs = 0; levelKills = 0; blitzDone = false;   // —— v0.2.6 本关计时与击杀重置 · v1.2.34 ——
     enemiesSpawned = 0;
     // —— v0.2.6 无尽模式：敌人数量随波次递增（封顶 2.5x） ——
     const emCount = endlessMode ? Math.min(2.5, 1 + level * 0.05) : 1;
@@ -5483,7 +5504,7 @@
     bullets = []; enemies = []; recycleParticles(); texts = []; powerups = []; mines = []; coinDrops = [];   // —— v1.2.30 换关清空散币 ——
     lasers = [];                 // —— v0.2.5 Boss 多样化：换关清空激光 ——
     baseAlive = true;
-    fx = { rapid: 0, double: 0, freeze: 0, pierce: 0 };
+    fx = { rapid: 0, double: 0, freeze: 0, pierce: 0, slow: 0 };
     combo = 0; comboTimer = 0; comboWindowMax = 0;
     bossHp = 0; bossMaxHp = 0;
     generateMap();
@@ -5670,6 +5691,7 @@
     if (fx.double > 0) { fx.double -= dt; if (fx.double <= 0) buffEndNote('double'); }
     if (fx.pierce > 0) { fx.pierce -= dt; if (fx.pierce <= 0) buffEndNote('pierce'); }   // —— v1.2.23 ——
     if (fx.freeze > 0) { fx.freeze -= dt; if (fx.freeze <= 0) buffEndNote('freeze'); }
+    if (fx.slow > 0) { fx.slow -= dt; if (fx.slow <= 0) buffEndNote('slow'); }   // —— v1.2.32 ——
     if (comboTimer > 0) { comboTimer -= dt; if (comboTimer <= 0) { if (comboShield && combo >= 3) { comboShield = false; comboTimer = 1.5; comboWindowMax = Math.max(comboWindowMax, 1.5); fieldNoteShow('🛡 连击护盾 · 宽限 1.5 秒', 'warn', 1600, 1); } else { fieldNoteShow(comboEndText(combo, stat.maxCombo), 'info', 1600, 1); combo = 0; } } }   // —— v1.2.18 连击护盾宽限 ——
     if (hurtFlash > 0) hurtFlash = decay(hurtFlash, dt, 2.2);
     if (bossWarn > 0) bossWarn -= dt;
@@ -6225,6 +6247,7 @@
     showFx('快速', fx.rapid, '#ffe600');
     showFx('双管', fx.double, '#ff00ff');
     showFx('冻结', fx.freeze, '#4d9fff');
+    showFx('缓速', fx.slow, '#8fd6ff');   // —— v1.2.32 ——
     showFx('磁暴', magnetStorm, '#00f0ff');
 
     // 受击红闪：四边红色 vignette 渐隐
@@ -6539,6 +6562,13 @@
       ctx.beginPath(); ctx.arc(cx, cy + 1, s - 1, 0, Math.PI * 2); ctx.fill();
       ctx.fillRect(cx - 0.75, cy - s - 1, 1.5, 3);
       ctx.beginPath(); ctx.arc(cx, cy - s - 2, 1, 0, Math.PI * 2); ctx.fill();
+    } else if (type === 'slow') {
+      // —— v1.2.32 缓速图标：沙漏 ——
+      ctx.beginPath(); ctx.moveTo(cx - s + 1, cy - s); ctx.lineTo(cx + s - 1, cy - s); ctx.lineTo(cx - s + 1, cy + s); ctx.lineTo(cx + s - 1, cy + s); ctx.closePath(); ctx.stroke();
+    } else if (type === 'repair') {
+      // —— v1.2.36 维修图标：扳手斜线 ——
+      ctx.lineWidth = 2.5; ctx.beginPath(); ctx.moveTo(cx - s + 1, cy + s - 1); ctx.lineTo(cx + s - 1, cy - s + 1); ctx.stroke(); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(cx + s - 2, cy - s + 2, 2.5, 0, Math.PI * 2); ctx.stroke();
     } else if (type === 'bomb') {
       ctx.beginPath();
       ctx.arc(cx, cy + 1, s - 1, 0, Math.PI * 2);
@@ -24434,7 +24464,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     return t <= 2 ? 2 : (t <= 5 ? 1 : 0);
   }
   function buffEndText(kind) {
-    const m = { rapid: '快速弹结束', double: '双管炮结束', freeze: '冻结结束', magnet: '磁暴结束', shield: '护盾结束', pierce: '穿甲结束' };
+    const m = { rapid: '快速弹结束', double: '双管炮结束', freeze: '冻结结束', magnet: '磁暴结束', shield: '护盾结束', pierce: '穿甲结束', slow: '缓速结束' };
     return Object.hasOwn(m, kind) ? m[kind] : '';
   }
   function buffEndNote(kind) {
@@ -24711,6 +24741,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     }
     if (kind === 'title' && typeof missionBadgeUpdate === 'function') missionBadgeUpdate();
     if (kind === 'title') { try { welcomeBackCheck(); } catch (e) { /* 忽略 */ } }   // —— v1.2.24 老兵回归 ——
+    if (kind === 'title' && weekendNow() && !wkToasted) { wkToasted = true; showToast('🎉 周末狂欢：击毁金币 ×1.5'); }   // —— v1.2.38 ——
     overlay.classList.remove('hide');
     ovTitle.style.color = '';
     ovSub.style.display = '';
@@ -25074,9 +25105,19 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
 
   // ===== 商店（永久加成 + 角色皮肤）=====
   let shopTab = 'bonus';
+  // —— v1.2.39 宠物币兑金币 ——
+  function petToCoin(n) { n = Math.max(1, Math.floor(Number(n)) || 0); if (petCoins < n) return 0; addPetCoin(-n); return addGold(n * 120); }
+  let xchgBound = false;
+  function bindXchgBtn() { const b = $('xchgBtn'); if (!b || xchgBound) return; xchgBound = true; b.addEventListener('click', () => { const got = petToCoin(1); showToast(got > 0 ? '兑换成功 +' + got + '🪙' : '宠物币不足'); renderShop(); }); }
   function openShop() { shopBox.classList.add('show'); renderShop(); }
   function closeShop() { shopBox.classList.remove('show'); }
+  // —— v1.2.40 商店数字键速购 ——
+  document.addEventListener('keydown', ev => {
+    if (!shopBox || !shopBox.classList.contains('show') || shopTab !== 'bonus') return;
+    if (ev.key >= '1' && ev.key <= '9') { const def = BONUS_DEF[Number(ev.key) - 1]; if (def) { try { buyBonus(def.id); } catch (e) { /* 忽略 */ } } }
+  });
   function renderShop() {
+    try { bindXchgBtn(); } catch (e) { /* 忽略 */ }
     const sc = $('shopCoins'); if (sc) sc.textContent = hudNum(coins);
     shopBody.innerHTML = '';
     const sd = $('shopDeal'); if (sd) sd.textContent = dealText(weekSeed(Date.now()));
@@ -26032,16 +26073,24 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   let dexData = { kills: {} };
   try { const d = JSON.parse(saveStore.getItem(LS_DEX) || 'null'); if (d && typeof d.kills === 'object' && d.kills) dexData = d; } catch (e) { /* 忽略 */ }
   function dexSave() { try { saveStore.setItem(LS_DEX, JSON.stringify(dexData)); } catch (e) { /* 忽略 */ } }
-  function dexAdd(type) {
+  const DEX_KEYS_TOTAL = Object.keys(ENEMY_TYPES).length + 1;   // 兵种 + Boss —— v1.2.37 ——
+  function dexSeenCount() { let n = 0; for (const k of Object.keys(ENEMY_TYPES)) if ((dexData.kills[k] || 0) > 0) n++; if ((dexData.kills.boss || 0) > 0) n++; return n; }
+  function dexAdd(type, force) {
     if (!type) return;
     dexData.kills[type] = (dexData.kills[type] || 0) + 1;
+    // —— v1.2.37 图鉴集齐奖励（测试模式不自动发币，由 dexAddNow 强制触发，防污染断言）——
+    if (!dexData.rewarded && dexSeenCount() >= DEX_KEYS_TOTAL) {
+      dexData.rewarded = 1;
+      if (!__testMode || force) { addPetCoin(2); try { showToast('🏅 图鉴集齐 · 奖励 +2🐾'); } catch (e) { /* 忽略 */ } }
+    }
     dexSave();
   }
   function renderDex() {
     const body = $('dexBody'); if (!body) return;
     const keys = Object.keys(ENEMY_TYPES);
     const total = keys.reduce((a, k) => a + (dexData.kills[k] || 0), 0) + (dexData.kills.boss || 0);
-    $('dexSub').textContent = '已击毁 ' + total + ' 辆敌军坦克 · 击毁数跨局累计';
+    const allSeen = dexSeenCount() >= DEX_KEYS_TOTAL;   // —— v1.2.41 ——
+    $('dexSub').textContent = '已击毁 ' + total + ' 辆敌军坦克 · 击毁数跨局累计' + (allSeen ? ' · 🏅 已集齐' : '');
     let html = '';
     const rows = keys.map(k => Object.assign({ key: k }, ENEMY_TYPES[k]));
     rows.push({ key: 'boss', label: 'Boss', speed: 0, hp: '多阶段', score: '1000×关', color: '#ff2d55' });
@@ -26049,13 +26098,13 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       const k = dexData.kills[r.key] || 0;
       const seen = k > 0;
       const col = r.color || '#9aa7b8';
-      html += '<div class="dexRow' + (seen ? '' : ' dexLocked') + '">'
+      html += '<div class="dexRow' + (allSeen ? ' dexDone' : '') + (seen ? '' : ' dexLocked') + '"' + (allSeen ? ' style="border:1px solid rgba(255,215,94,.55);border-radius:8px;"' : '') + '>'
         + '<span class="dexChip" style="background:' + col + '"></span>'
         + '<span class="dexName">' + (seen ? r.label : '？？？') + '</span>'
         + '<span class="dexStat">' + (seen ? ('速 ' + (r.speed || '—') + ' · 血 ' + r.hp + ' · ' + r.score + ' 分') : '尚未遭遇') + '</span>'
         + '<b class="dexKills">' + (seen ? ('×' + k) : '—') + '</b></div>';
     }
-    body.innerHTML = html;
+    body.innerHTML = (allSeen ? '<div class="dexDoneBar" style="margin:0 0 8px;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,215,94,.6);background:rgba(255,215,94,.12);color:#ffd75e;text-align:center;">🏅 图鉴集齐 · 已领取 +2🐾 集齐奖励</div>' : '') + html;
   }
   function openDex() { renderDex(); $('dexBox').classList.add('show'); }
   function closeDex() { const el = $('dexBox'); if (el) el.classList.remove('show'); }
@@ -26812,7 +26861,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     // —— v0.2.5 Boss 多样化：退出回菜单重置轮换与激光 ——
     bossType = BOSS_TYPES[0]; bossCount = 0; lasers = [];
     baseAlive = true;
-    fx = { rapid: 0, double: 0, freeze: 0, pierce: 0 };
+    fx = { rapid: 0, double: 0, freeze: 0, pierce: 0, slow: 0 };
     upgrades = {}; upgTotal = 0; upgradeOpen = false;
     dailyMode = false; dailyMods = { _names: [] };
     customMode = false; customMap = null;   // v0.2.7 自制关卡：退出回菜单重置
@@ -26997,7 +27046,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.31', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.41', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -29529,7 +29578,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       resumeBeatsNow: resumeBeats, resumeBeatTextNow: resumeBeatText, resumeStateNow: () => ({ counting: !!resumeTimer, paused }), setPausedForNow: ms => { pausedAt = performance.now() - ms; },
       streakMilestoneNow: streakMilestone, killStreakNow: () => killStreak,
       topToastHoldNow: topToastHold, topToastShowNow: topToastShow, stutterToastOnNow: stutterToastOn, stutterToastNow: txt => { smToastShow(txt); return document.getElementById('smToast').classList.contains('sm-fade'); },
-      buffUrgencyNow: buffUrgency, buffEndTextNow: buffEndText, buffEndsNow: () => buffEnds, buffEndNow: k => buffEndNote(k), setBuffNow: (k, v) => { if (k === 'rapid') fx.rapid = v; else if (k === 'double') fx.double = v; else if (k === 'freeze') fx.freeze = v; else if (k === 'magnet') magnetStorm = v; else if (k === 'pierce') fx.pierce = v; else return false; return true; }, buffStateNow: () => ({ rapid: fx.rapid, double: fx.double, freeze: fx.freeze, magnet: magnetStorm, pierce: fx.pierce || 0 }),
+      buffUrgencyNow: buffUrgency, buffEndTextNow: buffEndText, buffEndsNow: () => buffEnds, buffEndNow: k => buffEndNote(k), setBuffNow: (k, v) => { if (k === 'rapid') fx.rapid = v; else if (k === 'double') fx.double = v; else if (k === 'freeze') fx.freeze = v; else if (k === 'magnet') magnetStorm = v; else if (k === 'pierce') fx.pierce = v; else if (k === 'slow') fx.slow = v; else return false; return true; }, buffStateNow: () => ({ rapid: fx.rapid, double: fx.double, freeze: fx.freeze, magnet: magnetStorm, pierce: fx.pierce || 0, slow: fx.slow || 0 }),
       spawnGuardStateNow: spawnGuardState, spawnGuardCountNow: () => spawnGuardCount,
       foesLeftStateNow: foesLeftState, foesBadgeCountNow: () => foesBadgeCount, foesTotalsNow: () => ({ total: enemiesTotal, spawned: enemiesSpawned, alive: enemies.length }),
       comboArcStateNow: comboArcState, comboArcCountNow: () => comboArcCount,
@@ -29674,6 +29723,9 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       mineCountNow: () => mines.length,
       dexNow: () => JSON.parse(JSON.stringify(dexData)),
       dexResetNow: () => { dexData = { kills: {} }; dexSave(); renderDex(); return true; },
+      dexSeenNow: () => dexSeenCount(), dexRewardedNow: () => !!dexData.rewarded,
+      dexAddNow: (t) => { dexAdd(t, true); return dexSeenCount(); },
+      dexFillNow: () => { for (const k of Object.keys(ENEMY_TYPES)) dexData.kills[k] = Math.max(1, dexData.kills[k] || 0); dexSave(); return true; },
       openDexNow: () => { openDex(); return $('dexBox').classList.contains('show'); },
       closeDexNow: () => { closeDex(); return !$('dexBox').classList.contains('show'); },
       panelOpenNow: () => panelOpen(),
@@ -29682,10 +29734,20 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       welcomeResetNow: () => { welcomeSet(0); return welcomeGet(); },
       dayIdxNow: (n) => dayIdxOf(n),
       applyPowerupNow: (t) => { if (!POWERUP_DEF[t]) return false; applyPowerup(t); return true; },
+      baseWallsNow: () => { let n = 0; for (const [dy, dx] of BASE_LEVELS[baseLevel].walls) { const gx = BASE.x + dx, gy = BASE.y + dy; if (inside(gx, gy) && map[gy] && map[gy][gx] === TILE_BRICK) n++; } return n; },
+      baseWallBreakNow: (n) => { let done = 0; for (const [dy, dx] of BASE_LEVELS[baseLevel].walls) { const gx = BASE.x + dx, gy = BASE.y + dy; if (inside(gx, gy) && map[gy] && map[gy][gx] === TILE_BRICK) { map[gy][gx] = 0; done++; if (done >= n) break; } } markMapDirty(); return done; },
+      baseWallTotalNow: () => BASE_LEVELS[baseLevel].walls.filter(([dy, dx]) => inside(BASE.x + dx, BASE.y + dy)).length,
       powerupTypesNow: () => POWERUP_LIST.slice(),
-      lvPerfNow: () => ({ gold: lvPerfGold, kind: lvPerfKind, hidden: !($('lvPerfRow')) || $('lvPerfRow').hidden, lbl: ($('lvPerfLbl') || {}).textContent, val: ($('lvPerfVal') || {}).textContent }),
+      lvPerfNow: () => ({ gold: lvPerfGold, kind: lvPerfKind, wing: lvWingBonus, hidden: !($('lvPerfRow')) || $('lvPerfRow').hidden, lbl: ($('lvPerfLbl') || {}).textContent, val: ($('lvPerfVal') || {}).textContent }),
       setTookHitNow: (v) => { tookHitThisLevel = !!v; return tookHitThisLevel; },
       setLivesNow: (v) => { lives = Math.max(0, Math.floor(Number(v)) || 0); lastLives = -1; return lives; },
+      petToCoinNow: (n) => petToCoin(n),
+      weekendNow: () => weekendNow(), setWeekendNow: (v) => { weekendOv = (v === null || v === undefined) ? null : !!v; return weekendNow(); },
+      killMileHitNow: (s, k) => killMileHit(s, k), killMileSeenNow: () => killMileSeen(), setKillMileSeenNow: (v) => { killMileSeenSet(v); return killMileSeen(); },
+      careerKillsNow: () => career.kills, setCareerKillsNow: (v) => { career.kills = Math.max(0, Math.floor(Number(v)) || 0); return career.kills; },
+      killMileCheckNow: () => killMileGrant(true),
+      blitzNow: () => blitzDone, setBlitzOvNow: (v) => { blitzOv = (v === null || v === undefined) ? null : !!v; return true; },
+      setWingAliveNow: (v) => { wingmanEnabled = !!v; if (v && (!wingman || wingman.dead)) wingman = makeWingman(SPAWN.x + 1, SPAWN.y); if (!v) wingman = null; return !!(wingman && !wingman.dead); },
       adClaim: () => claimAd(),
       adSkip: () => skipAd(),
       setAdClaimed: (v) => { adClaimed = !!v; try { saveStore.setItem(LS_AD1, v ? '1' : '0'); } catch (e) {} },
