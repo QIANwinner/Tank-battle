@@ -27431,6 +27431,39 @@ async function main() {
     return (n0 > 0 && n1 === 0) || JSON.stringify({ n0, n1 });
   });
 
+  // U9433–U9436: 过关幕布（元素存在 / 换关触发 / 自动消隐 / 初始隐藏）
+  await senseCheck("U9433 #lvWipe 元素存在且前一轮幕布结束后无残留 on 类", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    await Z(1400);   // 前序断言可能刚触发过幕布（1.1s 自动移除）
+    const w = $('lvWipe');
+    return !!(w && !w.classList.contains('on')) || 'lvWipe missing or dirty';
+  });
+  await senseCheck("U9434 过关进下一关触发幕布 on 类", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.advanceLevelNow();
+    await Z(60);
+    const on = $('lvWipe').classList.contains('on');
+    T.quit();
+    return on || 'wipe not triggered';
+  });
+  await senseCheck("U9435 幕布约 1.1 秒后自动移除 on 类", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.advanceLevelNow();
+    await Z(60);
+    const on1 = $('lvWipe').classList.contains('on');
+    await Z(1400);
+    const off = !$('lvWipe').classList.contains('on');
+    T.quit();
+    return (on1 && off) || JSON.stringify({ on1, off });
+  });
+  await senseCheck("U9436 幕布不拦截输入（pointer-events none）", (T,$) => {
+    const w = $('lvWipe');
+    const pe = getComputedStyle(w).pointerEvents;
+    return (pe === 'none') || JSON.stringify({ pe });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
