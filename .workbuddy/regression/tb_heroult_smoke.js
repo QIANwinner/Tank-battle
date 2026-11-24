@@ -27652,6 +27652,36 @@ async function main() {
     return (!!btn && /120/.test(btn.textContent)) || 'no xchgBtn';
   });
 
+  // U9461–U9463: 商店数字键速购
+  await senseCheck("U9461 强化页按 1 购入首个强化", async (T,$) => {
+    T.setCoinsNow(9999); T.resetBonusNow(); T.setShopTab('bonus');
+    document.getElementById('shopBox').classList.add('show');
+    const lv0 = T.bonus().lifeup || 0;
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: '1' }));
+    const lv1 = T.bonus().lifeup || 0;
+    document.getElementById('shopBox').classList.remove('show');
+    T.resetBonusNow(); T.setCoinsNow(0);
+    return (lv1 === lv0 + 1) || JSON.stringify({ lv0, lv1 });
+  });
+  await senseCheck("U9462 非强化页签按键不触发购买", async (T,$) => {
+    T.setCoinsNow(9999); T.resetBonusNow(); T.setShopTab('pet');
+    document.getElementById('shopBox').classList.add('show');
+    const lv0 = T.bonus().lifeup || 0;
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: '1' }));
+    const lv1 = T.bonus().lifeup || 0;
+    document.getElementById('shopBox').classList.remove('show');
+    T.resetBonusNow(); T.setCoinsNow(0);
+    return (lv1 === lv0) || JSON.stringify({ lv0, lv1 });
+  });
+  await senseCheck("U9463 商店关闭时按键不生效", async (T,$) => {
+    T.setCoinsNow(9999); T.resetBonusNow();
+    const lv0 = T.bonus().lifeup || 0;
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: '1' }));
+    const lv1 = T.bonus().lifeup || 0;
+    T.resetBonusNow(); T.setCoinsNow(0);
+    return (lv1 === lv0) || JSON.stringify({ lv0, lv1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
