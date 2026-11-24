@@ -27339,6 +27339,26 @@ async function main() {
     return (n === 10) || JSON.stringify({ n });
   });
 
+  // U9425–U9426: 低血量脉冲（1 命告警 / 回血解除）
+  await senseCheck("U9425 仅剩 1 命：生命读数进入 lvDanger 脉冲态", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setLivesNow(1);
+    await Z(150);
+    const danger = $('lives').classList.contains('lvDanger');
+    T.quit();
+    return danger || JSON.stringify({ cls: $('lives') ? $('lives').className : null });
+  });
+  await senseCheck("U9426 恢复到 3 命：lvDanger 自动解除", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setLivesNow(1); await Z(120);
+    T.setLivesNow(3); await Z(120);
+    const off = !$('lives').classList.contains('lvDanger');
+    T.quit();
+    return off || JSON.stringify({ cls: $('lives') ? $('lives').className : null });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
