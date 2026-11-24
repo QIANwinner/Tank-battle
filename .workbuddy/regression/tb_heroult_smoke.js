@@ -27899,6 +27899,28 @@ async function main() {
     return (!!t && t.cur <= t.tgt) || JSON.stringify({ len: tr && tr.length });
   });
 
+  // U9491–U9493: 签到大奖预览
+  await senseCheck("U9491 签到面板出现第7天皇冠格", async (T,$) => {
+    T.openSigninNow();
+    const g = document.querySelector('.sDay.grand');
+    const txt = g ? g.textContent : '';
+    T.closeSigninNow();
+    return (!!g && /第7天/.test(txt) && /👑/.test(txt)) || JSON.stringify({ has: !!g, txt });
+  });
+  await senseCheck("U9492 底部提示含大奖预告", async (T,$) => {
+    T.openSigninNow();
+    const h = document.querySelector('.signinHint');
+    const txt = h ? h.textContent : '';
+    T.closeSigninNow();
+    return (/大奖/.test(txt)) || JSON.stringify({ txt });
+  });
+  await senseCheck("U9493 只有一个 grand 格", async (T,$) => {
+    T.openSigninNow();
+    const n = document.querySelectorAll('.sDay.grand').length;
+    T.closeSigninNow();
+    return (n === 1) || JSON.stringify({ n });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
