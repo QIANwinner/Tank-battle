@@ -26045,6 +26045,181 @@ async function main() {
     return ok || JSON.stringify({ cd, life });
   });
 
+
+  // U9279–U9284: 每日任务核心引擎
+  await senseCheck("U9279 missionPick 种子确定/3条异类/目标奖励对齐", (T,$) => {
+    const a = T.missionPickNow(20301115), b = T.missionPickNow(20301115);
+    const det = JSON.stringify(a) === JSON.stringify(b);
+    const types = a.map(m => m.type);
+    const distinct = new Set(types).size === 3 && types.every(t => ['kills','levels','pickups','combo','score','boss'].includes(t));
+    const aligned = a.every(m => m.target > 0 && m.reward > 0);
+    const bad = T.missionPickNow(0).length === 0 && T.missionPickNow(-5).length === 0 && T.missionPickNow('x').length === 0;
+    return (det && a.length === 3 && distinct && aligned && bad) || JSON.stringify({ det, distinct, aligned, bad, a });
+  });
+  await senseCheck("U9280 missionText/missionPct 纯函数边界", (T,$) => {
+    const t = T.missionTextNow({ type: 'kills', target: 30 }) === '击毁敌军 30 辆';
+    const bad = T.missionTextNow(null) === '' && T.missionTextNow({ type: 'nope', target: 5 }) === '' && T.missionTextNow({ type: 'kills', target: -1 }) === '';
+    const p = T.missionPctNow({ target: 10, prog: 5 }) === 50 && T.missionPctNow({ target: 10, prog: 99 }) === 100 && T.missionPctNow({ target: 0, prog: 5 }) === 0 && T.missionPctNow(null) === 0;
+    return (t && bad && p) || JSON.stringify({ t, bad, p });
+  });
+  await senseCheck("U9281 missionsNow 按日生成+bump累计", (T,$) => {
+    T.setDailySeed(20301225); const st = T.missionResetNow();
+    const ok = st.day === 20301225 && st.items.length === 3 && st.items.every(m => m.prog === 0 && !m.done && !m.claimed);
+    const t0 = st.items[0].type;
+    T.missionBumpNow(t0, 2); const p1 = T.missionsNow().items[0].prog === 2;
+    T.missionBumpNow(t0, 3); const p2 = T.missionsNow().items[0].prog === 5;
+    T.setDailySeed(0); T.missionResetNow();
+    return (ok && p1 && p2) || JSON.stringify({ ok, p1, p2, st });
+  });
+  await senseCheck("U9282 gauge取峰值不累加+达标置done", (T,$) => {
+    T.setDailySeed(20301226); const st = T.missionResetNow();
+    const gm = st.items.find(m => m.type === 'combo' || m.type === 'score');
+    let gOk = true, gVal = -1;
+    if (gm) { T.missionBumpNow(gm.type, 500, true); T.missionBumpNow(gm.type, 300, true); gVal = T.missionsNow().items.find(m => m.type === gm.type).prog; gOk = gVal === 500; }
+    const m0 = st.items[0];
+    T.missionBumpNow(m0.type, m0.target + 99, false);
+    const done = T.missionsNow().items[0].done === true;
+    T.setDailySeed(0); T.missionResetNow();
+    return (gOk && done) || JSON.stringify({ gOk, gVal, done, gm: gm && gm.type });
+  });
+  await senseCheck("U9283 领取一次发金币,二次领取无效", (T,$) => {
+    T.setDailySeed(20301227); const st = T.missionResetNow();
+    const m0 = st.items[0]; T.missionBumpNow(m0.type, m0.target, false);
+    const c0 = T.coinsNow();
+    const r1 = T.missionClaimNow(0), r2 = T.missionClaimNow(0);
+    const paid = T.coinsNow() === c0 + m0.reward;
+    T.setDailySeed(0); T.missionResetNow();
+    return (r1 === m0.reward && r2 === 0 && paid) || JSON.stringify({ r1, r2, c0, c1: T.coinsNow(), reward: m0.reward });
+  });
+  await senseCheck("U9284 跨日自动重生成", (T,$) => {
+    T.setDailySeed(20301228); const a = T.missionResetNow();
+    T.missionBumpNow(a.items[0].type, 1, false);
+    T.setDailySeed(20301229); const b = T.missionsNow();
+    const fresh = b.day === 20301229 && b.items.length === 3 && b.items.every(m => m.prog === 0 && !m.done && !m.claimed);
+    T.setDailySeed(0); T.missionResetNow();
+    return fresh || JSON.stringify({ b });
+  });
+
+
+  // U9285–U9290: 每日任务面板+红点徽标
+  await senseCheck("U9285 菜单按钮与面板存在,开关联动", (T,$) => {
+    const btn = !!$('btnMissions') && $('btnMissions').textContent.includes('每日任务');
+    const opened = T.missionOpenNow() === true && $('missionBox').classList.contains('show');
+    const closed = T.missionCloseNow() === true && !$('missionBox').classList.contains('show');
+    return (btn && opened && closed) || JSON.stringify({ btn, opened, closed });
+  });
+  await senseCheck("U9286 面板渲染3张卡+副标题+进度格式", (T,$) => {
+    T.setDailySeed(20301230); T.missionResetNow();
+    T.missionOpenNow();
+    const d = T.msnDomNow();
+    const cards = T.msnCardInfoNow();
+    const ok = d.cards === 3 && d.sub.includes('每日') && cards.every(c => c.name.length > 0 && /^\d+\/\d+ · 奖励 \d+/.test(c.prog) && /^\d+%$/.test(c.w));
+    T.missionCloseNow(); T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ d, cards });
+  });
+  await senseCheck("U9287 完成任务卡高亮+领取按钮可点", (T,$) => {
+    T.setDailySeed(20301231); const st = T.missionResetNow();
+    T.missionBumpNow(st.items[0].type, st.items[0].target, false);
+    T.missionOpenNow();
+    const d = T.msnDomNow(); const cards = T.msnCardInfoNow();
+    const ok = d.claims === 1 && cards[0].done && !cards[0].claimed;
+    T.missionCloseNow(); T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ d, cards });
+  });
+  await senseCheck("U9288 DOM点击领取发金币+卡变已领取", (T,$) => {
+    T.setDailySeed(20310101); const st = T.missionResetNow();
+    T.missionBumpNow(st.items[0].type, st.items[0].target, false);
+    T.missionOpenNow();
+    const c0 = T.coinsNow();
+    const clicked = T.msnClaimClickNow(0);
+    const paid = T.coinsNow() === c0 + st.items[0].reward;
+    const cards = T.msnCardInfoNow();
+    const ok = clicked && paid && cards[0].claimed;
+    T.missionCloseNow(); T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ clicked, paid, card: cards[0] });
+  });
+  await senseCheck("U9289 红点:可领出现/领完消失", (T,$) => {
+    T.setDailySeed(20310102); const st = T.missionResetNow();
+    const off0 = T.msnDotNow() === false;
+    T.missionBumpNow(st.items[0].type, st.items[0].target, false);
+    const on = T.msnDotNow() === true;
+    T.missionClaimNow(0);
+    const off1 = T.msnDotNow() === false;
+    T.setDailySeed(0); T.missionResetNow();
+    return (off0 && on && off1) || JSON.stringify({ off0, on, off1 });
+  });
+  await senseCheck("U9290 全部完成提示明天再来", (T,$) => {
+    T.setDailySeed(20310103); const st = T.missionResetNow();
+    st.items.forEach(m => T.missionBumpNow(m.type, m.target, false));
+    T.missionOpenNow();
+    const hint = T.msnDomNow().hint;
+    T.missionCloseNow(); T.setDailySeed(0); T.missionResetNow();
+    return (hint.includes('全部完成') && hint.includes('明天')) || JSON.stringify({ hint });
+  });
+
+
+  // U9291–U9296: 全勤奖励+菜单提醒
+  await senseCheck("U9291 全领发全勤奖+2宠物币一次", (T,$) => {
+    T.setDailySeed(20310104); const st = T.missionResetNow();
+    const p0 = T.petCoins();
+    st.items.forEach(m => T.missionBumpNow(m.type, m.target, false));
+    st.items.forEach((m, i) => T.missionClaimNow(i));
+    const delta = T.petCoins() - p0;
+    T.setDailySeed(0); T.missionResetNow();
+    return delta === 2 || JSON.stringify({ p0, p1: T.petCoins(), delta });
+  });
+  await senseCheck("U9292 主菜单有待领→toast提醒一次", async (T,$) => {
+    T.setDailySeed(20310105); const st = T.missionResetNow();
+    T.missionBumpNow(st.items[0].type, st.items[0].target, false);
+    T.missionRemindResetNow();
+    T.quit(); await new Promise(r => setTimeout(r, 1900));
+    const txt = document.getElementById('toast').textContent || '';
+    const ok = txt.includes('任务') && txt.includes('待领取') && T.missionRemindedNow() === true;
+    T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ txt });
+  });
+  await senseCheck("U9293 提醒每页一次不重复", async (T,$) => {
+    T.setDailySeed(20310106); const st = T.missionResetNow();
+    T.missionBumpNow(st.items[0].type, st.items[0].target, false);
+    // 上一断言已把 missionReminded 置 true；不再 reset,第二次回菜单不应再弹
+    document.getElementById('toast').textContent = '';
+    T.startGame(); T.skipIntro(); T.quit(); await new Promise(r => setTimeout(r, 1900));
+    const txt = document.getElementById('toast').textContent || '';
+    const ok = !txt.includes('待领取') && T.missionRemindedNow() === true;
+    T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ txt, flag: T.missionRemindedNow() });
+  });
+  await senseCheck("U9294 claimable计数准确", (T,$) => {
+    T.setDailySeed(20310107); const st = T.missionResetNow();
+    const n0 = T.missionClaimableNow();
+    T.missionBumpNow(st.items[0].type, st.items[0].target, false);
+    T.missionBumpNow(st.items[1].type, st.items[1].target, false);
+    const n2 = T.missionClaimableNow();
+    T.missionClaimNow(0);
+    const n1 = T.missionClaimableNow();
+    T.setDailySeed(0); T.missionResetNow();
+    return (n0 === 0 && n2 === 2 && n1 === 1) || JSON.stringify({ n0, n1, n2 });
+  });
+  await senseCheck("U9295 非法输入容错不炸不改状态", (T,$) => {
+    T.setDailySeed(20310108); const st = T.missionResetNow();
+    const before = JSON.stringify(T.missionsNow().items);
+    const r1 = T.missionBumpNow('nope', 5, false);
+    const r2 = T.missionBumpNow('kills', 'x', false);
+    const r3 = T.missionClaimNow(99) === 0 && T.missionClaimNow(-1) === 0 && T.missionClaimNow('a') === 0;
+    const same = JSON.stringify(T.missionsNow().items) === before;
+    T.setDailySeed(0); T.missionResetNow();
+    return (r1 === null && r2 === null && r3 && same) || JSON.stringify({ r1, r2, r3, same });
+  });
+  await senseCheck("U9296 回主菜单刷新红点", (T,$) => {
+    T.setDailySeed(20310109); const st = T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    T.missionBumpNow(st.items[0].type, st.items[0].target, false);
+    T.quit();
+    const on = T.msnDotNow() === true;
+    T.setDailySeed(0); T.missionResetNow();
+    return on || JSON.stringify({ on });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
