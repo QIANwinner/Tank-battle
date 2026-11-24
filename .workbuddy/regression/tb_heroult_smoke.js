@@ -27514,6 +27514,42 @@ async function main() {
     return (perf.gold === 10 && /僚机保全/.test(perf.lbl || '')) || JSON.stringify(perf);
   });
 
+  // U9443–U9445: 闪电战首杀奖
+  await senseCheck("U9443 开局首杀触发闪电战并加金币", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.setBlitzOvNow(true);
+    T.spawnFoeNow(312, 100, 'normal'); await Z(60);
+    const c0 = T.coinsNow();
+    T.kill(); await Z(60);
+    const d = T.coinsNow() - c0;
+    const flag = T.blitzNow();
+    T.quit();
+    return (flag === true && d >= 10) || JSON.stringify({ flag, d });
+  });
+  await senseCheck("U9444 闪电战只发一次：第二杀无追加", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.setBlitzOvNow(true);
+    T.spawnFoeNow(312, 100, 'normal'); T.spawnFoeNow(312, 400, 'normal'); await Z(60);
+    let c = T.coinsNow(); T.kill(); await Z(60);
+    const d1 = T.coinsNow() - c;
+    c = T.coinsNow(); T.kill(); await Z(60);
+    const d2 = T.coinsNow() - c;
+    T.quit();
+    return (d1 - d2 >= 10) || JSON.stringify({ d1, d2 });
+  });
+  await senseCheck("U9445 过关后闪电战标记复位", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.setBlitzOvNow(true);
+    T.spawnFoeNow(312, 100, 'normal'); await Z(60); T.kill(); await Z(60);
+    const before = T.blitzNow();
+    T.advanceLevelNow();   // 触发 lvIntro 过场→startLevel（约1.5s）
+    let after = T.blitzNow();
+    for (let i = 0; i < 30 && after; i++) { await Z(150); after = T.blitzNow(); }
+    T.setBlitzOvNow(null);
+    T.quit();
+    return (before === true && after === false) || JSON.stringify({ before, after });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
