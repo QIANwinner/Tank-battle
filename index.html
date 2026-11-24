@@ -1869,7 +1869,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.71</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.81</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2870,7 +2870,7 @@
   let lvStarsNow = 0;                // —— v0.2.6 本关评级星数 ——
   let levelKills = 0;                // —— v0.2.6 本关击杀数（结算界面） ——
   try {
-    const c = JSON.parse(localStorage.getItem(LS_CAREER) || '{}');
+    const c = healedJson(LS_CAREER, {});   // —— v1.2.77 存档自愈加载 ——
     if (c && typeof c === 'object') {
       career.games = careerNum(c.games);
       career.kills = careerNum(c.kills);
@@ -2915,6 +2915,13 @@
   function playtimeAchCheck() {   // —— v1.2.58 游戏时长成就 ——
     if (career.playSec >= 3600) unlockAch('play1h');
     if (career.playSec >= 18000) unlockAch('play5h');
+  }
+  let healedKeys = [];   // —— v1.2.77 自愈记录 ——
+  function healedJson(key, fb) {
+    let v = null;
+    try { v = localStorage.getItem(key); return JSON.parse(v || 'null') ?? fb; } catch (e) { /* 落入自愈 */ }
+    try { if (typeof backupRestore === 'function' && backupRestore(key)) { healedKeys.push(key); try { return JSON.parse(localStorage.getItem(key) || 'null') ?? fb; } catch (e2) { /* 忽略 */ } } } catch (e3) { /* 忽略 */ }
+    return fb;
   }
   function recordGame(win) {
     career.games++;
@@ -3191,6 +3198,8 @@
   // 微信 / iOS 需要用户手势后才能出声
   document.addEventListener('WeixinJSBridgeReady', ensureAudio, false);
   document.addEventListener('touchstart', ensureAudio, { passive: true });
+  document.addEventListener('pointerdown', ensureAudio, { passive: true });   // —— v1.2.76 桌面鼠标唤醒 ——
+  document.addEventListener('keydown', ensureAudio);   // —— v1.2.76 键盘唤醒 ——
 
   function beep(freq, dur, type = 'square', vol = 0.06) {
     if (muted) return;
@@ -3928,8 +3937,14 @@
       const gpx = gx * TILE + (TILE - wingman.size) / 2, gpy = gy * TILE + (TILE - wingman.size) / 2;
       if (!isBlocked(gpx, gpy, wingman.size) && !tankHitsTank(gpx, gpy, wingman.size, wingman)) { sx = gx; sy = gy; break; }
     }
-    wingman.x = sx * TILE + (TILE - wingman.size) / 2;
-    wingman.y = sy * TILE + (TILE - wingman.size) / 2;
+    const fx0 = sx * TILE + (TILE - wingman.size) / 2, fy0 = sy * TILE + (TILE - wingman.size) / 2;   // —— v1.2.78 兜底校验 ——
+    if (isBlocked(fx0, fy0, wingman.size)) {
+      const pxx = player && !player.dead ? player.x : SPAWN.x * TILE, pyy = player && !player.dead ? player.y : SPAWN.y * TILE;
+      if (!isBlocked(pxx, pyy, wingman.size)) { wingman.x = pxx; wingman.y = pyy; }
+      else { wingman.x = SPAWN.x * TILE + (TILE - wingman.size) / 2; wingman.y = SPAWN.y * TILE + (TILE - wingman.size) / 2; }
+    } else {
+      wingman.x = fx0; wingman.y = fy0;
+    }
     wingman.dead = false; wingman.hp = wingman.maxHp;
     wingman.spawnInv = 90; wingman.dir = DIR.UP;
     addText(wingman.x + wingman.size / 2, wingman.y - 12, '僚机归队!', '#7fd7ff');
@@ -5266,6 +5281,7 @@
     for (const e of enemies) {
       if (e.dead) continue;
       if (e.isBoss) {
+        if (e.enterT > 0) continue;   // —— v1.2.80 入场中Boss不受炸弹 ——
         runDmgAdd(4);
         e.hp -= 4; e.hitFlash = 6;
         if (e.hp <= 0) { e.dead = true; onEnemyKilled(e); }
@@ -5345,7 +5361,10 @@
     advanceLevel();
   }
 
+  let lvAdvLock = false;   // —— v1.2.72 换关重入锁 ——
   function advanceLevel() {
+    if (lvAdvLock) return false;   // —— v1.2.72 重入直接忽略，防跳关 ——
+    lvAdvLock = true; setTimeout(() => { lvAdvLock = false; }, 3000);
     hideUpgradeBox();
     // —— v1.1.226 过关防线：清掉弹层期误触的暂停/回场计时，避免换关冻结 ——
     resumeCancel();
@@ -5543,6 +5562,7 @@
 
   // ===== 关卡 / 敌人生成 =====
   function startLevel() {
+    lvAdvLock = false;   // —— v1.2.72 新关生效即释放 ——
     bossLevel = (level % 5 === 0);
     if (bossLevel) { const bt = BOSS_TYPES[bossCount % BOSS_TYPES.length]; if (bt) setTimeout(() => { try { showToast('⚠️ Boss「' + bt.name + '」来袭 · ' + bt.desc); } catch (e) { /* 忽略 */ } }, 1200); }   // —— v1.2.48 Boss 弱点提示 ——
     tookHitThisLevel = false; lvPerfGold = 0; lvWingBonus = 0; lvFastBonus = 0;   // —— v1.2.22 新关清零表现奖励 · v1.2.33 · v1.2.46 ——
@@ -5827,6 +5847,9 @@
     }
     // —— v1.2.21 存活敌人越界/陷墙脱困看门狗 ——
     for (const e of enemies) unstickEnemy(e);
+    if (wingman && !wingman.dead) unstickEnemy(wingman);   // —— v1.2.73 僚机陷墙自救 ——
+    if (player && !player.dead) unstickEnemy(player);   // —— v1.2.79 玩家陷墙自救 ——
+    if (player2 && !player2.dead) unstickEnemy(player2);   // —— v1.2.79 P2 同理 ——
 
     if (!baseAlive) { endGame(false); return; }
 
@@ -24916,7 +24939,10 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   }
 
   // ===== 控制 =====
-  function start(mode, startLv) {
+  let startLock = false, startCalls = 0;   // —— v1.2.75 开局防抖 ——
+  function start(mode, startLv, force) {
+    if (startLock && !force) return false;   // —— v1.2.75 350ms 内用户重入忽略，测试钩子可强开 ——
+    startLock = true; startCalls++; setTimeout(() => { startLock = false; }, 350);
     dailyMode = mode === 'daily';
     if (dailyMode) applyDailyHero();   // —— v0.3.18 每日挑战:玩家未选英雄时自动装备今日推荐 ——
     timedMode = mode === 'timed';
@@ -24971,6 +24997,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     lvResultPending = false; lvResult.classList.remove('show'); adPending = false; adBox.classList.remove('show'); lvClearDone = false;
     closeMilestone();   // —— v1.1.234 庆典弹层也不带进新局 ——
     closeSignin(); closeMissions(); closeShop(); closeDex();   // —— v1.2.9 菜单弹层开局前全关 ——
+    closeAllPanels();   // —— v1.2.81 全量兜底：新弹层忘加进清单也会被关掉 ——
     try { missionRunSnap = {}; for (const m of missionsNow().items) missionRunSnap[m.type] = m.prog; } catch (e) { missionRunSnap = null; }   // —— v1.2.14 任务快照 ——
     closeSaveBox(); closeAch(); closeCareerRep(); closeCareer(); closeLevelSelect(); closeEditor();   // —— v1.2.9 其余弹层同样全关，防开局后按键被 panelOpen 挡死 ——
     if (dailyMode) {
@@ -26232,6 +26259,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   }
   function openSignin() { renderSignin(); $('signinBox').classList.add('show'); }
   function closeSignin() { const el = $('signinBox'); if (el) el.classList.remove('show'); }
+  function closeAllPanels() { document.querySelectorAll('.show').forEach(el => el.classList.remove('show')); }   // —— v1.2.81 弹层全量兜底 ——
 
   // —— v1.2.25 敌人图鉴：击毁数跨局累计 ——
   const LS_DEX = 'tank-battle-dex';
@@ -27259,7 +27287,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.71', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.81', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -29910,7 +29938,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       closeAchNow: () => { closeAch(); return !$('achBox').classList.contains('show'); },
       bullets: () => bullets.map(b => ({ dir: b.dir, x: b.x, y: b.y, size: b.size, speed: b.speed, pen: b.pen, bomb: b.bomb, owner: b.owner.isPlayer ? 'p' : 'e' })),
       // —— 局外养成验证 ——
-      startGame: () => { wingmanEnabled = false; return start('normal'); },   // v0.3.2 测试关僚机保确定性
+      startGame: () => { wingmanEnabled = false; return start('normal', 0, true); },   // v0.3.2 测试关僚机保确定性 —— v1.2.75 强开防抖 ——
       livesNow: () => lives,
       setLives: (n) => { lives = Math.max(0, n | 0); lastLives = -1; },
       hudCoins: () => elCoins ? elCoins.textContent : null,
@@ -30005,6 +30033,23 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       bgmRushWaveNow: () => BGM_RUSH_WAVE,
       // —— v0.2.9 金币经济补全验证钩子（?test=1 暴露） ——
       gachaNow: () => drawGacha(),
+      closeAllNow: () => { closeAllPanels(); return document.querySelectorAll('.show').length; },
+      showCountNow: () => document.querySelectorAll('.show').length,
+      bossEnterNow: () => { const b = enemies.find(e => e.isBoss); return b ? { hp: b.hp, enterT: b.enterT || 0, dead: !!b.dead } : null; },
+      setBossEnterNow: (v) => { const b = enemies.find(e => e.isBoss); if (b) b.enterT = v; return !!b; },
+      unstickPlayerNow: () => player ? unstickEnemy(player) : null,
+      setPlayerPosNow: (x, y) => { if (player) { player.x = x; player.y = y; } return !!player; },
+      respawnWingNow: () => { respawnWingman(); return wingman ? { x: wingman.x, y: wingman.y } : null; },
+      wingBlockedNow: () => wingman ? isBlocked(wingman.x, wingman.y, wingman.size) : null,
+      healedJsonNow: (k, fb) => healedJson(k, fb), healedKeysNow: () => healedKeys.slice(),
+      corruptSaveNow: (k) => { try { localStorage.setItem(k, '{{{corrupt'); return true; } catch (e) { return false; } },
+      audioStateNow: () => (typeof audioCtx !== 'undefined' && audioCtx) ? audioCtx.state : 'none',
+      startCallsNow: () => startCalls, setStartLockNow: (v) => { startLock = !!v; return startLock; },
+      overscrollNow: (id) => { const e = document.getElementById(id); return e ? getComputedStyle(e).overscrollBehavior : 'none'; },
+      wingPosNow: () => wingman ? { x: wingman.x, y: wingman.y, dead: !!wingman.dead } : null,
+      setWingPosNow: (x, y) => { if (wingman) { wingman.x = x; wingman.y = y; } return !!wingman; },
+      unstickWingNow: () => wingman ? unstickEnemy(wingman) : null,
+      lvAdvLockNow: () => lvAdvLock, setLvAdvLockNow: (v) => { lvAdvLock = !!v; return lvAdvLock; },
       todayStatsNow: () => ({ ...todayData }), todayAddNow: (k, v) => { todayAdd(k, v); return todayData; },
       todayResetNow: () => { todayData = { day: String(dayKey()), kills: 0, coins: 0, games: 0 }; try { saveStore.setItem(LS_TODAY, JSON.stringify(todayData)); } catch (e) { /* 忽略 */ } return true; },
       todayChipNow: () => { updateTodayChip(); const e = $('todayChip'); return e ? { txt: e.textContent, show: e.style.display !== 'none' } : null; },
@@ -30121,7 +30166,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       fireOnce: () => { if (!player || player.cooldown > 0) return -1; fire(player); return player.cooldown; },
       playerSpd: () => player ? player.speed : -1,
       // —— v0.2.3 限时冲分 ——
-      startMode: (m) => start(m),
+      startMode: (m) => start(m, 0, true),   // —— v1.2.75 强开防抖 ——
       timedState: () => ({ timedMode, timeLimit, timeLeft, shown: !!(elTimerWrap && elTimerWrap.style.display !== 'none') }),
       // —— v0.2.4 成就系统扩展 / 存档提醒 / 音效 / 皮肤描述 ——
       achHas: (id) => achUnlocked.has(id),
@@ -30309,7 +30354,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
         };
       },
       // —— v0.2.6 无尽/生存模式 ——
-      startEndless: () => { start('endless'); return { endless: endlessMode }; },
+      startEndless: () => { start('endless', 0, true); return { endless: endlessMode }; },
       endlessInfo: () => ({
         endless: endlessMode, level: level, bestWave: bestWave,
         enemyMul: endlessMode ? {
@@ -30375,8 +30420,8 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       multiOpen: () => { if (multiBox) multiBox.classList.add('show'); return !!(multiBox && multiBox.classList.contains('show')); },
       multiClose: () => { if (multiBox) multiBox.classList.remove('show'); return !(multiBox && multiBox.classList.contains('show')); },
       multiOpenNow: () => !!(multiBox && multiBox.classList.contains('show')),
-      startCoop: () => { start('coop'); return { multiMode, p2: !!player2 }; },
-      startVersus: () => { start('versus'); return { multiMode, p2: !!player2 }; },
+      startCoop: () => { start('coop', 0, true); return { multiMode, p2: !!player2 }; },
+      startVersus: () => { start('versus', 0, true); return { multiMode, p2: !!player2 }; },
       multiNow: () => ({ multiMode, lives2, running, gameOver,
         p2: player2 ? { x: player2.x, y: player2.y, dir: player2.dir, dead: player2.dead, spawnInv: player2.spawnInv } : null }),
       setPlayer2: (x, y) => { if (player2) { player2.x = x; player2.y = y; player2.dead = false; } return !!player2; },

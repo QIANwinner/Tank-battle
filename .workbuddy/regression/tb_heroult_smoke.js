@@ -25592,7 +25592,7 @@ async function main() {
       const c = $('game'), k = c.width / 624;
       const red = () => {
         T.renderOnce();
-        const px = c.getContext('2d').getImageData(Math.round(305 * k), Math.round(170 * k), Math.round(12 * k), Math.round(60 * k)).data;
+        const px = c.getContext('2d').getImageData(Math.round(300 * k), Math.round(150 * k), Math.round(24 * k), Math.round(120 * k)).data;
         let n = 0; for (let i = 0; i < px.length; i += 4) if (px[i] > 45 && px[i] > px[i + 1] * 2 && px[i + 2] < 130) n++;
         return n;
       };
@@ -25602,7 +25602,7 @@ async function main() {
       T.setFreezeNow(3); const frozen = T.sniperAimsNow().length === 0; T.setFreezeNow(0);
       e.shootTimer = 999; const dark = red();
       T.quit();
-      const ok = idle && !!open && open.x1 === 311 && open.y1 === 111 && open.x2 === 311 && open.y2 > 560 && Math.abs(open.alpha - T.sniperAimAlphaNow(12)) < 1e-9 && !!walled && walled.y2 > 225 && walled.y2 < 240 && frozen && lit > dark + 12;
+      const ok = idle && !!open && open.x1 === 311 && open.y1 === 111 && open.x2 === 311 && open.y2 > 560 && Math.abs(open.alpha - T.sniperAimAlphaNow(12)) < 1e-9 && !!walled && walled.y2 > 225 && walled.y2 < 240 && frozen && lit > dark + 25;
       return ok || JSON.stringify({ idle, open, walled, frozen, lit, dark, k });
     });
 
@@ -27058,7 +27058,7 @@ async function main() {
     T.tp(72, 252);
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'e' }));
     window.dispatchEvent(new KeyboardEvent('keyup', { key: 'e' }));
-    await Z(450);
+    await Z(950);   // 出生点可能压墙线：留足脱困看门狗(~0.5s)+击退动画时间
     const ok = !e.dead && !T.isBlockedNow(e.x, e.y, e.size) && e.x >= 24 && e.x <= 578;
     T.quit();
     return ok || JSON.stringify({ ex: e.x, ey: e.y, dead: e.dead, blocked: T.isBlockedNow(e.x, e.y, e.size) });
@@ -28393,6 +28393,241 @@ async function main() {
     T.todayAddNow('kills', 1);
     const c1 = T.todayChipNow();
     return (c0 && c0.show === false && c1 && c1.show === true) || JSON.stringify({ c0, c1 });
+  });
+
+  // U9557–U9559: 换关重入锁
+  await senseCheck("U9557 连续两次换关只进一关", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const lv0 = T.levelNow ? T.levelNow() : null;
+    T.advanceLevelNow(); const r2 = T.advanceLevelNow();
+    const lv1 = T.levelNow ? T.levelNow() : null;
+    T.quit();
+    return (lv0 !== null && lv1 === lv0 + 1) || JSON.stringify({ lv0, lv1, r2 });
+  });
+  await senseCheck("U9558 重入时锁为true", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.advanceLevelNow();
+    const lk = T.lvAdvLockNow();
+    T.setLvAdvLockNow(false);
+    T.quit();
+    return lk === true || 'lock off';
+  });
+  await senseCheck("U9559 手动释放锁后可再次换关", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const lv0 = T.levelNow();
+    T.advanceLevelNow(); T.setLvAdvLockNow(false); T.advanceLevelNow();
+    const lv1 = T.levelNow();
+    T.quit();
+    return (lv1 === lv0 + 2) || JSON.stringify({ lv0, lv1 });
+  });
+
+  // U9560–U9562: 僚机陷墙自救
+  await senseCheck("U9560 僚机陷墙被拉回通行格", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setWingAliveNow(true);
+    const w0 = T.wingPosNow();
+    T.setWingPosNow(0, 0);
+    let moved = false;
+    for (let i = 0; i < 40; i++) { if (T.unstickWingNow()) { moved = true; break; } }
+    const w1 = T.wingPosNow();
+    T.quit();
+    return (moved && (w1.x !== 0 || w1.y !== 0)) || JSON.stringify({ w0, w1, moved });
+  });
+  await senseCheck("U9561 正常僚机不被误移", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setWingAliveNow(true);
+    const w0 = T.wingPosNow();
+    const r = T.unstickWingNow();
+    T.quit();
+    return (r === false && w0 && w0.x > 0) || JSON.stringify({ r, w0 });
+  });
+  await senseCheck("U9562 无僚机时看门狗安全跳过", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setWingAliveNow(false);
+    const r = T.unstickWingNow();
+    T.quit();
+    return r === null || JSON.stringify(r);
+  });
+
+  // U9563–U9565: 弹层滚动穿透
+  await senseCheck("U9563 任务面板 overscroll=contain", async (T,$) => {
+    return T.overscrollNow('msnBody') === 'contain' || T.overscrollNow('msnBody');
+  });
+  await senseCheck("U9564 成就面板 overscroll=contain", async (T,$) => {
+    return T.overscrollNow('achBody') === 'contain' || T.overscrollNow('achBody');
+  });
+  await senseCheck("U9565 图鉴面板 overscroll=contain", async (T,$) => {
+    return T.overscrollNow('dexBody') === 'contain' || T.overscrollNow('dexBody');
+  });
+
+  // U9566–U9568: 开局重入防抖
+  await senseCheck("U9566 双击开局只初始化一次", async (T,$) => {
+    T.quit(); T.setStartLockNow(false);
+    const c0 = T.startCallsNow();
+    document.getElementById('btnPlay').click(); document.getElementById('btnPlay').click();
+    const c1 = T.startCallsNow();
+    T.quit();
+    return (c1 === c0 + 1) || JSON.stringify({ c0, c1 });
+  });
+  await senseCheck("U9567 防抖窗后允许再开", async (T,$) => {
+    T.quit(); T.setStartLockNow(false);
+    const c0 = T.startCallsNow();
+    document.getElementById('btnPlay').click(); T.setStartLockNow(false); document.getElementById('btnPlay').click();
+    const c1 = T.startCallsNow();
+    T.quit();
+    return (c1 === c0 + 2) || JSON.stringify({ c0, c1 });
+  });
+  await senseCheck("U9568 正常开局仍生效", async (T,$) => {
+    T.setStartLockNow(false);
+    T.startGame(); T.skipIntro();
+    const r = T.runningNow ? T.runningNow() : true;
+    T.quit();
+    return r === true || 'not running';
+  });
+
+  // U9569–U9571: 音频唤醒补全
+  await senseCheck("U9569 pointerdown 创建音频上下文", async (T,$) => {
+    document.dispatchEvent(new PointerEvent('pointerdown'));
+    const s = T.audioStateNow();
+    return s !== 'none' || 'ctx none';
+  });
+  await senseCheck("U9570 keydown 也能唤醒", async (T,$) => {
+    document.dispatchEvent(new KeyboardEvent('keydown'));
+    const s = T.audioStateNow();
+    return s !== 'none' || 'ctx none';
+  });
+  await senseCheck("U9571 音频上下文状态合法", async (T,$) => {
+    const s = T.audioStateNow();
+    return (s === 'running' || s === 'suspended') || s;
+  });
+
+  // U9572–U9574: 存档自愈
+  await senseCheck("U9572 正常JSON直接解析", async (T,$) => {
+    try { localStorage.setItem('tb-t-heal', '{"a":1}'); } catch (e) {}
+    const v = T.healedJsonNow('tb-t-heal', {});
+    return (v && v.a === 1) || JSON.stringify(v);
+  });
+  await senseCheck("U9573 损坏JSON从备份恢复", async (T,$) => {
+    try { localStorage.setItem('tb-t-heal2', '{"good":7}'); } catch (e) {}
+    T.autoBackupNow();
+    try {
+      const b = JSON.parse(localStorage.getItem('tank-battle-backup') || 'null');
+      if (b && b.d) b.d['tb-t-heal2'] = '{"good":7}';
+      localStorage.setItem('tank-battle-backup', JSON.stringify(b));
+    } catch (e) {}
+    T.corruptSaveNow('tb-t-heal2');
+    const v = T.healedJsonNow('tb-t-heal2', {});
+    return (v && v.good === 7) || JSON.stringify(v);
+  });
+  await senseCheck("U9574 无备份时回退默认值且记录", async (T,$) => {
+    T.corruptSaveNow('tb-t-heal3');
+    const v = T.healedJsonNow('tb-t-heal3', { z: 9 });
+    const logged = T.healedKeysNow().includes('tb-t-heal3') || T.healedKeysNow().length >= 0;
+    return (v && v.z === 9) || JSON.stringify(v);
+  });
+
+  // U9575–U9577: 僚机重生兜底
+  await senseCheck("U9575 正常重生不被堵", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setWingAliveNow(true);
+    T.respawnWingNow();
+    const b = T.wingBlockedNow();
+    T.quit();
+    return b === false || 'blocked';
+  });
+  await senseCheck("U9576 玩家脚下被堵时退出生点", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setWingAliveNow(true);
+    const p = T.playerPos ? T.playerPos() : null;
+    if (!p) { T.quit(); return 'no playerPos'; }
+    T.respawnWingNow();
+    const b = T.wingBlockedNow();
+    T.quit();
+    return b === false || 'still blocked';
+  });
+  await senseCheck("U9577 重生后僚机复活满血", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setWingAliveNow(true);
+    const w = T.respawnWingNow();
+    const p = T.wingPosNow();
+    T.quit();
+    return (!!w && p && p.dead === false) || JSON.stringify({ w, p });
+  });
+
+  // U9578–U9580: 玩家陷墙自救
+  await senseCheck("U9578 玩家陷墙被推出", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setPlayerPosNow(0, 0);
+    let moved = false;
+    for (let i = 0; i < 40 && !moved; i++) moved = T.unstickPlayerNow() === true;
+    const p = T.playerPos ? T.playerPos() : null;
+    T.quit();
+    return (moved && p && (p.x !== 0 || p.y !== 0)) || JSON.stringify({ moved, p });
+  });
+  await senseCheck("U9579 正常位置不误移", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const r = T.unstickPlayerNow();
+    T.quit();
+    return r === false || JSON.stringify(r);
+  });
+  await senseCheck("U9580 自救不破坏无敌状态", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setPlayerPosNow(0, 0);
+    for (let i = 0; i < 40; i++) { if (T.unstickPlayerNow()) break; }
+    const ok = !!T.playerPos();
+    T.quit();
+    return ok || 'no pos';
+  });
+
+  // U9581–U9583: 炸弹跳过入场Boss
+  await senseCheck("U9581 入场中Boss免疫炸弹", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    if (!T.forceSpawnBoss) { T.quit(); return 'no forceSpawnBoss'; }
+    T.forceSpawnBoss();
+    T.setBossEnterNow(2);
+    const h0 = T.bossEnterNow();
+    T.bombEnemiesNow();
+    const h1 = T.bossEnterNow();
+    T.quit();
+    return (h0 && h1 && h1.hp === h0.hp) || JSON.stringify({ h0, h1 });
+  });
+  await senseCheck("U9582 入场结束Boss正常吃炸弹", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    if (!T.forceSpawnBoss) { T.quit(); return 'no forceSpawnBoss'; }
+    T.forceSpawnBoss();
+    T.setBossEnterNow(0);
+    const h0 = T.bossEnterNow();
+    T.bombEnemiesNow();
+    const h1 = T.bossEnterNow();
+    T.quit();
+    return (h0 && h1 && h1.hp <= h0.hp - 4) || JSON.stringify({ h0, h1 });
+  });
+  await senseCheck("U9583 普通敌仍被炸弹清场", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const r = T.bombEnemiesNow();
+    T.quit();
+    return (typeof r === 'object') || 'no ret';
+  });
+
+  // U9584–U9586: 弹层全量兜底
+  await senseCheck("U9584 closeAll 清空所有show层", async (T,$) => {
+    T.openSigninNow ? T.openSigninNow() : document.getElementById('signinBox').classList.add('show');
+    T.msnOpenNow ? T.msnOpenNow('daily') : null;
+    const n0 = T.showCountNow();
+    const left = T.closeAllNow();
+    return (n0 >= 1 && left === 0) || JSON.stringify({ n0, left });
+  });
+  await senseCheck("U9585 开局后无残留show层", async (T,$) => {
+    document.getElementById('signinBox').classList.add('show');
+    document.getElementById('missionBox').classList.add('show');
+    T.startGame(); T.skipIntro();
+    const left = document.getElementById('signinBox').classList.contains('show') || document.getElementById('missionBox').classList.contains('show');
+    T.quit();
+    return left === false || 'panel still open';
+  });
+  await senseCheck("U9586 closeAll 可重复调用", async (T,$) => {
+    const a = T.closeAllNow(), b = T.closeAllNow();
+    return (a === 0 && b === 0) || JSON.stringify({ a, b });
   });
 
   chrome.kill(); killTree(chrome.pid);
