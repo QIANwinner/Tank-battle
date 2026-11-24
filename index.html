@@ -1868,7 +1868,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.62</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.63</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -25166,14 +25166,14 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       for (const def of BONUS_DEF) {
         const lv = bonus[def.id] || 0;
         const maxed = lv >= def.max;
-        const price = maxed ? 0 : dealApply('强化', def.price[lv]);   // —— v1.1.235 显示价=实扣价 ——
+        const price = maxed ? 0 : dealApply('强化', dealPriceFor(def.id, def.price[lv]));   // —— v1.1.235 显示价=实扣价 · v1.2.63 ——
         const item = document.createElement('div');
         item.className = 'shopItem'; item.dataset.bid = def.id;   // —— v1.2.45 ——
         item.innerHTML = v5ShopIconHtml(def.icon) +
           '<span class="siName">' + def.name + (def.id === recId ? ' <b class="recBadge">荐</b>' : '') + '</span>' +   // —— v1.2.62 ——
           '<span class="siDesc">' + def.desc + '</span>' +
           '<span class="siEff">' + shopEffLine(def, lv) + '</span>' +
-          '<span class="siMeta">' + shopMetaText(maxed, lv, def.max, price) + '</span>' +
+          '<span class="siMeta">' + shopMetaText(maxed, lv, def.max, price) + (dealOn(def.id) ? ' <b class="ddealTag">6折·限1次</b>' : '') + '</span>' +   // —— v1.2.63 ——
           '<button class="siBtn' + (maxed ? ' owned disabled' : '') + '">' + shopBtnLabel(maxed, price) + '</button>';
         const btn = item.querySelector('.siBtn');
         if (!maxed) btn.onclick = () => buyBonus(def.id);
@@ -25282,6 +25282,17 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const el = document.querySelector('.shopItem[data-bid="' + id + '"]'); if (!el) return;
     el.classList.add('siBuyFlash'); setTimeout(() => el.classList.remove('siBuyFlash'), 450);
   }
+  const LS_DDEAL = 'tank-battle-ddeal';   // —— v1.2.63 每日限购 ——
+    let ddeal = { day: '', id: '', used: false };
+    try { const dd = JSON.parse(saveStore.getItem(LS_DDEAL) || 'null'); if (dd && dd.day) ddeal = dd; } catch (e) { /* 忽略 */ }
+    function dailyDeal() {
+      const tk = String(dayKey());
+      if (ddeal.day !== tk) { ddeal = { day: tk, id: BONUS_DEF[Math.abs(tk | 0) % BONUS_DEF.length].id, used: false }; try { saveStore.setItem(LS_DDEAL, JSON.stringify(ddeal)); } catch (e) { /* 忽略 */ } }
+      return ddeal;
+    }
+    function dealPriceFor(id, raw) { const d = dailyDeal(); return (d.id === id && !d.used) ? Math.max(1, Math.round(raw * 0.6)) : raw; }
+    function dealOn(id) { const d = dailyDeal(); return d.id === id && !d.used; }
+    function dailyDealUse(id) { const d = dailyDeal(); if (d.id === id && !d.used) { ddeal.used = true; try { saveStore.setItem(LS_DDEAL, JSON.stringify(ddeal)); } catch (e) { /* 忽略 */ } } }
   function bonusRecommendId() {   // —— v1.2.62 强化推荐：等级最低者优先，同级取便宜 ——
     let best = null, bestKey = null;
     for (const d of BONUS_DEF) {
@@ -25299,9 +25310,10 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (lv >= def.max) return;
     const rawPrice = def.price[lv];
     if (!Number.isFinite(rawPrice)) return;   // —— v1.1.235 坏档防御:异常价格不买不扣 ——
-    const price = dealApply('强化', rawPrice);
+    const price = dealApply('强化', dealPriceFor(def.id, rawPrice));   // —— v1.2.63 每日限购价 ——
     if (coins < price) { showToast(insufficientMsg('🪙 金币', coins, price)); beep(180, 0.12, 'square', 0.05); return; }
     coins -= price; bonus[id] = lv + 1; bonusSpent += price;   // v0.2.9 追踪强化累计投入
+    dailyDealUse(def.id);   // —— v1.2.63 限购额度已用 ——
     saveCoins(); saveBonus(); saveBonusSpent(); renderShop(); updateCoinHud();
     showToast(bonusBuyMsg(def.icon, def.name, coins));
     shopBuyFlash(def.id);   // —— v1.2.45 购买闪光 ——
@@ -27167,7 +27179,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.62', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.63', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -29913,6 +29925,9 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       bgmRushWaveNow: () => BGM_RUSH_WAVE,
       // —— v0.2.9 金币经济补全验证钩子（?test=1 暴露） ——
       gachaNow: () => drawGacha(),
+      dailyDealNow: () => { const d = dailyDeal(); return { id: d.id, used: d.used }; },
+      setDailyDealNow: (id, used) => { ddeal = { day: String(dayKey()), id, used: !!used }; saveStore.setItem(LS_DDEAL, JSON.stringify(ddeal)); return ddeal; },
+      buyBonusNow: (id) => buyBonus(id),
       bonusRecNow: () => bonusRecommendId(), setBonusLvNow: (id, lv) => { bonus[id] = Math.max(0, lv | 0); saveBonus(); return bonus[id]; },
       recBadgeDomNow: () => { setShopTab('bonus'); const e = shopBody.querySelector('.recBadge'); const it = e && e.closest('.shopItem'); return it ? it.dataset.bid : null; },
       gachaTodayCostNow: () => dealApply('抽奖', gachaTodayCost(GACHA_COST)),

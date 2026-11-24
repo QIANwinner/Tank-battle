@@ -28191,6 +28191,30 @@ async function main() {
     return (b !== a) || JSON.stringify({ a, b });
   });
 
+  // U9530–U9532: 每日限购
+  await senseCheck("U9530 每日限购槽存在且未用", async (T,$) => {
+    const d = T.dailyDealNow();
+    return (typeof d.id === 'string' && d.id.length > 0 && d.used === false) || JSON.stringify(d);
+  });
+  await senseCheck("U9531 限购品6折购买后标记已用", async (T,$) => {
+    T.setBonusLvNow('cd', 0); T.setCoinsNow(99999);
+    T.setDailyDealNow('cd', false);
+    const c0 = T.coins();
+    T.buyBonusNow('cd');
+    const d = T.dailyDealNow();
+    const spent = c0 - T.coins();
+    const ok = d.used === true && spent > 0 && spent <= 30;
+    return ok || JSON.stringify({ d, spent });
+  });
+  await senseCheck("U9532 已用后同品恢复原价", async (T,$) => {
+    T.setBonusLvNow('spd', 0); T.setCoinsNow(99999);
+    T.setDailyDealNow('spd', true);
+    const c0 = T.coins();
+    T.buyBonusNow('spd');
+    const spent = c0 - T.coins();
+    return (spent === 50) || 'spent:' + spent;
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
