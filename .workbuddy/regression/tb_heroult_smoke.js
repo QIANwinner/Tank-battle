@@ -27942,6 +27942,35 @@ async function main() {
     return (p1 === p0 + 1) || JSON.stringify({ p0, p1 });
   });
 
+  // U9497–U9499: 成就筛选
+  await senseCheck("U9497 成就筛选芯片渲染3颗", async (T,$) => {
+    T.achFilterSetNow('all');
+    T.achOpenNow();
+    const chips = [...document.querySelectorAll('.achChip')];
+    const ok = chips.length === 3 && chips[0].dataset.f === 'all' && chips[2].dataset.f === 'locked';
+    T.closeAch ? T.closeAch() : document.getElementById('achBox').classList.remove('show');
+    return ok || 'chips:' + chips.length;
+  });
+  await senseCheck("U9498 未解锁筛选只显示 locked 行", async (T,$) => {
+    T.achFilterSetNow('locked');
+    T.achOpenNow();
+    const rows = [...document.querySelectorAll('.achItem')];
+    const allLocked = rows.length > 0 && rows.every(r => r.classList.contains('locked'));
+    T.achFilterSetNow('done');
+    T.achOpenNow();
+    const drows = [...document.querySelectorAll('.achItem')];
+    const noneLocked = drows.every(r => !r.classList.contains('locked'));
+    document.getElementById('achBox').classList.remove('show');
+    return (allLocked && noneLocked) || JSON.stringify({ allLocked, noneLocked, n: rows.length });
+  });
+  await senseCheck("U9499 全部筛选恢复且芯片高亮跟随", async (T,$) => {
+    T.achFilterSetNow('all');
+    const total = T.achOpenNow();
+    const on = document.querySelector('.achChip.on');
+    document.getElementById('achBox').classList.remove('show');
+    return (total > 5 && on && on.dataset.f === 'all') || JSON.stringify({ total, on: on && on.dataset.f });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

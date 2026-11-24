@@ -1868,7 +1868,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.51</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.52</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2968,6 +2968,7 @@
     { id: 'petmax', icon: '🐣', name: '满级萌宠', desc: '任意宠物升到满级', reward: 0, petReward: 3 },
     { id: 'petall', icon: '💞', name: '宠物全家福', desc: v5PetAllDesc(PET_DEF.length), reward: 0, petReward: 5 }
   ];
+  let achFilter = 'all';   // —— v1.2.52 成就筛选状态：all/done/locked ——
   // —— v0.2.7 成就分组（分组进度条用） ——
   const ACH_GROUP = {
     first: 'combat', combo8: 'combat', boss: 'combat', nohit: 'combat', surge: 'combat',
@@ -26001,6 +26002,10 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     statRow.className = 'achPetStat';
     statRow.innerHTML = achPetStatHtml(ps.got, ps.total, got, ACHIEVE.length) + '<span>🎖 ' + achRankName(got, ACHIEVE.length) + '</span>'
     achBody.appendChild(statRow);
+    const achChipBar = document.createElement('div');   // —— v1.2.52 筛选芯片条 ——
+    achChipBar.className = 'achChips';
+    achChipBar.innerHTML = [['all', '全部'], ['done', '已解锁'], ['locked', '未解锁']].map(p => '<button class="achChip' + (achFilter === p[0] ? ' on' : '') + '" data-f="' + p[0] + '">' + p[1] + '</button>').join('');
+    achBody.appendChild(achChipBar);
     // —— v1.2.49 行内进度：复用成就追踪数据源 ——
     const achTrk = {};
     for (const t of achTrackState({ kills: career.kills, coins: coins, boss: career.bossKills, wins: career.wins, stars: career.totalStars, daily: dailyCount, lv: maxUnlocked, wave: bestWave, skins: ownedSkins.length })) achTrk[t.id] = t;
@@ -26016,6 +26021,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       achBody.appendChild(head);
       for (const a of list) {
         const on = achUnlocked.has(a.id);
+        if ((achFilter === 'done' && !on) || (achFilter === 'locked' && on)) continue;   // —— v1.2.52 ——
         const row = document.createElement('div');
         row.className = 'achItem' + (on ? '' : ' locked');
         // —— v0.3.4 奖励展示：金币 + 宠物币（宠物成就只显示🐾） ——
@@ -26030,6 +26036,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
         achBody.appendChild(row);
       }
     }
+    achBody.querySelectorAll('.achChip[data-f]').forEach(b => b.addEventListener('click', () => { achFilter = b.dataset.f; openAch(); }));   // —— v1.2.52 ——
   }
   function closeAch() { if (achBox) achBox.classList.remove('show'); }
 
@@ -27089,7 +27096,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.51', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.52', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -29835,6 +29842,8 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       bgmRushWaveNow: () => BGM_RUSH_WAVE,
       // —— v0.2.9 金币经济补全验证钩子（?test=1 暴露） ——
       gachaNow: () => drawGacha(),
+      achFilterSetNow: (f) => { achFilter = f; return achFilter; },
+      achOpenNow: () => { openAch(); return achBody.querySelectorAll('.achItem').length; },
       gachaState: () => ({ cost: GACHA_COST, count: gachaCount, coins, bonusSpent,
         totalLv: Object.values(bonus).reduce((s, v) => s + v, 0) }),
       setCoinsNow: (n) => { coins = Math.max(0, Math.floor(n)); saveCoins(); return coins; },
