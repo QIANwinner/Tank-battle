@@ -28678,6 +28678,23 @@ async function main() {
     return (T.bulletTrailLenNow({ speed: 0 }) === 0) || 'nonzero';
   });
 
+  // U9596–U9598: 草丛摆动
+  await senseCheck("U9596 摆动幅度限幅 ±1.8", (T,$) => {
+    let mx = 0;
+    for (let t = 0; t < 5000; t += 137) mx = Math.max(mx, Math.abs(T.treeSwayNow(t * 7 % 500, t % 300)));
+    return (mx <= 1.81) || ('mx:' + mx);
+  });
+  await senseCheck("U9597 不同坐标相位不同", (T,$) => {
+    const a = T.treeSwayNow(0, 0), b = T.treeSwayNow(96, 48);
+    return (a !== b) || 'same';
+  });
+  await senseCheck("U9598 随时间变化", async (T,$) => {
+    const a = T.treeSwayNow(24, 24);
+    await new Promise(r => setTimeout(r, 500));
+    const b = T.treeSwayNow(24, 24);
+    return (a !== b) || JSON.stringify({ a, b });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

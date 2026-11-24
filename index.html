@@ -1869,7 +1869,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.84</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.85</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2688,6 +2688,8 @@
   let mapStaticCtx = null;
   let mapDirty = true;
   const animatedTiles = [], treeTiles = [], tankSprites = new Map(), floatTextSprites = new Map();
+  // —— v1.2.85 草丛摆动相位（坐标错相正弦） ——
+  function treeSway(x, y) { return reduced() ? 0 : Math.sin((animTime + x * 1.9 + y * 2.7) / 420) * 1.8; }
   // —— v1.2.84 子弹拖尾长度（速度正比，封顶20px） ——
   function bulletTrailLen(b) { return Math.min((b.speed || 0) * 3.2, 20); }
   let treeStamp = null, treeScale = 0;
@@ -6199,7 +6201,7 @@
         g.scale(treeScale, treeScale);
         drawTree(0, 0, g);
       }
-      for (const cell of treeTiles) ctx.drawImage(treeStamp, cell.x, cell.y, treeStamp.width / treeScale, treeStamp.height / treeScale);
+      for (const cell of treeTiles) ctx.drawImage(treeStamp, cell.x + treeSway(cell.x, cell.y), cell.y, treeStamp.width / treeScale, treeStamp.height / treeScale);   // —— v1.2.85 摆动 ——
     }
     drawLastEnemyMark();
     drawFoeHpBars();
@@ -27304,7 +27306,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.84', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.85', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -30062,6 +30064,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       corruptSaveNow: (k) => { try { localStorage.setItem(k, '{{{corrupt'); return true; } catch (e) { return false; } },
       audioStateNow: () => (typeof audioCtx !== 'undefined' && audioCtx) ? audioCtx.state : 'none',
       startCallsNow: () => startCalls, setStartLockNow: (v) => { startLock = !!v; return startLock; },
+      treeSwayNow: (x, y) => treeSway(x, y),
       bulletTrailLenNow: (b) => bulletTrailLen(b),
       hudRollNow: (el) => !!(el && el.classList && el.classList.contains('numRoll')),
       overscrollNow: (id) => { const e = document.getElementById(id); return e ? getComputedStyle(e).overscrollBehavior : 'none'; },
