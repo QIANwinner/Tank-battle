@@ -25327,6 +25327,7 @@ async function main() {
   await senseCheck("U9068 真实计时归零：提示与文案一致，连击清零", async (T,$) => {
       const raf = () => new Promise(requestAnimationFrame);
       T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+      T.setComboShieldNow(false);   // —— v1.2.18 连击护盾会宽限一次，本测只看真归零 ——
       await raf(); T.comboExpireNow(6);
       const end = performance.now() + 3000;
       while ($('fieldNote').hidden && performance.now() < end) await raf();
@@ -26812,6 +26813,57 @@ async function main() {
     const d = T.coinsNow() - c0;
     T.quit(); T.setDailySeed(0); T.missionResetNow();
     return (d === 0) || JSON.stringify({ d });
+  });
+
+
+  // U9375–U9380: 连击护盾
+  await senseCheck("U9375 护盾宽限：归零续 1.5 秒", async (T,$) => {
+    T.startGame(); T.skipIntro();
+    T.setComboNow(5, 0.01, 5); T.setComboShieldNow(true);
+    await new Promise(r => setTimeout(r, 300));
+    const st = T.comboTimerObjNow();
+    const sh = T.comboShieldNow();
+    T.quit();
+    return (st.combo === 5 && sh === false && st.t > 0 && st.t <= 1.5) || JSON.stringify({ st, sh });
+  });
+  await senseCheck("U9376 连击不足 3 不触发", async (T,$) => {
+    T.startGame(); T.skipIntro();
+    T.setComboNow(2, 0.01, 5); T.setComboShieldNow(true);
+    await new Promise(r => setTimeout(r, 300));
+    const st = T.comboTimerObjNow();
+    const sh = T.comboShieldNow();
+    T.quit();
+    return (st.combo === 0 && sh === true) || JSON.stringify({ st, sh });
+  });
+  await senseCheck("U9377 护盾只宽限一次", async (T,$) => {
+    T.startGame(); T.skipIntro();
+    T.setComboNow(4, 0.01, 5); T.setComboShieldNow(true);
+    await new Promise(r => setTimeout(r, 300));
+    T.setComboNow(4, 0.01, 5);
+    await new Promise(r => setTimeout(r, 300));
+    const st = T.comboTimerObjNow();
+    T.quit();
+    return (st.combo === 0) || JSON.stringify({ st });
+  });
+  await senseCheck("U9378 新局护盾重置", (T,$) => {
+    T.startGame(); T.skipIntro(); T.setComboShieldNow(false); T.quit();
+    T.startGame(); T.skipIntro();
+    const sh = T.comboShieldNow();
+    T.quit();
+    return (sh === true) || JSON.stringify({ sh });
+  });
+  await senseCheck("U9379 comboShieldState 纯函数边界", (T,$) => {
+    const a = T.comboShieldStateNow(true, 3, 2, 5), b = T.comboShieldStateNow(false, 3, 2, 5), c = T.comboShieldStateNow(true, 0, 0, 0), d = T.comboShieldStateNow(true, 1, 2, 5);
+    return (a.ring === true && b.ring === false && c.ring === false && d.ring === false) || JSON.stringify({ a, b, c, d });
+  });
+  await senseCheck("U9380 真实对局护盾环入画", async (T,$) => {
+    T.startGame(); T.skipIntro();
+    T.setComboNow(3, 2, 5); T.setComboShieldNow(true);
+    const n0 = T.comboArcCountNow();
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    const drew = T.comboArcCountNow() > n0;
+    T.quit();
+    return drew || 'arc not drawn';
   });
 
   chrome.kill(); killTree(chrome.pid);
