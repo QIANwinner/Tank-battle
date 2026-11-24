@@ -26714,6 +26714,52 @@ async function main() {
     return (r1.granted && !r2.granted && day) || JSON.stringify({ r1, r2, day });
   });
 
+
+  // U9363–U9368: 挑战契约
+  await senseCheck("U9363 契约切换且持久化", (T,$) => {
+    T.setContractNow(true);
+    const on = T.contractNow() === true;
+    const saved = localStorage.getItem('tank-battle-contract') === '1';
+    T.setContractNow(false);
+    const off = T.contractNow() === false && localStorage.getItem('tank-battle-contract') === '0';
+    return (on && saved && off) || JSON.stringify({ on, saved, off });
+  });
+  await senseCheck("U9364 契约倍率 spd/hp/reward/score", (T,$) => {
+    T.setContractNow(true); const m = T.contractDiffNow();
+    T.setContractNow(false); const n = T.contractDiffNow();
+    return (Math.abs(m.spd - 1.3) < 1e-6 && Math.abs(m.hp - 1.3) < 1e-6 && Math.abs(m.reward - 1.5) < 1e-6 && Math.abs(m.score - 1.2) < 1e-6 && n.spd === 1) || JSON.stringify({ m, n });
+  });
+  await senseCheck("U9365 契约叠硬核难度", (T,$) => {
+    T.setContractNow(true);
+    const d0 = T.contractDiffNow();
+    document.querySelector('#diffSeg button[data-diff="hard"]').click();
+    const dh = T.contractDiffNow();
+    document.querySelector('#diffSeg button[data-diff="normal"]').click();
+    T.setContractNow(false);
+    return (Math.abs(dh.spd - 1.18 * 1.3) < 1e-3 && Math.abs(dh.hp - 1.3 * 1.3) < 1e-3) || JSON.stringify({ d0, dh });
+  });
+  await senseCheck("U9366 契约 seg 点击切换", (T,$) => {
+    document.querySelector('#contractSeg button[data-ct="1"]').click();
+    const on = T.contractNow() === true && document.querySelector('#contractSeg button[data-ct="1"]').classList.contains('active');
+    document.querySelector('#contractSeg button[data-ct="0"]').click();
+    const off = T.contractNow() === false;
+    return (on && off) || JSON.stringify({ on, off });
+  });
+  await senseCheck("U9367 契约击杀金 ×1.5", (T,$) => {
+    T.setContractNow(true);
+    const g = T.enemyGoldNow ? T.enemyGoldNow({ isBoss: false, type: 'normal' }) : -1;
+    T.setContractNow(false);
+    const g0 = T.enemyGoldNow ? T.enemyGoldNow({ isBoss: false, type: 'normal' }) : -1;
+    return (g > 0 && g0 > 0 && g === Math.max(1, Math.round(g0 * 1.5))) || JSON.stringify({ g, g0 });
+  });
+  await senseCheck("U9368 契约徽标随开关显隐", (T,$) => {
+    T.setContractNow(true);
+    const on = T.contractPillNow();
+    T.setContractNow(false);
+    const off = T.contractPillNow();
+    return (on && on.hidden === false && on.txt.includes('契约') && off && off.hidden === true) || JSON.stringify({ on, off });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

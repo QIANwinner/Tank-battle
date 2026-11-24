@@ -77,6 +77,7 @@
     <div class="pill m-hide" id="ultCdWrap"><span class="k">💥</span><div id="ultCdBar"></div></div>
     <div class="pill m-hide" id="pickupLog"></div>
     <div class="pill m-hide"><span class="k">🎯</span><span class="v" id="hitRateVal"></span></div>
+    <div class="pill m-hide" id="contractWrap" hidden><span class="k">⚡</span><span class="v">契约 ×1.5</span></div>
     <div class="pill m-hide"><span class="k">⚔</span><span class="v" id="kpmVal"></span></div>
     <div class="pill m-hide"><span class="k">👑</span><span class="v" id="bossKillVal"></span></div>
     <div class="pill m-hide"><span class="k">🎚</span><span class="v" id="diffBadgeVal"></span></div>
@@ -1501,6 +1502,13 @@
         <button data-diff="hard">🔥 硬核</button>
       </div>
     </div>
+    <div class="diffRow" id="contractRow">
+      <span class="diffLabel">契约</span>
+      <div class="seg" id="contractSeg">
+        <button data-ct="0">🕊 常规</button>
+        <button data-ct="1">⚡ 契约 ×1.5</button>
+      </div>
+    </div>
     <div class="diffRow" id="heroRow">
       <span class="diffLabel">英雄</span>
       <div class="seg" id="heroSeg">
@@ -1848,7 +1856,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.15</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.16</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2247,6 +2255,7 @@
         contrastSeg = $('contrastSeg'), cbSeg = $('cbSeg'),
         randMapSeg = $('randMapSeg'),     // —— v0.2.9 随机地图开关 ——
         diffSeg = $('diffSeg'),
+        contractSeg = $('contractSeg'),
         heroSeg = $('heroSeg');           // —— v0.3.6 英雄选择 ——
 
   // ===== URL 参数：好友挑战 (?ch=分数-关卡) / 每日挑战 (?daily=1) =====
@@ -2315,15 +2324,30 @@
   // —— v0.2.3 难度选择：轻松 / 标准 / 硬核 ——
   const LS_DIFF = 'tank-battle-diff';
   let difficulty = 'normal';          // 'easy' | 'normal' | 'hard'
+  // —— v1.2.16 挑战契约：风险换收益（敌 spd/hp ×1.3，金币 ×1.5，得分 ×1.2） ——
+  const LS_CONTRACT = 'tank-battle-contract';
+  let contractMode = false;
+  try { contractMode = localStorage.getItem(LS_CONTRACT) === '1'; } catch (e) { /* 忽略 */ }
+  function contractMul(m) {
+    if (!contractMode || !m) return m;
+    return { spd: m.spd * 1.3, hp: m.hp * 1.3, reward: m.reward * 1.5, score: m.score * 1.2 };
+  }
+  function setContract(on) {
+    contractMode = !!on;
+    try { saveStore.setItem(LS_CONTRACT, contractMode ? '1' : '0'); } catch (e) { /* 忽略 */ }
+    applySettingsUI();
+    sfxPickup();
+  }
+  function contractNoteText(on) { return on ? '⚡ 契约生效 · 敌军 +30% · 金币 ×1.5' : ''; }
   try {
     const d = localStorage.getItem(LS_DIFF);
     if (d === 'easy' || d === 'normal' || d === 'hard') difficulty = d;
   } catch (e) { /* 忽略 */ }
   function diffMul() {
     // —— v0.2.4 硬核经济回调：奖励 0.85→1.0（得分 1.2 已作补偿），硬核不再金币劝退 ——
-    if (difficulty === 'easy') return { spd: 0.85, hp: 1, reward: 1.15, score: 1 };
-    if (difficulty === 'hard') return { spd: 1.18, hp: 1.3, reward: 1.0, score: 1.2 };
-    return { spd: 1, hp: 1, reward: 1, score: 1 };
+    if (difficulty === 'easy') return contractMul({ spd: 0.85, hp: 1, reward: 1.15, score: 1 });
+    if (difficulty === 'hard') return contractMul({ spd: 1.18, hp: 1.3, reward: 1.0, score: 1.2 });
+    return contractMul({ spd: 1, hp: 1, reward: 1, score: 1 });
   }
   // 画质档位决定 DPR 上限（高=2 / 中=1.5 / 低=1），像素量是最大性能杠杆
   // —— v0.2.1 自适应画质：auto 档监控实际 FPS，持续低帧自动降档、回升自动升档 ——
@@ -24628,6 +24652,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     else if (multiMode === 2) introTxt = '⚔ 双人对抗';
     showLevelIntro(introTxt);
     updateTimerHud();
+    if (contractMode) fieldNoteShow(contractNoteText(true), 'warn', 2600, 1);   // —— v1.2.16 契约开局提示 ——
     if (dailyMode) {
       const d = new Date();
       showToast(dailyIntroMsg(d.getMonth() + 1, d.getDate()));
@@ -25263,6 +25288,11 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       for (const b of diffSeg.querySelectorAll('button'))
         b.classList.toggle('active', b.dataset.diff === difficulty);
     }
+    if (contractSeg) {
+      for (const b of contractSeg.querySelectorAll('button'))
+        b.classList.toggle('active', b.dataset.ct === (contractMode ? '1' : '0'));
+    }
+    const ctrW0 = $('contractWrap'); if (ctrW0) ctrW0.hidden = !contractMode;   // —— v1.2.16 契约徽标 ——
     if (settingsFullBtn) settingsFullBtn.textContent = fullscreenBtnText(isFullscreen());
   }
   function setDifficulty(d) {
@@ -26613,7 +26643,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.15', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.16', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -26818,6 +26848,9 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
 
   diffSeg.addEventListener('click', (e) => {
     const b = e.target.closest('button'); if (b) setDifficulty(b.dataset.diff);
+  });
+  if (contractSeg) contractSeg.addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (b) setContract(b.dataset.ct === '1');
   });
   // —— v0.3.6 英雄选择接线;v0.3.9 未购点击即走解锁流程 ——
   heroSeg.addEventListener('click', (e) => {
@@ -29393,6 +29426,10 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       msnClaimClickNow: (i) => { const b = document.querySelector('#msnBody .msnClaim[data-i="' + i + '"]'); if (b) b.click(); return !!b; },
       msnHudNow: () => { const el = $('msnHud'); return el ? { hidden: el.hidden, chips: [...el.querySelectorAll('.mhChip')].map(c => ({ t: c.textContent, done: c.classList.contains('done'), claimed: c.classList.contains('claimed') })) } : null; },
       panelOpenNow: () => panelOpen(),
+      contractNow: () => contractMode, setContractNow: (v) => { setContract(!!v); return contractMode; },
+      contractDiffNow: () => diffMul(), contractNoteNow: (v) => contractNoteText(v),
+      contractPillNow: () => { const el = $('contractWrap'); return el ? { hidden: el.hidden, txt: el.textContent } : null; },
+      enemyGoldNow: (e) => enemyGold(e),
       pauseMsnNow: () => { const el = $('pauseMsnWrap'); return el ? { hidden: el.hidden, txt: ($('pauseMsnVal') || {}).textContent || '' } : null; },
       lvMsnRowNow: () => { const el = $('lvMsnRow'); return el ? { hidden: el.hidden, txt: ($('lvMsnVal') || {}).textContent || '' } : null; },
       missionRunSnapNow: () => missionRunSnap,
