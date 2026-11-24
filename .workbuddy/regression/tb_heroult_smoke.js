@@ -26139,7 +26139,8 @@ async function main() {
     return ok || JSON.stringify({ clicked, paid, card: cards[0] });
   });
   await senseCheck("U9289 红点:可领出现/领完消失", (T,$) => {
-    T.setDailySeed(20310102); const st = T.missionResetNow();
+    T.setDailySeed(20310102); const st = T.missionResetNow(); T.wmissionResetNow();   // —— v1.2.10 起红点同计周任务可领，先归零 ——
+    T.quit();   // 回菜单触发 missionBadgeUpdate 刷新红点
     const off0 = T.msnDotNow() === false;
     T.missionBumpNow(st.items[0].type, st.items[0].target, false);
     const on = T.msnDotNow() === true;
@@ -26440,6 +26441,63 @@ async function main() {
     const clean = !$('missionBox').classList.contains('show') && !$('signinBox').classList.contains('show') && !$('shopBox').classList.contains('show');
     T.quit();
     return clean || 'panels left open';
+  });
+
+
+  // U9327–U9332: 每周任务
+  await senseCheck("U9327 周种子确定/3条异类/目标奖励", (T,$) => {
+    const a = T.wmissionPickNow('2026-W48'), b = T.wmissionPickNow('2026-W48');
+    const det = JSON.stringify(a) === JSON.stringify(b);
+    const distinct = new Set(a.map(m => m.type)).size === 3;
+    const aligned = a.every(m => m.target > 0 && m.reward > 0);
+    const bad = T.wmissionPickNow('').length === 0;
+    return (det && a.length === 3 && distinct && aligned && bad) || JSON.stringify({ det, distinct, aligned, bad, a });
+  });
+  await senseCheck("U9328 每日事件引擎带动周任务", (T,$) => {
+    T.setWeekIsoNow('2026-W91'); const st = T.wmissionResetNow();
+    const t0 = st.items[0].type;
+    T.missionBumpNow(t0, 7, false);
+    const p = T.wmissionsNow().items[0].prog;
+    T.setWeekIsoNow(''); T.wmissionResetNow();
+    return p === 7 || JSON.stringify({ t0, p });
+  });
+  await senseCheck("U9329 周任务领取发宠物币一次", (T,$) => {
+    T.setWeekIsoNow('2026-W92'); const st = T.wmissionResetNow();
+    const m0 = st.items[0]; T.wmissionBumpNow(m0.type, m0.target, false);
+    const p0 = T.petCoins();
+    const r1 = T.wmissionClaimNow(0), r2 = T.wmissionClaimNow(0);
+    const paid = T.petCoins() === p0 + m0.reward;
+    T.setWeekIsoNow(''); T.wmissionResetNow();
+    return (r1 === m0.reward && r2 === 0 && paid) || JSON.stringify({ r1, r2, paid });
+  });
+  await senseCheck("U9330 跨周自动重生成", (T,$) => {
+    T.setWeekIsoNow('2026-W93'); const a = T.wmissionResetNow();
+    T.wmissionBumpNow(a.items[0].type, 3, false);
+    T.setWeekIsoNow('2026-W94'); const b = T.wmissionsNow();
+    const fresh = b.wk === '2026-W94' && b.items.every(m => m.prog === 0 && !m.done && !m.claimed);
+    T.setWeekIsoNow(''); T.wmissionResetNow();
+    return fresh || JSON.stringify({ b });
+  });
+  await senseCheck("U9331 面板页签切换渲染周任务", (T,$) => {
+    T.setWeekIsoNow('2026-W95'); T.wmissionResetNow();
+    T.missionOpenNow();
+    T.msnTabSetNow('weekly');
+    const cards = T.msnCardInfoNow();
+    const tabs = document.querySelectorAll('#msnBody .msnTab').length;
+    const ok = cards.length === 3 && tabs === 2 && cards.every(c => c.prog.includes('🐾')) && T.msnDomNow().sub.includes('周');
+    T.msnTabSetNow('daily'); T.missionCloseNow(); T.setWeekIsoNow(''); T.wmissionResetNow();
+    return ok || JSON.stringify({ cards, tabs });
+  });
+  await senseCheck("U9332 红点同时计周任务可领", (T,$) => {
+    T.setDailySeed(20310210); T.missionResetNow();
+    T.setWeekIsoNow('2026-W96'); const st = T.wmissionResetNow();
+    T.msnDotNow();
+    const off = T.missionBadgeNow ? T.missionBadgeNow() : null;
+    T.wmissionBumpNow(st.items[0].type, st.items[0].target, false);
+    T.missionOpenNow(); T.missionCloseNow();
+    const on = T.msnDotNow() === true;
+    T.setWeekIsoNow(''); T.wmissionResetNow(); T.setDailySeed(0); T.missionResetNow();
+    return on === true || JSON.stringify({ off, on });
   });
 
   chrome.kill(); killTree(chrome.pid);
