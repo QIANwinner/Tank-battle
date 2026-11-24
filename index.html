@@ -1856,7 +1856,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.19</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.20</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2686,6 +2686,7 @@
   let wave = 1, wavesTotal = 1;      // 波次：当前波 / 总波数
   let waveSpawned = 0, waveGapT = 0; // 本波已刷 / 波间休整倒计时（帧）
   let spawnWarnPt = null;            // 出生预告点（刷前 35 帧闪烁警示）
+  let spawnBlockT = 0;                 // —— v1.2.20 出生点全堵计数（看门狗强刷） ——
   let baseAlive = true;
   let reviveCount = 0;       // 本局金币复活次数（成本递增）
   let shake = 0;
@@ -5119,6 +5120,11 @@
     // —— v1.1.226 过关防线：清掉弹层期误触的暂停/回场计时，避免换关冻结 ——
     resumeCancel();
     if (paused) { paused = false; pauseBtn.textContent = pauseIconText(false); hideOverlay(); setBgm(computeTargetBgm()); }
+    // —— v1.2.20 过关防线：换关前强制恢复战斗态，防 gameOver/覆盖层残留软锁 ——
+    if (!running || gameOver) { gameOver = false; won = false; running = true; hideOverlay(); }
+    // —— v1.2.20 过关防线：转换态全量清场，绕过 claim 直进也不留残层 ——
+    lvResultPending = false; lvResult.classList.remove('show');
+    adPending = false; adBox.classList.remove('show');
     level++;
     missionBump('levels', 1);   // —— v1.2.2 每日任务:过关计数 ——
     if (level >= 5) unlockAch('lv5');
@@ -5205,13 +5211,16 @@
     if (!lvResultPending) return;
     lvResultPending = false;
     lvResult.classList.remove('show');
-    const g = addGold(lvStarsNow * 25);
-    showToast(starRewardMsg(lvStarsNow, g, coins));
-    sfxCoin();   // v0.3.2 金币入账音
-    updateHud();
-    // 第一关通过 → 内测广告弹窗（一次性），领完/跳过再进强化面板
-    if (maybeShowAdPopup()) return;
-    offerUpgradesSafe();
+    // —— v1.2.20 过关防线：领取链任一环节异常都保底进下一关，不许无层可操作 ——
+    try {
+      const g = addGold(lvStarsNow * 25);
+      showToast(starRewardMsg(lvStarsNow, g, coins));
+      sfxCoin();   // v0.3.2 金币入账音
+      updateHud();
+      // 第一关通过 → 内测广告弹窗（一次性），领完/跳过再进强化面板
+      if (maybeShowAdPopup()) return;
+      offerUpgradesSafe();
+    } catch (e) { try { advanceLevel(); } catch (e2) { /* 忽略 */ } }
   }
 
   // —— v1.1.226 过关防线：强化面板异常时保底进下一关，不许卡死 ——
@@ -5262,7 +5271,7 @@
     // 单波洪流：所有敌人一波刷完，不再分拨分批
     wavesTotal = 1;
     wave = 1; waveSpawned = 0; waveGapT = 0;
-    enemySpawnTimer = bossLevel ? 40 : 30;
+    enemySpawnTimer = bossLevel ? 40 : 30; spawnBlockT = 0;   // —— v1.2.20 看门狗换关清零 ——
     bullets = []; enemies = []; recycleParticles(); texts = []; powerups = [];
     lasers = [];                 // —— v0.2.5 Boss 多样化：换关清空激光 ——
     baseAlive = true;
@@ -5325,6 +5334,12 @@
     if (pt) {
       spawnEnemy(pt[0], pt[1], pickEnemyType());
       enemiesSpawned++;
+      spawnBlockT = 0;
+    } else if (++spawnBlockT >= 16) {
+      // —— v1.2.20 出生点看门狗：三点全堵约 8 秒强制补刷，防永远刷不满软锁 ——
+      spawnBlockT = 0;
+      const c2 = spawnPoints[randInt(0, spawnPoints.length - 1)];
+      if (c2) { spawnEnemy(c2[0], c2[1], pickEnemyType()); enemiesSpawned++; }
     }
   }
 
@@ -5404,6 +5419,8 @@
 
     // v0.2.3 里程碑庆典：冻结世界，仅保留画面
     if (milestoneOpen) { draw(); return; }
+    // —— v1.2.20 过关防线：结算/广告/强化层打开期间冻结世界，残弹不再偷家 ——
+    if (lvResultPending || adPending || upgradeOpen) { draw(); return; }
 
     // 关卡过渡：冻结世界，展示「第 N 关」大字
     if (lvIntroT > 0) {
@@ -26693,7 +26710,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.19', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.20', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -27308,6 +27325,16 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
         enemies = [];
         enemiesSpawned = enemiesTotal;
       },
+      // —— v1.2.20 过关链验证钩子 ——
+      gameOverNow: () => gameOver,
+      runningNow: () => running,
+      enemiesSpawnedNow: () => enemiesSpawned,
+      enemiesTotalNow: () => enemiesTotal,
+      spawnBlockNow: () => spawnBlockT,
+      baseRectNow: () => ({ x: BASE.x * TILE, y: BASE.y * TILE, w: TILE }),
+      spawnEBulletAt: (x, y, dir) => { perfPoolSpawn(x, y, 4, dir == null ? 4 : dir, BULLET_SPEED * 0.8, enemies.find(e => !e.dead) || { isPlayer: false }, 0, false); return bullets.length; },
+      blockSpawnPoints: () => { let n = 0; for (const c of spawnPoints) { if (!c) continue; enemies.push({ x: c[0], y: c[1], size: TANK_SIZE, color: '#88aacc', type: 'normal', hp: 999, maxHp: 999, dead: false, freezeT: 1e9, hitFlash: 0, portalCd: 0, kbt: 0, changeTimer: 0 }); n++; } return n; },
+      adResetNow: () => { adClaimed = false; adPending = false; if (adBox) adBox.classList.remove('show'); return true; },
       addStat: (k, v) => { stat[k] = (stat[k] || 0) + v; },
       // —— Boss 验证用 ——
       setBossHp: (n) => { const b = enemies.find(e => e.isBoss && !e.dead); if (b) b.hp = n; },
