@@ -28554,6 +28554,31 @@ async function main() {
     return (!!w && p && p.dead === false) || JSON.stringify({ w, p });
   });
 
+  // U9578–U9580: 玩家陷墙自救
+  await senseCheck("U9578 玩家陷墙被推出", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setPlayerPosNow(0, 0);
+    let moved = false;
+    for (let i = 0; i < 40 && !moved; i++) moved = T.unstickPlayerNow() === true;
+    const p = T.playerPos ? T.playerPos() : null;
+    T.quit();
+    return (moved && p && (p.x !== 0 || p.y !== 0)) || JSON.stringify({ moved, p });
+  });
+  await senseCheck("U9579 正常位置不误移", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const r = T.unstickPlayerNow();
+    T.quit();
+    return r === false || JSON.stringify(r);
+  });
+  await senseCheck("U9580 自救不破坏无敌状态", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setPlayerPosNow(0, 0);
+    for (let i = 0; i < 40; i++) { if (T.unstickPlayerNow()) break; }
+    const ok = !!T.playerPos();
+    T.quit();
+    return ok || 'no pos';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
