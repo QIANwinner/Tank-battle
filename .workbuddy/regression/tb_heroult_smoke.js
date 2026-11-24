@@ -27206,6 +27206,37 @@ async function main() {
     return (Array.isArray(list) && list.includes('pierce')) || JSON.stringify(list);
   });
 
+  // U9413–U9415: 老兵回归奖励（缺席≥3天一次性 +80 / 正常出勤不触发 / 游玩日自动刷新）
+  await senseCheck("U9413 缺席5天回主菜单：一次性 +80 回归礼且不重复发", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    const d = new Date(); d.setDate(d.getDate() - 5);
+    const old = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+    T.setLastPlayNow(old); T.welcomeResetNow();
+    const c0 = T.coinsNow();
+    T.showOverlay('title'); await Z(200);
+    const c1 = T.coinsNow();
+    T.showOverlay('title'); await Z(120);
+    const c2 = T.coinsNow();
+    return (c1 - c0 === 80 && c2 - c1 === 0) || JSON.stringify({ c0, c1, c2 });
+  });
+  await senseCheck("U9414 昨日刚玩过：回归礼不触发", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    const d = new Date(); d.setDate(d.getDate() - 1);
+    const yd = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+    T.setLastPlayNow(yd); T.welcomeResetNow();
+    const c0 = T.coinsNow();
+    T.showOverlay('title'); await Z(150);
+    return (T.coinsNow() - c0 === 0) || JSON.stringify({ c0, now: T.coinsNow() });
+  });
+  await senseCheck("U9415 回到主菜单后最近游玩日自动刷新为今天", (T,$) => {
+    T.setLastPlayNow(20000101);
+    T.showOverlay('title');
+    const lp = T.lastPlayNow();
+    const d = new Date();
+    const tk = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+    return (lp === tk) || JSON.stringify({ lp, tk });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
