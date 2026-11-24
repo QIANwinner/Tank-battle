@@ -28763,6 +28763,40 @@ async function main() {
     return (T.frostSheenAlphaNow(0) === 0.15 && typeof T.frostSheenAlphaNow === 'function') || 'fn';
   });
 
+  // U9605–U9607: 任务芯片飞出
+  await senseCheck("U9605 完成任务芯片挂 pop 类", async (T,$) => {
+    T.missionResetNow();
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const st = T.missionsNow();
+    const m = st.items.find(x => !x.done);
+    if (!m) { T.quit(); return 'all done'; }
+    T.missionBumpNow(m.type, m.target);
+    await new Promise(r => setTimeout(r, 120));
+    const chip = document.querySelector('#msnHud .mhChip.pop');
+    T.quit();
+    return !!chip || 'no pop chip';
+  });
+  await senseCheck("U9606 弹出时间戳已记录", async (T,$) => {
+    T.missionResetNow();
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const st = T.missionsNow();
+    const m = st.items.find(x => !x.done);
+    if (!m) { T.quit(); return 'all done'; }
+    T.missionBumpNow(m.type, m.target);
+    await new Promise(r => setTimeout(r, 120));
+    const mp = T.msnPopMapNow();
+    const has = Object.keys(mp).length > 0 && mp[m.type] !== undefined;
+    T.quit();
+    return has || 'empty';
+  });
+  await senseCheck("U9607 未完成芯片不挂 pop", (T,$) => {
+    T.missionResetNow();
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const pops = document.querySelectorAll('#msnHud .mhChip.pop').length;
+    T.quit();
+    return (pops === 0) || ('pops:' + pops);
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
