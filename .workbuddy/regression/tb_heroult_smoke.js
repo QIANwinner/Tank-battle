@@ -27682,6 +27682,31 @@ async function main() {
     return (lv1 === lv0) || JSON.stringify({ lv0, lv1 });
   });
 
+  // U9464–U9466: 图鉴集齐横幅与金框
+  await senseCheck("U9464 未集齐：无横幅无「已集齐」", async (T,$) => {
+    T.dexResetNow(); T.openDexNow();
+    const sub = (document.getElementById('dexSub') || {}).textContent || '';
+    const bar = document.querySelector('.dexDoneBar');
+    const done = document.querySelectorAll('.dexRow.dexDone').length;
+    T.closeDexNow();
+    return (!/已集齐/.test(sub) && !bar && done === 0) || JSON.stringify({ sub, bar: !!bar, done });
+  });
+  await senseCheck("U9465 集齐后：副标题+横幅+金框行", async (T,$) => {
+    T.dexResetNow(); T.dexFillNow(); T.dexAddNow('boss'); T.openDexNow();
+    const sub = (document.getElementById('dexSub') || {}).textContent || '';
+    const bar = document.querySelector('.dexDoneBar');
+    const done = document.querySelectorAll('.dexRow.dexDone').length;
+    T.closeDexNow();
+    return (/已集齐/.test(sub) && !!bar && done >= 8) || JSON.stringify({ sub, bar: !!bar, done });
+  });
+  await senseCheck("U9466 重置后横幅消失", async (T,$) => {
+    T.dexResetNow(); T.openDexNow();
+    const bar = document.querySelector('.dexDoneBar');
+    const done = document.querySelectorAll('.dexRow.dexDone').length;
+    T.closeDexNow();
+    return (!bar && done === 0) || JSON.stringify({ bar: !!bar, done });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
