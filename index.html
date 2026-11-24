@@ -1869,7 +1869,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.79</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.80</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -5281,6 +5281,7 @@
     for (const e of enemies) {
       if (e.dead) continue;
       if (e.isBoss) {
+        if (e.enterT > 0) continue;   // —— v1.2.80 入场中Boss不受炸弹 ——
         runDmgAdd(4);
         e.hp -= 4; e.hitFlash = 6;
         if (e.hp <= 0) { e.dead = true; onEnemyKilled(e); }
@@ -27284,7 +27285,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.79', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.80', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -30030,6 +30031,8 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       bgmRushWaveNow: () => BGM_RUSH_WAVE,
       // —— v0.2.9 金币经济补全验证钩子（?test=1 暴露） ——
       gachaNow: () => drawGacha(),
+      bossEnterNow: () => { const b = enemies.find(e => e.isBoss); return b ? { hp: b.hp, enterT: b.enterT || 0, dead: !!b.dead } : null; },
+      setBossEnterNow: (v) => { const b = enemies.find(e => e.isBoss); if (b) b.enterT = v; return !!b; },
       unstickPlayerNow: () => player ? unstickEnemy(player) : null,
       setPlayerPosNow: (x, y) => { if (player) { player.x = x; player.y = y; } return !!player; },
       respawnWingNow: () => { respawnWingman(); return wingman ? { x: wingman.x, y: wingman.y } : null; },

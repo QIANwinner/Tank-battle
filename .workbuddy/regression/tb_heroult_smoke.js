@@ -28579,6 +28579,36 @@ async function main() {
     return ok || 'no pos';
   });
 
+  // U9581–U9583: 炸弹跳过入场Boss
+  await senseCheck("U9581 入场中Boss免疫炸弹", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    if (!T.forceSpawnBoss) { T.quit(); return 'no forceSpawnBoss'; }
+    T.forceSpawnBoss();
+    T.setBossEnterNow(2);
+    const h0 = T.bossEnterNow();
+    T.bombEnemiesNow();
+    const h1 = T.bossEnterNow();
+    T.quit();
+    return (h0 && h1 && h1.hp === h0.hp) || JSON.stringify({ h0, h1 });
+  });
+  await senseCheck("U9582 入场结束Boss正常吃炸弹", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    if (!T.forceSpawnBoss) { T.quit(); return 'no forceSpawnBoss'; }
+    T.forceSpawnBoss();
+    T.setBossEnterNow(0);
+    const h0 = T.bossEnterNow();
+    T.bombEnemiesNow();
+    const h1 = T.bossEnterNow();
+    T.quit();
+    return (h0 && h1 && h1.hp <= h0.hp - 4) || JSON.stringify({ h0, h1 });
+  });
+  await senseCheck("U9583 普通敌仍被炸弹清场", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const r = T.bombEnemiesNow();
+    T.quit();
+    return (typeof r === 'object') || 'no ret';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
