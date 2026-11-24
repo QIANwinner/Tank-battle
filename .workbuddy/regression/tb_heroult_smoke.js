@@ -28911,6 +28911,34 @@ async function main() {
     return p1 === p0 || JSON.stringify({ p0, p1 });
   });
 
+  // U9620–U9622: 空投补给
+  await senseCheck("U9620 空投倒计时随关重置", (T,$) => {
+    T.startAtLevel(2); T.skipIntro();
+    const t = T.airDropNow();
+    T.quit();
+    return (t > 10 && t <= 21) || JSON.stringify({ t });
+  });
+  await senseCheck("U9621 倒计时归零投放道具", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startAtLevel(2); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.airDropSetNow(0.15);
+    await Z(700);
+    const fired = T.airDropNow() <= 0;
+    const has = T.powerups().length > 0 || T.floatTextsNow().some(t => t.indexOf('空投') >= 0);
+    T.quit();
+    return (fired && has) || JSON.stringify({ fired, has, pu: T.powerups() });
+  });
+  await senseCheck("U9622 空投落点可通行", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startAtLevel(2); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.airDropSetNow(0.15);
+    await Z(700);
+    const pp = T.puPosNow();
+    const ok = pp.length > 0 && pp.every(p => !T.isBlockedNow(p.x, p.y, 16));
+    T.quit();
+    return ok || JSON.stringify(pp);
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
