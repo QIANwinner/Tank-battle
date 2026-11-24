@@ -26617,6 +26617,61 @@ async function main() {
     return tf.includes('cubic-bezier') || JSON.stringify({ tf });
   });
 
+
+  // U9351–U9356: 结算任务小结
+  await senseCheck("U9351 结算任务行元素存在", (T,$) => {
+    const r = T.lvMsnRowNow();
+    return r && r.hidden === true || JSON.stringify({ r });
+  });
+  await senseCheck("U9352 无进展时保持隐藏", (T,$) => {
+    T.setDailySeed(20310215); T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    T.showLvResultNow();
+    const r = T.lvMsnRowNow();
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return (r && r.hidden === true) || JSON.stringify({ r });
+  });
+  await senseCheck("U9353 本局增量显示图标+N", (T,$) => {
+    T.setDailySeed(20310216); const st = T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    T.missionBumpNow(st.items[0].type, Math.max(1, st.items[0].target - 1), false);
+    T.showLvResultNow();
+    const r = T.lvMsnRowNow();
+    const ok = r && !r.hidden && /\+\d/.test(r.txt);
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ r });
+  });
+  await senseCheck("U9354 待领个数显示", (T,$) => {
+    T.setDailySeed(20310217); const st = T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    T.missionBumpNow(st.items[0].type, st.items[0].target, false);
+    T.showLvResultNow();
+    const r = T.lvMsnRowNow();
+    const ok = r && !r.hidden && r.txt.includes('待领');
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ r });
+  });
+  await senseCheck("U9355 快照随开局重置", (T,$) => {
+    T.setDailySeed(20310218); const st = T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    T.missionBumpNow(st.items[0].type, 5, false);
+    T.quit();
+    T.startGame(); T.skipIntro();
+    const snap = T.missionRunSnapNow();
+    T.showLvResultNow();
+    const r = T.lvMsnRowNow();
+    const ok = snap && snap[st.items[0].type] === 5 && r && r.hidden === true;
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ snap, r });
+  });
+  await senseCheck("U9356 快照缺失容错不炸", (T,$) => {
+    T.setDailySeed(20310219); T.missionResetNow();
+    T.showLvResultNow();
+    const r = T.lvMsnRowNow();
+    T.setDailySeed(0); T.missionResetNow();
+    return (r && r.hidden === true) || JSON.stringify({ r });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
