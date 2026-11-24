@@ -8377,3 +8377,50 @@ html.compact-hud #hud .m-hide { display:none !important; }
 #lvResult .lvCard:hover { transform: none; }
 .swBanner { cursor: pointer; }
 
+/* —— v1.2.27 过关结算彩带 —— */
+#lvResult .lvCard { position: relative; }
+.lvConf {
+  position: absolute; top: -8%;
+  font-size: 20px; pointer-events: none; z-index: 5;
+  animation: lvConfFall 1.7s cubic-bezier(.3,.6,.6,1) forwards;
+}
+@keyframes lvConfFall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  80%  { opacity: .9; }
+  100% { transform: translateY(320px) rotate(260deg); opacity: 0; }
+}
+
+/* —— v1.2.28 低血量危险脉冲 —— */
+#lives.lvDanger {
+  color: #ff2d55;
+  animation: livesPulse .7s ease-in-out infinite;
+  text-shadow: 0 0 10px rgba(255,45,85,.85);
+}
+@keyframes livesPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: .55; transform: scale(1.12); }
+}
+
+/* —— v1.2.29 结算行错峰点亮 —— */
+#lvResult .lvRow.lvIn {
+  animation: lvRowIn .5s cubic-bezier(.2,.9,.3,1.25) both;
+}
+@keyframes lvRowIn {
+  from { opacity: 0; transform: translateY(12px); filter: blur(2px); }
+  to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+/* —— v1.2.31 过关幕布 —— */
+#lvWipe {
+  position: absolute; inset: 0; z-index: 40;
+  pointer-events: none; opacity: 0;
+  background: radial-gradient(ellipse at center, rgba(8,10,24,.72) 0%, rgba(4,6,16,.9) 100%);
+  backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+}
+#lvWipe.on { animation: lvWipeAnim 1s ease-in-out forwards; }
+@keyframes lvWipeAnim {
+  0%   { opacity: 0; }
+  25%  { opacity: .9; }
+  100% { opacity: 0; }
+}
+

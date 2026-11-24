@@ -1078,9 +1078,10 @@ async function main() {
       const g = T.claimLvNow();
       const s = T.lvResultNow();
       const gained = T.coins() - before;
-      t('Z2 领取星级奖励金币(25×星数) + 面板关闭',
-        gained === g.gold && gained === s.stars * 25 && s.pending === false && s.show === false,
-        'gained=' + gained + ' gold=' + g.gold + ' stars=' + s.stars + ' pending=' + s.pending + ' show=' + s.show);
+      const perf = T.lvPerfNow ? (T.lvPerfNow().gold || 0) : 0;   // —— v1.2.22 过关表现奖励计入领取额 ——
+      t('Z2 领取星级奖励金币(25×星数+表现奖励) + 面板关闭',
+        gained === g.gold && gained === s.stars * 25 + perf && s.pending === false && s.show === false,
+        'gained=' + gained + ' gold=' + g.gold + ' stars=' + s.stars + ' perf=' + perf + ' pending=' + s.pending + ' show=' + s.show);
       T.closeUpgrade ? T.closeUpgrade() : null;
     } catch (e) { t('Z2 领取星级奖励金币', false, e.message); }
 

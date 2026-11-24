@@ -26621,7 +26621,11 @@ async function main() {
 
   // U9351–U9356: 结算任务小结
   await senseCheck("U9351 结算任务行元素存在", (T,$) => {
+    T.setDailySeed(20310215); T.missionResetNow();   // —— v1.2.22 修正：钉住种子+重置，消除日种子环境抖动 ——
+    T.startGame(); T.skipIntro();
+    T.showLvResultNow();
     const r = T.lvMsnRowNow();
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
     return r && r.hidden === true || JSON.stringify({ r });
   });
   await senseCheck("U9352 无进展时保持隐藏", (T,$) => {
@@ -27136,6 +27140,328 @@ async function main() {
     const ok = T.lvResultNow().show === true;
     T.quit();
     return ok || JSON.stringify(T.lvResultNow());
+  });
+
+  // U9407–U9409: 过关表现奖励（完美过关 +30 / 险胜翻盘 +15）
+  await senseCheck("U9407 无伤通关结算亮「完美过关 +30」且领取实到账", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setTookHitNow(false); T.setLivesNow(3);
+    const c0 = T.coinsNow();
+    T.showLvResultNow();
+    const perf = T.lvPerfNow();
+    const rowOk = perf.gold === 30 && perf.kind === 'perf' && perf.hidden === false && /\+30/.test(perf.val || '');
+    T.claimLvNow(); await Z(80);
+    const gained = T.coinsNow() - c0;
+    T.closeUpgrade(); T.quit();
+    return (rowOk && gained >= 30) || JSON.stringify({ perf, gained });
+  });
+  await senseCheck("U9408 掉过命且生命充足：无表现奖励，领取仅星级金", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setTookHitNow(true); T.setLivesNow(3);
+    T.showLvResultNow();
+    const perf = T.lvPerfNow();
+    const ok = perf.gold === 0 && perf.hidden === true;
+    T.claimLvNow(); await Z(50); T.closeUpgrade(); T.quit();
+    return ok || JSON.stringify(perf);
+  });
+  await senseCheck("U9409 残血险胜：掉过命仅剩1命亮「险胜翻盘 +15」", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setTookHitNow(true); T.setLivesNow(1);
+    T.showLvResultNow();
+    const perf = T.lvPerfNow();
+    const ok = perf.gold === 15 && perf.kind === 'close' && perf.hidden === false && /险胜/.test(perf.lbl || '');
+    T.claimLvNow(); await Z(50); T.closeUpgrade(); T.quit();
+    return ok || JSON.stringify(perf);
+  });
+
+  // U9410–U9412: 穿甲弹道具（拾取计时 / 子弹穿透 +1 / 掉落池含新类型）
+  await senseCheck("U9410 拾取穿甲弹：fx.pierce 置 10 秒并随时间衰减结束", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const ok0 = T.applyPowerupNow('pierce') === true;
+    const v1 = T.buffStateNow().pierce;
+    T.setBuffNow('pierce', 0.05);
+    await Z(220);
+    const v2 = T.buffStateNow().pierce;
+    T.quit();
+    return (ok0 && v1 === 10 && v2 <= 0) || JSON.stringify({ ok0, v1, v2 });
+  });
+  await senseCheck("U9411 穿甲生效期间玩家子弹穿透 +1，结束后恢复", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setBuffNow('pierce', 0);
+    T.fireOnce(); await Z(60);
+    const p0 = T.lastBulletPen();
+    T.applyPowerupNow('pierce');
+    let p1 = null;   // fireOnce 不清冷却，轮询到新弹出现
+    for (let i = 0; i < 60 && p1 !== (p0 || 0) + 1; i++) { T.fireOnce(); await Z(50); p1 = T.lastBulletPen(); }
+    T.quit();
+    return (p1 === (p0 || 0) + 1) || JSON.stringify({ p0, p1 });
+  });
+  await senseCheck("U9412 新道具进入随机掉落池：POWERUP_LIST 含 pierce", (T,$) => {
+    const list = T.powerupTypesNow();
+    return (Array.isArray(list) && list.includes('pierce')) || JSON.stringify(list);
+  });
+
+  // U9413–U9415: 老兵回归奖励（缺席≥3天一次性 +80 / 正常出勤不触发 / 游玩日自动刷新）
+  await senseCheck("U9413 缺席5天回主菜单：一次性 +80 回归礼且不重复发", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    const d = new Date(); d.setDate(d.getDate() - 5);
+    const old = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+    T.setLastPlayNow(old); T.welcomeResetNow();
+    const c0 = T.coinsNow();
+    T.showOverlay('title'); await Z(200);
+    const c1 = T.coinsNow();
+    T.showOverlay('title'); await Z(120);
+    const c2 = T.coinsNow();
+    return (c1 - c0 === 80 && c2 - c1 === 0) || JSON.stringify({ c0, c1, c2 });
+  });
+  await senseCheck("U9414 昨日刚玩过：回归礼不触发", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    const d = new Date(); d.setDate(d.getDate() - 1);
+    const yd = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+    T.setLastPlayNow(yd); T.welcomeResetNow();
+    const c0 = T.coinsNow();
+    T.showOverlay('title'); await Z(150);
+    return (T.coinsNow() - c0 === 0) || JSON.stringify({ c0, now: T.coinsNow() });
+  });
+  await senseCheck("U9415 回到主菜单后最近游玩日自动刷新为今天", (T,$) => {
+    T.setLastPlayNow(20000101);
+    T.showOverlay('title');
+    const lp = T.lastPlayNow();
+    const d = new Date();
+    const tk = d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
+    return (lp === tk) || JSON.stringify({ lp, tk });
+  });
+
+  // U9416–U9419: 敌人图鉴（面板开合 / 击杀跨局计数 / 未遭遇锁定 / panelOpen 拦截）
+  await senseCheck("U9416 图鉴面板打开渲染 8 行（7 兵种 + Boss）且未遭遇显示？？？", (T,$) => {
+    T.dexResetNow();
+    const shown = T.openDexNow();
+    const rows = document.querySelectorAll('#dexBody .dexRow').length;
+    const locked = document.querySelectorAll('#dexBody .dexLocked').length;
+    const bossRow = document.querySelectorAll('#dexBody .dexRow')[7];
+    T.closeDexNow();
+    return !!(shown && rows === 8 && locked === 8 && bossRow) || JSON.stringify({ shown, rows, locked });
+  });
+  await senseCheck("U9417 击毁敌人计入图鉴：击杀 normal 后 dex.kills.normal ≥1 并解锁行", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.dexResetNow();
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(312, 100, 'normal');
+    await Z(60);
+    T.kill(); await Z(60);
+    const k = (T.dexNow().kills || {}).normal || 0;
+    T.quit();
+    T.openDexNow();
+    const unlocked = document.querySelectorAll('#dexBody .dexRow:not(.dexLocked)').length;
+    T.closeDexNow();
+    return (k >= 1 && unlocked >= 1) || JSON.stringify({ k, unlocked });
+  });
+  await senseCheck("U9418 图鉴打开时 panelOpen 为真，战斗快捷键被拦截", (T,$) => {
+    T.openDexNow();
+    const po = T.panelOpenNow();
+    T.closeDexNow();
+    const po2 = T.panelOpenNow();
+    return (po === true && po2 === false) || JSON.stringify({ po, po2 });
+  });
+  await senseCheck("U9419 Esc 可关图鉴；开局时残留图鉴被自动清出", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.openDexNow();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    await Z(40);
+    const closed1 = !$('dexBox').classList.contains('show');
+    T.openDexNow();
+    T.startGame();
+    await Z(40);
+    const closed2 = !$('dexBox').classList.contains('show');
+    T.quit();
+    return (closed1 && closed2) || JSON.stringify({ closed1, closed2 });
+  });
+
+  // U9420–U9422: 感应地雷（拾取布设 / 感应引爆清场 / 超时失效）
+  await senseCheck("U9420 拾取地雷即在脚下布设：0.6 秒内完成布防", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const c0 = T.mineCountNow();
+    T.applyPowerupNow('mine');
+    const m = T.minesNow()[0];
+    await Z(800);
+    const armed = T.minesNow()[0];
+    T.quit();
+    return (c0 === 0 && T.mineCountNow() >= 0 && m && m.arm <= 0.6 && armed && armed.arm <= 0 && armed.life > 0) || JSON.stringify({ c0, m, armed });
+  });
+  await senseCheck("U9421 敌人踏入地雷半径引爆：范围击杀并消耗地雷", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.tp(312, 300);
+    T.applyPowerupNow('mine');
+    await Z(800);
+    T.spawnFoeNow(312, 310, 'normal');
+    const e = T.r18enNow().find(x => !x.dead);
+    e.dir = 4;   // 定向下防止乱跑
+    await Z(600);
+    const killed = e.dead === true;
+    const left = T.mineCountNow();
+    T.quit();
+    return (killed && left === 0) || JSON.stringify({ killed, left, mines: T.minesNow() });
+  });
+  await senseCheck("U9422 地雷 25 秒未触发自动失效消失", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.tp(312, 300);
+    T.applyPowerupNow('mine');
+    const m = T.minesNow()[0];
+    T.quit();
+    return (m && m.life <= 25 && m.life > 20) || JSON.stringify(m);
+  });
+
+  // U9423–U9424: 结算彩带（10 枚错峰 / 重复结算不堆积）
+  await senseCheck("U9423 弹出结算生成 10 枚彩带且错峰下落", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.showLvResultNow();
+    const conf = document.querySelectorAll('#lvResult .lvConf');
+    const delays = [...conf].map(c => parseFloat(c.style.animationDelay));
+    const asc = delays.every((d, i) => i === 0 || d >= delays[i - 1]);
+    T.claimLvNow(); T.closeUpgrade(); T.quit();
+    return (conf.length === 10 && asc) || JSON.stringify({ n: conf.length, delays });
+  });
+  await senseCheck("U9424 重复结算彩带重建不堆积（始终 10 枚）", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.showLvResultNow();
+    T.claimLvNow(); await Z(40); T.closeUpgrade();
+    T.showLvResultNow();
+    const n = document.querySelectorAll('#lvResult .lvConf').length;
+    T.claimLvNow(); T.closeUpgrade(); T.quit();
+    return (n === 10) || JSON.stringify({ n });
+  });
+
+  // U9425–U9426: 低血量脉冲（1 命告警 / 回血解除）
+  await senseCheck("U9425 仅剩 1 命：生命读数进入 lvDanger 脉冲态", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setLivesNow(1);
+    await Z(150);
+    const danger = $('lives').classList.contains('lvDanger');
+    T.quit();
+    return danger || JSON.stringify({ cls: $('lives') ? $('lives').className : null });
+  });
+  await senseCheck("U9426 恢复到 3 命：lvDanger 自动解除", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setLivesNow(1); await Z(120);
+    T.setLivesNow(3); await Z(120);
+    const off = !$('lives').classList.contains('lvDanger');
+    T.quit();
+    return off || JSON.stringify({ cls: $('lives') ? $('lives').className : null });
+  });
+
+  // U9427–U9429: 结算行点亮（全行 lvIn / 延迟递增 / 重复弹窗重置）
+  await senseCheck("U9427 结算弹出后全部数据行带 lvIn 且延迟递增", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.showLvResultNow();
+    const rows = [...document.querySelectorAll('#lvResult .lvRow')];
+    const allIn = rows.every(r => r.classList.contains('lvIn'));
+    const delays = rows.map(r => parseFloat(r.style.animationDelay));
+    const asc = delays.every((d, i) => i === 0 || d > delays[i - 1]);
+    T.claimLvNow(); T.closeUpgrade(); T.quit();
+    return (allIn && asc && rows.length >= 5) || JSON.stringify({ allIn, asc, n: rows.length });
+  });
+  await senseCheck("U9428 隐藏行（任务进展未触发时）同样参与错峰动画", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.showLvResultNow();
+    const hidden = [...document.querySelectorAll('#lvResult .lvRow')].filter(r => r.hidden);
+    const ok = hidden.every(r => r.classList.contains('lvIn'));
+    T.claimLvNow(); T.closeUpgrade(); T.quit();
+    return ok || JSON.stringify({ hidden: hidden.length });
+  });
+  await senseCheck("U9429 再次弹出结算：动画类名重建（先摘后加）", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.showLvResultNow();
+    T.claimLvNow(); await Z(30); T.closeUpgrade();
+    T.showLvResultNow();
+    const rows = [...document.querySelectorAll('#lvResult .lvRow')];
+    const ok = rows.every(r => r.classList.contains('lvIn'));
+    T.claimLvNow(); T.closeUpgrade(); T.quit();
+    return ok || 'rows missing lvIn';
+  });
+
+  // U9430–U9432: 金币散落（精英必掉 / 磁吸拾取到账 / 换关清空）
+  await senseCheck("U9430 击毁精英必掉 2 枚金币", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(312, 150, 'elite');
+    await Z(60);
+    T.kill();
+    await Z(80);
+    const n = T.coinDropCountNow();
+    T.quit();
+    return (n >= 2) || JSON.stringify({ n });
+  });
+  await senseCheck("U9431 靠近金币自动磁吸拾取：+3🪙 即时到账", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(312, 150, 'elite');
+    await Z(60);
+    T.kill(); await Z(60);
+    const drops = T.coinDropsNow();
+    if (!drops.length) { T.quit(); return 'no drops'; }
+    const c0 = T.coinsNow();
+    T.tp(drops[0].x - 11, drops[0].y - 11);
+    await Z(400);
+    const gained = T.coinsNow() - c0;
+    T.quit();
+    return (gained >= 3) || JSON.stringify({ drops, gained });
+  });
+  await senseCheck("U9432 换关时散落金币清空", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(312, 150, 'elite');
+    await Z(60);
+    T.kill(); await Z(60);
+    const n0 = T.coinDropCountNow();
+    T.advanceLevelNow();
+    await Z(2000);   // advanceLevel 先播关卡介绍（lvIntroT≈1.5s），startLevel 才真正重建地图清场
+    const n1 = T.coinDropCountNow();
+    T.quit();
+    return (n0 > 0 && n1 === 0) || JSON.stringify({ n0, n1 });
+  });
+
+  // U9433–U9436: 过关幕布（元素存在 / 换关触发 / 自动消隐 / 初始隐藏）
+  await senseCheck("U9433 #lvWipe 元素存在且前一轮幕布结束后无残留 on 类", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    await Z(1400);   // 前序断言可能刚触发过幕布（1.1s 自动移除）
+    const w = $('lvWipe');
+    return !!(w && !w.classList.contains('on')) || 'lvWipe missing or dirty';
+  });
+  await senseCheck("U9434 过关进下一关触发幕布 on 类", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.advanceLevelNow();
+    await Z(60);
+    const on = $('lvWipe').classList.contains('on');
+    T.quit();
+    return on || 'wipe not triggered';
+  });
+  await senseCheck("U9435 幕布约 1.1 秒后自动移除 on 类", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.advanceLevelNow();
+    await Z(60);
+    const on1 = $('lvWipe').classList.contains('on');
+    await Z(1400);
+    const off = !$('lvWipe').classList.contains('on');
+    T.quit();
+    return (on1 && off) || JSON.stringify({ on1, off });
+  });
+  await senseCheck("U9436 幕布不拦截输入（pointer-events none）", (T,$) => {
+    const w = $('lvWipe');
+    const pe = getComputedStyle(w).pointerEvents;
+    return (pe === 'none') || JSON.stringify({ pe });
   });
 
   chrome.kill(); killTree(chrome.pid);
