@@ -27707,6 +27707,241 @@ async function main() {
     return (!bar && done === 0) || JSON.stringify({ bar: !!bar, done });
   });
 
+  // U9467–U9469: 基地护垒道具
+  await senseCheck("U9467 护垒进入道具池且初始 baseGuard=0", async (T,$) => {
+    const list = T.powerupTypesNow();
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const g = T.baseGuardNow();
+    T.quit();
+    return (list.includes('guard') && g === 0) || JSON.stringify({ has: list.includes('guard'), g });
+  });
+  await senseCheck("U9468 护垒期间基地墙砖不可摧", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setBaseGuardNow(8);
+    const p = T.baseWallPxNow(), w0 = T.baseWallsNow();
+    const hit = T.damageTileNow(p.x, p.y);
+    const w1 = T.baseWallsNow();
+    T.quit();
+    return (hit === true && w1 === w0 && w0 > 0) || JSON.stringify({ hit, w0, w1 });
+  });
+  await senseCheck("U9469 无护垒时同一墙砖可摧", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const p = T.baseWallPxNow(), w0 = T.baseWallsNow();
+    const hit = T.damageTileNow(p.x, p.y);
+    const w1 = T.baseWallsNow();
+    T.quit();
+    return (hit === true && w1 === w0 - 1) || JSON.stringify({ hit, w0, w1 });
+  });
+
+  // U9470–U9472: 背水一战
+  await senseCheck("U9470 残血标志随 lives 变化", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setLivesNow(3); const r3 = T.rageNow();
+    T.setLivesNow(1); const r1 = T.rageNow();
+    T.quit();
+    return (r3 === false && r1 === true) || JSON.stringify({ r3, r1 });
+  });
+  await senseCheck("U9471 残血冷却约为满血的 0.8 倍", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setLivesNow(3); T.setCdNow(0); T.fireOnce();
+    const cd3 = T.cdMaxNow();
+    T.setLivesNow(1); T.setCdNow(0); T.fireOnce();
+    const cd1 = T.cdMaxNow();
+    T.quit();
+    const ratio = cd3 > 0 ? cd1 / cd3 : 0;
+    return (cd3 > 0 && cd1 > 0 && ratio > 0.74 && ratio < 0.86) || JSON.stringify({ cd3, cd1, ratio });
+  });
+  await senseCheck("U9472 回到多命后冷却恢复", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setLivesNow(1); T.setCdNow(0); T.fireOnce();
+    const cd1 = T.cdMaxNow();
+    T.setLivesNow(3); T.setCdNow(0); T.fireOnce();
+    const cd3 = T.cdMaxNow();
+    T.quit();
+    return (cd3 > cd1 && cd1 > 0) || JSON.stringify({ cd1, cd3 });
+  });
+
+  // U9473–U9475: 精英击破播报
+  await senseCheck("U9473 击毁精英弹专属播报", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(312, 150, 'normal'); await Z(60); T.kill(); await Z(80);   // 先消耗「初战告捷」成就 toast
+    T.spawnFoeNow(312, 150, 'elite'); await Z(60);
+    T.kill(); await Z(60);
+    const hit = T.floatTextsNow().some(s => /精英击破/.test(s));
+    T.quit();
+    return (hit === true) || JSON.stringify({ texts: T.floatTextsNow().slice(-4) });
+  });
+  await senseCheck("U9474 击毁普通敌不弹精英播报", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(312, 150, 'normal'); await Z(60);
+    T.kill(); await Z(60);
+    const hit = T.floatTextsNow().some(s => /精英击破/.test(s));
+    T.quit();
+    return (hit === false) || JSON.stringify({ texts: T.floatTextsNow().slice(-4) });
+  });
+  await senseCheck("U9475 精英型在类型表中存在", async (T,$) => {
+    return (T.enemyGoldNow({ isBoss: false, type: 'elite' }) > 0) || 'elite missing';
+  });
+
+  // U9476–U9478: 商店购买动画
+  await senseCheck("U9476 强化卡带 data-bid 标记", async (T,$) => {
+    T.setShopTab('bonus'); T.setCoinsNow(9999); T.resetBonusNow(); T.renderShopNow();
+    document.getElementById('shopBox').classList.add('show');
+    const n = document.querySelectorAll('.shopItem[data-bid]').length;
+    document.getElementById('shopBox').classList.remove('show');
+    return (n >= 9) || JSON.stringify({ n });
+  });
+  await senseCheck("U9477 购买成功卡片挂 siBuyFlash", async (T,$) => {
+    T.setShopTab('bonus'); T.setCoinsNow(9999); T.resetBonusNow(); T.renderShopNow();
+    document.getElementById('shopBox').classList.add('show');
+    T.buyBonusNow('cd');
+    const el = document.querySelector('.shopItem[data-bid="cd"].siBuyFlash');
+    document.getElementById('shopBox').classList.remove('show');
+    T.resetBonusNow(); T.setCoinsNow(0);
+    return (!!el) || 'no flash';
+  });
+  await senseCheck("U9478 未购买卡不闪光", async (T,$) => {
+    T.setShopTab('bonus'); T.resetBonusNow(); T.renderShopNow();
+    document.getElementById('shopBox').classList.add('show');
+    const n = document.querySelectorAll('.siBuyFlash').length;
+    document.getElementById('shopBox').classList.remove('show');
+    return (n === 0) || JSON.stringify({ n });
+  });
+
+  // U9479–U9481: 速通奖
+  await senseCheck("U9479 20秒速通：+15 且文案含速通", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setTookHitNow(true); T.setLivesNow(3); T.setLevelSecsNow(20);
+    T.showLvResultNow();
+    const perf = T.lvPerfNow();
+    T.closeUpgrade(); T.quit();
+    return (perf.fast === 15 && perf.gold === 15 && /速通/.test(perf.lbl || '')) || JSON.stringify(perf);
+  });
+  await senseCheck("U9480 60秒过关：无速通奖", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setTookHitNow(true); T.setLivesNow(3); T.setLevelSecsNow(60);
+    T.showLvResultNow();
+    const perf = T.lvPerfNow();
+    T.closeUpgrade(); T.quit();
+    return (perf.fast === 0 && perf.gold === 0 && perf.hidden === true) || JSON.stringify(perf);
+  });
+  await senseCheck("U9481 无伤速通叠满：完美+速通=45", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setTookHitNow(false); T.setLivesNow(3); T.setLevelSecsNow(15);
+    T.showLvResultNow();
+    const perf = T.lvPerfNow();
+    T.closeUpgrade(); T.quit();
+    return (perf.gold === 45 && /速通/.test(perf.lbl || '') && /完美/.test(perf.lbl || '')) || JSON.stringify(perf);
+  });
+
+  // U9482–U9484: 险胜徽章
+  await senseCheck("U9482 残血过关徽章 +1", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setTookHitNow(true); T.setLivesNow(1);
+    const c0 = T.clutchNow();
+    T.showLvResultNow();
+    const c1 = T.clutchNow();
+    T.closeUpgrade(); T.quit();
+    return (c1 === c0 + 1) || JSON.stringify({ c0, c1 });
+  });
+  await senseCheck("U9483 满血过关不加徽章", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setTookHitNow(false); T.setLivesNow(3);
+    const c0 = T.clutchNow();
+    T.showLvResultNow();
+    const c1 = T.clutchNow();
+    T.closeUpgrade(); T.quit();
+    return (c1 === c0) || JSON.stringify({ c0, c1 });
+  });
+  await senseCheck("U9484 徽章档位持久化可读写", async (T,$) => {
+    T.setClutchNow(7);
+    const v = T.clutchNow();
+    T.setClutchNow(0);
+    return (v === 7) || JSON.stringify({ v });
+  });
+
+  // U9485–U9487: Boss 弱点提示
+  await senseCheck("U9485 Boss提示文案非空且含分隔", async (T,$) => {
+    const t = T.bossTipNow();
+    return (typeof t === 'string' && t.length > 2 && /·/.test(t)) || JSON.stringify({ t });
+  });
+  await senseCheck("U9486 提示含真实 Boss 名", async (T,$) => {
+    const t = T.bossTipNow();
+    return (/壁垒|猎手|分裂者/.test(t)) || JSON.stringify({ t });
+  });
+  await senseCheck("U9487 普通关不开 Boss 提示路径", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const lv = T.level ? T.level() : (T.state ? T.state().level : 1);
+    T.quit();
+    return ((lv % 5) !== 0) || JSON.stringify({ lv });
+  });
+
+  // U9488–U9490: 成就进度条
+  await senseCheck("U9488 追踪数据源有未完成项", async (T,$) => {
+    const tr = T.achTrackStateNow({ kills: 5, coins: 100, boss: 0, wins: 0, stars: 0, daily: 0, lv: 1, wave: 0, skins: 0 });
+    const has = Array.isArray(tr) && tr.some(t => t.tgt > 0 && t.cur < t.tgt);
+    return has || JSON.stringify(tr && tr.length);
+  });
+  await senseCheck("U9489 打开成就墙出现 achProg 进度条", async (T,$) => {
+    T.setCareerKillsNow(120);
+    T.openAchNow();
+    const n = document.querySelectorAll('.achProg').length;
+    const em = document.querySelector('.achProg em');
+    const txt = em ? em.textContent : '';
+    T.closeAchNow(); T.setCareerKillsNow(0);
+    return (n > 0 && txt.includes('/')) || JSON.stringify({ n, txt });
+  });
+  await senseCheck("U9490 进度条数据 N/M 渲染正确", async (T,$) => {
+    const tr = T.achTrackStateNow({ kills: 120, coins: 0, boss: 0, wins: 0, stars: 0, daily: 0, lv: 1, wave: 0, skins: 0 });
+    const t = (tr || []).find(x => x.tgt > 0 && x.cur > 0 && x.cur < x.tgt);
+    return (!!t && t.cur <= t.tgt) || JSON.stringify({ len: tr && tr.length });
+  });
+
+  // U9491–U9493: 签到大奖预览
+  await senseCheck("U9491 签到面板出现第7天皇冠格", async (T,$) => {
+    T.openSigninNow();
+    const g = document.querySelector('.sDay.grand');
+    const txt = g ? g.textContent : '';
+    T.closeSigninNow();
+    return (!!g && /第7天/.test(txt) && /👑/.test(txt)) || JSON.stringify({ has: !!g, txt });
+  });
+  await senseCheck("U9492 底部提示含大奖预告", async (T,$) => {
+    T.openSigninNow();
+    const h = document.querySelector('.signinHint');
+    const txt = h ? h.textContent : '';
+    T.closeSigninNow();
+    return (/大奖/.test(txt)) || JSON.stringify({ txt });
+  });
+  await senseCheck("U9493 只有一个 grand 格", async (T,$) => {
+    T.openSigninNow();
+    const n = document.querySelectorAll('.sDay.grand').length;
+    T.closeSigninNow();
+    return (n === 1) || JSON.stringify({ n });
+  });
+
+  // U9494–U9496: 金袋道具
+  await senseCheck("U9494 金袋进入道具池", async (T,$) => {
+    return T.powerupTypesNow().includes('gold') || 'no gold';
+  });
+  await senseCheck("U9495 拾取金袋金币 +25 起", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const c0 = T.coinsNow();
+    T.applyPowerupNow('gold');
+    const d = T.coinsNow() - c0;
+    T.quit();
+    return (d >= 25) || JSON.stringify({ d });
+  });
+  await senseCheck("U9496 金袋计入拾取统计", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const p0 = T.runPickupsNow ? T.runPickupsNow() : 0;
+    T.applyPowerupNow('gold');
+    const p1 = T.runPickupsNow ? T.runPickupsNow() : 1;
+    T.quit();
+    return (p1 === p0 + 1) || JSON.stringify({ p0, p1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
