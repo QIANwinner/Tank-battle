@@ -27282,6 +27282,42 @@ async function main() {
     return (closed1 && closed2) || JSON.stringify({ closed1, closed2 });
   });
 
+  // U9420–U9422: 感应地雷（拾取布设 / 感应引爆清场 / 超时失效）
+  await senseCheck("U9420 拾取地雷即在脚下布设：0.6 秒内完成布防", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const c0 = T.mineCountNow();
+    T.applyPowerupNow('mine');
+    const m = T.minesNow()[0];
+    await Z(800);
+    const armed = T.minesNow()[0];
+    T.quit();
+    return (c0 === 0 && T.mineCountNow() >= 0 && m && m.arm <= 0.6 && armed && armed.arm <= 0 && armed.life > 0) || JSON.stringify({ c0, m, armed });
+  });
+  await senseCheck("U9421 敌人踏入地雷半径引爆：范围击杀并消耗地雷", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.tp(312, 300);
+    T.applyPowerupNow('mine');
+    await Z(800);
+    T.spawnFoeNow(312, 310, 'normal');
+    const e = T.r18enNow().find(x => !x.dead);
+    e.dir = 4;   // 定向下防止乱跑
+    await Z(600);
+    const killed = e.dead === true;
+    const left = T.mineCountNow();
+    T.quit();
+    return (killed && left === 0) || JSON.stringify({ killed, left, mines: T.minesNow() });
+  });
+  await senseCheck("U9422 地雷 25 秒未触发自动失效消失", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.tp(312, 300);
+    T.applyPowerupNow('mine');
+    const m = T.minesNow()[0];
+    T.quit();
+    return (m && m.life <= 25 && m.life > 20) || JSON.stringify(m);
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
