@@ -27942,6 +27942,237 @@ async function main() {
     return (p1 === p0 + 1) || JSON.stringify({ p0, p1 });
   });
 
+  // U9497–U9499: 成就筛选
+  await senseCheck("U9497 成就筛选芯片渲染3颗", async (T,$) => {
+    T.achFilterSetNow('all');
+    T.achOpenNow();
+    const chips = [...document.querySelectorAll('.achChip')];
+    const ok = chips.length === 3 && chips[0].dataset.f === 'all' && chips[2].dataset.f === 'locked';
+    T.closeAch ? T.closeAch() : document.getElementById('achBox').classList.remove('show');
+    return ok || 'chips:' + chips.length;
+  });
+  await senseCheck("U9498 未解锁筛选只显示 locked 行", async (T,$) => {
+    T.achFilterSetNow('locked');
+    T.achOpenNow();
+    const rows = [...document.querySelectorAll('.achItem')];
+    const allLocked = rows.length > 0 && rows.every(r => r.classList.contains('locked'));
+    T.achFilterSetNow('done');
+    T.achOpenNow();
+    const drows = [...document.querySelectorAll('.achItem')];
+    const noneLocked = drows.every(r => !r.classList.contains('locked'));
+    document.getElementById('achBox').classList.remove('show');
+    return (allLocked && noneLocked) || JSON.stringify({ allLocked, noneLocked, n: rows.length });
+  });
+  await senseCheck("U9499 全部筛选恢复且芯片高亮跟随", async (T,$) => {
+    T.achFilterSetNow('all');
+    const total = T.achOpenNow();
+    const on = document.querySelector('.achChip.on');
+    document.getElementById('achBox').classList.remove('show');
+    return (total > 5 && on && on.dataset.f === 'all') || JSON.stringify({ total, on: on && on.dataset.f });
+  });
+
+  // U9500–U9502: 补签卡
+  await senseCheck("U9500 漏签1天且连击>0时 missed=true", async (T,$) => {
+    T.signinSetState(-2, 5);
+    const st = T.signinInfoNow();
+    const ok = st.missed === true && st.done === false;
+    T.signinReset();
+    return ok || JSON.stringify(st);
+  });
+  await senseCheck("U9501 补签扣200且今日可续连击", async (T,$) => {
+    T.setCoinsNow(500); T.signinSetState(-2, 5);
+    const r = T.signinFixNow(), st = T.signinInfoNow();
+    const ok = r.ok === true && r.streak === 5 && st.streak === 6 && st.missed === false;
+    T.signinReset();
+    return ok || JSON.stringify({ r, st });
+  });
+  await senseCheck("U9502 金币不足或已签到不可补签", async (T,$) => {
+    T.setCoinsNow(50); T.signinSetState(-2, 4);
+    const poor = T.signinFixNow();
+    T.setCoinsNow(500); T.signinSetState(0, 4);
+    const done = T.signinFixNow();
+    const ok = poor.ok === false && poor.why === 'coins' && done.ok === false;
+    T.signinReset();
+    return ok || JSON.stringify({ poor, done });
+  });
+
+  // U9503–U9505: 任务完成历史
+  await senseCheck("U9503 领取任务写入历史首条", async (T,$) => {
+    const n0 = T.mhistNow().length;
+    T.mhistPushNow('🎯', '专项测试任务');
+    const h = T.mhistNow();
+    return (h.length === Math.min(6, n0 + 1) && h[0].n === '专项测试任务' && h[0].i === '🎯' && h[0].d.length === 4) || JSON.stringify(h[0]);
+  });
+  await senseCheck("U9504 历史环形上限6条最新在前", async (T,$) => {
+    for (let k = 0; k < 8; k++) T.mhistPushNow('🔥', '任务' + k);
+    const h = T.mhistNow();
+    const ok = h.length === 6 && h[0].n === '任务7' && h[5].n === '任务2';
+    return ok || JSON.stringify({ len: h.length, first: h[0] && h[0].n, last: h[5] && h[5].n });
+  });
+  await senseCheck("U9505 面板渲染历史行数与数据一致", async (T,$) => {
+    T.msnOpenNow('daily');
+    const rows = document.querySelectorAll('#msnBody .mhistRow').length;
+    const h = T.mhistNow().length;
+    document.getElementById('missionBox').classList.remove('show');
+    return (rows === h && rows > 0) || JSON.stringify({ rows, h });
+  });
+
+  // U9506–U9508: 周任务迷你条
+  await senseCheck("U9506 每日页签渲染迷你条 N/3", async (T,$) => {
+    T.msnOpenNow('daily');
+    const el = document.querySelector('#msnBody .wkMini span');
+    const ok = !!el && /本周 \d\/3/.test(el.textContent);
+    document.getElementById('missionBox').classList.remove('show');
+    return ok || ('missing wkMini');
+  });
+  await senseCheck("U9507 重置周任务后显示 0/3 且宽度0%", async (T,$) => {
+    T.wmissionResetNow();
+    T.msnOpenNow('daily');
+    const sp = document.querySelector('#msnBody .wkMini span');
+    const bar = document.querySelector('#msnBody .wkMini i b');
+    const ok = !!sp && sp.textContent.indexOf('0/3') >= 0 && !!bar && bar.style.width === '0%';
+    document.getElementById('missionBox').classList.remove('show');
+    return ok || JSON.stringify({ t: sp && sp.textContent, w: bar && bar.style.width });
+  });
+  await senseCheck("U9508 完成1条周任务后迷你条 1/3", async (T,$) => {
+    T.wmissionResetNow();
+    const w = T.wmissionsNow().items[0];
+    T.wmissionBumpNow ? T.wmissionBumpNow(w.type, w.target) : null;
+    T.msnOpenNow('daily');
+    const sp = document.querySelector('#msnBody .wkMini span');
+    const ok = !!sp && /[13]\/3/.test(sp.textContent);
+    document.getElementById('missionBox').classList.remove('show');
+    return ok || ('t:' + (sp && sp.textContent));
+  });
+
+  // U9509–U9511: 生涯花费统计
+  await senseCheck("U9509 生涯面板含累计投入行", async (T,$) => {
+    const html = T.openCareerNow();
+    document.getElementById('careerBox').classList.remove('show');
+    return html.indexOf('累计投入') >= 0 || 'missing';
+  });
+  await senseCheck("U9510 投入数值随 bonusSpent 渲染", async (T,$) => {
+    T.setBonusSpentNow(12345);
+    const html = T.openCareerNow();
+    document.getElementById('careerBox').classList.remove('show');
+    return html.indexOf('>12345<') >= 0 || 'no12345';
+  });
+  await senseCheck("U9511 钩子读写 bonusSpent 一致", async (T,$) => {
+    T.setBonusSpentNow(77);
+    const ok = T.bonusSpentNow() === 77;
+    T.setBonusSpentNow(0);
+    return ok || 'v:' + T.bonusSpentNow();
+  });
+
+  // U9512–U9514: 图鉴击杀分布
+  await senseCheck("U9512 3杀普通+1杀Boss分布条显示75%", async (T,$) => {
+    T.dexResetNow();
+    T.dexAddNow('normal'); T.dexAddNow('normal'); T.dexAddNow('normal'); T.dexAddNow('boss');
+    T.openDexNow();
+    const el = document.querySelector('#dexBody .dexTop');
+    const ok = !!el && el.textContent.indexOf('75%') >= 0;
+    document.getElementById('dexBox').classList.remove('show');
+    T.dexResetNow();
+    return ok || (el ? el.textContent : 'no dexTop');
+  });
+  await senseCheck("U9513 Boss计入分布并显示👑Boss", async (T,$) => {
+    T.dexResetNow();
+    T.dexAddNow('boss');
+    T.openDexNow();
+    const el = document.querySelector('#dexBody .dexTop');
+    const ok = !!el && el.textContent.indexOf('👑Boss') >= 0 && el.textContent.indexOf('100%') >= 0;
+    document.getElementById('dexBox').classList.remove('show');
+    T.dexResetNow();
+    return ok || (el ? el.textContent : 'no dexTop');
+  });
+  await senseCheck("U9514 空图鉴不渲染分布条", async (T,$) => {
+    T.dexResetNow();
+    T.openDexNow();
+    const el = document.querySelector('#dexBody .dexTop');
+    document.getElementById('dexBox').classList.remove('show');
+    return el === null || 'unexpected dexTop';
+  });
+
+  // U9515–U9517: 游戏时长成就
+  await senseCheck("U9515 时长成就已注册", async (T,$) => {
+    const ids = T.achIdsNow();
+    return (ids.includes('play1h') && ids.includes('play5h')) || 'missing';
+  });
+  await senseCheck("U9516 playSec>=3600 解锁沙场老将", async (T,$) => {
+    T.setPlaySecNow(3600);
+    T.playtimeCheckNow();
+    const ok = T.achHas('play1h') === true;
+    T.setPlaySecNow(0);
+    return ok || 'not unlocked';
+  });
+  await senseCheck("U9517 playSec>=18000 解锁坦克之魂", async (T,$) => {
+    T.setPlaySecNow(18000);
+    T.playtimeCheckNow();
+    const ok = T.achHas('play5h') === true && T.achHas('play1h') === true;
+    T.setPlaySecNow(0);
+    return ok || 'not unlocked';
+  });
+
+  // U9518–U9520: 抽奖保底
+  await senseCheck("U9518 普通抽后保底计数+1或归零", async (T,$) => {
+    T.setCoinsNow(99999); T.setGachaPityNow(0);
+    const r = T.gachaNow(), p = T.gachaPityNow();
+    const ok = !!r && (r.coins === 3000 ? p === 0 : p === 1);
+    T.setGachaPityNow(0);
+    return ok || JSON.stringify({ r, p });
+  });
+  await senseCheck("U9519 保底10抽必中超级大奖且归零", async (T,$) => {
+    T.setCoinsNow(99999); T.setGachaPityNow(10);
+    const r = T.gachaNow(), p = T.gachaPityNow();
+    const ok = !!r && r.coins === 3000 && p === 0;
+    T.setGachaPityNow(0);
+    return ok || JSON.stringify({ r, p });
+  });
+  await senseCheck("U9520 抽奖卡渲染距保底文案", async (T,$) => {
+    T.setGachaPityNow(3);
+    const t = T.gachaRenderNow();
+    const ok = !!t && t.indexOf('距保底 7 抽') >= 0;
+    T.setGachaPityNow(0);
+    return ok || ('t:' + t);
+  });
+
+  // U9521–U9523: 抽奖历史
+  await senseCheck("U9521 抽奖写入历史首条", async (T,$) => {
+    T.setCoinsNow(99999);
+    const n0 = T.ghistNow().length;
+    const r = T.gachaNow(), h = T.ghistNow();
+    const ok = !!r && h.length === Math.min(8, n0 + 1) && h[0] === r.label;
+    return ok || JSON.stringify({ r, h0: h[0] });
+  });
+  await senseCheck("U9522 历史环形上限8条最新在前", async (T,$) => {
+    T.setCoinsNow(99999);
+    for (let k = 0; k < 10; k++) T.gachaNow();
+    const h = T.ghistNow();
+    return (h.length === 8) || 'len:' + h.length;
+  });
+  await senseCheck("U9523 历史行数与DOM渲染一致", async (T,$) => {
+    const rows = T.ghistDomNow(), h = T.ghistNow().length;
+    return (rows === h && rows > 0) || JSON.stringify({ rows, h });
+  });
+
+  // U9524–U9526: 每日首抽半价
+  await senseCheck("U9524 非今日首抽价格低于原价", async (T,$) => {
+    T.setGachaDayNow('19990101');
+    const half = T.gachaTodayCostNow(), full = T.gachaFullCostNow();
+    return (half < full && half <= Math.ceil(full / 2)) || JSON.stringify({ half, full });
+  });
+  await senseCheck("U9525 抽完后恢复原价", async (T,$) => {
+    T.setGachaDayNow('19990101'); T.setCoinsNow(99999);
+    T.gachaNow();
+    const after = T.gachaTodayCostNow(), full = T.gachaFullCostNow();
+    return (after === full) || JSON.stringify({ after, full });
+  });
+  await senseCheck("U9526 首抽可用时卡片显示半价徽标", async (T,$) => {
+    T.setGachaDayNow('19990101');
+    const t = T.gachaMetaNow();
+    return (!!t && t.indexOf('今日首抽半价') >= 0) || ('t:' + t);
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

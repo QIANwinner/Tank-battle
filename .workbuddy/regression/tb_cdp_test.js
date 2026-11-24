@@ -805,7 +805,7 @@ async function main() {
     try {
       reset(); T.resetAch();
       const n = T.achCountNow();
-      t('T1 成就总数(v0.3.4 扩至 30 枚)', n.total === 30, 'total=' + n.total);
+      t('T1 成就总数(v1.2.58 扩至 32 枚)', n.total === 32, 'total=' + n.total);
     } catch (e) { t('T1 成就总数', false, e.message); }
 
     try {
@@ -1295,9 +1295,10 @@ async function main() {
     try {
       const c0 = T.setCoinsNow(1000);
       const st0 = T.gachaState();
+      const gcost = T.gachaTodayCostNow ? T.gachaTodayCostNow() : 500;   // —— v1.2.61 每日首抽半价：实扣价动态读取 ——
       const r = T.gachaNow();
-      const ok = !!r && r.balance === c0 - 500 + (r.coins || 0) && st0.count + 1 === T.gachaState().count;
-      t('AC14 抽奖扣500+发放奖励', ok === true, JSON.stringify({ c0, label: r && r.label, balance: r && r.balance, count: T.gachaState().count }));
+      const ok = !!r && r.balance === c0 - gcost + (r.coins || 0) && st0.count + 1 === T.gachaState().count;
+      t('AC14 抽奖扣费+发放奖励', ok === true, JSON.stringify({ c0, gcost, label: r && r.label, balance: r && r.balance, count: T.gachaState().count }));
     } catch (e) { t('AC14 抽奖扣500+发放奖励', false, e.message); }
 
     try {

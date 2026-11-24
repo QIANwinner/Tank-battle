@@ -1868,7 +1868,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.51</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.61</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2895,11 +2895,16 @@
   function saveBoard() { try { saveStore.setItem(LS_BOARD, JSON.stringify(board)); } catch (e) { /* 忽略 */ } }
   function boardRank() { return board.findIndex(b => b.uid === career.lastUid); }
   // 一局结束：累计生涯 + 更新各模式最佳 + 写入排行榜（仅在得分>0 时上榜）
+  function playtimeAchCheck() {   // —— v1.2.58 游戏时长成就 ——
+    if (career.playSec >= 3600) unlockAch('play1h');
+    if (career.playSec >= 18000) unlockAch('play5h');
+  }
   function recordGame(win) {
     career.games++;
     career.kills += stat.kills;
     killMileGrant();   // —— v1.2.35 生涯击毁里程碑 ——
     career.playSec += Math.round(playSecRun);
+    playtimeAchCheck();   // —— v1.2.58 ——
     // —— v0.2.7 生涯统计扩展：累计金币/星/Boss 击杀/死亡/命中/胜场/模式场次 ——
     career.bossKills += stat.bossKills;
     career.deaths += stat.deaths;
@@ -2966,8 +2971,11 @@
     // —— v0.3.4 宠物经济成就：宠物币专属来源（reward 0 金币 + petReward 宠物币） ——
     { id: 'pet1',   icon: '🐾', name: '初次饲主', desc: '购买第一只宠物', reward: 0, petReward: 2 },
     { id: 'petmax', icon: '🐣', name: '满级萌宠', desc: '任意宠物升到满级', reward: 0, petReward: 3 },
-    { id: 'petall', icon: '💞', name: '宠物全家福', desc: v5PetAllDesc(PET_DEF.length), reward: 0, petReward: 5 }
+    { id: 'petall', icon: '💞', name: '宠物全家福', desc: v5PetAllDesc(PET_DEF.length), reward: 0, petReward: 5 },
+    { id: 'play1h', icon: '⏱', name: '沙场老将', desc: '累计游玩 1 小时', reward: 800, petReward: 0 },
+    { id: 'play5h', icon: '🕰', name: '坦克之魂', desc: '累计游玩 5 小时', reward: 3000, petReward: 0 }
   ];
+  let achFilter = 'all';   // —— v1.2.52 成就筛选状态：all/done/locked ——
   // —— v0.2.7 成就分组（分组进度条用） ——
   const ACH_GROUP = {
     first: 'combat', combo8: 'combat', boss: 'combat', nohit: 'combat', surge: 'combat',
@@ -25453,6 +25461,19 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
 
   // ===== v0.2.9 金币经济补全：抽奖箱 / 强化重置 / 成就徽章展示框 =====
   const GACHA_COST = 500;      // 单次抽奖价格
+  const GACHA_PITY_MAX = 10;   // —— v1.2.59 十连非酋保底 ——
+  const LS_GACHA_PITY = 'tank-battle-gacha-pity';
+  let gachaPity = 0;
+  try { gachaPity = Math.max(0, parseInt(saveStore.getItem(LS_GACHA_PITY) || '0', 10) || 0); } catch (e) { /* 忽略 */ }
+  function saveGachaPity() { try { saveStore.setItem(LS_GACHA_PITY, String(gachaPity)); } catch (e) { /* 忽略 */ } }
+  const LS_GHIST = 'tank-battle-ghist';   // —— v1.2.60 抽奖历史（环形8条） ——
+  const LS_GACHA_DAY = 'tank-battle-gacha-day';   // —— v1.2.61 每日首抽半价 ——
+  let gachaDayK = '';
+  try { gachaDayK = saveStore.getItem(LS_GACHA_DAY) || ''; } catch (e) { /* 忽略 */ }
+  function gachaTodayCost(base) { return gachaDayK === String(dayKey()) ? base : Math.max(1, Math.floor(base / 2)); }
+  let ghist = [];
+  try { const gh = JSON.parse(saveStore.getItem(LS_GHIST) || '[]'); if (Array.isArray(gh)) ghist = gh.slice(0, 8); } catch (e) { /* 忽略 */ }
+  function ghistPush(label) { ghist.unshift(label); if (ghist.length > 8) ghist.length = 8; try { saveStore.setItem(LS_GHIST, JSON.stringify(ghist)); } catch (e) { /* 忽略 */ } }
   const GACHA_POOL = [         // 奖励池（权重 + 效果）
     { w: 30, label: '🪙 +600',    coins: 600 },
     { w: 20, label: '🪙 +1000',   coins: 1000 },
@@ -25467,10 +25488,12 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     return GACHA_POOL[0];
   }
   function drawGacha() {
-    const cost = dealApply('抽奖', GACHA_COST);   // —— v1.1.235 抽奖类特惠周 ——
+    const cost = dealApply('抽奖', gachaTodayCost(GACHA_COST));   // —— v1.1.235 抽奖类特惠周 · v1.2.61 首抽半价 ——
     if (coins < cost) { showToast(insufficientMsg('🪙 金币', coins, cost, '抽奖')); beep(180, 0.12, 'square', 0.05); return null; }
     coins -= cost; gachaCount++;
-    const win = pickGacha();
+    gachaDayK = String(dayKey()); try { saveStore.setItem(LS_GACHA_DAY, gachaDayK); } catch (e) { /* 忽略 */ }   // —— v1.2.61 首抽额度已用 ——
+    let win = pickGacha();
+    if (gachaPity >= GACHA_PITY_MAX) win = GACHA_POOL[4];   // —— v1.2.59 保底必中超级大奖 ——
     let detail = '';
     if (win.coins) { coins += win.coins; detail = v5GachaCoinDetail(win.coins); }
     else if (win.bonus) {
@@ -25482,7 +25505,9 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
         saveBonus();
       } else { coins += cost; detail = '⚡ 强化已全满级 → 返还成本'; }
     }
-    saveCoins(); saveGacha(); renderShop(); updateCoinHud();
+    if (win === GACHA_POOL[4]) gachaPity = 0; else gachaPity++;   // —— v1.2.59 ——
+    ghistPush(win.label);   // —— v1.2.60 记入抽奖历史 ——
+    saveCoins(); saveGacha(); saveGachaPity(); renderShop(); updateCoinHud();
     sfxPickup();
     return { label: win.label, coins: win.coins || 0, bonus: win.bonus || false, detail, balance: coins, count: gachaCount };
   }
@@ -25522,13 +25547,14 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     shopBody.appendChild(gachaProbPanel());   // —— v0.6.15 概率公示 ——
     const gc = document.createElement('div');
     gc.className = 'gachaCard';
-    const gachaCost = dealApply('抽奖', GACHA_COST);   // —— v1.1.235 显示价=实扣价 ——
+    const gachaCost = dealApply('抽奖', gachaTodayCost(GACHA_COST));   // —— v1.1.235 显示价=实扣价 · v1.2.61 首抽半价 ——
     const afford = coins >= gachaCost;
     gc.innerHTML = '<span class="gachaIcon">🎰</span>' +
       '<div class="gachaInfo">' +
         '<div class="gachaName">幸运抽奖箱</div>' +
         '<div class="gachaDesc">' + v5GachaDescText(gachaCost) + '</div>' +
-        '<div class="gachaMeta">' + v5GachaMetaText(gachaCount, coins) + '</div>' +
+        '<div class="gachaMeta">' + v5GachaMetaText(gachaCount, coins) + (gachaDayK !== String(dayKey()) ? ' · 🎉 今日首抽半价' : '') + '</div>' +   // —— v1.2.61 ——
+        '<div class="gachaPity">🎯 距保底 ' + Math.max(0, GACHA_PITY_MAX - gachaPity) + ' 抽 · 十连非酋必中大奖</div>' +   // —— v1.2.59 ——
       '</div>' +
       v5GachaBtnHtml(afford, gachaCost);
     const btn = gc.querySelector('.gachaBtn');
@@ -25537,6 +25563,12 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       if (r) showToast(gachaMsg(r.label, r.detail, coins));
     };
     shopBody.appendChild(gc);
+    if (ghist.length) {   // —— v1.2.60 抽奖历史列表 ——
+      const ghEl = document.createElement('div');
+      ghEl.className = 'gachaHist';
+      ghEl.innerHTML = '<div class="ghistT">📜 最近抽奖</div>' + ghist.map((x, i) => '<div class="ghistRow"><span>' + x + '</span><em>#' + (gachaCount - i) + '</em></div>').join('');
+      shopBody.appendChild(ghEl);
+    }
     const rc = document.createElement('div');
     rc.className = 'gachaCard';
     const totalLv = Object.values(bonus).reduce((s, v) => s + v, 0);
@@ -26001,6 +26033,10 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     statRow.className = 'achPetStat';
     statRow.innerHTML = achPetStatHtml(ps.got, ps.total, got, ACHIEVE.length) + '<span>🎖 ' + achRankName(got, ACHIEVE.length) + '</span>'
     achBody.appendChild(statRow);
+    const achChipBar = document.createElement('div');   // —— v1.2.52 筛选芯片条 ——
+    achChipBar.className = 'achChips';
+    achChipBar.innerHTML = [['all', '全部'], ['done', '已解锁'], ['locked', '未解锁']].map(p => '<button class="achChip' + (achFilter === p[0] ? ' on' : '') + '" data-f="' + p[0] + '">' + p[1] + '</button>').join('');
+    achBody.appendChild(achChipBar);
     // —— v1.2.49 行内进度：复用成就追踪数据源 ——
     const achTrk = {};
     for (const t of achTrackState({ kills: career.kills, coins: coins, boss: career.bossKills, wins: career.wins, stars: career.totalStars, daily: dailyCount, lv: maxUnlocked, wave: bestWave, skins: ownedSkins.length })) achTrk[t.id] = t;
@@ -26016,6 +26052,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       achBody.appendChild(head);
       for (const a of list) {
         const on = achUnlocked.has(a.id);
+        if ((achFilter === 'done' && !on) || (achFilter === 'locked' && on)) continue;   // —— v1.2.52 ——
         const row = document.createElement('div');
         row.className = 'achItem' + (on ? '' : ' locked');
         // —— v0.3.4 奖励展示：金币 + 宠物币（宠物成就只显示🐾） ——
@@ -26030,6 +26067,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
         achBody.appendChild(row);
       }
     }
+    achBody.querySelectorAll('.achChip[data-f]').forEach(b => b.addEventListener('click', () => { achFilter = b.dataset.f; openAch(); }));   // —— v1.2.52 ——
   }
   function closeAch() { if (achBox) achBox.classList.remove('show'); }
 
@@ -26105,8 +26143,18 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (signinData.last === tk) return { done: true, streak: signinData.streak };
     const cont = signinData.last === String(dayKey(-1));
     const streak = cont ? signinData.streak + 1 : 1;
-    return { done: false, streak, reward: signinReward(streak) };
+    const missed = !cont && signinData.streak > 0 && signinData.last === String(dayKey(-2));   // —— v1.2.53 漏签1天可补签 ——
+    return { done: false, streak, reward: signinReward(streak), missed };
   };
+  const SIGNIN_FIX_COST = 200;   // —— v1.2.53 补签卡价格 ——
+  function signinFix() {
+    const st = signinNow();
+    if (st.done || !st.missed) return { ok: false, why: 'none' };
+    if (coins < SIGNIN_FIX_COST) return { ok: false, why: 'coins' };
+    coins -= SIGNIN_FIX_COST; saveCoins(); updateCoinHud();
+    signinData.last = String(dayKey(-1)); saveSignin();   // 视作昨天已签，今日可续连击
+    return { ok: true, cost: SIGNIN_FIX_COST, streak: signinData.streak };
+  }
   function openSignin() { renderSignin(); $('signinBox').classList.add('show'); }
   function closeSignin() { const el = $('signinBox'); if (el) el.classList.remove('show'); }
 
@@ -26134,6 +26182,8 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const allSeen = dexSeenCount() >= DEX_KEYS_TOTAL;   // —— v1.2.41 ——
     $('dexSub').textContent = '已击毁 ' + total + ' 辆敌军坦克 · 击毁数跨局累计' + (allSeen ? ' · 🏅 已集齐' : '');
     let html = '';
+    const dTop = keys.concat('boss').map(k => [k, dexData.kills[k] || 0]).filter(x => x[1] > 0).sort((a, b) => b[1] - a[1]).slice(0, 3);   // —— v1.2.57 击杀分布 TOP3 ——
+    if (dTop.length && total > 0) html += '<div class="dexTop">📊 ' + dTop.map(x => (x[0] === 'boss' ? '👑Boss' : (ENEMY_TYPES[x[0]] || {}).label || x[0]) + ' ' + Math.round(x[1] / total * 100) + '%').join(' · ') + '</div>';
     const rows = keys.map(k => Object.assign({ key: k }, ENEMY_TYPES[k]));
     rows.push({ key: 'boss', label: 'Boss', speed: 0, hp: '多阶段', score: '1000×关', color: '#ff2d55' });
     for (const r of rows) {
@@ -26163,11 +26213,14 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       html += '<div class="sDay ' + cls + (i === 6 ? ' grand' : '') + '"><span class="dN">' + (i === 6 ? '👑' : '') + '第' + day + '天</span><span class="dC">' + icon + '</span><span class="dP">+' + reward + '</span></div>';   // —— v1.2.50 ——
     }
     html += '</div>';
+    if (st.missed) html += '<button class="signinFix" id="signinFixBtn">🩹 补签昨天 · ' + SIGNIN_FIX_COST + '🪙 · 保住 ' + signinData.streak + ' 连击</button>';   // —— v1.2.53 ——
     html += '<button class="signinBtn" ' + (st.done ? 'disabled' : '') + '>' + (st.done ? '今日已签 ✓' : '🎁 领取今日 ' + st.reward + ' 金币') + '</button>';
     html += '<div class="signinHint">' + (st.done ? '明天再来 · 连续签到奖励更高 · 第7天领大奖' : '每日首次领取 · 连续 7 天循环递增，中断重置 · 第7天领大奖') + '</div>';   // —— v1.2.50 ——
     $('signinBody').innerHTML = html;
     const btn = $('signinBody').querySelector('.signinBtn');
     if (btn && !st.done) btn.addEventListener('click', claimSignin);
+    const fixB = $('signinFixBtn');   // —— v1.2.53 ——
+    if (fixB) fixB.addEventListener('click', () => { const r = signinFix(); showToast(r.ok ? '🩹 已补签 · 连击保住 ' + r.streak + ' 天' : '金币不足 · 补签需 ' + SIGNIN_FIX_COST + '🪙'); renderSignin(); });
   }
   function claimSignin() {
     const st = signinNow();
@@ -26186,6 +26239,10 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
 
   // —— v1.2.2 每日任务:按日种子轮换 3 条,跨局累计,主菜单领取金币 ——
   const LS_MISSIONS = 'tank-battle-missions';
+  const LS_MHIST = 'tank-battle-mhist';   // —— v1.2.54 任务完成历史（环形6条） ——
+  let mhist = [];
+  try { const mh = JSON.parse(saveStore.getItem(LS_MHIST) || '[]'); if (Array.isArray(mh)) mhist = mh.slice(0, 6); } catch (e) { /* 忽略 */ }
+  function mhistPush(icon, name) { mhist.unshift({ i: icon, n: name, d: String(dayKey()).slice(4) }); if (mhist.length > 6) mhist.length = 6; try { saveStore.setItem(LS_MHIST, JSON.stringify(mhist)); } catch (e) { /* 忽略 */ } }
   const MISSION_DEFS = {
     kills:   { icon: '💥', name: '击毁敌军',  unit: '辆',   targets: [15, 30, 50],       rewards: [80, 150, 240] },
     levels:  { icon: '🚩', name: '通过关卡',  unit: '关',   targets: [2, 4, 6],          rewards: [80, 150, 240] },
@@ -26270,6 +26327,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     m.claimed = true;
     coins += m.reward; saveCoins(); updateCoinHud();
     missionSave(); sfxCoin();
+    mhistPush((MISSION_DEFS[m.type] || {}).icon || '🎯', missionText(m));   // —— v1.2.54 记入历史 ——
     // —— v1.2.4 全勤奖励:3 条全领额外宠物币 ——
     if (st.items.every(x => x.claimed)) { addPetCoin(MISSION_ALLDONE_PET); showToast('🎯 今日任务全勤 · 额外 +' + MISSION_ALLDONE_PET + '🐾'); }
     return m.reward;
@@ -26299,11 +26357,18 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // —— v1.2.3 每日任务面板 ——
   function openMissions() { renderMissions(); $('missionBox').classList.add('show'); }
   function closeMissions() { const el = $('missionBox'); if (el) el.classList.remove('show'); }
+  function wkMiniHtml() {   // —— v1.2.55 周任务迷你进度条 ——
+    const w = wmissionsNow().items;
+    const dn = w.filter(x => x.done).length;
+    const pct = Math.round(dn / Math.max(1, w.length) * 100);
+    return '<div class="wkMini"><span>🌟 本周 ' + dn + '/' + w.length + '</span><i><b style="width:' + pct + '%"></b></i></div>';
+  }
   function renderMissions() {
     if (msnTab === 'weekly') { renderWMissions(); return; }   // —— v1.2.10 每周页签 ——
     const st = missionsNow();
     $('msnSub').textContent = '每日 0 点刷新 · 跨局累计';
     let html = '<div class="msnTabs"><button class="msnTab on" data-t="daily">📅 每日</button><button class="msnTab" data-t="weekly">🌟 每周</button></div>';
+    html += wkMiniHtml();   // —— v1.2.55 ——
     st.items.forEach((m, i) => {
       const d = MISSION_DEFS[m.type] || { icon: '❓' };
       const btn = m.claimed ? '<button class="msnClaim" disabled>已领取 ✓</button>'
@@ -26316,6 +26381,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
         '<div class="msnProg">' + Math.min(m.prog, m.target) + '/' + m.target + ' · 奖励 ' + m.reward + '🪙</div></div>' + btn + '</div>';
     });
     if (!missionAllDone()) html += '<button class="msnReroll" id="msnReroll"' + (st.rerolled ? ' disabled' : '') + '>🔄 换一批任务 · ' + MISSION_REROLL_COST + '🪙' + (st.rerolled ? ' · 今日已换' : '') + '</button>';
+    if (mhist.length) html += '<div class="mhist"><div class="mhistT">📜 近日完成</div>' + mhist.map(h => '<div class="mhistRow"><span>' + h.i + '</span><span class="mhistN">' + h.n + '</span><em>' + h.d + '</em></div>').join('') + '</div>';   // —— v1.2.54 ——
     html += '<div class="msnHint">' + (missionAllDone() ? '今日任务全部完成 · 明天再来 🌙' : '完成任务后回主菜单领取奖励') + '</div>';
     $('msnBody').innerHTML = html;
     $('msnBody').querySelectorAll('.msnClaim[data-i]').forEach(b => b.addEventListener('click', () => { missionClaim(+b.dataset.i); renderMissions(); missionBadgeUpdate(); }));
@@ -26512,6 +26578,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       '<div class="carStat"><b>' + acc + '%</b><span>总命中率</span></div>' +
       '<div class="carStat"><b>' + wr + '%</b><span>胜率</span></div>' +
       '<div class="carStat"><b>' + (career.clutch || 0) + '</b><span>险胜徽章</span></div>' +   // —— v1.2.47 ——
+      '<div class="carStat"><b>' + (bonusSpent | 0) + '</b><span>累计投入🪙</span></div>' +   // —— v1.2.56 花费统计 ——
       '</div>');
     // 各模式最佳
     rows.push('<div class="carSec">各模式最佳</div><div class="carGrid">' +
@@ -27089,7 +27156,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.51', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.61', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -29835,6 +29902,24 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       bgmRushWaveNow: () => BGM_RUSH_WAVE,
       // —— v0.2.9 金币经济补全验证钩子（?test=1 暴露） ——
       gachaNow: () => drawGacha(),
+      gachaTodayCostNow: () => dealApply('抽奖', gachaTodayCost(GACHA_COST)),
+      gachaFullCostNow: () => dealApply('抽奖', GACHA_COST),
+      setGachaDayNow: (k) => { gachaDayK = String(k); return gachaDayK; },
+      gachaMetaNow: () => { renderGacha(); const e = document.querySelector('#shopBody .gachaMeta'); return e ? e.textContent : null; },
+      ghistNow: () => ghist.slice(),
+      ghistDomNow: () => { renderGacha(); return document.querySelectorAll('#shopBody .ghistRow').length; },
+      gachaPityNow: () => gachaPity, setGachaPityNow: (v) => { gachaPity = Math.max(0, v | 0); saveGachaPity(); return gachaPity; },
+      gachaRenderNow: () => { renderGacha(); const e = document.querySelector('#shopBody .gachaPity'); return e ? e.textContent : null; },
+      setPlaySecNow: (s) => { career.playSec = Math.max(0, s | 0); saveCareer(); return career.playSec; },
+      playtimeCheckNow: () => { playtimeAchCheck(); return career.playSec; },
+      achIdsNow: () => ACHIEVE.map(a => a.id),
+      openCareerNow: () => { openCareer(); return $('carBody').innerHTML; },
+      bonusSpentNow: () => bonusSpent | 0, setBonusSpentNow: (v) => { bonusSpent = Math.max(0, v | 0); saveBonusSpent(); return bonusSpent; },
+      mhistNow: () => mhist.slice(), mhistPushNow: (i, n) => { mhistPush(i, n); return mhist.length; },
+      msnOpenNow: (tab) => { if (tab) msnTab = tab; renderMissions(); $('missionBox').classList.add('show'); return true; },
+      signinInfoNow: () => signinNow(), signinFixNow: () => signinFix(),
+      achFilterSetNow: (f) => { achFilter = f; return achFilter; },
+      achOpenNow: () => { openAch(); return achBody.querySelectorAll('.achItem').length; },
       gachaState: () => ({ cost: GACHA_COST, count: gachaCount, coins, bonusSpent,
         totalLv: Object.values(bonus).reduce((s, v) => s + v, 0) }),
       setCoinsNow: (n) => { coins = Math.max(0, Math.floor(n)); saveCoins(); return coins; },
