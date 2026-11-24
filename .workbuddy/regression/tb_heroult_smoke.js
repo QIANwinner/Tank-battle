@@ -28173,6 +28173,228 @@ async function main() {
     return (!!t && t.indexOf('今日首抽半价') >= 0) || ('t:' + t);
   });
 
+  // U9527–U9529: 强化推荐
+  await senseCheck("U9527 推荐函数返回有效强化id", async (T,$) => {
+    const id = T.bonusRecNow();
+    return (typeof id === 'string' && id.length > 0) || 'no rec';
+  });
+  await senseCheck("U9528 推荐与徽标一致", async (T,$) => {
+    const id = T.bonusRecNow(), dom = T.recBadgeDomNow();
+    return (id === dom) || JSON.stringify({ id, dom });
+  });
+  await senseCheck("U9529 买满后推荐切换到下一项", async (T,$) => {
+    const a = T.bonusRecNow();
+    if (!a) return 'none';
+    T.setBonusLvNow(a, 99);
+    const b = T.bonusRecNow();
+    T.setBonusLvNow(a, 0);
+    return (b !== a) || JSON.stringify({ a, b });
+  });
+
+  // U9530–U9532: 每日限购
+  await senseCheck("U9530 每日限购槽存在且未用", async (T,$) => {
+    const d = T.dailyDealNow();
+    return (typeof d.id === 'string' && d.id.length > 0 && d.used === false) || JSON.stringify(d);
+  });
+  await senseCheck("U9531 限购品6折购买后标记已用", async (T,$) => {
+    T.setBonusLvNow('cd', 0); T.setCoinsNow(99999);
+    T.setDailyDealNow('cd', false);
+    const c0 = T.coins();
+    T.buyBonusNow('cd');
+    const d = T.dailyDealNow();
+    const spent = c0 - T.coins();
+    const ok = d.used === true && spent > 0 && spent <= 30;
+    return ok || JSON.stringify({ d, spent });
+  });
+  await senseCheck("U9532 已用后同品恢复原价", async (T,$) => {
+    T.setBonusLvNow('spd', 0); T.setCoinsNow(99999);
+    T.setDailyDealNow('spd', true);
+    const c0 = T.coins();
+    T.buyBonusNow('spd');
+    const spent = c0 - T.coins();
+    return (spent === 50) || 'spent:' + spent;
+  });
+
+  // U9533–U9535: 金币兑宠物币
+  await senseCheck("U9533 300金币换1宠物币", async (T,$) => {
+    T.setCoinsNow(1000); T.setPetCoins(0);
+    const r = T.coinToPetNow(1);
+    const ok = r === 1 && T.petCoins() === 1 && T.coins() === 700;
+    return ok || JSON.stringify({ r, c: T.coins(), p: T.petCoins() });
+  });
+  await senseCheck("U9534 金币不足拒绝兑换", async (T,$) => {
+    T.setCoinsNow(100); T.setPetCoins(0);
+    const r = T.coinToPetNow(1);
+    return (r === 0 && T.petCoins() === 0 && T.coins() === 100) || JSON.stringify({ r });
+  });
+  await senseCheck("U9535 批量兑换按300倍扣款", async (T,$) => {
+    T.setCoinsNow(1000); T.setPetCoins(0);
+    const r = T.coinToPetNow(3);
+    return (r === 3 && T.petCoins() === 3 && T.coins() === 100) || JSON.stringify({ r, c: T.coins(), p: T.petCoins() });
+  });
+
+  // U9536–U9538: 新手任务
+  await senseCheck("U9536 新手任务三条规定状态", async (T,$) => {
+    T.noviceResetNow();
+    const st = T.noviceNow();
+    return (st.length === 3 && st.every(x => x.claimed === false) && st[0].id === 'first') || JSON.stringify(st);
+  });
+  await senseCheck("U9537 条件达成可领取且发奖", async (T,$) => {
+    T.noviceResetNow(); T.setCoinsNow(0);
+    const st = T.noviceNow();
+    const doable = st.find(x => x.done);
+    if (!doable) return 'none-done';
+    const r = T.noviceClaimNow(doable.id);
+    const ok = r === doable.rw && T.coins() === doable.rw;
+    return ok || JSON.stringify({ doable, r, c: T.coins() });
+  });
+  await senseCheck("U9538 全部领完面板不再渲染新手区", async (T,$) => {
+    T.noviceResetNow();
+    T.setCareerGamesNow(1); T.setCareerKillsNow(10); T.setBonusSpentNow(1);
+    for (const x of T.noviceNow()) T.noviceClaimNow(x.id);
+    T.msnOpenNow('daily');
+    const nv = document.querySelector('#msnBody .nvWrap');
+    document.getElementById('missionBox').classList.remove('show');
+    T.setBonusSpentNow(0);
+    return nv === null || 'nv still shown';
+  });
+
+  // U9539–U9541: 图鉴详情
+  await senseCheck("U9539 点击行展开详情", async (T,$) => {
+    T.dexResetNow(); T.dexAddNow('normal');
+    T.openDexNow();
+    const row = document.querySelector('#dexBody .dexRow[data-k="normal"]');
+    if (!row) return 'no row';
+    row.click();
+    const open = row.classList.contains('dexOpen');
+    const det = row.querySelector('.dexDetail');
+    document.getElementById('dexBox').classList.remove('show');
+    T.dexResetNow();
+    return (open && !!det) || 'not open';
+  });
+  await senseCheck("U9540 详情含击毁数与占比", async (T,$) => {
+    T.dexResetNow(); T.dexAddNow('normal'); T.dexAddNow('normal');
+    T.openDexNow();
+    const row = document.querySelector('#dexBody .dexRow[data-k="normal"]');
+    row.click();
+    const t = row.querySelector('.dexDetail').textContent;
+    document.getElementById('dexBox').classList.remove('show');
+    T.dexResetNow();
+    return (t.indexOf('击毁 2') >= 0 && t.indexOf('100%') >= 0) || ('t:' + t);
+  });
+  await senseCheck("U9541 再次点击收起详情", async (T,$) => {
+    T.dexResetNow(); T.dexAddNow('boss');
+    T.openDexNow();
+    const row = document.querySelector('#dexBody .dexRow[data-k="boss"]');
+    row.click(); row.click();
+    const closed = !row.classList.contains('dexOpen');
+    document.getElementById('dexBox').classList.remove('show');
+    T.dexResetNow();
+    return closed || 'still open';
+  });
+
+  // U9542–U9544: 收藏皮肤
+  await senseCheck("U9542 收藏切换状态", async (T,$) => {
+    const r1 = T.favSkinTglNow('classic');
+    const on = T.favSkinNow().includes('classic');
+    const r2 = T.favSkinTglNow('classic');
+    const off = !T.favSkinNow().includes('classic');
+    return (r1 === true && on && r2 === false && off) || JSON.stringify({ r1, on, r2, off });
+  });
+  await senseCheck("U9543 收藏皮肤排序置顶", async (T,$) => {
+    const order = T.skinOrderNow();
+    if (!order.length) return 'no items';
+    const pick = order[order.length - 1];
+    T.favSkinSetNow(pick, true);
+    const order2 = T.skinOrderNow();
+    const ok = order2[0] === pick;
+    T.favSkinSetNow(pick, false);
+    return ok || JSON.stringify({ first: order2[0], pick });
+  });
+  await senseCheck("U9544 收藏星标DOM渲染", async (T,$) => {
+    T.favSkinSetNow('classic', true);
+    T.skinOrderNow();
+    const ok = !!document.querySelector('#shopBody .favStar.on');
+    T.favSkinSetNow('classic', false);
+    return ok || 'no star';
+  });
+
+  // U9545–U9547: 自动备份
+  await senseCheck("U9545 备份写入快照", async (T,$) => {
+    const ok = T.autoBackupNow() === true;
+    const b = T.backupGetNow();
+    return (ok && b && b.d && typeof b.day === 'string' && b.day.length === 8) || JSON.stringify(b && b.day);
+  });
+  await senseCheck("U9546 快照含核心键", async (T,$) => {
+    T.autoBackupNow();
+    const b = T.backupGetNow();
+    const keys = b && b.d ? Object.keys(b.d) : [];
+    return keys.length >= 2 || 'keys:' + keys.length;
+  });
+  await senseCheck("U9547 恢复接口可从备份取回", async (T,$) => {
+    T.setCoinsNow(7777); T.autoBackupNow();
+    T.setCoinsNow(1);
+    const r = T.backupRestoreNow('tank-battle-coins');
+    const ok = r === true;
+    return ok || 'restore fail';
+  });
+
+  // U9548–U9550: 伤害数字
+  await senseCheck("U9548 伤害数字飘字生成", async (T,$) => {
+    const n0 = T.floatTextsNow().length;
+    T.dmgNumNow(100, 100, 1);
+    const ts = T.floatTextsNow();
+    return (ts.length === n0 + 1 && String(ts[ts.length - 1]).indexOf('-1') >= 0) || JSON.stringify(ts.slice(-2));
+  });
+  await senseCheck("U9549 巨弹头伤害数字为-2", async (T,$) => {
+    T.dmgNumNow(100, 100, 2);
+    const ts = T.floatTextsNow();
+    return String(ts[ts.length - 1]).indexOf('-2') >= 0 || JSON.stringify(ts[ts.length - 1]);
+  });
+  await senseCheck("U9550 减弱动效下不生成伤害数字", async (T,$) => {
+    T.setReducedNow('on');
+    const n0 = T.floatTextsNow().length;
+    T.dmgNumNow(50, 50, 5);
+    const same = T.floatTextsNow().length === n0;
+    T.setReducedNow('auto');
+    return same || 'still spawned';
+  });
+
+  // U9551–U9553: 明日词条预告
+  await senseCheck("U9551 词条函数确定性返回2-3条", async (T,$) => {
+    const a = T.dailyModsForNow(20260216), b = T.dailyModsForNow(20260216);
+    return (a.length >= 2 && a.length <= 3 && a.join('|') === b.join('|')) || JSON.stringify(a);
+  });
+  await senseCheck("U9552 不同种子词条不同", async (T,$) => {
+    const a = T.dailyModsForNow(20260216), b = T.dailyModsForNow(20260217), c = T.dailyModsForNow(20260218);
+    const set = new Set([a.join('|'), b.join('|'), c.join('|')]);
+    return set.size >= 2 || 'all same';
+  });
+  await senseCheck("U9553 预告区渲染明日词条", async (T,$) => {
+    const t = T.tmrModsDomNow();
+    const exp = '🔮 明日词条 · ' + T.tmrModsNow().split('/').join(' / ');
+    return (!!t && t.indexOf('明日词条') >= 0) || ('t:' + t + ' exp:' + exp);
+  });
+
+  // U9554–U9556: 今日战绩
+  await senseCheck("U9554 今日统计累计", async (T,$) => {
+    T.todayAddNow('kills', 3); T.todayAddNow('coins', 50); T.todayAddNow('games', 1);
+    const t = T.todayStatsNow();
+    return (t.day === String(T.dayKeyNow ? T.dayKeyNow() : '') || t.day.length === 8) && t.kills >= 3 && t.coins >= 50 && t.games >= 1 || JSON.stringify(t);
+  });
+  await senseCheck("U9555 战绩条显示内容", async (T,$) => {
+    const c = T.todayChipNow();
+    const ok = !!c && c.show === true && c.txt.indexOf('今日') >= 0 && c.txt.indexOf('击杀') >= 0;
+    return ok || JSON.stringify(c);
+  });
+  await senseCheck("U9556 全零时战绩条隐藏", async (T,$) => {
+    T.todayResetNow();
+    const c0 = T.todayChipNow();
+    T.todayAddNow('kills', 1);
+    const c1 = T.todayChipNow();
+    return (c0 && c0.show === false && c1 && c1.show === true) || JSON.stringify({ c0, c1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

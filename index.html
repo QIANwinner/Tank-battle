@@ -1535,6 +1535,7 @@
       <!-- v0.3.19 每日挑战「今日英雄」推荐提示(随 btnDaily 显隐) -->
       <div id="dailyHeroTip" class="dailyTip"></div>
       <div id="dailyModIcons" class="dailyTip"></div>
+      <div id="todayChip" class="dailyTip"></div>
     </div>
     <!-- 内容与工具 -->
     <div class="menuGroup" id="groupTools">
@@ -1868,7 +1869,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.61</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.71</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -1913,7 +1914,7 @@
   <div id="shopBox">
     <div class="shopHead">
       <div class="shopTitle">🛒 军械商店</div>
-      <div class="shopWallet">🪙 <b id="shopCoins">0</b> · 🐾 <b id="shopPetCoins">0</b> <button id="xchgBtn" type="button" style="margin-left:8px;font-size:11px;padding:2px 8px;border-radius:8px;border:1px solid rgba(255,215,94,.5);background:rgba(255,215,94,.12);color:#ffd75e;cursor:pointer;">1🐾→120🪙</button></div>
+      <div class="shopWallet">🪙 <b id="shopCoins">0</b> · 🐾 <b id="shopPetCoins">0</b> <button id="xchgBtn" type="button" style="margin-left:8px;font-size:11px;padding:2px 8px;border-radius:8px;border:1px solid rgba(255,215,94,.5);background:rgba(255,215,94,.12);color:#ffd75e;cursor:pointer;">1🐾→120🪙</button><button id="xchgBtn2" type="button" style="margin-left:6px;font-size:11px;padding:2px 8px;border-radius:8px;border:1px solid rgba(255,150,220,.5);background:rgba(255,150,220,.12);color:#ff9fe0;cursor:pointer;">300🪙→1🐾</button></div>
       <button class="shopClose" id="btnShopClose" aria-label="关闭">✕</button>
     </div>
     <div class="petEarnHint">🐾 宠物币来源:<b>🏅成就</b> 1-3/枚(共65) · <b>📅签到</b> +1 · <b>🌊无尽</b> 每10波+1(羁绊激活×2) ｜ 消耗:宠物 · 英雄解锁</div>
@@ -2450,6 +2451,11 @@
   let bonus = { lifeup: 0, cd: 0, spd: 0, coinup: 0, shield: 0, revive: 0, combo: 0, bulletspd: 0, pierce: 0, supply: 0, focus: 0 };      // 永久加成等级
   let baseLevel = 0;                                                   // 基地升级等级（护墙阵法）
   let ownedSkins = ['classic'];                                        // 已购皮肤
+  const LS_FAVSKIN = 'tank-battle-favskin';   // —— v1.2.67 收藏皮肤 ——
+  let favSkins = [];
+  try { const fs2 = JSON.parse(saveStore.getItem(LS_FAVSKIN) || '[]'); if (Array.isArray(fs2)) favSkins = fs2; } catch (e) { /* 忽略 */ }
+  function favSortSkins(list) { const fav = list.filter(id => favSkins.includes(id)); return fav.concat(list.filter(id => !favSkins.includes(id))); }
+  function favSkinToggle(id) { const i = favSkins.indexOf(id); if (i >= 0) favSkins.splice(i, 1); else favSkins.push(id); try { saveStore.setItem(LS_FAVSKIN, JSON.stringify(favSkins)); } catch (e) { /* 忽略 */ } renderShop(); return favSkins.includes(id); }
   let equippedSkin = 'classic';                                        // 当前装备皮肤
   let levelStars = {};                                                 // —— v0.2.6 关卡星级（1-3 星） ——
   let maxUnlocked = 1;                                                 // —— v0.2.6 已解锁最高关卡（默认第 1 关） ——
@@ -2892,6 +2898,17 @@
     if (Array.isArray(bd)) board = bd.slice(0, 10);
   } catch (e) { /* 忽略 */ }
   function saveCareer() { try { saveStore.setItem(LS_CAREER, JSON.stringify(career)); } catch (e) { /* 忽略 */ } }
+  const LS_BACKUP = 'tank-battle-backup';   // —— v1.2.68 自动备份 ——
+  function autoBackup() {
+    try {
+      const snap = { day: String(dayKey()), d: {} };
+      for (const k of [LS_COINS, LS_CAREER, LS_MISSIONS, LS_BONUSSPENT]) { const v = saveStore.getItem(k); if (v != null) snap.d[k] = v; }
+      saveStore.setItem(LS_BACKUP, JSON.stringify(snap));
+      return true;
+    } catch (e) { return false; }
+  }
+  function backupGet() { try { return JSON.parse(saveStore.getItem(LS_BACKUP) || 'null'); } catch (e) { return null; } }
+  function backupRestore(k) { const b = backupGet(); if (!b || !b.d || b.d[k] == null) return false; try { saveStore.setItem(k, b.d[k]); return true; } catch (e) { return false; } }
   function saveBoard() { try { saveStore.setItem(LS_BOARD, JSON.stringify(board)); } catch (e) { /* 忽略 */ } }
   function boardRank() { return board.findIndex(b => b.uid === career.lastUid); }
   // 一局结束：累计生涯 + 更新各模式最佳 + 写入排行榜（仅在得分>0 时上榜）
@@ -2901,6 +2918,7 @@
   }
   function recordGame(win) {
     career.games++;
+    todayAdd('games', 1);   // —— v1.2.71 今日局数 ——
     career.kills += stat.kills;
     killMileGrant();   // —— v1.2.35 生涯击毁里程碑 ——
     career.playSec += Math.round(playSecRun);
@@ -2922,6 +2940,7 @@
     if (endlessMode) career.modeGames.endless++;
     if (difficulty === 'hard') career.modeGames.hard++;
     saveCareer();
+    autoBackup();   // —— v1.2.68 结算即备份 ——
     if (score > 0) {
       // —— v0.2.7 分榜：无尽局记入 endless ——
       const modeTag = endlessMode ? 'endless' : (dailyMode ? 'daily' : (timedMode ? 'timed' : 'normal'));
@@ -3070,8 +3089,14 @@
     if (show) {
       const def = HEROES[dailyHero()];
       if (def) tip.innerHTML = dailyHeroTipHtml(def.icon, def.name, def.desc);
-    const dmi = $('dailyModIcons'); if (dmi) dmi.innerHTML = dailyModIconsHtml(dailyMods);
+    const dmi = $('dailyModIcons'); if (dmi) dmi.innerHTML = dailyModIconsHtml(dailyMods) + '<div class="tmrMods">🔮 明日词条 · ' + dailyModsFor(dayKey(1)).join(' / ') + '</div>';   // —— v1.2.70 明日预告 ——
     }
+  }
+  function dailyModsFor(seed) {   // —— v1.2.70 纯函数：按种子算词条名（与实际抽取同序列） ——
+    const r = mulberry32(seed), pool = DAILY_MODS.slice(), names = [];
+    const n = 2 + Math.floor(r() * 2);
+    for (let i = 0; i < n && pool.length; i++) names.push(pool.splice(Math.floor(r() * pool.length), 1)[0].name);
+    return names;
   }
   let dailyMode = false;        // 本局是否每日挑战
   let endlessMode = false;       // —— v0.2.6 无尽/生存模式（波次指数增长） ——
@@ -3783,6 +3808,7 @@
   function addText(x, y, str, color = '#00f0ff') {
     texts.push({ x, y, str, color, life: 0.9, max: 0.9 });
   }
+  function dmgNum(x, y, v) { if (reduced()) return; addText(x, y, '-' + v, '#ffd75e'); }   // —— v1.2.69 伤害数字 ——
 
   // ===== 坦克 =====
   function makePlayer(px, py, color) {
@@ -4609,6 +4635,7 @@
             const extra = ((upgrades.bigbullet || 0) > 0 && e.hp > 1) ? 1 : 0;
             runDmgAdd(1 + extra);
             e.hp -= 1 + extra; e.hitFlash = 6;
+            dmgNum(cx, cy - 14, 1 + extra);   // —— v1.2.69 ——
             // 冰冻子弹：命中几率冻住 1 秒（每层 +15% 概率）
             if (!e.isBoss && !(e.freezeT > 0) && rng() < 0.15 * (upgrades.freeze || 0)) {
               e.freezeT = 60;
@@ -4939,6 +4966,7 @@
     // —— v0.2.7 生涯统计：累计获得金币（recordGame 统一持久化） ——
     career.totalCoins += gain;
     runCoins += gain;
+    todayAdd('coins', gain);   // —— v1.2.71 今日金币 ——
     // —— v0.2.4 成就：金库余额达 3000 ——
     if (coins >= 3000) unlockAch('rich');
     // —— v0.3.2 金币大亨：余额达 10000 ——
@@ -4989,6 +5017,7 @@
   function onEnemyKilled(e) {
     sfxBoom();
     petReact('kill');   // —— v0.3.3 宠物击杀欢跳 ——
+    todayAdd('kills', 1);   // —— v1.2.71 今日击杀 ——
     hitStop = reduced() ? 0 : (e.isBoss ? 0.06 : 0.03);   // 击杀定格（减弱动效时关闭；Boss 用慢动作替代长定格）
     vibe(e.isBoss ? [60, 50, 130] : 15);
     spawnParticles(e.x + e.size / 2, e.y + e.size / 2, e.color, e.isBoss ? 48 : 16);
@@ -24796,6 +24825,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     btnDaily.style.display = (kind === 'title' && !dailyInvited) ? 'block' : 'none';
     const lrc = $('lastRunCard'); if (lrc && kind === 'title') lrc.innerHTML = lastRunCardHtml(lastRun);   // —— v0.6.22 最近一局卡片 ——
     updateDailyHeroTip();   // —— v0.3.19 每日挑战「今日英雄」推荐提示(随 btnDaily 显隐) ——
+    updateTodayChip();   // —— v1.2.71 今日战绩条 ——
     // v0.2.3 限时冲分入口：仅标题页且非 ?time= 直达时显示
     if (btnTimed) btnTimed.style.display = (kind === 'title' && !timedInvited) ? 'block' : 'none';
     // —— v0.2.6 无尽模式入口：仅标题页显示 ——
@@ -25145,8 +25175,11 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   let shopTab = 'bonus';
   // —— v1.2.39 宠物币兑金币 ——
   function petToCoin(n) { n = Math.max(1, Math.floor(Number(n)) || 0); if (petCoins < n) return 0; addPetCoin(-n); return addGold(n * 120); }
+  function coinToPet(n) { n = Math.max(1, Math.floor(Number(n)) || 0); const cost = n * 300; if (coins < cost) return 0; coins -= cost; saveCoins(); addPetCoin(n); updateCoinHud(); return n; }   // —— v1.2.64 金币兑宠物币 ——
   let xchgBound = false;
-  function bindXchgBtn() { const b = $('xchgBtn'); if (!b || xchgBound) return; xchgBound = true; b.addEventListener('click', () => { const got = petToCoin(1); showToast(got > 0 ? '兑换成功 +' + got + '🪙' : '宠物币不足'); renderShop(); }); }
+  function bindXchgBtn() { const b = $('xchgBtn'); if (!b || xchgBound) return; xchgBound = true; b.addEventListener('click', () => { const got = petToCoin(1); showToast(got > 0 ? '兑换成功 +' + got + '🪙' : '宠物币不足'); renderShop(); });
+    const b2 = $('xchgBtn2'); if (b2) b2.addEventListener('click', () => { const got = coinToPet(1); showToast(got > 0 ? '兑换成功 +1🐾' : '金币不足 · 需 300🪙'); renderShop(); });   // —— v1.2.64 ——
+  }
   function openShop() { shopBox.classList.add('show'); renderShop(); }
   function closeShop() { shopBox.classList.remove('show'); }
   // —— v1.2.40 商店数字键速购 ——
@@ -25162,17 +25195,18 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (shopTab === 'bonus') {
       // 基地升级卡（护墙阵法随等级变化）
       shopBody.appendChild(baseCardEl());
+      const recId = bonusRecommendId();   // —— v1.2.62 ——
       for (const def of BONUS_DEF) {
         const lv = bonus[def.id] || 0;
         const maxed = lv >= def.max;
-        const price = maxed ? 0 : dealApply('强化', def.price[lv]);   // —— v1.1.235 显示价=实扣价 ——
+        const price = maxed ? 0 : dealApply('强化', dealPriceFor(def.id, def.price[lv]));   // —— v1.1.235 显示价=实扣价 · v1.2.63 ——
         const item = document.createElement('div');
         item.className = 'shopItem'; item.dataset.bid = def.id;   // —— v1.2.45 ——
         item.innerHTML = v5ShopIconHtml(def.icon) +
-          '<span class="siName">' + def.name + '</span>' +
+          '<span class="siName">' + def.name + (def.id === recId ? ' <b class="recBadge">荐</b>' : '') + '</span>' +   // —— v1.2.62 ——
           '<span class="siDesc">' + def.desc + '</span>' +
           '<span class="siEff">' + shopEffLine(def, lv) + '</span>' +
-          '<span class="siMeta">' + shopMetaText(maxed, lv, def.max, price) + '</span>' +
+          '<span class="siMeta">' + shopMetaText(maxed, lv, def.max, price) + (dealOn(def.id) ? ' <b class="ddealTag">6折·限1次</b>' : '') + '</span>' +   // —— v1.2.63 ——
           '<button class="siBtn' + (maxed ? ' owned disabled' : '') + '">' + shopBtnLabel(maxed, price) + '</button>';
         const btn = item.querySelector('.siBtn');
         if (!maxed) btn.onclick = () => buyBonus(def.id);
@@ -25188,7 +25222,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       // —— v0.3.3 僚机皮肤：购买 / 装备 ——
       renderWingmanSkins();
     } else {
-      for (const id of SKIN_LIST) {
+      for (const id of favSortSkins(SKIN_LIST)) {   // —— v1.2.67 收藏置顶 ——
         const sk = SKINS[id];
         const owned = ownedSkins.includes(id);
         const equipped = equippedSkin === id;
@@ -25197,7 +25231,8 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
         item.className = v5RarClass(rar, equipped);
         const rarBadge = v5RarBadge(rar);
         const desc = sk.fish ? '🐟 限定版 · 专属肥鱼造型' : (sk.fx ? fxDesc(sk.fx) : '玩家坦克外观配色');
-        item.innerHTML = v5SkinPrevHtml() +
+        item.innerHTML = '<button class="favStar' + (favSkins.includes(id) ? ' on' : '') + '" data-fav="' + id + '" title="收藏">★</button>' +
+          v5SkinPrevHtml() +   // —— v1.2.67 收藏星标 ——
           v5SkinNameHtml(sk.name, rarBadge) +
           v5SkinDescHtml(desc) +
           '<span class="siMeta">' + v5SkinMeta(owned, equipped, dealApply('皮肤', sk.price)) + '</span>' +
@@ -25209,6 +25244,8 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
           if (equipped) return;
           if (owned) equipSkin(id); else buySkin(id);
         };
+        const fsb = item.querySelector('.favStar');   // —— v1.2.67 ——
+        if (fsb) fsb.onclick = (ev) => { ev.stopPropagation(); favSkinToggle(id); };
         shopBody.appendChild(item);
       }
     }
@@ -25281,6 +25318,27 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const el = document.querySelector('.shopItem[data-bid="' + id + '"]'); if (!el) return;
     el.classList.add('siBuyFlash'); setTimeout(() => el.classList.remove('siBuyFlash'), 450);
   }
+  const LS_DDEAL = 'tank-battle-ddeal';   // —— v1.2.63 每日限购 ——
+    let ddeal = { day: '', id: '', used: false };
+    try { const dd = JSON.parse(saveStore.getItem(LS_DDEAL) || 'null'); if (dd && dd.day) ddeal = dd; } catch (e) { /* 忽略 */ }
+    function dailyDeal() {
+      const tk = String(dayKey());
+      if (ddeal.day !== tk) { ddeal = { day: tk, id: BONUS_DEF[Math.abs(tk | 0) % BONUS_DEF.length].id, used: false }; try { saveStore.setItem(LS_DDEAL, JSON.stringify(ddeal)); } catch (e) { /* 忽略 */ } }
+      return ddeal;
+    }
+    function dealPriceFor(id, raw) { const d = dailyDeal(); return (d.id === id && !d.used) ? Math.max(1, Math.round(raw * 0.6)) : raw; }
+    function dealOn(id) { const d = dailyDeal(); return d.id === id && !d.used; }
+    function dailyDealUse(id) { const d = dailyDeal(); if (d.id === id && !d.used) { ddeal.used = true; try { saveStore.setItem(LS_DDEAL, JSON.stringify(ddeal)); } catch (e) { /* 忽略 */ } } }
+  function bonusRecommendId() {   // —— v1.2.62 强化推荐：等级最低者优先，同级取便宜 ——
+    let best = null, bestKey = null;
+    for (const d of BONUS_DEF) {
+      const lv = bonus[d.id] || 0;
+      if (lv >= d.max) continue;
+      const key = lv * 100000 + d.price[lv];
+      if (bestKey === null || key < bestKey) { bestKey = key; best = d.id; }
+    }
+    return best;
+  }
   function buyBonus(id) {
     const def = BONUS_DEF.find(x => x.id === id);
     if (!def) return;
@@ -25288,9 +25346,10 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (lv >= def.max) return;
     const rawPrice = def.price[lv];
     if (!Number.isFinite(rawPrice)) return;   // —— v1.1.235 坏档防御:异常价格不买不扣 ——
-    const price = dealApply('强化', rawPrice);
+    const price = dealApply('强化', dealPriceFor(def.id, rawPrice));   // —— v1.2.63 每日限购价 ——
     if (coins < price) { showToast(insufficientMsg('🪙 金币', coins, price)); beep(180, 0.12, 'square', 0.05); return; }
     coins -= price; bonus[id] = lv + 1; bonusSpent += price;   // v0.2.9 追踪强化累计投入
+    dailyDealUse(def.id);   // —— v1.2.63 限购额度已用 ——
     saveCoins(); saveBonus(); saveBonusSpent(); renderShop(); updateCoinHud();
     showToast(bonusBuyMsg(def.icon, def.name, coins));
     shopBuyFlash(def.id);   // —— v1.2.45 购买闪光 ——
@@ -26137,6 +26196,22 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     lastPlaySet(tk);
     return false;
   }
+  const LS_TODAY = 'tank-battle-today';   // —— v1.2.71 今日战绩 ——
+  let todayData = { day: '', kills: 0, coins: 0, games: 0 };
+  try { const td = JSON.parse(saveStore.getItem(LS_TODAY) || 'null'); if (td && td.day === String(dayKey())) todayData = td; } catch (e) { /* 忽略 */ }
+  function todayAdd(k, v) {
+    const tk = String(dayKey());
+    if (todayData.day !== tk) todayData = { day: tk, kills: 0, coins: 0, games: 0 };
+    todayData[k] = (todayData[k] || 0) + v;
+    try { saveStore.setItem(LS_TODAY, JSON.stringify(todayData)); } catch (e) { /* 忽略 */ }
+  }
+  function updateTodayChip() {
+    const el = $('todayChip'); if (!el) return;
+    const t = todayData.day === String(dayKey()) ? todayData : { kills: 0, coins: 0, games: 0 };
+    const on = t.kills + t.coins + t.games > 0;
+    el.style.display = on ? 'block' : 'none';
+    if (on) el.innerHTML = '⚔ 今日 · 击杀 <b>' + t.kills + '</b> · 金币 <b>+' + t.coins + '</b> · 局数 <b>' + t.games + '</b>';
+  }
   const signinReward = (day) => SIGNIN_REWARDS[(Math.max(1, day) - 1) % SIGNIN_REWARDS.length];
   const signinNow = () => {
     const tk = String(todayKey());
@@ -26190,13 +26265,16 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       const k = dexData.kills[r.key] || 0;
       const seen = k > 0;
       const col = r.color || '#9aa7b8';
-      html += '<div class="dexRow' + (allSeen ? ' dexDone' : '') + (seen ? '' : ' dexLocked') + '"' + (allSeen ? ' style="border:1px solid rgba(255,215,94,.55);border-radius:8px;"' : '') + '>'
+      html += '<div class="dexRow' + (allSeen ? ' dexDone' : '') + (seen ? '' : ' dexLocked') + '" data-k="' + r.key + '"' + (allSeen ? ' style="border:1px solid rgba(255,215,94,.55);border-radius:8px;"' : '') + '>'
         + '<span class="dexChip" style="background:' + col + '"></span>'
         + '<span class="dexName">' + (seen ? r.label : '？？？') + '</span>'
         + '<span class="dexStat">' + (seen ? ('速 ' + (r.speed || '—') + ' · 血 ' + r.hp + ' · ' + r.score + ' 分') : '尚未遭遇') + '</span>'
-        + '<b class="dexKills">' + (seen ? ('×' + k) : '—') + '</b></div>';
+        + '<b class="dexKills">' + (seen ? ('×' + k) : '—') + '</b>'
+        + (seen ? '<div class="dexDetail">📈 击毁 ' + k + ' 辆 · 占 ' + Math.round(k / (total || 1) * 100) + '% · 色码 ' + col + '</div>' : '')
+        + '</div>';   // —— v1.2.66 图鉴详情 ——
     }
     body.innerHTML = (allSeen ? '<div class="dexDoneBar" style="margin:0 0 8px;padding:6px 10px;border-radius:8px;border:1px solid rgba(255,215,94,.6);background:rgba(255,215,94,.12);color:#ffd75e;text-align:center;">🏅 图鉴集齐 · 已领取 +2🐾 集齐奖励</div>' : '') + html;
+    body.querySelectorAll('.dexRow[data-k]').forEach(el => el.addEventListener('click', () => el.classList.toggle('dexOpen')));   // —— v1.2.66 点击展开详情 ——
   }
   function openDex() { renderDex(); $('dexBox').classList.add('show'); }
   function closeDex() { const el = $('dexBox'); if (el) el.classList.remove('show'); }
@@ -26357,6 +26435,29 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   // —— v1.2.3 每日任务面板 ——
   function openMissions() { renderMissions(); $('missionBox').classList.add('show'); }
   function closeMissions() { const el = $('missionBox'); if (el) el.classList.remove('show'); }
+  const LS_NOVICE = 'tank-battle-novice';   // —— v1.2.65 新手任务 ——
+  let noviceClaimed = [];
+  try { const nv = JSON.parse(saveStore.getItem(LS_NOVICE) || '[]'); if (Array.isArray(nv)) noviceClaimed = nv; } catch (e) { /* 忽略 */ }
+  const NOVICE_DEF = [
+    { id: 'first', icon: '🎮', name: '完成首局游戏',      test: () => career.games >= 1,                              rw: 50 },
+    { id: 'k10',   icon: '💥', name: '累计击毁 10 辆敌军', test: () => career.kills >= 10,                             rw: 80 },
+    { id: 'buy',   icon: '🛒', name: '购买任意强化',      test: () => bonusSpent > 0 || Object.values(bonus).some(v => v > 0), rw: 120 },
+  ];
+  function noviceState() { return NOVICE_DEF.map(d => ({ id: d.id, icon: d.icon, name: d.name, rw: d.rw, done: d.test(), claimed: noviceClaimed.includes(d.id) })); }
+  function noviceClaim(id) {
+    const d = NOVICE_DEF.find(x => x.id === id);
+    if (!d || !d.test() || noviceClaimed.includes(id)) return 0;
+    noviceClaimed.push(id); try { saveStore.setItem(LS_NOVICE, JSON.stringify(noviceClaimed)); } catch (e) { /* 忽略 */ }
+    coins += d.rw; saveCoins(); updateCoinHud(); sfxCoin();
+    return d.rw;
+  }
+  function noviceHtml() {
+    const st = noviceState();
+    if (st.every(x => x.claimed)) return '';
+    return '<div class="nvWrap"><div class="mhistT">🌱 新手启程</div>' + st.map(x =>
+      '<div class="nvRow"><span>' + x.icon + '</span><span class="mhistN">' + x.name + '</span>' +
+      (x.claimed ? '<em>✓</em>' : x.done ? '<button class="nvClaim" data-nv="' + x.id + '">+' + x.rw + '🪙</button>' : '<em>进行中</em>') + '</div>').join('') + '</div>';
+  }
   function wkMiniHtml() {   // —— v1.2.55 周任务迷你进度条 ——
     const w = wmissionsNow().items;
     const dn = w.filter(x => x.done).length;
@@ -26368,6 +26469,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const st = missionsNow();
     $('msnSub').textContent = '每日 0 点刷新 · 跨局累计';
     let html = '<div class="msnTabs"><button class="msnTab on" data-t="daily">📅 每日</button><button class="msnTab" data-t="weekly">🌟 每周</button></div>';
+    html += noviceHtml();   // —— v1.2.65 新手任务 ——
     html += wkMiniHtml();   // —— v1.2.55 ——
     st.items.forEach((m, i) => {
       const d = MISSION_DEFS[m.type] || { icon: '❓' };
@@ -26385,6 +26487,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     html += '<div class="msnHint">' + (missionAllDone() ? '今日任务全部完成 · 明天再来 🌙' : '完成任务后回主菜单领取奖励') + '</div>';
     $('msnBody').innerHTML = html;
     $('msnBody').querySelectorAll('.msnClaim[data-i]').forEach(b => b.addEventListener('click', () => { missionClaim(+b.dataset.i); renderMissions(); missionBadgeUpdate(); }));
+    $('msnBody').querySelectorAll('.nvClaim[data-nv]').forEach(b => b.addEventListener('click', () => { const got = noviceClaim(b.dataset.nv); if (got) showToast('🌱 新手任务 +' + got + '🪙'); renderMissions(); }));   // —— v1.2.65 ——
     const mrr = $('msnReroll');
     if (mrr) mrr.addEventListener('click', () => { const r = missionReroll(); if (!r.ok) showToast(r.why === 'coins' ? '金币不足 · 换一批需要 ' + MISSION_REROLL_COST + '🪙' : '今日已换过 · 明天再来'); renderMissions(); });
     $('msnBody').querySelectorAll('.msnTab').forEach(b => b.addEventListener('click', () => { msnTab = b.dataset.t; renderMissions(); }));   // —— v1.2.10 页签切换 ——
@@ -27156,7 +27259,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.61', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.71', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -29902,6 +30005,25 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       bgmRushWaveNow: () => BGM_RUSH_WAVE,
       // —— v0.2.9 金币经济补全验证钩子（?test=1 暴露） ——
       gachaNow: () => drawGacha(),
+      todayStatsNow: () => ({ ...todayData }), todayAddNow: (k, v) => { todayAdd(k, v); return todayData; },
+      todayResetNow: () => { todayData = { day: String(dayKey()), kills: 0, coins: 0, games: 0 }; try { saveStore.setItem(LS_TODAY, JSON.stringify(todayData)); } catch (e) { /* 忽略 */ } return true; },
+      todayChipNow: () => { updateTodayChip(); const e = $('todayChip'); return e ? { txt: e.textContent, show: e.style.display !== 'none' } : null; },
+      dailyModsForNow: (s) => dailyModsFor(s), tmrModsNow: () => dailyModsFor(dayKey(1)).join('/'),
+      tmrModsDomNow: () => { updateDailyHeroTip(); const e = document.querySelector('#dailyModIcons .tmrMods'); return e ? e.textContent : null; },
+      dmgNumNow: (x, y, v) => { dmgNum(x, y, v); return texts.length; }, setReducedNow: (v) => { reduceMotion = v; return reduced(); },
+      autoBackupNow: () => autoBackup(), backupGetNow: () => backupGet(), backupRestoreNow: (k) => backupRestore(k),
+      favSkinNow: () => favSkins.slice(), favSkinTglNow: (id) => favSkinToggle(id),
+      favSkinSetNow: (id, on) => { const i = favSkins.indexOf(id); if (on && i < 0) favSkins.push(id); if (!on && i >= 0) favSkins.splice(i, 1); try { saveStore.setItem(LS_FAVSKIN, JSON.stringify(favSkins)); } catch (e) { /* 忽略 */ } return favSkins.includes(id); },
+      skinOrderNow: () => { setShopTab('skins'); return [...shopBody.querySelectorAll('.shopItem')].map(it => { const s = it.querySelector('.favStar'); return s ? s.dataset.fav : null; }); },
+      noviceNow: () => noviceState(), noviceClaimNow: (id) => noviceClaim(id),
+      setCareerGamesNow: (v) => { career.games = Math.max(0, v | 0); saveCareer(); return career.games; },
+      noviceResetNow: () => { noviceClaimed = []; try { saveStore.removeItem(LS_NOVICE); } catch (e) { /* 忽略 */ } return true; },
+      coinToPetNow: (n) => coinToPet(n),
+      dailyDealNow: () => { const d = dailyDeal(); return { id: d.id, used: d.used }; },
+      setDailyDealNow: (id, used) => { ddeal = { day: String(dayKey()), id, used: !!used }; saveStore.setItem(LS_DDEAL, JSON.stringify(ddeal)); return ddeal; },
+      buyBonusNow: (id) => buyBonus(id),
+      bonusRecNow: () => bonusRecommendId(), setBonusLvNow: (id, lv) => { bonus[id] = Math.max(0, lv | 0); saveBonus(); return bonus[id]; },
+      recBadgeDomNow: () => { setShopTab('bonus'); const e = shopBody.querySelector('.recBadge'); const it = e && e.closest('.shopItem'); return it ? it.dataset.bid : null; },
       gachaTodayCostNow: () => dealApply('抽奖', gachaTodayCost(GACHA_COST)),
       gachaFullCostNow: () => dealApply('抽奖', GACHA_COST),
       setGachaDayNow: (k) => { gachaDayK = String(k); return gachaDayK; },
