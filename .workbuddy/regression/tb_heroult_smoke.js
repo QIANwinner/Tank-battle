@@ -26672,6 +26672,48 @@ async function main() {
     return (r && r.hidden === true) || JSON.stringify({ r });
   });
 
+
+  // U9357–U9362: 每日幸运开局
+  await senseCheck("U9357 luckyPick 种子确定且在定义内", (T,$) => {
+    const a = T.luckyPickNow(20311224), b = T.luckyPickNow(20311224), c = T.luckyPickNow(20311225);
+    const ids = ['rapid','double','shield','gold'];
+    return (a && b && a.id === b.id && ids.includes(a.id) && c && ids.includes(c.id)) || JSON.stringify({ a, b, c });
+  });
+  await senseCheck("U9358 非法种子容错不炸", (T,$) => {
+    const a = T.luckyPickNow(0), b2 = T.luckyPickNow('x'), c = T.luckyPickNow(-3), d = T.luckyPickNow(NaN);
+    return (a === null && b2 === null && c === null && d === null) || JSON.stringify({ a, b2, c, d });
+  });
+  await senseCheck("U9359 幸运装填真实生效 fx.rapid", (T,$) => {
+    T.startGame(); T.skipIntro(); T.luckyResetNow();
+    const r = T.luckyApplyNow('rapid');
+    const st = T.r65fxNow();
+    T.quit();
+    return (r.granted && r.id === 'rapid' && st && st.rapid > 0) || JSON.stringify({ r, st });
+  });
+  await senseCheck("U9360 幸运护盾提升 spawnInv", (T,$) => {
+    T.startGame(); T.skipIntro(); T.luckyResetNow();
+    const r = T.luckyApplyNow('shield');
+    const inv = T.spawnInvNow();
+    T.quit();
+    return (r.granted && r.id === 'shield' && inv >= 150) || JSON.stringify({ r, inv });
+  });
+  await senseCheck("U9361 幸运金币入账 +40", (T,$) => {
+    T.startGame(); T.skipIntro(); T.luckyResetNow();
+    const c0 = T.coinsNow();
+    const r = T.luckyApplyNow('gold');
+    const d = T.coinsNow() - c0;
+    T.quit();
+    return (r.granted && r.id === 'gold' && d >= 40) || JSON.stringify({ r, d });
+  });
+  await senseCheck("U9362 每日一次不重复发", (T,$) => {
+    T.startGame(); T.skipIntro(); T.luckyResetNow();
+    const r1 = T.luckyApplyNow('gold');
+    const r2 = T.luckyApplyNow('gold');
+    const day = T.luckyStateNow().lastDay > 0;
+    T.quit();
+    return (r1.granted && !r2.granted && day) || JSON.stringify({ r1, r2, day });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
