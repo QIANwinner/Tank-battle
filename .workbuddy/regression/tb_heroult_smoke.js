@@ -25998,6 +25998,53 @@ async function main() {
     return (spent === 0 && T.coinsNow() === c0 && stillLv0) || JSON.stringify({ spent, c0, now: T.coinsNow(), p });
   });
 
+  // U9273–U9278: 强化卡升级收益预览
+  await senseCheck("U9273 bonusEffVal 纯函数:数值/取整/非法", (T,$) => {
+    const a = T.bonusEffValNow('lifeup', 0) === 0 && T.bonusEffValNow('lifeup', 2) === 2;
+    const b = T.bonusEffValNow('coinup', 2) === 30 && T.bonusEffValNow('cd', 3) === 15;
+    const c = T.bonusEffValNow('nope', 5) === 0 && T.bonusEffValNow('cd', 'a') === 0 && T.bonusEffValNow('cd', -1) === 0 && T.bonusEffValNow('cd', 1.9) === 5;
+    return (a && b && c) || JSON.stringify({ a, b, c });
+  });
+  await senseCheck("U9274 bonusEffText 文案与非法 id", (T,$) => {
+    const ok = T.bonusEffTextNow('cd', 2) === '射速 +10%' && T.bonusEffTextNow('revive', 1) === '复活成本 -15%' && T.bonusEffTextNow('pierce', 2) === '穿透 +2 个' && T.bonusEffTextNow('x', 1) === '';
+    return ok || JSON.stringify({ a: T.bonusEffTextNow('cd', 2), b: T.bonusEffTextNow('revive', 1), c: T.bonusEffTextNow('pierce', 2) });
+  });
+  await senseCheck("U9275 shopEffLine 正常/满级/非法", (T,$) => {
+    const def = { id: 'cd', max: 3 };
+    const a = T.shopEffLineNow(def, 0) === '射速 +0% → 射速 +5%';
+    const b = T.shopEffLineNow(def, 3) === '满级效果 · 射速 +15%';
+    const c = T.shopEffLineNow(def, -1) === '' && T.shopEffLineNow(def, 'x') === '' && T.shopEffLineNow(null, 1) === '' && T.shopEffLineNow({ id: 'nope', max: 3 }, 1) === '';
+    return (a && b && c) || JSON.stringify({ a, b, c, x: T.shopEffLineNow(def, 0) });
+  });
+  await senseCheck("U9276 商店卡片渲染 siEff 行且数量齐全", (T,$) => {
+    T.setBonus({}); T.setShopTab('bonus'); document.getElementById("btnShop").click();
+    const effs = [...document.querySelectorAll('#shopBody .shopItem .siEff')];
+    const n = effs.length;
+    const first = effs[0] && effs[0].textContent;
+    document.getElementById('shopBox').classList.remove('show');
+    return (n === 11 && first === '生命 +0 → 生命 +1') || JSON.stringify({ n, first });
+  });
+  await senseCheck("U9277 购买后预览实时更新", (T,$) => {
+    T.setBonus({}); T.setCoins(9999); T.setShopTab('bonus'); document.getElementById("btnShop").click();
+    const effTxt = () => [...document.querySelectorAll('#shopBody .shopItem .siEff')].map(e => e.textContent);
+    const before = effTxt();
+    T.buyBonusNow('cd');
+    const after = effTxt();
+    document.getElementById('shopBox').classList.remove('show');
+    const idx = before.findIndex(t => t.startsWith('射速'));
+    const ok = idx >= 0 && before[idx] === '射速 +0% → 射速 +5%' && after[idx] === '射速 +5% → 射速 +10%';
+    return ok || JSON.stringify({ idx, b: before[idx], a: after[idx] });
+  });
+  await senseCheck("U9278 预览数值与函数一致(DOM=纯函数)", (T,$) => {
+    T.setBonus({ cd: 2, lifeup: 1 }); T.setShopTab('bonus'); document.getElementById("btnShop").click();
+    const effs = [...document.querySelectorAll('#shopBody .shopItem .siEff')].map(e => e.textContent);
+    document.getElementById('shopBox').classList.remove('show');
+    const cd = effs.find(t => t.startsWith('射速'));
+    const life = effs.find(t => t.startsWith('生命'));
+    const ok = cd === '射速 +10% → 射速 +15%' && life === '生命 +1 → 生命 +2';
+    return ok || JSON.stringify({ cd, life });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
