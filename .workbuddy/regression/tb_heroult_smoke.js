@@ -27464,6 +27464,30 @@ async function main() {
     return (pe === 'none') || JSON.stringify({ pe });
   });
 
+  // U9437–U9439: 缓速场道具
+  await senseCheck("U9437 缓速进入道具池且初始 fx.slow=0", async (T,$) => {
+    const list = T.powerupTypesNow();
+    const bs = T.buffStateNow();
+    return (list.includes('slow') && (bs.slow || 0) === 0) || JSON.stringify({ slow: list.includes('slow'), bs });
+  });
+  await senseCheck("U9438 拾取缓速置 fx.slow=6，setBuffNow 可清，文案正确", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.applyPowerupNow('slow');
+    const s1 = T.buffStateNow().slow;
+    const txt = T.buffEndTextNow('slow');
+    T.setBuffNow('slow', 0);
+    const s2 = T.buffStateNow().slow;
+    T.quit();
+    return (s1 === 6 && s2 === 0 && txt === '缓速结束') || JSON.stringify({ s1, s2, txt });
+  });
+  await senseCheck("U9439 setBuffNow 注入缓速可读回", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setBuffNow('slow', 5);
+    const v = T.buffStateNow().slow;
+    T.setBuffNow('slow', 0); T.quit();
+    return (v === 5) || JSON.stringify({ v });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
