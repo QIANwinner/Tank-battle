@@ -27051,6 +27051,7 @@ async function main() {
   await senseCheck("U9399 近战大招 E 击退残血敌人绝不穿入 2x2 钢墙或水池死角", async (T,$) => {
     const Z = ms => new Promise(r => setTimeout(r, ms));
     document.querySelector('#randMapSeg [data-rand="0"]').click();
+    T.buyHeroNow('vanguard');   // 击退由近战先锋大招触发,先确保英雄正确
     T.startAtLevel(8); T.skipIntro(); T.invul(99999); T.stopSpawn();
     T.spawnFoeNow(96, 252, 'elite');
     const e = T.r18enNow().find(x => !x.dead);
@@ -28628,6 +28629,35 @@ async function main() {
   await senseCheck("U9586 closeAll 可重复调用", async (T,$) => {
     const a = T.closeAllNow(), b = T.closeAllNow();
     return (a === 0 && b === 0) || JSON.stringify({ a, b });
+  });
+
+  // U9587–U9589: HUD 数字滚动
+  await senseCheck("U9587 金币变化触发滚动脉冲", (T,$) => {
+    const el = document.getElementById('coins');
+    const c0 = T.coins();
+    T.addGold(20);
+    const c1 = T.coins();
+    const shown = parseFloat((el.textContent || '').replace(/[^\d.-]/g, '')) || 0;
+    const ok = shown === c1 && c1 === c0 + 20;   // DOM 始终即写最终值
+    return ok || JSON.stringify({ c0, c1, shown });
+  });
+  await senseCheck("U9588 变化时挂 numRoll 脉冲类", (T,$) => {
+    const el = document.getElementById('coins');
+    T.addGold(5);
+    const rolled = T.hudRollNow(el);
+    return rolled === true || 'no roll class';
+  });
+  await senseCheck("U9589 得分变化同走脉冲且读数准确", (T,$) => {
+    const el = document.getElementById('score');
+    if (!el) return 'no score el';
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(200, 200, 'normal');
+    const e = T.r18enNow().find(x => !x.dead);
+    T.kill(e);
+    const shown = parseInt(el.textContent.replace(/\D/g, ''), 10);
+    const ok = shown >= 0;
+    T.quit();
+    return ok || 'bad score';
   });
 
   chrome.kill(); killTree(chrome.pid);

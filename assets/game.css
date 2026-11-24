@@ -8460,3 +8460,10 @@ html.compact-hud #hud .m-hide { display:none !important; }
 .tmrMods{margin-top:3px;font-size:10px;color:#8fa3ba;opacity:.85;}
 /* —— v1.2.74 弹层滚动穿透修复 —— */
 .msnBody,.achBody,.carBody,#dexBody,#signinBody,#shopBody{overscroll-behavior:contain;}
+
+.numRoll { animation: numRoll .32s ease-out; }
+@keyframes numRoll {
+  0%   { transform: translateY(0); opacity: 1; }
+  35%  { transform: translateY(-5px); opacity: 0.55; }
+  100% { transform: translateY(0); opacity: 1; }
+}
