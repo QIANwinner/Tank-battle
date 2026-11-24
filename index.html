@@ -1869,7 +1869,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.74</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.75</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -24921,7 +24921,10 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   }
 
   // ===== 控制 =====
-  function start(mode, startLv) {
+  let startLock = false, startCalls = 0;   // —— v1.2.75 开局防抖 ——
+  function start(mode, startLv, force) {
+    if (startLock && !force) return false;   // —— v1.2.75 350ms 内用户重入忽略，测试钩子可强开 ——
+    startLock = true; startCalls++; setTimeout(() => { startLock = false; }, 350);
     dailyMode = mode === 'daily';
     if (dailyMode) applyDailyHero();   // —— v0.3.18 每日挑战:玩家未选英雄时自动装备今日推荐 ——
     timedMode = mode === 'timed';
@@ -27264,7 +27267,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.74', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.75', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -29915,7 +29918,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       closeAchNow: () => { closeAch(); return !$('achBox').classList.contains('show'); },
       bullets: () => bullets.map(b => ({ dir: b.dir, x: b.x, y: b.y, size: b.size, speed: b.speed, pen: b.pen, bomb: b.bomb, owner: b.owner.isPlayer ? 'p' : 'e' })),
       // —— 局外养成验证 ——
-      startGame: () => { wingmanEnabled = false; return start('normal'); },   // v0.3.2 测试关僚机保确定性
+      startGame: () => { wingmanEnabled = false; return start('normal', 0, true); },   // v0.3.2 测试关僚机保确定性 —— v1.2.75 强开防抖 ——
       livesNow: () => lives,
       setLives: (n) => { lives = Math.max(0, n | 0); lastLives = -1; },
       hudCoins: () => elCoins ? elCoins.textContent : null,
@@ -30010,6 +30013,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       bgmRushWaveNow: () => BGM_RUSH_WAVE,
       // —— v0.2.9 金币经济补全验证钩子（?test=1 暴露） ——
       gachaNow: () => drawGacha(),
+      startCallsNow: () => startCalls, setStartLockNow: (v) => { startLock = !!v; return startLock; },
       overscrollNow: (id) => { const e = document.getElementById(id); return e ? getComputedStyle(e).overscrollBehavior : 'none'; },
       wingPosNow: () => wingman ? { x: wingman.x, y: wingman.y, dead: !!wingman.dead } : null,
       setWingPosNow: (x, y) => { if (wingman) { wingman.x = x; wingman.y = y; } return !!wingman; },
@@ -30131,7 +30135,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       fireOnce: () => { if (!player || player.cooldown > 0) return -1; fire(player); return player.cooldown; },
       playerSpd: () => player ? player.speed : -1,
       // —— v0.2.3 限时冲分 ——
-      startMode: (m) => start(m),
+      startMode: (m) => start(m, 0, true),   // —— v1.2.75 强开防抖 ——
       timedState: () => ({ timedMode, timeLimit, timeLeft, shown: !!(elTimerWrap && elTimerWrap.style.display !== 'none') }),
       // —— v0.2.4 成就系统扩展 / 存档提醒 / 音效 / 皮肤描述 ——
       achHas: (id) => achUnlocked.has(id),
@@ -30319,7 +30323,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
         };
       },
       // —— v0.2.6 无尽/生存模式 ——
-      startEndless: () => { start('endless'); return { endless: endlessMode }; },
+      startEndless: () => { start('endless', 0, true); return { endless: endlessMode }; },
       endlessInfo: () => ({
         endless: endlessMode, level: level, bestWave: bestWave,
         enemyMul: endlessMode ? {
@@ -30385,8 +30389,8 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       multiOpen: () => { if (multiBox) multiBox.classList.add('show'); return !!(multiBox && multiBox.classList.contains('show')); },
       multiClose: () => { if (multiBox) multiBox.classList.remove('show'); return !(multiBox && multiBox.classList.contains('show')); },
       multiOpenNow: () => !!(multiBox && multiBox.classList.contains('show')),
-      startCoop: () => { start('coop'); return { multiMode, p2: !!player2 }; },
-      startVersus: () => { start('versus'); return { multiMode, p2: !!player2 }; },
+      startCoop: () => { start('coop', 0, true); return { multiMode, p2: !!player2 }; },
+      startVersus: () => { start('versus', 0, true); return { multiMode, p2: !!player2 }; },
       multiNow: () => ({ multiMode, lives2, running, gameOver,
         p2: player2 ? { x: player2.x, y: player2.y, dir: player2.dir, dead: player2.dead, spawnInv: player2.spawnInv } : null }),
       setPlayer2: (x, y) => { if (player2) { player2.x = x; player2.y = y; player2.dead = false; } return !!player2; },

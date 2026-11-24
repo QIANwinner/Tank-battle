@@ -28460,6 +28460,31 @@ async function main() {
     return T.overscrollNow('dexBody') === 'contain' || T.overscrollNow('dexBody');
   });
 
+  // U9566–U9568: 开局重入防抖
+  await senseCheck("U9566 双击开局只初始化一次", async (T,$) => {
+    T.quit(); T.setStartLockNow(false);
+    const c0 = T.startCallsNow();
+    document.getElementById('btnPlay').click(); document.getElementById('btnPlay').click();
+    const c1 = T.startCallsNow();
+    T.quit();
+    return (c1 === c0 + 1) || JSON.stringify({ c0, c1 });
+  });
+  await senseCheck("U9567 防抖窗后允许再开", async (T,$) => {
+    T.quit(); T.setStartLockNow(false);
+    const c0 = T.startCallsNow();
+    document.getElementById('btnPlay').click(); T.setStartLockNow(false); document.getElementById('btnPlay').click();
+    const c1 = T.startCallsNow();
+    T.quit();
+    return (c1 === c0 + 2) || JSON.stringify({ c0, c1 });
+  });
+  await senseCheck("U9568 正常开局仍生效", async (T,$) => {
+    T.setStartLockNow(false);
+    T.startGame(); T.skipIntro();
+    const r = T.runningNow ? T.runningNow() : true;
+    T.quit();
+    return r === true || 'not running';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
