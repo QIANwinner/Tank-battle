@@ -27318,6 +27318,27 @@ async function main() {
     return (m && m.life <= 25 && m.life > 20) || JSON.stringify(m);
   });
 
+  // U9423–U9424: 结算彩带（10 枚错峰 / 重复结算不堆积）
+  await senseCheck("U9423 弹出结算生成 10 枚彩带且错峰下落", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.showLvResultNow();
+    const conf = document.querySelectorAll('#lvResult .lvConf');
+    const delays = [...conf].map(c => parseFloat(c.style.animationDelay));
+    const asc = delays.every((d, i) => i === 0 || d >= delays[i - 1]);
+    T.claimLvNow(); T.closeUpgrade(); T.quit();
+    return (conf.length === 10 && asc) || JSON.stringify({ n: conf.length, delays });
+  });
+  await senseCheck("U9424 重复结算彩带重建不堆积（始终 10 枚）", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.showLvResultNow();
+    T.claimLvNow(); await Z(40); T.closeUpgrade();
+    T.showLvResultNow();
+    const n = document.querySelectorAll('#lvResult .lvConf').length;
+    T.claimLvNow(); T.closeUpgrade(); T.quit();
+    return (n === 10) || JSON.stringify({ n });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
