@@ -1594,6 +1594,13 @@
 
       <div class="setRow"><span class="setLabel">🏆 成就</span><span id="nextAchTip"></span></div>
       <div class="setRow"><span class="setLabel">⌨️ 开火键</span><button id="fireKeyBtn">空格 / J（默认）</button></div>
+      <div class="setRow">
+        <span class="setLabel">🌙 夜晚氛围<span class="hint">冷色罩光+暗角</span></span>
+        <div class="seg" id="nightSeg">
+          <button data-night="0">关</button>
+          <button data-night="1">开</button>
+        </div>
+      </div>
       <div class="setRow"><span>📖 新手引导</span><button class="setBtn" id="btnTourReplay">重新查看</button></div>
       <details id="touchBox" class="saveStatBox"><summary>🕹 触屏布局</summary><div id="touchBody"></div></details>
       <label class="fpsToggle"><input type="checkbox" id="compactHud"> 精简战斗信息</label>
@@ -1869,7 +1876,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.81</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.91</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2346,8 +2353,18 @@
   let difficulty = 'normal';          // 'easy' | 'normal' | 'hard'
   // —— v1.2.16 挑战契约：风险换收益（敌 spd/hp ×1.3，金币 ×1.5，得分 ×1.2） ——
   const LS_CONTRACT = 'tank-battle-contract';
+  // —— v1.2.86 夜晚氛围 ——
+  const LS_NIGHT = 'tank-battle-night';
   let contractMode = false;
   try { contractMode = localStorage.getItem(LS_CONTRACT) === '1'; } catch (e) { /* 忽略 */ }
+  let nightFx = false;
+  try { nightFx = localStorage.getItem(LS_NIGHT) === '1'; } catch (e) { /* 忽略 */ }
+  function setNight(on) {
+    nightFx = !!on;
+    try { saveStore.setItem(LS_NIGHT, nightFx ? '1' : '0'); } catch (e) { /* 忽略 */ }
+    applySettingsUI();
+    sfxPickup();
+  }
   function contractMul(m) {
     if (!contractMode || !m) return m;
     return { spd: m.spd * 1.3, hp: m.hp * 1.3, reward: m.reward * 1.5, score: m.score * 1.2 };
@@ -2687,7 +2704,22 @@
   let mapStaticCanvas = document.createElement('canvas');
   let mapStaticCtx = null;
   let mapDirty = true;
-  const animatedTiles = [], treeTiles = [], tankSprites = new Map(), floatTextSprites = new Map();
+  const animatedTiles = [], treeTiles = [], tankSprites = new Map(), floatTextSprites = new Map(), wrecks = [];
+  let muzzleFx = 0;   // —— v1.2.91 炮口焰光计数 ——
+  // —— v1.2.90 星级弹出音计划 ——
+  let starSfxCount = 0;
+  function starSfxPlan(i) { return 90 + i * 170; }
+  function starSfxTick(i) { starSfxCount++; try { beep(680 + i * 200, 0.07, 'sine', 0.05); } catch (e) { /* 音频未就绪 */ } }
+  // —— v1.2.89 残骸焦痕透明度：9s 线性渐隐 ——
+  function wreckAlpha(age) { return age >= 0 && age < 9000 ? 0.42 * (1 - age / 9000) : 0; }
+  // —— v1.2.87 冰冻反光透明度（剩余冻结帧→衰减） ——
+  function frostSheenAlpha(ft) { return Math.max(0.15, Math.min(0.5, 0.15 + ft / 300)); }
+  // —— v1.2.83 履带条纹位相（位移→滚动偏移） ——
+  function treadMarks(acc) { const o = (acc % 6 + 6) % 6, out = []; for (let y = -9 + o; y < 10; y += 6) out.push(y); return out; }
+  // —— v1.2.85 草丛摆动相位（坐标错相正弦） ——
+  function treeSway(x, y) { return reduced() ? 0 : Math.sin((animTime + x * 1.9 + y * 2.7) / 420) * 1.8; }
+  // —— v1.2.84 子弹拖尾长度（速度正比，封顶20px） ——
+  function bulletTrailLen(b) { return Math.min((b.speed || 0) * 3.2, 20); }
   let treeStamp = null, treeScale = 0;
   let player = null;
   let player2 = null;          // v0.2.7 双人同屏 P2
@@ -4204,6 +4236,7 @@
     const pen = isP ? (upgrades.pierce || 0) + (bonus.pierce || 0) + (snipe ? 999 : 0) + (fx.pierce > 0 ? 1 : 0) : 0;   // 穿透弹头：可穿透敌人次数（强化 + 穿甲弹头永久加成 + 英雄狙击大招 + v1.2.23 穿甲弹道具）
     const shoot = (ox, oy, dir) => {
       perfPoolSpawn(ox - 2, oy - 2, bsize, dir, bulletSpeed, tank, pen, (upgrades.bomb || 0) > 0);
+      if (!reduced()) { spawnParticles(ox, oy, '#ffd27a', 3); muzzleFx++; }   // —— v1.2.91 炮口焰光 ——
       if (isP) stat.shots++;
     };
     if (isP && fx.double > 0) {
@@ -5003,7 +5036,7 @@
   // v0.3.43: 大额货币千分位,小额保持原样(兼容既有 HUD 断言)
   function fmtNum(n) { return n >= 10000 ? Number(n).toLocaleString('en-US') : String(n); }
   function updateCoinHud() {
-    if (elCoins) elCoins.textContent = fmtNum(coins);
+    if (elCoins) hudTween(elCoins, coins, fmtNum);   // —— v1.2.82 数字滚动 ——
     const sc = $('shopCoins'); if (sc) sc.textContent = fmtNum(coins);
     const pc = $('shopPetCoins'); if (pc) pc.textContent = fmtNum(petCoins);   // —— v0.3.4 宠物币 ——
     const hpc = $('hudPetCoins'); if (hpc) hpc.textContent = fmtNum(petCoins);  // —— v0.3.44 局内宠物币 ——
@@ -5036,6 +5069,7 @@
     hitStop = reduced() ? 0 : (e.isBoss ? 0.06 : 0.03);   // 击杀定格（减弱动效时关闭；Boss 用慢动作替代长定格）
     vibe(e.isBoss ? [60, 50, 130] : 15);
     spawnParticles(e.x + e.size / 2, e.y + e.size / 2, e.color, e.isBoss ? 48 : 16);
+    wrecks.push({ x: e.x + e.size / 2, y: e.y + e.size / 2, r: e.size * 0.55, t: animTime }); if (wrecks.length > 24) wrecks.shift();   // —— v1.2.89 焦痕 ——
     shake = e.isBoss ? 16 : 6;
     stat.kills++;
     missionBump('kills', 1);   // —— v1.2.2 每日任务 ——
@@ -5463,7 +5497,7 @@
     try {
       // 星级弹出动画（逐个点亮）
       const stars = lvResult.querySelectorAll('.lvStars span');
-      stars.forEach((s, i) => { s.classList.remove('on'); void s.offsetWidth; if (i < lvStarsNow) s.classList.add('on'); });
+      stars.forEach((s, i) => { s.classList.remove('on'); void s.offsetWidth; if (i < lvStarsNow) { s.classList.add('on'); setTimeout(() => starSfxTick(i), starSfxPlan(i)); } });   // —— v1.2.90 星级音 ——
       // —— v1.2.29 数据行错峰点亮 ——
       lvResult.querySelectorAll('.lvRow').forEach((r, i) => {
         r.classList.remove('lvIn');
@@ -5578,7 +5612,7 @@
     wavesTotal = 1;
     wave = 1; waveSpawned = 0; waveGapT = 0;
     enemySpawnTimer = bossLevel ? 40 : 30; spawnBlockT = 0;   // —— v1.2.20 看门狗换关清零 ——
-    bullets = []; enemies = []; recycleParticles(); texts = []; powerups = []; mines = []; coinDrops = [];   // —— v1.2.30 换关清空散币 ——
+    bullets = []; enemies = []; recycleParticles(); texts = []; powerups = []; mines = []; coinDrops = []; wrecks.length = 0;   // —— v1.2.30 换关清空散币 ——
     lasers = [];                 // —— v0.2.5 Boss 多样化：换关清空激光 ——
     baseAlive = true;
     fx = { rapid: 0, double: 0, freeze: 0, pierce: 0, slow: 0 }; baseGuard = 0;
@@ -6128,6 +6162,13 @@
         if (pfPlan.glow && perfGovGlow()) setGlow(bcol, b.owner.isBoss ? 10 : (isSnip ? 9 : 6)); else ctx.shadowBlur = 0;
         ctx.fillStyle = bcol;
       }
+      // —— v1.2.84 子弹拖尾 ——
+      if (!reduced() && b.speed > 0) {
+        const tl = bulletTrailLen(b);
+        const bx = b.x + b.size / 2, by = b.y + b.size / 2;
+        ctx.save(); ctx.globalAlpha = 0.32; ctx.strokeStyle = ctx.fillStyle; ctx.lineWidth = Math.max(1, b.size * 0.45);
+        ctx.beginPath(); ctx.moveTo(bx - DX[b.dir] * tl, by - DY[b.dir] * tl); ctx.lineTo(bx, by); ctx.stroke(); ctx.restore();
+      }
       ctx.fillRect(b.x, b.y, b.size, b.size);
       // —— v0.2.5 高对比：子弹描边 ——
       if (highContrast) { ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 1; ctx.strokeRect(b.x - 0.5, b.y - 0.5, b.size + 1, b.size + 1); }
@@ -6148,6 +6189,14 @@
         // 闪烁隐藏
       } else drawTank(p);
       if (p === player) drawComboArc(p);
+    }
+
+    // —— v1.2.89 残骸焦痕 ——
+    for (let i = wrecks.length - 1; i >= 0; i--) {
+      const w = wrecks[i], wa = wreckAlpha(animTime - w.t);
+      if (wa <= 0) { wrecks.splice(i, 1); continue; }
+      ctx.save(); ctx.globalAlpha = wa; ctx.fillStyle = '#1a1410';
+      ctx.beginPath(); ctx.ellipse(w.x, w.y, w.r, w.r * 0.7, 0.35, 0, Math.PI * 2); ctx.fill(); ctx.restore();
     }
 
     // —— v0.3.2 AI 僚机（无敌闪烁 + 血条） ——
@@ -6190,7 +6239,18 @@
         g.scale(treeScale, treeScale);
         drawTree(0, 0, g);
       }
-      for (const cell of treeTiles) ctx.drawImage(treeStamp, cell.x, cell.y, treeStamp.width / treeScale, treeStamp.height / treeScale);
+      for (const cell of treeTiles) ctx.drawImage(treeStamp, cell.x + treeSway(cell.x, cell.y), cell.y, treeStamp.width / treeScale, treeStamp.height / treeScale);   // —— v1.2.85 摆动 ——
+    }
+    // —— v1.2.86 夜晚氛围：冷色罩光 + 暗角 ——
+    if (nightFx && !reduced()) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(10,18,52,0.20)';
+      ctx.fillRect(0, 0, W, H);
+      const vg = ctx.createRadialGradient(W / 2, H / 2, H * 0.28, W / 2, H / 2, H * 0.62);
+      vg.addColorStop(0, 'rgba(4,8,28,0)');
+      vg.addColorStop(1, 'rgba(4,8,28,0.38)');
+      ctx.fillStyle = vg; ctx.fillRect(0, 0, W, H);
+      ctx.restore();
     }
     drawLastEnemyMark();
     drawFoeHpBars();
@@ -6707,6 +6767,25 @@
       ctx.drawImage(sprite, -width / 2, -width / 2, width, width);
     }
     ctx.restore();
+    // —— v1.2.83 履带动画：位移驱动条纹滚动 ——
+    {
+      const lx = (t.treadX === undefined ? t.x : t.treadX), ly = (t.treadY === undefined ? t.y : t.treadY);
+      const dd = Math.hypot(t.x - lx, t.y - ly);
+      t.treadAcc = (t.treadAcc || 0) + dd; t.treadX = t.x; t.treadY = t.y;
+      if (dd > 0.01 && t.treadAcc > 0 && !reduced()) {
+        ctx.save(); ctx.translate(cx, cy); ctx.rotate(t.dir * Math.PI / 4); ctx.scale(scale, scale);
+        ctx.fillStyle = 'rgba(255,255,255,0.20)';
+        for (const ty of treadMarks(t.treadAcc)) { ctx.fillRect(-10.5, ty - 0.7, 4, 1.4); ctx.fillRect(6.5, ty - 0.7, 4, 1.4); }
+        ctx.restore();
+      }
+    }
+    // —— v1.2.87 冰冻反光 ——
+    if ((t.freezeT || 0) > 0) {
+      ctx.save(); ctx.globalAlpha = frostSheenAlpha(t.freezeT); ctx.strokeStyle = '#cfeeff'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(t.x + s * 0.2, t.y + s * 0.85); ctx.lineTo(t.x + s * 0.8, t.y + s * 0.15); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(t.x + s * 0.05, t.y + s * 0.55); ctx.lineTo(t.x + s * 0.45, t.y + s * 0.1); ctx.stroke();
+      ctx.restore();
+    }
     if (!t.isPlayer && !t.isWingman && !t.isBoss && t.maxHp > 1) {
       const width = t.maxHp * 6 - 2;
       for (let i = 0; i < t.maxHp; i++) {
@@ -23566,10 +23645,18 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     return perfLastFps;
   }
   // updateHud 换检测写入：值未变则不写 DOM（120Hz 屏静态帧零写入）。
+  // —— v1.2.82 HUD 数字滚动：读数变化时 .numRoll 上滚脉冲（DOM 始终写最终值） ——
+  function hudTween(el, target, fmt) {
+    if (!el) return;
+    const nv = fmt(target);
+    if (el.textContent === nv) return;
+    el.textContent = nv;
+    if (!reduced()) { el.classList.remove('numRoll'); void el.offsetWidth; el.classList.add('numRoll'); }
+  }
   function perfHudWrite(score, best, level, enemiesTotal, enemiesSpawned, enemiesLeft) {
     const s = hudNum(score), b = hudNum(best), l = hudLevelText(level);
     const r = remainingText(enemiesTotal, enemiesSpawned, enemiesLeft);
-    if (s !== perfHudCache.s) { perfHudCache.s = s; elScore.textContent = s; }
+    if (s !== perfHudCache.s) { perfHudCache.s = s; hudTween(elScore, score, hudNum); }   // —— v1.2.82 数字滚动 ——
     if (b !== perfHudCache.b) { perfHudCache.b = b; elBest.textContent = b; }
     if (l !== perfHudCache.l) { perfHudCache.l = l; elLevel.textContent = l; }
     const lvPill = elLevel ? elLevel.parentElement : null;
@@ -25773,6 +25860,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
         b.classList.toggle('active', b.dataset.ct === (contractMode ? '1' : '0'));
     }
     const ctrW0 = $('contractWrap'); if (ctrW0) ctrW0.hidden = !contractMode;   // —— v1.2.16 契约徽标 ——
+    const ngtSeg = $('nightSeg'); if (ngtSeg) for (const b of ngtSeg.querySelectorAll('button')) b.classList.toggle('active', b.dataset.night === (nightFx ? '1' : '0'));   // —— v1.2.86 ——
     if (settingsFullBtn) settingsFullBtn.textContent = fullscreenBtnText(isFullscreen());
   }
   function setDifficulty(d) {
@@ -26520,16 +26608,21 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (mrr) mrr.addEventListener('click', () => { const r = missionReroll(); if (!r.ok) showToast(r.why === 'coins' ? '金币不足 · 换一批需要 ' + MISSION_REROLL_COST + '🪙' : '今日已换过 · 明天再来'); renderMissions(); });
     $('msnBody').querySelectorAll('.msnTab').forEach(b => b.addEventListener('click', () => { msnTab = b.dataset.t; renderMissions(); }));   // —— v1.2.10 页签切换 ——
   }
+  const msnPopT = {};   // —— v1.2.88 芯片飞出时间戳 ——
   function missionHudUpdate() {
     const el = $('msnHud'); if (!el) return;
     const on = !!(running && !gameOver);
     el.hidden = !on;
-    if (!on) return;
+    if (!on) { for (const k in msnPopT) delete msnPopT[k]; return; }
     const st = missionsNow();
     let html = '';
     for (const m of st.items) {
       const d = MISSION_DEFS[m.type] || { icon: '❓' };
-      html += '<div class="mhChip' + (m.claimed ? ' claimed' : m.done ? ' done' : '') + '">' + d.icon + ' ' + Math.min(m.prog, m.target) + '/' + m.target + '</div>';
+      const seenKey = 'seen_' + m.type;
+      if (m.done && !msnPopT[seenKey]) { msnPopT[seenKey] = 1; msnPopT[m.type] = animTime; }
+      if (!m.done) msnPopT[seenKey] = 0;
+      const popCls = (msnPopT[m.type] !== undefined && animTime - msnPopT[m.type] < 900) ? ' pop' : '';
+      html += '<div class="mhChip' + (m.claimed ? ' claimed' : m.done ? ' done' : '') + popCls + '">' + d.icon + ' ' + Math.min(m.prog, m.target) + '/' + m.target + '</div>';
     }
     el.innerHTML = html;
   }
@@ -27093,7 +27186,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
 
   // ===== 回到主菜单（暂停时退出） =====
   function quitToMenu() {
-    player = null; bullets = []; enemies = []; recycleParticles(); texts = []; powerups = []; mines = []; coinDrops = [];   // —— v1.2.30 退局清空散币 ——
+    player = null; bullets = []; enemies = []; recycleParticles(); texts = []; powerups = []; mines = []; coinDrops = []; wrecks.length = 0;   // —— v1.2.30 退局清空散币 ——
     ultWaves = []; ultFlash = 0;      // v0.2.7 近战大招特效清理
     score = 0; lives = 3; level = 1; combo = 0; comboTimer = 0; comboWindowMax = 0;
     running = false; paused = false; gameOver = false; won = false;
@@ -27287,7 +27380,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.81', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.91', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -27499,6 +27592,10 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   if (contractSeg) contractSeg.addEventListener('click', (e) => {
     const b = e.target.closest('button'); if (b) setContract(b.dataset.ct === '1');
   });
+  const nightSegEl = $('nightSeg');
+  if (nightSegEl) nightSegEl.addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (b) setNight(b.dataset.night === '1');
+  });   // —— v1.2.86 ——
   // —— v0.3.6 英雄选择接线;v0.3.9 未购点击即走解锁流程 ——
   heroSeg.addEventListener('click', (e) => {
     const b = e.target.closest('button');
@@ -30045,6 +30142,17 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       corruptSaveNow: (k) => { try { localStorage.setItem(k, '{{{corrupt'); return true; } catch (e) { return false; } },
       audioStateNow: () => (typeof audioCtx !== 'undefined' && audioCtx) ? audioCtx.state : 'none',
       startCallsNow: () => startCalls, setStartLockNow: (v) => { startLock = !!v; return startLock; },
+      muzzleFxNow: () => muzzleFx, partsLenNow: () => particles.length,
+      starSfxPlanNow: (i) => starSfxPlan(i), starSfxCountNow: () => starSfxCount,
+      wrecksNow: () => wrecks.length, wreckAlphaNow: (a) => wreckAlpha(a),
+      msnPopMapNow: () => ({ ...msnPopT }),
+      frostSheenAlphaNow: (ft) => frostSheenAlpha(ft),
+      nightFxNow: () => nightFx, setNightFxNow: (v) => { setNight(!!v); return nightFx; },
+      treadMarksNow: (a) => treadMarks(a), treadAccNow: () => player ? (player.treadAcc || 0) : -1,
+      nightFxNow: () => nightFx, setNightFxNow: (v) => { setNight(!!v); return nightFx; },
+      treeSwayNow: (x, y) => treeSway(x, y),
+      bulletTrailLenNow: (b) => bulletTrailLen(b),
+      hudRollNow: (el) => !!(el && el.classList && el.classList.contains('numRoll')),
       overscrollNow: (id) => { const e = document.getElementById(id); return e ? getComputedStyle(e).overscrollBehavior : 'none'; },
       wingPosNow: () => wingman ? { x: wingman.x, y: wingman.y, dead: !!wingman.dead } : null,
       setWingPosNow: (x, y) => { if (wingman) { wingman.x = x; wingman.y = y; } return !!wingman; },

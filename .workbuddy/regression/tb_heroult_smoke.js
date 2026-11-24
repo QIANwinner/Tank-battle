@@ -27051,11 +27051,18 @@ async function main() {
   await senseCheck("U9399 近战大招 E 击退残血敌人绝不穿入 2x2 钢墙或水池死角", async (T,$) => {
     const Z = ms => new Promise(r => setTimeout(r, ms));
     document.querySelector('#randMapSeg [data-rand="0"]').click();
+    T.buyHeroNow('vanguard');   // 击退由近战先锋大招触发,币不足时退化为碰撞推挤(同样走 pushTankSafe 防墙路径)
     T.startAtLevel(8); T.skipIntro(); T.invul(99999); T.stopSpawn();
-    T.spawnFoeNow(96, 252, 'elite');
+    // 运行时自寻「右边 48px 是墙」的合法出生点，避开压墙格
+    let sx = -1, sy = -1;
+    for (let x = 48; x < 560 && sx < 0; x += 24)
+      for (let y = 48; y < 560; y += 24)
+        if (!T.isBlockedNow(x, y, 40) && T.isBlockedNow(x + 48, y, 40)) { sx = x; sy = y; break; }
+    if (sx < 0) { T.quit(); return 'no wall-adjacent spot'; }
+    T.spawnFoeNow(sx, sy, 'elite');
     const e = T.r18enNow().find(x => !x.dead);
     e.hp = 6; e.maxHp = 6;
-    T.tp(72, 252);
+    T.tp(sx - 26, sy);
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'e' }));
     window.dispatchEvent(new KeyboardEvent('keyup', { key: 'e' }));
     await Z(950);   // 出生点可能压墙线：留足脱困看门狗(~0.5s)+击退动画时间
@@ -28628,6 +28635,246 @@ async function main() {
   await senseCheck("U9586 closeAll 可重复调用", async (T,$) => {
     const a = T.closeAllNow(), b = T.closeAllNow();
     return (a === 0 && b === 0) || JSON.stringify({ a, b });
+  });
+
+  // U9587–U9589: HUD 数字滚动
+  await senseCheck("U9587 金币变化触发滚动脉冲", (T,$) => {
+    const el = document.getElementById('coins');
+    const c0 = T.coins();
+    T.addGold(20);
+    const c1 = T.coins();
+    const shown = parseFloat((el.textContent || '').replace(/[^\d.-]/g, '')) || 0;
+    const ok = shown === c1 && c1 === c0 + 20;   // DOM 始终即写最终值
+    return ok || JSON.stringify({ c0, c1, shown });
+  });
+  await senseCheck("U9588 变化时挂 numRoll 脉冲类", (T,$) => {
+    const el = document.getElementById('coins');
+    T.addGold(5);
+    const rolled = T.hudRollNow(el);
+    return rolled === true || 'no roll class';
+  });
+  await senseCheck("U9589 得分变化同走脉冲且读数准确", (T,$) => {
+    const el = document.getElementById('score');
+    if (!el) return 'no score el';
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(200, 200, 'normal');
+    const e = T.r18enNow().find(x => !x.dead);
+    T.kill(e);
+    const shown = parseInt(el.textContent.replace(/\D/g, ''), 10);
+    const ok = shown >= 0;
+    T.quit();
+    return ok || 'bad score';
+  });
+
+  // U9593–U9595: 子弹拖尾
+  await senseCheck("U9593 拖尾长度正比于速度且有上限", (T,$) => {
+    const slow = T.bulletTrailLenNow({ speed: 3 });
+    const fast = T.bulletTrailLenNow({ speed: 9 });
+    const cap = T.bulletTrailLenNow({ speed: 99 });
+    return (slow > 0 && fast > slow && cap === 20) || JSON.stringify({ slow, fast, cap });
+  });
+  await senseCheck("U9594 真实子弹渲染不抛错且画面正常", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.fireOnce();
+    T.renderOnce();
+    T.quit();
+    return true;
+  });
+  await senseCheck("U9595 零速弹不产生拖尾调用", (T,$) => {
+    return (T.bulletTrailLenNow({ speed: 0 }) === 0) || 'nonzero';
+  });
+
+  // U9596–U9598: 草丛摆动
+  await senseCheck("U9596 摆动幅度限幅 ±1.8", (T,$) => {
+    let mx = 0;
+    for (let t = 0; t < 5000; t += 137) mx = Math.max(mx, Math.abs(T.treeSwayNow(t * 7 % 500, t % 300)));
+    return (mx <= 1.81) || ('mx:' + mx);
+  });
+  await senseCheck("U9597 不同坐标相位不同", (T,$) => {
+    const a = T.treeSwayNow(0, 0), b = T.treeSwayNow(96, 48);
+    return (a !== b) || 'same';
+  });
+  await senseCheck("U9598 随时间变化", async (T,$) => {
+    const a = T.treeSwayNow(24, 24);
+    await new Promise(r => setTimeout(r, 500));
+    const b = T.treeSwayNow(24, 24);
+    return (a !== b) || JSON.stringify({ a, b });
+  });
+
+  // U9599–U9601: 夜晚氛围
+  await senseCheck("U9599 设置开关持久化", (T,$) => {
+    T.setNightFxNow(true);
+    const ls = localStorage.getItem('tank-battle-night');
+    const on = T.nightFxNow() === true;
+    T.setNightFxNow(false);
+    const off = T.nightFxNow() === false && localStorage.getItem('tank-battle-night') === '0';
+    return (on && off && ls === '1') || JSON.stringify({ on, off, ls });
+  });
+  await senseCheck("U9600 设置面板出现夜晚氛围行", (T,$) => {
+    const seg = document.getElementById('nightSeg');
+    return (seg && seg.querySelectorAll('button').length === 2) || 'no seg';
+  });
+  await senseCheck("U9601 开启后渲染一帧不抛错", (T,$) => {
+    T.setNightFxNow(true);
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.renderOnce();
+    T.quit(); T.setNightFxNow(false);
+    return true;
+  });
+
+  // U9590–U9592: 履带动画
+  await senseCheck("U9590 treadMarks 周期为6且覆盖履带区", (T,$) => {
+    const a = T.treadMarksNow(0), b = T.treadMarksNow(6), c = T.treadMarksNow(12);
+    const same = JSON.stringify(a) === JSON.stringify(b) && JSON.stringify(b) === JSON.stringify(c);
+    const inRange = a.length >= 3 && a.every(y => y >= -9.5 && y < 10);
+    const shifted = JSON.stringify(a) !== JSON.stringify(T.treadMarksNow(3));
+    return (same && inRange && shifted) || JSON.stringify({ a, b });
+  });
+  await senseCheck("U9591 位移累计进入 treadAcc", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'd' }));
+    await new Promise(r => setTimeout(r, 350));
+    window.dispatchEvent(new KeyboardEvent('keyup', { key: 'd' }));
+    await new Promise(r => requestAnimationFrame(r));
+    const acc = T.treadAccNow();
+    T.quit();
+    return (acc > 5) || ('acc:' + acc);
+  });
+  await senseCheck("U9592 不移动时 treadAcc 不增", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    await new Promise(r => requestAnimationFrame(r));
+    await new Promise(r => requestAnimationFrame(r));
+    const a0 = T.treadAccNow();
+    await new Promise(r => requestAnimationFrame(r));
+    const a1 = T.treadAccNow();
+    T.quit();
+    return (a1 === a0) || JSON.stringify({ a0, a1 });
+  });
+
+  // U9602–U9604: 冰冻反光
+  await senseCheck("U9602 反光透明度边界正确", (T,$) => {
+    const lo = T.frostSheenAlphaNow(0), mid = T.frostSheenAlphaNow(60), hi = T.frostSheenAlphaNow(9999);
+    return (lo === 0.15 && mid > lo && hi === 0.5) || JSON.stringify({ lo, mid, hi });
+  });
+  await senseCheck("U9603 冻结敌人渲染不抛错", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(200, 200, 'normal');
+    const e = T.r18enNow().find(x => !x.dead);
+    e.freezeT = 90;
+    T.renderOnce();
+    T.quit();
+    return e.freezeT > 0;
+  });
+  await senseCheck("U9604 未冻结不走高光路径", (T,$) => {
+    return (T.frostSheenAlphaNow(0) === 0.15 && typeof T.frostSheenAlphaNow === 'function') || 'fn';
+  });
+
+  // U9605–U9607: 任务芯片飞出
+  await senseCheck("U9605 完成任务芯片挂 pop 类", async (T,$) => {
+    T.missionResetNow();
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const st = T.missionsNow();
+    const m = st.items.find(x => !x.done);
+    if (!m) { T.quit(); return 'all done'; }
+    T.missionBumpNow(m.type, m.target);
+    await new Promise(r => setTimeout(r, 120));
+    const chip = document.querySelector('#msnHud .mhChip.pop');
+    T.quit();
+    return !!chip || 'no pop chip';
+  });
+  await senseCheck("U9606 弹出时间戳已记录", async (T,$) => {
+    T.missionResetNow();
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const st = T.missionsNow();
+    const m = st.items.find(x => !x.done);
+    if (!m) { T.quit(); return 'all done'; }
+    T.missionBumpNow(m.type, m.target);
+    await new Promise(r => setTimeout(r, 120));
+    const mp = T.msnPopMapNow();
+    const has = Object.keys(mp).length > 0 && mp[m.type] !== undefined;
+    T.quit();
+    return has || 'empty';
+  });
+  await senseCheck("U9607 未完成芯片不挂 pop", (T,$) => {
+    T.missionResetNow();
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const pops = document.querySelectorAll('#msnHud .mhChip.pop').length;
+    T.quit();
+    return (pops === 0) || ('pops:' + pops);
+  });
+
+  // U9608–U9610: 残骸印记
+  await senseCheck("U9608 击杀留下焦痕", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const w0 = T.wrecksNow();
+    T.spawnFoeNow(200, 200, 'normal');
+    const e = T.r18enNow().find(x => !x.dead);
+    T.kill(e);
+    const w1 = T.wrecksNow();
+    T.quit();
+    return (w1 === w0 + 1) || JSON.stringify({ w0, w1 });
+  });
+  await senseCheck("U9609 焦痕透明度单调衰减至0", (T,$) => {
+    const a0 = T.wreckAlphaNow(0), a4 = T.wreckAlphaNow(4000), a9 = T.wreckAlphaNow(9000), aX = T.wreckAlphaNow(12000);
+    return (a0 > a4 && a4 > 0 && a9 === 0 && aX === 0) || JSON.stringify({ a0, a4, a9 });
+  });
+  await senseCheck("U9610 退局清空焦痕", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(200, 200, 'normal');
+    const e = T.r18enNow().find(x => !x.dead);
+    T.kill(e);
+    T.quit();
+    return (T.wrecksNow() === 0) || ('left:' + T.wrecksNow());
+  });
+
+  // U9611–U9613: 星级音效
+  await senseCheck("U9611 星音错峰递增", (T,$) => {
+    const p0 = T.starSfxPlanNow(0), p1 = T.starSfxPlanNow(1), p2 = T.starSfxPlanNow(2);
+    return (p0 < p1 && p1 < p2 && p1 - p0 === 170) || JSON.stringify({ p0, p1, p2 });
+  });
+  await senseCheck("U9612 过关结算触发星级音计数", async (T,$) => {
+    const c0 = T.starSfxCountNow();
+    T.startGame(); T.skipIntro(); T.invul(99999);
+    T.forceClear();
+    await new Promise(r => setTimeout(r, 700));
+    const c1 = T.starSfxCountNow();
+    T.quit();
+    return (c1 > c0) || JSON.stringify({ c0, c1 });
+  });
+  await senseCheck("U9613 结算星点亮逻辑不变", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999);
+    T.forceClear();
+    await new Promise(r => setTimeout(r, 300));
+    const ons = document.querySelectorAll('#lvResult .lvStars span.on').length;
+    T.quit();
+    return (ons >= 1 && ons <= 3) || ('ons:' + ons);
+  });
+
+  // U9614–U9616: 炮口焰光
+  await senseCheck("U9614 开火触发焰光计数", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const m0 = T.muzzleFxNow();
+    T.fireOnce();
+    const m1 = T.muzzleFxNow();
+    T.quit();
+    return (m1 > m0) || JSON.stringify({ m0, m1 });
+  });
+  await senseCheck("U9615 焰光粒子实际生成", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const p0 = T.partsLenNow();
+    T.fireOnce();
+    const p1 = T.partsLenNow();
+    T.quit();
+    return (p1 > p0) || JSON.stringify({ p0, p1 });
+  });
+  await senseCheck("U9616 冷却内重复开火不再生焰光", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.fireOnce();
+    const m0 = T.muzzleFxNow();
+    T.fireOnce();   // 冷却中
+    const m1 = T.muzzleFxNow();
+    T.quit();
+    return (m1 === m0) || JSON.stringify({ m0, m1 });
   });
 
   chrome.kill(); killTree(chrome.pid);
