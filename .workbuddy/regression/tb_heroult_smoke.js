@@ -28045,6 +28045,25 @@ async function main() {
     return ok || ('t:' + (sp && sp.textContent));
   });
 
+  // U9509–U9511: 生涯花费统计
+  await senseCheck("U9509 生涯面板含累计投入行", async (T,$) => {
+    const html = T.openCareerNow();
+    document.getElementById('careerBox').classList.remove('show');
+    return html.indexOf('累计投入') >= 0 || 'missing';
+  });
+  await senseCheck("U9510 投入数值随 bonusSpent 渲染", async (T,$) => {
+    T.setBonusSpentNow(12345);
+    const html = T.openCareerNow();
+    document.getElementById('careerBox').classList.remove('show');
+    return html.indexOf('>12345<') >= 0 || 'no12345';
+  });
+  await senseCheck("U9511 钩子读写 bonusSpent 一致", async (T,$) => {
+    T.setBonusSpentNow(77);
+    const ok = T.bonusSpentNow() === 77;
+    T.setBonusSpentNow(0);
+    return ok || 'v:' + T.bonusSpentNow();
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
