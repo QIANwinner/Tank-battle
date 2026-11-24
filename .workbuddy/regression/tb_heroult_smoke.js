@@ -28449,6 +28449,17 @@ async function main() {
     return r === null || JSON.stringify(r);
   });
 
+  // U9563–U9565: 弹层滚动穿透
+  await senseCheck("U9563 任务面板 overscroll=contain", async (T,$) => {
+    return T.overscrollNow('msnBody') === 'contain' || T.overscrollNow('msnBody');
+  });
+  await senseCheck("U9564 成就面板 overscroll=contain", async (T,$) => {
+    return T.overscrollNow('achBody') === 'contain' || T.overscrollNow('achBody');
+  });
+  await senseCheck("U9565 图鉴面板 overscroll=contain", async (T,$) => {
+    return T.overscrollNow('dexBody') === 'contain' || T.overscrollNow('dexBody');
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
