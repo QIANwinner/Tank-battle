@@ -27237,6 +27237,51 @@ async function main() {
     return (lp === tk) || JSON.stringify({ lp, tk });
   });
 
+  // U9416–U9419: 敌人图鉴（面板开合 / 击杀跨局计数 / 未遭遇锁定 / panelOpen 拦截）
+  await senseCheck("U9416 图鉴面板打开渲染 8 行（7 兵种 + Boss）且未遭遇显示？？？", (T,$) => {
+    T.dexResetNow();
+    const shown = T.openDexNow();
+    const rows = document.querySelectorAll('#dexBody .dexRow').length;
+    const locked = document.querySelectorAll('#dexBody .dexLocked').length;
+    const bossRow = document.querySelectorAll('#dexBody .dexRow')[7];
+    T.closeDexNow();
+    return !!(shown && rows === 8 && locked === 8 && bossRow) || JSON.stringify({ shown, rows, locked });
+  });
+  await senseCheck("U9417 击毁敌人计入图鉴：击杀 normal 后 dex.kills.normal ≥1 并解锁行", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.dexResetNow();
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(312, 100, 'normal');
+    await Z(60);
+    T.kill(); await Z(60);
+    const k = (T.dexNow().kills || {}).normal || 0;
+    T.quit();
+    T.openDexNow();
+    const unlocked = document.querySelectorAll('#dexBody .dexRow:not(.dexLocked)').length;
+    T.closeDexNow();
+    return (k >= 1 && unlocked >= 1) || JSON.stringify({ k, unlocked });
+  });
+  await senseCheck("U9418 图鉴打开时 panelOpen 为真，战斗快捷键被拦截", (T,$) => {
+    T.openDexNow();
+    const po = T.panelOpenNow();
+    T.closeDexNow();
+    const po2 = T.panelOpenNow();
+    return (po === true && po2 === false) || JSON.stringify({ po, po2 });
+  });
+  await senseCheck("U9419 Esc 可关图鉴；开局时残留图鉴被自动清出", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.openDexNow();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    await Z(40);
+    const closed1 = !$('dexBox').classList.contains('show');
+    T.openDexNow();
+    T.startGame();
+    await Z(40);
+    const closed2 = !$('dexBox').classList.contains('show');
+    T.quit();
+    return (closed1 && closed2) || JSON.stringify({ closed1, closed2 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
