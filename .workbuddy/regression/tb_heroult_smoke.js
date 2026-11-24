@@ -27707,6 +27707,32 @@ async function main() {
     return (!bar && done === 0) || JSON.stringify({ bar: !!bar, done });
   });
 
+  // U9467–U9469: 基地护垒道具
+  await senseCheck("U9467 护垒进入道具池且初始 baseGuard=0", async (T,$) => {
+    const list = T.powerupTypesNow();
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const g = T.baseGuardNow();
+    T.quit();
+    return (list.includes('guard') && g === 0) || JSON.stringify({ has: list.includes('guard'), g });
+  });
+  await senseCheck("U9468 护垒期间基地墙砖不可摧", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setBaseGuardNow(8);
+    const p = T.baseWallPxNow(), w0 = T.baseWallsNow();
+    const hit = T.damageTileNow(p.x, p.y);
+    const w1 = T.baseWallsNow();
+    T.quit();
+    return (hit === true && w1 === w0 && w0 > 0) || JSON.stringify({ hit, w0, w1 });
+  });
+  await senseCheck("U9469 无护垒时同一墙砖可摧", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const p = T.baseWallPxNow(), w0 = T.baseWallsNow();
+    const hit = T.damageTileNow(p.x, p.y);
+    const w1 = T.baseWallsNow();
+    T.quit();
+    return (hit === true && w1 === w0 - 1) || JSON.stringify({ hit, w0, w1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
