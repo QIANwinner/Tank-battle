@@ -1868,7 +1868,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.67</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.68</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2897,6 +2897,17 @@
     if (Array.isArray(bd)) board = bd.slice(0, 10);
   } catch (e) { /* 忽略 */ }
   function saveCareer() { try { saveStore.setItem(LS_CAREER, JSON.stringify(career)); } catch (e) { /* 忽略 */ } }
+  const LS_BACKUP = 'tank-battle-backup';   // —— v1.2.68 自动备份 ——
+  function autoBackup() {
+    try {
+      const snap = { day: String(dayKey()), d: {} };
+      for (const k of [LS_COINS, LS_CAREER, LS_MISSIONS, LS_BONUSSPENT]) { const v = saveStore.getItem(k); if (v != null) snap.d[k] = v; }
+      saveStore.setItem(LS_BACKUP, JSON.stringify(snap));
+      return true;
+    } catch (e) { return false; }
+  }
+  function backupGet() { try { return JSON.parse(saveStore.getItem(LS_BACKUP) || 'null'); } catch (e) { return null; } }
+  function backupRestore(k) { const b = backupGet(); if (!b || !b.d || b.d[k] == null) return false; try { saveStore.setItem(k, b.d[k]); return true; } catch (e) { return false; } }
   function saveBoard() { try { saveStore.setItem(LS_BOARD, JSON.stringify(board)); } catch (e) { /* 忽略 */ } }
   function boardRank() { return board.findIndex(b => b.uid === career.lastUid); }
   // 一局结束：累计生涯 + 更新各模式最佳 + 写入排行榜（仅在得分>0 时上榜）
@@ -2927,6 +2938,7 @@
     if (endlessMode) career.modeGames.endless++;
     if (difficulty === 'hard') career.modeGames.hard++;
     saveCareer();
+    autoBackup();   // —— v1.2.68 结算即备份 ——
     if (score > 0) {
       // —— v0.2.7 分榜：无尽局记入 endless ——
       const modeTag = endlessMode ? 'endless' : (dailyMode ? 'daily' : (timedMode ? 'timed' : 'normal'));
@@ -27218,7 +27230,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.67', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.68', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -29964,6 +29976,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       bgmRushWaveNow: () => BGM_RUSH_WAVE,
       // —— v0.2.9 金币经济补全验证钩子（?test=1 暴露） ——
       gachaNow: () => drawGacha(),
+      autoBackupNow: () => autoBackup(), backupGetNow: () => backupGet(), backupRestoreNow: (k) => backupRestore(k),
       favSkinNow: () => favSkins.slice(), favSkinTglNow: (id) => favSkinToggle(id),
       favSkinSetNow: (id, on) => { const i = favSkins.indexOf(id); if (on && i < 0) favSkins.push(id); if (!on && i >= 0) favSkins.splice(i, 1); try { saveStore.setItem(LS_FAVSKIN, JSON.stringify(favSkins)); } catch (e) { /* 忽略 */ } return favSkins.includes(id); },
       skinOrderNow: () => { setShopTab('skins'); return [...shopBody.querySelectorAll('.shopItem')].map(it => { const s = it.querySelector('.favStar'); return s ? s.dataset.fav : null; }); },

@@ -28319,6 +28319,26 @@ async function main() {
     return ok || 'no star';
   });
 
+  // U9545–U9547: 自动备份
+  await senseCheck("U9545 备份写入快照", async (T,$) => {
+    const ok = T.autoBackupNow() === true;
+    const b = T.backupGetNow();
+    return (ok && b && b.d && typeof b.day === 'string' && b.day.length === 8) || JSON.stringify(b && b.day);
+  });
+  await senseCheck("U9546 快照含核心键", async (T,$) => {
+    T.autoBackupNow();
+    const b = T.backupGetNow();
+    const keys = b && b.d ? Object.keys(b.d) : [];
+    return keys.length >= 2 || 'keys:' + keys.length;
+  });
+  await senseCheck("U9547 恢复接口可从备份取回", async (T,$) => {
+    T.setCoinsNow(7777); T.autoBackupNow();
+    T.setCoinsNow(1);
+    const r = T.backupRestoreNow('tank-battle-coins');
+    const ok = r === true;
+    return ok || 'restore fail';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
