@@ -28695,6 +28695,27 @@ async function main() {
     return (a !== b) || JSON.stringify({ a, b });
   });
 
+  // U9599–U9601: 夜晚氛围
+  await senseCheck("U9599 设置开关持久化", (T,$) => {
+    T.setNightFxNow(true);
+    const ls = localStorage.getItem('tank-battle-night');
+    const on = T.nightFxNow() === true;
+    T.setNightFxNow(false);
+    const off = T.nightFxNow() === false && localStorage.getItem('tank-battle-night') === '0';
+    return (on && off && ls === '1') || JSON.stringify({ on, off, ls });
+  });
+  await senseCheck("U9600 设置面板出现夜晚氛围行", (T,$) => {
+    const seg = document.getElementById('nightSeg');
+    return (seg && seg.querySelectorAll('button').length === 2) || 'no seg';
+  });
+  await senseCheck("U9601 开启后渲染一帧不抛错", (T,$) => {
+    T.setNightFxNow(true);
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.renderOnce();
+    T.quit(); T.setNightFxNow(false);
+    return true;
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
