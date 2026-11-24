@@ -28821,6 +28821,29 @@ async function main() {
     return (T.wrecksNow() === 0) || ('left:' + T.wrecksNow());
   });
 
+  // U9611–U9613: 星级音效
+  await senseCheck("U9611 星音错峰递增", (T,$) => {
+    const p0 = T.starSfxPlanNow(0), p1 = T.starSfxPlanNow(1), p2 = T.starSfxPlanNow(2);
+    return (p0 < p1 && p1 < p2 && p1 - p0 === 170) || JSON.stringify({ p0, p1, p2 });
+  });
+  await senseCheck("U9612 过关结算触发星级音计数", async (T,$) => {
+    const c0 = T.starSfxCountNow();
+    T.startGame(); T.skipIntro(); T.invul(99999);
+    T.forceClear();
+    await new Promise(r => setTimeout(r, 700));
+    const c1 = T.starSfxCountNow();
+    T.quit();
+    return (c1 > c0) || JSON.stringify({ c0, c1 });
+  });
+  await senseCheck("U9613 结算星点亮逻辑不变", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999);
+    T.forceClear();
+    await new Promise(r => setTimeout(r, 300));
+    const ons = document.querySelectorAll('#lvResult .lvStars span.on').length;
+    T.quit();
+    return (ons >= 1 && ons <= 3) || ('ons:' + ons);
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
