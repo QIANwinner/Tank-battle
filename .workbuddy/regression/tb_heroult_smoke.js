@@ -28939,6 +28939,41 @@ async function main() {
     return ok || JSON.stringify(pp);
   });
 
+  // U9623–U9625: 复仇悬赏
+  await senseCheck("U9623 敌弹命中玩家挂悬赏", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn();
+    T.spawnFoeNow(400, 100, 'normal');
+    for (let i = 0; i < 40 && T.spawnInvNow() > 0; i++) await Z(200);
+    const pp = T.r18posNow();
+    T.spawnBulletNow(pp.px - 40, pp.py - 2, 2, true);
+    await Z(900);
+    const b = (T.r18enNow()[0] || {}).bounty || 0;
+    T.quit();
+    return b === 40 || JSON.stringify({ b });
+  });
+  await senseCheck("U9624 击杀悬赏敌人结算金币", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(400, 100, 'normal');
+    const e = T.r18enNow()[0];
+    e.bounty = 40; e.hp = 1;
+    const c0 = T.coins();
+    T.kill();
+    const c1 = T.coins();
+    T.quit();
+    return c1 - c0 >= 40 || JSON.stringify({ c0, c1 });
+  });
+  await senseCheck("U9625 悬赏结算飘字播报", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(400, 100, 'normal');
+    const e = T.r18enNow()[0];
+    e.bounty = 40; e.hp = 1;
+    T.kill();
+    const has = T.floatTextsNow().some(s => s.indexOf('悬赏') >= 0);
+    T.quit();
+    return has || JSON.stringify(T.floatTextsNow());
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
