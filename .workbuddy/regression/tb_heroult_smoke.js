@@ -28136,6 +28136,25 @@ async function main() {
     return ok || ('t:' + t);
   });
 
+  // U9521–U9523: 抽奖历史
+  await senseCheck("U9521 抽奖写入历史首条", async (T,$) => {
+    T.setCoinsNow(99999);
+    const n0 = T.ghistNow().length;
+    const r = T.gachaNow(), h = T.ghistNow();
+    const ok = !!r && h.length === Math.min(8, n0 + 1) && h[0] === r.label;
+    return ok || JSON.stringify({ r, h0: h[0] });
+  });
+  await senseCheck("U9522 历史环形上限8条最新在前", async (T,$) => {
+    T.setCoinsNow(99999);
+    for (let k = 0; k < 10; k++) T.gachaNow();
+    const h = T.ghistNow();
+    return (h.length === 8) || 'len:' + h.length;
+  });
+  await senseCheck("U9523 历史行数与DOM渲染一致", async (T,$) => {
+    const rows = T.ghistDomNow(), h = T.ghistNow().length;
+    return (rows === h && rows > 0) || JSON.stringify({ rows, h });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

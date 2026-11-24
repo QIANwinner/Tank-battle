@@ -8440,3 +8440,7 @@ html.compact-hud #hud .m-hide { display:none !important; }
 .wkMini i{flex:1;height:5px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden;}
 .wkMini i b{display:block;height:100%;background:linear-gradient(90deg,#ffd45e,#ffb84e);border-radius:3px;transition:width .3s;}
 .dexTop{margin:0 10px 8px;padding:6px 10px;border-radius:8px;background:rgba(88,196,255,.08);border:1px solid rgba(88,196,255,.2);font-size:11px;color:#a9dcff;}
+.gachaHist{margin:0 10px 10px;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);}
+.ghistT{font-size:11px;color:#8fa3ba;margin-bottom:5px;}
+.ghistRow{display:flex;justify-content:space-between;font-size:11px;color:#cfd8e3;padding:2px 0;}
+.ghistRow em{font-style:normal;color:#7c8ea3;font-size:10px;}
