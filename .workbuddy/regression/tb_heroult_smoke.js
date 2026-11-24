@@ -26621,7 +26621,11 @@ async function main() {
 
   // U9351–U9356: 结算任务小结
   await senseCheck("U9351 结算任务行元素存在", (T,$) => {
+    T.setDailySeed(20310215); T.missionResetNow();   // —— v1.2.22 修正：钉住种子+重置，消除日种子环境抖动 ——
+    T.startGame(); T.skipIntro();
+    T.showLvResultNow();
     const r = T.lvMsnRowNow();
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
     return r && r.hidden === true || JSON.stringify({ r });
   });
   await senseCheck("U9352 无进展时保持隐藏", (T,$) => {
@@ -27136,6 +27140,41 @@ async function main() {
     const ok = T.lvResultNow().show === true;
     T.quit();
     return ok || JSON.stringify(T.lvResultNow());
+  });
+
+  // U9407–U9409: 过关表现奖励（完美过关 +30 / 险胜翻盘 +15）
+  await senseCheck("U9407 无伤通关结算亮「完美过关 +30」且领取实到账", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setTookHitNow(false); T.setLivesNow(3);
+    const c0 = T.coinsNow();
+    T.showLvResultNow();
+    const perf = T.lvPerfNow();
+    const rowOk = perf.gold === 30 && perf.kind === 'perf' && perf.hidden === false && /\+30/.test(perf.val || '');
+    T.claimLvNow(); await Z(80);
+    const gained = T.coinsNow() - c0;
+    T.closeUpgrade(); T.quit();
+    return (rowOk && gained >= 30) || JSON.stringify({ perf, gained });
+  });
+  await senseCheck("U9408 掉过命且生命充足：无表现奖励，领取仅星级金", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setTookHitNow(true); T.setLivesNow(3);
+    T.showLvResultNow();
+    const perf = T.lvPerfNow();
+    const ok = perf.gold === 0 && perf.hidden === true;
+    T.claimLvNow(); await Z(50); T.closeUpgrade(); T.quit();
+    return ok || JSON.stringify(perf);
+  });
+  await senseCheck("U9409 残血险胜：掉过命仅剩1命亮「险胜翻盘 +15」", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setTookHitNow(true); T.setLivesNow(1);
+    T.showLvResultNow();
+    const perf = T.lvPerfNow();
+    const ok = perf.gold === 15 && perf.kind === 'close' && perf.hidden === false && /险胜/.test(perf.lbl || '');
+    T.claimLvNow(); await Z(50); T.closeUpgrade(); T.quit();
+    return ok || JSON.stringify(perf);
   });
 
   chrome.kill(); killTree(chrome.pid);
