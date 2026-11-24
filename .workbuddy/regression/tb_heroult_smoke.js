@@ -27550,6 +27550,26 @@ async function main() {
     return (before === true && after === false) || JSON.stringify({ before, after });
   });
 
+  // U9446–U9448: 生涯击毁里程碑
+  await senseCheck("U9446 killMileHit 纯函数边界正确", async (T,$) => {
+    const a = T.killMileHitNow(0, 600), b = T.killMileHitNow(500, 1600), c = T.killMileHitNow(0, 499), d = T.killMileHitNow(3000, 6500);
+    return (a === 500 && b === 1500 && c === 0 && d === 6000) || JSON.stringify({ a, b, c, d });
+  });
+  await senseCheck("U9447 跨越 500：发 +10 并落档", async (T,$) => {
+    T.setKillMileSeenNow(0); T.setCareerKillsNow(600);
+    const c0 = T.coinsNow();
+    const hit = T.killMileCheckNow();
+    const got = T.coinsNow() - c0, seen = T.killMileSeenNow();
+    T.setKillMileSeenNow(0); T.setCareerKillsNow(0);
+    return (hit === 500 && got === 10 && seen === 500) || JSON.stringify({ hit, got, seen });
+  });
+  await senseCheck("U9448 同档不重复发", async (T,$) => {
+    T.setKillMileSeenNow(500); T.setCareerKillsNow(600);
+    const hit = T.killMileCheckNow();
+    T.setKillMileSeenNow(0); T.setCareerKillsNow(0);
+    return (hit === 0) || JSON.stringify({ hit });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
