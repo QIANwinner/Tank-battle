@@ -28797,6 +28797,30 @@ async function main() {
     return (pops === 0) || ('pops:' + pops);
   });
 
+  // U9608–U9610: 残骸印记
+  await senseCheck("U9608 击杀留下焦痕", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const w0 = T.wrecksNow();
+    T.spawnFoeNow(200, 200, 'normal');
+    const e = T.r18enNow().find(x => !x.dead);
+    T.kill(e);
+    const w1 = T.wrecksNow();
+    T.quit();
+    return (w1 === w0 + 1) || JSON.stringify({ w0, w1 });
+  });
+  await senseCheck("U9609 焦痕透明度单调衰减至0", (T,$) => {
+    const a0 = T.wreckAlphaNow(0), a4 = T.wreckAlphaNow(4000), a9 = T.wreckAlphaNow(9000), aX = T.wreckAlphaNow(12000);
+    return (a0 > a4 && a4 > 0 && a9 === 0 && aX === 0) || JSON.stringify({ a0, a4, a9 });
+  });
+  await senseCheck("U9610 退局清空焦痕", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(200, 200, 'normal');
+    const e = T.r18enNow().find(x => !x.dead);
+    T.kill(e);
+    T.quit();
+    return (T.wrecksNow() === 0) || ('left:' + T.wrecksNow());
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
