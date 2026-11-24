@@ -1,3 +1,16 @@
+# v1.1.234 · 输入穿透防线 + 庆典弹层清理
+
+> 修两个存量缺陷:① 输入框穿透——在关卡名(#edName)/存档码(#saveCode)里打字时,空格被 preventDefault 打不出来、方向键不能移光标、m/f/e/b 还触发游戏快捷键;新增 isTypingTarget 防线,输入框/下拉/可编辑区打字不再触发游戏按键。② 庆典弹层泄漏——milestoneOpen 只在 closeMilestone 复位,start()/quitToMenu() 均不清理,若庆典期间换局会残留冻结标记与礼花层;两处补上 closeMilestone(),与 v1.1.226 过关防线同口径。新增测试钩子 keysNow/mutedNow/typingTargetNow/milestoneOpenNow/milestoneShowNow。 回归：主回归 169/169；专项 9204/9204（U9261–U9266）。
+
+## 🅰 改进
+
+- 修两个存量缺陷:① 输入框穿透——在关卡名(#edName)/存档码(#saveCode)里打字时,空格被 preventDefault 打不出来、方向键不能移光标、m/f/e/b 还触发游戏快捷键;新增 isTypingTarget 防线,输入框/下拉/可编辑区打字不再触发游戏按键。② 庆典弹层泄漏——milestoneOpen 只在 closeMilestone 复位,start()/quitToMenu() 均不清理,若庆典期间换局会残留冻结标记与礼花层;两处补上 closeMilestone(),与 v1.1.226 过关防线同口径。新增测试钩子 keysNow/mutedNow/typingTargetNow/milestoneOpenNow/milestoneShowNow。
+
+## 🅱 验证
+
+- 主回归 169/169；专项 9204/9204（U9261–U9266）；内联脚本语法 SYNTAX OK
+- SW 缓存 v11234，游戏内版本 V1.1.234；远程树与本地树一致（sync_push）
+
 # v1.1.233 · 每日词条开局提示
 
 > 每日挑战开局时，战场提示条把今天的 2~3 条特殊词条一口气列出来（如「弹雨 · 暴走」），不用打完才发现规则不一样。 回归：主套件 169/169。
