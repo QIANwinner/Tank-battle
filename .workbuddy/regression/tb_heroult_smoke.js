@@ -28113,6 +28113,29 @@ async function main() {
     return ok || 'not unlocked';
   });
 
+  // U9518–U9520: 抽奖保底
+  await senseCheck("U9518 普通抽后保底计数+1或归零", async (T,$) => {
+    T.setCoinsNow(99999); T.setGachaPityNow(0);
+    const r = T.gachaNow(), p = T.gachaPityNow();
+    const ok = !!r && (r.coins === 3000 ? p === 0 : p === 1);
+    T.setGachaPityNow(0);
+    return ok || JSON.stringify({ r, p });
+  });
+  await senseCheck("U9519 保底10抽必中超级大奖且归零", async (T,$) => {
+    T.setCoinsNow(99999); T.setGachaPityNow(10);
+    const r = T.gachaNow(), p = T.gachaPityNow();
+    const ok = !!r && r.coins === 3000 && p === 0;
+    T.setGachaPityNow(0);
+    return ok || JSON.stringify({ r, p });
+  });
+  await senseCheck("U9520 抽奖卡渲染距保底文案", async (T,$) => {
+    T.setGachaPityNow(3);
+    const t = T.gachaRenderNow();
+    const ok = !!t && t.indexOf('距保底 7 抽') >= 0;
+    T.setGachaPityNow(0);
+    return ok || ('t:' + t);
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
