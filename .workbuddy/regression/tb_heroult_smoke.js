@@ -28215,6 +28215,24 @@ async function main() {
     return (spent === 50) || 'spent:' + spent;
   });
 
+  // U9533–U9535: 金币兑宠物币
+  await senseCheck("U9533 300金币换1宠物币", async (T,$) => {
+    T.setCoinsNow(1000); T.setPetCoins(0);
+    const r = T.coinToPetNow(1);
+    const ok = r === 1 && T.petCoins() === 1 && T.coins() === 700;
+    return ok || JSON.stringify({ r, c: T.coins(), p: T.petCoins() });
+  });
+  await senseCheck("U9534 金币不足拒绝兑换", async (T,$) => {
+    T.setCoinsNow(100); T.setPetCoins(0);
+    const r = T.coinToPetNow(1);
+    return (r === 0 && T.petCoins() === 0 && T.coins() === 100) || JSON.stringify({ r });
+  });
+  await senseCheck("U9535 批量兑换按300倍扣款", async (T,$) => {
+    T.setCoinsNow(1000); T.setPetCoins(0);
+    const r = T.coinToPetNow(3);
+    return (r === 3 && T.petCoins() === 3 && T.coins() === 100) || JSON.stringify({ r, c: T.coins(), p: T.petCoins() });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
