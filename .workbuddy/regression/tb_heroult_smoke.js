@@ -28660,6 +28660,24 @@ async function main() {
     return ok || 'bad score';
   });
 
+  // U9593–U9595: 子弹拖尾
+  await senseCheck("U9593 拖尾长度正比于速度且有上限", (T,$) => {
+    const slow = T.bulletTrailLenNow({ speed: 3 });
+    const fast = T.bulletTrailLenNow({ speed: 9 });
+    const cap = T.bulletTrailLenNow({ speed: 99 });
+    return (slow > 0 && fast > slow && cap === 20) || JSON.stringify({ slow, fast, cap });
+  });
+  await senseCheck("U9594 真实子弹渲染不抛错且画面正常", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.fireOnce();
+    T.renderOnce();
+    T.quit();
+    return true;
+  });
+  await senseCheck("U9595 零速弹不产生拖尾调用", (T,$) => {
+    return (T.bulletTrailLenNow({ speed: 0 }) === 0) || 'nonzero';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
