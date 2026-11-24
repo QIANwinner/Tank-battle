@@ -28259,6 +28259,40 @@ async function main() {
     return nv === null || 'nv still shown';
   });
 
+  // U9539–U9541: 图鉴详情
+  await senseCheck("U9539 点击行展开详情", async (T,$) => {
+    T.dexResetNow(); T.dexAddNow('normal');
+    T.openDexNow();
+    const row = document.querySelector('#dexBody .dexRow[data-k="normal"]');
+    if (!row) return 'no row';
+    row.click();
+    const open = row.classList.contains('dexOpen');
+    const det = row.querySelector('.dexDetail');
+    document.getElementById('dexBox').classList.remove('show');
+    T.dexResetNow();
+    return (open && !!det) || 'not open';
+  });
+  await senseCheck("U9540 详情含击毁数与占比", async (T,$) => {
+    T.dexResetNow(); T.dexAddNow('normal'); T.dexAddNow('normal');
+    T.openDexNow();
+    const row = document.querySelector('#dexBody .dexRow[data-k="normal"]');
+    row.click();
+    const t = row.querySelector('.dexDetail').textContent;
+    document.getElementById('dexBox').classList.remove('show');
+    T.dexResetNow();
+    return (t.indexOf('击毁 2') >= 0 && t.indexOf('100%') >= 0) || ('t:' + t);
+  });
+  await senseCheck("U9541 再次点击收起详情", async (T,$) => {
+    T.dexResetNow(); T.dexAddNow('boss');
+    T.openDexNow();
+    const row = document.querySelector('#dexBody .dexRow[data-k="boss"]');
+    row.click(); row.click();
+    const closed = !row.classList.contains('dexOpen');
+    document.getElementById('dexBox').classList.remove('show');
+    T.dexResetNow();
+    return closed || 'still open';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
