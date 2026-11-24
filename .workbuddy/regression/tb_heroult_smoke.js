@@ -27733,6 +27733,34 @@ async function main() {
     return (hit === true && w1 === w0 - 1) || JSON.stringify({ hit, w0, w1 });
   });
 
+  // U9470–U9472: 背水一战
+  await senseCheck("U9470 残血标志随 lives 变化", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setLivesNow(3); const r3 = T.rageNow();
+    T.setLivesNow(1); const r1 = T.rageNow();
+    T.quit();
+    return (r3 === false && r1 === true) || JSON.stringify({ r3, r1 });
+  });
+  await senseCheck("U9471 残血冷却约为满血的 0.8 倍", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setLivesNow(3); T.setCdNow(0); T.fireOnce();
+    const cd3 = T.cdMaxNow();
+    T.setLivesNow(1); T.setCdNow(0); T.fireOnce();
+    const cd1 = T.cdMaxNow();
+    T.quit();
+    const ratio = cd3 > 0 ? cd1 / cd3 : 0;
+    return (cd3 > 0 && cd1 > 0 && ratio > 0.74 && ratio < 0.86) || JSON.stringify({ cd3, cd1, ratio });
+  });
+  await senseCheck("U9472 回到多命后冷却恢复", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setLivesNow(1); T.setCdNow(0); T.fireOnce();
+    const cd1 = T.cdMaxNow();
+    T.setLivesNow(3); T.setCdNow(0); T.fireOnce();
+    const cd3 = T.cdMaxNow();
+    T.quit();
+    return (cd3 > cd1 && cd1 > 0) || JSON.stringify({ cd1, cd3 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

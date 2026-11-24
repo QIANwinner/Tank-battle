@@ -1,5 +1,5 @@
 /* Navigation uses a bounded network attempt; static assets use the release cache. */
-const CACHE = 'tank-battle-v1242';
+const CACHE = 'tank-battle-v1243';
 const PREFIX = 'tank-battle-';
 const ASSETS = ['./', './index.html', './assets/game.css', './assets/storage.js',
   './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png'];
