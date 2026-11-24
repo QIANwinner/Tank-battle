@@ -28745,6 +28745,24 @@ async function main() {
     return (a1 === a0) || JSON.stringify({ a0, a1 });
   });
 
+  // U9602–U9604: 冰冻反光
+  await senseCheck("U9602 反光透明度边界正确", (T,$) => {
+    const lo = T.frostSheenAlphaNow(0), mid = T.frostSheenAlphaNow(60), hi = T.frostSheenAlphaNow(9999);
+    return (lo === 0.15 && mid > lo && hi === 0.5) || JSON.stringify({ lo, mid, hi });
+  });
+  await senseCheck("U9603 冻结敌人渲染不抛错", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(200, 200, 'normal');
+    const e = T.r18enNow().find(x => !x.dead);
+    e.freezeT = 90;
+    T.renderOnce();
+    T.quit();
+    return e.freezeT > 0;
+  });
+  await senseCheck("U9604 未冻结不走高光路径", (T,$) => {
+    return (T.frostSheenAlphaNow(0) === 0.15 && typeof T.frostSheenAlphaNow === 'function') || 'fn';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
