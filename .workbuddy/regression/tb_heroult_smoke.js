@@ -27488,6 +27488,32 @@ async function main() {
     return (v === 5) || JSON.stringify({ v });
   });
 
+  // U9440–U9442: 僚机保全奖
+  await senseCheck("U9440 无僚机时表现奖励不含僚机保全", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setTookHitNow(false); T.setLivesNow(3);
+    T.showLvResultNow();
+    const perf = T.lvPerfNow();
+    T.closeUpgrade(); T.quit();
+    return (perf.wing === 0 && perf.gold === 30) || JSON.stringify(perf);
+  });
+  await senseCheck("U9441 僚机存活+无伤：+40 且文案含僚机保全", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setWingAliveNow(true); T.setTookHitNow(false); T.setLivesNow(3);
+    T.showLvResultNow();
+    const perf = T.lvPerfNow();
+    T.closeUpgrade(); T.quit();
+    return (perf.wing === 10 && perf.gold === 40 && /僚机保全/.test(perf.lbl || '')) || JSON.stringify(perf);
+  });
+  await senseCheck("U9442 掉过命且生命充足：仅僚机保全 +10", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setWingAliveNow(true); T.setTookHitNow(true); T.setLivesNow(3);
+    T.showLvResultNow();
+    const perf = T.lvPerfNow();
+    T.closeUpgrade(); T.quit();
+    return (perf.gold === 10 && /僚机保全/.test(perf.lbl || '')) || JSON.stringify(perf);
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
