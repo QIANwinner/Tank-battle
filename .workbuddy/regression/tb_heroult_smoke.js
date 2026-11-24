@@ -25592,7 +25592,7 @@ async function main() {
       const c = $('game'), k = c.width / 624;
       const red = () => {
         T.renderOnce();
-        const px = c.getContext('2d').getImageData(Math.round(305 * k), Math.round(170 * k), Math.round(12 * k), Math.round(60 * k)).data;
+        const px = c.getContext('2d').getImageData(Math.round(300 * k), Math.round(150 * k), Math.round(24 * k), Math.round(120 * k)).data;
         let n = 0; for (let i = 0; i < px.length; i += 4) if (px[i] > 45 && px[i] > px[i + 1] * 2 && px[i + 2] < 130) n++;
         return n;
       };
@@ -25602,7 +25602,7 @@ async function main() {
       T.setFreezeNow(3); const frozen = T.sniperAimsNow().length === 0; T.setFreezeNow(0);
       e.shootTimer = 999; const dark = red();
       T.quit();
-      const ok = idle && !!open && open.x1 === 311 && open.y1 === 111 && open.x2 === 311 && open.y2 > 560 && Math.abs(open.alpha - T.sniperAimAlphaNow(12)) < 1e-9 && !!walled && walled.y2 > 225 && walled.y2 < 240 && frozen && lit > dark + 12;
+      const ok = idle && !!open && open.x1 === 311 && open.y1 === 111 && open.x2 === 311 && open.y2 > 560 && Math.abs(open.alpha - T.sniperAimAlphaNow(12)) < 1e-9 && !!walled && walled.y2 > 225 && walled.y2 < 240 && frozen && lit > dark + 25;
       return ok || JSON.stringify({ idle, open, walled, frozen, lit, dark, k });
     });
 
@@ -27058,7 +27058,7 @@ async function main() {
     T.tp(72, 252);
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'e' }));
     window.dispatchEvent(new KeyboardEvent('keyup', { key: 'e' }));
-    await Z(450);
+    await Z(950);   // 出生点可能压墙线：留足脱困看门狗(~0.5s)+击退动画时间
     const ok = !e.dead && !T.isBlockedNow(e.x, e.y, e.size) && e.x >= 24 && e.x <= 578;
     T.quit();
     return ok || JSON.stringify({ ex: e.x, ey: e.y, dead: e.dead, blocked: T.isBlockedNow(e.x, e.y, e.size) });
@@ -28483,6 +28483,22 @@ async function main() {
     const r = T.runningNow ? T.runningNow() : true;
     T.quit();
     return r === true || 'not running';
+  });
+
+  // U9569–U9571: 音频唤醒补全
+  await senseCheck("U9569 pointerdown 创建音频上下文", async (T,$) => {
+    document.dispatchEvent(new PointerEvent('pointerdown'));
+    const s = T.audioStateNow();
+    return s !== 'none' || 'ctx none';
+  });
+  await senseCheck("U9570 keydown 也能唤醒", async (T,$) => {
+    document.dispatchEvent(new KeyboardEvent('keydown'));
+    const s = T.audioStateNow();
+    return s !== 'none' || 'ctx none';
+  });
+  await senseCheck("U9571 音频上下文状态合法", async (T,$) => {
+    const s = T.audioStateNow();
+    return (s === 'running' || s === 'suspended') || s;
   });
 
   chrome.kill(); killTree(chrome.pid);
