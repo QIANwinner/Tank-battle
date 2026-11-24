@@ -28233,6 +28233,32 @@ async function main() {
     return (r === 3 && T.petCoins() === 3 && T.coins() === 100) || JSON.stringify({ r, c: T.coins(), p: T.petCoins() });
   });
 
+  // U9536–U9538: 新手任务
+  await senseCheck("U9536 新手任务三条规定状态", async (T,$) => {
+    T.noviceResetNow();
+    const st = T.noviceNow();
+    return (st.length === 3 && st.every(x => x.claimed === false) && st[0].id === 'first') || JSON.stringify(st);
+  });
+  await senseCheck("U9537 条件达成可领取且发奖", async (T,$) => {
+    T.noviceResetNow(); T.setCoinsNow(0);
+    const st = T.noviceNow();
+    const doable = st.find(x => x.done);
+    if (!doable) return 'none-done';
+    const r = T.noviceClaimNow(doable.id);
+    const ok = r === doable.rw && T.coins() === doable.rw;
+    return ok || JSON.stringify({ doable, r, c: T.coins() });
+  });
+  await senseCheck("U9538 全部领完面板不再渲染新手区", async (T,$) => {
+    T.noviceResetNow();
+    T.setCareerGamesNow(1); T.setCareerKillsNow(10); T.setBonusSpentNow(1);
+    for (const x of T.noviceNow()) T.noviceClaimNow(x.id);
+    T.msnOpenNow('daily');
+    const nv = document.querySelector('#msnBody .nvWrap');
+    document.getElementById('missionBox').classList.remove('show');
+    T.setBonusSpentNow(0);
+    return nv === null || 'nv still shown';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
