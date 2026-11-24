@@ -26338,6 +26338,56 @@ async function main() {
     return none || 'reroll button still present';
   });
 
+
+  // U9315–U9320: 局内任务小部件
+  await senseCheck("U9315 元素存在且菜单下隐藏", (T,$) => {
+    T.quit();
+    const h = T.msnHudNow();
+    return h && h.hidden === true || JSON.stringify({ h });
+  });
+  await senseCheck("U9316 开局显示3枚芯片", (T,$) => {
+    T.setDailySeed(20310207); T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    const h = T.msnHudNow();
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return (h && !h.hidden && h.chips.length === 3 && h.chips.every(c => c.t.includes('/'))) || JSON.stringify({ h });
+  });
+  await senseCheck("U9317 进度实时刷新", (T,$) => {
+    T.setDailySeed(20310208); const st = T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    const t0 = st.items[0].type;
+    T.missionBumpNow(t0, 4, false);
+    const h = T.msnHudNow();
+    const chip = h && h.chips[0];
+    const ok = chip && chip.t.includes('4/');
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ chip });
+  });
+  await senseCheck("U9318 完成芯片金色态", (T,$) => {
+    T.setDailySeed(20310209); const st = T.missionResetNow();
+    T.startGame(); T.skipIntro();
+    T.missionBumpNow(st.items[0].type, st.items[0].target, false);
+    const h = T.msnHudNow();
+    const ok = h && h.chips[0] && h.chips[0].done === true;
+    T.quit(); T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ chips: h && h.chips });
+  });
+  await senseCheck("U9319 退出后隐藏", (T,$) => {
+    T.startGame(); T.skipIntro();
+    const on = T.msnHudNow().hidden === false;
+    T.quit();
+    const off = T.msnHudNow().hidden === true;
+    return (on && off) || JSON.stringify({ on, off });
+  });
+  await senseCheck("U9320 芯片玻璃样式", (T,$) => {
+    T.startGame(); T.skipIntro();
+    const c = document.querySelector('#msnHud .mhChip');
+    const cs = c ? getComputedStyle(c) : null;
+    const ok = cs && cs.borderRadius !== '0px' && cs.fontVariantNumeric === 'tabular-nums';
+    T.quit();
+    return ok || JSON.stringify({ cs: cs && cs.borderRadius });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
