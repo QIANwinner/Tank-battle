@@ -28339,6 +28339,27 @@ async function main() {
     return ok || 'restore fail';
   });
 
+  // U9548–U9550: 伤害数字
+  await senseCheck("U9548 伤害数字飘字生成", async (T,$) => {
+    const n0 = T.floatTextsNow().length;
+    T.dmgNumNow(100, 100, 1);
+    const ts = T.floatTextsNow();
+    return (ts.length === n0 + 1 && String(ts[ts.length - 1]).indexOf('-1') >= 0) || JSON.stringify(ts.slice(-2));
+  });
+  await senseCheck("U9549 巨弹头伤害数字为-2", async (T,$) => {
+    T.dmgNumNow(100, 100, 2);
+    const ts = T.floatTextsNow();
+    return String(ts[ts.length - 1]).indexOf('-2') >= 0 || JSON.stringify(ts[ts.length - 1]);
+  });
+  await senseCheck("U9550 减弱动效下不生成伤害数字", async (T,$) => {
+    T.setReducedNow('on');
+    const n0 = T.floatTextsNow().length;
+    T.dmgNumNow(50, 50, 5);
+    const same = T.floatTextsNow().length === n0;
+    T.setReducedNow('auto');
+    return same || 'still spawned';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
