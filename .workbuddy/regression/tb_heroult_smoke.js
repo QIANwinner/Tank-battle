@@ -28173,6 +28173,24 @@ async function main() {
     return (!!t && t.indexOf('今日首抽半价') >= 0) || ('t:' + t);
   });
 
+  // U9527–U9529: 强化推荐
+  await senseCheck("U9527 推荐函数返回有效强化id", async (T,$) => {
+    const id = T.bonusRecNow();
+    return (typeof id === 'string' && id.length > 0) || 'no rec';
+  });
+  await senseCheck("U9528 推荐与徽标一致", async (T,$) => {
+    const id = T.bonusRecNow(), dom = T.recBadgeDomNow();
+    return (id === dom) || JSON.stringify({ id, dom });
+  });
+  await senseCheck("U9529 买满后推荐切换到下一项", async (T,$) => {
+    const a = T.bonusRecNow();
+    if (!a) return 'none';
+    T.setBonusLvNow(a, 99);
+    const b = T.bonusRecNow();
+    T.setBonusLvNow(a, 0);
+    return (b !== a) || JSON.stringify({ a, b });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
