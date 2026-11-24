@@ -26283,6 +26283,61 @@ async function main() {
     return txt.includes(':hover::after') && txt.includes('left: 130%') || 'missing';
   });
 
+
+  // U9309–U9314: 任务重摇
+  await senseCheck("U9309 重摇扣50+未完成重置+标记", (T,$) => {
+    T.setDailySeed(20310201); const st = T.missionResetNow();
+    const t0 = st.items[0].type; T.missionBumpNow(t0, 5, false);
+    T.setCoins(500);
+    const r = T.missionRerollNow();
+    const s2 = T.missionsNow();
+    const ok = r.ok === true && T.coinsNow() === 450 && s2.rerolled === true && s2.items.filter(m => !m.done && !m.claimed).every(m => m.prog === 0);
+    T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ r, coins: T.coinsNow(), s2 });
+  });
+  await senseCheck("U9310 每日只能换一次", (T,$) => {
+    T.setDailySeed(20310202); T.missionResetNow(); T.setCoins(500);
+    T.missionRerollNow(); const r2 = T.missionRerollNow();
+    const ok = r2.ok === false && r2.why === 'used' && T.coinsNow() === 450;
+    T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ r2, coins: T.coinsNow() });
+  });
+  await senseCheck("U9311 币不足拒绝且不扣", (T,$) => {
+    T.setDailySeed(20310203); T.missionResetNow(); T.setCoins(30);
+    const r = T.missionRerollNow();
+    const ok = r.ok === false && r.why === 'coins' && T.coinsNow() === 30 && T.missionsNow().rerolled !== true;
+    T.setDailySeed(0); T.missionResetNow();
+    return ok || JSON.stringify({ r });
+  });
+  await senseCheck("U9312 完成/已领项保留不动", (T,$) => {
+    T.setDailySeed(20310204); const st = T.missionResetNow();
+    const m0 = st.items[0];
+    T.missionBumpNow(m0.type, m0.target, false); T.missionClaimNow(0);
+    T.setCoins(500); T.missionRerollNow();
+    const s2 = T.missionsNow();
+    const kept = s2.items.some(m => m.type === m0.type && m.claimed === true);
+    const fresh = s2.items.filter(m => !m.claimed).every(m => m.prog === 0 && !m.done);
+    T.setDailySeed(0); T.missionResetNow();
+    return (kept && fresh && s2.items.length === 3) || JSON.stringify({ kept, fresh, items: s2.items });
+  });
+  await senseCheck("U9313 面板重摇按钮点击生效", (T,$) => {
+    T.setDailySeed(20310205); T.missionResetNow(); T.setCoins(500);
+    T.missionOpenNow();
+    const has = !!$('msnReroll');
+    T.msnRerollClickNow();
+    const used = T.missionsNow().rerolled === true && $('msnReroll') && $('msnReroll').disabled && $('msnReroll').textContent.includes('已换');
+    T.missionCloseNow(); T.setDailySeed(0); T.missionResetNow();
+    return (has && used) || JSON.stringify({ has, used, txt: $('msnReroll') && $('msnReroll').textContent });
+  });
+  await senseCheck("U9314 全部完成时无重摇按钮", (T,$) => {
+    T.setDailySeed(20310206); const st = T.missionResetNow();
+    st.items.forEach(m => T.missionBumpNow(m.type, m.target, false));
+    T.missionOpenNow();
+    const none = !$('msnReroll');
+    T.missionCloseNow(); T.setDailySeed(0); T.missionResetNow();
+    return none || 'reroll button still present';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
