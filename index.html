@@ -1868,7 +1868,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.36</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.37</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -26058,9 +26058,16 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   let dexData = { kills: {} };
   try { const d = JSON.parse(saveStore.getItem(LS_DEX) || 'null'); if (d && typeof d.kills === 'object' && d.kills) dexData = d; } catch (e) { /* 忽略 */ }
   function dexSave() { try { saveStore.setItem(LS_DEX, JSON.stringify(dexData)); } catch (e) { /* 忽略 */ } }
-  function dexAdd(type) {
+  const DEX_KEYS_TOTAL = Object.keys(ENEMY_TYPES).length + 1;   // 兵种 + Boss —— v1.2.37 ——
+  function dexSeenCount() { let n = 0; for (const k of Object.keys(ENEMY_TYPES)) if ((dexData.kills[k] || 0) > 0) n++; if ((dexData.kills.boss || 0) > 0) n++; return n; }
+  function dexAdd(type, force) {
     if (!type) return;
     dexData.kills[type] = (dexData.kills[type] || 0) + 1;
+    // —— v1.2.37 图鉴集齐奖励（测试模式不自动发币，由 dexAddNow 强制触发，防污染断言）——
+    if (!dexData.rewarded && dexSeenCount() >= DEX_KEYS_TOTAL) {
+      dexData.rewarded = 1;
+      if (!__testMode || force) { addPetCoin(2); try { showToast('🏅 图鉴集齐 · 奖励 +2🐾'); } catch (e) { /* 忽略 */ } }
+    }
     dexSave();
   }
   function renderDex() {
@@ -27023,7 +27030,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.36', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.37', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -29700,6 +29707,9 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       mineCountNow: () => mines.length,
       dexNow: () => JSON.parse(JSON.stringify(dexData)),
       dexResetNow: () => { dexData = { kills: {} }; dexSave(); renderDex(); return true; },
+      dexSeenNow: () => dexSeenCount(), dexRewardedNow: () => !!dexData.rewarded,
+      dexAddNow: (t) => { dexAdd(t, true); return dexSeenCount(); },
+      dexFillNow: () => { for (const k of Object.keys(ENEMY_TYPES)) dexData.kills[k] = Math.max(1, dexData.kills[k] || 0); dexSave(); return true; },
       openDexNow: () => { openDex(); return $('dexBox').classList.contains('show'); },
       closeDexNow: () => { closeDex(); return !$('dexBox').classList.contains('show'); },
       panelOpenNow: () => panelOpen(),

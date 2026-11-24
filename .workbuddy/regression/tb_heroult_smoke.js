@@ -27596,6 +27596,27 @@ async function main() {
     return (after === total && mid === total - 3) || JSON.stringify({ mid, after, total });
   });
 
+  // U9452–U9454: 图鉴集齐奖励
+  await senseCheck("U9452 重置后未集齐无奖励", async (T,$) => {
+    T.dexResetNow();
+    const seen = T.dexSeenNow(), rw = T.dexRewardedNow();
+    return (seen === 0 && rw === false) || JSON.stringify({ seen, rw });
+  });
+  await senseCheck("U9453 全部点亮发 +2🐾 并落档", async (T,$) => {
+    T.dexResetNow(); T.dexFillNow();
+    const p0 = T.petCoins();
+    const seen = T.dexAddNow('boss');
+    const p1 = T.petCoins(), rw = T.dexRewardedNow();
+    return (seen >= 8 && rw === true && p1 - p0 === 2) || JSON.stringify({ seen, rw, d: p1 - p0 });
+  });
+  await senseCheck("U9454 集齐后再击杀不重复发奖", async (T,$) => {
+    const p0 = T.petCoins();
+    T.dexAddNow('boss');
+    const p1 = T.petCoins();
+    T.dexResetNow();
+    return (p1 - p0 === 0) || JSON.stringify({ d: p1 - p0 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
