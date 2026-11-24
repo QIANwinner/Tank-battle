@@ -27971,6 +27971,31 @@ async function main() {
     return (total > 5 && on && on.dataset.f === 'all') || JSON.stringify({ total, on: on && on.dataset.f });
   });
 
+  // U9500–U9502: 补签卡
+  await senseCheck("U9500 漏签1天且连击>0时 missed=true", async (T,$) => {
+    T.signinSetState(-2, 5);
+    const st = T.signinInfoNow();
+    const ok = st.missed === true && st.done === false;
+    T.signinReset();
+    return ok || JSON.stringify(st);
+  });
+  await senseCheck("U9501 补签扣200且今日可续连击", async (T,$) => {
+    T.setCoinsNow(500); T.signinSetState(-2, 5);
+    const r = T.signinFixNow(), st = T.signinInfoNow();
+    const ok = r.ok === true && r.streak === 5 && st.streak === 6 && st.missed === false;
+    T.signinReset();
+    return ok || JSON.stringify({ r, st });
+  });
+  await senseCheck("U9502 金币不足或已签到不可补签", async (T,$) => {
+    T.setCoinsNow(50); T.signinSetState(-2, 4);
+    const poor = T.signinFixNow();
+    T.setCoinsNow(500); T.signinSetState(0, 4);
+    const done = T.signinFixNow();
+    const ok = poor.ok === false && poor.why === 'coins' && done.ok === false;
+    T.signinReset();
+    return ok || JSON.stringify({ poor, done });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
