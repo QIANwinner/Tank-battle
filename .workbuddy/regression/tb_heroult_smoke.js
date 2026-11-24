@@ -27785,6 +27785,31 @@ async function main() {
     return (T.enemyGoldNow({ isBoss: false, type: 'elite' }) > 0) || 'elite missing';
   });
 
+  // U9476–U9478: 商店购买动画
+  await senseCheck("U9476 强化卡带 data-bid 标记", async (T,$) => {
+    T.setShopTab('bonus'); T.setCoinsNow(9999); T.resetBonusNow(); T.renderShopNow();
+    document.getElementById('shopBox').classList.add('show');
+    const n = document.querySelectorAll('.shopItem[data-bid]').length;
+    document.getElementById('shopBox').classList.remove('show');
+    return (n >= 9) || JSON.stringify({ n });
+  });
+  await senseCheck("U9477 购买成功卡片挂 siBuyFlash", async (T,$) => {
+    T.setShopTab('bonus'); T.setCoinsNow(9999); T.resetBonusNow(); T.renderShopNow();
+    document.getElementById('shopBox').classList.add('show');
+    T.buyBonusNow('cd');
+    const el = document.querySelector('.shopItem[data-bid="cd"].siBuyFlash');
+    document.getElementById('shopBox').classList.remove('show');
+    T.resetBonusNow(); T.setCoinsNow(0);
+    return (!!el) || 'no flash';
+  });
+  await senseCheck("U9478 未购买卡不闪光", async (T,$) => {
+    T.setShopTab('bonus'); T.resetBonusNow(); T.renderShopNow();
+    document.getElementById('shopBox').classList.add('show');
+    const n = document.querySelectorAll('.siBuyFlash').length;
+    document.getElementById('shopBox').classList.remove('show');
+    return (n === 0) || JSON.stringify({ n });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
