@@ -26220,6 +26220,40 @@ async function main() {
     return on || JSON.stringify({ on });
   });
 
+
+  // U9297–U9302: 液态玻璃·面板基底
+  await senseCheck("U9297 主要面板 backdrop blur", (T,$) => {
+    const cs = id => getComputedStyle($(id));
+    const ok = ['signinBody','msnBody','carBody','achBody'].every(id => (cs(id).backdropFilter || '').includes('blur'));
+    return ok || JSON.stringify({ a: cs('msnBody').backdropFilter });
+  });
+  await senseCheck("U9298 顶部高光内阴影+半透渐变", (T,$) => {
+    const h = getComputedStyle($('signinBox').querySelector('.signinHead'));
+    const ok = h.boxShadow.includes('inset') && (h.backgroundImage || '').includes('linear-gradient');
+    return ok || JSON.stringify({ bs: h.boxShadow.slice(0, 80), bg: (h.backgroundImage || '').slice(0, 60) });
+  });
+  await senseCheck("U9299 菜单分组卡玻璃化", (T,$) => {
+    const g = getComputedStyle($('groupTools'));
+    return (g.backdropFilter || '').includes('blur') && g.boxShadow !== 'none' || JSON.stringify({ bf: g.backdropFilter });
+  });
+  await senseCheck("U9300 结算/强化/广告卡玻璃化", (T,$) => {
+    const a = getComputedStyle(document.querySelector('#lvResult .lvCard'));
+    const b = getComputedStyle(document.querySelector('#upgradeBox .upCard'));
+    const c = getComputedStyle(document.querySelector('#adBox .adCard'));
+    const ok = [a, b, c].every(s => (s.backdropFilter || '').includes('blur'));
+    return ok || JSON.stringify({ a: a.backdropFilter, b: b.backdropFilter, c: c.backdropFilter });
+  });
+  await senseCheck("U9301 编辑器/里程碑玻璃化", (T,$) => {
+    const a = getComputedStyle(document.querySelector('#editorBox .edCard'));
+    const b = getComputedStyle(document.querySelector('#milestone .miloBody'));
+    return (a.backdropFilter || '').includes('blur') && (b.backdropFilter || '').includes('blur') || JSON.stringify({ a: a.backdropFilter, b: b.backdropFilter });
+  });
+  await senseCheck("U9302 圆角未被破坏", (T,$) => {
+    const h = getComputedStyle($('signinBox').querySelector('.signinHead'));
+    const body = getComputedStyle($('signinBody'));
+    return h.borderTopLeftRadius !== '0px' && body.borderBottomLeftRadius !== '0px' || JSON.stringify({ h: h.borderTopLeftRadius, b: body.borderBottomLeftRadius });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
