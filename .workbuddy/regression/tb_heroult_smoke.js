@@ -27570,6 +27570,32 @@ async function main() {
     return (hit === 0) || JSON.stringify({ hit });
   });
 
+  // U9449–U9451: 基地维修包
+  await senseCheck("U9449 维修进入道具池且基地墙计数可读", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const list = T.powerupTypesNow();
+    const full = T.baseWallsNow(), total = T.baseWallTotalNow();
+    T.quit();
+    return (list.includes('repair') && full === total && total > 0) || JSON.stringify({ has: list.includes('repair'), full, total });
+  });
+  await senseCheck("U9450 拆墙计数正确下降", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const f0 = T.baseWallsNow();
+    const broke = T.baseWallBreakNow(3);
+    const f1 = T.baseWallsNow();
+    T.quit();
+    return (broke === 3 && f1 === f0 - 3) || JSON.stringify({ broke, f0, f1 });
+  });
+  await senseCheck("U9451 拾取维修包重建全部护墙", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.baseWallBreakNow(3);
+    const mid = T.baseWallsNow();
+    T.applyPowerupNow('repair');
+    const after = T.baseWallsNow(), total = T.baseWallTotalNow();
+    T.quit();
+    return (after === total && mid === total - 3) || JSON.stringify({ mid, after, total });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
