@@ -27177,6 +27177,35 @@ async function main() {
     return ok || JSON.stringify(perf);
   });
 
+  // U9410–U9412: 穿甲弹道具（拾取计时 / 子弹穿透 +1 / 掉落池含新类型）
+  await senseCheck("U9410 拾取穿甲弹：fx.pierce 置 10 秒并随时间衰减结束", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const ok0 = T.applyPowerupNow('pierce') === true;
+    const v1 = T.buffStateNow().pierce;
+    T.setBuffNow('pierce', 0.05);
+    await Z(220);
+    const v2 = T.buffStateNow().pierce;
+    T.quit();
+    return (ok0 && v1 === 10 && v2 <= 0) || JSON.stringify({ ok0, v1, v2 });
+  });
+  await senseCheck("U9411 穿甲生效期间玩家子弹穿透 +1，结束后恢复", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setBuffNow('pierce', 0);
+    T.fireOnce(); await Z(60);
+    const p0 = T.lastBulletPen();
+    T.applyPowerupNow('pierce');
+    let p1 = null;   // fireOnce 不清冷却，轮询到新弹出现
+    for (let i = 0; i < 60 && p1 !== (p0 || 0) + 1; i++) { T.fireOnce(); await Z(50); p1 = T.lastBulletPen(); }
+    T.quit();
+    return (p1 === (p0 || 0) + 1) || JSON.stringify({ p0, p1 });
+  });
+  await senseCheck("U9412 新道具进入随机掉落池：POWERUP_LIST 含 pierce", (T,$) => {
+    const list = T.powerupTypesNow();
+    return (Array.isArray(list) && list.includes('pierce')) || JSON.stringify(list);
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
