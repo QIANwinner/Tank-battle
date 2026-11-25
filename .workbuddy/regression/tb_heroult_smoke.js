@@ -25592,7 +25592,7 @@ async function main() {
       const c = $('game'), k = c.width / 624;
       const red = () => {
         T.renderOnce();
-        const px = c.getContext('2d').getImageData(Math.round(300 * k), Math.round(150 * k), Math.round(24 * k), Math.round(120 * k)).data;
+        const px = c.getContext('2d').getImageData(Math.round(300 * k), Math.round(300 * k), Math.round(24 * k), Math.round(100 * k)).data;
         let n = 0; for (let i = 0; i < px.length; i += 4) if (px[i] > 45 && px[i] > px[i + 1] * 2 && px[i + 2] < 130) n++;
         return n;
       };
@@ -27157,11 +27157,11 @@ async function main() {
     const c0 = T.coinsNow();
     T.showLvResultNow();
     const perf = T.lvPerfNow();
-    const rowOk = perf.gold === 30 && perf.kind === 'perf' && perf.hidden === false && /\+30/.test(perf.val || '');
+    const rowOk = perf.gold === 60 && perf.kind === 'perf' && perf.hidden === false && /\+60/.test(perf.val || '');
     T.claimLvNow(); await Z(80);
     const gained = T.coinsNow() - c0;
     T.closeUpgrade(); T.quit();
-    return (rowOk && gained >= 30) || JSON.stringify({ perf, gained });
+    return (rowOk && gained >= 60) || JSON.stringify({ perf, gained });
   });
   await senseCheck("U9408 掉过命且生命充足：无表现奖励，领取仅星级金", async (T,$) => {
     const Z = ms => new Promise(r => setTimeout(r, ms));
@@ -27502,7 +27502,7 @@ async function main() {
     T.showLvResultNow();
     const perf = T.lvPerfNow();
     T.closeUpgrade(); T.quit();
-    return (perf.wing === 0 && perf.gold === 30) || JSON.stringify(perf);
+    return (perf.wing === 0 && perf.gold === 60) || JSON.stringify(perf);
   });
   await senseCheck("U9441 僚机存活+无伤：+40 且文案含僚机保全", async (T,$) => {
     T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
@@ -27510,7 +27510,7 @@ async function main() {
     T.showLvResultNow();
     const perf = T.lvPerfNow();
     T.closeUpgrade(); T.quit();
-    return (perf.wing === 10 && perf.gold === 40 && /僚机保全/.test(perf.lbl || '')) || JSON.stringify(perf);
+    return (perf.wing === 10 && perf.gold === 70 && /僚机保全/.test(perf.lbl || '')) || JSON.stringify(perf);
   });
   await senseCheck("U9442 掉过命且生命充足：仅僚机保全 +10", async (T,$) => {
     T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
@@ -27840,7 +27840,7 @@ async function main() {
     T.showLvResultNow();
     const perf = T.lvPerfNow();
     T.closeUpgrade(); T.quit();
-    return (perf.gold === 45 && /速通/.test(perf.lbl || '') && /完美/.test(perf.lbl || '')) || JSON.stringify(perf);
+    return (perf.gold === 75 && /速通/.test(perf.lbl || '') && /完美/.test(perf.lbl || '')) || JSON.stringify(perf);
   });
 
   // U9482–U9484: 险胜徽章
@@ -29218,6 +29218,33 @@ async function main() {
     const n = T.lastFoeNotedNow();
     T.quit();
     return n === true || JSON.stringify({ n });
+  });
+
+  // U9647–U9649: S级评价
+  await senseCheck("U9647 无伤满星授S级徽记", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.lvStateSetNow({ hit: false, secs: 8, kills: 99, lives: 3 });
+    T.showLvResultNow();
+    const t = T.lvPerfTextNow();
+    const has = t.indexOf('S级') >= 0;
+    T.quit();
+    return has || JSON.stringify({ t });
+  });
+  await senseCheck("U9648 受击过关无S级", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.lvStateSetNow({ hit: true, secs: 8, kills: 99, lives: 1 });
+    T.showLvResultNow();
+    const t = T.lvPerfTextNow();
+    T.quit();
+    return t.indexOf('S级') < 0 || JSON.stringify({ t });
+  });
+  await senseCheck("U9649 S级奖励计数为30", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.lvStateSetNow({ hit: false, secs: 8, kills: 99, lives: 3 });
+    T.showLvResultNow();
+    const r = T.lvRankNow();
+    T.quit();
+    return r === 30 || JSON.stringify({ r });
   });
 
   chrome.kill(); killTree(chrome.pid);

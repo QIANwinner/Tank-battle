@@ -1876,7 +1876,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.101</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.102</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2907,6 +2907,7 @@
   let lvStarsNow = 0;                // —— v0.2.6 本关评级星数 ——
   let levelKills = 0;                // —— v0.2.6 本关击杀数（结算界面） ——
   let lvShots = 0, lvHits = 0, lvAccBonus = 0;   // —— v1.2.95 本关射击命中统计 ——
+  let lvRankS = 0, lastInterest = 0, weather = 'clear', firstWinDayK = '', lvNewRec = false, streakHoldT = 0, luckyLevel = false;   // —— v1.2.102~110 系统波状态 ——
   try {
     const c = healedJson(LS_CAREER, {});   // —— v1.2.77 存档自愈加载 ——
     if (c && typeof c === 'object') {
@@ -5505,6 +5506,8 @@
     lvPerfGold += lvFastBonus;
     lvAccBonus = (lvShots >= 8 && lvHits / lvShots >= 0.9 && multiMode !== 2) ? 15 : 0;   // —— v1.2.95 百发百中 ——
     lvPerfGold += lvAccBonus;
+    lvRankS = (lvPerfKind === 'perf' && lvStarsNow >= 3 && multiMode !== 2) ? 30 : 0;   // —— v1.2.102 S级评价 ——
+    lvPerfGold += lvRankS;
     if (lives <= 1 && multiMode !== 2) { career.clutch = (career.clutch || 0) + 1; saveCareer(); }   // —— v1.2.47 险胜徽章 ——
     const lvPerfEl = $('lvPerfRow');
     if (lvPerfEl) {
@@ -5515,6 +5518,7 @@
         if (lvWingBonus > 0) lvParts.push('🛡 僚机保全');
         if (lvFastBonus > 0) lvParts.push('⚡ 速通');   // —— v1.2.46 ——
         if (lvAccBonus > 0) lvParts.push('🎯 百发百中');   // —— v1.2.95 ——
+        if (lvRankS > 0) lvParts.push('🌟 S级完美');   // —— v1.2.102 ——
         $('lvPerfLbl').textContent = lvParts.join(' + ');
         $('lvPerfVal').textContent = '+' + lvPerfGold + ' 🪙';
       }
@@ -5660,6 +5664,7 @@
     bossDeathT = 0; timeScale = 1;
     levelSecs = 0; levelKills = 0; blitzDone = false;   // —— v0.2.6 本关计时与击杀重置 · v1.2.34 ——
     lvShots = 0; lvHits = 0; lvAccBonus = 0;   // —— v1.2.95 ——
+    lvRankS = 0; lvNewRec = false; streakHoldT = 0;   // —— v1.2.102/108/109 ——
     enemiesSpawned = 0;
     airDropT = 20;   // —— v1.2.93 空投重置 ——
     medkitDropped = false;   // —— v1.2.98 急救空投重置 ——
@@ -27465,7 +27470,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.101', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.102', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -28116,7 +28121,17 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       spawnBulletNow: (x, y, dir, foe) => { const o = foe ? enemies.find(z => !z.dead) : player; if (!o) return -1; bullets.push({ x, y, dir, speed: BULLET_SPEED, size: 4, owner: o, dead: false }); return bullets.length; },
       lvAccNow: () => ({ s: lvShots, h: lvHits }), lvAccSetNow: (s, h) => { lvShots = s | 0; lvHits = h | 0; return true; }, lvPerfTextNow: () => { const e = $('lvPerfLbl'); return e ? e.textContent : ''; },
       medkitNow: () => medkitDropped, goldenNow: () => enemies.filter(e => e.golden && !e.dead).length,
-      lastFoeNow: () => { const live = enemies.filter(x => !x.dead); return (enemiesTotal - levelKills === 1 && live.length === 1) ? { x: Math.round(live[0].x), y: Math.round(live[0].y) } : null; }, lastFoeNotedNow: () => lastFoeNoted, enemiesTotalSetNow: (n) => { enemiesTotal = Math.max(0, n | 0); return enemiesTotal; },
+      lastFoeNow: () => { const live = enemies.filter(x => !x.dead); return (enemiesTotal - levelKills === 1 && live.length === 1) ? { x: Math.round(live[0].x), y: Math.round(live[0].y) } : null; }, lastFoeNotedNow: () => lastFoeNoted,       enemiesTotalSetNow: (n) => { enemiesTotal = Math.max(0, n | 0); return enemiesTotal; },
+      lvStateSetNow: (o) => { o = o || {}; if (o.hit !== undefined) tookHitThisLevel = !!o.hit; if (o.secs !== undefined) levelSecs = Number(o.secs) || 0; if (o.kills !== undefined) levelKills = o.kills | 0; if (o.lives !== undefined) lives = o.lives | 0; return true; },
+      weatherNow: () => weather, weatherSetNow: (w) => { weather = w; return weather; },
+      diffNow: () => ({ d: difficulty, hp: diffMul().hp, spd: diffMul().spd, rw: diffMul().reward }),
+      firstWinNow: () => firstWinDayK, firstWinResetNow: () => { firstWinDayK = ''; return true; }, dayKeyNow: () => String(dayKey()),
+      lvBestNow: () => (career.lvBest || {})[level] || 0, lvBestSetNow: (n) => { career.lvBest = career.lvBest || {}; career.lvBest[level] = n; return career.lvBest[level]; }, lvRecNow: () => lvNewRec,
+      streakHoldNow: () => streakHoldT, streakHoldSetNow: (v) => { streakHoldT = Number(v) || 0; return streakHoldT; }, killStreakNow: () => killStreak,
+      luckyNow: () => luckyLevel, dropRateNow: () => (dailyMods.doublePU || luckyLevel ? 0.30 : 0.15),
+      achPointsNow: () => achUnlocked.size * 10,
+      lvRankNow: () => lvRankS, interestNow: () => lastInterest,
+      endNow: (w) => { endGame(!!w); return gameOver; },
       spawnBlockNow: () => spawnBlockT,
       baseRectNow: () => ({ x: BASE.x * TILE, y: BASE.y * TILE, w: TILE }),
       spawnEBulletAt: (x, y, dir) => { perfPoolSpawn(x, y, 4, dir == null ? 4 : dir, BULLET_SPEED * 0.8, enemies.find(e => !e.dead) || { isPlayer: false }, 0, false); return bullets.length; },
