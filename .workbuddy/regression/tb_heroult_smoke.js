@@ -29153,6 +29153,40 @@ async function main() {
     return has || JSON.stringify({ pu: T.powerups() });
   });
 
+  // U9641–U9643: 精英敌将
+  await senseCheck("U9641 首只敌人为金色敌将", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    document.querySelector('#randMapSeg [data-rand="0"]').click();
+    T.startAtLevel(3); T.skipIntro();
+    for (let i = 0; i < 60 && T.r18enNow().length === 0; i++) await Z(200);
+    const g = T.r18enNow().find(e => e.golden);
+    const ok = !!g && g.maxHp >= 3 && T.goldenNow() === 1;
+    T.quit();
+    return ok || JSON.stringify({ g: !!g, n: T.goldenNow() });
+  });
+  await senseCheck("U9642 后续敌人不再镀金", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    document.querySelector('#randMapSeg [data-rand="0"]').click();
+    T.startAtLevel(3); T.skipIntro();
+    for (let i = 0; i < 30 && T.r18enNow().length === 0; i++) await Z(200);
+    T.spawnFoeNow(400, 100, 'normal');
+    T.spawnFoeNow(200, 100, 'normal');
+    const n = T.goldenNow();
+    T.quit();
+    return n === 1 || JSON.stringify({ n });
+  });
+  await senseCheck("U9643 击杀敌将掉道具加金币", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(400, 100, 'normal');
+    const g = T.r18enNow().find(e => e.golden) || T.r18enNow()[0];
+    const p0 = T.powerups().length, c0 = T.coins();
+    g.hp = 1;
+    T.kill();
+    const dp = T.powerups().length - p0, dc = T.coins() - c0;
+    T.quit();
+    return (dp >= 1 && dc >= 30) || JSON.stringify({ dp, dc });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
