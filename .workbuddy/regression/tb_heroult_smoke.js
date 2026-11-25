@@ -29044,6 +29044,51 @@ async function main() {
     return has || JSON.stringify(T.floatTextsNow());
   });
 
+  // U9632–U9634: Boss弱点
+  await senseCheck("U9632 背后命中追加伤害", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const pp = T.r18posNow();
+    T.spawnFoeNow(pp.px - 20, pp.py - 96, 'normal');
+    const e = T.r18enNow()[0];
+    e.isBoss = true; e.enterT = 0; e.hp = 10; e.freezeT = 1e9;
+    T.fireOnce();
+    e.dir = 0;
+    await Z(800);
+    const ok = e.hp <= 8;
+    T.quit();
+    return ok || JSON.stringify({ hp: e.hp });
+  });
+  await senseCheck("U9633 正面命中正常伤害", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const pp = T.r18posNow();
+    T.spawnFoeNow(pp.px - 20, pp.py - 96, 'normal');
+    const e = T.r18enNow()[0];
+    e.isBoss = true; e.enterT = 0; e.hp = 10; e.freezeT = 1e9;
+    T.fireOnce();
+    e.dir = 4;
+    await Z(800);
+    const noWeak = !T.floatTextsNow().some(t => t.indexOf('弱点') >= 0);
+    const ok = noWeak && e.hp < 10;
+    T.quit();
+    return ok || JSON.stringify({ hp: e.hp, noWeak });
+  });
+  await senseCheck("U9634 弱点命中飘字", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const pp = T.r18posNow();
+    T.spawnFoeNow(pp.px - 20, pp.py - 96, 'normal');
+    const e = T.r18enNow()[0];
+    e.isBoss = true; e.enterT = 0; e.hp = 10; e.freezeT = 1e9;
+    T.fireOnce();
+    e.dir = 0;
+    await Z(800);
+    const has = T.floatTextsNow().some(s => s.indexOf('弱点') >= 0);
+    T.quit();
+    return has || JSON.stringify(T.floatTextsNow());
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
