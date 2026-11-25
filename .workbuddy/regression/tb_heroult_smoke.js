@@ -28877,6 +28877,349 @@ async function main() {
     return (m1 === m0) || JSON.stringify({ m0, m1 });
   });
 
+  // U9617–U9619: 隐藏宝箱
+  await senseCheck("U9617 每关生成隐藏宝箱", (T,$) => {
+    document.querySelector('#randMapSeg [data-rand="0"]').click();
+    T.startAtLevel(3); T.skipIntro();
+    const n = T.chestNow().length;
+    T.quit();
+    return (n >= 1 && n <= 2) || JSON.stringify({ n });
+  });
+  await senseCheck("U9618 击破宝箱掉落道具", (T,$) => {
+    document.querySelector('#randMapSeg [data-rand="0"]').click();
+    T.startAtLevel(3); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const C = T.colsNow(), key = T.chestNow()[0];
+    const x = key % C, y = Math.floor(key / C);
+    const p0 = T.powerups().length, n0 = T.chestNow().length;
+    T.breakTileNow(x, y);
+    const p1 = T.powerups().length, left = T.chestNow().length;
+    T.quit();
+    return (p1 > p0 && left === n0 - 1) || JSON.stringify({ p0, p1, left, n0 });
+  });
+  await senseCheck("U9619 普通砖墙不掉道具", (T,$) => {
+    document.querySelector('#randMapSeg [data-rand="0"]').click();
+    T.startAtLevel(3); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const chest = new Set(T.chestNow()), C = T.colsNow();
+    let bx = -1, by = -1;
+    for (let y = 2; y < C - 2 && bx < 0; y++) for (let x = 2; x < C - 2; x++)
+      if (T.tileAtNow(x, y) === 1 && !chest.has(y * C + x)) { bx = x; by = y; break; }
+    if (bx < 0) { T.quit(); return 'no plain brick'; }
+    const p0 = T.powerups().length;
+    T.breakTileNow(bx, by);
+    const p1 = T.powerups().length;
+    T.quit();
+    return p1 === p0 || JSON.stringify({ p0, p1 });
+  });
+
+  // U9620–U9622: 空投补给
+  await senseCheck("U9620 空投倒计时随关重置", (T,$) => {
+    T.startAtLevel(2); T.skipIntro();
+    const t = T.airDropNow();
+    T.quit();
+    return (t > 10 && t <= 21) || JSON.stringify({ t });
+  });
+  await senseCheck("U9621 倒计时归零投放道具", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startAtLevel(2); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.airDropSetNow(0.15);
+    await Z(700);
+    const fired = T.airDropNow() <= 0;
+    const has = T.powerups().length > 0 || T.floatTextsNow().some(t => t.indexOf('空投') >= 0);
+    T.quit();
+    return (fired && has) || JSON.stringify({ fired, has, pu: T.powerups() });
+  });
+  await senseCheck("U9622 空投落点可通行", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startAtLevel(2); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.airDropSetNow(0.15);
+    await Z(700);
+    const pp = T.puPosNow();
+    const ok = pp.length > 0 && pp.every(p => !T.isBlockedNow(p.x, p.y, 16));
+    T.quit();
+    return ok || JSON.stringify(pp);
+  });
+
+  // U9623–U9625: 复仇悬赏
+  await senseCheck("U9623 敌弹命中玩家挂悬赏", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn();
+    T.spawnFoeNow(400, 100, 'normal');
+    for (let i = 0; i < 40 && T.spawnInvNow() > 0; i++) await Z(200);
+    const pp = T.r18posNow();
+    T.spawnBulletNow(pp.px - 40, pp.py - 2, 2, true);
+    await Z(900);
+    const b = (T.r18enNow()[0] || {}).bounty || 0;
+    T.quit();
+    return b === 40 || JSON.stringify({ b });
+  });
+  await senseCheck("U9624 击杀悬赏敌人结算金币", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(400, 100, 'normal');
+    const e = T.r18enNow()[0];
+    e.bounty = 40; e.hp = 1;
+    const c0 = T.coins();
+    T.kill();
+    const c1 = T.coins();
+    T.quit();
+    return c1 - c0 >= 40 || JSON.stringify({ c0, c1 });
+  });
+  await senseCheck("U9625 悬赏结算飘字播报", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(400, 100, 'normal');
+    const e = T.r18enNow()[0];
+    e.bounty = 40; e.hp = 1;
+    T.kill();
+    const has = T.floatTextsNow().some(s => s.indexOf('悬赏') >= 0);
+    T.quit();
+    return has || JSON.stringify(T.floatTextsNow());
+  });
+
+  // U9626–U9628: 百发百中
+  await senseCheck("U9626 高命中得精准徽记", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.lvAccSetNow(10, 10);
+    T.showLvResultNow();
+    const t = T.lvPerfTextNow();
+    const has = t.indexOf('🎯') >= 0 || t.indexOf('百发百中') >= 0;
+    T.quit();
+    return has || JSON.stringify({ t });
+  });
+  await senseCheck("U9627 低命中无徽记", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.lvAccSetNow(10, 5);
+    T.showLvResultNow();
+    const t = T.lvPerfTextNow();
+    const has = t.indexOf('百发百中') >= 0;
+    T.quit();
+    return !has || JSON.stringify({ t });
+  });
+  await senseCheck("U9628 真实命中计入统计", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const pp = T.r18posNow();
+    T.spawnFoeNow(pp.px - 20, pp.py - 96, 'normal');
+    T.fireOnce();
+    await Z(800);
+    const a = T.lvAccNow();
+    T.quit();
+    return (a.s >= 1 && a.h >= 1) || JSON.stringify(a);
+  });
+
+  // U9629–U9631: 弹弹相消
+  await senseCheck("U9629 拦截普通敌弹 +10", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(400, 100, 'normal');
+    const pp = T.r18posNow(), s0 = T.scoreNow();
+    T.spawnBulletNow(pp.px - 2, pp.py - 30, 0, false);
+    T.spawnBulletNow(pp.px - 2, pp.py - 60, 4, true);
+    await Z(800);
+    const d = T.scoreNow() - s0;
+    T.quit();
+    return d === 10 || JSON.stringify({ d });
+  });
+  await senseCheck("U9630 拦截Boss弹 +20", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(400, 100, 'normal');
+    T.r18enNow()[0].isBoss = true;
+    const pp = T.r18posNow(), s0 = T.scoreNow();
+    T.spawnBulletNow(pp.px - 2, pp.py - 30, 0, false);
+    T.spawnBulletNow(pp.px - 2, pp.py - 60, 4, true);
+    await Z(800);
+    const d = T.scoreNow() - s0;
+    T.quit();
+    return d === 20 || JSON.stringify({ d });
+  });
+  await senseCheck("U9631 拦截飘字 +10", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(400, 100, 'normal');
+    const pp = T.r18posNow();
+    T.spawnBulletNow(pp.px - 2, pp.py - 30, 0, false);
+    T.spawnBulletNow(pp.px - 2, pp.py - 60, 4, true);
+    await Z(800);
+    const has = T.floatTextsNow().some(s => s === '+10');
+    T.quit();
+    return has || JSON.stringify(T.floatTextsNow());
+  });
+
+  // U9632–U9634: Boss弱点
+  await senseCheck("U9632 背后命中追加伤害", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const pp = T.r18posNow();
+    T.spawnFoeNow(pp.px - 20, pp.py - 96, 'normal');
+    const e = T.r18enNow()[0];
+    e.isBoss = true; e.enterT = 0; e.hp = 10; e.freezeT = 1e9;
+    T.fireOnce();
+    e.dir = 0;
+    await Z(800);
+    const ok = e.hp <= 8;
+    T.quit();
+    return ok || JSON.stringify({ hp: e.hp });
+  });
+  await senseCheck("U9633 正面命中正常伤害", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const pp = T.r18posNow();
+    T.spawnFoeNow(pp.px - 20, pp.py - 96, 'normal');
+    const e = T.r18enNow()[0];
+    e.isBoss = true; e.enterT = 0; e.hp = 10; e.freezeT = 1e9;
+    T.fireOnce();
+    e.dir = 4;
+    await Z(800);
+    const noWeak = !T.floatTextsNow().some(t => t.indexOf('弱点') >= 0);
+    const ok = noWeak && e.hp < 10;
+    T.quit();
+    return ok || JSON.stringify({ hp: e.hp, noWeak });
+  });
+  await senseCheck("U9634 弱点命中飘字", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const pp = T.r18posNow();
+    T.spawnFoeNow(pp.px - 20, pp.py - 96, 'normal');
+    const e = T.r18enNow()[0];
+    e.isBoss = true; e.enterT = 0; e.hp = 10; e.freezeT = 1e9;
+    T.fireOnce();
+    e.dir = 0;
+    await Z(800);
+    const has = T.floatTextsNow().some(s => s.indexOf('弱点') >= 0);
+    T.quit();
+    return has || JSON.stringify(T.floatTextsNow());
+  });
+
+  // U9635–U9637: 急救空投
+  await senseCheck("U9635 降至1命投放医疗包", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn();
+    T.setLives(2);
+    T.spawnFoeNow(400, 100, 'normal');
+    for (let i = 0; i < 40 && T.spawnInvNow() > 0; i++) await Z(200);
+    const pp = T.r18posNow();
+    T.spawnBulletNow(pp.px - 40, pp.py - 2, 2, true);
+    await Z(900);
+    const has = T.medkitNow() === true || T.powerups().indexOf('life') >= 0;
+    T.quit();
+    return has || JSON.stringify({ pu: T.powerups(), m: T.medkitNow() });
+  });
+  await senseCheck("U9636 急救空投标记置位", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn();
+    T.setLives(2);
+    T.spawnFoeNow(400, 100, 'normal');
+    for (let i = 0; i < 40 && T.spawnInvNow() > 0; i++) await Z(200);
+    const pp = T.r18posNow();
+    T.spawnBulletNow(pp.px - 40, pp.py - 2, 2, true);
+    await Z(2500);
+    const lv = T.livesNow();
+    T.quit();
+    return lv >= 2 || JSON.stringify({ lv });
+  });
+  await senseCheck("U9637 多命阵亡不投空投", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn();
+    T.setLives(3);
+    T.spawnFoeNow(400, 100, 'normal');
+    for (let i = 0; i < 40 && T.spawnInvNow() > 0; i++) await Z(200);
+    const pp = T.r18posNow();
+    T.spawnBulletNow(pp.px - 40, pp.py - 2, 2, true);
+    await Z(900);
+    const no = T.powerups().indexOf('life') < 0 && T.medkitNow() === false;
+    T.quit();
+    return no || JSON.stringify({ pu: T.powerups(), m: T.medkitNow() });
+  });
+
+  // U9638–U9640: 连杀馈赠
+  await senseCheck("U9638 三连杀掉快速弹", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    for (let i = 0; i < 3; i++) { T.spawnFoeNow(400 + i * 10, 100, 'normal'); T.kill(); }
+    const has = T.powerups().indexOf('rapid') >= 0;
+    T.quit();
+    return has || JSON.stringify({ pu: T.powerups() });
+  });
+  await senseCheck("U9639 五连杀掉护盾", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    for (let i = 0; i < 5; i++) { T.spawnFoeNow(400 + i * 10, 100, 'normal'); T.kill(); }
+    const has = T.powerups().indexOf('shield') >= 0;
+    T.quit();
+    return has || JSON.stringify({ pu: T.powerups() });
+  });
+  await senseCheck("U9640 八连杀掉炸弹", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    for (let i = 0; i < 8; i++) { T.spawnFoeNow(400 + i * 10, 100, 'normal'); T.kill(); }
+    const has = T.powerups().indexOf('bomb') >= 0;
+    T.quit();
+    return has || JSON.stringify({ pu: T.powerups() });
+  });
+
+  // U9641–U9643: 精英敌将
+  await senseCheck("U9641 首只敌人为金色敌将", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    document.querySelector('#randMapSeg [data-rand="0"]').click();
+    T.startAtLevel(3); T.skipIntro();
+    for (let i = 0; i < 60 && T.r18enNow().length === 0; i++) await Z(200);
+    const g = T.r18enNow().find(e => e.golden);
+    const ok = !!g && g.maxHp >= 3 && T.goldenNow() === 1;
+    T.quit();
+    return ok || JSON.stringify({ g: !!g, n: T.goldenNow() });
+  });
+  await senseCheck("U9642 后续敌人不再镀金", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    document.querySelector('#randMapSeg [data-rand="0"]').click();
+    T.startAtLevel(3); T.skipIntro();
+    for (let i = 0; i < 30 && T.r18enNow().length === 0; i++) await Z(200);
+    T.spawnFoeNow(400, 100, 'normal');
+    T.spawnFoeNow(200, 100, 'normal');
+    const n = T.goldenNow();
+    T.quit();
+    return n === 1 || JSON.stringify({ n });
+  });
+  await senseCheck("U9643 击杀敌将掉道具加金币", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(400, 100, 'normal');
+    const g = T.r18enNow().find(e => e.golden) || T.r18enNow()[0];
+    const p0 = T.powerups().length, c0 = T.coins();
+    g.hp = 1;
+    T.kill();
+    const dp = T.powerups().length - p0, dc = T.coins() - c0;
+    T.quit();
+    return (dp >= 1 && dc >= 30) || JSON.stringify({ dp, dc });
+  });
+
+  // U9644–U9646: 残敌指引
+  await senseCheck("U9644 仅剩1敌定位返回", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.enemiesTotalSetNow(2);
+    T.spawnFoeNow(400, 100, 'normal');
+    T.spawnFoeNow(200, 100, 'normal');
+    T.kill();
+    const lf = T.lastFoeNow();
+    T.quit();
+    return (!!lf && typeof lf.x === 'number') || JSON.stringify({ lf });
+  });
+  await senseCheck("U9645 清场后定位消失", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.enemiesTotalSetNow(1);
+    T.spawnFoeNow(400, 100, 'normal');
+    T.kill();
+    const lf = T.lastFoeNow();
+    T.quit();
+    return lf === null || JSON.stringify({ lf });
+  });
+  await senseCheck("U9646 残敌提示触发", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.enemiesTotalSetNow(2);
+    T.spawnFoeNow(400, 100, 'normal');
+    T.spawnFoeNow(200, 100, 'normal');
+    T.kill();
+    await Z(500);
+    const n = T.lastFoeNotedNow();
+    T.quit();
+    return n === true || JSON.stringify({ n });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
