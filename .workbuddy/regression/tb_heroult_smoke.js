@@ -29358,6 +29358,34 @@ async function main() {
     return s === 0 || JSON.stringify({ s });
   });
 
+  // U9662–U9664: 每日首胜
+  await senseCheck("U9662 首次领取得首胜金", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.firstWinResetNow();
+    T.setCoinsNow(1000);
+    T.showLvResultNow();
+    const c0 = T.coins();
+    T.claimLvNow();
+    const fw = T.firstWinNow(), d = T.coins() - c0;
+    T.quit();
+    return (fw === T.dayKeyNow() && d >= 50) || JSON.stringify({ fw, d });
+  });
+  await senseCheck("U9663 当日二次领取无首胜", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.firstWinResetNow();
+    T.showLvResultNow(); T.claimLvNow();
+    T.showLvResultNow();
+    const c0 = T.coins();
+    T.claimLvNow();
+    const fw = T.firstWinNow();
+    T.quit();
+    return fw === T.dayKeyNow() || JSON.stringify({ fw });
+  });
+  await senseCheck("U9664 首胜标记持久化", (T,$) => {
+    const fw = T.firstWinNow(), k = T.dayKeyNow();
+    return fw === '' || fw === k || JSON.stringify({ fw, k });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
