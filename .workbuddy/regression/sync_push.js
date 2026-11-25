@@ -36,10 +36,12 @@ function gh(args, input) {
     args += ' --input "' + tmp + '"';
   }
   let last = '';
-  // 代理可用性会反转:先保留系统代理,再剥离代理;每通道各重试 3 次。
+  // 代理可用性会反转:先保留系统代理,再剥离代理,最后显式本地代理;每通道各重试 3 次。
   // blob/tree 内容寻址天然幂等,commit/ref 重复写入最多留下一个悬挂提交,树仍一致。
-  for (const strip of [false, true]) {
-    const env = strip ? ghEnv() : { ...process.env };
+  const proxyEnv = { ...process.env };
+  const px = process.env.TB_GH_PROXY || 'http://127.0.0.1:7897';
+  proxyEnv.HTTP_PROXY = px; proxyEnv.HTTPS_PROXY = px; proxyEnv.http_proxy = px; proxyEnv.https_proxy = px;
+  for (const env of [{ ...process.env }, ghEnv(), proxyEnv]) {
     const opts = { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024, env, timeout: 120000 };
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {

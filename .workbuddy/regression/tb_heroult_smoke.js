@@ -29447,6 +29447,26 @@ async function main() {
     return (h > 4 && k === 2) || JSON.stringify({ h, k });
   });
 
+  // U9671–U9673: 幸运关
+  await senseCheck("U9671 第7关判定幸运关", (T,$) => {
+    T.startAtLevel(7); T.skipIntro();
+    const l = T.luckyNow(), r = T.dropRateNow();
+    T.quit();
+    return (l === true && r === 0.30) || JSON.stringify({ l, r });
+  });
+  await senseCheck("U9672 第6关非幸运关", (T,$) => {
+    T.startAtLevel(6); T.skipIntro();
+    const l = T.luckyNow(), r = T.dropRateNow();
+    T.quit();
+    return (l === false && r === 0.15) || JSON.stringify({ l, r });
+  });
+  await senseCheck("U9673 第14关同为幸运关", (T,$) => {
+    T.startAtLevel(14); T.skipIntro();
+    const l = T.luckyNow();
+    T.quit();
+    return l === true || JSON.stringify({ l });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
