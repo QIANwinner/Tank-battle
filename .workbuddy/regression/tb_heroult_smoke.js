@@ -29415,6 +29415,38 @@ async function main() {
     return t.indexOf('新纪录') >= 0 || JSON.stringify({ t });
   });
 
+  // U9668–U9670: 连杀保持窗
+  await senseCheck("U9668 击杀开启保持窗", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(400, 100, 'normal');
+    T.kill();
+    const h = T.streakHoldNow(), k = T.killStreakNow();
+    T.quit();
+    return (h > 0 && k === 1) || JSON.stringify({ h, k });
+  });
+  await senseCheck("U9669 超时连杀清零", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(400, 100, 'normal');
+    T.kill();
+    T.streakHoldSetNow(0.1);
+    await Z(700);
+    const k = T.killStreakNow();
+    T.quit();
+    return k === 0 || JSON.stringify({ k });
+  });
+  await senseCheck("U9670 再杀刷新窗口", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(400, 100, 'normal');
+    T.kill();
+    T.streakHoldSetNow(1);
+    T.spawnFoeNow(200, 100, 'normal');
+    T.kill();
+    const h = T.streakHoldNow(), k = T.killStreakNow();
+    T.quit();
+    return (h > 4 && k === 2) || JSON.stringify({ h, k });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
