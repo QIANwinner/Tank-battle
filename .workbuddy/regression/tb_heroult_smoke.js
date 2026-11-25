@@ -25585,6 +25585,7 @@ async function main() {
   await senseCheck("U9145 无效计时不亮线，未知方向不延伸", T => { const p = T.sniperAimEndNow(100, 100, 9), q = T.sniperAimEndNow(100, 100, 'x'); return [NaN, -5, '10', Infinity, null, undefined].every(v => T.sniperAimAlphaNow(v) === 0) && p.x === 100 && p.y === 100 && q.x === 100 && q.y === 100; });
   await senseCheck("U9146 真实狙击手：临开火亮红线，被墙截断，冻结时熄灭", (T,$) => {
       T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+      T.spawnFoeNow(120, 500, 'normal');   // 诱饵敌，避免仅剩1敌触发残敌定位红色指针污染采样
       const e = T.spawnEnemyAt(300, 100, 'sniper'); e.dir = 4;
       const idle = T.sniperAimsNow().length === 0;
       e.shootTimer = 12;
@@ -29245,6 +29246,36 @@ async function main() {
     const r = T.lvRankNow();
     T.quit();
     return r === 30 || JSON.stringify({ r });
+  });
+
+  // U9650–U9652: 过关利息
+  await senseCheck("U9650 领取触发利息入账", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setCoinsNow(2000);
+    T.showLvResultNow();
+    T.claimLvNow();
+    const i = T.interestNow();
+    T.quit();
+    return i >= 20 || JSON.stringify({ i });
+  });
+  await senseCheck("U9651 利息封顶50", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setCoinsNow(99999);
+    T.showLvResultNow();
+    T.claimLvNow();
+    const i = T.interestNow();
+    T.quit();
+    return i === 50 || JSON.stringify({ i });
+  });
+  await senseCheck("U9652 金币实账含利息", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setCoinsNow(2000);
+    T.showLvResultNow();
+    const c0 = T.coins();
+    T.claimLvNow();
+    const d = T.coins() - c0;
+    T.quit();
+    return d >= T.interestNow() || JSON.stringify({ d });
   });
 
   chrome.kill(); killTree(chrome.pid);
