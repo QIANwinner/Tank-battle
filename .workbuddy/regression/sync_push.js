@@ -41,7 +41,7 @@ function gh(args, input) {
   const proxyEnv = { ...process.env };
   const px = process.env.TB_GH_PROXY || 'http://127.0.0.1:7897';
   proxyEnv.HTTP_PROXY = px; proxyEnv.HTTPS_PROXY = px; proxyEnv.http_proxy = px; proxyEnv.https_proxy = px;
-  for (const env of [{ ...process.env }, ghEnv(), proxyEnv]) {
+  for (const env of [proxyEnv, { ...process.env }, ghEnv()]) {   // 代理优先:本机直连 api.github.com 会被 fake-ip 劫持,先试代理省 6 次空转
     const opts = { encoding: 'utf8', maxBuffer: 256 * 1024 * 1024, env, timeout: 120000 };
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
