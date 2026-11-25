@@ -29324,6 +29324,40 @@ async function main() {
     return (d === 'normal' && m.hp === 1) || JSON.stringify({ d, m });
   });
 
+  // U9659–U9661: R键重开
+  await senseCheck("U9659 失败画面按R重开", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro();
+    T.endNow(false);
+    await Z(300);
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'r' }));
+    await Z(300);
+    const ok = T.runningNow() === true && T.gameOverNow() === false;
+    T.quit();
+    return ok || JSON.stringify({ run: T.runningNow() });
+  });
+  await senseCheck("U9660 游戏中按R不触发", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const c0 = T.startCallsNow();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'r' }));
+    await Z(200);
+    const c1 = T.startCallsNow();
+    T.quit();
+    return c1 === c0 || JSON.stringify({ c0, c1 });
+  });
+  await senseCheck("U9661 R重开分数清零", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro();
+    T.endNow(false);
+    await Z(300);
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'r' }));
+    await Z(300);
+    const s = T.scoreNow();
+    T.quit();
+    return s === 0 || JSON.stringify({ s });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
