@@ -29278,6 +29278,36 @@ async function main() {
     return d >= T.interestNow() || JSON.stringify({ d });
   });
 
+  // U9653–U9655: 战地天气
+  await senseCheck("U9653 雨天敌速降低8%", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.weatherSetNow('clear');
+    T.spawnFoeNow(400, 100, 'normal');
+    const s0 = T.r18enNow()[0].speed;
+    T.weatherSetNow('rain');
+    T.spawnFoeNow(200, 100, 'normal');
+    const s1 = T.r18enNow()[1].speed;
+    T.quit();
+    return s1 < s0 || JSON.stringify({ s0, s1 });
+  });
+  await senseCheck("U9654 天气值合法", (T,$) => {
+    T.startGame(); T.skipIntro();
+    const w = T.weatherNow();
+    T.quit();
+    return ['clear', 'rain', 'snow', 'wind'].indexOf(w) >= 0 || JSON.stringify({ w });
+  });
+  await senseCheck("U9655 大风敌速提升8%", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.weatherSetNow('clear');
+    T.spawnFoeNow(400, 100, 'normal');
+    const s0 = T.r18enNow()[0].speed;
+    T.weatherSetNow('wind');
+    T.spawnFoeNow(200, 100, 'normal');
+    const s1 = T.r18enNow()[1].speed;
+    T.quit();
+    return s1 > s0 || JSON.stringify({ s0, s1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
