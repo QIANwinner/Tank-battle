@@ -29486,6 +29486,43 @@ async function main() {
     return (typeof p === 'number' && p >= 0 && p % 10 === 0) || JSON.stringify({ p });
   });
 
+  // U9677–U9679: 暴击弹
+  await senseCheck("U9677 暴击伤害翻倍", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.critForceNow(true); T.clearMap();
+    T.spawnFoeNow(400, 100, 'armored');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9;
+    const hp0 = e.hp;
+    T.spawnBulletNow(e.x + e.size / 2 - 2, e.y + e.size + 6, 0, false);
+    for (let i = 0; i < 25 && e.hp >= hp0; i++) await Z(50);
+    T.quit();
+    return e.hp <= hp0 - 2 || JSON.stringify({ hp0, hp: e.hp });
+  });
+  await senseCheck("U9678 暴击计数与飘字", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.critForceNow(true); T.clearMap();
+    T.spawnFoeNow(400, 100, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9; e.hp = 9;
+    T.spawnBulletNow(e.x + e.size / 2 - 2, e.y + e.size + 6, 0, false);
+    let c = 0, t = false;
+    for (let i = 0; i < 25 && c < 1; i++) { await Z(50); c = T.critNow(); t = t || T.floatTextsNow().some(x => x.indexOf('暴击') >= 0); }
+    T.quit();
+    return (c >= 1 && t) || JSON.stringify({ c, t });
+  });
+  await senseCheck("U9679 换局暴击计数清零", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.critForceNow(true); T.clearMap();
+    T.spawnFoeNow(400, 100, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9; e.hp = 9;
+    T.spawnBulletNow(e.x + e.size / 2 - 2, e.y + e.size + 6, 0, false);
+    for (let i = 0; i < 25 && T.critNow() < 1; i++) await Z(50);
+    T.critForceNow(false);
+    T.quit(); T.startGame(); T.skipIntro();
+    const c = T.critNow();
+    T.quit();
+    return c === 0 || JSON.stringify({ c });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
