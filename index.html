@@ -1500,6 +1500,7 @@
         <button data-diff="easy">😌 轻松</button>
         <button data-diff="normal">⚖ 标准</button>
         <button data-diff="hard">🔥 硬核</button>
+        <button data-diff="hell">💀 炼狱</button>
       </div>
     </div>
     <div class="diffRow" id="contractRow">
@@ -1876,7 +1877,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.101</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.111</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2384,6 +2385,7 @@
     // —— v0.2.4 硬核经济回调：奖励 0.85→1.0（得分 1.2 已作补偿），硬核不再金币劝退 ——
     if (difficulty === 'easy') return contractMul({ spd: 0.85, hp: 1, reward: 1.15, score: 1 });
     if (difficulty === 'hard') return contractMul({ spd: 1.18, hp: 1.3, reward: 1.0, score: 1.2 });
+    if (difficulty === 'hell') return contractMul({ spd: 1.3, hp: 1.5, reward: 1.6, score: 1.4 });   // —— v1.2.105 炼狱 ——
     return contractMul({ spd: 1, hp: 1, reward: 1, score: 1 });
   }
   // 画质档位决定 DPR 上限（高=2 / 中=1.5 / 低=1），像素量是最大性能杠杆
@@ -2907,6 +2909,7 @@
   let lvStarsNow = 0;                // —— v0.2.6 本关评级星数 ——
   let levelKills = 0;                // —— v0.2.6 本关击杀数（结算界面） ——
   let lvShots = 0, lvHits = 0, lvAccBonus = 0;   // —— v1.2.95 本关射击命中统计 ——
+  let lvRankS = 0, lastInterest = 0, weather = 'clear', firstWinDayK = '', lvNewRec = false, streakHoldT = 0, luckyLevel = false;   // —— v1.2.102~110 系统波状态 ——
   try {
     const c = healedJson(LS_CAREER, {});   // —— v1.2.77 存档自愈加载 ——
     if (c && typeof c === 'object') {
@@ -4197,7 +4200,7 @@
     const hp = Math.max(1, Math.ceil(def.hp * DM.hp * emHp));
     enemies.push({
       x, y, dir: DIR.DOWN,
-      speed: def.speed * levelSpeedMul() * (dailyMods.speedMul || 1) * DM.spd * emSpd,
+      speed: def.speed * levelSpeedMul() * (dailyMods.speedMul || 1) * DM.spd * emSpd * (weather === 'rain' ? 0.92 : weather === 'wind' ? 1.08 : 1),   // —— v1.2.104 天气移速 ——
       cooldown: 0, isPlayer: false,
       type, hp: hp, maxHp: hp, size: TANK_SIZE,
       color: def.color || pickEnemyColor(),
@@ -5121,7 +5124,7 @@
     stat.kills++;
     missionBump('kills', 1);   // —— v1.2.2 每日任务 ——
     dexAdd(e.isBoss ? 'boss' : e.type);   // —— v1.2.25 敌人图鉴击杀计数 ——
-    killStreak++; streakFlash(killStreak);
+    killStreak++; streakFlash(killStreak); streakHoldT = 8;   // —— v1.2.109 连杀保持窗 ——
     if (killStreak === 3 || killStreak === 5 || killStreak === 8) {   // —— v1.2.99 连杀馈赠 ——
       spawnPowerup(e.x + e.size / 2, e.y + e.size / 2, killStreak >= 8 ? 'bomb' : (killStreak >= 5 ? 'shield' : 'rapid'));
       addText(e.x + e.size / 2, e.y - 14, '🎁 连杀馈赠 x' + killStreak, '#ffd75e');
@@ -5183,7 +5186,7 @@
       spawnPowerup(x - 20, y, 'shield');
       spawnPowerup(x + 20, y, 'life');
       spawnPowerup(x, y);
-    } else if (rng() < (dailyMods.doublePU ? 0.30 : 0.15)) {
+    } else if (rng() < (dailyMods.doublePU || luckyLevel ? 0.30 : 0.15)) {   // —— v1.2.110 幸运关 ——
       spawnPowerup(x, y);
     }
   }
@@ -5505,6 +5508,12 @@
     lvPerfGold += lvFastBonus;
     lvAccBonus = (lvShots >= 8 && lvHits / lvShots >= 0.9 && multiMode !== 2) ? 15 : 0;   // —— v1.2.95 百发百中 ——
     lvPerfGold += lvAccBonus;
+    lvRankS = (lvPerfKind === 'perf' && lvStarsNow >= 3 && multiMode !== 2) ? 30 : 0;   // —— v1.2.102 S级评价 ——
+    const pb108 = (career.lvBest || {})[level] || 0;
+    if (levelSecs > 0 && levelSecs < 999 && (!pb108 || levelSecs < pb108) && multiMode !== 2) {   // —— v1.2.108 速通纪录 ——
+      career.lvBest = career.lvBest || {}; career.lvBest[level] = levelSecs; saveCareer(); lvNewRec = true;
+    }
+    lvPerfGold += lvRankS;
     if (lives <= 1 && multiMode !== 2) { career.clutch = (career.clutch || 0) + 1; saveCareer(); }   // —— v1.2.47 险胜徽章 ——
     const lvPerfEl = $('lvPerfRow');
     if (lvPerfEl) {
@@ -5515,6 +5524,8 @@
         if (lvWingBonus > 0) lvParts.push('🛡 僚机保全');
         if (lvFastBonus > 0) lvParts.push('⚡ 速通');   // —— v1.2.46 ——
         if (lvAccBonus > 0) lvParts.push('🎯 百发百中');   // —— v1.2.95 ——
+        if (lvRankS > 0) lvParts.push('🌟 S级完美');   // —— v1.2.102 ——
+        if (lvNewRec) lvParts.push('⏱ 新纪录');   // —— v1.2.108 ——
         $('lvPerfLbl').textContent = lvParts.join(' + ');
         $('lvPerfVal').textContent = '+' + lvPerfGold + ' 🪙';
       }
@@ -5607,6 +5618,14 @@
     // —— v1.2.20 过关防线：领取链任一环节异常都保底进下一关，不许无层可操作 ——
     try {
       const g = addGold(lvStarsNow * 25 + (lvPerfGold || 0));   // —— v1.2.22 表现奖励随星级金一并入账 ——
+      lastInterest = Math.min(50, Math.floor(coins * 0.02));
+      if (lastInterest > 0) addGold(lastInterest);   // —— v1.2.103 过关利息 ——
+      if (firstWinDayK !== String(dayKey())) {   // —— v1.2.107 每日首胜 ——
+        firstWinDayK = String(dayKey());
+        try { saveStore.setItem(LS_FIRSTWIN_DAY, firstWinDayK); } catch (e2) { /* 忽略 */ }
+        addGold(50);
+        showToast('🎉 每日首胜 +50🪙');
+      }
       showToast(starRewardMsg(lvStarsNow, g, coins));
       sfxCoin();   // v0.3.2 金币入账音
       updateHud();
@@ -5660,8 +5679,13 @@
     bossDeathT = 0; timeScale = 1;
     levelSecs = 0; levelKills = 0; blitzDone = false;   // —— v0.2.6 本关计时与击杀重置 · v1.2.34 ——
     lvShots = 0; lvHits = 0; lvAccBonus = 0;   // —— v1.2.95 ——
+    lvRankS = 0; lvNewRec = false; streakHoldT = 0; killStreak = 0;   // —— v1.2.102/108/109 ——
     enemiesSpawned = 0;
     airDropT = 20;   // —— v1.2.93 空投重置 ——
+    weather = __testMode ? 'clear' : ['clear', 'rain', 'snow', 'wind'][randInt(0, 3)];   // —— v1.2.104 战地天气（测试态默认晴,weatherSetNow 强制）——
+    luckyLevel = !bossLevel && level % 7 === 0;   // —— v1.2.110 幸运关 ——
+    if (weather !== 'clear' && multiMode !== 2) fieldNoteShow('🌦 ' + ({ rain: '雨战 · 敌速 -8%', snow: '雪战', wind: '大风 · 敌速 +8%' })[weather], 'info', 2000, 1);
+    if (luckyLevel && multiMode !== 2) fieldNoteShow('🍀 幸运关 · 道具掉率翻倍', 'info', 2200, 1);   // —— v1.2.110 ——
     medkitDropped = false;   // —— v1.2.98 急救空投重置 ——
     goldenPicked = false;   // —— v1.2.100 精英敌将重置 ——
     lastFoeNoted = false;   // —— v1.2.101 残敌指引重置 ——
@@ -5865,6 +5889,7 @@
     if (fx.freeze > 0) { fx.freeze -= dt; if (fx.freeze <= 0) buffEndNote('freeze'); }
     if (fx.slow > 0) { fx.slow -= dt; if (fx.slow <= 0) buffEndNote('slow'); }   // —— v1.2.32 ——
     if (baseGuard > 0) { baseGuard -= dt; if (baseGuard <= 0) buffEndNote('guard'); }   // —— v1.2.42 ——
+    if (streakHoldT > 0) { streakHoldT -= dt; if (streakHoldT <= 0 && killStreak > 0) { killStreak = 0; fieldNoteShow('⚔ 连杀中断', 'info', 1400, 1); } }   // —— v1.2.109 ——
     if (comboTimer > 0) { comboTimer -= dt; if (comboTimer <= 0) { if (comboShield && combo >= 3) { comboShield = false; comboTimer = 1.5; comboWindowMax = Math.max(comboWindowMax, 1.5); fieldNoteShow('🛡 连击护盾 · 宽限 1.5 秒', 'warn', 1600, 1); } else { fieldNoteShow(comboEndText(combo, stat.maxCombo), 'info', 1600, 1); combo = 0; } } }   // —— v1.2.18 连击护盾宽限 ——
     if (hurtFlash > 0) hurtFlash = decay(hurtFlash, dt, 2.2);
     if (bossWarn > 0) bossWarn -= dt;
@@ -5903,8 +5928,10 @@
     if (airDropT > 0 && multiMode !== 2) {
       airDropT -= dt;
       if (airDropT <= 0) {
-        let adx = W / 2, ady = H / 2;
-        for (let t = 0; t < 40; t++) { const tx = rand(TILE * 2, W - TILE * 3), ty = rand(TILE * 2, H - TILE * 3); if (!isBlocked(tx, ty, 16)) { adx = tx; ady = ty; break; } }
+        let adx = -1, ady = -1;
+        for (let t = 0; t < 40 && adx < 0; t++) { const tx = rand(TILE * 2, W - TILE * 3), ty = rand(TILE * 2, H - TILE * 3); if (!isBlocked(tx - 8, ty - 8, 16)) { adx = tx; ady = ty; } }   // —— v1.2.105 检测对齐道具实落点(x-8,y-8) ——
+        if (adx < 0) { find: for (let gy = 1; gy * TILE < H - TILE; gy++) for (let gx = 1; gx * TILE < W - TILE; gx++) { const tx = gx * TILE + 8, ty = gy * TILE + 8; if (!isBlocked(tx - 8, ty - 8, 16)) { adx = tx; ady = ty; break find; } } }
+        if (adx < 0) { adx = W / 2; ady = H / 2; }
         spawnPowerup(adx, ady);
         addText(adx + 8, ady - 12, '📦 空投补给', '#9fe870');
         fieldNoteShow('📦 空投补给已投放', 'info', 1600, 1);
@@ -25726,8 +25753,10 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   function saveGachaPity() { try { saveStore.setItem(LS_GACHA_PITY, String(gachaPity)); } catch (e) { /* 忽略 */ } }
   const LS_GHIST = 'tank-battle-ghist';   // —— v1.2.60 抽奖历史（环形8条） ——
   const LS_GACHA_DAY = 'tank-battle-gacha-day';   // —— v1.2.61 每日首抽半价 ——
+  const LS_FIRSTWIN_DAY = 'tank-battle-firstwin-day';   // —— v1.2.107 每日首胜 ——
   let gachaDayK = '';
   try { gachaDayK = saveStore.getItem(LS_GACHA_DAY) || ''; } catch (e) { /* 忽略 */ }
+  try { firstWinDayK = saveStore.getItem(LS_FIRSTWIN_DAY) || ''; } catch (e) { /* 忽略 */ }   // —— v1.2.107 ——
   function gachaTodayCost(base) { return gachaDayK === String(dayKey()) ? base : Math.max(1, Math.floor(base / 2)); }
   let ghist = [];
   try { const gh = JSON.parse(saveStore.getItem(LS_GHIST) || '[]'); if (Array.isArray(gh)) ghist = gh.slice(0, 8); } catch (e) { /* 忽略 */ }
@@ -25949,7 +25978,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (settingsFullBtn) settingsFullBtn.textContent = fullscreenBtnText(isFullscreen());
   }
   function setDifficulty(d) {
-    if (d !== 'easy' && d !== 'normal' && d !== 'hard') return;
+    if (d !== 'easy' && d !== 'normal' && d !== 'hard' && d !== 'hell') return;   // —— v1.2.105 ——
     difficulty = d;
     try { saveStore.setItem(LS_DIFF, d); } catch (e) { /* 忽略 */ }
     applySettingsUI();
@@ -26290,7 +26319,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     const ps = achPetStats();
     const statRow = document.createElement('div');
     statRow.className = 'achPetStat';
-    statRow.innerHTML = achPetStatHtml(ps.got, ps.total, got, ACHIEVE.length) + '<span>🎖 ' + achRankName(got, ACHIEVE.length) + '</span>'
+    statRow.innerHTML = achPetStatHtml(ps.got, ps.total, got, ACHIEVE.length) + '<span>🎖 ' + achRankName(got, ACHIEVE.length) + '</span><span>🏆 成就点数 ' + (got * 10) + '</span>'   // —— v1.2.111 ——
     achBody.appendChild(statRow);
     const achChipBar = document.createElement('div');   // —— v1.2.52 筛选芯片条 ——
     achChipBar.className = 'achChips';
@@ -27465,7 +27494,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.101', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.111', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -27744,6 +27773,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
 
   window.addEventListener('keydown', (e) => {
     if (isTypingTarget(e.target)) return;   // —— v1.1.234 打字不进 keys、不吞空格/方向键、不触发快捷键 ——
+    if ((e.key === 'r' || e.key === 'R') && gameOver) { ensureAudio(); start(dailyMode); return; }   // —— v1.2.106 R 键快捷重开 ——
     if (panelOpen()) return;   // —— v1.2.9 弹层开着时快捷键不进游戏 ——
     // —— v1.2.21 过关转换弹层键盘直达：Enter/空格继续结算，Enter 领内测金币，1/2/3 选强化卡 ——
     if (lvResultPending) {
@@ -28116,7 +28146,17 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       spawnBulletNow: (x, y, dir, foe) => { const o = foe ? enemies.find(z => !z.dead) : player; if (!o) return -1; bullets.push({ x, y, dir, speed: BULLET_SPEED, size: 4, owner: o, dead: false }); return bullets.length; },
       lvAccNow: () => ({ s: lvShots, h: lvHits }), lvAccSetNow: (s, h) => { lvShots = s | 0; lvHits = h | 0; return true; }, lvPerfTextNow: () => { const e = $('lvPerfLbl'); return e ? e.textContent : ''; },
       medkitNow: () => medkitDropped, goldenNow: () => enemies.filter(e => e.golden && !e.dead).length,
-      lastFoeNow: () => { const live = enemies.filter(x => !x.dead); return (enemiesTotal - levelKills === 1 && live.length === 1) ? { x: Math.round(live[0].x), y: Math.round(live[0].y) } : null; }, lastFoeNotedNow: () => lastFoeNoted, enemiesTotalSetNow: (n) => { enemiesTotal = Math.max(0, n | 0); return enemiesTotal; },
+      lastFoeNow: () => { const live = enemies.filter(x => !x.dead); return (enemiesTotal - levelKills === 1 && live.length === 1) ? { x: Math.round(live[0].x), y: Math.round(live[0].y) } : null; }, lastFoeNotedNow: () => lastFoeNoted,       enemiesTotalSetNow: (n) => { enemiesTotal = Math.max(0, n | 0); return enemiesTotal; },
+      lvStateSetNow: (o) => { o = o || {}; if (o.hit !== undefined) tookHitThisLevel = !!o.hit; if (o.secs !== undefined) levelSecs = Number(o.secs) || 0; if (o.kills !== undefined) levelKills = o.kills | 0; if (o.lives !== undefined) lives = o.lives | 0; return true; },
+      weatherNow: () => weather, weatherSetNow: (w) => { weather = w; return weather; },
+      diffNow: () => ({ d: difficulty, hp: diffMul().hp, spd: diffMul().spd, rw: diffMul().reward }),
+      firstWinNow: () => firstWinDayK, firstWinResetNow: () => { firstWinDayK = ''; return true; }, dayKeyNow: () => String(dayKey()),
+      lvBestNow: () => (career.lvBest || {})[level] || 0, lvBestSetNow: (n) => { career.lvBest = career.lvBest || {}; career.lvBest[level] = n; return career.lvBest[level]; }, lvRecNow: () => lvNewRec,
+      streakHoldNow: () => streakHoldT, streakHoldSetNow: (v) => { streakHoldT = Number(v) || 0; return streakHoldT; }, killStreakNow: () => killStreak,
+      luckyNow: () => luckyLevel, dropRateNow: () => (dailyMods.doublePU || luckyLevel ? 0.30 : 0.15),
+      achPointsNow: () => achUnlocked.size * 10,
+      lvRankNow: () => lvRankS, interestNow: () => lastInterest,
+      endNow: (w) => { endGame(!!w); return gameOver; },
       spawnBlockNow: () => spawnBlockT,
       baseRectNow: () => ({ x: BASE.x * TILE, y: BASE.y * TILE, w: TILE }),
       spawnEBulletAt: (x, y, dir) => { perfPoolSpawn(x, y, 4, dir == null ? 4 : dir, BULLET_SPEED * 0.8, enemies.find(e => !e.dead) || { isPlayer: false }, 0, false); return bullets.length; },

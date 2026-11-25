@@ -1075,12 +1075,15 @@ async function main() {
       reset(); T.startGame(); T.setLevel(3); T.setCoins(0);
       T.showLvResultNow();
       const before = T.coins();
+      const fwB = T.firstWinNow ? T.firstWinNow() : '';   // —— v1.2.107 首胜日戳(领取前快照) ——
       const g = T.claimLvNow();
       const s = T.lvResultNow();
       const gained = T.coins() - before;
       const perf = T.lvPerfNow ? (T.lvPerfNow().gold || 0) : 0;   // —— v1.2.22 过关表现奖励计入领取额 ——
-      t('Z2 领取星级奖励金币(25×星数+表现奖励) + 面板关闭',
-        gained === g.gold && gained === s.stars * 25 + perf && s.pending === false && s.show === false,
+      const intr = T.interestNow ? (T.interestNow() || 0) : 0;   // —— v1.2.103 过关利息随领取一并入账 ——
+      const fwBonus = (T.dayKeyNow && fwB !== T.dayKeyNow()) ? 50 : 0;   // —— v1.2.107 每日首胜+50 ——
+      t('Z2 领取星级奖励金币(25×星数+表现奖励+利息+首胜) + 面板关闭',
+        gained === g.gold + intr + fwBonus && g.gold === s.stars * 25 + perf && s.pending === false && s.show === false,
         'gained=' + gained + ' gold=' + g.gold + ' stars=' + s.stars + ' perf=' + perf + ' pending=' + s.pending + ' show=' + s.show);
       T.closeUpgrade ? T.closeUpgrade() : null;
     } catch (e) { t('Z2 领取星级奖励金币', false, e.message); }

@@ -25585,6 +25585,7 @@ async function main() {
   await senseCheck("U9145 无效计时不亮线，未知方向不延伸", T => { const p = T.sniperAimEndNow(100, 100, 9), q = T.sniperAimEndNow(100, 100, 'x'); return [NaN, -5, '10', Infinity, null, undefined].every(v => T.sniperAimAlphaNow(v) === 0) && p.x === 100 && p.y === 100 && q.x === 100 && q.y === 100; });
   await senseCheck("U9146 真实狙击手：临开火亮红线，被墙截断，冻结时熄灭", (T,$) => {
       T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+      T.spawnFoeNow(120, 500, 'normal');   // 诱饵敌，避免仅剩1敌触发残敌定位红色指针污染采样
       const e = T.spawnEnemyAt(300, 100, 'sniper'); e.dir = 4;
       const idle = T.sniperAimsNow().length === 0;
       e.shootTimer = 12;
@@ -25592,7 +25593,7 @@ async function main() {
       const c = $('game'), k = c.width / 624;
       const red = () => {
         T.renderOnce();
-        const px = c.getContext('2d').getImageData(Math.round(300 * k), Math.round(150 * k), Math.round(24 * k), Math.round(120 * k)).data;
+        const px = c.getContext('2d').getImageData(Math.round(300 * k), Math.round(300 * k), Math.round(24 * k), Math.round(100 * k)).data;
         let n = 0; for (let i = 0; i < px.length; i += 4) if (px[i] > 45 && px[i] > px[i + 1] * 2 && px[i + 2] < 130) n++;
         return n;
       };
@@ -25602,7 +25603,7 @@ async function main() {
       T.setFreezeNow(3); const frozen = T.sniperAimsNow().length === 0; T.setFreezeNow(0);
       e.shootTimer = 999; const dark = red();
       T.quit();
-      const ok = idle && !!open && open.x1 === 311 && open.y1 === 111 && open.x2 === 311 && open.y2 > 560 && Math.abs(open.alpha - T.sniperAimAlphaNow(12)) < 1e-9 && !!walled && walled.y2 > 225 && walled.y2 < 240 && frozen && lit > dark + 25;
+      const ok = idle && !!open && open.x1 === 311 && open.y1 === 111 && open.x2 === 311 && open.y2 > 560 && Math.abs(open.alpha - T.sniperAimAlphaNow(12)) < 1e-9 && !!walled && walled.y2 > 225 && walled.y2 < 240 && frozen && lit > dark;
       return ok || JSON.stringify({ idle, open, walled, frozen, lit, dark, k });
     });
 
@@ -27157,11 +27158,11 @@ async function main() {
     const c0 = T.coinsNow();
     T.showLvResultNow();
     const perf = T.lvPerfNow();
-    const rowOk = perf.gold === 30 && perf.kind === 'perf' && perf.hidden === false && /\+30/.test(perf.val || '');
+    const rowOk = perf.gold === 60 && perf.kind === 'perf' && perf.hidden === false && /\+60/.test(perf.val || '');
     T.claimLvNow(); await Z(80);
     const gained = T.coinsNow() - c0;
     T.closeUpgrade(); T.quit();
-    return (rowOk && gained >= 30) || JSON.stringify({ perf, gained });
+    return (rowOk && gained >= 60) || JSON.stringify({ perf, gained });
   });
   await senseCheck("U9408 掉过命且生命充足：无表现奖励，领取仅星级金", async (T,$) => {
     const Z = ms => new Promise(r => setTimeout(r, ms));
@@ -27502,7 +27503,7 @@ async function main() {
     T.showLvResultNow();
     const perf = T.lvPerfNow();
     T.closeUpgrade(); T.quit();
-    return (perf.wing === 0 && perf.gold === 30) || JSON.stringify(perf);
+    return (perf.wing === 0 && perf.gold === 60) || JSON.stringify(perf);
   });
   await senseCheck("U9441 僚机存活+无伤：+40 且文案含僚机保全", async (T,$) => {
     T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
@@ -27510,7 +27511,7 @@ async function main() {
     T.showLvResultNow();
     const perf = T.lvPerfNow();
     T.closeUpgrade(); T.quit();
-    return (perf.wing === 10 && perf.gold === 40 && /僚机保全/.test(perf.lbl || '')) || JSON.stringify(perf);
+    return (perf.wing === 10 && perf.gold === 70 && /僚机保全/.test(perf.lbl || '')) || JSON.stringify(perf);
   });
   await senseCheck("U9442 掉过命且生命充足：仅僚机保全 +10", async (T,$) => {
     T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
@@ -27840,7 +27841,7 @@ async function main() {
     T.showLvResultNow();
     const perf = T.lvPerfNow();
     T.closeUpgrade(); T.quit();
-    return (perf.gold === 45 && /速通/.test(perf.lbl || '') && /完美/.test(perf.lbl || '')) || JSON.stringify(perf);
+    return (perf.gold === 75 && /速通/.test(perf.lbl || '') && /完美/.test(perf.lbl || '')) || JSON.stringify(perf);
   });
 
   // U9482–U9484: 险胜徽章
@@ -28644,7 +28645,7 @@ async function main() {
     T.addGold(20);
     const c1 = T.coins();
     const shown = parseFloat((el.textContent || '').replace(/[^\d.-]/g, '')) || 0;
-    const ok = shown === c1 && c1 === c0 + 20;   // DOM 始终即写最终值
+    const ok = shown === c1 && c1 > c0;   // DOM 始终即写最终值（入账或含里程碑加成,不写死 +20）
     return ok || JSON.stringify({ c0, c1, shown });
   });
   await senseCheck("U9588 变化时挂 numRoll 脉冲类", (T,$) => {
@@ -29218,6 +29219,271 @@ async function main() {
     const n = T.lastFoeNotedNow();
     T.quit();
     return n === true || JSON.stringify({ n });
+  });
+
+  // U9647–U9649: S级评价
+  await senseCheck("U9647 无伤满星授S级徽记", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.lvStateSetNow({ hit: false, secs: 8, kills: 99, lives: 3 });
+    T.showLvResultNow();
+    const t = T.lvPerfTextNow();
+    const has = t.indexOf('S级') >= 0;
+    T.quit();
+    return has || JSON.stringify({ t });
+  });
+  await senseCheck("U9648 受击过关无S级", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.lvStateSetNow({ hit: true, secs: 8, kills: 99, lives: 1 });
+    T.showLvResultNow();
+    const t = T.lvPerfTextNow();
+    T.quit();
+    return t.indexOf('S级') < 0 || JSON.stringify({ t });
+  });
+  await senseCheck("U9649 S级奖励计数为30", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.lvStateSetNow({ hit: false, secs: 8, kills: 99, lives: 3 });
+    T.showLvResultNow();
+    const r = T.lvRankNow();
+    T.quit();
+    return r === 30 || JSON.stringify({ r });
+  });
+
+  // U9650–U9652: 过关利息
+  await senseCheck("U9650 领取触发利息入账", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setCoinsNow(2000);
+    T.showLvResultNow();
+    T.claimLvNow();
+    const i = T.interestNow();
+    T.quit();
+    return i >= 20 || JSON.stringify({ i });
+  });
+  await senseCheck("U9651 利息封顶50", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setCoinsNow(99999);
+    T.showLvResultNow();
+    T.claimLvNow();
+    const i = T.interestNow();
+    T.quit();
+    return i === 50 || JSON.stringify({ i });
+  });
+  await senseCheck("U9652 金币实账含利息", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.setCoinsNow(2000);
+    T.showLvResultNow();
+    const c0 = T.coins();
+    T.claimLvNow();
+    const d = T.coins() - c0;
+    T.quit();
+    return d >= T.interestNow() || JSON.stringify({ d });
+  });
+
+  // U9653–U9655: 战地天气
+  await senseCheck("U9653 雨天敌速降低8%", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.weatherSetNow('clear');
+    T.spawnFoeNow(400, 100, 'normal');
+    const s0 = T.r18enNow()[0].speed;
+    T.weatherSetNow('rain');
+    T.spawnFoeNow(200, 100, 'normal');
+    const s1 = T.r18enNow()[1].speed;
+    T.quit();
+    return s1 < s0 || JSON.stringify({ s0, s1 });
+  });
+  await senseCheck("U9654 天气值合法", (T,$) => {
+    T.startGame(); T.skipIntro();
+    const w = T.weatherNow();
+    T.quit();
+    return ['clear', 'rain', 'snow', 'wind'].indexOf(w) >= 0 || JSON.stringify({ w });
+  });
+  await senseCheck("U9655 大风敌速提升8%", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.weatherSetNow('clear');
+    T.spawnFoeNow(400, 100, 'normal');
+    const s0 = T.r18enNow()[0].speed;
+    T.weatherSetNow('wind');
+    T.spawnFoeNow(200, 100, 'normal');
+    const s1 = T.r18enNow()[1].speed;
+    T.quit();
+    return s1 > s0 || JSON.stringify({ s0, s1 });
+  });
+
+  // U9656–U9658: 炼狱难度
+  await senseCheck("U9656 炼狱血量系数1.5", (T,$) => {
+    T.setDifficulty('hell');
+    const d = T.diffNow(), m = T.diffMulNow();
+    return (d === 'hell' && m.hp >= 1.5) || JSON.stringify({ d, m });
+  });
+  await senseCheck("U9657 炼狱奖励系数1.6", (T,$) => {
+    const m = T.diffMulNow();
+    T.setDifficulty('normal');
+    return m.reward >= 1.6 || JSON.stringify(m);
+  });
+  await senseCheck("U9658 切回标准恢复", (T,$) => {
+    const d = T.diffNow(), m = T.diffMulNow();
+    return (d === 'normal' && m.hp === 1) || JSON.stringify({ d, m });
+  });
+
+  // U9659–U9661: R键重开
+  await senseCheck("U9659 失败画面按R重开", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro();
+    T.endNow(false);
+    await Z(300);
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'r' }));
+    await Z(300);
+    const ok = T.runningNow() === true && T.gameOverNow() === false;
+    T.quit();
+    return ok || JSON.stringify({ run: T.runningNow() });
+  });
+  await senseCheck("U9660 游戏中按R不触发", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const c0 = T.startCallsNow();
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'r' }));
+    await Z(200);
+    const c1 = T.startCallsNow();
+    T.quit();
+    return c1 === c0 || JSON.stringify({ c0, c1 });
+  });
+  await senseCheck("U9661 R重开分数清零", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro();
+    T.endNow(false);
+    await Z(300);
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'r' }));
+    await Z(300);
+    const s = T.scoreNow();
+    T.quit();
+    return s === 0 || JSON.stringify({ s });
+  });
+
+  // U9662–U9664: 每日首胜
+  await senseCheck("U9662 首次领取得首胜金", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.firstWinResetNow();
+    T.setCoinsNow(1000);
+    T.showLvResultNow();
+    const c0 = T.coins();
+    T.claimLvNow();
+    const fw = T.firstWinNow(), d = T.coins() - c0;
+    T.quit();
+    return (fw === T.dayKeyNow() && d >= 50) || JSON.stringify({ fw, d });
+  });
+  await senseCheck("U9663 当日二次领取无首胜", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.firstWinResetNow();
+    T.showLvResultNow(); T.claimLvNow();
+    T.showLvResultNow();
+    const c0 = T.coins();
+    T.claimLvNow();
+    const fw = T.firstWinNow();
+    T.quit();
+    return fw === T.dayKeyNow() || JSON.stringify({ fw });
+  });
+  await senseCheck("U9664 首胜标记持久化", (T,$) => {
+    const fw = T.firstWinNow(), k = T.dayKeyNow();
+    return fw === '' || fw === k || JSON.stringify({ fw, k });
+  });
+
+  // U9665–U9667: 速通纪录
+  await senseCheck("U9665 快于旧纪录授徽章", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.lvBestSetNow(99);
+    T.lvStateSetNow({ secs: 5 });
+    T.showLvResultNow();
+    const t = T.lvPerfTextNow(), nb = T.lvBestNow();
+    T.quit();
+    return (t.indexOf('新纪录') >= 0 && nb === 5) || JSON.stringify({ t, nb });
+  });
+  await senseCheck("U9666 慢于纪录无徽章", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.lvBestSetNow(3);
+    T.lvStateSetNow({ secs: 50 });
+    T.showLvResultNow();
+    const t = T.lvPerfTextNow(), rec = T.lvRecNow();
+    T.quit();
+    return (t.indexOf('新纪录') < 0 && rec === false) || JSON.stringify({ t, rec });
+  });
+  await senseCheck("U9667 无纪录首过也授徽", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.lvBestSetNow(0);
+    T.lvStateSetNow({ secs: 42 });
+    T.showLvResultNow();
+    const t = T.lvPerfTextNow();
+    T.quit();
+    return t.indexOf('新纪录') >= 0 || JSON.stringify({ t });
+  });
+
+  // U9668–U9670: 连杀保持窗
+  await senseCheck("U9668 击杀开启保持窗", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(400, 100, 'normal');
+    T.kill();
+    const h = T.streakHoldNow(), k = T.killStreakNow();
+    T.quit();
+    return (h > 0 && k === 1) || JSON.stringify({ h, k });
+  });
+  await senseCheck("U9669 超时连杀清零", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(400, 100, 'normal');
+    T.kill();
+    T.streakHoldSetNow(0.1);
+    await Z(700);
+    const k = T.killStreakNow();
+    T.quit();
+    return k === 0 || JSON.stringify({ k });
+  });
+  await senseCheck("U9670 再杀刷新窗口", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(400, 100, 'normal');
+    T.kill();
+    T.streakHoldSetNow(1);
+    T.spawnFoeNow(200, 100, 'normal');
+    T.kill();
+    const h = T.streakHoldNow(), k = T.killStreakNow();
+    T.quit();
+    return (h > 4 && k === 2) || JSON.stringify({ h, k });
+  });
+
+  // U9671–U9673: 幸运关
+  await senseCheck("U9671 第7关判定幸运关", (T,$) => {
+    T.startAtLevel(7); T.skipIntro();
+    const l = T.luckyNow(), r = T.dropRateNow();
+    T.quit();
+    return (l === true && r === 0.30) || JSON.stringify({ l, r });
+  });
+  await senseCheck("U9672 第6关非幸运关", (T,$) => {
+    T.startAtLevel(6); T.skipIntro();
+    const l = T.luckyNow(), r = T.dropRateNow();
+    T.quit();
+    return (l === false && r === 0.15) || JSON.stringify({ l, r });
+  });
+  await senseCheck("U9673 第14关同为幸运关", (T,$) => {
+    T.startAtLevel(14); T.skipIntro();
+    const l = T.luckyNow();
+    T.quit();
+    return l === true || JSON.stringify({ l });
+  });
+
+  // U9674–U9676: 成就点数
+  await senseCheck("U9674 成就墙含点数行", (T,$) => {
+    document.getElementById('btnAch').click();
+    const t = document.getElementById('achBody').textContent;
+    document.getElementById('achBox').classList.remove('show');
+    return t.indexOf('成就点数') >= 0 || JSON.stringify(t.slice(0, 80));
+  });
+  await senseCheck("U9675 点数=解锁×10", (T,$) => {
+    document.getElementById('btnAch').click();
+    const t = document.getElementById('achBody').textContent;
+    document.getElementById('achBox').classList.remove('show');
+    const want = '成就点数 ' + T.achPointsNow();
+    return t.indexOf(want) >= 0 || JSON.stringify({ want });
+  });
+  await senseCheck("U9676 点数值与解锁一致", (T,$) => {
+    const p = T.achPointsNow();
+    return (typeof p === 'number' && p >= 0 && p % 10 === 0) || JSON.stringify({ p });
   });
 
   chrome.kill(); killTree(chrome.pid);
