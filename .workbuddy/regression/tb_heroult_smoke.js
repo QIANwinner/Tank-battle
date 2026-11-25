@@ -29089,6 +29089,47 @@ async function main() {
     return has || JSON.stringify(T.floatTextsNow());
   });
 
+  // U9635–U9637: 急救空投
+  await senseCheck("U9635 降至1命投放医疗包", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn();
+    T.setLives(2);
+    T.spawnFoeNow(400, 100, 'normal');
+    for (let i = 0; i < 40 && T.spawnInvNow() > 0; i++) await Z(200);
+    const pp = T.r18posNow();
+    T.spawnBulletNow(pp.px - 40, pp.py - 2, 2, true);
+    await Z(900);
+    const has = T.medkitNow() === true || T.powerups().indexOf('life') >= 0;
+    T.quit();
+    return has || JSON.stringify({ pu: T.powerups(), m: T.medkitNow() });
+  });
+  await senseCheck("U9636 急救空投标记置位", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn();
+    T.setLives(2);
+    T.spawnFoeNow(400, 100, 'normal');
+    for (let i = 0; i < 40 && T.spawnInvNow() > 0; i++) await Z(200);
+    const pp = T.r18posNow();
+    T.spawnBulletNow(pp.px - 40, pp.py - 2, 2, true);
+    await Z(2500);
+    const lv = T.livesNow();
+    T.quit();
+    return lv >= 2 || JSON.stringify({ lv });
+  });
+  await senseCheck("U9637 多命阵亡不投空投", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn();
+    T.setLives(3);
+    T.spawnFoeNow(400, 100, 'normal');
+    for (let i = 0; i < 40 && T.spawnInvNow() > 0; i++) await Z(200);
+    const pp = T.r18posNow();
+    T.spawnBulletNow(pp.px - 40, pp.py - 2, 2, true);
+    await Z(900);
+    const no = T.powerups().indexOf('life') < 0 && T.medkitNow() === false;
+    T.quit();
+    return no || JSON.stringify({ pu: T.powerups(), m: T.medkitNow() });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

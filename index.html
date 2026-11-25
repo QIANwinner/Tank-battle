@@ -1876,7 +1876,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.97</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.98</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2738,6 +2738,7 @@
   let powerups = [];
   let chestTiles = new Set();   // —— v1.2.92 隐藏宝箱：砖墙内藏补给 ——
   let airDropT = 0;   // —— v1.2.93 空投补给倒计时 ——
+  let medkitDropped = false;   // —— v1.2.98 急救空投标记 ——
   let mines = [];   // —— v1.2.26 感应地雷 ——
   let coinDrops = [];   // —— v1.2.30 金币散落物 ——
   let score = 0;
@@ -4990,6 +4991,11 @@
     spawnParticles(p.x + TANK_SIZE / 2, p.y + TANK_SIZE / 2, p.color, 18);
     shake = 10;
     if (isP2) lives2--; else lives--;
+    if (!isP2 && lives === 1 && multiMode !== 2 && !medkitDropped) {   // —— v1.2.98 急救空投 ——
+      medkitDropped = true;
+      spawnPowerup(p.x + TANK_SIZE + 8, p.y, 'life');
+      fieldNoteShow('📦 急救空投已投放', 'warn', 2000, 2);
+    }
     if (!isP2) killStreak = 0;
     if (!isP2 && multiMode !== 2) fieldNoteShow(deathNoteText(lastHit, lives), 'warn', 2200, 2);
     updateHud();
@@ -5642,6 +5648,7 @@
     lvShots = 0; lvHits = 0; lvAccBonus = 0;   // —— v1.2.95 ——
     enemiesSpawned = 0;
     airDropT = 20;   // —— v1.2.93 空投重置 ——
+    medkitDropped = false;   // —— v1.2.98 急救空投重置 ——
     // —— v0.2.6 无尽模式：敌人数量随波次递增（封顶 2.5x） ——
     const emCount = endlessMode ? Math.min(2.5, 1 + level * 0.05) : 1;
     enemiesTotal = bossLevel ? 1 : Math.round((6 + level * 2) * (dailyMods.surge ? 1.3 : 1) * emCount);
@@ -27429,7 +27436,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.97', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.98', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
