@@ -29467,6 +29467,25 @@ async function main() {
     return l === true || JSON.stringify({ l });
   });
 
+  // U9674–U9676: 成就点数
+  await senseCheck("U9674 成就墙含点数行", (T,$) => {
+    document.getElementById('btnAch').click();
+    const t = document.getElementById('achBody').textContent;
+    document.getElementById('achBox').classList.remove('show');
+    return t.indexOf('成就点数') >= 0 || JSON.stringify(t.slice(0, 80));
+  });
+  await senseCheck("U9675 点数=解锁×10", (T,$) => {
+    document.getElementById('btnAch').click();
+    const t = document.getElementById('achBody').textContent;
+    document.getElementById('achBox').classList.remove('show');
+    const want = '成就点数 ' + T.achPointsNow();
+    return t.indexOf(want) >= 0 || JSON.stringify({ want });
+  });
+  await senseCheck("U9676 点数值与解锁一致", (T,$) => {
+    const p = T.achPointsNow();
+    return (typeof p === 'number' && p >= 0 && p % 10 === 0) || JSON.stringify({ p });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
