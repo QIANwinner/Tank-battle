@@ -29386,6 +29386,35 @@ async function main() {
     return fw === '' || fw === k || JSON.stringify({ fw, k });
   });
 
+  // U9665–U9667: 速通纪录
+  await senseCheck("U9665 快于旧纪录授徽章", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.lvBestSetNow(99);
+    T.lvStateSetNow({ secs: 5 });
+    T.showLvResultNow();
+    const t = T.lvPerfTextNow(), nb = T.lvBestNow();
+    T.quit();
+    return (t.indexOf('新纪录') >= 0 && nb === 5) || JSON.stringify({ t, nb });
+  });
+  await senseCheck("U9666 慢于纪录无徽章", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.lvBestSetNow(3);
+    T.lvStateSetNow({ secs: 50 });
+    T.showLvResultNow();
+    const t = T.lvPerfTextNow(), rec = T.lvRecNow();
+    T.quit();
+    return (t.indexOf('新纪录') < 0 && rec === false) || JSON.stringify({ t, rec });
+  });
+  await senseCheck("U9667 无纪录首过也授徽", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.lvBestSetNow(0);
+    T.lvStateSetNow({ secs: 42 });
+    T.showLvResultNow();
+    const t = T.lvPerfTextNow();
+    T.quit();
+    return t.indexOf('新纪录') >= 0 || JSON.stringify({ t });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
