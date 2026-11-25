@@ -29187,6 +29187,39 @@ async function main() {
     return (dp >= 1 && dc >= 30) || JSON.stringify({ dp, dc });
   });
 
+  // U9644–U9646: 残敌指引
+  await senseCheck("U9644 仅剩1敌定位返回", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.enemiesTotalSetNow(2);
+    T.spawnFoeNow(400, 100, 'normal');
+    T.spawnFoeNow(200, 100, 'normal');
+    T.kill();
+    const lf = T.lastFoeNow();
+    T.quit();
+    return (!!lf && typeof lf.x === 'number') || JSON.stringify({ lf });
+  });
+  await senseCheck("U9645 清场后定位消失", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.enemiesTotalSetNow(1);
+    T.spawnFoeNow(400, 100, 'normal');
+    T.kill();
+    const lf = T.lastFoeNow();
+    T.quit();
+    return lf === null || JSON.stringify({ lf });
+  });
+  await senseCheck("U9646 残敌提示触发", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.enemiesTotalSetNow(2);
+    T.spawnFoeNow(400, 100, 'normal');
+    T.spawnFoeNow(200, 100, 'normal');
+    T.kill();
+    await Z(500);
+    const n = T.lastFoeNotedNow();
+    T.quit();
+    return n === true || JSON.stringify({ n });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
