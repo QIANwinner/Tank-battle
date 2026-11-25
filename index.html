@@ -1876,7 +1876,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.98</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.99</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -5113,6 +5113,10 @@
     missionBump('kills', 1);   // —— v1.2.2 每日任务 ——
     dexAdd(e.isBoss ? 'boss' : e.type);   // —— v1.2.25 敌人图鉴击杀计数 ——
     killStreak++; streakFlash(killStreak);
+    if (killStreak === 3 || killStreak === 5 || killStreak === 8) {   // —— v1.2.99 连杀馈赠 ——
+      spawnPowerup(e.x + e.size / 2, e.y + e.size / 2, killStreak >= 8 ? 'bomb' : (killStreak >= 5 ? 'shield' : 'rapid'));
+      addText(e.x + e.size / 2, e.y - 14, '🎁 连杀馈赠 x' + killStreak, '#ffd75e');
+    }
     levelKills++;                                   // —— v0.2.6 本关击杀（结算界面） ——
     if (!blitzDone && levelSecs <= 8 && (__testMode ? blitzOv === true : true)) { blitzDone = true; const bz = addGold(10); if (player) addText(clamp(player.x + TANK_SIZE / 2, 84, W - 84), player.y - 6, '⚡ 闪电战 +' + bz + '🪙', '#ffd75e'); }   // —— v1.2.34 ——
     if (e.type === 'elite') { addText(e.x + e.size / 2, e.y - 10, '👑 精英击破', '#ffd75e'); showToast('👑 精英击破 · 敌方精锐 -1'); }   // —— v1.2.44 精英击破播报 ——
@@ -27436,7 +27440,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.98', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.99', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';

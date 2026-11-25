@@ -29130,6 +29130,29 @@ async function main() {
     return no || JSON.stringify({ pu: T.powerups(), m: T.medkitNow() });
   });
 
+  // U9638–U9640: 连杀馈赠
+  await senseCheck("U9638 三连杀掉快速弹", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    for (let i = 0; i < 3; i++) { T.spawnFoeNow(400 + i * 10, 100, 'normal'); T.kill(); }
+    const has = T.powerups().indexOf('rapid') >= 0;
+    T.quit();
+    return has || JSON.stringify({ pu: T.powerups() });
+  });
+  await senseCheck("U9639 五连杀掉护盾", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    for (let i = 0; i < 5; i++) { T.spawnFoeNow(400 + i * 10, 100, 'normal'); T.kill(); }
+    const has = T.powerups().indexOf('shield') >= 0;
+    T.quit();
+    return has || JSON.stringify({ pu: T.powerups() });
+  });
+  await senseCheck("U9640 八连杀掉炸弹", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    for (let i = 0; i < 8; i++) { T.spawnFoeNow(400 + i * 10, 100, 'normal'); T.kill(); }
+    const has = T.powerups().indexOf('bomb') >= 0;
+    T.quit();
+    return has || JSON.stringify({ pu: T.powerups() });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
