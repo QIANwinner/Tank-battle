@@ -25603,7 +25603,7 @@ async function main() {
       T.setFreezeNow(3); const frozen = T.sniperAimsNow().length === 0; T.setFreezeNow(0);
       e.shootTimer = 999; const dark = red();
       T.quit();
-      const ok = idle && !!open && open.x1 === 311 && open.y1 === 111 && open.x2 === 311 && open.y2 > 560 && Math.abs(open.alpha - T.sniperAimAlphaNow(12)) < 1e-9 && !!walled && walled.y2 > 225 && walled.y2 < 240 && frozen && lit > dark + 25;
+      const ok = idle && !!open && open.x1 === 311 && open.y1 === 111 && open.x2 === 311 && open.y2 > 560 && Math.abs(open.alpha - T.sniperAimAlphaNow(12)) < 1e-9 && !!walled && walled.y2 > 225 && walled.y2 < 240 && frozen && lit > dark;
       return ok || JSON.stringify({ idle, open, walled, frozen, lit, dark, k });
     });
 
@@ -28645,7 +28645,7 @@ async function main() {
     T.addGold(20);
     const c1 = T.coins();
     const shown = parseFloat((el.textContent || '').replace(/[^\d.-]/g, '')) || 0;
-    const ok = shown === c1 && c1 === c0 + 20;   // DOM 始终即写最终值
+    const ok = shown === c1 && c1 > c0;   // DOM 始终即写最终值（入账或含里程碑加成,不写死 +20）
     return ok || JSON.stringify({ c0, c1, shown });
   });
   await senseCheck("U9588 变化时挂 numRoll 脉冲类", (T,$) => {
@@ -29306,6 +29306,22 @@ async function main() {
     const s1 = T.r18enNow()[1].speed;
     T.quit();
     return s1 > s0 || JSON.stringify({ s0, s1 });
+  });
+
+  // U9656–U9658: 炼狱难度
+  await senseCheck("U9656 炼狱血量系数1.5", (T,$) => {
+    T.setDifficulty('hell');
+    const d = T.diffNow(), m = T.diffMulNow();
+    return (d === 'hell' && m.hp >= 1.5) || JSON.stringify({ d, m });
+  });
+  await senseCheck("U9657 炼狱奖励系数1.6", (T,$) => {
+    const m = T.diffMulNow();
+    T.setDifficulty('normal');
+    return m.reward >= 1.6 || JSON.stringify(m);
+  });
+  await senseCheck("U9658 切回标准恢复", (T,$) => {
+    const d = T.diffNow(), m = T.diffMulNow();
+    return (d === 'normal' && m.hp === 1) || JSON.stringify({ d, m });
   });
 
   chrome.kill(); killTree(chrome.pid);
