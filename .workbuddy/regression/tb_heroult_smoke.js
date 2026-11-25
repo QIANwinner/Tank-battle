@@ -29005,6 +29005,45 @@ async function main() {
     return (a.s >= 1 && a.h >= 1) || JSON.stringify(a);
   });
 
+  // U9629–U9631: 弹弹相消
+  await senseCheck("U9629 拦截普通敌弹 +10", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(400, 100, 'normal');
+    const pp = T.r18posNow(), s0 = T.scoreNow();
+    T.spawnBulletNow(pp.px - 2, pp.py - 30, 0, false);
+    T.spawnBulletNow(pp.px - 2, pp.py - 60, 4, true);
+    await Z(800);
+    const d = T.scoreNow() - s0;
+    T.quit();
+    return d === 10 || JSON.stringify({ d });
+  });
+  await senseCheck("U9630 拦截Boss弹 +20", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(400, 100, 'normal');
+    T.r18enNow()[0].isBoss = true;
+    const pp = T.r18posNow(), s0 = T.scoreNow();
+    T.spawnBulletNow(pp.px - 2, pp.py - 30, 0, false);
+    T.spawnBulletNow(pp.px - 2, pp.py - 60, 4, true);
+    await Z(800);
+    const d = T.scoreNow() - s0;
+    T.quit();
+    return d === 20 || JSON.stringify({ d });
+  });
+  await senseCheck("U9631 拦截飘字 +10", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.spawnFoeNow(400, 100, 'normal');
+    const pp = T.r18posNow();
+    T.spawnBulletNow(pp.px - 2, pp.py - 30, 0, false);
+    T.spawnBulletNow(pp.px - 2, pp.py - 60, 4, true);
+    await Z(800);
+    const has = T.floatTextsNow().some(s => s === '+10');
+    T.quit();
+    return has || JSON.stringify(T.floatTextsNow());
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
