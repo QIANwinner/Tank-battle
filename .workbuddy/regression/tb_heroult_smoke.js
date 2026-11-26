@@ -29592,6 +29592,35 @@ async function main() {
     return (a0 === 1 && a1 === 0 && l1 === l0) || JSON.stringify({ a0, a1, l0, l1 });
   });
 
+  // U9689–U9691: 霰弹
+  await senseCheck("U9689 拾取霰弹激活", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.pickupApplyNow('spread');
+    const s = T.spreadNow();
+    T.quit();
+    return s > 0 || JSON.stringify({ s });
+  });
+  await senseCheck("U9690 霰弹三向弹道", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.fxSetNow('spread', 9);
+    T.fireOnce();
+    const ds = T.bulletsInfoNow().filter(b => b.own && !b.dead).map(b => b.dir);
+    const set = new Set(ds);
+    let fan = false;
+    for (let d = 0; d < 8; d++) if (set.has(d) && set.has((d + 7) % 8) && set.has((d + 1) % 8)) { fan = true; break; }
+    T.quit();
+    return (ds.length === 3 && fan) || JSON.stringify({ ds });
+  });
+  await senseCheck("U9691 霰弹倒计时衰减", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.fxSetNow('spread', 0.05);
+    await Z(400);
+    const s = T.spreadNow();
+    T.quit();
+    return s <= 0 || JSON.stringify({ s });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
