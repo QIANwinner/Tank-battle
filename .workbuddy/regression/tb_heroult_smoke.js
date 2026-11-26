@@ -29548,6 +29548,25 @@ async function main() {
     return f.length === 0 || JSON.stringify(f);
   });
 
+  // U9683–U9685: 暂停简报
+  await senseCheck("U9683 暂停显示击杀数", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    $('pauseBtn').click();
+    const t = T.pauseStatNow();
+    $('pauseBtn').click();
+    T.quit();
+    return (!!t && t.indexOf('击杀') >= 0) || JSON.stringify({ t });
+  });
+  await senseCheck("U9684 简报含命中率", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    $('pauseBtn').click();
+    const t = T.pauseStatNow();
+    $('pauseBtn').click();
+    T.quit();
+    return (!!t && /命中 \d+%/.test(t) && t.indexOf('用时') >= 0) || JSON.stringify({ t });
+  });
+  await senseCheck("U9685 简报元素存在", (T,$) => !!$('pauseStatLine'));
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
