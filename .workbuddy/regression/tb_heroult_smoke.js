@@ -29621,6 +29621,36 @@ async function main() {
     return s <= 0 || JSON.stringify({ s });
   });
 
+  // U9692–U9694: 追踪弹
+  await senseCheck("U9692 拾取追踪激活", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.pickupApplyNow('homing');
+    const s = T.homingNow();
+    T.quit();
+    return s > 0 || JSON.stringify({ s });
+  });
+  await senseCheck("U9693 子弹转向最近敌人", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(500, 300, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9;
+    T.fxSetNow('homing', 9);
+    T.spawnBulletNow(120, 300, 6, false);   // 向左飞,背离敌人
+    let turned = false;
+    for (let i = 0; i < 30 && !turned; i++) { await Z(100); const b = T.bulletsInfoNow().find(x => x.own && !x.dead); if (b && b.dir !== 6) turned = true; }
+    T.quit();
+    return turned || JSON.stringify(T.bulletsInfoNow());
+  });
+  await senseCheck("U9694 追踪倒计时衰减", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.fxSetNow('homing', 0.05);
+    await Z(400);
+    const s = T.homingNow();
+    T.quit();
+    return s <= 0 || JSON.stringify({ s });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
