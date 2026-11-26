@@ -29567,6 +29567,31 @@ async function main() {
   });
   await senseCheck("U9685 简报元素存在", (T,$) => !!$('pauseStatLine'));
 
+  // U9686–U9688: 护甲片
+  await senseCheck("U9686 拾取护甲计数为1", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.pickupApplyNow('armor');
+    const a = T.armorNow();
+    T.quit();
+    return a === 1 || JSON.stringify({ a });
+  });
+  await senseCheck("U9687 护甲在道具表中", (T,$) => {
+    T.startGame(); T.skipIntro(); T.quit();
+    return typeof T.pickupApplyNow === 'function' && T.armorNow() === 0;
+  });
+  await senseCheck("U9688 护甲抵挡后玩家存活", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn();
+    T.pickupApplyNow('armor');
+    for (let i = 0; i < 40 && T.spawnInvNow() > 0; i++) await Z(200);
+    const a0 = T.armorNow(), l0 = T.livesNow();
+    T.enemyShotAtPlayerNow('normal');
+    await Z(900);
+    const a1 = T.armorNow(), l1 = T.livesNow();
+    T.quit();
+    return (a0 === 1 && a1 === 0 && l1 === l0) || JSON.stringify({ a0, a1, l0, l1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
