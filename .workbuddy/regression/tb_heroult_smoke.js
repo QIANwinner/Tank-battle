@@ -29651,6 +29651,35 @@ async function main() {
     return s <= 0 || JSON.stringify({ s });
   });
 
+  // U9695–U9697: 弹射弹
+  await senseCheck("U9695 拾取弹射激活", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.pickupApplyNow('rico');
+    const s = T.ricoNow();
+    T.quit();
+    return s > 0 || JSON.stringify({ s });
+  });
+  await senseCheck("U9696 子弹碰钢墙反弹", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.setTile(10, 8, 2);   // 钢墙于 (240,192)
+    T.fxSetNow('rico', 9);
+    T.spawnBulletNow(180, 194, 2, false);   // 向右射向钢墙
+    let bounced = false;
+    for (let i = 0; i < 30 && !bounced; i++) { await Z(100); const b = T.bulletsInfoNow().find(x => x.own && !x.dead); if (b && b.dir === 6) bounced = true; }
+    T.quit();
+    return bounced || JSON.stringify(T.bulletsInfoNow());
+  });
+  await senseCheck("U9697 弹射倒计时衰减", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.fxSetNow('rico', 0.05);
+    await Z(400);
+    const s = T.ricoNow();
+    T.quit();
+    return s <= 0 || JSON.stringify({ s });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
