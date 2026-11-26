@@ -29732,6 +29732,45 @@ async function main() {
     return seen === true || 'off-bush never targeted';
   });
 
+  // U9704–U9706: 蓄力炮
+  await senseCheck("U9704 蓄力松开发射大弹", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.keySet(' ', false);
+    T.chargeSetNow(90);
+    let f = 0;
+    for (let i = 0; i < 20 && !f; i++) { await Z(100); f = T.chargeFiredNow(); }
+    const b = T.bulletsInfoNow().find(x => x.own && x.size === 8 && !x.dead);
+    T.quit();
+    return (f >= 1 && !!b) || JSON.stringify({ f, bs: T.bulletsInfoNow() });
+  });
+  await senseCheck("U9705 蓄力弹伤害3", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    const DXA = [0, 0.71, 1, 0.71, 0, -0.71, -1, -0.71], DYA = [-1, -0.71, 0, 0.71, 1, 0.71, 0, -0.71];
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(400, 100, 'elite');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9; e.hp = 5;
+    const hp0 = e.hp;
+    T.keySet(' ', false); T.chargeSetNow(90);
+    for (let i = 0; i < 40 && e.hp >= hp0; i++) {
+      const b = T.bulletsInfoNow().find(x => x.own && x.size === 8 && !x.dead);
+      if (b) { e.x = b.x + b.size / 2 + DXA[b.dir] * 40 - e.size / 2; e.y = b.y + b.size / 2 + DYA[b.dir] * 40 - e.size / 2; }
+      await Z(50);
+    }
+    const hp1 = e.hp;
+    T.quit();
+    return hp1 <= hp0 - 3 || JSON.stringify({ hp0, hp1 });
+  });
+  await senseCheck("U9706 蓄力后槽清零", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.keySet(' ', false); T.chargeSetNow(90);
+    for (let i = 0; i < 20 && T.chargeFiredNow() < 1; i++) await Z(100);
+    const c = T.chargeNow();
+    T.quit();
+    return c === 0 || JSON.stringify({ c });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

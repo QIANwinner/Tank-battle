@@ -1878,7 +1878,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.120</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.121</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -4761,7 +4761,7 @@
             const extra = ((upgrades.bigbullet || 0) > 0 && e.hp > 1) ? 1 : 0;
             const weak97 = e.isBoss && b.dir === e.dir;   // —— v1.2.97 背后弱点 ——
             const crit112 = critForce || rng() < 0.10;   // —— v1.2.112 暴击弹 ——
-            const dmg112 = (1 + extra + (weak97 ? 1 : 0)) * (crit112 ? 2 : 1);
+            const dmg112 = ((b.charged ? 3 : 1) + extra + (weak97 ? 1 : 0)) * (crit112 ? 2 : 1);   // —— v1.2.121 蓄力弹伤3 ——
             if (crit112) { critCount++; addText(cx, cy - 26, '⚡ 暴击', '#ffe600'); }
             runDmgAdd(dmg112);
             e.hp -= dmg112; e.hitFlash = 6;
@@ -4869,9 +4869,21 @@
         player.y = ny;
       clampPlayer();
     }
-    if (keys[' '] || keys['Space'] || keys['j'] || keys['J']) fire(player);
+    if (keys[' '] || keys['Space'] || keys['j'] || keys['J']) { fire(player); chargeT = Math.min(chargeT + k, 120); }
+    else if (chargeT >= 60) { chargeShot(); chargeT = 0; }
+    else chargeT = 0;   // —— v1.2.121 蓄力炮 ——
     if (player.portalCd > 0) player.portalCd -= k;
     checkPortal(player);
+  }
+
+  // —— v1.2.121 蓄力炮：松开开火键时若蓄满发射高伤穿透弹 ——
+  function chargeShot() {
+    if (!player || player.dead) return;
+    const cx = player.x + TANK_SIZE / 2, cy = player.y + TANK_SIZE / 2;
+    const b = perfPoolSpawn(cx - 4, cy - 4, 8, player.dir, BULLET_SPEED * 1.2, player, 99, false);
+    b.charged = true; chargeFired++;
+    spawnParticles(cx, cy, '#9be7ff', 12); sfxUltimate();
+    addText(cx, cy - 16, '🔋 蓄力炮', '#9be7ff');
   }
 
   // ===== v0.2.7 近战大招（E 键）：冷却 + 近战 AOE =====
@@ -27553,7 +27565,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.120', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.121', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
