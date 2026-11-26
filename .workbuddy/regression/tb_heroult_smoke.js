@@ -29702,6 +29702,36 @@ async function main() {
     return hp1 < hp0 || JSON.stringify({ hp0, hp1 });
   });
 
+  // U9701–U9703: 草丛隐身
+  await senseCheck("U9701 草丛判定正确", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    const gx = Math.floor((p.px - 2) / 24), gy = Math.floor((p.py - 2) / 24);
+    const b0 = T.bushNow();
+    T.setTile(gx, gy, 4);
+    const b1 = T.bushNow();
+    T.quit();
+    return (b0 === false && b1 === true) || JSON.stringify({ b0, b1 });
+  });
+  await senseCheck("U9702 草丛中敌人不索敌", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.setTile(Math.floor((p.px - 2) / 24), Math.floor((p.py - 2) / 24), 4);
+    T.spawnFoeNow(400, 100, 'elite');
+    let seen = false;
+    for (let i = 0; i < 60; i++) if (T.eTargetNow() === 'player') { seen = true; break; }
+    T.quit();
+    return seen === false || 'in-bush still targeted';
+  });
+  await senseCheck("U9703 离开草丛恢复索敌", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(400, 100, 'elite');
+    let seen = false;
+    for (let i = 0; i < 200; i++) if (T.eTargetNow() === 'player') { seen = true; break; }
+    T.quit();
+    return seen === true || 'off-bush never targeted';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
