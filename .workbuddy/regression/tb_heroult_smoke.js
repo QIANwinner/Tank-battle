@@ -29680,6 +29680,28 @@ async function main() {
     return s <= 0 || JSON.stringify({ s });
   });
 
+  // U9698–U9700: 电网
+  await senseCheck("U9698 电网常量存在", (T,$) => T.elecTileNow() === 6);
+  await senseCheck("U9699 电网可通行", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.setTile(10, 8, 6);
+    const b = T.isBlockedNow(10 * 24 + 4, 8 * 24 + 4, 16);
+    T.quit();
+    return b === false || JSON.stringify({ b });
+  });
+  await senseCheck("U9700 敌人站电网受电击", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.setTile(10, 8, 6);
+    T.spawnFoeNow(10 * 24 + 2, 8 * 24 + 2, 'armored');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9;
+    const hp0 = e.hp;
+    for (let i = 0; i < 30 && e.hp >= hp0; i++) await Z(200);
+    const hp1 = e.hp;
+    T.quit();
+    return hp1 < hp0 || JSON.stringify({ hp0, hp1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
