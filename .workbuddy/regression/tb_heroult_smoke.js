@@ -29523,6 +29523,31 @@ async function main() {
     return c === 0 || JSON.stringify({ c });
   });
 
+  // U9680–U9682: 击杀播报
+  await senseCheck("U9680 击杀写入播报", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const e = T.spawnFoeNow(400, 100, 'normal'); e.hp = 1;
+    T.kill();
+    const f = T.killFeedNow();
+    T.quit();
+    return (f.length === 1 && f[0].indexOf('击毁') >= 0) || JSON.stringify(f);
+  });
+  await senseCheck("U9681 播报最多保留3条", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    for (let i = 0; i < 4; i++) { const e = T.spawnFoeNow(100 + i * 60, 100, 'normal'); e.hp = 1; T.kill(); }
+    const f = T.killFeedNow();
+    T.quit();
+    return f.length === 3 || JSON.stringify(f);
+  });
+  await senseCheck("U9682 换局播报清空", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const e = T.spawnFoeNow(400, 100, 'normal'); e.hp = 1; T.kill();
+    T.quit(); T.startGame(); T.skipIntro();
+    const f = T.killFeedNow();
+    T.quit();
+    return f.length === 0 || JSON.stringify(f);
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
