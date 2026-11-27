@@ -30504,6 +30504,46 @@ async function main() {
     return v === 0 || JSON.stringify({ v });
   });
 
+  // U9773–U9775: 加速带
+  await senseCheck("U9773 加速带提速倍率", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 9);
+    T.renderOnce();
+    const m = T.tileSpeedMulNow();
+    T.quit();
+    return m === 1.7 || JSON.stringify({ m });
+  });
+  await senseCheck("U9774 加速带上位移更快", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    const run = async (dash) => {
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+      const p0 = T.r18posNow();
+      if (dash) { for (let gx = 0; gx < 26; gx++) for (let gy = 0; gy < 26; gy++) T.setTile(gx, gy, 9); T.renderOnce(); }
+      T.keySet('w', true);
+      await Z(400);
+      T.keySet('w', false);
+      const p1 = T.r18posNow();
+      T.quit();
+      return p0.py - p1.py;
+    };
+    const d0 = await run(false);
+    const d1 = await run(true);
+    return (d0 > 5 && d1 > d0 * 1.3) || JSON.stringify({ d0, d1 });
+  });
+  await senseCheck("U9775 冰沙加速倍率互不串扰", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 8);
+    T.renderOnce();
+    const mS = T.tileSpeedMulNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 9);
+    T.renderOnce();
+    const mD = T.tileSpeedMulNow();
+    T.quit();
+    return (mS === 0.5 && mD === 1.7) || JSON.stringify({ mS, mD });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
