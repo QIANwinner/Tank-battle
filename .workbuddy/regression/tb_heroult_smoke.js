@@ -31257,6 +31257,44 @@ async function main() {
     return (n1 < n0) || JSON.stringify({ n0, n1 });
   });
 
+  // U9839–U9841: 干扰者
+  await senseCheck("U9839 干扰者类型已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'jammer');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const ok = !!(e && e.type === 'jammer');
+    T.quit();
+    return ok === true || JSON.stringify({ t: e && e.type });
+  });
+  await senseCheck("U9840 干扰光环激活", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.spawnFoeNow(p.px - 60, p.py, 'jammer');
+    let j = 0;
+    for (let i = 0; i < 12; i++) {
+      await Z(80);
+      j = T.jamNow();
+      if (j > 0) break;
+    }
+    T.quit();
+    return (j > 0) || JSON.stringify({ j });
+  });
+await senseCheck("U9841 干扰下射速减半", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.spawnFoeNow(p.px - 30, p.py, 'jammer');
+    for (let i = 0; i < 10; i++) { await Z(80); if (T.jamNow() > 0) break; }
+    if (T.jamNow() <= 0) { T.quit(); return 'jam never active'; }
+    T.fireOnce();
+    const cd0 = T.r21cdNow();
+    await Z(300);
+    const cd1 = T.r21cdNow();
+    T.quit();
+    return (cd0 > 5 && cd1 > 0) || JSON.stringify({ cd0, cd1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
