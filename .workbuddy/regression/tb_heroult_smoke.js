@@ -30470,6 +30470,40 @@ async function main() {
     return (d0 > 5 && d1 > d0 * 1.2) || JSON.stringify({ d0, d1 });
   });
 
+  // U9770–U9772: 流沙
+  await senseCheck("U9770 流沙地形减速倍率", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 8);
+    T.renderOnce();
+    const m = T.tileSpeedMulNow();
+    T.quit();
+    return m === 0.5 || JSON.stringify({ m });
+  });
+  await senseCheck("U9771 流沙上位移减半", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    const run = async (sand) => {
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+      const p0 = T.r18posNow();
+      if (sand) { for (let gx = 0; gx < 26; gx++) for (let gy = 0; gy < 26; gy++) T.setTile(gx, gy, 8); T.renderOnce(); }
+      T.keySet('w', true);
+      await Z(400);
+      T.keySet('w', false);
+      const p1 = T.r18posNow();
+      T.quit();
+      return p0.py - p1.py;
+    };
+    const d0 = await run(false);
+    const d1 = await run(true);
+    return (d0 > 5 && d1 < d0 * 0.75) || JSON.stringify({ d0, d1 });
+  });
+  await senseCheck("U9772 流沙判定按中心格", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const v = T.tileUnderNow();
+    T.quit();
+    return v === 0 || JSON.stringify({ v });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
