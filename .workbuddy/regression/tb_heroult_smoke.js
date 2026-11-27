@@ -29846,6 +29846,43 @@ async function main() {
     return t > 0 || JSON.stringify({ t });
   });
 
+  // U9713–U9715: 盾卫
+  await senseCheck("U9713 盾卫正面格挡不掉血", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'guardian');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9; e.dir = 0;
+    const hp0 = e.hp;
+    T.spawnBulletNow(e.x + e.size / 2 - 2, e.y - 10, 4, false);   // 上方朝下=正面(e.dir0朝上)
+    for (let i = 0; i < 15; i++) await Z(50);
+    const hp1 = e.hp;
+    T.quit();
+    return hp1 === hp0 || JSON.stringify({ hp0, hp1 });
+  });
+  await senseCheck("U9714 盾卫背后命中掉血", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'guardian');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9; e.dir = 0;
+    const hp0 = e.hp;
+    T.spawnBulletNow(e.x + e.size / 2 - 2, e.y + e.size + 6, 0, false);   // 下方朝上=背后
+    for (let i = 0; i < 15 && e.hp >= hp0; i++) await Z(50);
+    const hp1 = e.hp;
+    T.quit();
+    return hp1 < hp0 || JSON.stringify({ hp0, hp1 });
+  });
+  await senseCheck("U9715 格挡飘字出现", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'guardian');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9; e.dir = 0;
+    T.spawnBulletNow(e.x + e.size / 2 - 2, e.y - 10, 4, false);
+    let seen = false;
+    for (let i = 0; i < 15 && !seen; i++) { await Z(50); seen = T.floatTextsNow().some(x => x.indexOf('格挡') >= 0); }
+    T.quit();
+    return seen === true || JSON.stringify({ ts: T.floatTextsNow() });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
