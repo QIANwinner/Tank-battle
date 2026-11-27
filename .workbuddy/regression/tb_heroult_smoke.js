@@ -30085,6 +30085,49 @@ async function main() {
     return seen === true || JSON.stringify({ ts: T.floatTextsNow() });
   });
 
+  // U9734–U9736: Boss 宝箱
+  await senseCheck("U9734 Boss死亡掉落道具", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.forceSpawnBoss();
+    await Z(400);
+    const b = T.r18enNow().filter(x => !x.dead && x.isBoss).pop();
+    if (b) { b.hp = 1; b.enterT = 0; b.freezeT = 1e9; }
+    T.clearBulletsNow ? T.clearBulletsNow() : 0;
+    const n0 = T.puPosNow().length;
+    if (b) { T.spawnBulletNow(b.x + b.size / 2 - 2, b.y + b.size + 8, 0, false); }
+    for (let i = 0; i < 30 && T.puPosNow().length < n0 + 2; i++) await Z(100);
+    const n1 = T.puPosNow().length;
+    T.quit();
+    return n1 >= n0 + 2 || JSON.stringify({ n0, n1, boss: !!b });
+  });
+  await senseCheck("U9735 Boss宝箱飘字", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.forceSpawnBoss();
+    await Z(400);
+    const b = T.r18enNow().filter(x => !x.dead && x.isBoss).pop();
+    if (b) { b.hp = 1; b.enterT = 0; b.freezeT = 1e9; T.spawnBulletNow(b.x + b.size / 2 - 2, b.y + b.size + 8, 0, false); }
+    let seen = false;
+    for (let i = 0; i < 30 && !seen; i++) { await Z(100); seen = T.floatTextsNow().some(x => x.indexOf('Boss 宝箱') >= 0 || x.indexOf('宝箱') >= 0); }
+    T.quit();
+    return seen === true || JSON.stringify({ boss: !!b, ts: T.floatTextsNow() });
+  });
+  await senseCheck("U9736 Boss宝箱赏金入账", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.forceSpawnBoss();
+    await Z(400);
+    const b = T.r18enNow().filter(x => !x.dead && x.isBoss).pop();
+    if (b) { b.hp = 1; b.enterT = 0; b.freezeT = 1e9; }
+    const c0 = T.coins();
+    if (b) T.spawnBulletNow(b.x + b.size / 2 - 2, b.y + b.size + 8, 0, false);
+    for (let i = 0; i < 30 && T.coins() - c0 < 50; i++) await Z(100);
+    const d = T.coins() - c0;
+    T.quit();
+    return d >= 50 || JSON.stringify({ d, boss: !!b });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
