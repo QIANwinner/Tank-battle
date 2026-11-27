@@ -26175,8 +26175,13 @@ async function main() {
     T.setDailySeed(20310105); const st = T.missionResetNow();
     T.missionBumpNow(st.items[0].type, st.items[0].target, false);
     T.missionRemindResetNow();
-    T.quit(); await new Promise(r => setTimeout(r, 1900));
-    const txt = document.getElementById('toast').textContent || '';
+    T.quit();
+    let txt = '';
+    for (let i = 0; i < 30; i++) {   // —— 轮询至提醒出现(重负载下 1600ms 排程可能迟到) ——
+      await new Promise(r => setTimeout(r, 100));
+      txt = document.getElementById('toast').textContent || '';
+      if (txt.includes('任务') && txt.includes('待领取')) break;
+    }
     const ok = txt.includes('任务') && txt.includes('待领取') && T.missionRemindedNow() === true;
     T.setDailySeed(0); T.missionResetNow();
     return ok || JSON.stringify({ txt });
@@ -26920,6 +26925,8 @@ async function main() {
     T.startGame(); T.skipIntro();
     const br = T.baseRectNow();
     T.spawnEBulletAt(br.x + br.w / 2 - 2, br.y + 2, 4);
+    for (let i = 0; i < 30 && T.baseAliveNow() === true && (T.baseHpNow ? T.baseHpNow() === 2 : false); i++) await Z(60);
+    T.spawnEBulletAt(br.x + br.w / 2 - 2, br.y + 2, 4);   // —— v1.2.138 起基地2耐久:首弹被承,补第二弹 ——
     for (let i = 0; i < 60 && T.baseAliveNow() === true; i++) await Z(60);
     const dead = T.baseAliveNow() === false;
     for (let i = 0; i < 120 && !T.gameOverNow(); i++) await Z(80);
@@ -30193,6 +30200,35 @@ async function main() {
     const hurt = !e || e.dead === true || e.hp < hp0;
     T.quit();
     return hurt === true || JSON.stringify({ hp0, hp: e && e.hp, dead: e && e.dead });
+  });
+
+  // U9743–U9745: 自动炮台
+  await senseCheck("U9743 自动炮台道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('sentry');
+    T.quit();
+    return ok === true || JSON.stringify({ ok });
+  });
+  await senseCheck("U9744 拾取后部署炮台", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const n0 = T.sentriesNow().length;
+    T.pickupApplyNow('sentry');
+    const n1 = T.sentriesNow().length;
+    T.quit();
+    return n1 === n0 + 1 || JSON.stringify({ n0, n1 });
+  });
+  await senseCheck("U9745 炮台自动击杀近敌", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.pickupApplyNow('sentry');
+    T.spawnFoeNow(p.px - 10, p.py - 70, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (e) e.freezeT = 1e9;
+    let dead = false;
+    for (let i = 0; i < 60 && !dead; i++) { await Z(80); dead = !e || e.dead === true; }
+    T.quit();
+    return dead === true || 'sentry no kill';
   });
 
   chrome.kill(); killTree(chrome.pid);

@@ -1878,7 +1878,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.133</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.134</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2069,6 +2069,7 @@
     rico:   { color: '#b5e0ff', label: '弹射弹' },   // —— v1.2.118 弹射弹 ——
     star:   { color: '#fff59d', label: '无敌星' },   // —— v1.2.132 ——
     timebomb: { color: '#ff8a65', label: '定时炸弹' },   // —— v1.2.133 ——
+    sentry: { color: '#90caf9', label: '自动炮台' },   // —— v1.2.134 ——
   };
   const POWERUP_LIST = Object.keys(POWERUP_DEF);
 
@@ -5484,6 +5485,7 @@
       case 'rico':   fx.rico = 8; break;   // —— v1.2.118 弹射弹 8s ——
       case 'star':   fx.star = 8; break;   // —— v1.2.132 无敌星 8s ——
       case 'timebomb': if (player) timebombs.push({ x: player.x + TANK_SIZE / 2, y: player.y + TANK_SIZE / 2, t: 180 }); break;   // —— v1.2.133 ——
+      case 'sentry': if (player) sentries.push({ x: player.x + TANK_SIZE / 2, y: player.y + TANK_SIZE / 2, life: 1200, cd: 0 }); break;   // —— v1.2.134 ——
     }
     if (player) addText(clamp(player.x + TANK_SIZE / 2, 84, W - 84), player.y - 6, pickupEffectText(type, pickBefore, pickupState()) || def.label, def.color);
     runPowerups++;
@@ -6045,6 +6047,24 @@
       }
     }
     timebombs = timebombs.filter(tb => !tb.boom);
+    for (const st of sentries) {   // —— v1.2.134 自动炮台索敌开火 ——
+      st.life -= k; st.cd -= k;
+      if (st.cd <= 0) {
+        let best134 = null, bd134 = 150 * 150;
+        for (const e of enemies) {
+          if (e.dead || e.enterT > 0) continue;
+          const dx134 = e.x + e.size / 2 - st.x, dy134 = e.y + e.size / 2 - st.y, dd134 = dx134 * dx134 + dy134 * dy134;
+          if (dd134 < bd134) { bd134 = dd134; best134 = e; }
+        }
+        if (best134 && player) {
+          st.cd = 45;
+          const d134 = dirFromVec(best134.x + best134.size / 2 - st.x, best134.y + best134.size / 2 - st.y);
+          perfPoolSpawn(st.x - 2, st.y - 2, 4, d134, BULLET_SPEED, player, 0, false);
+          if (!reduced()) spawnParticles(st.x, st.y, '#90caf9', 2);
+        } else st.cd = 15;
+      }
+    }
+    sentries = sentries.filter(st => st.life > 0);
     if (baseGuard > 0) { baseGuard -= dt; if (baseGuard <= 0) buffEndNote('guard'); }   // —— v1.2.42 ——
     if (streakHoldT > 0) { streakHoldT -= dt; if (streakHoldT <= 0 && killStreak > 0) { killStreak = 0; fieldNoteShow('⚔ 连杀中断', 'info', 1400, 1); } }   // —— v1.2.109 ——
     if (comboTimer > 0) { comboTimer -= dt; if (comboTimer <= 0) { if (comboShield && combo >= 3) { comboShield = false; comboTimer = 1.5; comboWindowMax = Math.max(comboWindowMax, 1.5); fieldNoteShow('🛡 连击护盾 · 宽限 1.5 秒', 'warn', 1600, 1); } else { fieldNoteShow(comboEndText(combo, stat.maxCombo), 'info', 1600, 1); combo = 0; } } }   // —— v1.2.18 连击护盾宽限 ——
@@ -6545,6 +6565,13 @@
       ctx.save(); ctx.globalAlpha = 0.55 + 0.45 * Math.sin(animTime / 50);
       ctx.fillStyle = '#ff8a65'; ctx.beginPath(); ctx.arc(tb.x, tb.y, 7, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#3a1a08'; ctx.beginPath(); ctx.arc(tb.x, tb.y, 3, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+    for (const st of sentries) {   // —— v1.2.134 炮台绘制 ——
+      ctx.save();
+      ctx.fillStyle = '#1c2a4a'; ctx.fillRect(st.x - 7, st.y - 7, 14, 14);
+      ctx.strokeStyle = '#90caf9'; ctx.lineWidth = 1.5; ctx.strokeRect(st.x - 7, st.y - 7, 14, 14);
+      ctx.fillStyle = '#90caf9'; ctx.beginPath(); ctx.arc(st.x, st.y, 3, 0, Math.PI * 2); ctx.fill();
       ctx.restore();
     }
     // —— w12deploys 链式锚点 ——
@@ -25485,7 +25512,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (dailyMode) {
       const d = new Date();
       showToast(dailyIntroMsg(d.getMonth() + 1, d.getDate()));
-      if (dailyMods._descFull) setTimeout(() => showToast(dailyModMsg(dailyMods._descFull)), 2200);
+      if (dailyMods._descFull) { const dfToast = dailyMods._descFull; setTimeout(() => showToast(dailyModMsg(dfToast)), 2200); }   // —— v1.2.134 闭包捕获：quit 重置后不再打印 undefined ——
     } else if (timedMode) {
       showToast(timedIntroMsg(timeLimit));
     }
@@ -27713,7 +27740,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.133', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.134', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
