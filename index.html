@@ -1878,7 +1878,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.131</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.141</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2067,6 +2067,11 @@
     spread: { color: '#ffd166', label: '霰弹' },   // —— v1.2.116 霰弹 ——
     homing: { color: '#7bf1a8', label: '追踪弹' },   // —— v1.2.117 追踪弹 ——
     rico:   { color: '#b5e0ff', label: '弹射弹' },   // —— v1.2.118 弹射弹 ——
+    star:   { color: '#fff59d', label: '无敌星' },   // —— v1.2.132 ——
+    timebomb: { color: '#ff8a65', label: '定时炸弹' },   // —— v1.2.133 ——
+    sentry: { color: '#90caf9', label: '自动炮台' },   // —— v1.2.134 ——
+    camo:   { color: '#a5d6a7', label: '迷彩' },   // —— v1.2.140 ——
+    score2: { color: '#ffe082', label: '双倍积分' },   // —— v1.2.141 ——
   };
   const POWERUP_LIST = Object.keys(POWERUP_DEF);
 
@@ -2924,6 +2929,7 @@
   let lvRankS = 0, lastInterest = 0, weather = 'clear', firstWinDayK = '', lvNewRec = false, streakHoldT = 0, luckyLevel = false;   // —— v1.2.102~110 系统波状态 ——
   let critCount = 0, critForce = false, playerArmor = 0, chargeT = 0, chargeFired = 0;   // —— v1.2.112~121 波10状态 ——
   let poisonClouds = [], chillT = 0, poisonT = 0, nightLevel = false, hordeT = 0, affixForce = null;   // —— v1.2.122~131 波11状态 ——
+  let timebombs = [], sentries = [], stormT = 0, stormWarnT = 0, fogLevel = false, goldLevel = false, baseHp = 2;   // —— v1.2.132~141 波12状态 ——
   let killFeed = [];   // —— v1.2.113 击杀播报 ——
   try {
     const c = healedJson(LS_CAREER, {});   // —— v1.2.77 存档自愈加载 ——
@@ -4463,7 +4469,7 @@
     return inside(gx, gy) && map[gy][gx] === TILE_TREE;
   }
   function enemyTarget(e) {
-    if (playerInBush()) return rng() < 0.2 ? 'base' : null;   // —— v1.2.120 草丛隐身：索不到玩家改打基地 ——
+    if (playerInBush() || fx.camo > 0) return rng() < 0.2 ? 'base' : null;   // —— v1.2.120 草丛隐身 + v1.2.140 迷彩 ——
     const r = rng();
     switch (e.type) {
       case 'elite':    return r < 0.16 ? 'player' : r < 0.26 ? 'base' : null;
@@ -4785,6 +4791,15 @@
       if (baseAlive) {
         const bx = BASE.x * TILE, by = BASE.y * TILE;
         if (cx >= bx && cx <= bx + TILE && cy >= by && cy <= by + TILE) {
+          if (baseHp > 1 && multiMode !== 2) {   // —— v1.2.138 基地耐久:首击存活 ——
+            baseHp--;
+            addText(bx + TILE / 2, by - 10, '🏰 基地受损! 还能承受 1 击', '#ffb14d');
+            showToast('🏰 基地受损！再中一弹即告失守');
+            shake = 10; hurtFlash = 1; vibe([90, 50, 90]);
+            spawnParticles(bx + TILE / 2, by + TILE / 2, '#ffb14d', 16);
+            b.dead = true; sfxHit();
+            return;
+          }
           baseAlive = false;
           defeatCause = { target: 'base', how: b.owner.isPlayer ? 'self' : 'shot', by: shooterLabel(b.owner) };
           b.dead = true; sfxBoom();
@@ -5099,6 +5114,7 @@
     p = p || player;
     if (!p || p.dead) return;
     if (p === player && playerArmor > 0 && multiMode !== 2) { playerArmor = 0; p.spawnInv = Math.max(p.spawnInv || 0, 90); addText(p.x + TANK_SIZE / 2, p.y - 10, '🛡 护甲抵消', '#c7d2fe'); sfxPickup(); return; }   // —— v1.2.115 护甲片挡死 ——
+    if (p === player && fx.star > 0 && multiMode !== 2) { addText(p.x + TANK_SIZE / 2, p.y - 10, '⭐ 无敌', '#fff59d'); return; }   // —— v1.2.132 无敌星免伤 ——
     const isP2 = p === player2;
     p.dead = true;
     stat.deaths++;
@@ -5245,6 +5261,7 @@
     if (e.golden) { const gg100 = addGold(30, e.x + e.size / 2, e.y - 38); spawnPowerup(e.x + e.size / 2, e.y + e.size / 2); addText(e.x + e.size / 2, e.y - 38, '👑 敌将伏法 +' + gg100 + '🪙', '#ffd75e'); }   // —— v1.2.100 ——
     if (e.affix) { const ag128 = addGold(15, e.x + e.size / 2, e.y - 50); addText(e.x + e.size / 2, e.y - 50, '🏷 词缀赏金 +' + ag128 + '🪙', '#ffb14d'); }   // —— v1.2.128 ——
     if (hordeT > 0 && !e.isBoss) { const hg130 = addGold(10, e.x + e.size / 2, e.y - 62); addText(e.x + e.size / 2, e.y - 62, '🌊 敌潮赏金 +' + hg130 + '🪙', '#6bd8ff'); }   // —— v1.2.130 ——
+    if (goldLevel && !e.isBoss) { const gg137 = addGold(6, e.x + e.size / 2, e.y - 74); addText(e.x + e.size / 2, e.y - 74, '🪙 淘金赏金 +' + gg137 + '🪙', '#ffe082'); }   // —— v1.2.137 ——
     if (e.isBoss) { stat.bossKills++; missionBump('boss', 1); }   // —— v1.2.2 每日任务 ——
     addKillScore(e);
     // 金币掉落：不同敌人金币不同，受金运加成
@@ -5290,7 +5307,7 @@
     // 连击暴击：连击系数加成 +50%；战利品猎手：基础分 +25%/层；连击大师：连击得分 +10%/级
     const mult = (1 + (combo - 1) * 0.1 * (1 + 0.5 * (upgrades.double || 0))) * (1 + 0.1 * (bonus.combo || 0));
     const gain = Math.round(baseScore * mult * (1 + 0.25 * (upgrades.greed || 0)) / 10) * 10;
-    score += gain;
+    score += gain * (fx.score2 > 0 ? 2 : 1);   // —— v1.2.141 双倍积分 ——
     missionBump('score', score, true);   // —— v1.2.2 每日任务:单局得分 ——
     addText(e.x + e.size / 2, e.y - 4, v5ComboGainText(gain), combo >= 3 ? '#ff00ff' : '#00f0ff');
     if (combo >= 3) addText(e.x + e.size / 2, e.y - 24, combo + ' 连击', '#ffe600');
@@ -5405,7 +5422,7 @@
   // —— v1.2.30 金币散落物：磁吸拾取，80px 引力 / 22px 拾取 / 6s 生命 ——
   function coinDropSpawn(cx, cy, e) {
     if (multiMode === 2) return;
-    const n = e.isBoss ? 4 : ((e.type === 'elite' || e.type === 'sniper') ? 2 : (rng() < 0.5 ? 1 : 0));
+    const n = (e.isBoss ? 4 : ((e.type === 'elite' || e.type === 'sniper') ? 2 : (rng() < 0.5 ? 1 : 0))) * (goldLevel ? 2 : 1);   // —— v1.2.137 淘金双倍散落 ——
     for (let i = 0; i < n; i++) {
       coinDrops.push({
         x: clamp(cx + (rng() - 0.5) * 28, TILE + 6, W - TILE - 6),
@@ -5478,6 +5495,11 @@
       case 'spread': fx.spread = 8; break;   // —— v1.2.116 霰弹 8s ——
       case 'homing': fx.homing = 8; break;   // —— v1.2.117 追踪弹 8s ——
       case 'rico':   fx.rico = 8; break;   // —— v1.2.118 弹射弹 8s ——
+      case 'star':   fx.star = 8; break;   // —— v1.2.132 无敌星 8s ——
+      case 'timebomb': if (player) timebombs.push({ x: player.x + TANK_SIZE / 2, y: player.y + TANK_SIZE / 2, t: 180 }); break;   // —— v1.2.133 ——
+      case 'sentry': if (player) sentries.push({ x: player.x + TANK_SIZE / 2, y: player.y + TANK_SIZE / 2, life: 1200, cd: 0 }); break;   // —— v1.2.134 ——
+      case 'camo':   fx.camo = 8; break;   // —— v1.2.140 迷彩 8s ——
+      case 'score2': fx.score2 = 8; break;   // —— v1.2.141 双倍积分 8s ——
     }
     if (player) addText(clamp(player.x + TANK_SIZE / 2, 84, W - 84), player.y - 6, pickupEffectText(type, pickBefore, pickupState()) || def.label, def.color);
     runPowerups++;
@@ -5563,6 +5585,11 @@
       if (!def) return;
       upgrades[id] = (upgrades[id] || 0) + 1;
       upgTotal++;
+      if ((upgrades[id] || 0) === 3) {   // —— v1.2.139 专精奖励 ——
+        const mg139 = addGold(50);
+        showToast('🎓 ' + def.name + ' 专精达成！+' + mg139 + '🪙');
+        if (player) addText(clamp(player.x + TANK_SIZE / 2, 84, W - 84), player.y - 26, '🎓 专精! +' + mg139 + '🪙', '#ffe082');
+      }
       // 即时生效项
       if (id === 'hp') { lives = Math.min(lives + 1, 9); lastLives = -1; }
       if (id === 'shield' && player) player.spawnInv = Math.max(player.spawnInv || 0, 180);
@@ -5795,6 +5822,8 @@
     lvAdvLock = false;   // —— v1.2.72 新关生效即释放 ——
     bossLevel = (level % 5 === 0);
     nightLevel = !bossLevel && level % 4 === 2;   // —— v1.2.129 夜战关 ——
+    fogLevel = !bossLevel && level % 11 === 4;   // —— v1.2.136 迷雾关 ——
+    goldLevel = !bossLevel && level % 9 === 6;   // —— v1.2.137 淘金关 ——
     if (bossLevel) { const bt = BOSS_TYPES[bossCount % BOSS_TYPES.length]; if (bt) setTimeout(() => { try { showToast('⚠️ Boss「' + bt.name + '」来袭 · ' + bt.desc); } catch (e) { /* 忽略 */ } }, 1200); }   // —— v1.2.48 Boss 弱点提示 ——
     tookHitThisLevel = false; lvPerfGold = 0; lvWingBonus = 0; lvFastBonus = 0;   // —— v1.2.22 新关清零表现奖励 · v1.2.33 · v1.2.46 ——
     lvClearDone = false; lvClearWatchT = 0;   // —— v1.2.21 重置过关闸门与看门狗 ——
@@ -5804,6 +5833,7 @@
     lvRankS = 0; lvNewRec = false; streakHoldT = 0; killStreak = 0;   // —— v1.2.102/108/109 ——
     critCount = 0; playerArmor = 0; chargeT = 0; chargeFired = 0; killFeed = [];   // —— v1.2.112/113/115/121 ——
     poisonClouds = []; chillT = 0; poisonT = 0; hordeT = 0; affixForce = null;   // —— v1.2.122~131(nightLevel 在 startLevel 另置) ——
+    timebombs = []; sentries = []; stormT = __testMode ? 999999 : 2700 + rng() * 1800; stormWarnT = 0; baseHp = 2;   // 测试态不自动风暴   // —— v1.2.132~138(fog/gold 在 startLevel 另置) ——
     enemiesSpawned = 0;
     airDropT = 20;   // —— v1.2.93 空投重置 ——
     weather = __testMode ? 'clear' : ['clear', 'rain', 'snow', 'wind'][randInt(0, 3)];   // —— v1.2.104 战地天气（测试态默认晴,weatherSetNow 强制）——
@@ -6016,6 +6046,48 @@
     if (fx.spread > 0) fx.spread -= dt;   // —— v1.2.116 ——
     if (fx.homing > 0) fx.homing -= dt;   // —— v1.2.117 ——
     if (fx.rico > 0) fx.rico -= dt;   // —— v1.2.118 ——
+    if (fx.star > 0) fx.star -= dt;   // —— v1.2.132 ——
+    if (fx.camo > 0) fx.camo -= dt;   // —— v1.2.140 ——
+    if (fx.score2 > 0) fx.score2 -= dt;   // —— v1.2.141 ——
+    if (fx.star > 0 && player && !player.dead && multiMode !== 2) {   // —— v1.2.132 无敌星接触杀 ——
+      for (const e of enemies) {
+        if (e.dead || e.enterT > 0) continue;
+        if (Math.abs(e.x + e.size / 2 - (player.x + TANK_SIZE / 2)) < (e.size + TANK_SIZE) / 2 && Math.abs(e.y + e.size / 2 - (player.y + TANK_SIZE / 2)) < (e.size + TANK_SIZE) / 2) {
+          e.hp = 0; e.dead = true; onEnemyKilled(e);
+        }
+      }
+    }
+    for (const tb of timebombs) {   // —— v1.2.133 定时炸弹起爆 ——
+      tb.t -= k;
+      if (tb.t <= 0 && !tb.boom) {
+        tb.boom = true;
+        spawnParticles(tb.x, tb.y, '#ff8a65', 30); shake = Math.max(shake, 8); sfxBoom();
+        for (const e of enemies) {
+          if (e.dead) continue;
+          const dx133 = e.x + e.size / 2 - tb.x, dy133 = e.y + e.size / 2 - tb.y;
+          if (dx133 * dx133 + dy133 * dy133 < 90 * 90) { e.hp -= 2; e.hitFlash = 6; if (e.hp <= 0) { e.dead = true; onEnemyKilled(e); } }
+        }
+      }
+    }
+    timebombs = timebombs.filter(tb => !tb.boom);
+    for (const st of sentries) {   // —— v1.2.134 自动炮台索敌开火 ——
+      st.life -= k; st.cd -= k;
+      if (st.cd <= 0) {
+        let best134 = null, bd134 = 150 * 150;
+        for (const e of enemies) {
+          if (e.dead || e.enterT > 0) continue;
+          const dx134 = e.x + e.size / 2 - st.x, dy134 = e.y + e.size / 2 - st.y, dd134 = dx134 * dx134 + dy134 * dy134;
+          if (dd134 < bd134) { bd134 = dd134; best134 = e; }
+        }
+        if (best134 && player) {
+          st.cd = 45;
+          const d134 = dirFromVec(best134.x + best134.size / 2 - st.x, best134.y + best134.size / 2 - st.y);
+          perfPoolSpawn(st.x - 2, st.y - 2, 4, d134, BULLET_SPEED, player, 0, false);
+          if (!reduced()) spawnParticles(st.x, st.y, '#90caf9', 2);
+        } else st.cd = 15;
+      }
+    }
+    sentries = sentries.filter(st => st.life > 0);
     if (baseGuard > 0) { baseGuard -= dt; if (baseGuard <= 0) buffEndNote('guard'); }   // —— v1.2.42 ——
     if (streakHoldT > 0) { streakHoldT -= dt; if (streakHoldT <= 0 && killStreak > 0) { killStreak = 0; fieldNoteShow('⚔ 连杀中断', 'info', 1400, 1); } }   // —— v1.2.109 ——
     if (comboTimer > 0) { comboTimer -= dt; if (comboTimer <= 0) { if (comboShield && combo >= 3) { comboShield = false; comboTimer = 1.5; comboWindowMax = Math.max(comboWindowMax, 1.5); fieldNoteShow('🛡 连击护盾 · 宽限 1.5 秒', 'warn', 1600, 1); } else { fieldNoteShow(comboEndText(combo, stat.maxCombo), 'info', 1600, 1); combo = 0; } } }   // —— v1.2.18 连击护盾宽限 ——
@@ -6069,6 +6141,26 @@
     if (chillT > 0) chillT = Math.max(0, chillT - k);
     // —— v1.2.130 敌潮计时衰减 ——
     if (hordeT > 0) hordeT = Math.max(0, hordeT - k);
+    if (stormT > 0 && multiMode !== 2) {   // —— v1.2.135 弹幕风暴倒计时 ——
+      stormT -= k;
+      if (stormT <= 0) {
+        stormT = 0; stormWarnT = 150;
+        if (player) addText(clamp(player.x + TANK_SIZE / 2, 84, W - 84), player.y - 40, '🌪 弹幕风暴来袭!', '#ff6b6b');
+        showToast('🌪 弹幕风暴来袭！注意走位');
+      }
+    }
+    if (stormWarnT > 0) {   // —— v1.2.135 风暴三连齐射 ——
+      stormWarnT -= k;
+      if (stormWarnT <= 0) {
+        for (const e of enemies) {
+          if (e.dead || e.enterT > 0) continue;
+          const p135 = nearestPlayerTo(e.x, e.y); if (!p135) continue;
+          const d135 = dirFromVec(p135.x - e.x, p135.y - e.y);
+          for (const dd135 of [d135, (d135 + 1) % 8, (d135 + 7) % 8]) perfPoolSpawn(e.x + e.size / 2 - 2, e.y + e.size / 2 - 2, 4, dd135, BULLET_SPEED * 0.8, e, 0, false);
+        }
+        stormT = __testMode ? 999999 : 2700 + rng() * 1800;
+      }
+    }
     // —— v1.2.93 空投补给：每 20s 在随机空点投放一件道具 ——
     if (airDropT > 0 && multiMode !== 2) {
       airDropT -= dt;
@@ -6512,7 +6604,22 @@
     drawEnemyIntroMark();
     drawLastFoeMark();   // —— v1.2.101 ——
     drawRespawnMark();
+    for (const tb of timebombs) {   // —— v1.2.133 定时炸弹绘制 ——
+      ctx.save(); ctx.globalAlpha = 0.55 + 0.45 * Math.sin(animTime / 50);
+      ctx.fillStyle = '#ff8a65'; ctx.beginPath(); ctx.arc(tb.x, tb.y, 7, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#3a1a08'; ctx.beginPath(); ctx.arc(tb.x, tb.y, 3, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+    for (const st of sentries) {   // —— v1.2.134 炮台绘制 ——
+      ctx.save();
+      ctx.fillStyle = '#1c2a4a'; ctx.fillRect(st.x - 7, st.y - 7, 14, 14);
+      ctx.strokeStyle = '#90caf9'; ctx.lineWidth = 1.5; ctx.strokeRect(st.x - 7, st.y - 7, 14, 14);
+      ctx.fillStyle = '#90caf9'; ctx.beginPath(); ctx.arc(st.x, st.y, 3, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+    // —— w12deploys 链式锚点 ——
     drawNightVeil();   // —— v1.2.129 夜战帷幕 ——
+    drawFogVeil();   // —— v1.2.136 迷雾帷幕 ——
 
     // 道具
     powerupRingCount = 0;
@@ -6988,6 +7095,20 @@
   }
 
   // —— v1.2.129 夜战帷幕:压暗全屏,玩家光圈清晰 ——
+  function drawFogVeil() {   // —— v1.2.136 迷雾帷幕:浓雾锁场,光圈更小 ——
+    if (!fogLevel || !running) return;
+    ctx.save();
+    const pcx = player && !player.dead ? player.x + TANK_SIZE / 2 : W / 2, pcy = player && !player.dead ? player.y + TANK_SIZE / 2 : H / 2;
+    const g136 = ctx.createRadialGradient(pcx, pcy, 36, pcx, pcy, 140);
+    g136.addColorStop(0, 'rgba(6,8,14,0)');
+    g136.addColorStop(0.6, 'rgba(6,8,14,0.72)');
+    g136.addColorStop(1, 'rgba(6,8,14,0.95)');
+    ctx.fillStyle = g136; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = 'rgba(6,8,14,0.95)';
+    ctx.fillRect(0, 0, W, Math.max(0, pcy - 140)); ctx.fillRect(0, Math.min(H, pcy + 140), W, H);
+    ctx.fillRect(0, 0, Math.max(0, pcx - 140), H); ctx.fillRect(Math.min(W, pcx + 140), 0, W, H);
+    ctx.restore();
+  }
   function drawNightVeil() {
     if (!nightLevel || !running) return;
     ctx.save();
@@ -25449,7 +25570,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (dailyMode) {
       const d = new Date();
       showToast(dailyIntroMsg(d.getMonth() + 1, d.getDate()));
-      if (dailyMods._descFull) setTimeout(() => showToast(dailyModMsg(dailyMods._descFull)), 2200);
+      if (dailyMods._descFull) { const dfToast = dailyMods._descFull; setTimeout(() => showToast(dailyModMsg(dfToast)), 2200); }   // —— v1.2.134 闭包捕获：quit 重置后不再打印 undefined ——
     } else if (timedMode) {
       showToast(timedIntroMsg(timeLimit));
     }
@@ -27677,7 +27798,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.131', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.141', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -28348,6 +28469,9 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       chargeNow: () => chargeT, chargeSetNow: (v) => { chargeT = Number(v) || 0; return chargeT; }, chargeFiredNow: () => chargeFired,
       nightNow: () => nightLevel, hordeNow: () => hordeT, chillNow: () => chillT, poisonNow: () => poisonT, cloudsNow: () => poisonClouds.map(c => ({ x: Math.round(c.x), y: Math.round(c.y), t: Math.round(c.t) })),
       affixForceNow: (v) => { affixForce = v || null; return affixForce; }, hordeSetNow: (v) => { hordeT = Number(v) || 0; return hordeT; },
+      starNow: () => fx.star || 0, camoNow: () => fx.camo || 0, score2Now: () => fx.score2 || 0, timebombsNow: () => timebombs.map(b => ({ x: Math.round(b.x), y: Math.round(b.y), t: Math.round(b.t) })),
+      sentriesNow: () => sentries.map(b => ({ x: Math.round(b.x), y: Math.round(b.y), life: Math.round(b.life) })), stormNow: () => stormT, stormWarnNow: () => stormWarnT,
+      stormSetNow: (v) => { stormT = Number(v) || 0; return stormT; }, fogNow: () => fogLevel, goldRushNow: () => goldLevel, baseHpNow: () => baseHp,
       bulletsInfoNow: () => bullets.map(b => ({ x: Math.round(b.x), y: Math.round(b.y), dir: b.dir, size: b.size, own: !!(b.owner && b.owner.isPlayer), dead: !!b.dead })),
       pauseStatNow: () => { const e = $('pauseStatLine'); return e ? e.textContent : null; },
       endNow: (w) => { endGame(!!w); return gameOver; },

@@ -25387,6 +25387,8 @@ async function main() {
       const raf = () => new Promise(requestAnimationFrame);
       T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
       T.enemyShotAtBaseNow('sniper');
+      for (let i = 0; i < 40 && (!T.baseHpNow || T.baseHpNow() === 2) && !T.gameOverNow(); i++) await new Promise(r => setTimeout(r, 70));   // —— v1.2.138 起基地2耐久:等首弹被承 ——
+      if (!T.gameOverNow()) T.enemyShotAtBaseNow('sniper');   // —— 补第二弹 ——
       const end = performance.now() + 3000;
       while ($('overlay').classList.contains('hide') && performance.now() < end) await raf();
       const el = $('defeatCauseWrap'), cause = T.defeatCauseNow();
@@ -26175,8 +26177,13 @@ async function main() {
     T.setDailySeed(20310105); const st = T.missionResetNow();
     T.missionBumpNow(st.items[0].type, st.items[0].target, false);
     T.missionRemindResetNow();
-    T.quit(); await new Promise(r => setTimeout(r, 1900));
-    const txt = document.getElementById('toast').textContent || '';
+    T.quit();
+    let txt = '';
+    for (let i = 0; i < 30; i++) {   // —— 轮询至提醒出现(重负载下 1600ms 排程可能迟到) ——
+      await new Promise(r => setTimeout(r, 100));
+      txt = document.getElementById('toast').textContent || '';
+      if (txt.includes('任务') && txt.includes('待领取')) break;
+    }
     const ok = txt.includes('任务') && txt.includes('待领取') && T.missionRemindedNow() === true;
     T.setDailySeed(0); T.missionResetNow();
     return ok || JSON.stringify({ txt });
@@ -26920,6 +26927,8 @@ async function main() {
     T.startGame(); T.skipIntro();
     const br = T.baseRectNow();
     T.spawnEBulletAt(br.x + br.w / 2 - 2, br.y + 2, 4);
+    for (let i = 0; i < 30 && T.baseAliveNow() === true && (T.baseHpNow ? T.baseHpNow() === 2 : false); i++) await Z(60);
+    T.spawnEBulletAt(br.x + br.w / 2 - 2, br.y + 2, 4);   // —— v1.2.138 起基地2耐久:首弹被承,补第二弹 ——
     for (let i = 0; i < 60 && T.baseAliveNow() === true; i++) await Z(60);
     const dead = T.baseAliveNow() === false;
     for (let i = 0; i < 120 && !T.gameOverNow(); i++) await Z(80);
@@ -29907,7 +29916,7 @@ async function main() {
   await senseCheck("U9718 中毒满则阵亡扣命", async (T,$) => {
     const Z = ms => new Promise(r => setTimeout(r, ms));
     T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap();
-    for (let i = 0; i < 30 && T.spawnInvNow() > 0; i++) await Z(100);
+    for (let i = 0; i < 80 && T.spawnInvNow() > 0; i++) await Z(100);   // —— 批次重负载 RAF 减速兼容 ——
     T.spawnFoeNow(300, 100, 'plague');
     T.kill();
     const c = T.cloudsNow()[0];
@@ -29968,13 +29977,13 @@ async function main() {
   await senseCheck("U9722 吸血敌命中玩家回血", async (T,$) => {
     const Z = ms => new Promise(r => setTimeout(r, ms));
     T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap();
-    for (let i = 0; i < 30 && T.spawnInvNow() > 0; i++) await Z(100);
+    for (let i = 0; i < 80 && T.spawnInvNow() > 0; i++) await Z(100);   // —— 批次重负载 RAF 减速兼容 ——
     T.spawnFoeNow(300, 100, 'vampire');
     const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9;
     const hp0 = e.hp;
     const p = T.r18posNow();
     T.spawnEBulletAt(p.px - 2, p.py - 30, 4);
-    for (let i = 0; i < 25 && e.hp <= hp0; i++) await Z(80);
+    for (let i = 0; i < 40 && e.hp <= hp0; i++) await Z(80);
     const hp1 = e.hp;
     T.quit();
     return hp1 > hp0 || JSON.stringify({ hp0, hp1 });
@@ -29982,7 +29991,7 @@ async function main() {
   await senseCheck("U9723 吸血飘字出现", async (T,$) => {
     const Z = ms => new Promise(r => setTimeout(r, ms));
     T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap();
-    for (let i = 0; i < 30 && T.spawnInvNow() > 0; i++) await Z(100);
+    for (let i = 0; i < 80 && T.spawnInvNow() > 0; i++) await Z(100);   // —— 批次重负载 RAF 减速兼容 ——
     T.spawnFoeNow(300, 100, 'vampire');
     const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9;
     const p = T.r18posNow();
@@ -30126,6 +30135,305 @@ async function main() {
     const d = T.coins() - c0;
     T.quit();
     return d >= 50 || JSON.stringify({ d, boss: !!b });
+  });
+
+  // U9737–U9739: 无敌星
+  await senseCheck("U9737 无敌星道具已注册并可拾取", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('star');
+    const v = T.starNow();
+    T.quit();
+    return (ok && v > 0) === true || JSON.stringify({ ok, v });
+  });
+  await senseCheck("U9738 无敌星期间免伤", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(100, 100, 'normal');
+    for (let i = 0; i < 40 && T.spawnInvNow() > 0; i++) await Z(80);
+    T.pickupApplyNow('star');
+    const p = T.r18posNow();
+    const l0 = T.livesNow();
+    T.spawnEBulletAt(p.px, p.py - 26, 4);
+    for (let i = 0; i < 20; i++) await Z(60);
+    const l1 = T.livesNow();
+    T.quit();
+    return l1 >= l0 || JSON.stringify({ l0, l1 });
+  });
+  await senseCheck("U9739 无敌星接触碾压敌人", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.spawnFoeNow(p.px - 10, p.py, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (e) e.freezeT = 1e9;
+    T.pickupApplyNow('star');
+    T.tp(p.px - 10, p.py);
+    let dead = false;
+    for (let i = 0; i < 20 && !dead; i++) { await Z(60); dead = !e || e.dead === true; }
+    T.quit();
+    return dead === true || 'contact no kill';
+  });
+
+  // U9740–U9742: 定时炸弹
+  await senseCheck("U9740 定时炸弹道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('timebomb');
+    T.quit();
+    return ok === true || JSON.stringify({ ok });
+  });
+  await senseCheck("U9741 拾取后脚下埋弹", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const n0 = T.timebombsNow().length;
+    T.pickupApplyNow('timebomb');
+    const n1 = T.timebombsNow().length;
+    T.quit();
+    return n1 === n0 + 1 || JSON.stringify({ n0, n1 });
+  });
+  await senseCheck("U9742 三秒后爆炸伤敌", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.pickupApplyNow('timebomb');
+    T.spawnFoeNow(p.px - 10, p.py - 40, 'armored');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (e) e.freezeT = 1e9;
+    const hp0 = e ? e.hp : 0;
+    for (let i = 0; i < 60; i++) { await Z(80); if (!e || e.dead || e.hp < hp0) break; }
+    const hurt = !e || e.dead === true || e.hp < hp0;
+    T.quit();
+    return hurt === true || JSON.stringify({ hp0, hp: e && e.hp, dead: e && e.dead });
+  });
+
+  // U9743–U9745: 自动炮台
+  await senseCheck("U9743 自动炮台道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('sentry');
+    T.quit();
+    return ok === true || JSON.stringify({ ok });
+  });
+  await senseCheck("U9744 拾取后部署炮台", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const n0 = T.sentriesNow().length;
+    T.pickupApplyNow('sentry');
+    const n1 = T.sentriesNow().length;
+    T.quit();
+    return n1 === n0 + 1 || JSON.stringify({ n0, n1 });
+  });
+  await senseCheck("U9745 炮台自动击杀近敌", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.pickupApplyNow('sentry');
+    T.spawnFoeNow(p.px - 10, p.py - 70, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (e) e.freezeT = 1e9;
+    let dead = false;
+    for (let i = 0; i < 60 && !dead; i++) { await Z(80); dead = !e || e.dead === true; }
+    T.quit();
+    return dead === true || 'sentry no kill';
+  });
+
+  // U9746–U9748: 弹幕风暴
+  await senseCheck("U9746 开局风暴倒计时初始化", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const v = T.stormNow();
+    T.quit();
+    return v > 0 || JSON.stringify({ v });
+  });
+  await senseCheck("U9747 风暴触发后敌弹齐射", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'normal');
+    T.stormSetNow(1);
+    let n = 0;
+    for (let i = 0; i < 70 && n === 0; i++) { await Z(80); n = T.bulletsInfoNow().filter(b => !b.own && !b.dead).length; }
+    T.quit();
+    return n > 0 || 'no storm bullets';
+  });
+  await senseCheck("U9748 风暴预警飘字出现", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'normal');
+    T.stormSetNow(1);
+    let seen = false;
+    for (let i = 0; i < 30 && !seen; i++) { await Z(60); seen = T.floatTextsNow().some(x => x.indexOf('弹幕风暴') >= 0); }
+    T.quit();
+    return seen === true || 'no warn text';
+  });
+
+  // U9749–U9751: 迷雾战争关
+  await senseCheck("U9749 第4关为迷雾关", (T,$) => {
+    T.startAtLevel(4); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const v = T.fogNow();
+    T.quit();
+    return v === true || JSON.stringify({ v });
+  });
+  await senseCheck("U9750 第8关非迷雾关", (T,$) => {
+    T.startAtLevel(8); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const v = T.fogNow();
+    T.quit();
+    return v === false || JSON.stringify({ v });
+  });
+  await senseCheck("U9751 迷雾关角落画面压暗", (T,$) => {
+    T.startAtLevel(4); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.renderOnce();
+    const cv = $('game'), cx2 = cv.getContext('2d');
+    const corner = cx2.getImageData(4, 4, 1, 1).data;
+    const sum = corner[0] + corner[1] + corner[2];
+    T.quit();
+    return sum < 150 || JSON.stringify({ sum, px: [corner[0], corner[1], corner[2]] });
+  });
+
+  // U9752–U9754: 淘金关
+  await senseCheck("U9752 第6关为淘金关", (T,$) => {
+    T.startAtLevel(6); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const v = T.goldRushNow();
+    T.quit();
+    return v === true || JSON.stringify({ v });
+  });
+  await senseCheck("U9753 第7关非淘金关", (T,$) => {
+    T.startAtLevel(7); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const v = T.goldRushNow();
+    T.quit();
+    return v === false || JSON.stringify({ v });
+  });
+  await senseCheck("U9754 淘金关击杀有赏金飘字", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startAtLevel(6); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (e) { e.freezeT = 1e9; e.hp = 1; }
+    T.spawnBulletNow(e.x + e.size / 2 - 2, e.y + e.size + 6, 0, false);
+    let seen = false;
+    for (let i = 0; i < 30 && !seen; i++) { await Z(70); seen = T.floatTextsNow().some(x => x.indexOf('淘金赏金') >= 0); }
+    T.quit();
+    return seen === true || 'no goldrush bounty';
+  });
+
+  // U9755–U9757: 基地耐久
+  await senseCheck("U9755 基地耐久初始为2", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const v = T.baseHpNow();
+    T.quit();
+    return v === 2 || JSON.stringify({ v });
+  });
+  await senseCheck("U9756 首击受损但基地仍在", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(100, 100, 'normal');
+    T.spawnEBulletAt(12 * 24 + 10, 23 * 24 - 18, 4);
+    for (let i = 0; i < 30 && T.baseHpNow() === 2; i++) await Z(70);
+    const hp = T.baseHpNow(), alive = T.baseAliveNow(), over = T.gameOverNow();
+    T.quit();
+    return (hp === 1 && alive === true && !over) || JSON.stringify({ hp, alive, over });
+  });
+  await senseCheck("U9757 第二击基地失守", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(100, 100, 'normal');
+    T.spawnEBulletAt(12 * 24 + 10, 23 * 24 - 18, 4);
+    for (let i = 0; i < 30 && T.baseHpNow() === 2; i++) await Z(70);
+    T.spawnEBulletAt(12 * 24 + 10, 23 * 24 - 18, 4);
+    let over = false;
+    for (let i = 0; i < 40 && !over; i++) { await Z(80); over = !!T.gameOverNow(); }
+    T.quit();
+    return over === true || JSON.stringify({ hp: T.baseHpNow(), alive: T.baseAliveNow() });
+  });
+
+  // U9758–U9760: 强化专精
+  await senseCheck("U9758 三层强化触发专精飘字", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.chooseUpgrade('rapid'); await Z(150); T.chooseUpgrade('rapid'); await Z(150); T.chooseUpgrade('rapid');
+    await Z(300);
+    const seen = T.floatTextsNow().some(x => x.indexOf('专精') >= 0);
+    T.quit();
+    return seen === true || 'no mastery text';
+  });
+  await senseCheck("U9759 专精赏金入账", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.chooseUpgrade('rapid'); await Z(150); T.chooseUpgrade('rapid'); await Z(150);
+    const c0 = T.coins();
+    T.chooseUpgrade('rapid');
+    await Z(300);
+    const c1 = T.coins();
+    T.quit();
+    return c1 > c0 || JSON.stringify({ c0, c1 });
+  });
+  await senseCheck("U9760 两层强化不触发专精", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.chooseUpgrade('rapid'); await Z(150); T.chooseUpgrade('rapid');
+    await Z(300);
+    const seen = T.floatTextsNow().some(x => x.indexOf('专精') >= 0);
+    T.quit();
+    return seen === false || 'mastery fired at 2';
+  });
+
+  // U9761–U9763: 迷彩道具
+  await senseCheck("U9761 迷彩道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('camo');
+    const v = T.camoNow();
+    T.quit();
+    return (ok && v > 0) === true || JSON.stringify({ ok, v });
+  });
+  await senseCheck("U9762 迷彩期间敌人不索敌", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(400, 100, 'elite');
+    T.pickupApplyNow('camo');
+    let seen = false;
+    for (let i = 0; i < 60; i++) if (T.eTargetNow() === 'player') { seen = true; break; }
+    T.quit();
+    return seen === false || 'camo still targeted';
+  });
+  await senseCheck("U9763 迷彩结束恢复索敌", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(400, 100, 'elite');
+    T.pickupApplyNow('camo');
+    T.fxSetNow('camo', 0);
+    let seen = false;
+    for (let i = 0; i < 200; i++) if (T.eTargetNow() === 'player') { seen = true; break; }
+    T.quit();
+    return seen === true || 'never re-targeted';
+  });
+
+  // U9764–U9766: 双倍积分
+  await senseCheck("U9764 双倍积分道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('score2');
+    const v = T.score2Now();
+    T.quit();
+    return (ok && v > 0) === true || JSON.stringify({ ok, v });
+  });
+  await senseCheck("U9765 双倍积分期间击杀得分翻倍", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    const killOne = async (useBuff) => {
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+      if (useBuff) T.fxSetNow('score2', 8);
+      const s0 = T.scoreNow();
+      T.spawnFoeNow(300, 100, 'normal');
+      const e = T.r18enNow().filter(x => !x.dead).pop();
+      if (e) { e.freezeT = 1e9; e.hp = 1; }
+      T.spawnBulletNow(e.x + e.size / 2 - 2, e.y + e.size + 6, 0, false);
+      for (let i = 0; i < 30 && !(e.dead); i++) await Z(60);
+      const gain = T.scoreNow() - s0;
+      T.quit();
+      return gain;
+    };
+    const gA = await killOne(false);
+    const gB = await killOne(true);
+    return (gA > 0 && gB === gA * 2) || JSON.stringify({ gA, gB });
+  });
+  await senseCheck("U9766 双倍积分计时衰减", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.fxSetNow('score2', 0.6);
+    for (let i = 0; i < 30 && T.score2Now() > 0; i++) await Z(100);
+    const v = T.score2Now();
+    T.quit();
+    return v <= 0 || JSON.stringify({ v });
   });
 
   chrome.kill(); killTree(chrome.pid);
