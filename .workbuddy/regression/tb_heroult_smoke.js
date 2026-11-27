@@ -30652,6 +30652,42 @@ async function main() {
     return seen === true || 'no heal text';
   });
 
+  // U9785–U9787: 充能站
+  await senseCheck("U9785 站上充能站蓄力加速", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 13);
+    T.renderOnce();
+    T.chargeSetNow(0);
+    T.keySet('j', true);
+    await Z(500);
+    T.keySet('j', false);
+    const c = T.chargeNow();
+    T.quit();
+    return c >= 20 || JSON.stringify({ c });
+  });
+  await senseCheck("U9786 非充能站蓄力常速", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.chargeSetNow(0);
+    T.keySet('j', true);
+    await Z(500);
+    T.keySet('j', false);
+    const c = T.chargeNow();
+    T.quit();
+    return (c > 0 && c < 55) || JSON.stringify({ c });   // 常速500ms≈30帧,加速态90可区分
+  });
+  await senseCheck("U9787 充能站地形识别正确", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 13);
+    T.renderOnce();
+    const v = T.tileUnderNow();
+    T.quit();
+    return v === 13 || JSON.stringify({ v });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
