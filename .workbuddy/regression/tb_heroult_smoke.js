@@ -31018,6 +31018,35 @@ async function main() {
     return n === 0 || JSON.stringify({ n });
   });
 
+  // U9818–U9820: 回溯
+  await senseCheck("U9818 回溯拾取记录位置", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    for (let i = 0; i < 20 && !T.runningNow(); i++) await Z(100);
+    T.applyPowerupNow('recall');
+    const r = T.recallNow();
+    T.quit();
+    return !!(r && r.t > 0 && r.pos) || JSON.stringify({ r });
+  });
+  await senseCheck("U9819 回溯到时瞬移归位", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    for (let i = 0; i < 20 && !T.runningNow(); i++) await Z(100);
+    const p0 = T.r18posNow();
+    T.applyPowerupNow('recall');
+    T.tp(p0.px + 96, p0.py);
+    let back = false;
+    for (let i = 0; i < 60 && !back; i++) { await Z(90); const p1 = T.r18posNow(); back = Math.abs(p1.px - p0.px) < 30; }
+    T.quit();
+    return back === true || 'no recall teleport';
+  });
+  await senseCheck("U9820 回溯道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('recall');
+    T.quit();
+    return ok === true || 'apply failed';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
