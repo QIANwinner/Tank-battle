@@ -30765,6 +30765,45 @@ async function main() {
     return v === 15 || JSON.stringify({ v });
   });
 
+  // U9794–U9796: 定时门
+  await senseCheck("U9794 定时门周期开闭", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const g0 = T.gateOpenNow();
+    let flipped = false;
+    for (let i = 0; i < 80 && !flipped; i++) { await Z(90); flipped = T.gateOpenNow() !== g0; }
+    T.quit();
+    return flipped === true || 'gate never flipped';
+  });
+  await senseCheck("U9795 关门阻挡玩家通行", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    const gx = Math.floor(p.px / 24), gy = Math.floor((p.py - 26) / 24);
+    T.setTile(gx, gy, 16);
+    T.gateSetNow(false);
+    T.renderOnce();
+    T.keySet('w', true);
+    await Z(500);
+    T.keySet('w', false);
+    const p1 = T.r18posNow();
+    T.quit();
+    return p1.py > p.py - 26 || JSON.stringify({ y0: p.py, y1: p1.py });
+  });
+  await senseCheck("U9796 开门恢复通行", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.gateSetNow(true);
+    T.renderOnce();
+    T.keySet('w', true);
+    await Z(400);
+    T.keySet('w', false);
+    const p1 = T.r18posNow();
+    T.quit();
+    return p1.py < p.py - 5 || JSON.stringify({ y0: p.py, y1: p1.py });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
