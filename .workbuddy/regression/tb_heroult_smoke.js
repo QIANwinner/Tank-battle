@@ -31176,6 +31176,36 @@ async function main() {
     return (rt < 240) || JSON.stringify({ rt });
   });
 
+  // U9833–U9835: 巨人
+  await senseCheck("U9833 巨人六血登记", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'giant');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const ok = !!(e && e.type === 'giant' && e.maxHp >= 6);
+    T.quit();
+    return ok === true || JSON.stringify({ hp: e && e.maxHp });
+  });
+  await senseCheck("U9834 巨人体型1.5倍", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'giant');
+    T.spawnFoeNow(400, 100, 'normal');
+    const es = T.r18enNow().filter(x => !x.dead);
+    const g = es.find(x => x.type === 'giant'), n = es.find(x => x.type === 'normal');
+    const ok = !!(g && n && g.size >= n.size + 8);
+    T.quit();
+    return ok === true || JSON.stringify({ gs: g && g.size, ns: n && n.size });
+  });
+  await senseCheck("U9835 巨人移速减半", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'giant');
+    T.spawnFoeNow(400, 100, 'normal');
+    const es = T.r18enNow().filter(x => !x.dead);
+    const g = es.find(x => x.type === 'giant'), n = es.find(x => x.type === 'normal');
+    const ok = !!(g && n && g.speed < n.speed * 0.75);
+    T.quit();
+    return ok === true || JSON.stringify({ gs: g && g.speed, ns: n && n.speed });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
