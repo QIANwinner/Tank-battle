@@ -1878,7 +1878,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.151</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.161</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2082,6 +2082,16 @@
     sentry: { color: '#90caf9', label: '自动炮台' },   // —— v1.2.134 ——
     camo:   { color: '#a5d6a7', label: '迷彩' },   // —— v1.2.140 ——
     score2: { color: '#ffe082', label: '双倍积分' },   // —— v1.2.141 ——
+    emp:    { color: '#80d8ff', label: '电磁脉冲' },   // —— v1.2.152 ——
+    magnet8: { color: '#ff8a80', label: '磁铁' },   // —— v1.2.153 ——
+    split:  { color: '#ce93d8', label: '分裂弹' },   // —— v1.2.154 ——
+    chain:  { color: '#fff176', label: '连锁闪电' },   // —— v1.2.155 ——
+    burn:   { color: '#ff7043', label: '燃烧弹' },   // —— v1.2.156 ——
+    barrier: { color: '#4dd0e1', label: '盾墙' },   // —— v1.2.157 ——
+    blackhole: { color: '#b388ff', label: '黑洞' },   // —— v1.2.158 ——
+    recall: { color: '#ffab91', label: '回溯' },   // —— v1.2.159 ——
+    timewarp: { color: '#90a4ae', label: '时间缓流' },   // —— v1.2.160 ——
+    radar:  { color: '#ef5350', label: '雷达' },   // —— v1.2.161 ——
   };
   const POWERUP_LIST = Object.keys(POWERUP_DEF);
 
@@ -2941,6 +2951,7 @@
   let poisonClouds = [], chillT = 0, poisonT = 0, nightLevel = false, hordeT = 0, affixForce = null;   // —— v1.2.122~131 波11状态 ——
   let timebombs = [], sentries = [], stormT = 0, stormWarnT = 0, fogLevel = false, goldLevel = false, baseHp = 2;   // —— v1.2.132~141 波12状态 ——
   let gateOpen = true, gateT = 0;   // —— v1.2.151 定时门 ——
+  let blackholes = [], recallT = 0, recallPos = null;   // —— v1.2.158/159 黑洞·回溯 ——
   let killFeed = [];   // —— v1.2.113 击杀播报 ——
   try {
     const c = healedJson(LS_CAREER, {});   // —— v1.2.77 存档自愈加载 ——
@@ -4495,7 +4506,7 @@
     if (!isBlocked(bx, t.y, t.size) && !tankHitsTank(bx, t.y, t.size, t)) t.x = bx;
   }
   function moveTank(t, k) {
-    const spd142 = t.speed * tileSpeedMulEnt(t);   // —— v1.2.142 地形倍率 ——
+    const spd142 = t.speed * tileSpeedMulEnt(t) * (!t.isPlayer && fx.timewarp > 0 ? 0.5 : 1);   // —— v1.2.142 地形倍率 · v1.2.160 时间缓流 ——
     const nx = t.x + DX[t.dir] * spd142 * k;
     const ny = t.y + DY[t.dir] * spd142 * k;
     let moved = false;
@@ -4593,6 +4604,14 @@
       if (inside(gx150, gy150) && map[gy150][gx150] === TILE_ACID) { e.acidT = (e.acidT || 0) + k; if (e.acidT >= 50) { e.acidT = 0; e.hp -= 1; e.hitFlash = 4; spawnParticles(e.x + e.size / 2, e.y + e.size / 2, '#8ce040', 4); if (e.hp <= 0) { e.dead = true; onEnemyKilled(e); return; } } }
       else e.acidT = 0; }
     beltPushEnt(e, k);   // —— v1.2.145 冻结敌人也随传送带移动 ——
+    if (e.burnT > 0) {   // —— v1.2.156 灼烧DoT ——
+      e.burnT -= k;
+      if (Math.floor(e.burnT) % 60 === 0 && e.burnT > 1) {
+        e.hp -= 1; e.hitFlash = 4;
+        spawnParticles(e.x + e.size / 2, e.y + e.size / 2, '#ff7043', 3);
+        if (e.hp <= 0) { e.dead = true; onEnemyKilled(e); return; }
+      }
+    }
     if (e.freezeT > 0) { e.freezeT -= k; if (e.freezeT <= 0) e.freezeT = 0; return; }  // 冰冻子弹：单兵冻结中不动不射
     if (e.isBoss) { updateBoss(e, k); return; }
     if (e.type === 'sniper')  { updateSniper(e, k); return; }    // 狙击：远处压制
@@ -4877,6 +4896,7 @@
           if (e.dead) continue;
           if (e.isBoss && e.enterT > 0) continue;   // Boss 出场下降中无敌
           if (e.type === 'phantom' && (e.cloakT || 0) >= 170) continue;   // —— v1.2.122 幻影隐形穿透 ——
+          if (b.splitFrom === e) continue;   // —— v1.2.154 分裂子子弹免疫源敌 ——
           if (cx >= e.x && cx <= e.x + e.size && cy >= e.y && cy <= e.y + e.size) {
             // —— v1.2.124 盾卫正面格挡:弹向与敌朝向相反=正面来袭 ——
             if (e.type === 'guardian' && (b.dir + 4) % 8 === e.dir) {
@@ -4902,6 +4922,26 @@
             if (e.isBoss) bossHitFlash = 0.18;      // Boss 血条受击闪白
             // 爆破弹头：命中时小范围溅射（波及周围敌人，不重复伤及直接命中者）
             if (b.bomb) blastBullet(cx, cy, e);
+            if (fx.burn > 0) { e.burnT = 180; }   // —— v1.2.156 燃烧弹:命中灼烧 ——
+            if (fx.chain > 0) {   // —— v1.2.155 连锁闪电:电弧跳转 ——
+              let best155 = null, bd155 = 120 * 120;
+              for (const e2 of enemies) {
+                if (!e2 || e2.dead || e2 === e) continue;
+                const dx155 = e2.x - e.x, dy155 = e2.y - e.y, dd155 = dx155 * dx155 + dy155 * dy155;
+                if (dd155 < bd155) { bd155 = dd155; best155 = e2; }
+              }
+              if (best155) {
+                best155.hp -= 1; best155.hitFlash = 4;
+                spawnParticles(best155.x + best155.size / 2, best155.y + best155.size / 2, '#fff176', 5);
+                addText(best155.x + best155.size / 2, best155.y - 10, '⚡ 连锁', '#fff176');
+                if (best155.hp <= 0) { best155.dead = true; onEnemyKilled(best155); }
+              }
+            }
+            if (fx.split > 0 && !b.splitChild) {   // —— v1.2.154 分裂弹:命中裂解 ——
+              for (const dd154 of [(b.dir + 2) % 8, (b.dir + 6) % 8]) {
+                bullets.push({ x: b.x + DX[dd154] * 10, y: b.y + DY[dd154] * 10, dir: dd154, speed: b.speed * 0.9, size: 3, owner: b.owner, dead: false, splitChild: true, splitFrom: e });
+              }
+            }
             if (e.hp <= 0) { e.dead = true; onEnemyKilled(e); }
             else { sfxHit(); spawnParticles(cx, cy, e.color, 6); }
             // 穿透弹头：有穿透余量则继续飞行（同一帧可连中），否则销毁
@@ -4929,6 +4969,16 @@
             if (b.owner && b.owner.type === 'vampire' && !b.owner.dead) {   // —— v1.2.127 吸血回复 ——
               b.owner.hp += 1; b.owner.maxHp += 1;
               addText(b.owner.x + b.owner.size / 2, b.owner.y - 12, '🩸 吸血', '#ff5f8f');
+            }
+            if (fx.barrier > 0 && p === player) {   // —— v1.2.157 盾墙:正面敌弹格挡 ——
+              const frontal157 = Math.abs(DX[b.dir] + DX[p.dir]) + Math.abs(DY[b.dir] + DY[p.dir]) <= 1 || ((b.dir + 4) % 8) === p.dir;
+              if (frontal157) {
+                b.dead = true;
+                spawnParticles(cx, cy, '#4dd0e1', 5);
+                addText(p.x + TANK_SIZE / 2, p.y - 12, '🛡 盾墙格挡', '#4dd0e1');
+                sfxHit();
+                return;
+              }
             }
             lastHit = { how: 'shot', by: shooterLabel(b.owner) };
             hurtEdge = hurtEdgeOf(b.dir);
@@ -5445,6 +5495,11 @@
         const pcx = player.x + TANK_SIZE / 2, pcy = player.y + TANK_SIZE / 2;
         let dx = pcx - (p.x + 8), dy = pcy - (p.y + 8);
         let d2 = dx * dx + dy * dy;
+        if (fx.magnet8 > 0 && d2 > 64) {   // —— v1.2.153 磁铁道具吸附 ——
+          const dd = Math.sqrt(d2) || 1;
+          p.x += dx / dd * 2.2 * dt * 60 / 60;
+          p.y += dy / dd * 2.2 * dt * 60 / 60;
+        }
         if (magR > 24 && d2 < magR * magR) {
           const d = Math.sqrt(d2) || 1;
           p.x += dx / d * pullSpd * dt;
@@ -5574,6 +5629,23 @@
       case 'sentry': if (player) sentries.push({ x: player.x + TANK_SIZE / 2, y: player.y + TANK_SIZE / 2, life: 1200, cd: 0 }); break;   // —— v1.2.134 ——
       case 'camo':   fx.camo = 8; break;   // —— v1.2.140 迷彩 8s ——
       case 'score2': fx.score2 = 8; break;   // —— v1.2.141 双倍积分 8s ——
+      case 'magnet8': fx.magnet8 = 8; break;   // —— v1.2.153 磁铁 8s ——
+      case 'split':  fx.split = 8; break;   // —— v1.2.154 分裂弹 8s ——
+      case 'chain':  fx.chain = 8; break;   // —— v1.2.155 连锁闪电 8s ——
+      case 'burn':   fx.burn = 8; break;   // —— v1.2.156 燃烧弹 8s ——
+      case 'barrier': fx.barrier = 10; break;   // —— v1.2.157 盾墙 10s ——
+      case 'blackhole': if (player) blackholes.push({ x: player.x + TANK_SIZE / 2, y: player.y + TANK_SIZE / 2, t: 300 }); break;   // —— v1.2.158 黑洞 5s ——
+      case 'recall': if (player) { recallPos = { x: player.x, y: player.y }; recallT = 180; } break;   // —— v1.2.159 回溯 3s ——
+      case 'timewarp': fx.timewarp = 8; break;   // —— v1.2.160 时间缓流 8s ——
+      case 'radar': fx.radar = 15; break;   // —— v1.2.161 雷达 15s ——
+      case 'emp': {   // —— v1.2.152 电磁脉冲:清屏敌弹+眩晕 ——
+        let cleared = 0;
+        for (const bb of bullets) { if (bb && !bb.dead && !(bb.owner && bb.owner.isPlayer)) { bb.dead = true; cleared++; } }
+        for (const ee of enemies) { if (ee && !ee.dead) ee.freezeT = Math.max(ee.freezeT || 0, 120); }
+        if (player) addText(player.x + TANK_SIZE / 2, player.y - 16, '⚡ 电磁脉冲 · 清弹 ' + cleared, '#80d8ff');
+        sfxPickup();
+        break;
+      }
     }
     if (player) addText(clamp(player.x + TANK_SIZE / 2, 84, W - 84), player.y - 6, pickupEffectText(type, pickBefore, pickupState()) || def.label, def.color);
     runPowerups++;
@@ -6119,6 +6191,13 @@
     if (fx.slow > 0) { fx.slow -= dt; if (fx.slow <= 0) buffEndNote('slow'); }   // —— v1.2.32 ——
     if (fx.spread > 0) fx.spread -= dt;   // —— v1.2.116 ——
     if (fx.homing > 0) fx.homing -= dt;   // —— v1.2.117 ——
+    if (fx.magnet8 > 0) fx.magnet8 -= dt;   // —— v1.2.153 磁铁 ——
+    if (fx.split > 0) fx.split -= dt;   // —— v1.2.154 分裂弹 ——
+    if (fx.chain > 0) fx.chain -= dt;   // —— v1.2.155 连锁闪电 ——
+    if (fx.burn > 0) fx.burn -= dt;   // —— v1.2.156 燃烧弹 ——
+    if (fx.barrier > 0) fx.barrier -= dt;   // —— v1.2.157 盾墙 ——
+    if (fx.timewarp > 0) fx.timewarp -= dt;   // —— v1.2.160 时间缓流 ——
+    if (fx.radar > 0) fx.radar -= dt;   // —— v1.2.161 雷达 ——
     if (fx.rico > 0) fx.rico -= dt;   // —— v1.2.118 ——
     if (fx.star > 0) fx.star -= dt;   // —— v1.2.132 ——
     if (fx.camo > 0) fx.camo -= dt;   // —— v1.2.140 ——
@@ -6216,6 +6295,29 @@
     // —— v1.2.130 敌潮计时衰减 ——
     if (hordeT > 0) hordeT = Math.max(0, hordeT - k);
     { gateT += k; if (gateT >= 300) { gateT = 0; gateOpen = !gateOpen; markMapDirty(); } }   // —— v1.2.151 定时门开闭 ——
+    for (const bh of blackholes) {   // —— v1.2.158 黑洞引力 ——
+      bh.t -= k;
+      for (const e of enemies) {
+        if (!e || e.dead) continue;
+        const dxb = bh.x - (e.x + e.size / 2), dyb = bh.y - (e.y + e.size / 2);
+        const ddb = Math.sqrt(dxb * dxb + dyb * dyb) || 1;
+        if (ddb < 150 && ddb > 20) {
+          const nx158 = e.x + dxb / ddb * 0.6 * k, ny158 = e.y + dyb / ddb * 0.6 * k;
+          if (!isBlocked(nx158, e.y, e.size)) e.x = nx158;
+          if (!isBlocked(e.x, ny158, e.size)) e.y = ny158;
+        }
+      }
+    }
+    blackholes = blackholes.filter(bh => bh.t > 0);
+    if (recallT > 0) {   // —— v1.2.159 回溯倒计时 ——
+      recallT -= k;
+      if (recallT <= 0 && recallPos && player && !player.dead) {
+        player.x = recallPos.x; player.y = recallPos.y;
+        addText(player.x + TANK_SIZE / 2, player.y - 14, '⏪ 回溯归位', '#ffab91');
+        sfxPickup();
+        recallPos = null;
+      }
+    }
     if (stormT > 0 && multiMode !== 2) {   // —— v1.2.135 弹幕风暴倒计时 ——
       stormT -= k;
       if (stormT <= 0) {
@@ -25334,6 +25436,14 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
   }
   function drawFoeHpBars() {
     for (const e of enemies) { if (!e.dead) drawFoeHp(e); }
+    if (fx.radar > 0) {   // —— v1.2.161 雷达:敌人头顶红三角 ——
+      ctx.fillStyle = '#ef5350';
+      for (const e of enemies) {
+        if (e.dead) continue;
+        const mx = e.x + e.size / 2, my = e.y - 7;
+        ctx.beginPath(); ctx.moveTo(mx, my + 5); ctx.lineTo(mx - 4, my - 2); ctx.lineTo(mx + 4, my - 2); ctx.closePath(); ctx.fill();
+      }
+    }
   }
   let recordNear = false;
   function bestGapText(score, best) {
@@ -27883,7 +27993,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.151', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.161', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -28559,6 +28669,13 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       stormSetNow: (v) => { stormT = Number(v) || 0; return stormT; }, fogNow: () => fogLevel, goldRushNow: () => goldLevel, baseHpNow: () => baseHp,
       tileUnderNow: () => tileAtEnt(player), tileSpeedMulNow: () => tileSpeedMulEnt(player), gateOpenNow: () => (typeof gateOpen === 'undefined' ? true : gateOpen),
       gateSetNow: (v) => { if (typeof gateOpen !== 'undefined') { gateOpen = !!v; gateT = 0; markMapDirty(); } return gateOpen; },
+      // —— v1.2.152~161 波14钩子 ——
+      fxValNow: (k) => fx[k] || 0,
+      enemyBulletsNow: () => bullets.filter(b => !b.dead && !(b.owner && b.owner.isPlayer)).length,
+      powerupsNow: () => powerups.filter(p => !p.dead).map(p => ({ x: Math.round(p.x), y: Math.round(p.y), type: p.type })),
+      spawnPowerupAt: (x, y, type) => { powerups.push({ x, y, type: type || 'rapid', dead: false, life: 600, bob: 0 }); return powerups.length; },
+      blackholesNow: () => (typeof blackholes === 'undefined' ? [] : blackholes.map(h => ({ x: Math.round(h.x), y: Math.round(h.y), t: Math.round(h.t) }))),
+      recallNow: () => (typeof recallT === 'undefined' ? null : { t: recallT, pos: recallPos }),
       bulletsInfoNow: () => bullets.map(b => ({ x: Math.round(b.x), y: Math.round(b.y), dir: b.dir, size: b.size, own: !!(b.owner && b.owner.isPlayer), dead: !!b.dead })),
       pauseStatNow: () => { const e = $('pauseStatLine'); return e ? e.textContent : null; },
       endNow: (w) => { endGame(!!w); return gameOver; },

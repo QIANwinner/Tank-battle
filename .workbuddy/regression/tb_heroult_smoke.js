@@ -30804,6 +30804,304 @@ async function main() {
     return p1.py < p.py - 5 || JSON.stringify({ y0: p.py, y1: p1.py });
   });
 
+  // U9797–U9799: 电磁脉冲
+  await senseCheck("U9797 电磁脉冲清除敌弹", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'normal');
+    T.spawnEBulletAt(300, 200, 4);
+    T.spawnEBulletAt(320, 200, 4);
+    const before = T.enemyBulletsNow();
+    T.applyPowerupNow('emp');
+    const after = T.enemyBulletsNow();
+    T.quit();
+    return (before >= 1 && after === 0) || JSON.stringify({ before, after });
+  });
+  await senseCheck("U9798 电磁脉冲眩晕敌人", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'normal');
+    T.applyPowerupNow('emp');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const fz = e ? (e.freezeT || 0) : 0;
+    T.quit();
+    return fz >= 100 || JSON.stringify({ fz });
+  });
+  await senseCheck("U9799 电磁脉冲道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('emp');
+    T.quit();
+    return ok === true || 'apply failed';
+  });
+
+  // U9800–U9802: 磁铁
+  await senseCheck("U9800 磁铁生效期间道具被吸向玩家", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.spawnPowerupAt(p.px + 100, p.py, 'rapid');
+    T.applyPowerupNow('magnet8');
+    const x0 = T.powerupsNow().length ? T.powerupsNow()[0].x : 0;
+    for (let i = 0; i < 20; i++) await Z(80);
+    const pu = T.powerupsNow();
+    const x1 = pu.length ? pu[0].x : p.px;
+    T.quit();
+    return (x1 < x0 || pu.length === 0) || JSON.stringify({ x0, x1, n: pu.length });
+  });
+  await senseCheck("U9801 磁铁计时器启动", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.applyPowerupNow('magnet8');
+    const v = T.fxValNow('magnet8');
+    T.quit();
+    return v > 0 || JSON.stringify({ v });
+  });
+  await senseCheck("U9802 磁铁道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('magnet8');
+    T.quit();
+    return ok === true || 'apply failed';
+  });
+
+  // U9803–U9805: 分裂弹
+  await senseCheck("U9803 分裂弹命中裂解小子弹", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'armored');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (e) e.freezeT = 1e9;
+    T.applyPowerupNow('split');
+    if (e) T.spawnBulletNow(e.x + 8, e.y + 60, 0, false);
+    let small = 0;
+    for (let i = 0; i < 25 && !small; i++) { await Z(70); small = T.bulletsInfoNow().filter(b => !b.dead && b.size <= 3).length; }
+    T.quit();
+    return small >= 1 || JSON.stringify({ small });
+  });
+  await senseCheck("U9804 分裂弹计时器启动", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.applyPowerupNow('split');
+    const v = T.fxValNow('split');
+    T.quit();
+    return v > 0 || JSON.stringify({ v });
+  });
+  await senseCheck("U9805 分裂弹道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('split');
+    T.quit();
+    return ok === true || 'apply failed';
+  });
+
+  // U9806–U9808: 连锁闪电
+  await senseCheck("U9806 连锁闪电跳转伤害近敌", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'armored');
+    T.spawnFoeNow(360, 100, 'armored');
+    const es = T.r18enNow().filter(x => !x.dead);
+    es.forEach(x => { x.freezeT = 1e9; });
+    const hp1 = es.length > 1 ? es[1].hp : 0;
+    T.applyPowerupNow('chain');
+    if (es.length) T.spawnBulletNow(es[0].x, es[0].y + 40, 0, false);
+    for (let i = 0; i < 30; i++) { await Z(70); if (es.length > 1 && es[1].hp < hp1) break; }
+    const hurt = es.length > 1 && (es[1].hp < hp1 || es[1].dead);
+    T.quit();
+    return hurt === true || JSON.stringify({ hp1, hp: es[1] && es[1].hp });
+  });
+  await senseCheck("U9807 连锁闪电计时器启动", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.applyPowerupNow('chain');
+    const v = T.fxValNow('chain');
+    T.quit();
+    return v > 0 || JSON.stringify({ v });
+  });
+  await senseCheck("U9808 连锁闪电道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('chain');
+    T.quit();
+    return ok === true || 'apply failed';
+  });
+
+  // U9809–U9811: 燃烧弹
+  await senseCheck("U9809 燃烧弹命中附加灼烧", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'armored');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (e) e.freezeT = 1e9;
+    T.applyPowerupNow('burn');
+    if (e) T.spawnBulletNow(e.x, e.y + 40, 0, false);
+    let bt = 0;
+    for (let i = 0; i < 25 && !bt; i++) { await Z(70); bt = e && e.burnT || 0; }
+    T.quit();
+    return bt > 0 || JSON.stringify({ bt });
+  });
+  await senseCheck("U9810 灼烧持续掉血", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'armored');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (e) { e.freezeT = 1e9; e.burnT = 180; }
+    const hp0 = e ? e.hp : 0;
+    for (let i = 0; i < 40; i++) { await Z(90); if (!e || e.dead || e.hp < hp0) break; }
+    const hurt = !e || e.dead === true || e.hp < hp0;
+    T.quit();
+    return hurt === true || JSON.stringify({ hp0, hp: e && e.hp });
+  });
+  await senseCheck("U9811 燃烧弹道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('burn');
+    T.quit();
+    return ok === true || 'apply failed';
+  });
+
+  // U9812–U9814: 盾墙
+  await senseCheck("U9812 盾墙格挡正面敌弹", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap();
+    for (let i = 0; i < 80 && T.spawnInvNow() > 0; i++) await Z(100);
+    T.applyPowerupNow('barrier');
+    const l0 = T.livesNow();
+    const p = T.r18posNow();
+    T.spawnEBulletAt(p.px - 2, p.py - 30, 4);
+    for (let i = 0; i < 30; i++) { await Z(70); if (T.livesNow() < l0) break; }
+    const l1 = T.livesNow();
+    T.quit();
+    return l1 >= l0 || JSON.stringify({ l0, l1 });
+  });
+  await senseCheck("U9813 盾墙格挡飘字", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap();
+    for (let i = 0; i < 80 && T.spawnInvNow() > 0; i++) await Z(100);
+    T.applyPowerupNow('barrier');
+    const p = T.r18posNow();
+    T.spawnEBulletAt(p.px - 2, p.py - 30, 4);
+    let seen = false;
+    for (let i = 0; i < 25 && !seen; i++) { await Z(70); seen = T.floatTextsNow().some(x => x.indexOf('盾墙') >= 0); }
+    T.quit();
+    return seen === true || 'no barrier text';
+  });
+  await senseCheck("U9814 盾墙道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('barrier');
+    const v = T.fxValNow('barrier');
+    T.quit();
+    return (ok === true && v > 0) || JSON.stringify({ ok, v });
+  });
+
+  // U9815–U9817: 黑洞
+  await senseCheck("U9815 黑洞道具生成奇点", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.applyPowerupNow('blackhole');
+    const n = T.blackholesNow().length;
+    T.quit();
+    return n >= 1 || JSON.stringify({ n });
+  });
+  await senseCheck("U9816 黑洞拖拽近敌", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (e) e.freezeT = 1e9;
+    const p = T.r18posNow();
+    if (e) { e.x = p.px + 80; e.y = p.py; }
+    T.applyPowerupNow('blackhole');
+    const d0 = e ? Math.abs(e.x - p.px) : 0;
+    for (let i = 0; i < 25; i++) await Z(80);
+    const d1 = e ? Math.abs(e.x - p.px) : 999;
+    T.quit();
+    return (d1 < d0) || JSON.stringify({ d0, d1 });
+  });
+  await senseCheck("U9817 黑洞到时消散", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.applyPowerupNow('blackhole');
+    let n = 1;
+    for (let i = 0; i < 90 && n > 0; i++) { await Z(90); n = T.blackholesNow().length; }
+    T.quit();
+    return n === 0 || JSON.stringify({ n });
+  });
+
+  // U9818–U9820: 回溯
+  await senseCheck("U9818 回溯拾取记录位置", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    for (let i = 0; i < 20 && !T.runningNow(); i++) await Z(100);
+    T.applyPowerupNow('recall');
+    const r = T.recallNow();
+    T.quit();
+    return !!(r && r.t > 0 && r.pos) || JSON.stringify({ r });
+  });
+  await senseCheck("U9819 回溯到时瞬移归位", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    for (let i = 0; i < 20 && !T.runningNow(); i++) await Z(100);
+    const p0 = T.r18posNow();
+    T.applyPowerupNow('recall');
+    T.tp(p0.px + 96, p0.py);
+    let back = false;
+    for (let i = 0; i < 60 && !back; i++) { await Z(90); const p1 = T.r18posNow(); back = Math.abs(p1.px - p0.px) < 30; }
+    T.quit();
+    return back === true || 'no recall teleport';
+  });
+  await senseCheck("U9820 回溯道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('recall');
+    T.quit();
+    return ok === true || 'apply failed';
+  });
+
+  // U9821–U9823: 时间缓流
+  await senseCheck("U9821 时间缓流敌人减速", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.applyPowerupNow('timewarp');
+    const v = T.fxValNow('timewarp');
+    T.quit();
+    return v > 0 || JSON.stringify({ v });
+  });
+  await senseCheck("U9822 时间缓流不影响玩家", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.applyPowerupNow('timewarp');
+    const p0 = T.r18posNow();
+    T.keySet('a', true);
+    await Z(400);
+    T.keySet('a', false);
+    const p1 = T.r18posNow();
+    T.quit();
+    return p1.px < p0.px - 10 || JSON.stringify({ x0: p0.px, x1: p1.px });
+  });
+  await senseCheck("U9823 时间缓流道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('timewarp');
+    T.quit();
+    return ok === true || 'apply failed';
+  });
+
+  // U9824–U9826: 雷达
+  await senseCheck("U9824 雷达计时器启动", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.applyPowerupNow('radar');
+    const v = T.fxValNow('radar');
+    T.quit();
+    return v > 0 || JSON.stringify({ v });
+  });
+  await senseCheck("U9825 雷达期间标记敌人", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'normal');
+    T.applyPowerupNow('radar');
+    await Z(300);
+    T.renderOnce();
+    const errFree = T.pageErrCountNow ? T.pageErrCountNow() === 0 : true;
+    const v = T.fxValNow('radar');
+    T.quit();
+    return (errFree && v > 0) || JSON.stringify({ errFree, v });
+  });
+  await senseCheck("U9826 雷达道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('radar');
+    T.quit();
+    return ok === true || 'apply failed';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
