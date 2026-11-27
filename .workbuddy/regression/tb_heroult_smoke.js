@@ -30620,6 +30620,38 @@ async function main() {
     return seen === true || 'no spike warn';
   });
 
+  // U9782–U9784: 回血泉
+  await senseCheck("U9782 站上回血泉护甲充能", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 12);
+    T.renderOnce();
+    let arm = 0;
+    for (let i = 0; i < 60 && arm < 1; i++) { await Z(90); arm = T.armorNow(); }
+    T.quit();
+    return arm >= 1 || JSON.stringify({ arm });
+  });
+  await senseCheck("U9783 离开回血泉不充能", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    await Z(1200);
+    const arm = T.armorNow();
+    T.quit();
+    return arm === 0 || JSON.stringify({ arm });
+  });
+  await senseCheck("U9784 充能飘字出现", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 12);
+    T.renderOnce();
+    let seen = false;
+    for (let i = 0; i < 60 && !seen; i++) { await Z(90); seen = T.floatTextsNow().some(x => x.indexOf('护甲凝聚') >= 0); }
+    T.quit();
+    return seen === true || 'no heal text';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
