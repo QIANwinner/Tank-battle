@@ -30726,6 +30726,45 @@ async function main() {
     return p1.py > p.py - 26 || JSON.stringify({ y0: p.py, y1: p1.py });
   });
 
+  // U9791–U9793: 毒池
+  await senseCheck("U9791 敌人站毒池受伤", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'armored');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (e) e.freezeT = 1e9;
+    const hp0 = e ? e.hp : 0;
+    if (e) T.setTile(Math.floor((e.x + e.size / 2) / 24), Math.floor((e.y + e.size / 2) / 24), 15);
+    T.renderOnce();
+    for (let i = 0; i < 50; i++) { await Z(80); if (!e || e.dead || e.hp < hp0) break; }
+    const hurt = !e || e.dead === true || e.hp < hp0;
+    T.quit();
+    return hurt === true || JSON.stringify({ hp0, hp: e && e.hp });
+  });
+  await senseCheck("U9792 玩家站毒池减速不受伤", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap();
+    for (let i = 0; i < 40 && T.spawnInvNow() > 0; i++) await Z(80);
+    const p = T.r18posNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 15);
+    T.renderOnce();
+    const m = T.tileSpeedMulNow();
+    const l0 = T.livesNow();
+    await Z(800);
+    const l1 = T.livesNow();
+    T.quit();
+    return (m === 0.6 && l1 >= l0) || JSON.stringify({ m, l0, l1 });
+  });
+  await senseCheck("U9793 毒池地形识别正确", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 15);
+    T.renderOnce();
+    const v = T.tileUnderNow();
+    T.quit();
+    return v === 15 || JSON.stringify({ v });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
