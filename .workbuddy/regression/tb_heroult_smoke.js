@@ -25387,6 +25387,8 @@ async function main() {
       const raf = () => new Promise(requestAnimationFrame);
       T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
       T.enemyShotAtBaseNow('sniper');
+      for (let i = 0; i < 40 && (!T.baseHpNow || T.baseHpNow() === 2) && !T.gameOverNow(); i++) await new Promise(r => setTimeout(r, 70));   // —— v1.2.138 起基地2耐久:等首弹被承 ——
+      if (!T.gameOverNow()) T.enemyShotAtBaseNow('sniper');   // —— 补第二弹 ——
       const end = performance.now() + 3000;
       while ($('overlay').classList.contains('hide') && performance.now() < end) await raf();
       const el = $('defeatCauseWrap'), cause = T.defeatCauseNow();
@@ -30306,6 +30308,36 @@ async function main() {
     for (let i = 0; i < 30 && !seen; i++) { await Z(70); seen = T.floatTextsNow().some(x => x.indexOf('淘金赏金') >= 0); }
     T.quit();
     return seen === true || 'no goldrush bounty';
+  });
+
+  // U9755–U9757: 基地耐久
+  await senseCheck("U9755 基地耐久初始为2", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const v = T.baseHpNow();
+    T.quit();
+    return v === 2 || JSON.stringify({ v });
+  });
+  await senseCheck("U9756 首击受损但基地仍在", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(100, 100, 'normal');
+    T.spawnEBulletAt(12 * 24 + 10, 23 * 24 - 18, 4);
+    for (let i = 0; i < 30 && T.baseHpNow() === 2; i++) await Z(70);
+    const hp = T.baseHpNow(), alive = T.baseAliveNow(), over = T.gameOverNow();
+    T.quit();
+    return (hp === 1 && alive === true && !over) || JSON.stringify({ hp, alive, over });
+  });
+  await senseCheck("U9757 第二击基地失守", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(100, 100, 'normal');
+    T.spawnEBulletAt(12 * 24 + 10, 23 * 24 - 18, 4);
+    for (let i = 0; i < 30 && T.baseHpNow() === 2; i++) await Z(70);
+    T.spawnEBulletAt(12 * 24 + 10, 23 * 24 - 18, 4);
+    let over = false;
+    for (let i = 0; i < 40 && !over; i++) { await Z(80); over = !!T.gameOverNow(); }
+    T.quit();
+    return over === true || JSON.stringify({ hp: T.baseHpNow(), alive: T.baseAliveNow() });
   });
 
   chrome.kill(); killTree(chrome.pid);
