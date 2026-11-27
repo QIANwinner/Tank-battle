@@ -27246,14 +27246,15 @@ async function main() {
   });
 
   // U9416–U9419: 敌人图鉴（面板开合 / 击杀跨局计数 / 未遭遇锁定 / panelOpen 拦截）
-  await senseCheck("U9416 图鉴面板打开渲染 8 行（7 兵种 + Boss）且未遭遇显示？？？", (T,$) => {
+  await senseCheck("U9416 图鉴面板打开渲染全部兵种行且未遭遇显示？？？", (T,$) => {
     T.dexResetNow();
     const shown = T.openDexNow();
     const rows = document.querySelectorAll('#dexBody .dexRow').length;
     const locked = document.querySelectorAll('#dexBody .dexLocked').length;
-    const bossRow = document.querySelectorAll('#dexBody .dexRow')[7];
+    const all = document.querySelectorAll('#dexBody .dexRow');
+    const bossRow = all[all.length - 1];   // —— v1.2.122 起敌种扩容,行数动态化,末行恒为 Boss ——
     T.closeDexNow();
-    return !!(shown && rows === 8 && locked === 8 && bossRow) || JSON.stringify({ shown, rows, locked });
+    return !!(shown && rows >= 8 && rows === locked && bossRow) || JSON.stringify({ shown, rows, locked });
   });
   await senseCheck("U9417 击毁敌人计入图鉴：击杀 normal 后 dex.kills.normal ≥1 并解锁行", async (T,$) => {
     const Z = ms => new Promise(r => setTimeout(r, ms));
@@ -29769,6 +29770,362 @@ async function main() {
     const c = T.chargeNow();
     T.quit();
     return c === 0 || JSON.stringify({ c });
+  });
+
+  // U9707–U9709: 幻影敌人
+  await senseCheck("U9707 幻影类型已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'phantom');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const ok = e && e.type === 'phantom' && e.hp >= 1;
+    T.quit();
+    return ok === true || JSON.stringify({ t: e && e.type });
+  });
+  await senseCheck("U9708 隐形时子弹穿透免疫", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'phantom');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9; e.cloakT = 200;
+    const hp0 = e.hp;
+    T.spawnBulletNow(e.x + e.size / 2 - 2, e.y + e.size + 6, 0, false);
+    for (let i = 0; i < 15; i++) await Z(50);
+    const hp1 = e.hp;
+    e.cloakT = 0;
+    T.spawnBulletNow(e.x + e.size / 2 - 2, e.y + e.size + 6, 0, false);
+    for (let i = 0; i < 15 && e.hp >= hp1; i++) await Z(50);
+    const hp2 = e.hp;
+    T.quit();
+    return (hp1 === hp0 && hp2 < hp1) || JSON.stringify({ hp0, hp1, hp2 });
+  });
+  await senseCheck("U9709 隐形循环计时推进", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'phantom');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.cloakT = 0;
+    for (let i = 0; i < 10 && !(e.cloakT > 0); i++) await Z(80);
+    const c = e.cloakT;
+    T.quit();
+    return c > 0 || JSON.stringify({ c });
+  });
+
+  // U9710–U9712: 医疗兵
+  await senseCheck("U9710 医疗兵治疗受伤友军", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'medic');
+    T.spawnFoeNow(330, 110, 'armored');
+    const es = T.r18enNow().filter(x => !x.dead);
+    const m = es.find(x => x.type === 'medic'), a = es.find(x => x.type === 'armored');
+    a.hp = 1; a.freezeT = 1e9; m.medicT = 145;
+    for (let i = 0; i < 20 && a.hp < 2; i++) await Z(100);
+    const hp = a.hp;
+    T.quit();
+    return hp >= 2 || JSON.stringify({ hp });
+  });
+  await senseCheck("U9711 满血友军不被治疗", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'medic');
+    T.spawnFoeNow(330, 110, 'armored');
+    const es = T.r18enNow().filter(x => !x.dead);
+    const m = es.find(x => x.type === 'medic'), a = es.find(x => x.type === 'armored');
+    const hp0 = a.hp; a.freezeT = 1e9; m.medicT = 145;
+    for (let i = 0; i < 12; i++) await Z(100);
+    const hp1 = a.hp;
+    T.quit();
+    return hp1 <= hp0 || JSON.stringify({ hp0, hp1 });
+  });
+  await senseCheck("U9712 医疗计时器推进", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'medic');
+    const m = T.r18enNow().filter(x => !x.dead).pop(); m.medicT = 0;
+    for (let i = 0; i < 10 && !(m.medicT > 0); i++) await Z(80);
+    const t = m.medicT;
+    T.quit();
+    return t > 0 || JSON.stringify({ t });
+  });
+
+  // U9713–U9715: 盾卫
+  await senseCheck("U9713 盾卫正面格挡不掉血", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'guardian');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9; e.dir = 0;
+    const hp0 = e.hp;
+    T.spawnBulletNow(e.x + e.size / 2 - 2, e.y - 10, 4, false);   // 上方朝下=正面(e.dir0朝上)
+    for (let i = 0; i < 15; i++) await Z(50);
+    const hp1 = e.hp;
+    T.quit();
+    return hp1 === hp0 || JSON.stringify({ hp0, hp1 });
+  });
+  await senseCheck("U9714 盾卫背后命中掉血", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'guardian');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9; e.dir = 0;
+    const hp0 = e.hp;
+    T.spawnBulletNow(e.x + e.size / 2 - 2, e.y + e.size + 6, 0, false);   // 下方朝上=背后
+    for (let i = 0; i < 15 && e.hp >= hp0; i++) await Z(50);
+    const hp1 = e.hp;
+    T.quit();
+    return hp1 < hp0 || JSON.stringify({ hp0, hp1 });
+  });
+  await senseCheck("U9715 格挡飘字出现", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'guardian');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9; e.dir = 0;
+    T.spawnBulletNow(e.x + e.size / 2 - 2, e.y - 10, 4, false);
+    let seen = false;
+    for (let i = 0; i < 15 && !seen; i++) { await Z(50); seen = T.floatTextsNow().some(x => x.indexOf('格挡') >= 0); }
+    T.quit();
+    return seen === true || JSON.stringify({ ts: T.floatTextsNow() });
+  });
+
+  // U9716–U9718: 毒雾
+  await senseCheck("U9716 毒雾敌死亡留雾", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'plague');
+    T.kill();
+    const n = T.cloudsNow().length;
+    T.quit();
+    return n >= 1 || JSON.stringify({ n });
+  });
+  await senseCheck("U9717 玩家滞留毒雾中毒累积", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'plague');
+    T.kill();
+    const c = T.cloudsNow()[0];
+    if (c) T.tp(c.x - 10, c.y - 10);
+    let pt = 0;
+    for (let i = 0; i < 20 && pt <= 0; i++) { await Z(80); pt = T.poisonNow(); }
+    T.quit();
+    return pt > 0 || JSON.stringify({ pt, c });
+  });
+  await senseCheck("U9718 中毒满则阵亡扣命", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap();
+    for (let i = 0; i < 30 && T.spawnInvNow() > 0; i++) await Z(100);
+    T.spawnFoeNow(300, 100, 'plague');
+    T.kill();
+    const c = T.cloudsNow()[0];
+    if (c) T.tp(c.x - 10, c.y - 10);
+    const l0 = T.livesNow();
+    for (let i = 0; i < 40 && T.livesNow() >= l0; i++) await Z(100);
+    const l1 = T.livesNow();
+    T.quit();
+    return l1 < l0 || JSON.stringify({ l0, l1 });
+  });
+
+  // U9719–U9721: 寒冰
+  await senseCheck("U9719 靠近寒冰敌人获得寒意", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.spawnFoeNow(p.px - 10, p.py - 60, 'frost');
+    let c = 0;
+    for (let i = 0; i < 15 && c <= 0; i++) { await Z(80); c = T.chillNow(); }
+    T.quit();
+    return c > 0 || JSON.stringify({ c });
+  });
+  await senseCheck("U9720 远离后寒意衰减", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.spawnFoeNow(p.px - 10, p.py - 60, 'frost');
+    for (let i = 0; i < 15 && T.chillNow() <= 0; i++) await Z(80);
+    T.kill();
+    let c1 = 99;
+    for (let i = 0; i < 25 && c1 > 0; i++) { await Z(80); c1 = T.chillNow(); }
+    T.quit();
+    return c1 <= 0 || JSON.stringify({ c1 });
+  });
+  await senseCheck("U9721 寒意中位移减慢", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p0 = T.r18posNow();
+    T.keySet('w', true);
+    for (let i = 0; i < 10; i++) await Z(50);
+    T.keySet('w', false);
+    const dNormal = Math.abs(T.r18posNow().py - p0.py);
+    T.quit();
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p1 = T.r18posNow();
+    T.spawnFoeNow(p1.px - 10, p1.py - 60, 'frost');
+    for (let i = 0; i < 15 && T.chillNow() <= 0; i++) await Z(80);
+    const p2 = T.r18posNow();
+    T.keySet('w', true);
+    for (let i = 0; i < 10; i++) await Z(50);
+    T.keySet('w', false);
+    const dChill = Math.abs(T.r18posNow().py - p2.py);
+    T.quit();
+    return (dChill < dNormal * 0.8) || JSON.stringify({ dNormal, dChill });
+  });
+
+  // U9722–U9724: 吸血
+  await senseCheck("U9722 吸血敌命中玩家回血", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap();
+    for (let i = 0; i < 30 && T.spawnInvNow() > 0; i++) await Z(100);
+    T.spawnFoeNow(300, 100, 'vampire');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9;
+    const hp0 = e.hp;
+    const p = T.r18posNow();
+    T.spawnEBulletAt(p.px - 2, p.py - 30, 4);
+    for (let i = 0; i < 25 && e.hp <= hp0; i++) await Z(80);
+    const hp1 = e.hp;
+    T.quit();
+    return hp1 > hp0 || JSON.stringify({ hp0, hp1 });
+  });
+  await senseCheck("U9723 吸血飘字出现", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap();
+    for (let i = 0; i < 30 && T.spawnInvNow() > 0; i++) await Z(100);
+    T.spawnFoeNow(300, 100, 'vampire');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9;
+    const p = T.r18posNow();
+    T.spawnEBulletAt(p.px - 2, p.py - 30, 4);
+    let seen = false;
+    for (let i = 0; i < 25 && !seen; i++) { await Z(80); seen = T.floatTextsNow().some(x => x.indexOf('吸血') >= 0); }
+    T.quit();
+    return seen === true || JSON.stringify({ ts: T.floatTextsNow() });
+  });
+  await senseCheck("U9724 吸血敌类型已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'vampire');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const ok = e && e.type === 'vampire' && e.speed > 1.1;
+    T.quit();
+    return ok === true || JSON.stringify({ t: e && e.type, sp: e && e.speed });
+  });
+
+  // U9725–U9727: 词缀
+  await senseCheck("U9725 坚韧词缀生命+1", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.affixForceNow('tough');
+    T.spawnFoeNow(300, 100, 'armored');
+    T.affixForceNow(null);
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const ok = e.affix === 'tough' && e.maxHp >= 3;
+    T.quit();
+    return ok === true || JSON.stringify({ af: e.affix, hp: e.hp, maxHp: e.maxHp });
+  });
+  await senseCheck("U9726 急速词缀移速+35%", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.affixForceNow('haste');
+    T.spawnFoeNow(300, 100, 'fast');
+    T.affixForceNow(null);
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    T.spawnFoeNow(400, 100, 'fast');
+    const es = T.r18enNow().filter(x => !x.dead);
+    const plain = es[es.length - 1];
+    const ok = e.affix === 'haste' && e.speed > plain.speed * 1.2;
+    T.quit();
+    return ok === true || JSON.stringify({ s1: e.speed, s0: plain.speed });
+  });
+  await senseCheck("U9727 击杀词缀敌额外赏金", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.affixForceNow('tough');
+    T.spawnFoeNow(300, 100, 'normal');
+    T.affixForceNow(null);
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.hp = 1;
+    const c0 = T.coins();
+    T.kill();
+    const d = T.coins() - c0;
+    const has15 = T.floatTextsNow().some(x => x.indexOf('词缀赏金') >= 0);
+    T.quit();
+    return (e.affix === 'tough' && has15) || JSON.stringify({ d, has15 });
+  });
+
+  // U9728–U9730: 夜战
+  await senseCheck("U9728 第2关为夜战", (T,$) => {
+    T.startAtLevel(2); T.skipIntro();
+    const n = T.nightNow();
+    T.quit();
+    return n === true || JSON.stringify({ n });
+  });
+  await senseCheck("U9729 第3关非夜战", (T,$) => {
+    T.startAtLevel(3); T.skipIntro();
+    const n = T.nightNow();
+    T.quit();
+    return n === false || JSON.stringify({ n });
+  });
+  await senseCheck("U9730 夜战角落画面压暗", (T,$) => {
+    T.startAtLevel(2); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.renderOnce();
+    const cv = $('game'), cx2 = cv.getContext('2d');
+    const corner = cx2.getImageData(4, 4, 1, 1).data;
+    const sum = corner[0] + corner[1] + corner[2];
+    T.quit();
+    return sum < 150 || JSON.stringify({ sum, px: [corner[0], corner[1], corner[2]] });
+  });
+
+  // U9731–U9733: 敌潮
+  await senseCheck("U9731 第3关敌潮激活", (T,$) => {
+    T.startAtLevel(3); T.skipIntro();
+    const h = T.hordeNow(), tot = T.enemiesTotalNow();
+    T.quit();
+    return (h > 0 && tot >= 18) || JSON.stringify({ h, tot });
+  });
+  await senseCheck("U9732 第4关非敌潮", (T,$) => {
+    T.startAtLevel(4); T.skipIntro();
+    const h = T.hordeNow(), tot = T.enemiesTotalNow();
+    T.quit();
+    return (h <= 0 && tot < 18) || JSON.stringify({ h, tot });
+  });
+  await senseCheck("U9733 敌潮击杀赏金", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.hordeSetNow(500);
+    T.spawnFoeNow(300, 100, 'normal');
+    T.kill();
+    const seen = T.floatTextsNow().some(x => x.indexOf('敌潮赏金') >= 0);
+    T.quit();
+    return seen === true || JSON.stringify({ ts: T.floatTextsNow() });
+  });
+
+  // U9734–U9736: Boss 宝箱
+  await senseCheck("U9734 Boss死亡掉落道具", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.forceSpawnBoss();
+    await Z(400);
+    const b = T.r18enNow().filter(x => !x.dead && x.isBoss).pop();
+    if (b) { b.hp = 1; b.enterT = 0; b.freezeT = 1e9; }
+    T.clearBulletsNow ? T.clearBulletsNow() : 0;
+    const n0 = T.puPosNow().length;
+    if (b) { T.spawnBulletNow(b.x + b.size / 2 - 2, b.y + b.size + 8, 0, false); }
+    for (let i = 0; i < 30 && T.puPosNow().length < n0 + 2; i++) await Z(100);
+    const n1 = T.puPosNow().length;
+    T.quit();
+    return n1 >= n0 + 2 || JSON.stringify({ n0, n1, boss: !!b });
+  });
+  await senseCheck("U9735 Boss宝箱飘字", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.forceSpawnBoss();
+    await Z(400);
+    const b = T.r18enNow().filter(x => !x.dead && x.isBoss).pop();
+    if (b) { b.hp = 1; b.enterT = 0; b.freezeT = 1e9; T.spawnBulletNow(b.x + b.size / 2 - 2, b.y + b.size + 8, 0, false); }
+    let seen = false;
+    for (let i = 0; i < 30 && !seen; i++) { await Z(100); seen = T.floatTextsNow().some(x => x.indexOf('Boss 宝箱') >= 0 || x.indexOf('宝箱') >= 0); }
+    T.quit();
+    return seen === true || JSON.stringify({ boss: !!b, ts: T.floatTextsNow() });
+  });
+  await senseCheck("U9736 Boss宝箱赏金入账", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.forceSpawnBoss();
+    await Z(400);
+    const b = T.r18enNow().filter(x => !x.dead && x.isBoss).pop();
+    if (b) { b.hp = 1; b.enterT = 0; b.freezeT = 1e9; }
+    const c0 = T.coins();
+    if (b) T.spawnBulletNow(b.x + b.size / 2 - 2, b.y + b.size + 8, 0, false);
+    for (let i = 0; i < 30 && T.coins() - c0 < 50; i++) await Z(100);
+    const d = T.coins() - c0;
+    T.quit();
+    return d >= 50 || JSON.stringify({ d, boss: !!b });
   });
 
   chrome.kill(); killTree(chrome.pid);

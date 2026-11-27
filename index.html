@@ -1878,7 +1878,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.121</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.131</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2041,6 +2041,12 @@
     sniper:   { speed: 0.80, hp: 1, score: 250, color: '#a06bff', label: '狙击' },
     suicide:  { speed: 2.05, hp: 1, score: 150, color: '#ff6b35', label: '自爆' },
     engineer: { speed: 1.00, hp: 2, score: 180, color: '#2ecc71', label: '工兵' },
+    phantom:  { speed: 1.45, hp: 1, score: 250, color: '#b8c8ff', label: '幻影' },   // —— v1.2.122 ——
+    medic:    { speed: 1.00, hp: 2, score: 280, color: '#7dffb0', label: '医疗' },   // —— v1.2.123 ——
+    guardian: { speed: 0.85, hp: 2, score: 260, color: '#c8a44d', label: '盾卫' },   // —— v1.2.124 ——
+    plague:   { speed: 1.10, hp: 2, score: 240, color: '#a0e048', label: '毒雾' },   // —— v1.2.125 ——
+    frost:    { speed: 0.95, hp: 2, score: 240, color: '#9fdcff', label: '寒冰' },   // —— v1.2.126 ——
+    vampire:  { speed: 1.25, hp: 1, score: 260, color: '#ff5f8f', label: '吸血' },   // —— v1.2.127 ——
   };
 
   // 道具定义
@@ -2917,6 +2923,7 @@
   let lvShots = 0, lvHits = 0, lvAccBonus = 0;   // —— v1.2.95 本关射击命中统计 ——
   let lvRankS = 0, lastInterest = 0, weather = 'clear', firstWinDayK = '', lvNewRec = false, streakHoldT = 0, luckyLevel = false;   // —— v1.2.102~110 系统波状态 ——
   let critCount = 0, critForce = false, playerArmor = 0, chargeT = 0, chargeFired = 0;   // —— v1.2.112~121 波10状态 ——
+  let poisonClouds = [], chillT = 0, poisonT = 0, nightLevel = false, hordeT = 0, affixForce = null;   // —— v1.2.122~131 波11状态 ——
   let killFeed = [];   // —— v1.2.113 击杀播报 ——
   try {
     const c = healedJson(LS_CAREER, {});   // —— v1.2.77 存档自愈加载 ——
@@ -4161,6 +4168,16 @@
     // 每日词条：疾风骤雨（只出快速）/ 狙击天团（大量狙击）
     if (dailyMods.onlyFast) return 'fast';
     if (dailyMods.sniperBoost && r < 0.35) return 'sniper';
+    // —— v1.2.122~127 新敌种注入:5 关起低率混入 ——
+    if (level >= 5) {
+      const rn122 = rng();
+      if (rn122 < 0.018) return 'phantom';
+      if (rn122 < 0.038) return 'medic';
+      if (rn122 < 0.058) return 'guardian';
+      if (rn122 < 0.076) return 'plague';
+      if (rn122 < 0.094) return 'frost';
+      if (rn122 < 0.110) return 'vampire';
+    }
     // 有效难度 = 关卡（已改单波，无波次加成）
     const lvl = level;
     if (lvl >= 8) {
@@ -4223,6 +4240,15 @@
       g100.golden = true; g100.hp += 2; g100.maxHp += 2; g100.color = '#ffd75e';
       addText(g100.x + g100.size / 2, g100.y - 10, '👑 精英敌将', '#ffd75e');
     }
+    // —— v1.2.128 词缀:急速/坚韧/狂怒 ——
+    { const af128 = enemies[enemies.length - 1];
+      const roll = affixForce || (rng() < 0.18 ? ['haste', 'tough', 'fury'][randInt(0, 2)] : null);
+      if (roll && type !== 'boss' && !af128.isBoss) {
+        af128.affix = roll;
+        if (roll === 'haste') af128.speed *= 1.35;
+        else if (roll === 'tough') { af128.hp += 1; af128.maxHp += 1; }
+        else if (roll === 'fury') af128.fury = true;
+      } }
     enemyIntroQueue(type);
   }
 
@@ -4515,6 +4541,24 @@
     if (e.type === 'sniper')  { updateSniper(e, k); return; }    // 狙击：远处压制
     if (e.type === 'suicide') { updateSuicide(e, k); return; }   // 自爆：贴脸引爆
     if (e.type === 'engineer'){ updateEngineer(e, k); return; }  // 工兵：专拆基地
+    if (e.type === 'phantom') { e.cloakT = ((e.cloakT || 0) + k) % 300; }   // —— v1.2.122 幻影显隐循环(>=170 隐形) ——
+    if (e.type === 'frost' && player && !player.dead) {   // —— v1.2.126 寒气光环 ——
+      const fd = Math.hypot((player.x + TANK_SIZE / 2) - (e.x + e.size / 2), (player.y + TANK_SIZE / 2) - (e.y + e.size / 2));
+      if (fd <= 110) chillT = 30;
+    }
+    if (e.type === 'medic') {   // —— v1.2.123 医疗兵:150帧群体治疗 ——
+      e.medicT = (e.medicT || 0) + k;
+      if (e.medicT >= 150) {
+        e.medicT = 0;
+        let best = null, worst = 0;
+        for (const a of enemies) {
+          if (a.dead || a === e || a.hp >= a.maxHp) continue;
+          const d = Math.hypot(a.x - e.x, a.y - e.y);
+          if (d <= 130 && (a.maxHp - a.hp) >= worst) { worst = a.maxHp - a.hp; best = a; }
+        }
+        if (best) { best.hp = Math.min(best.maxHp, best.hp + 1); spawnParticles(best.x + best.size / 2, best.y + best.size / 2, '#7dffb0', 6); }
+      }
+    }
 
     if ((e.changeTimer -= k) <= 0) {
       e.changeTimer = randInt(50, 170);
@@ -4523,7 +4567,7 @@
     const shootMin = Math.max(22, 60 - level * 4);
     const shootMax = Math.max(80, 150 - level * 6);
     if ((e.shootTimer -= k) <= 0) {
-      e.shootTimer = randInt(shootMin, shootMax);
+      e.shootTimer = Math.round(randInt(shootMin, shootMax) * (e.fury ? 0.55 : 1));   // —— v1.2.128 狂怒射速 ——
       fire(e);
     }
     // 分层目标锁定：精英追玩家，装甲/工兵直冲基地，快速游走
@@ -4755,7 +4799,13 @@
         for (const e of enemies) {
           if (e.dead) continue;
           if (e.isBoss && e.enterT > 0) continue;   // Boss 出场下降中无敌
+          if (e.type === 'phantom' && (e.cloakT || 0) >= 170) continue;   // —— v1.2.122 幻影隐形穿透 ——
           if (cx >= e.x && cx <= e.x + e.size && cy >= e.y && cy <= e.y + e.size) {
+            // —— v1.2.124 盾卫正面格挡:弹向与敌朝向相反=正面来袭 ——
+            if (e.type === 'guardian' && (b.dir + 4) % 8 === e.dir) {
+              addText(cx, cy - 18, '🛡 格挡', '#c8a44d'); spawnParticles(cx, cy, '#ffe28a', 5); sfxHit();
+              b.dead = true; return;
+            }
             stat.hits++; lvHits++;   // —— v1.2.95 ——
             // 巨弹头强化：对多血敌人额外 -1 伤害
             const extra = ((upgrades.bigbullet || 0) > 0 && e.hp > 1) ? 1 : 0;
@@ -4799,6 +4849,10 @@
           if (cx >= p.x && cx <= p.x + TANK_SIZE && cy >= p.y && cy <= p.y + TANK_SIZE) {
             stkRecord(b, p);
             if (b.owner && !b.owner.isPlayer) b.owner.bounty = (b.owner.bounty || 0) + 40;   // —— v1.2.94 复仇悬赏 ——
+            if (b.owner && b.owner.type === 'vampire' && !b.owner.dead) {   // —— v1.2.127 吸血回复 ——
+              b.owner.hp += 1; b.owner.maxHp += 1;
+              addText(b.owner.x + b.owner.size / 2, b.owner.y - 12, '🩸 吸血', '#ff5f8f');
+            }
             lastHit = { how: 'shot', by: shooterLabel(b.owner) };
             hurtEdge = hurtEdgeOf(b.dir);
             b.dead = true; killPlayer(p); return;
@@ -4859,7 +4913,7 @@
     if (mx !== 0 || my !== 0) {
       player.dir = dirFromVec(mx, my);
       // 斜向走 1/√2 速度，保证各方向合速度一致；疾速履带强化 +15%/层；永久加成移速 +5%/级
-      const spd = player.speed * (1 + 0.15 * (upgrades.speed || 0)) * (1 + 0.05 * (bonus.spd || 0));
+      const spd = player.speed * (1 + 0.15 * (upgrades.speed || 0)) * (1 + 0.05 * (bonus.spd || 0)) * (chillT > 0 ? 0.55 : 1);   // —— v1.2.126 寒冰减速 ——
       const step = spd * k * ((mx !== 0 && my !== 0) ? Math.SQRT1_2 : 1);
       const nx = player.x + mx * step;
       const ny = player.y + my * step;
@@ -5189,6 +5243,8 @@
     if (e.type === 'elite') { addText(e.x + e.size / 2, e.y - 10, '👑 精英击破', '#ffd75e'); showToast('👑 精英击破 · 敌方精锐 -1'); }   // —— v1.2.44 精英击破播报 ——
     if (e.bounty > 0) { const bg94 = addGold(e.bounty, e.x + e.size / 2, e.y - 26); addText(e.x + e.size / 2, e.y - 26, '💰 悬赏 +' + bg94 + '🪙', '#ffd75e'); showToast('💰 复仇悬赏 +' + bg94 + '🪙'); }   // —— v1.2.94 ——
     if (e.golden) { const gg100 = addGold(30, e.x + e.size / 2, e.y - 38); spawnPowerup(e.x + e.size / 2, e.y + e.size / 2); addText(e.x + e.size / 2, e.y - 38, '👑 敌将伏法 +' + gg100 + '🪙', '#ffd75e'); }   // —— v1.2.100 ——
+    if (e.affix) { const ag128 = addGold(15, e.x + e.size / 2, e.y - 50); addText(e.x + e.size / 2, e.y - 50, '🏷 词缀赏金 +' + ag128 + '🪙', '#ffb14d'); }   // —— v1.2.128 ——
+    if (hordeT > 0 && !e.isBoss) { const hg130 = addGold(10, e.x + e.size / 2, e.y - 62); addText(e.x + e.size / 2, e.y - 62, '🌊 敌潮赏金 +' + hg130 + '🪙', '#6bd8ff'); }   // —— v1.2.130 ——
     if (e.isBoss) { stat.bossKills++; missionBump('boss', 1); }   // —— v1.2.2 每日任务 ——
     addKillScore(e);
     // 金币掉落：不同敌人金币不同，受金运加成
@@ -5201,9 +5257,15 @@
       addText(hx, hy, '+1 ❤', '#ff6b81');
       updateHud();
     }
+    if (e.type === 'plague') { poisonClouds.push({ x: e.x + e.size / 2, y: e.y + e.size / 2, t: 480, r: 52 }); addText(e.x + e.size / 2, e.y - 22, '☠ 毒雾', '#a0e048'); }   // —— v1.2.125 ——
     maybeDropPowerup(e.x + e.size / 2, e.y + e.size / 2, e.isBoss);
     coinDropSpawn(e.x + e.size / 2, e.y + e.size / 2, e);   // —— v1.2.30 金币散落 ——
     if (e.isBoss) {
+      // —— v1.2.131 Boss 宝箱:双道具 + 50 金 ——
+      { const bx131 = e.x + e.size / 2, by131 = e.y + e.size / 2;
+        spawnPowerup(bx131 - 20, by131); spawnPowerup(bx131 + 20, by131);
+        const bg131 = addGold(50, bx131, by131 - 30);
+        addText(bx131, by131 - 44, '🎁 Boss 宝箱 +' + bg131 + '🪙', '#ffd75e'); }
       bossHp = 0;
       // 死亡演出：连环爆炸 + 慢动作 + 白闪
       bossDeathT = 1.15; bossDeathX = e.x + e.size / 2; bossDeathY = e.y + e.size / 2;
@@ -5732,6 +5794,7 @@
   function startLevel() {
     lvAdvLock = false;   // —— v1.2.72 新关生效即释放 ——
     bossLevel = (level % 5 === 0);
+    nightLevel = !bossLevel && level % 4 === 2;   // —— v1.2.129 夜战关 ——
     if (bossLevel) { const bt = BOSS_TYPES[bossCount % BOSS_TYPES.length]; if (bt) setTimeout(() => { try { showToast('⚠️ Boss「' + bt.name + '」来袭 · ' + bt.desc); } catch (e) { /* 忽略 */ } }, 1200); }   // —— v1.2.48 Boss 弱点提示 ——
     tookHitThisLevel = false; lvPerfGold = 0; lvWingBonus = 0; lvFastBonus = 0;   // —— v1.2.22 新关清零表现奖励 · v1.2.33 · v1.2.46 ——
     lvClearDone = false; lvClearWatchT = 0;   // —— v1.2.21 重置过关闸门与看门狗 ——
@@ -5740,6 +5803,7 @@
     lvShots = 0; lvHits = 0; lvAccBonus = 0;   // —— v1.2.95 ——
     lvRankS = 0; lvNewRec = false; streakHoldT = 0; killStreak = 0;   // —— v1.2.102/108/109 ——
     critCount = 0; playerArmor = 0; chargeT = 0; chargeFired = 0; killFeed = [];   // —— v1.2.112/113/115/121 ——
+    poisonClouds = []; chillT = 0; poisonT = 0; hordeT = 0; affixForce = null;   // —— v1.2.122~131(nightLevel 在 startLevel 另置) ——
     enemiesSpawned = 0;
     airDropT = 20;   // —— v1.2.93 空投重置 ——
     weather = __testMode ? 'clear' : ['clear', 'rain', 'snow', 'wind'][randInt(0, 3)];   // —— v1.2.104 战地天气（测试态默认晴,weatherSetNow 强制）——
@@ -5752,6 +5816,7 @@
     // —— v0.2.6 无尽模式：敌人数量随波次递增（封顶 2.5x） ——
     const emCount = endlessMode ? Math.min(2.5, 1 + level * 0.05) : 1;
     enemiesTotal = bossLevel ? 1 : Math.round((6 + level * 2) * (dailyMods.surge ? 1.3 : 1) * emCount);
+    if (!bossLevel && multiMode !== 2 && level % 3 === 0) { enemiesTotal += 6; hordeT = 900; }   // —— v1.2.130 敌潮 ——
     if (multiMode === 2) enemiesTotal = 0;   // —— v0.2.7 对抗模式：无敌人，纯 PvP ——
     // 单波洪流：所有敌人一波刷完，不再分拨分批
     wavesTotal = 1;
@@ -5808,7 +5873,7 @@
       if (enemySpawnTimer <= 35 && !spawnWarnPt) spawnWarnPt = spawnPoints[randInt(0, 2)];
       return;
     }
-    enemySpawnTimer = 30;
+    enemySpawnTimer = hordeT > 0 ? 14 : 30;   // —— v1.2.130 敌潮刷速翻倍 ——
     // 优先用预告点，被占则顺延其他空点
     const tryPts = spawnWarnPt ? [spawnWarnPt].concat(spawnPoints) : spawnPoints;
     let pt = null;
@@ -5987,6 +6052,23 @@
     enemies.forEach(e => { if (e.portalCd > 0) e.portalCd -= k; updateEnemy(e, k); checkPortal(e); });
     bullets.forEach(b => updateBullet(b, k));
     updateLasers(k);        // —— v0.2.5 猎手激光扫射 ——
+    // —— v1.2.125 毒雾:衰减 + 玩家滞留中毒 ——
+    if (poisonClouds.length) {
+      for (const c of poisonClouds) c.t -= k;
+      poisonClouds = poisonClouds.filter(c => c.t > 0);
+      if (player && !player.dead) {
+        const pcx = player.x + TANK_SIZE / 2, pcy = player.y + TANK_SIZE / 2;
+        const inCloud = poisonClouds.some(c => Math.hypot(pcx - c.x, pcy - c.y) <= c.r);
+        if (inCloud) {
+          poisonT += k;
+          if (poisonT >= 90) { poisonT = 0; killPlayer(player); }
+        } else poisonT = 0;
+      } else poisonT = 0;
+    } else poisonT = 0;
+    // —— v1.2.126 寒冰减速衰减 ——
+    if (chillT > 0) chillT = Math.max(0, chillT - k);
+    // —— v1.2.130 敌潮计时衰减 ——
+    if (hordeT > 0) hordeT = Math.max(0, hordeT - k);
     // —— v1.2.93 空投补给：每 20s 在随机空点投放一件道具 ——
     if (airDropT > 0 && multiMode !== 2) {
       airDropT -= dt;
@@ -6430,9 +6512,17 @@
     drawEnemyIntroMark();
     drawLastFoeMark();   // —— v1.2.101 ——
     drawRespawnMark();
+    drawNightVeil();   // —— v1.2.129 夜战帷幕 ——
 
     // 道具
     powerupRingCount = 0;
+    for (const c of poisonClouds) {   // —— v1.2.125 毒雾绘制 ——
+      ctx.save(); ctx.globalAlpha = Math.min(0.42, c.t / 480 * 0.5);
+      const g125 = ctx.createRadialGradient(c.x, c.y, 4, c.x, c.y, c.r);
+      g125.addColorStop(0, '#a0e048'); g125.addColorStop(1, 'rgba(90,140,30,0)');
+      ctx.fillStyle = g125; ctx.beginPath(); ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
     for (const p of powerups) drawPowerup(p);
     for (const m of mines) drawMine(m);   // —— v1.2.26 ——
     for (const c of coinDrops) drawCoinDrop(c);   // —— v1.2.30 ——
@@ -6897,6 +6987,22 @@
     }
   }
 
+  // —— v1.2.129 夜战帷幕:压暗全屏,玩家光圈清晰 ——
+  function drawNightVeil() {
+    if (!nightLevel || !running) return;
+    ctx.save();
+    const pcx = player && !player.dead ? player.x + TANK_SIZE / 2 : W / 2, pcy = player && !player.dead ? player.y + TANK_SIZE / 2 : H / 2;
+    const g129 = ctx.createRadialGradient(pcx, pcy, 60, pcx, pcy, 230);
+    g129.addColorStop(0, 'rgba(2,4,16,0)');
+    g129.addColorStop(0.55, 'rgba(2,4,16,0.45)');
+    g129.addColorStop(1, 'rgba(2,4,16,0.86)');
+    ctx.fillStyle = g129; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = 'rgba(2,4,16,0.86)';
+    ctx.fillRect(0, 0, W, Math.max(0, pcy - 230)); ctx.fillRect(0, Math.min(H, pcy + 230), W, H);
+    ctx.fillRect(0, 0, Math.max(0, pcx - 230), H); ctx.fillRect(Math.min(W, pcx + 230), 0, W, H);
+    ctx.restore();
+  }
+
   function drawTank(t) {
     const s = t.size;
     const scale = s / TANK_SIZE;
@@ -6951,6 +7057,12 @@
       ctx.save(); ctx.globalAlpha = frostSheenAlpha(t.freezeT); ctx.strokeStyle = '#cfeeff'; ctx.lineWidth = 1.6;
       ctx.beginPath(); ctx.moveTo(t.x + s * 0.2, t.y + s * 0.85); ctx.lineTo(t.x + s * 0.8, t.y + s * 0.15); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(t.x + s * 0.05, t.y + s * 0.55); ctx.lineTo(t.x + s * 0.45, t.y + s * 0.1); ctx.stroke();
+      ctx.restore();
+    }
+    if (t.type === 'phantom' && (t.cloakT || 0) >= 170) {   // —— v1.2.122 幻影隐形面纱 ——
+      ctx.save(); ctx.globalAlpha = 0.72; ctx.fillStyle = '#0a1030';
+      ctx.fillRect(t.x - 2, t.y - 2, s + 4, s + 4);
+      ctx.strokeStyle = '#b8c8ff'; ctx.lineWidth = 1; ctx.strokeRect(t.x - 2, t.y - 2, s + 4, s + 4);
       ctx.restore();
     }
     if (!t.isPlayer && !t.isWingman && !t.isBoss && t.maxHp > 1) {
@@ -27565,7 +27677,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.121', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.131', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -28234,6 +28346,8 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       elecTileNow: () => TILE_ELEC, bushNow: () => playerInBush(),
       eTargetNow: () => { const e = enemies.find(z => !z.dead); return e ? enemyTarget(e) : null; },
       chargeNow: () => chargeT, chargeSetNow: (v) => { chargeT = Number(v) || 0; return chargeT; }, chargeFiredNow: () => chargeFired,
+      nightNow: () => nightLevel, hordeNow: () => hordeT, chillNow: () => chillT, poisonNow: () => poisonT, cloudsNow: () => poisonClouds.map(c => ({ x: Math.round(c.x), y: Math.round(c.y), t: Math.round(c.t) })),
+      affixForceNow: (v) => { affixForce = v || null; return affixForce; }, hordeSetNow: (v) => { hordeT = Number(v) || 0; return hordeT; },
       bulletsInfoNow: () => bullets.map(b => ({ x: Math.round(b.x), y: Math.round(b.y), dir: b.dir, size: b.size, own: !!(b.owner && b.owner.isPlayer), dead: !!b.dead })),
       pauseStatNow: () => { const e = $('pauseStatLine'); return e ? e.textContent : null; },
       endNow: (w) => { endGame(!!w); return gameOver; },
