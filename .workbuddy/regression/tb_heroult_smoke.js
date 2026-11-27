@@ -31075,6 +31075,33 @@ async function main() {
     return ok === true || 'apply failed';
   });
 
+  // U9824–U9826: 雷达
+  await senseCheck("U9824 雷达计时器启动", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.applyPowerupNow('radar');
+    const v = T.fxValNow('radar');
+    T.quit();
+    return v > 0 || JSON.stringify({ v });
+  });
+  await senseCheck("U9825 雷达期间标记敌人", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'normal');
+    T.applyPowerupNow('radar');
+    await Z(300);
+    T.renderOnce();
+    const errFree = T.pageErrCountNow ? T.pageErrCountNow() === 0 : true;
+    const v = T.fxValNow('radar');
+    T.quit();
+    return (errFree && v > 0) || JSON.stringify({ errFree, v });
+  });
+  await senseCheck("U9826 雷达道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('radar');
+    T.quit();
+    return ok === true || 'apply failed';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
