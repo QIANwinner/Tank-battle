@@ -30282,6 +30282,32 @@ async function main() {
     return sum < 150 || JSON.stringify({ sum, px: [corner[0], corner[1], corner[2]] });
   });
 
+  // U9752–U9754: 淘金关
+  await senseCheck("U9752 第6关为淘金关", (T,$) => {
+    T.startAtLevel(6); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const v = T.goldRushNow();
+    T.quit();
+    return v === true || JSON.stringify({ v });
+  });
+  await senseCheck("U9753 第7关非淘金关", (T,$) => {
+    T.startAtLevel(7); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const v = T.goldRushNow();
+    T.quit();
+    return v === false || JSON.stringify({ v });
+  });
+  await senseCheck("U9754 淘金关击杀有赏金飘字", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startAtLevel(6); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (e) { e.freezeT = 1e9; e.hp = 1; }
+    T.spawnBulletNow(e.x + e.size / 2 - 2, e.y + e.size + 6, 0, false);
+    let seen = false;
+    for (let i = 0; i < 30 && !seen; i++) { await Z(70); seen = T.floatTextsNow().some(x => x.indexOf('淘金赏金') >= 0); }
+    T.quit();
+    return seen === true || 'no goldrush bounty';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
