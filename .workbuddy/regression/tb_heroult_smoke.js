@@ -31517,6 +31517,46 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (sl && sl.size < e.size && sl.speed > 1.2) || JSON.stringify({ sl: sl && { size: sl.size, speed: sl.speed }, es: e.size });
   });
 
+  // U9857–U9859: 冲锋者
+  await senseCheck("U9857 冲锋者Boss已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const id = T.spawnBossAsNow('charger');
+    const bt = T.bossTypeNow();
+    T.quit();
+    return (id === 'charger' && bt.id === 'charger') || JSON.stringify({ id, bt });
+  });
+  await senseCheck("U9858 冲锋技能进入预警", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('charger');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    let st = '';
+    for (let i = 0; i < 15; i++) {
+      await Z(90);
+      st = b.state;
+      if (st === 'charge_warn' || st === 'charge') break;
+    }
+    T.quit();
+    return (st === 'charge_warn' || st === 'charge') || JSON.stringify({ st });
+  });
+  await senseCheck("U9859 冲锋产生位移", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('charger');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    for (let i = 0; i < 15; i++) { await Z(90); if (b.state === 'charge') break; }
+    if (b.state !== 'charge') { T.quit(); return 'never charged: ' + b.state; }
+    const x0 = b.x, y0 = b.y;
+    for (let i = 0; i < 8; i++) await Z(80);
+    const moved = Math.hypot(b.x - x0, b.y - y0);
+    T.quit();
+    return (moved > 20) || JSON.stringify({ moved: Math.round(moved), st: b.state });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
