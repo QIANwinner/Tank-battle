@@ -31463,6 +31463,60 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return gone === true || 'trail never decayed';
   });
 
+  // U9854–U9856: 分裂虫
+  await senseCheck("U9854 分裂虫死亡裂变", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'splitbug');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no splitbug'; }
+    e.hp = 1; e.freezeT = 99999;
+    T.spawnBulletNow(e.x + 8, e.y + 8, 2, false);
+    let n = 0;
+    for (let i = 0; i < 20; i++) {
+      await Z(90);
+      n = T.r18enNow().filter(x => !x.dead && x.type === 'splitling').length;
+      if (n > 0) break;
+    }
+    T.quit();
+    return (n >= 1) || 'no splitling';
+  });
+  await senseCheck("U9855 裂变补充敌数", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const t0 = T.enemiesTotalNow();
+    T.spawnFoeNow(300, 100, 'splitbug');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no splitbug'; }
+    e.hp = 1; e.freezeT = 99999;
+    T.spawnBulletNow(e.x + 8, e.y + 8, 2, false);
+    let dt = 0;
+    for (let i = 0; i < 20; i++) {
+      await Z(90);
+      dt = T.enemiesTotalNow() - t0;
+      if (dt >= 2) break;
+    }
+    T.quit();
+    return (dt >= 2) || JSON.stringify({ t0, dt });
+  });
+  await senseCheck("U9856 幼虫小型高速", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'splitbug');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no splitbug'; }
+    e.hp = 1; e.freezeT = 99999;
+    T.spawnBulletNow(e.x + 8, e.y + 8, 2, false);
+    let sl = null;
+    for (let i = 0; i < 20; i++) {
+      await Z(90);
+      sl = T.r18enNow().find(x => !x.dead && x.type === 'splitling');
+      if (sl) break;
+    }
+    T.quit();
+    return (sl && sl.size < e.size && sl.speed > 1.2) || JSON.stringify({ sl: sl && { size: sl.size, speed: sl.speed }, es: e.size });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
