@@ -29808,6 +29808,44 @@ async function main() {
     return c > 0 || JSON.stringify({ c });
   });
 
+  // U9710–U9712: 医疗兵
+  await senseCheck("U9710 医疗兵治疗受伤友军", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'medic');
+    T.spawnFoeNow(330, 110, 'armored');
+    const es = T.r18enNow().filter(x => !x.dead);
+    const m = es.find(x => x.type === 'medic'), a = es.find(x => x.type === 'armored');
+    a.hp = 1; a.freezeT = 1e9; m.medicT = 145;
+    for (let i = 0; i < 20 && a.hp < 2; i++) await Z(100);
+    const hp = a.hp;
+    T.quit();
+    return hp >= 2 || JSON.stringify({ hp });
+  });
+  await senseCheck("U9711 满血友军不被治疗", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'medic');
+    T.spawnFoeNow(330, 110, 'armored');
+    const es = T.r18enNow().filter(x => !x.dead);
+    const m = es.find(x => x.type === 'medic'), a = es.find(x => x.type === 'armored');
+    const hp0 = a.hp; a.freezeT = 1e9; m.medicT = 145;
+    for (let i = 0; i < 12; i++) await Z(100);
+    const hp1 = a.hp;
+    T.quit();
+    return hp1 <= hp0 || JSON.stringify({ hp0, hp1 });
+  });
+  await senseCheck("U9712 医疗计时器推进", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'medic');
+    const m = T.r18enNow().filter(x => !x.dead).pop(); m.medicT = 0;
+    for (let i = 0; i < 10 && !(m.medicT > 0); i++) await Z(80);
+    const t = m.medicT;
+    T.quit();
+    return t > 0 || JSON.stringify({ t });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
