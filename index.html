@@ -1878,7 +1878,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.161</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.171</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2057,6 +2057,17 @@
     plague:   { speed: 1.10, hp: 2, score: 240, color: '#a0e048', label: '毒雾' },   // —— v1.2.125 ——
     frost:    { speed: 0.95, hp: 2, score: 240, color: '#9fdcff', label: '寒冰' },   // —— v1.2.126 ——
     vampire:  { speed: 1.25, hp: 1, score: 260, color: '#ff5f8f', label: '吸血' },   // —— v1.2.127 ——
+    assassin: { speed: 1.35, hp: 2, score: 280, color: '#8a5cff', label: '刺客' },   // —— v1.2.162 ——
+    rocket:   { speed: 0.90, hp: 2, score: 300, color: '#ff7a45', label: '火箭' },   // —— v1.2.163 ——
+    giant:    { speed: 0.55, hp: 6, score: 400, color: '#8fa3bf', label: '巨人' },   // —— v1.2.164 ——
+    miner:    { speed: 1.00, hp: 2, score: 280, color: '#d9a441', label: '布雷' },   // —— v1.2.165 ——
+    jammer:   { speed: 0.95, hp: 2, score: 290, color: '#b14aed', label: '干扰' },   // —— v1.2.166 ——
+    mirror:   { speed: 0.90, hp: 3, score: 320, color: '#e8f4ff', label: '镜面' },   // —— v1.2.167 ——
+    summoner: { speed: 0.85, hp: 2, score: 320, color: '#ff4d6d', label: '召唤' },   // —— v1.2.168 ——
+    swift:    { speed: 2.20, hp: 1, score: 270, color: '#4dfff3', label: '疾风' },   // —— v1.2.169 ——
+    venom:    { speed: 1.10, hp: 2, score: 290, color: '#7ce040', label: '毒蛛' },   // —— v1.2.170 ——
+    splitbug: { speed: 1.00, hp: 1, score: 200, color: '#ff8ae2', label: '分裂虫' },   // —— v1.2.171 ——
+    splitling:{ speed: 1.80, hp: 1, score: 60, color: '#ffb3f0', label: '幼虫' },   // —— v1.2.171 ——
   };
 
   // 道具定义
@@ -2949,6 +2960,7 @@
   let lvRankS = 0, lastInterest = 0, weather = 'clear', firstWinDayK = '', lvNewRec = false, streakHoldT = 0, luckyLevel = false;   // —— v1.2.102~110 系统波状态 ——
   let critCount = 0, critForce = false, playerArmor = 0, chargeT = 0, chargeFired = 0;   // —— v1.2.112~121 波10状态 ——
   let poisonClouds = [], chillT = 0, poisonT = 0, nightLevel = false, hordeT = 0, affixForce = null;   // —— v1.2.122~131 波11状态 ——
+  let jamT = 0, foeMines = [], venomTrail = [];   // —— v1.2.162~171 波15状态 ——
   let timebombs = [], sentries = [], stormT = 0, stormWarnT = 0, fogLevel = false, goldLevel = false, baseHp = 2;   // —— v1.2.132~141 波12状态 ——
   let gateOpen = true, gateT = 0;   // —— v1.2.151 定时门 ——
   let blackholes = [], recallT = 0, recallPos = null;   // —— v1.2.158/159 黑洞·回溯 ——
@@ -4217,6 +4229,16 @@
       if (rn122 < 0.076) return 'plague';
       if (rn122 < 0.094) return 'frost';
       if (rn122 < 0.110) return 'vampire';
+      if (rn122 >= 0.110 && rn122 < 0.126) return 'assassin';   // —— v1.2.162 ——
+      if (rn122 >= 0.126 && rn122 < 0.142) return 'rocket';   // —— v1.2.163 ——
+      if (rn122 >= 0.142 && rn122 < 0.158) return 'giant';   // —— v1.2.164 ——
+      if (rn122 >= 0.158 && rn122 < 0.174) return 'miner';   // —— v1.2.165 ——
+      if (rn122 >= 0.174 && rn122 < 0.190) return 'jammer';   // —— v1.2.166 ——
+      if (rn122 >= 0.190 && rn122 < 0.206) return 'mirror';   // —— v1.2.167 ——
+      if (rn122 >= 0.206 && rn122 < 0.222) return 'summoner';   // —— v1.2.168 ——
+      if (rn122 >= 0.222 && rn122 < 0.238) return 'swift';   // —— v1.2.169 ——
+      if (rn122 >= 0.238 && rn122 < 0.254) return 'venom';   // —— v1.2.170 ——
+      if (rn122 >= 0.254 && rn122 < 0.270) return 'splitbug';   // —— v1.2.171 ——
     }
     // 有效难度 = 关卡（已改单波，无波次加成）
     const lvl = level;
@@ -4273,6 +4295,7 @@
       changeTimer: randInt(60, 160), shootTimer: randInt(40, 140),
       hitFlash: 0, portalCd: 0
     });
+    if (type === 'giant') { enemies[enemies.length - 1].size = Math.round(TANK_SIZE * 1.5); }   // —— v1.2.164 巨人体型 ——
     // —— v1.2.100 精英敌将：每关首只敌人强化为金色敌将 ——
     if (!goldenPicked && !bossLevel && type !== 'boss') {
       goldenPicked = true;
@@ -4618,6 +4641,73 @@
     if (e.type === 'suicide') { updateSuicide(e, k); return; }   // 自爆：贴脸引爆
     if (e.type === 'engineer'){ updateEngineer(e, k); return; }  // 工兵：专拆基地
     if (e.type === 'phantom') { e.cloakT = ((e.cloakT || 0) + k) % 300; }   // —— v1.2.122 幻影显隐循环(>=170 隐形) ——
+    if (e.type === 'rocket') {   // —— v1.2.163 火箭兵:追踪弹 ——
+      e.rocketT = (e.rocketT || 0) + k;
+      if (e.rocketT >= 240 && player && !player.dead) {
+        e.rocketT = 0;
+        bullets.push({ x: e.x + e.size / 2, y: e.y + e.size / 2, dir: dirFromVec(player.x - e.x, player.y - e.y), speed: BULLET_SPEED * 0.55, size: 5, owner: e, dead: false, rocket: true });
+        spawnParticles(e.x + e.size / 2, e.y + e.size / 2, '#ff7a45', 5);
+      }
+      if (player && !player.dead) {
+        for (const rb163 of bullets) {
+          if (rb163 && !rb163.dead && rb163.rocket && rb163.owner === e) {
+            rb163.dir = dirFromVec(player.x + TANK_SIZE / 2 - rb163.x, player.y + TANK_SIZE / 2 - rb163.y);
+          }
+        }
+      }
+    }
+    if (e.type === 'miner') {   // —— v1.2.165 布雷者 ——
+      e.mineT = (e.mineT || 0) + k;
+      if (e.mineT >= 240) {
+        e.mineT = 0;
+        foeMines.push({ x: e.x + e.size / 2, y: e.y + e.size / 2, armT: 60 });
+        if (foeMines.length > 12) foeMines.shift();
+      }
+    }
+    if (e.type === 'jammer' && player && !player.dead) {   // —— v1.2.166 干扰光环 ——
+      const jd166 = Math.hypot((player.x + TANK_SIZE / 2) - (e.x + e.size / 2), (player.y + TANK_SIZE / 2) - (e.y + e.size / 2));
+      if (jd166 <= 120) jamT = 20;
+    }
+    if (e.type === 'summoner') {   // —— v1.2.168 召唤者 ——
+      e.sumT = (e.sumT || 0) + k;
+      e.sumN = e.sumN || 0;
+      if (e.sumT >= 360 && e.sumN < 3) {
+        e.sumT = 0;
+        const sx168 = e.x + DX[e.dir] * TILE, sy168 = e.y + DY[e.dir] * TILE;
+        if (inside(Math.floor(sx168 / TILE), Math.floor(sy168 / TILE)) && !isBlocked(sx168, sy168, TANK_SIZE)) {
+          spawnEnemy(sx168, sy168, 'normal');
+          e.sumN++;
+          enemiesTotal++;
+          spawnParticles(sx168 + TANK_SIZE / 2, sy168 + TANK_SIZE / 2, '#ff4d6d', 8);
+        }
+      }
+    }
+    if (e.type === 'swift') {   // —— v1.2.169 疾风蛇形 ——
+      e.zagT = (e.zagT || 0) + k;
+      if (e.zagT >= 45) { e.zagT = 0; e.dir = (e.dir + (rng() < 0.5 ? 1 : 7)) % 8; }
+    }
+    if (e.type === 'venom') {   // —— v1.2.170 毒蛛留迹 ——
+      e.venomT = (e.venomT || 0) + k;
+      if (e.venomT >= 30) {
+        e.venomT = 0;
+        venomTrail.push({ x: e.x + e.size / 2, y: e.y + e.size / 2, t: 180 });
+        if (venomTrail.length > 40) venomTrail.shift();
+      }
+    }
+    if (e.type === 'assassin' && player && !player.dead) {   // —— v1.2.162 刺客闪现 ——
+      e.blinkT = (e.blinkT || 0) + k;
+      if (e.blinkT >= 300) {
+        e.blinkT = 0;
+        const ang162 = rng() * Math.PI * 2;
+        const nx162 = clamp(player.x + Math.cos(ang162) * 3 * TILE, 0, W - e.size);
+        const ny162 = clamp(player.y + Math.sin(ang162) * 3 * TILE, 0, H - e.size);
+        if (!isBlocked(nx162, ny162, e.size)) {
+          spawnParticles(e.x + e.size / 2, e.y + e.size / 2, '#8a5cff', 8);
+          e.x = nx162; e.y = ny162;
+          spawnParticles(nx162 + e.size / 2, ny162 + e.size / 2, '#8a5cff', 8);
+        }
+      }
+    }
     if (e.type === 'frost' && player && !player.dead) {   // —— v1.2.126 寒气光环 ——
       const fd = Math.hypot((player.x + TANK_SIZE / 2) - (e.x + e.size / 2), (player.y + TANK_SIZE / 2) - (e.y + e.size / 2));
       if (fd <= 110) chillT = 30;
@@ -4911,7 +5001,16 @@
             const dmg112 = ((b.charged ? 3 : 1) + extra + (weak97 ? 1 : 0)) * (crit112 ? 2 : 1);   // —— v1.2.121 蓄力弹伤3 ——
             if (crit112) { critCount++; addText(cx, cy - 26, '⚡ 暴击', '#ffe600'); }
             runDmgAdd(dmg112);
-            e.hp -= dmg112; e.hitFlash = 6;
+            let refl167 = false;   // —— v1.2.167 镜面反弹 ——
+            if (e.type === 'mirror' && b.owner && b.owner.isPlayer && rng() < 0.5) refl167 = true;
+            if (refl167) {
+              b.dir = (b.dir + 4) % 8; b.owner = e; b.pen = (b.pen || 0) + 1;
+              spawnParticles(cx, cy, '#e8f4ff', 6);
+              addText(cx, cy - 20, '🪞 反弹', '#e8f4ff');
+              e.hitFlash = 6;
+            } else {
+              e.hp -= dmg112; e.hitFlash = 6;
+            }
             if (weak97) addText(cx, cy - 26, '💥 弱点', '#ffe600');
             dmgNum(cx, cy - 14, 1 + extra);   // —— v1.2.69 ——
             // 冰冻子弹：命中几率冻住 1 秒（每层 +15% 概率）
@@ -5009,6 +5108,27 @@
   function updatePlayer(k) {
     if (!player || player.dead) return;
     if (player.cooldown > 0) player.cooldown -= k;
+    if (jamT > 0) {   // —— v1.2.166 干扰:冷却恢复减半 ——
+      jamT -= k;
+      if (player.cooldown > 0) player.cooldown += k * 0.5;
+    }
+    for (const m165 of foeMines) {   // —— v1.2.165 敌雷触发 ——
+      if (m165.boom) continue;
+      if (m165.armT > 0) { m165.armT -= k; if ((animTime % 40) < k) spawnParticles(m165.x, m165.y, '#ff9f43', 1); continue; }
+      if (player && !player.dead && !(player.spawnInv > 0) && Math.hypot(player.x + TANK_SIZE / 2 - m165.x, player.y + TANK_SIZE / 2 - m165.y) < TILE) {
+        m165.boom = true; spawnParticles(m165.x, m165.y, '#ff9f43', 18); killPlayer(player);
+      }
+    }
+    for (let i165 = foeMines.length - 1; i165 >= 0; i165--) if (foeMines[i165].boom) foeMines.splice(i165, 1);
+    for (let i170 = venomTrail.length - 1; i170 >= 0; i170--) {   // —— v1.2.170 毒迹伤player ——
+      const v170 = venomTrail[i170];
+      v170.t -= k;
+      if (v170.t <= 0) { venomTrail.splice(i170, 1); continue; }
+      if ((animTime % 30) < k) spawnParticles(v170.x, v170.y, '#7ce040', 1);
+      if (player && !player.dead && !(player.spawnInv > 0) && Math.hypot(player.x + TANK_SIZE / 2 - v170.x, player.y + TANK_SIZE / 2 - v170.y) < TILE * 0.8) {
+        venomTrail.splice(i170, 1); killPlayer(player);
+      }
+    }
     if (player.ultCd > 0) {   // v0.3.2 大招充能完毕提示
       const step = cooldownStep(player.ultCd, k), shown = Math.ceil(player.ultCd);
       player.ultCd = step.cd;
@@ -5364,6 +5484,17 @@
     killFeed.push({ s: '✖ 击毁 ' + (e.isBoss ? 'Boss' : (ENEMY_TYPES[e.type] || {}).label || e.type), t: animTime });
     if (killFeed.length > 3) killFeed.shift();   // —— v1.2.113 击杀播报 ——
     petReact('kill');   // —— v0.3.3 宠物击杀欢跳 ——
+    if (e.type === 'splitbug') {   // —— v1.2.171 分裂虫裂变 ——
+      for (const sd171 of [-1, 1]) {
+        const sx171 = e.x + sd171 * TILE * 0.8, sy171 = e.y;
+        if (inside(Math.floor(sx171 / TILE), Math.floor(sy171 / TILE)) && !isBlocked(sx171, sy171, TANK_SIZE * 0.7)) {
+          spawnEnemy(sx171, sy171, 'splitling');
+          enemies[enemies.length - 1].size = Math.round(TANK_SIZE * 0.7);
+          enemiesTotal++;
+        }
+      }
+      spawnParticles(e.x + e.size / 2, e.y + e.size / 2, '#ff8ae2', 10);
+    }
     todayAdd('kills', 1);   // —— v1.2.71 今日击杀 ——
     hitStop = reduced() ? 0 : (e.isBoss ? 0.06 : 0.03);   // 击杀定格（减弱动效时关闭；Boss 用慢动作替代长定格）
     vibe(e.isBoss ? [60, 50, 130] : 15);
@@ -5979,6 +6110,7 @@
     lvRankS = 0; lvNewRec = false; streakHoldT = 0; killStreak = 0;   // —— v1.2.102/108/109 ——
     critCount = 0; playerArmor = 0; chargeT = 0; chargeFired = 0; killFeed = [];   // —— v1.2.112/113/115/121 ——
     poisonClouds = []; chillT = 0; poisonT = 0; hordeT = 0; affixForce = null;   // —— v1.2.122~131(nightLevel 在 startLevel 另置) ——
+    jamT = 0; foeMines = []; venomTrail = [];   // —— v1.2.162~171 ——
     timebombs = []; sentries = []; stormT = __testMode ? 999999 : 2700 + rng() * 1800; stormWarnT = 0; baseHp = 2;   // 测试态不自动风暴   // —— v1.2.132~138(fog/gold 在 startLevel 另置) ——
     enemiesSpawned = 0;
     airDropT = 20;   // —— v1.2.93 空投重置 ——
@@ -27993,7 +28125,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.161', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.171', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -28671,12 +28803,16 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       gateSetNow: (v) => { if (typeof gateOpen !== 'undefined') { gateOpen = !!v; gateT = 0; markMapDirty(); } return gateOpen; },
       // —— v1.2.152~161 波14钩子 ——
       fxValNow: (k) => fx[k] || 0,
+      // —— v1.2.162~171 波15钩子 ——
+      jamNow: () => (typeof jamT === 'undefined' ? 0 : jamT),
+      foeMinesNow: () => (typeof foeMines === 'undefined' ? [] : foeMines.map(m => ({ x: Math.round(m.x), y: Math.round(m.y) }))),
+      venomTrailNow: () => (typeof venomTrail === 'undefined' ? [] : venomTrail.map(v => ({ x: Math.round(v.x), y: Math.round(v.y), t: Math.round(v.t) }))),
       enemyBulletsNow: () => bullets.filter(b => !b.dead && !(b.owner && b.owner.isPlayer)).length,
       powerupsNow: () => powerups.filter(p => !p.dead).map(p => ({ x: Math.round(p.x), y: Math.round(p.y), type: p.type })),
       spawnPowerupAt: (x, y, type) => { powerups.push({ x, y, type: type || 'rapid', dead: false, life: 600, bob: 0 }); return powerups.length; },
       blackholesNow: () => (typeof blackholes === 'undefined' ? [] : blackholes.map(h => ({ x: Math.round(h.x), y: Math.round(h.y), t: Math.round(h.t) }))),
       recallNow: () => (typeof recallT === 'undefined' ? null : { t: recallT, pos: recallPos }),
-      bulletsInfoNow: () => bullets.map(b => ({ x: Math.round(b.x), y: Math.round(b.y), dir: b.dir, size: b.size, own: !!(b.owner && b.owner.isPlayer), dead: !!b.dead })),
+      bulletsInfoNow: () => bullets.map(b => ({ x: Math.round(b.x), y: Math.round(b.y), dir: b.dir, size: b.size, own: !!(b.owner && b.owner.isPlayer), dead: !!b.dead, rocket: !!b.rocket })),
       pauseStatNow: () => { const e = $('pauseStatLine'); return e ? e.textContent : null; },
       endNow: (w) => { endGame(!!w); return gameOver; },
       spawnBlockNow: () => spawnBlockT,

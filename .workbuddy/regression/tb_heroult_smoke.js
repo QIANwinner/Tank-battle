@@ -31102,6 +31102,421 @@ async function main() {
     return ok === true || 'apply failed';
   });
 
+  // U9827–U9829: 刺客
+  await senseCheck("U9827 刺客类型已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'assassin');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const ok = !!(e && e.type === 'assassin' && e.maxHp >= 2);
+    T.quit();
+    return ok === true || JSON.stringify({ t: e && e.type, hp: e && e.maxHp });
+  });
+  await senseCheck("U9828 刺客闪现近身", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.spawnFoeNow(p.px, 70, 'assassin');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no assassin'; }
+    const d0 = Math.hypot(e.x + e.size / 2 - p.px, e.y + e.size / 2 - p.py);
+    e.blinkT = 299;
+    for (let i = 0; i < 15; i++) await Z(80);
+    const d1 = Math.hypot(e.x + e.size / 2 - p.px, e.y + e.size / 2 - p.py);
+    T.quit();
+    return (d1 < d0 * 0.6) || JSON.stringify({ d0: Math.round(d0), d1: Math.round(d1) });
+  });
+  await senseCheck("U9829 刺客闪现计时复位", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'assassin');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no assassin'; }
+    e.blinkT = 299;
+    for (let i = 0; i < 10; i++) await Z(80);
+    const bt = e.blinkT || 0;
+    T.quit();
+    return (bt < 200) || JSON.stringify({ bt });
+  });
+
+  // U9830–U9832: 火箭兵
+  await senseCheck("U9830 火箭兵类型已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'rocket');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const ok = !!(e && e.type === 'rocket' && e.maxHp >= 2);
+    T.quit();
+    return ok === true || JSON.stringify({ t: e && e.type });
+  });
+  await senseCheck("U9831 火箭兵发射追踪弹", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'rocket');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no rocket'; }
+    e.rocketT = 239;
+    let seen = 0;
+    for (let i = 0; i < 20; i++) {
+      await Z(80);
+      seen = T.bulletsInfoNow().filter(b => b.rocket && !b.dead).length;
+      if (seen > 0) break;
+    }
+    T.quit();
+    return (seen > 0) || 'no rocket bullet';
+  });
+  await senseCheck("U9832 追踪弹计时循环", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'rocket');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no rocket'; }
+    e.rocketT = 239;
+    for (let i = 0; i < 12; i++) await Z(80);
+    const rt = e.rocketT || 0;
+    T.quit();
+    return (rt < 240) || JSON.stringify({ rt });
+  });
+
+  // U9833–U9835: 巨人
+  await senseCheck("U9833 巨人六血登记", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'giant');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const ok = !!(e && e.type === 'giant' && e.maxHp >= 6);
+    T.quit();
+    return ok === true || JSON.stringify({ hp: e && e.maxHp });
+  });
+  await senseCheck("U9834 巨人体型1.5倍", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'giant');
+    T.spawnFoeNow(400, 100, 'normal');
+    const es = T.r18enNow().filter(x => !x.dead);
+    const g = es.find(x => x.type === 'giant'), n = es.find(x => x.type === 'normal');
+    const ok = !!(g && n && g.size >= n.size + 8);
+    T.quit();
+    return ok === true || JSON.stringify({ gs: g && g.size, ns: n && n.size });
+  });
+  await senseCheck("U9835 巨人移速减半", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'giant');
+    T.spawnFoeNow(400, 100, 'normal');
+    const es = T.r18enNow().filter(x => !x.dead);
+    const g = es.find(x => x.type === 'giant'), n = es.find(x => x.type === 'normal');
+    const ok = !!(g && n && g.speed < n.speed * 0.75);
+    T.quit();
+    return ok === true || JSON.stringify({ gs: g && g.speed, ns: n && n.speed });
+  });
+
+  // U9836–U9838: 布雷者
+  await senseCheck("U9836 布雷者类型已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'miner');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const ok = !!(e && e.type === 'miner');
+    T.quit();
+    return ok === true || JSON.stringify({ t: e && e.type });
+  });
+  await senseCheck("U9837 布雷者埋设地雷", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'miner');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no miner'; }
+    e.mineT = 239;
+    let n = 0;
+    for (let i = 0; i < 15; i++) {
+      await Z(80);
+      n = T.foeMinesNow().length;
+      if (n > 0) break;
+    }
+    T.quit();
+    return (n > 0) || 'no mine';
+  });
+  await senseCheck("U9838 敌雷触发后消散", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.spawnFoeNow(p.px - 14, p.py - 14, 'miner');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no miner'; }
+    e.mineT = 239;
+    let n0 = 0;
+    for (let i = 0; i < 15; i++) {
+      await Z(80);
+      n0 = T.foeMinesNow().length;
+      if (n0 > 0) break;
+    }
+    if (n0 === 0) { T.quit(); return 'mine never dropped'; }
+    T.invul(0);
+    let n1 = n0;
+    for (let i = 0; i < 30; i++) {
+      await Z(100);
+      n1 = T.foeMinesNow().length;
+      if (n1 < n0) break;
+    }
+    T.quit();
+    return (n1 < n0) || JSON.stringify({ n0, n1 });
+  });
+
+  // U9839–U9841: 干扰者
+  await senseCheck("U9839 干扰者类型已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'jammer');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const ok = !!(e && e.type === 'jammer');
+    T.quit();
+    return ok === true || JSON.stringify({ t: e && e.type });
+  });
+  await senseCheck("U9840 干扰光环激活", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.spawnFoeNow(p.px - 60, p.py, 'jammer');
+    let j = 0;
+    for (let i = 0; i < 12; i++) {
+      await Z(80);
+      j = T.jamNow();
+      if (j > 0) break;
+    }
+    T.quit();
+    return (j > 0) || JSON.stringify({ j });
+  });
+await senseCheck("U9841 干扰下射速减半", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.spawnFoeNow(p.px - 30, p.py, 'jammer');
+    for (let i = 0; i < 10; i++) { await Z(80); if (T.jamNow() > 0) break; }
+    if (T.jamNow() <= 0) { T.quit(); return 'jam never active'; }
+    T.fireOnce();
+    const cd0 = T.r21cdNow();
+    await Z(300);
+    const cd1 = T.r21cdNow();
+    T.quit();
+    return (cd0 > 5 && cd1 > 0) || JSON.stringify({ cd0, cd1 });
+  });
+
+  // U9842–U9844: 镜面兵
+  await senseCheck("U9842 镜面兵类型已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'mirror');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const ok = !!(e && e.type === 'mirror' && e.maxHp >= 3);
+    T.quit();
+    return ok === true || JSON.stringify({ t: e && e.type, hp: e && e.maxHp });
+  });
+  await senseCheck("U9843 镜面反弹产生敌弹", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.spawnFoeNow(p.px - 14, p.py - 120, 'mirror');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no mirror'; }
+    e.freezeT = 9999;
+    let reflected = 0;
+    for (let s = 0; s < 10 && reflected === 0; s++) {
+      T.fireOnce();
+      for (let i = 0; i < 8; i++) {
+        await Z(90);
+        reflected = T.bulletsInfoNow().filter(b => !b.own && !b.dead).length;
+        if (reflected > 0) break;
+      }
+    }
+    T.quit();
+    return (reflected > 0) || 'no reflected bullet in 10 shots';
+  });
+  await senseCheck("U9844 反弹弹方向反转", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.spawnFoeNow(p.px - 14, p.py - 120, 'mirror');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no mirror'; }
+    e.freezeT = 9999;
+    let rb = null;
+    for (let s = 0; s < 10 && !rb; s++) {
+      T.fireOnce();
+      for (let i = 0; i < 8; i++) {
+        await Z(90);
+        const eb = T.bulletsInfoNow().filter(b => !b.own && !b.dead);
+        if (eb.length > 0) { rb = eb[0]; break; }
+      }
+    }
+    T.quit();
+    return (rb && rb.dir >= 3 && rb.dir <= 5) || JSON.stringify({ rb });
+  });
+
+  // U9845–U9847: 召唤者
+  await senseCheck("U9845 召唤者类型已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'summoner');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const ok = !!(e && e.type === 'summoner');
+    T.quit();
+    return ok === true || JSON.stringify({ t: e && e.type });
+  });
+  await senseCheck("U9846 召唤者召唤小兵", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'summoner');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no summoner'; }
+    e.sumT = 359;
+    let n = 0;
+    for (let i = 0; i < 18; i++) {
+      await Z(90);
+      n = T.r18enNow().filter(x => !x.dead && x.type === 'normal').length;
+      if (n > 0) break;
+    }
+    T.quit();
+    return (n > 0) || 'no minion summoned';
+  });
+  await senseCheck("U9847 召唤上限3名", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'summoner');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no summoner'; }
+    e.sumN = 3; e.sumT = 359;
+    const n0 = T.r18enNow().filter(x => !x.dead).length;
+    for (let i = 0; i < 15; i++) await Z(90);
+    const n1 = T.r18enNow().filter(x => !x.dead).length;
+    T.quit();
+    return (n1 === n0) || JSON.stringify({ n0, n1 });
+  });
+
+  // U9848–U9850: 疾风兵
+  await senseCheck("U9848 疾风兵类型已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'swift');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const ok = !!(e && e.type === 'swift');
+    T.quit();
+    return ok === true || JSON.stringify({ t: e && e.type });
+  });
+  await senseCheck("U9849 疾风兵极速", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'swift');
+    T.spawnFoeNow(400, 100, 'normal');
+    const es = T.r18enNow().filter(x => !x.dead);
+    const s = es.find(x => x.type === 'swift'), n = es.find(x => x.type === 'normal');
+    const ok = !!(s && n && s.speed > n.speed * 1.6);
+    T.quit();
+    return ok === true || JSON.stringify({ ss: s && s.speed, ns: n && n.speed });
+  });
+  await senseCheck("U9850 疾风蛇形变向", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'swift');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no swift'; }
+    e.zagT = 44;
+    const d0 = e.dir;
+    let changed = false;
+    for (let i = 0; i < 15; i++) {
+      await Z(90);
+      if (e.dir !== d0) { changed = true; break; }
+    }
+    T.quit();
+    return changed === true || JSON.stringify({ d0, d: e.dir });
+  });
+
+  // U9851–U9853: 毒蛛
+  await senseCheck("U9851 毒蛛类型已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'venom');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const ok = !!(e && e.type === 'venom');
+    T.quit();
+    return ok === true || JSON.stringify({ t: e && e.type });
+  });
+  await senseCheck("U9852 毒蛛留下毒迹", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'venom');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no venom'; }
+    e.venomT = 29;
+    let n = 0;
+    for (let i = 0; i < 15; i++) {
+      await Z(80);
+      n = T.venomTrailNow().length;
+      if (n > 0) break;
+    }
+    T.quit();
+    return (n > 0) || 'no trail';
+  });
+  await senseCheck("U9853 毒迹3秒消散", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'venom');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no venom'; }
+    e.venomT = 29;
+    for (let i = 0; i < 15; i++) { await Z(80); if (T.venomTrailNow().length > 0) break; }
+    e.freezeT = 99999;
+    let gone = false;
+    for (let i = 0; i < 60; i++) {
+      await Z(120);
+      if (T.venomTrailNow().length === 0) { gone = true; break; }
+    }
+    T.quit();
+    return gone === true || 'trail never decayed';
+  });
+
+  // U9854–U9856: 分裂虫
+  await senseCheck("U9854 分裂虫死亡裂变", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'splitbug');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no splitbug'; }
+    e.hp = 1; e.freezeT = 99999;
+    T.spawnBulletNow(e.x + 8, e.y + 8, 2, false);
+    let n = 0;
+    for (let i = 0; i < 20; i++) {
+      await Z(90);
+      n = T.r18enNow().filter(x => !x.dead && x.type === 'splitling').length;
+      if (n > 0) break;
+    }
+    T.quit();
+    return (n >= 1) || 'no splitling';
+  });
+  await senseCheck("U9855 裂变补充敌数", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const t0 = T.enemiesTotalNow();
+    T.spawnFoeNow(300, 100, 'splitbug');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no splitbug'; }
+    e.hp = 1; e.freezeT = 99999;
+    T.spawnBulletNow(e.x + 8, e.y + 8, 2, false);
+    let dt = 0;
+    for (let i = 0; i < 20; i++) {
+      await Z(90);
+      dt = T.enemiesTotalNow() - t0;
+      if (dt >= 2) break;
+    }
+    T.quit();
+    return (dt >= 2) || JSON.stringify({ t0, dt });
+  });
+  await senseCheck("U9856 幼虫小型高速", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'splitbug');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no splitbug'; }
+    e.hp = 1; e.freezeT = 99999;
+    T.spawnBulletNow(e.x + 8, e.y + 8, 2, false);
+    let sl = null;
+    for (let i = 0; i < 20; i++) {
+      await Z(90);
+      sl = T.r18enNow().find(x => !x.dead && x.type === 'splitling');
+      if (sl) break;
+    }
+    T.quit();
+    return (sl && sl.size < e.size && sl.speed > 1.2) || JSON.stringify({ sl: sl && { size: sl.size, speed: sl.speed }, es: e.size });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
