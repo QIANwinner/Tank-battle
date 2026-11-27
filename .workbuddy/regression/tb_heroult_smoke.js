@@ -30951,6 +30951,40 @@ async function main() {
     return ok === true || 'apply failed';
   });
 
+  // U9812–U9814: 盾墙
+  await senseCheck("U9812 盾墙格挡正面敌弹", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap();
+    for (let i = 0; i < 80 && T.spawnInvNow() > 0; i++) await Z(100);
+    T.applyPowerupNow('barrier');
+    const l0 = T.livesNow();
+    const p = T.r18posNow();
+    T.spawnEBulletAt(p.px - 2, p.py - 30, 4);
+    for (let i = 0; i < 30; i++) { await Z(70); if (T.livesNow() < l0) break; }
+    const l1 = T.livesNow();
+    T.quit();
+    return l1 >= l0 || JSON.stringify({ l0, l1 });
+  });
+  await senseCheck("U9813 盾墙格挡飘字", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap();
+    for (let i = 0; i < 80 && T.spawnInvNow() > 0; i++) await Z(100);
+    T.applyPowerupNow('barrier');
+    const p = T.r18posNow();
+    T.spawnEBulletAt(p.px - 2, p.py - 30, 4);
+    let seen = false;
+    for (let i = 0; i < 25 && !seen; i++) { await Z(70); seen = T.floatTextsNow().some(x => x.indexOf('盾墙') >= 0); }
+    T.quit();
+    return seen === true || 'no barrier text';
+  });
+  await senseCheck("U9814 盾墙道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('barrier');
+    const v = T.fxValNow('barrier');
+    T.quit();
+    return (ok === true && v > 0) || JSON.stringify({ ok, v });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
