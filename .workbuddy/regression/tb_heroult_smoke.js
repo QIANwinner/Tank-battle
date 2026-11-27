@@ -27246,14 +27246,15 @@ async function main() {
   });
 
   // U9416–U9419: 敌人图鉴（面板开合 / 击杀跨局计数 / 未遭遇锁定 / panelOpen 拦截）
-  await senseCheck("U9416 图鉴面板打开渲染 8 行（7 兵种 + Boss）且未遭遇显示？？？", (T,$) => {
+  await senseCheck("U9416 图鉴面板打开渲染全部兵种行且未遭遇显示？？？", (T,$) => {
     T.dexResetNow();
     const shown = T.openDexNow();
     const rows = document.querySelectorAll('#dexBody .dexRow').length;
     const locked = document.querySelectorAll('#dexBody .dexLocked').length;
-    const bossRow = document.querySelectorAll('#dexBody .dexRow')[7];
+    const all = document.querySelectorAll('#dexBody .dexRow');
+    const bossRow = all[all.length - 1];   // —— v1.2.122 起敌种扩容,行数动态化,末行恒为 Boss ——
     T.closeDexNow();
-    return !!(shown && rows === 8 && locked === 8 && bossRow) || JSON.stringify({ shown, rows, locked });
+    return !!(shown && rows >= 8 && rows === locked && bossRow) || JSON.stringify({ shown, rows, locked });
   });
   await senseCheck("U9417 击毁敌人计入图鉴：击杀 normal 后 dex.kills.normal ≥1 并解锁行", async (T,$) => {
     const Z = ms => new Promise(r => setTimeout(r, ms));
@@ -29769,6 +29770,42 @@ async function main() {
     const c = T.chargeNow();
     T.quit();
     return c === 0 || JSON.stringify({ c });
+  });
+
+  // U9707–U9709: 幻影敌人
+  await senseCheck("U9707 幻影类型已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'phantom');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const ok = e && e.type === 'phantom' && e.hp >= 1;
+    T.quit();
+    return ok === true || JSON.stringify({ t: e && e.type });
+  });
+  await senseCheck("U9708 隐形时子弹穿透免疫", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'phantom');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9; e.cloakT = 200;
+    const hp0 = e.hp;
+    T.spawnBulletNow(e.x + e.size / 2 - 2, e.y + e.size + 6, 0, false);
+    for (let i = 0; i < 15; i++) await Z(50);
+    const hp1 = e.hp;
+    e.cloakT = 0;
+    T.spawnBulletNow(e.x + e.size / 2 - 2, e.y + e.size + 6, 0, false);
+    for (let i = 0; i < 15 && e.hp >= hp1; i++) await Z(50);
+    const hp2 = e.hp;
+    T.quit();
+    return (hp1 === hp0 && hp2 < hp1) || JSON.stringify({ hp0, hp1, hp2 });
+  });
+  await senseCheck("U9709 隐形循环计时推进", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'phantom');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.cloakT = 0;
+    for (let i = 0; i < 10 && !(e.cloakT > 0); i++) await Z(80);
+    const c = e.cloakT;
+    T.quit();
+    return c > 0 || JSON.stringify({ c });
   });
 
   chrome.kill(); killTree(chrome.pid);
