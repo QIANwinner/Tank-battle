@@ -30340,6 +30340,37 @@ async function main() {
     return over === true || JSON.stringify({ hp: T.baseHpNow(), alive: T.baseAliveNow() });
   });
 
+  // U9758–U9760: 强化专精
+  await senseCheck("U9758 三层强化触发专精飘字", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.chooseUpgrade('rapid'); await Z(150); T.chooseUpgrade('rapid'); await Z(150); T.chooseUpgrade('rapid');
+    await Z(300);
+    const seen = T.floatTextsNow().some(x => x.indexOf('专精') >= 0);
+    T.quit();
+    return seen === true || 'no mastery text';
+  });
+  await senseCheck("U9759 专精赏金入账", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.chooseUpgrade('rapid'); await Z(150); T.chooseUpgrade('rapid'); await Z(150);
+    const c0 = T.coins();
+    T.chooseUpgrade('rapid');
+    await Z(300);
+    const c1 = T.coins();
+    T.quit();
+    return c1 > c0 || JSON.stringify({ c0, c1 });
+  });
+  await senseCheck("U9760 两层强化不触发专精", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.chooseUpgrade('rapid'); await Z(150); T.chooseUpgrade('rapid');
+    await Z(300);
+    const seen = T.floatTextsNow().some(x => x.indexOf('专精') >= 0);
+    T.quit();
+    return seen === false || 'mastery fired at 2';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
