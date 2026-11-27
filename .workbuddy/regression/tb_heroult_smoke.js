@@ -30804,6 +30804,34 @@ async function main() {
     return p1.py < p.py - 5 || JSON.stringify({ y0: p.py, y1: p1.py });
   });
 
+  // U9797–U9799: 电磁脉冲
+  await senseCheck("U9797 电磁脉冲清除敌弹", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'normal');
+    T.spawnEBulletAt(300, 200, 4);
+    T.spawnEBulletAt(320, 200, 4);
+    const before = T.enemyBulletsNow();
+    T.applyPowerupNow('emp');
+    const after = T.enemyBulletsNow();
+    T.quit();
+    return (before >= 1 && after === 0) || JSON.stringify({ before, after });
+  });
+  await senseCheck("U9798 电磁脉冲眩晕敌人", async (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'normal');
+    T.applyPowerupNow('emp');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const fz = e ? (e.freezeT || 0) : 0;
+    T.quit();
+    return fz >= 100 || JSON.stringify({ fz });
+  });
+  await senseCheck("U9799 电磁脉冲道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('emp');
+    T.quit();
+    return ok === true || 'apply failed';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
