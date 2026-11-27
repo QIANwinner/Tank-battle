@@ -30832,6 +30832,34 @@ async function main() {
     return ok === true || 'apply failed';
   });
 
+  // U9800–U9802: 磁铁
+  await senseCheck("U9800 磁铁生效期间道具被吸向玩家", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.spawnPowerupAt(p.px + 100, p.py, 'rapid');
+    T.applyPowerupNow('magnet8');
+    const x0 = T.powerupsNow().length ? T.powerupsNow()[0].x : 0;
+    for (let i = 0; i < 20; i++) await Z(80);
+    const pu = T.powerupsNow();
+    const x1 = pu.length ? pu[0].x : p.px;
+    T.quit();
+    return (x1 < x0 || pu.length === 0) || JSON.stringify({ x0, x1, n: pu.length });
+  });
+  await senseCheck("U9801 磁铁计时器启动", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.applyPowerupNow('magnet8');
+    const v = T.fxValNow('magnet8');
+    T.quit();
+    return v > 0 || JSON.stringify({ v });
+  });
+  await senseCheck("U9802 磁铁道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('magnet8');
+    T.quit();
+    return ok === true || 'apply failed';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
