@@ -30985,6 +30985,39 @@ async function main() {
     return (ok === true && v > 0) || JSON.stringify({ ok, v });
   });
 
+  // U9815–U9817: 黑洞
+  await senseCheck("U9815 黑洞道具生成奇点", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.applyPowerupNow('blackhole');
+    const n = T.blackholesNow().length;
+    T.quit();
+    return n >= 1 || JSON.stringify({ n });
+  });
+  await senseCheck("U9816 黑洞拖拽近敌", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (e) e.freezeT = 1e9;
+    const p = T.r18posNow();
+    if (e) { e.x = p.px + 80; e.y = p.py; }
+    T.applyPowerupNow('blackhole');
+    const d0 = e ? Math.abs(e.x - p.px) : 0;
+    for (let i = 0; i < 25; i++) await Z(80);
+    const d1 = e ? Math.abs(e.x - p.px) : 999;
+    T.quit();
+    return (d1 < d0) || JSON.stringify({ d0, d1 });
+  });
+  await senseCheck("U9817 黑洞到时消散", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.applyPowerupNow('blackhole');
+    let n = 1;
+    for (let i = 0; i < 90 && n > 0; i++) { await Z(90); n = T.blackholesNow().length; }
+    T.quit();
+    return n === 0 || JSON.stringify({ n });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
