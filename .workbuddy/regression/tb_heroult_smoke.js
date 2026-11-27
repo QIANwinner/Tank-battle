@@ -31102,6 +31102,42 @@ async function main() {
     return ok === true || 'apply failed';
   });
 
+  // U9827–U9829: 刺客
+  await senseCheck("U9827 刺客类型已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'assassin');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const ok = !!(e && e.type === 'assassin' && e.maxHp >= 2);
+    T.quit();
+    return ok === true || JSON.stringify({ t: e && e.type, hp: e && e.maxHp });
+  });
+  await senseCheck("U9828 刺客闪现近身", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.spawnFoeNow(p.px, 70, 'assassin');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no assassin'; }
+    const d0 = Math.hypot(e.x + e.size / 2 - p.px, e.y + e.size / 2 - p.py);
+    e.blinkT = 299;
+    for (let i = 0; i < 15; i++) await Z(80);
+    const d1 = Math.hypot(e.x + e.size / 2 - p.px, e.y + e.size / 2 - p.py);
+    T.quit();
+    return (d1 < d0 * 0.6) || JSON.stringify({ d0: Math.round(d0), d1: Math.round(d1) });
+  });
+  await senseCheck("U9829 刺客闪现计时复位", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'assassin');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no assassin'; }
+    e.blinkT = 299;
+    for (let i = 0; i < 10; i++) await Z(80);
+    const bt = e.blinkT || 0;
+    T.quit();
+    return (bt < 200) || JSON.stringify({ bt });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
