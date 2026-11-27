@@ -30436,6 +30436,374 @@ async function main() {
     return v <= 0 || JSON.stringify({ v });
   });
 
+  // U9767–U9769: 冰面
+  await senseCheck("U9767 冰面地形提速倍率", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 7);
+    T.renderOnce();
+    const m = T.tileSpeedMulNow();
+    T.quit();
+    return m === 1.45 || JSON.stringify({ m });
+  });
+  await senseCheck("U9768 非冰面倍率为1", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const m = T.tileSpeedMulNow();
+    T.quit();
+    return m === 1 || JSON.stringify({ m });
+  });
+  await senseCheck("U9769 冰面上位移更快", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    const run = async (ice) => {
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+      const p0 = T.r18posNow();
+      if (ice) { for (let gx = 0; gx < 26; gx++) for (let gy = 0; gy < 26; gy++) T.setTile(gx, gy, 7); T.renderOnce(); }
+      T.keySet('w', true);
+      await Z(400);
+      T.keySet('w', false);
+      const p1 = T.r18posNow();
+      T.quit();
+      return p0.py - p1.py;
+    };
+    const d0 = await run(false);
+    const d1 = await run(true);
+    return (d0 > 5 && d1 > d0 * 1.2) || JSON.stringify({ d0, d1 });
+  });
+
+  // U9770–U9772: 流沙
+  await senseCheck("U9770 流沙地形减速倍率", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 8);
+    T.renderOnce();
+    const m = T.tileSpeedMulNow();
+    T.quit();
+    return m === 0.5 || JSON.stringify({ m });
+  });
+  await senseCheck("U9771 流沙上位移减半", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    const run = async (sand) => {
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+      const p0 = T.r18posNow();
+      if (sand) { for (let gx = 0; gx < 26; gx++) for (let gy = 0; gy < 26; gy++) T.setTile(gx, gy, 8); T.renderOnce(); }
+      T.keySet('w', true);
+      await Z(400);
+      T.keySet('w', false);
+      const p1 = T.r18posNow();
+      T.quit();
+      return p0.py - p1.py;
+    };
+    const d0 = await run(false);
+    const d1 = await run(true);
+    return (d0 > 5 && d1 < d0 * 0.75) || JSON.stringify({ d0, d1 });
+  });
+  await senseCheck("U9772 流沙判定按中心格", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const v = T.tileUnderNow();
+    T.quit();
+    return v === 0 || JSON.stringify({ v });
+  });
+
+  // U9773–U9775: 加速带
+  await senseCheck("U9773 加速带提速倍率", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 9);
+    T.renderOnce();
+    const m = T.tileSpeedMulNow();
+    T.quit();
+    return m === 1.7 || JSON.stringify({ m });
+  });
+  await senseCheck("U9774 加速带上位移更快", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    const run = async (dash) => {
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+      const p0 = T.r18posNow();
+      if (dash) { for (let gx = 0; gx < 26; gx++) for (let gy = 0; gy < 26; gy++) T.setTile(gx, gy, 9); T.renderOnce(); }
+      T.keySet('w', true);
+      await Z(400);
+      T.keySet('w', false);
+      const p1 = T.r18posNow();
+      T.quit();
+      return p0.py - p1.py;
+    };
+    const d0 = await run(false);
+    const d1 = await run(true);
+    return (d0 > 5 && d1 > d0 * 1.3) || JSON.stringify({ d0, d1 });
+  });
+  await senseCheck("U9775 冰沙加速倍率互不串扰", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 8);
+    T.renderOnce();
+    const mS = T.tileSpeedMulNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 9);
+    T.renderOnce();
+    const mD = T.tileSpeedMulNow();
+    T.quit();
+    return (mS === 0.5 && mD === 1.7) || JSON.stringify({ mS, mD });
+  });
+
+  // U9776–U9778: 传送带
+  await senseCheck("U9776 传送带上玩家被右推", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p0 = T.r18posNow();
+    for (let gx = 0; gx < 26; gx++) for (let gy = 0; gy < 26; gy++) T.setTile(gx, gy, 10);
+    T.renderOnce();
+    await Z(500);
+    const p1 = T.r18posNow();
+    T.quit();
+    return p1.px > p0.px + 5 || JSON.stringify({ x0: p0.px, x1: p1.px });
+  });
+  await senseCheck("U9777 非传送带不推送", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p0 = T.r18posNow();
+    await Z(400);
+    const p1 = T.r18posNow();
+    T.quit();
+    return Math.abs(p1.px - p0.px) < 3 || JSON.stringify({ x0: p0.px, x1: p1.px });
+  });
+  await senseCheck("U9778 敌人站传送带也被右推", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(200, 300, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (e) e.freezeT = 1e9;
+    for (let gx = 0; gx < 26; gx++) for (let gy = 0; gy < 26; gy++) T.setTile(gx, gy, 10);
+    T.renderOnce();
+    const x0 = e ? e.x : 0;
+    await Z(500);
+    const x1 = e ? e.x : 0;
+    T.quit();
+    return x1 > x0 + 3 || JSON.stringify({ x0, x1 });
+  });
+
+  // U9779–U9781: 地刺
+  await senseCheck("U9779 敌人站地刺持续受伤", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'armored');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (e) e.freezeT = 1e9;
+    const hp0 = e ? e.hp : 0;
+    if (e) T.setTile(Math.floor((e.x + e.size / 2) / 24), Math.floor((e.y + e.size / 2) / 24), 11);
+    T.renderOnce();
+    for (let i = 0; i < 50; i++) { await Z(80); if (!e || e.dead || e.hp < hp0) break; }
+    const hurt = !e || e.dead === true || e.hp < hp0;
+    T.quit();
+    return hurt === true || JSON.stringify({ hp0, hp: e && e.hp });
+  });
+  await senseCheck("U9780 玩家站地刺只警告不阵亡", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap();
+    for (let i = 0; i < 40 && T.spawnInvNow() > 0; i++) await Z(80);
+    const p = T.r18posNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 11);
+    T.renderOnce();
+    const l0 = T.livesNow();
+    await Z(1500);
+    const l1 = T.livesNow();
+    T.quit();
+    return l1 >= l0 || JSON.stringify({ l0, l1 });
+  });
+  await senseCheck("U9781 地刺警告飘字出现", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 11);
+    T.renderOnce();
+    let seen = false;
+    for (let i = 0; i < 25 && !seen; i++) { await Z(90); seen = T.floatTextsNow().some(x => x.indexOf('地刺') >= 0); }
+    T.quit();
+    return seen === true || 'no spike warn';
+  });
+
+  // U9782–U9784: 回血泉
+  await senseCheck("U9782 站上回血泉护甲充能", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 12);
+    T.renderOnce();
+    let arm = 0;
+    for (let i = 0; i < 60 && arm < 1; i++) { await Z(90); arm = T.armorNow(); }
+    T.quit();
+    return arm >= 1 || JSON.stringify({ arm });
+  });
+  await senseCheck("U9783 离开回血泉不充能", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    await Z(1200);
+    const arm = T.armorNow();
+    T.quit();
+    return arm === 0 || JSON.stringify({ arm });
+  });
+  await senseCheck("U9784 充能飘字出现", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 12);
+    T.renderOnce();
+    let seen = false;
+    for (let i = 0; i < 60 && !seen; i++) { await Z(90); seen = T.floatTextsNow().some(x => x.indexOf('护甲凝聚') >= 0); }
+    T.quit();
+    return seen === true || 'no heal text';
+  });
+
+  // U9785–U9787: 充能站
+  await senseCheck("U9785 站上充能站蓄力加速", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 13);
+    T.renderOnce();
+    T.chargeSetNow(0);
+    T.keySet('j', true);
+    await Z(500);
+    T.keySet('j', false);
+    const c = T.chargeNow();
+    T.quit();
+    return c >= 20 || JSON.stringify({ c });
+  });
+  await senseCheck("U9786 非充能站蓄力常速", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.chargeSetNow(0);
+    T.keySet('j', true);
+    await Z(500);
+    T.keySet('j', false);
+    const c = T.chargeNow();
+    T.quit();
+    return (c > 0 && c < 55) || JSON.stringify({ c });   // 常速500ms≈30帧,加速态90可区分
+  });
+  await senseCheck("U9787 充能站地形识别正确", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 13);
+    T.renderOnce();
+    const v = T.tileUnderNow();
+    T.quit();
+    return v === 13 || JSON.stringify({ v });
+  });
+
+  // U9788–U9790: 弹跳弹墙
+  await senseCheck("U9788 子弹命中弹墙反射", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.setTile(13, 8, 14);
+    T.renderOnce();
+    T.spawnBulletNow(13 * 24 + 10, 8 * 24 + 40, 0, false);
+    let d = -1;
+    for (let i = 0; i < 25 && d !== 4; i++) { await Z(40); const bs = T.bulletsInfoNow().filter(b => !b.dead); if (bs.length) d = bs[0].dir; }
+    T.quit();
+    return d === 4 || JSON.stringify({ d });
+  });
+  await senseCheck("U9789 弹墙不销毁子弹", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.setTile(13, 8, 14);
+    T.renderOnce();
+    T.spawnBulletNow(13 * 24 + 10, 8 * 24 + 40, 0, false);
+    await Z(300);
+    const n = T.bulletsInfoNow().filter(b => !b.dead).length;
+    T.quit();
+    return n >= 1 || JSON.stringify({ n });
+  });
+  await senseCheck("U9790 弹墙阻挡坦克通行", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    const gx = Math.floor(p.px / 24), gy = Math.floor((p.py - 26) / 24);
+    T.setTile(gx, gy, 14);
+    T.renderOnce();
+    T.keySet('w', true);
+    await Z(500);
+    T.keySet('w', false);
+    const p1 = T.r18posNow();
+    T.quit();
+    return p1.py > p.py - 26 || JSON.stringify({ y0: p.py, y1: p1.py });
+  });
+
+  // U9791–U9793: 毒池
+  await senseCheck("U9791 敌人站毒池受伤", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'armored');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (e) e.freezeT = 1e9;
+    const hp0 = e ? e.hp : 0;
+    if (e) T.setTile(Math.floor((e.x + e.size / 2) / 24), Math.floor((e.y + e.size / 2) / 24), 15);
+    T.renderOnce();
+    for (let i = 0; i < 50; i++) { await Z(80); if (!e || e.dead || e.hp < hp0) break; }
+    const hurt = !e || e.dead === true || e.hp < hp0;
+    T.quit();
+    return hurt === true || JSON.stringify({ hp0, hp: e && e.hp });
+  });
+  await senseCheck("U9792 玩家站毒池减速不受伤", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap();
+    for (let i = 0; i < 40 && T.spawnInvNow() > 0; i++) await Z(80);
+    const p = T.r18posNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 15);
+    T.renderOnce();
+    const m = T.tileSpeedMulNow();
+    const l0 = T.livesNow();
+    await Z(800);
+    const l1 = T.livesNow();
+    T.quit();
+    return (m === 0.6 && l1 >= l0) || JSON.stringify({ m, l0, l1 });
+  });
+  await senseCheck("U9793 毒池地形识别正确", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 15);
+    T.renderOnce();
+    const v = T.tileUnderNow();
+    T.quit();
+    return v === 15 || JSON.stringify({ v });
+  });
+
+  // U9794–U9796: 定时门
+  await senseCheck("U9794 定时门周期开闭", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const g0 = T.gateOpenNow();
+    let flipped = false;
+    for (let i = 0; i < 80 && !flipped; i++) { await Z(90); flipped = T.gateOpenNow() !== g0; }
+    T.quit();
+    return flipped === true || 'gate never flipped';
+  });
+  await senseCheck("U9795 关门阻挡玩家通行", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    const gx = Math.floor(p.px / 24), gy = Math.floor((p.py - 26) / 24);
+    T.setTile(gx, gy, 16);
+    T.gateSetNow(false);
+    T.renderOnce();
+    T.keySet('w', true);
+    await Z(500);
+    T.keySet('w', false);
+    const p1 = T.r18posNow();
+    T.quit();
+    return p1.py > p.py - 26 || JSON.stringify({ y0: p.py, y1: p1.py });
+  });
+  await senseCheck("U9796 开门恢复通行", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.gateSetNow(true);
+    T.renderOnce();
+    T.keySet('w', true);
+    await Z(400);
+    T.keySet('w', false);
+    const p1 = T.r18posNow();
+    T.quit();
+    return p1.py < p.py - 5 || JSON.stringify({ y0: p.py, y1: p1.py });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

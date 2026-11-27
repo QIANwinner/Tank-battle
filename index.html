@@ -1878,7 +1878,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.141</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.151</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2003,6 +2003,16 @@
   const TILE_TREE  = 4;            // 草丛（遮挡视觉）
   const TILE_BARREL = 5;           // 可爆炸油桶（子弹命中即引爆，可连锁）
   const TILE_ELEC   = 6;           // 电网（可穿越,敌人站立受电击）—— v1.2.119
+  const TILE_ICE    = 7;           // 冰面（提速×1.45）—— v1.2.142
+  const TILE_SAND   = 8;           // 流沙（减速×0.5）—— v1.2.143
+  const TILE_DASH   = 9;           // 加速带（提速×1.7）—— v1.2.144
+  const TILE_BELT   = 10;          // 传送带（向右推送）—— v1.2.145
+  const TILE_SPIKE  = 11;          // 地刺（敌人站立受伤）—— v1.2.146
+  const TILE_HEAL   = 12;          // 回血泉（护甲充能）—— v1.2.147
+  const TILE_CHARGE = 13;          // 充能站（蓄力×3）—— v1.2.148
+  const TILE_BUMPER = 14;          // 弹跳弹墙（子弹反射）—— v1.2.149
+  const TILE_ACID   = 15;          // 毒池（敌伤+玩家减速）—— v1.2.150
+  const TILE_GATE   = 16;          // 定时门（周期开闭）—— v1.2.151
   const TILE_PORTAL = 6;           // 传送门（成对出现，进入即传送）
 
   // 八方向（0=上，顺时针每 45° 一档）：斜向分量为 ±√2/2，合速度与正向一致
@@ -2930,6 +2940,7 @@
   let critCount = 0, critForce = false, playerArmor = 0, chargeT = 0, chargeFired = 0;   // —— v1.2.112~121 波10状态 ——
   let poisonClouds = [], chillT = 0, poisonT = 0, nightLevel = false, hordeT = 0, affixForce = null;   // —— v1.2.122~131 波11状态 ——
   let timebombs = [], sentries = [], stormT = 0, stormWarnT = 0, fogLevel = false, goldLevel = false, baseHp = 2;   // —— v1.2.132~141 波12状态 ——
+  let gateOpen = true, gateT = 0;   // —— v1.2.151 定时门 ——
   let killFeed = [];   // —— v1.2.113 击杀播报 ——
   try {
     const c = healedJson(LS_CAREER, {});   // —— v1.2.77 存档自愈加载 ——
@@ -3693,7 +3704,7 @@
     return ((Date.now() ^ (randMapCounter++ * 0x9E3779B9)) >>> 0);
   }
   // 坦克可走判定：空地/树可走；砖/钢/水/油桶/传送门不可走（子弹可越水，坦克不行）
-  function tileWalkable(t) { return t === 0 || t === TILE_TREE; }
+  function tileWalkable(t) { return t === 0 || t === TILE_TREE || (t >= TILE_ICE && t <= TILE_GATE); }   // —— v1.2.142 波13地形均可通行 ——
   // 从 (sx,sy) 洪泛：返回可达标记 Uint8Array + 可达可走格数（4 邻接 BFS）
   function bfsReachable(sx, sy) {
     const seen = new Uint8Array(ROWS * COLS), q = [[sx, sy]];
@@ -3733,6 +3744,16 @@
           else if (r < 0.30) map[y][x] = TILE_WATER;
           else if (r < 0.38) map[y][x] = TILE_TREE;
           else if (r < 0.40) map[y][x] = TILE_ELEC;   // —— v1.2.119 电网 ——
+          else if (r < 0.42) map[y][x] = TILE_ICE;   // —— v1.2.142 冰面 ——
+          else if (r < 0.44) map[y][x] = TILE_SAND;   // —— v1.2.143 流沙 ——
+          else if (r < 0.455) map[y][x] = TILE_DASH;   // —— v1.2.144 加速带 ——
+          else if (r < 0.465) map[y][x] = TILE_BELT;   // —— v1.2.145 传送带 ——
+          else if (r < 0.475) map[y][x] = TILE_SPIKE;   // —— v1.2.146 地刺 ——
+          else if (r < 0.483) map[y][x] = TILE_HEAL;   // —— v1.2.147 回血泉 ——
+          else if (r < 0.491) map[y][x] = TILE_CHARGE;   // —— v1.2.148 充能站 ——
+          else if (r < 0.498) map[y][x] = TILE_BUMPER;   // —— v1.2.149 弹跳弹墙 ——
+          else if (r < 0.506) map[y][x] = TILE_ACID;   // —— v1.2.150 毒池 ——
+          else if (r < 0.512) map[y][x] = TILE_GATE;   // —— v1.2.151 定时门 ——
         }
       // 关键枢纽清障：基地护墙外圈 / 玩家出生区 / 三个敌人出生带（护墙本身由 decorateMap 后画，不受影响）
       clearHub(BASE.x, BASE.y, 2);
@@ -3775,10 +3796,12 @@
         if (!inside(x, y)) return true;
         const t = map[y][x];
         if (isBullet) {
-          if (t === TILE_STEEL || t === TILE_BRICK || t === TILE_BARREL) return true;
+          if (t === TILE_STEEL || t === TILE_BRICK || t === TILE_BARREL || t === TILE_BUMPER) return true;   // —— v1.2.149 弹跳弹墙 ——
+          if (t === TILE_GATE && !gateOpen) return true;   // —— v1.2.151 定时门(子弹) ——
           if (t === TILE_WATER) return false; // 子弹可越过水
         } else {
-          if (t === TILE_BRICK || t === TILE_STEEL || t === TILE_WATER || t === TILE_BARREL) return true;
+          if (t === TILE_BRICK || t === TILE_STEEL || t === TILE_WATER || t === TILE_BARREL || t === TILE_BUMPER) return true;   // —— v1.2.149 弹跳弹墙 ——
+          if (t === TILE_GATE && !gateOpen) return true;   // —— v1.2.151 定时门(坦克) ——
           if (x === BASE.x && y === BASE.y) return true;  // 基地格坦克不可驶入
         }
       }
@@ -4452,12 +4475,33 @@
   }
 
   // 按当前八方向移动：x/y 轴独立碰撞，斜向可沿墙滑动；返回是否成功移动
+  function tileSpeedMulEnt(ent) {   // —— v1.2.142 地形速度倍率(按中心格) ——
+    const gx = Math.floor((ent.x + ent.size / 2) / TILE), gy = Math.floor((ent.y + ent.size / 2) / TILE);
+    if (!inside(gx, gy)) return 1;
+    const tt = map[gy][gx];
+    if (tt === TILE_ICE) return 1.45;
+    if (tt === TILE_SAND) return 0.5;   // —— v1.2.143 ——
+    if (tt === TILE_DASH) return 1.7;   // —— v1.2.144 ——
+    if (tt === TILE_ACID) return 0.6;   // —— v1.2.150 毒池减速 ——
+    return 1;
+  }
+  function tileAtEnt(ent) {   // —— v1.2.142 中心格地形 ——
+    const gx = Math.floor((ent.x + ent.size / 2) / TILE), gy = Math.floor((ent.y + ent.size / 2) / TILE);
+    return inside(gx, gy) ? map[gy][gx] : 0;
+  }
+  function beltPushEnt(t, k) {   // —— v1.2.145 传送带向右推送 ——
+    if (tileAtEnt(t) !== TILE_BELT) return;
+    const bx = t.x + 0.9 * k;
+    if (!isBlocked(bx, t.y, t.size) && !tankHitsTank(bx, t.y, t.size, t)) t.x = bx;
+  }
   function moveTank(t, k) {
-    const nx = t.x + DX[t.dir] * t.speed * k;
-    const ny = t.y + DY[t.dir] * t.speed * k;
+    const spd142 = t.speed * tileSpeedMulEnt(t);   // —— v1.2.142 地形倍率 ——
+    const nx = t.x + DX[t.dir] * spd142 * k;
+    const ny = t.y + DY[t.dir] * spd142 * k;
     let moved = false;
     if (DX[t.dir] !== 0 && !isBlocked(nx, t.y, t.size) && !tankHitsTank(nx, t.y, t.size, t)) { t.x = nx; moved = true; }
     if (DY[t.dir] !== 0 && !isBlocked(t.x, ny, t.size) && !tankHitsTank(t.x, ny, t.size, t)) { t.y = ny; moved = true; }
+    beltPushEnt(t, k);   // —— v1.2.145 ——
     return moved;
   }
 
@@ -4542,6 +4586,13 @@
     { const gx = Math.floor((e.x + e.size / 2) / TILE), gy = Math.floor((e.y + e.size / 2) / TILE);   // —— v1.2.119 电网电击(先于冻结判定,冻住也挨电) ——
       if (inside(gx, gy) && map[gy][gx] === TILE_ELEC) { e.elecT = (e.elecT || 0) + k; if (e.elecT >= 50) { e.elecT = 0; runDmgAdd(1); e.hp -= 1; e.hitFlash = 4; spawnParticles(e.x + e.size / 2, e.y + e.size / 2, '#7df9ff', 5); if (e.hp <= 0) { e.dead = true; onEnemyKilled(e); return; } } }
       else e.elecT = 0; }
+    { const gx146 = Math.floor((e.x + e.size / 2) / TILE), gy146 = Math.floor((e.y + e.size / 2) / TILE);   // —— v1.2.146 地刺伤敌(先于冻结判定) ——
+      if (inside(gx146, gy146) && map[gy146][gx146] === TILE_SPIKE) { e.spikeT = (e.spikeT || 0) + k; if (e.spikeT >= 40) { e.spikeT = 0; e.hp -= 1; e.hitFlash = 4; spawnParticles(e.x + e.size / 2, e.y + e.size / 2, '#ff5f5f', 4); if (e.hp <= 0) { e.dead = true; onEnemyKilled(e); return; } } }
+      else e.spikeT = 0; }
+    { const gx150 = Math.floor((e.x + e.size / 2) / TILE), gy150 = Math.floor((e.y + e.size / 2) / TILE);   // —— v1.2.150 毒池伤敌 ——
+      if (inside(gx150, gy150) && map[gy150][gx150] === TILE_ACID) { e.acidT = (e.acidT || 0) + k; if (e.acidT >= 50) { e.acidT = 0; e.hp -= 1; e.hitFlash = 4; spawnParticles(e.x + e.size / 2, e.y + e.size / 2, '#8ce040', 4); if (e.hp <= 0) { e.dead = true; onEnemyKilled(e); return; } } }
+      else e.acidT = 0; }
+    beltPushEnt(e, k);   // —— v1.2.145 冻结敌人也随传送带移动 ——
     if (e.freezeT > 0) { e.freezeT -= k; if (e.freezeT <= 0) e.freezeT = 0; return; }  // 冰冻子弹：单兵冻结中不动不射
     if (e.isBoss) { updateBoss(e, k); return; }
     if (e.type === 'sniper')  { updateSniper(e, k); return; }    // 狙击：远处压制
@@ -4767,6 +4818,17 @@
 
       if (b.x < 0 || b.y < 0 || b.x + b.size > W || b.y + b.size > H) { b.dead = true; return; }
       if (isBlocked(b.x, b.y, b.size, true)) {
+        { let bumperHit149 = false;   // —— v1.2.149 弹跳弹墙反射(全子弹) ——
+          const bx0 = Math.floor(b.x / TILE), bx1 = Math.floor((b.x + b.size - 0.01) / TILE), by0 = Math.floor(b.y / TILE), by1 = Math.floor((b.y + b.size - 0.01) / TILE);
+          for (let yy = by0; yy <= by1 && !bumperHit149; yy++) for (let xx = bx0; xx <= bx1; xx++) if (inside(xx, yy) && map[yy][xx] === TILE_BUMPER) { bumperHit149 = true; break; }
+          if (bumperHit149) {
+            const ax149 = Math.abs(DX[b.dir]), ay149 = Math.abs(DY[b.dir]);
+            b.dir = ax149 === ay149 ? (b.dir + 4) % 8 : ax149 > ay149 ? (8 - b.dir) % 8 : (4 - b.dir + 8) % 8;
+            b.x += DX[b.dir] * 10; b.y += DY[b.dir] * 10;
+            spawnParticles(b.x, b.y, '#ffd166', 4); sfxHit();
+            continue;
+          }
+        }
         if (b.owner.isPlayer && fx.rico > 0 && !b.ricoUsed) {   // —— v1.2.118 钢墙弹射 ——
           let steelHit = false;
           { const x0 = Math.floor(b.x / TILE), x1 = Math.floor((b.x + b.size - 0.01) / TILE), y0 = Math.floor(b.y / TILE), y1 = Math.floor((b.y + b.size - 0.01) / TILE);
@@ -4928,7 +4990,7 @@
     if (mx !== 0 || my !== 0) {
       player.dir = dirFromVec(mx, my);
       // 斜向走 1/√2 速度，保证各方向合速度一致；疾速履带强化 +15%/层；永久加成移速 +5%/级
-      const spd = player.speed * (1 + 0.15 * (upgrades.speed || 0)) * (1 + 0.05 * (bonus.spd || 0)) * (chillT > 0 ? 0.55 : 1);   // —— v1.2.126 寒冰减速 ——
+      const spd = player.speed * (1 + 0.15 * (upgrades.speed || 0)) * (1 + 0.05 * (bonus.spd || 0)) * (chillT > 0 ? 0.55 : 1) * tileSpeedMulEnt(player);   // —— v1.2.126 寒冰减速 + v1.2.142 地形倍率 ——
       const step = spd * k * ((mx !== 0 && my !== 0) ? Math.SQRT1_2 : 1);
       const nx = player.x + mx * step;
       const ny = player.y + my * step;
@@ -4938,7 +5000,19 @@
         player.y = ny;
       clampPlayer();
     }
-    if (keys[' '] || keys['Space'] || keys['j'] || keys['J']) { fire(player); chargeT = Math.min(chargeT + k, 120); }
+    beltPushEnt(player, k);   // —— v1.2.145 传送带玩家侧 ——
+    if (tileAtEnt(player) === TILE_HEAL) {   // —— v1.2.147 回血泉护甲充能 ——
+      player.healT = (player.healT || 0) + k;
+      if (player.healT >= 180) {
+        player.healT = 0;
+        if (playerArmor < 1) { playerArmor = 1; addText(player.x + TANK_SIZE / 2, player.y - 8, '⛲ 护甲凝聚', '#7ee0c2'); sfxPickup(); }
+      }
+    } else player.healT = 0;
+    if (tileAtEnt(player) === TILE_SPIKE) {   // —— v1.2.146 地刺警告 ——
+      player.spikeWarnT = (player.spikeWarnT || 0) + k;
+      if (player.spikeWarnT >= 60) { player.spikeWarnT = 0; shake = Math.max(shake, 3); addText(player.x + TANK_SIZE / 2, player.y - 8, '⚠ 地刺', '#ff5f5f'); }
+    }
+    if (keys[' '] || keys['Space'] || keys['j'] || keys['J']) { fire(player); chargeT = Math.min(chargeT + k * (tileAtEnt(player) === TILE_CHARGE ? 3 : 1), 120); }   // —— v1.2.148 充能站蓄力×3 ——
     else if (chargeT >= 60) { chargeShot(); chargeT = 0; }
     else chargeT = 0;   // —— v1.2.121 蓄力炮 ——
     if (player.portalCd > 0) player.portalCd -= k;
@@ -6141,6 +6215,7 @@
     if (chillT > 0) chillT = Math.max(0, chillT - k);
     // —— v1.2.130 敌潮计时衰减 ——
     if (hordeT > 0) hordeT = Math.max(0, hordeT - k);
+    { gateT += k; if (gateT >= 300) { gateT = 0; gateOpen = !gateOpen; markMapDirty(); } }   // —— v1.2.151 定时门开闭 ——
     if (stormT > 0 && multiMode !== 2) {   // —— v1.2.135 弹幕风暴倒计时 ——
       stormT -= k;
       if (stormT <= 0) {
@@ -6442,6 +6517,16 @@
           else if (t === TILE_WATER) drawWater(x * TILE, y * TILE);
           else if (t === TILE_BARREL || t === TILE_PORTAL) animatedTiles.push({ t, x:x * TILE, y:y * TILE });
           else if (t === TILE_ELEC) { ctx.fillStyle = '#0a2233'; ctx.fillRect(x * TILE, y * TILE, TILE, TILE); ctx.strokeStyle = '#7df9ff'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x * TILE + 13, y * TILE + 3); ctx.lineTo(x * TILE + 8, y * TILE + 13); ctx.lineTo(x * TILE + 14, y * TILE + 12); ctx.lineTo(x * TILE + 10, y * TILE + 21); ctx.stroke(); }   // —— v1.2.119 电网绘制 ——
+          else if (t === TILE_ICE) { ctx.fillStyle = '#a8e6ff'; ctx.fillRect(x * TILE, y * TILE, TILE, TILE); ctx.strokeStyle = '#e8fbff'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x * TILE + 4, y * TILE + 18); ctx.lineTo(x * TILE + 18, y * TILE + 4); ctx.moveTo(x * TILE + 10, y * TILE + 20); ctx.lineTo(x * TILE + 20, y * TILE + 10); ctx.stroke(); }   // —— v1.2.142 冰面绘制 ——
+          else if (t === TILE_SAND) { ctx.fillStyle = '#c9a758'; ctx.fillRect(x * TILE, y * TILE, TILE, TILE); ctx.fillStyle = '#a8823c'; for (let si = 0; si < 4; si++) ctx.fillRect(x * TILE + 3 + si * 6, y * TILE + 4 + (si % 2) * 10, 3, 2); }   // —— v1.2.143 流沙绘制 ——
+          else if (t === TILE_DASH) { ctx.fillStyle = '#123a20'; ctx.fillRect(x * TILE, y * TILE, TILE, TILE); ctx.fillStyle = '#37e070'; ctx.beginPath(); ctx.moveTo(x * TILE + 5, y * TILE + 18); ctx.lineTo(x * TILE + 13, y * TILE + 6); ctx.lineTo(x * TILE + 13, y * TILE + 11); ctx.lineTo(x * TILE + 19, y * TILE + 11); ctx.lineTo(x * TILE + 11, y * TILE + 19); ctx.closePath(); ctx.fill(); }   // —— v1.2.144 加速带绘制 ——
+          else if (t === TILE_BELT) { ctx.fillStyle = '#26303a'; ctx.fillRect(x * TILE, y * TILE, TILE, TILE); ctx.fillStyle = '#7a93a8'; for (let bi = 0; bi < 3; bi++) { ctx.beginPath(); ctx.moveTo(x * TILE + 4 + bi * 7, y * TILE + 6); ctx.lineTo(x * TILE + 8 + bi * 7, y * TILE + 12); ctx.lineTo(x * TILE + 4 + bi * 7, y * TILE + 18); ctx.closePath(); ctx.fill(); } }   // —— v1.2.145 传送带绘制 ——
+          else if (t === TILE_SPIKE) { ctx.fillStyle = '#2a1620'; ctx.fillRect(x * TILE, y * TILE, TILE, TILE); ctx.fillStyle = '#ff5f5f'; for (let qi = 0; qi < 4; qi++) { const qx = x * TILE + 4 + (qi % 2) * 10, qy = y * TILE + 6 + Math.floor(qi / 2) * 10; ctx.beginPath(); ctx.moveTo(qx, qy + 6); ctx.lineTo(qx + 3, qy - 2); ctx.lineTo(qx + 6, qy + 6); ctx.closePath(); ctx.fill(); } }   // —— v1.2.146 地刺绘制 ——
+          else if (t === TILE_HEAL) { ctx.fillStyle = '#0d2e28'; ctx.fillRect(x * TILE, y * TILE, TILE, TILE); ctx.strokeStyle = '#7ee0c2'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(x * TILE + 12, y * TILE + 12, 7, 0, Math.PI * 2); ctx.stroke(); ctx.fillStyle = '#7ee0c2'; ctx.beginPath(); ctx.arc(x * TILE + 12, y * TILE + 12, 3, 0, Math.PI * 2); ctx.fill(); }   // —— v1.2.147 回血泉绘制 ——
+          else if (t === TILE_CHARGE) { ctx.fillStyle = '#2a2408'; ctx.fillRect(x * TILE, y * TILE, TILE, TILE); ctx.fillStyle = '#ffe600'; ctx.beginPath(); ctx.moveTo(x * TILE + 13, y * TILE + 3); ctx.lineTo(x * TILE + 8, y * TILE + 13); ctx.lineTo(x * TILE + 12, y * TILE + 13); ctx.lineTo(x * TILE + 10, y * TILE + 21); ctx.lineTo(x * TILE + 16, y * TILE + 10); ctx.lineTo(x * TILE + 12, y * TILE + 10); ctx.closePath(); ctx.fill(); }   // —— v1.2.148 充能站绘制 ——
+          else if (t === TILE_BUMPER) { ctx.fillStyle = '#3a2a10'; ctx.fillRect(x * TILE, y * TILE, TILE, TILE); ctx.strokeStyle = '#ffd166'; ctx.lineWidth = 2; ctx.strokeRect(x * TILE + 2, y * TILE + 2, TILE - 4, TILE - 4); ctx.beginPath(); ctx.moveTo(x * TILE + 4, y * TILE + 4); ctx.lineTo(x * TILE + TILE - 4, y * TILE + TILE - 4); ctx.moveTo(x * TILE + TILE - 4, y * TILE + 4); ctx.lineTo(x * TILE + 4, y * TILE + TILE - 4); ctx.stroke(); }   // —— v1.2.149 弹跳弹墙绘制 ——
+          else if (t === TILE_ACID) { ctx.fillStyle = '#14280a'; ctx.fillRect(x * TILE, y * TILE, TILE, TILE); ctx.fillStyle = '#8ce040'; ctx.globalAlpha = 0.75; ctx.beginPath(); ctx.arc(x * TILE + 7, y * TILE + 8, 3.5, 0, Math.PI * 2); ctx.arc(x * TILE + 16, y * TILE + 15, 4.5, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1; }   // —— v1.2.150 毒池绘制 ——
+          else if (t === TILE_GATE) { if (gateOpen) { ctx.fillStyle = '#10301a'; ctx.fillRect(x * TILE, y * TILE, TILE, TILE); ctx.strokeStyle = '#37e070'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]); ctx.strokeRect(x * TILE + 3, y * TILE + 3, TILE - 6, TILE - 6); ctx.setLineDash([]); } else { ctx.fillStyle = '#3a3f4a'; ctx.fillRect(x * TILE, y * TILE, TILE, TILE); ctx.fillStyle = '#20242c'; for (let gi = 0; gi < 3; gi++) ctx.fillRect(x * TILE + 3, y * TILE + 4 + gi * 7, TILE - 6, 3); } }   // —— v1.2.151 定时门绘制 ——
           else if (t === TILE_TREE) treeTiles.push({ x:x * TILE, y:y * TILE });
         }
     } finally { ctx = prev; }
@@ -27798,7 +27883,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.141', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.151', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -28472,6 +28557,8 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       starNow: () => fx.star || 0, camoNow: () => fx.camo || 0, score2Now: () => fx.score2 || 0, timebombsNow: () => timebombs.map(b => ({ x: Math.round(b.x), y: Math.round(b.y), t: Math.round(b.t) })),
       sentriesNow: () => sentries.map(b => ({ x: Math.round(b.x), y: Math.round(b.y), life: Math.round(b.life) })), stormNow: () => stormT, stormWarnNow: () => stormWarnT,
       stormSetNow: (v) => { stormT = Number(v) || 0; return stormT; }, fogNow: () => fogLevel, goldRushNow: () => goldLevel, baseHpNow: () => baseHp,
+      tileUnderNow: () => tileAtEnt(player), tileSpeedMulNow: () => tileSpeedMulEnt(player), gateOpenNow: () => (typeof gateOpen === 'undefined' ? true : gateOpen),
+      gateSetNow: (v) => { if (typeof gateOpen !== 'undefined') { gateOpen = !!v; gateT = 0; markMapDirty(); } return gateOpen; },
       bulletsInfoNow: () => bullets.map(b => ({ x: Math.round(b.x), y: Math.round(b.y), dir: b.dir, size: b.size, own: !!(b.owner && b.owner.isPlayer), dead: !!b.dead })),
       pauseStatNow: () => { const e = $('pauseStatLine'); return e ? e.textContent : null; },
       endNow: (w) => { endGame(!!w); return gameOver; },
