@@ -30039,6 +30039,29 @@ async function main() {
     return (e.affix === 'tough' && has15) || JSON.stringify({ d, has15 });
   });
 
+  // U9728–U9730: 夜战
+  await senseCheck("U9728 第2关为夜战", (T,$) => {
+    T.startAtLevel(2); T.skipIntro();
+    const n = T.nightNow();
+    T.quit();
+    return n === true || JSON.stringify({ n });
+  });
+  await senseCheck("U9729 第3关非夜战", (T,$) => {
+    T.startAtLevel(3); T.skipIntro();
+    const n = T.nightNow();
+    T.quit();
+    return n === false || JSON.stringify({ n });
+  });
+  await senseCheck("U9730 夜战角落画面压暗", (T,$) => {
+    T.startAtLevel(2); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.renderOnce();
+    const cv = $('game'), cx2 = cv.getContext('2d');
+    const corner = cx2.getImageData(4, 4, 1, 1).data;
+    const sum = corner[0] + corner[1] + corner[2];
+    T.quit();
+    return sum < 150 || JSON.stringify({ sum, px: [corner[0], corner[1], corner[2]] });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
