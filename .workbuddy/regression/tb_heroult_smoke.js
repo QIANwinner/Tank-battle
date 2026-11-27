@@ -31557,6 +31557,47 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (moved > 20) || JSON.stringify({ moved: Math.round(moved), st: b.state });
   });
 
+  // U9860–U9862: 盾卫王
+  await senseCheck("U9860 盾卫王Boss已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const id = T.spawnBossAsNow('aegis');
+    T.quit();
+    return (id === 'aegis') || JSON.stringify({ id });
+  });
+  await senseCheck("U9861 护盾技能激活", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('aegis');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    let st = 0;
+    for (let i = 0; i < 15; i++) {
+      await Z(90);
+      st = b.shieldT || 0;
+      if (st > 0) break;
+    }
+    T.quit();
+    return (st > 0) || 'shield never active';
+  });
+  await senseCheck("U9862 护盾格挡子弹", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('aegis');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    for (let i = 0; i < 15; i++) { await Z(90); if ((b.shieldT || 0) > 0) break; }
+    if (!(b.shieldT > 0)) { T.quit(); return 'no shield'; }
+    b.freezeT = 9999;
+    const hp0 = b.hp;
+    T.spawnBulletNow(b.x + 8, b.y - 30, 4, false);
+    for (let i = 0; i < 15; i++) await Z(80);
+    const hp1 = b.hp;
+    T.quit();
+    return (hp1 === hp0) || JSON.stringify({ hp0, hp1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
