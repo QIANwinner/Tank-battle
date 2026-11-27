@@ -31138,6 +31138,44 @@ async function main() {
     return (bt < 200) || JSON.stringify({ bt });
   });
 
+  // U9830–U9832: 火箭兵
+  await senseCheck("U9830 火箭兵类型已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'rocket');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const ok = !!(e && e.type === 'rocket' && e.maxHp >= 2);
+    T.quit();
+    return ok === true || JSON.stringify({ t: e && e.type });
+  });
+  await senseCheck("U9831 火箭兵发射追踪弹", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'rocket');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no rocket'; }
+    e.rocketT = 239;
+    let seen = 0;
+    for (let i = 0; i < 20; i++) {
+      await Z(80);
+      seen = T.bulletsInfoNow().filter(b => b.rocket && !b.dead).length;
+      if (seen > 0) break;
+    }
+    T.quit();
+    return (seen > 0) || 'no rocket bullet';
+  });
+  await senseCheck("U9832 追踪弹计时循环", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'rocket');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no rocket'; }
+    e.rocketT = 239;
+    for (let i = 0; i < 12; i++) await Z(80);
+    const rt = e.rocketT || 0;
+    T.quit();
+    return (rt < 240) || JSON.stringify({ rt });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

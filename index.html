@@ -1878,7 +1878,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.162</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.163</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -4629,6 +4629,21 @@
     if (e.type === 'suicide') { updateSuicide(e, k); return; }   // 自爆：贴脸引爆
     if (e.type === 'engineer'){ updateEngineer(e, k); return; }  // 工兵：专拆基地
     if (e.type === 'phantom') { e.cloakT = ((e.cloakT || 0) + k) % 300; }   // —— v1.2.122 幻影显隐循环(>=170 隐形) ——
+    if (e.type === 'rocket') {   // —— v1.2.163 火箭兵:追踪弹 ——
+      e.rocketT = (e.rocketT || 0) + k;
+      if (e.rocketT >= 240 && player && !player.dead) {
+        e.rocketT = 0;
+        bullets.push({ x: e.x + e.size / 2, y: e.y + e.size / 2, dir: dirFromVec(player.x - e.x, player.y - e.y), speed: BULLET_SPEED * 0.55, size: 5, owner: e, dead: false, rocket: true });
+        spawnParticles(e.x + e.size / 2, e.y + e.size / 2, '#ff7a45', 5);
+      }
+      if (player && !player.dead) {
+        for (const rb163 of bullets) {
+          if (rb163 && !rb163.dead && rb163.rocket && rb163.owner === e) {
+            rb163.dir = dirFromVec(player.x + TANK_SIZE / 2 - rb163.x, player.y + TANK_SIZE / 2 - rb163.y);
+          }
+        }
+      }
+    }
     if (e.type === 'assassin' && player && !player.dead) {   // —— v1.2.162 刺客闪现 ——
       e.blinkT = (e.blinkT || 0) + k;
       if (e.blinkT >= 300) {
@@ -28019,7 +28034,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.162', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.163', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -28706,7 +28721,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       spawnPowerupAt: (x, y, type) => { powerups.push({ x, y, type: type || 'rapid', dead: false, life: 600, bob: 0 }); return powerups.length; },
       blackholesNow: () => (typeof blackholes === 'undefined' ? [] : blackholes.map(h => ({ x: Math.round(h.x), y: Math.round(h.y), t: Math.round(h.t) }))),
       recallNow: () => (typeof recallT === 'undefined' ? null : { t: recallT, pos: recallPos }),
-      bulletsInfoNow: () => bullets.map(b => ({ x: Math.round(b.x), y: Math.round(b.y), dir: b.dir, size: b.size, own: !!(b.owner && b.owner.isPlayer), dead: !!b.dead })),
+      bulletsInfoNow: () => bullets.map(b => ({ x: Math.round(b.x), y: Math.round(b.y), dir: b.dir, size: b.size, own: !!(b.owner && b.owner.isPlayer), dead: !!b.dead, rocket: !!b.rocket })),
       pauseStatNow: () => { const e = $('pauseStatLine'); return e ? e.textContent : null; },
       endNow: (w) => { endGame(!!w); return gameOver; },
       spawnBlockNow: () => spawnBlockT,
