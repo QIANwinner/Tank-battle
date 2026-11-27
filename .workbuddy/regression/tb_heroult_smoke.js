@@ -29914,7 +29914,7 @@ async function main() {
   await senseCheck("U9718 中毒满则阵亡扣命", async (T,$) => {
     const Z = ms => new Promise(r => setTimeout(r, ms));
     T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap();
-    for (let i = 0; i < 30 && T.spawnInvNow() > 0; i++) await Z(100);
+    for (let i = 0; i < 80 && T.spawnInvNow() > 0; i++) await Z(100);   // —— 批次重负载 RAF 减速兼容 ——
     T.spawnFoeNow(300, 100, 'plague');
     T.kill();
     const c = T.cloudsNow()[0];
@@ -29975,13 +29975,13 @@ async function main() {
   await senseCheck("U9722 吸血敌命中玩家回血", async (T,$) => {
     const Z = ms => new Promise(r => setTimeout(r, ms));
     T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap();
-    for (let i = 0; i < 30 && T.spawnInvNow() > 0; i++) await Z(100);
+    for (let i = 0; i < 80 && T.spawnInvNow() > 0; i++) await Z(100);   // —— 批次重负载 RAF 减速兼容 ——
     T.spawnFoeNow(300, 100, 'vampire');
     const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9;
     const hp0 = e.hp;
     const p = T.r18posNow();
     T.spawnEBulletAt(p.px - 2, p.py - 30, 4);
-    for (let i = 0; i < 25 && e.hp <= hp0; i++) await Z(80);
+    for (let i = 0; i < 40 && e.hp <= hp0; i++) await Z(80);
     const hp1 = e.hp;
     T.quit();
     return hp1 > hp0 || JSON.stringify({ hp0, hp1 });
@@ -29989,7 +29989,7 @@ async function main() {
   await senseCheck("U9723 吸血飘字出现", async (T,$) => {
     const Z = ms => new Promise(r => setTimeout(r, ms));
     T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap();
-    for (let i = 0; i < 30 && T.spawnInvNow() > 0; i++) await Z(100);
+    for (let i = 0; i < 80 && T.spawnInvNow() > 0; i++) await Z(100);   // —— 批次重负载 RAF 减速兼容 ——
     T.spawnFoeNow(300, 100, 'vampire');
     const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9;
     const p = T.r18posNow();
@@ -30229,6 +30229,34 @@ async function main() {
     for (let i = 0; i < 60 && !dead; i++) { await Z(80); dead = !e || e.dead === true; }
     T.quit();
     return dead === true || 'sentry no kill';
+  });
+
+  // U9746–U9748: 弹幕风暴
+  await senseCheck("U9746 开局风暴倒计时初始化", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const v = T.stormNow();
+    T.quit();
+    return v > 0 || JSON.stringify({ v });
+  });
+  await senseCheck("U9747 风暴触发后敌弹齐射", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'normal');
+    T.stormSetNow(1);
+    let n = 0;
+    for (let i = 0; i < 70 && n === 0; i++) { await Z(80); n = T.bulletsInfoNow().filter(b => !b.own && !b.dead).length; }
+    T.quit();
+    return n > 0 || 'no storm bullets';
+  });
+  await senseCheck("U9748 风暴预警飘字出现", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'normal');
+    T.stormSetNow(1);
+    let seen = false;
+    for (let i = 0; i < 30 && !seen; i++) { await Z(60); seen = T.floatTextsNow().some(x => x.indexOf('弹幕风暴') >= 0); }
+    T.quit();
+    return seen === true || 'no warn text';
   });
 
   chrome.kill(); killTree(chrome.pid);
