@@ -30128,6 +30128,43 @@ async function main() {
     return d >= 50 || JSON.stringify({ d, boss: !!b });
   });
 
+  // U9737–U9739: 无敌星
+  await senseCheck("U9737 无敌星道具已注册并可拾取", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('star');
+    const v = T.starNow();
+    T.quit();
+    return (ok && v > 0) === true || JSON.stringify({ ok, v });
+  });
+  await senseCheck("U9738 无敌星期间免伤", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(100, 100, 'normal');
+    for (let i = 0; i < 40 && T.spawnInvNow() > 0; i++) await Z(80);
+    T.pickupApplyNow('star');
+    const p = T.r18posNow();
+    const l0 = T.livesNow();
+    T.spawnEBulletAt(p.px, p.py - 26, 4);
+    for (let i = 0; i < 20; i++) await Z(60);
+    const l1 = T.livesNow();
+    T.quit();
+    return l1 >= l0 || JSON.stringify({ l0, l1 });
+  });
+  await senseCheck("U9739 无敌星接触碾压敌人", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.spawnFoeNow(p.px - 10, p.py, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (e) e.freezeT = 1e9;
+    T.pickupApplyNow('star');
+    T.tp(p.px - 10, p.py);
+    let dead = false;
+    for (let i = 0; i < 20 && !dead; i++) { await Z(60); dead = !e || e.dead === true; }
+    T.quit();
+    return dead === true || 'contact no kill';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

@@ -1878,7 +1878,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.131</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.132</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2067,6 +2067,7 @@
     spread: { color: '#ffd166', label: '霰弹' },   // —— v1.2.116 霰弹 ——
     homing: { color: '#7bf1a8', label: '追踪弹' },   // —— v1.2.117 追踪弹 ——
     rico:   { color: '#b5e0ff', label: '弹射弹' },   // —— v1.2.118 弹射弹 ——
+    star:   { color: '#fff59d', label: '无敌星' },   // —— v1.2.132 ——
   };
   const POWERUP_LIST = Object.keys(POWERUP_DEF);
 
@@ -2924,6 +2925,7 @@
   let lvRankS = 0, lastInterest = 0, weather = 'clear', firstWinDayK = '', lvNewRec = false, streakHoldT = 0, luckyLevel = false;   // —— v1.2.102~110 系统波状态 ——
   let critCount = 0, critForce = false, playerArmor = 0, chargeT = 0, chargeFired = 0;   // —— v1.2.112~121 波10状态 ——
   let poisonClouds = [], chillT = 0, poisonT = 0, nightLevel = false, hordeT = 0, affixForce = null;   // —— v1.2.122~131 波11状态 ——
+  let timebombs = [], sentries = [], stormT = 0, stormWarnT = 0, fogLevel = false, goldLevel = false, baseHp = 2;   // —— v1.2.132~141 波12状态 ——
   let killFeed = [];   // —— v1.2.113 击杀播报 ——
   try {
     const c = healedJson(LS_CAREER, {});   // —— v1.2.77 存档自愈加载 ——
@@ -5099,6 +5101,7 @@
     p = p || player;
     if (!p || p.dead) return;
     if (p === player && playerArmor > 0 && multiMode !== 2) { playerArmor = 0; p.spawnInv = Math.max(p.spawnInv || 0, 90); addText(p.x + TANK_SIZE / 2, p.y - 10, '🛡 护甲抵消', '#c7d2fe'); sfxPickup(); return; }   // —— v1.2.115 护甲片挡死 ——
+    if (p === player && fx.star > 0 && multiMode !== 2) { addText(p.x + TANK_SIZE / 2, p.y - 10, '⭐ 无敌', '#fff59d'); return; }   // —— v1.2.132 无敌星免伤 ——
     const isP2 = p === player2;
     p.dead = true;
     stat.deaths++;
@@ -5478,6 +5481,7 @@
       case 'spread': fx.spread = 8; break;   // —— v1.2.116 霰弹 8s ——
       case 'homing': fx.homing = 8; break;   // —— v1.2.117 追踪弹 8s ——
       case 'rico':   fx.rico = 8; break;   // —— v1.2.118 弹射弹 8s ——
+      case 'star':   fx.star = 8; break;   // —— v1.2.132 无敌星 8s ——
     }
     if (player) addText(clamp(player.x + TANK_SIZE / 2, 84, W - 84), player.y - 6, pickupEffectText(type, pickBefore, pickupState()) || def.label, def.color);
     runPowerups++;
@@ -5804,6 +5808,7 @@
     lvRankS = 0; lvNewRec = false; streakHoldT = 0; killStreak = 0;   // —— v1.2.102/108/109 ——
     critCount = 0; playerArmor = 0; chargeT = 0; chargeFired = 0; killFeed = [];   // —— v1.2.112/113/115/121 ——
     poisonClouds = []; chillT = 0; poisonT = 0; hordeT = 0; affixForce = null;   // —— v1.2.122~131(nightLevel 在 startLevel 另置) ——
+    timebombs = []; sentries = []; stormT = 2700 + rng() * 1800; stormWarnT = 0; baseHp = 2;   // —— v1.2.132~138(fog/gold 在 startLevel 另置) ——
     enemiesSpawned = 0;
     airDropT = 20;   // —— v1.2.93 空投重置 ——
     weather = __testMode ? 'clear' : ['clear', 'rain', 'snow', 'wind'][randInt(0, 3)];   // —— v1.2.104 战地天气（测试态默认晴,weatherSetNow 强制）——
@@ -6016,6 +6021,15 @@
     if (fx.spread > 0) fx.spread -= dt;   // —— v1.2.116 ——
     if (fx.homing > 0) fx.homing -= dt;   // —— v1.2.117 ——
     if (fx.rico > 0) fx.rico -= dt;   // —— v1.2.118 ——
+    if (fx.star > 0) fx.star -= dt;   // —— v1.2.132 ——
+    if (fx.star > 0 && player && !player.dead && multiMode !== 2) {   // —— v1.2.132 无敌星接触杀 ——
+      for (const e of enemies) {
+        if (e.dead || e.enterT > 0) continue;
+        if (Math.abs(e.x + e.size / 2 - (player.x + TANK_SIZE / 2)) < (e.size + TANK_SIZE) / 2 && Math.abs(e.y + e.size / 2 - (player.y + TANK_SIZE / 2)) < (e.size + TANK_SIZE) / 2) {
+          e.hp = 0; e.dead = true; onEnemyKilled(e);
+        }
+      }
+    }
     if (baseGuard > 0) { baseGuard -= dt; if (baseGuard <= 0) buffEndNote('guard'); }   // —— v1.2.42 ——
     if (streakHoldT > 0) { streakHoldT -= dt; if (streakHoldT <= 0 && killStreak > 0) { killStreak = 0; fieldNoteShow('⚔ 连杀中断', 'info', 1400, 1); } }   // —— v1.2.109 ——
     if (comboTimer > 0) { comboTimer -= dt; if (comboTimer <= 0) { if (comboShield && combo >= 3) { comboShield = false; comboTimer = 1.5; comboWindowMax = Math.max(comboWindowMax, 1.5); fieldNoteShow('🛡 连击护盾 · 宽限 1.5 秒', 'warn', 1600, 1); } else { fieldNoteShow(comboEndText(combo, stat.maxCombo), 'info', 1600, 1); combo = 0; } } }   // —— v1.2.18 连击护盾宽限 ——
@@ -27677,7 +27691,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.131', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.132', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -28348,6 +28362,9 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       chargeNow: () => chargeT, chargeSetNow: (v) => { chargeT = Number(v) || 0; return chargeT; }, chargeFiredNow: () => chargeFired,
       nightNow: () => nightLevel, hordeNow: () => hordeT, chillNow: () => chillT, poisonNow: () => poisonT, cloudsNow: () => poisonClouds.map(c => ({ x: Math.round(c.x), y: Math.round(c.y), t: Math.round(c.t) })),
       affixForceNow: (v) => { affixForce = v || null; return affixForce; }, hordeSetNow: (v) => { hordeT = Number(v) || 0; return hordeT; },
+      starNow: () => fx.star || 0, camoNow: () => fx.camo || 0, score2Now: () => fx.score2 || 0, timebombsNow: () => timebombs.map(b => ({ x: Math.round(b.x), y: Math.round(b.y), t: Math.round(b.t) })),
+      sentriesNow: () => sentries.map(b => ({ x: Math.round(b.x), y: Math.round(b.y), life: Math.round(b.life) })), stormNow: () => stormT, stormWarnNow: () => stormWarnT,
+      stormSetNow: (v) => { stormT = Number(v) || 0; return stormT; }, fogNow: () => fogLevel, goldRushNow: () => goldLevel, baseHpNow: () => baseHp,
       bulletsInfoNow: () => bullets.map(b => ({ x: Math.round(b.x), y: Math.round(b.y), dir: b.dir, size: b.size, own: !!(b.owner && b.owner.isPlayer), dead: !!b.dead })),
       pauseStatNow: () => { const e = $('pauseStatLine'); return e ? e.textContent : null; },
       endNow: (w) => { endGame(!!w); return gameOver; },
