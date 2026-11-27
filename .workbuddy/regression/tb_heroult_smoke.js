@@ -31295,6 +31295,56 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (cd0 > 5 && cd1 > 0) || JSON.stringify({ cd0, cd1 });
   });
 
+  // U9842–U9844: 镜面兵
+  await senseCheck("U9842 镜面兵类型已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'mirror');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const ok = !!(e && e.type === 'mirror' && e.maxHp >= 3);
+    T.quit();
+    return ok === true || JSON.stringify({ t: e && e.type, hp: e && e.maxHp });
+  });
+  await senseCheck("U9843 镜面反弹产生敌弹", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.spawnFoeNow(p.px - 14, p.py - 120, 'mirror');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no mirror'; }
+    e.freezeT = 9999;
+    let reflected = 0;
+    for (let s = 0; s < 10 && reflected === 0; s++) {
+      T.fireOnce();
+      for (let i = 0; i < 8; i++) {
+        await Z(90);
+        reflected = T.bulletsInfoNow().filter(b => !b.own && !b.dead).length;
+        if (reflected > 0) break;
+      }
+    }
+    T.quit();
+    return (reflected > 0) || 'no reflected bullet in 10 shots';
+  });
+  await senseCheck("U9844 反弹弹方向反转", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.spawnFoeNow(p.px - 14, p.py - 120, 'mirror');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no mirror'; }
+    e.freezeT = 9999;
+    let rb = null;
+    for (let s = 0; s < 10 && !rb; s++) {
+      T.fireOnce();
+      for (let i = 0; i < 8; i++) {
+        await Z(90);
+        const eb = T.bulletsInfoNow().filter(b => !b.own && !b.dead);
+        if (eb.length > 0) { rb = eb[0]; break; }
+      }
+    }
+    T.quit();
+    return (rb && rb.dir >= 3 && rb.dir <= 5) || JSON.stringify({ rb });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

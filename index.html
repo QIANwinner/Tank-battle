@@ -1878,7 +1878,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.166</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.167</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2062,6 +2062,12 @@
     giant:    { speed: 0.55, hp: 6, score: 400, color: '#8fa3bf', label: '巨人' },   // —— v1.2.164 ——
     miner:    { speed: 1.00, hp: 2, score: 280, color: '#d9a441', label: '布雷' },   // —— v1.2.165 ——
     jammer:   { speed: 0.95, hp: 2, score: 290, color: '#b14aed', label: '干扰' },   // —— v1.2.166 ——
+    mirror:   { speed: 0.90, hp: 3, score: 320, color: '#e8f4ff', label: '镜面' },   // —— v1.2.167 ——
+    summoner: { speed: 0.85, hp: 2, score: 320, color: '#ff4d6d', label: '召唤' },   // —— v1.2.168 ——
+    swift:    { speed: 2.20, hp: 1, score: 270, color: '#4dfff3', label: '疾风' },   // —— v1.2.169 ——
+    venom:    { speed: 1.10, hp: 2, score: 290, color: '#7ce040', label: '毒蛛' },   // —— v1.2.170 ——
+    splitbug: { speed: 1.00, hp: 1, score: 200, color: '#ff8ae2', label: '分裂虫' },   // —— v1.2.171 ——
+    splitling:{ speed: 1.80, hp: 1, score: 60, color: '#ffb3f0', label: '幼虫' },   // —— v1.2.171 ——
   };
 
   // 道具定义
@@ -4228,6 +4234,11 @@
       if (rn122 >= 0.142 && rn122 < 0.158) return 'giant';   // —— v1.2.164 ——
       if (rn122 >= 0.158 && rn122 < 0.174) return 'miner';   // —— v1.2.165 ——
       if (rn122 >= 0.174 && rn122 < 0.190) return 'jammer';   // —— v1.2.166 ——
+      if (rn122 >= 0.190 && rn122 < 0.206) return 'mirror';   // —— v1.2.167 ——
+      if (rn122 >= 0.206 && rn122 < 0.222) return 'summoner';   // —— v1.2.168 ——
+      if (rn122 >= 0.222 && rn122 < 0.238) return 'swift';   // —— v1.2.169 ——
+      if (rn122 >= 0.238 && rn122 < 0.254) return 'venom';   // —— v1.2.170 ——
+      if (rn122 >= 0.254 && rn122 < 0.270) return 'splitbug';   // —— v1.2.171 ——
     }
     // 有效难度 = 关卡（已改单波，无波次加成）
     const lvl = level;
@@ -4964,7 +4975,16 @@
             const dmg112 = ((b.charged ? 3 : 1) + extra + (weak97 ? 1 : 0)) * (crit112 ? 2 : 1);   // —— v1.2.121 蓄力弹伤3 ——
             if (crit112) { critCount++; addText(cx, cy - 26, '⚡ 暴击', '#ffe600'); }
             runDmgAdd(dmg112);
-            e.hp -= dmg112; e.hitFlash = 6;
+            let refl167 = false;   // —— v1.2.167 镜面反弹 ——
+            if (e.type === 'mirror' && b.owner && b.owner.isPlayer && rng() < 0.5) refl167 = true;
+            if (refl167) {
+              b.dir = (b.dir + 4) % 8; b.owner = e; b.pen = (b.pen || 0) + 1;
+              spawnParticles(cx, cy, '#e8f4ff', 6);
+              addText(cx, cy - 20, '🪞 反弹', '#e8f4ff');
+              e.hitFlash = 6;
+            } else {
+              e.hp -= dmg112; e.hitFlash = 6;
+            }
             if (weak97) addText(cx, cy - 26, '💥 弱点', '#ffe600');
             dmgNum(cx, cy - 14, 1 + extra);   // —— v1.2.69 ——
             // 冰冻子弹：命中几率冻住 1 秒（每层 +15% 概率）
@@ -28059,7 +28079,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.166', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.167', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
