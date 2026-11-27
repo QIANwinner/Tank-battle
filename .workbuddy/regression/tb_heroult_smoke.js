@@ -30436,6 +30436,40 @@ async function main() {
     return v <= 0 || JSON.stringify({ v });
   });
 
+  // U9767–U9769: 冰面
+  await senseCheck("U9767 冰面地形提速倍率", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 7);
+    T.renderOnce();
+    const m = T.tileSpeedMulNow();
+    T.quit();
+    return m === 1.45 || JSON.stringify({ m });
+  });
+  await senseCheck("U9768 非冰面倍率为1", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const m = T.tileSpeedMulNow();
+    T.quit();
+    return m === 1 || JSON.stringify({ m });
+  });
+  await senseCheck("U9769 冰面上位移更快", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    const run = async (ice) => {
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+      const p0 = T.r18posNow();
+      if (ice) { for (let gx = 0; gx < 26; gx++) for (let gy = 0; gy < 26; gy++) T.setTile(gx, gy, 7); T.renderOnce(); }
+      T.keySet('w', true);
+      await Z(400);
+      T.keySet('w', false);
+      const p1 = T.r18posNow();
+      T.quit();
+      return p0.py - p1.py;
+    };
+    const d0 = await run(false);
+    const d1 = await run(true);
+    return (d0 > 5 && d1 > d0 * 1.2) || JSON.stringify({ d0, d1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
