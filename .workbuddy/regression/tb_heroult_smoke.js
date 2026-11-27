@@ -31206,6 +31206,57 @@ async function main() {
     return ok === true || JSON.stringify({ gs: g && g.speed, ns: n && n.speed });
   });
 
+  // U9836–U9838: 布雷者
+  await senseCheck("U9836 布雷者类型已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'miner');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const ok = !!(e && e.type === 'miner');
+    T.quit();
+    return ok === true || JSON.stringify({ t: e && e.type });
+  });
+  await senseCheck("U9837 布雷者埋设地雷", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'miner');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no miner'; }
+    e.mineT = 239;
+    let n = 0;
+    for (let i = 0; i < 15; i++) {
+      await Z(80);
+      n = T.foeMinesNow().length;
+      if (n > 0) break;
+    }
+    T.quit();
+    return (n > 0) || 'no mine';
+  });
+  await senseCheck("U9838 敌雷触发后消散", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.spawnFoeNow(p.px - 14, p.py - 14, 'miner');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no miner'; }
+    e.mineT = 239;
+    let n0 = 0;
+    for (let i = 0; i < 15; i++) {
+      await Z(80);
+      n0 = T.foeMinesNow().length;
+      if (n0 > 0) break;
+    }
+    if (n0 === 0) { T.quit(); return 'mine never dropped'; }
+    T.invul(0);
+    let n1 = n0;
+    for (let i = 0; i < 30; i++) {
+      await Z(100);
+      n1 = T.foeMinesNow().length;
+      if (n1 < n0) break;
+    }
+    T.quit();
+    return (n1 < n0) || JSON.stringify({ n0, n1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
