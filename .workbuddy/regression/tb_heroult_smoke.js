@@ -31598,6 +31598,46 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (hp1 === hp0) || JSON.stringify({ hp0, hp1 });
   });
 
+  // U9863–U9865: 螺旋者
+  await senseCheck("U9863 螺旋者Boss已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const id = T.spawnBossAsNow('spiraler');
+    T.quit();
+    return (id === 'spiraler') || JSON.stringify({ id });
+  });
+  await senseCheck("U9864 螺旋弹幕放量", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('spiraler');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    let n = 0;
+    for (let i = 0; i < 15; i++) {
+      await Z(90);
+      n = T.bulletsInfoNow().filter(x => !x.own && !x.dead).length;
+      if (n >= 10) break;
+    }
+    T.quit();
+    return (n >= 10) || JSON.stringify({ n });
+  });
+  await senseCheck("U9865 螺旋弹幕多方向", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('spiraler');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    let dirs = new Set();
+    for (let i = 0; i < 12; i++) {
+      await Z(90);
+      T.bulletsInfoNow().filter(x => !x.own && !x.dead).forEach(x => dirs.add(x.dir));
+      if (dirs.size >= 4) break;
+    }
+    T.quit();
+    return (dirs.size >= 4) || JSON.stringify({ dirs: dirs.size });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
