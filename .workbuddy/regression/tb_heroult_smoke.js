@@ -29486,6 +29486,291 @@ async function main() {
     return (typeof p === 'number' && p >= 0 && p % 10 === 0) || JSON.stringify({ p });
   });
 
+  // U9677–U9679: 暴击弹
+  await senseCheck("U9677 暴击伤害翻倍", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.critForceNow(true); T.clearMap();
+    T.spawnFoeNow(400, 100, 'armored');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9;
+    const hp0 = e.hp;
+    T.spawnBulletNow(e.x + e.size / 2 - 2, e.y + e.size + 6, 0, false);
+    for (let i = 0; i < 25 && e.hp >= hp0; i++) await Z(50);
+    T.quit();
+    return e.hp <= hp0 - 2 || JSON.stringify({ hp0, hp: e.hp });
+  });
+  await senseCheck("U9678 暴击计数与飘字", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.critForceNow(true); T.clearMap();
+    T.spawnFoeNow(400, 100, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9; e.hp = 9;
+    T.spawnBulletNow(e.x + e.size / 2 - 2, e.y + e.size + 6, 0, false);
+    let c = 0, t = false;
+    for (let i = 0; i < 25 && c < 1; i++) { await Z(50); c = T.critNow(); t = t || T.floatTextsNow().some(x => x.indexOf('暴击') >= 0); }
+    T.quit();
+    return (c >= 1 && t) || JSON.stringify({ c, t });
+  });
+  await senseCheck("U9679 换局暴击计数清零", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.critForceNow(true); T.clearMap();
+    T.spawnFoeNow(400, 100, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9; e.hp = 9;
+    T.spawnBulletNow(e.x + e.size / 2 - 2, e.y + e.size + 6, 0, false);
+    for (let i = 0; i < 25 && T.critNow() < 1; i++) await Z(50);
+    T.critForceNow(false);
+    T.quit(); T.startGame(); T.skipIntro();
+    const c = T.critNow();
+    T.quit();
+    return c === 0 || JSON.stringify({ c });
+  });
+
+  // U9680–U9682: 击杀播报
+  await senseCheck("U9680 击杀写入播报", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const e = T.spawnFoeNow(400, 100, 'normal'); e.hp = 1;
+    T.kill();
+    const f = T.killFeedNow();
+    T.quit();
+    return (f.length === 1 && f[0].indexOf('击毁') >= 0) || JSON.stringify(f);
+  });
+  await senseCheck("U9681 播报最多保留3条", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    for (let i = 0; i < 4; i++) { const e = T.spawnFoeNow(100 + i * 60, 100, 'normal'); e.hp = 1; T.kill(); }
+    const f = T.killFeedNow();
+    T.quit();
+    return f.length === 3 || JSON.stringify(f);
+  });
+  await senseCheck("U9682 换局播报清空", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const e = T.spawnFoeNow(400, 100, 'normal'); e.hp = 1; T.kill();
+    T.quit(); T.startGame(); T.skipIntro();
+    const f = T.killFeedNow();
+    T.quit();
+    return f.length === 0 || JSON.stringify(f);
+  });
+
+  // U9683–U9685: 暂停简报
+  await senseCheck("U9683 暂停显示击杀数", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    $('pauseBtn').click();
+    const t = T.pauseStatNow();
+    $('pauseBtn').click();
+    T.quit();
+    return (!!t && t.indexOf('击杀') >= 0) || JSON.stringify({ t });
+  });
+  await senseCheck("U9684 简报含命中率", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    $('pauseBtn').click();
+    const t = T.pauseStatNow();
+    $('pauseBtn').click();
+    T.quit();
+    return (!!t && /命中 \d+%/.test(t) && t.indexOf('用时') >= 0) || JSON.stringify({ t });
+  });
+  await senseCheck("U9685 简报元素存在", (T,$) => !!$('pauseStatLine'));
+
+  // U9686–U9688: 护甲片
+  await senseCheck("U9686 拾取护甲计数为1", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.pickupApplyNow('armor');
+    const a = T.armorNow();
+    T.quit();
+    return a === 1 || JSON.stringify({ a });
+  });
+  await senseCheck("U9687 护甲在道具表中", (T,$) => {
+    T.startGame(); T.skipIntro(); T.quit();
+    return typeof T.pickupApplyNow === 'function' && T.armorNow() === 0;
+  });
+  await senseCheck("U9688 护甲抵挡后玩家存活", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn();
+    T.pickupApplyNow('armor');
+    for (let i = 0; i < 40 && T.spawnInvNow() > 0; i++) await Z(200);
+    const a0 = T.armorNow(), l0 = T.livesNow();
+    T.enemyShotAtPlayerNow('normal');
+    await Z(900);
+    const a1 = T.armorNow(), l1 = T.livesNow();
+    T.quit();
+    return (a0 === 1 && a1 === 0 && l1 === l0) || JSON.stringify({ a0, a1, l0, l1 });
+  });
+
+  // U9689–U9691: 霰弹
+  await senseCheck("U9689 拾取霰弹激活", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.pickupApplyNow('spread');
+    const s = T.spreadNow();
+    T.quit();
+    return s > 0 || JSON.stringify({ s });
+  });
+  await senseCheck("U9690 霰弹三向弹道", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.fxSetNow('spread', 9);
+    T.fireOnce();
+    const ds = T.bulletsInfoNow().filter(b => b.own && !b.dead).map(b => b.dir);
+    const set = new Set(ds);
+    let fan = false;
+    for (let d = 0; d < 8; d++) if (set.has(d) && set.has((d + 7) % 8) && set.has((d + 1) % 8)) { fan = true; break; }
+    T.quit();
+    return (ds.length === 3 && fan) || JSON.stringify({ ds });
+  });
+  await senseCheck("U9691 霰弹倒计时衰减", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.fxSetNow('spread', 0.05);
+    await Z(400);
+    const s = T.spreadNow();
+    T.quit();
+    return s <= 0 || JSON.stringify({ s });
+  });
+
+  // U9692–U9694: 追踪弹
+  await senseCheck("U9692 拾取追踪激活", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.pickupApplyNow('homing');
+    const s = T.homingNow();
+    T.quit();
+    return s > 0 || JSON.stringify({ s });
+  });
+  await senseCheck("U9693 子弹转向最近敌人", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(500, 300, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9;
+    T.fxSetNow('homing', 9);
+    T.spawnBulletNow(120, 300, 6, false);   // 向左飞,背离敌人
+    let turned = false;
+    for (let i = 0; i < 30 && !turned; i++) { await Z(100); const b = T.bulletsInfoNow().find(x => x.own && !x.dead); if (b && b.dir !== 6) turned = true; }
+    T.quit();
+    return turned || JSON.stringify(T.bulletsInfoNow());
+  });
+  await senseCheck("U9694 追踪倒计时衰减", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.fxSetNow('homing', 0.05);
+    await Z(400);
+    const s = T.homingNow();
+    T.quit();
+    return s <= 0 || JSON.stringify({ s });
+  });
+
+  // U9695–U9697: 弹射弹
+  await senseCheck("U9695 拾取弹射激活", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.pickupApplyNow('rico');
+    const s = T.ricoNow();
+    T.quit();
+    return s > 0 || JSON.stringify({ s });
+  });
+  await senseCheck("U9696 子弹碰钢墙反弹", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.setTile(10, 8, 2);   // 钢墙于 (240,192)
+    T.fxSetNow('rico', 9);
+    T.spawnBulletNow(180, 194, 2, false);   // 向右射向钢墙
+    let bounced = false;
+    for (let i = 0; i < 30 && !bounced; i++) { await Z(100); const b = T.bulletsInfoNow().find(x => x.own && !x.dead); if (b && b.dir === 6) bounced = true; }
+    T.quit();
+    return bounced || JSON.stringify(T.bulletsInfoNow());
+  });
+  await senseCheck("U9697 弹射倒计时衰减", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.fxSetNow('rico', 0.05);
+    await Z(400);
+    const s = T.ricoNow();
+    T.quit();
+    return s <= 0 || JSON.stringify({ s });
+  });
+
+  // U9698–U9700: 电网
+  await senseCheck("U9698 电网常量存在", (T,$) => T.elecTileNow() === 6);
+  await senseCheck("U9699 电网可通行", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.setTile(10, 8, 6);
+    const b = T.isBlockedNow(10 * 24 + 4, 8 * 24 + 4, 16);
+    T.quit();
+    return b === false || JSON.stringify({ b });
+  });
+  await senseCheck("U9700 敌人站电网受电击", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.setTile(10, 8, 6);
+    T.spawnFoeNow(10 * 24 + 2, 8 * 24 + 2, 'armored');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9;
+    const hp0 = e.hp;
+    for (let i = 0; i < 30 && e.hp >= hp0; i++) await Z(200);
+    const hp1 = e.hp;
+    T.quit();
+    return hp1 < hp0 || JSON.stringify({ hp0, hp1 });
+  });
+
+  // U9701–U9703: 草丛隐身
+  await senseCheck("U9701 草丛判定正确", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    const gx = Math.floor((p.px - 2) / 24), gy = Math.floor((p.py - 2) / 24);
+    const b0 = T.bushNow();
+    T.setTile(gx, gy, 4);
+    const b1 = T.bushNow();
+    T.quit();
+    return (b0 === false && b1 === true) || JSON.stringify({ b0, b1 });
+  });
+  await senseCheck("U9702 草丛中敌人不索敌", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.setTile(Math.floor((p.px - 2) / 24), Math.floor((p.py - 2) / 24), 4);
+    T.spawnFoeNow(400, 100, 'elite');
+    let seen = false;
+    for (let i = 0; i < 60; i++) if (T.eTargetNow() === 'player') { seen = true; break; }
+    T.quit();
+    return seen === false || 'in-bush still targeted';
+  });
+  await senseCheck("U9703 离开草丛恢复索敌", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(400, 100, 'elite');
+    let seen = false;
+    for (let i = 0; i < 200; i++) if (T.eTargetNow() === 'player') { seen = true; break; }
+    T.quit();
+    return seen === true || 'off-bush never targeted';
+  });
+
+  // U9704–U9706: 蓄力炮
+  await senseCheck("U9704 蓄力松开发射大弹", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.keySet(' ', false);
+    T.chargeSetNow(90);
+    let f = 0;
+    for (let i = 0; i < 20 && !f; i++) { await Z(100); f = T.chargeFiredNow(); }
+    const b = T.bulletsInfoNow().find(x => x.own && x.size === 8 && !x.dead);
+    T.quit();
+    return (f >= 1 && !!b) || JSON.stringify({ f, bs: T.bulletsInfoNow() });
+  });
+  await senseCheck("U9705 蓄力弹伤害3", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    const DXA = [0, 0.71, 1, 0.71, 0, -0.71, -1, -0.71], DYA = [-1, -0.71, 0, 0.71, 1, 0.71, 0, -0.71];
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(400, 100, 'elite');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9; e.hp = 5;
+    const hp0 = e.hp;
+    T.keySet(' ', false); T.chargeSetNow(90);
+    for (let i = 0; i < 40 && e.hp >= hp0; i++) {
+      const b = T.bulletsInfoNow().find(x => x.own && x.size === 8 && !x.dead);
+      if (b) { e.x = b.x + b.size / 2 + DXA[b.dir] * 40 - e.size / 2; e.y = b.y + b.size / 2 + DYA[b.dir] * 40 - e.size / 2; }
+      await Z(50);
+    }
+    const hp1 = e.hp;
+    T.quit();
+    return hp1 <= hp0 - 3 || JSON.stringify({ hp0, hp1 });
+  });
+  await senseCheck("U9706 蓄力后槽清零", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    T.keySet(' ', false); T.chargeSetNow(90);
+    for (let i = 0; i < 20 && T.chargeFiredNow() < 1; i++) await Z(100);
+    const c = T.chargeNow();
+    T.quit();
+    return c === 0 || JSON.stringify({ c });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

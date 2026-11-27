@@ -52,7 +52,7 @@ function gh(args, input) {
         last = (e.stderr || e.message || '').toString().slice(0, 200);
         if (/404|Not Found|Validation Failed/i.test(last)) break;   // 确定性错误不重试
       }
-      if (attempt < 3) pause(600 * attempt);
+      if (attempt < 3) pause(1500 * attempt);   // —— 退避加长:fake-ip/代理抖动多为秒级瞬时 ——
     }
   }
   throw new Error('gh api ' + args.split(' ')[0] + ' failed after retries: ' + last);

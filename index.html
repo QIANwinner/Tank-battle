@@ -1493,6 +1493,7 @@
     <section class="senseNote" id="senseDashWrap" hidden><b>本局感知回顾</b><p id="senseDashVal"></p></section>
     <div class="senseNote" id="buffStackWrap" hidden><b>增益时刻表</b> <span id="buffStackVal">无生效增益</span></div>
     <div class="senseNote" id="pauseMsnWrap" hidden><b>今日任务</b> <span id="pauseMsnVal"></span></div>
+    <div class="senseNote" id="pauseStatLine" hidden></div>
     <p id="focusBackWrap" class="senseNote" role="status" hidden></p>
     <div class="diffRow" id="diffRow">
       <span class="diffLabel">难度</span>
@@ -1877,7 +1878,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.111</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.121</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2001,6 +2002,7 @@
   const TILE_WATER = 3;            // 水（坦克不能过，子弹可过）
   const TILE_TREE  = 4;            // 草丛（遮挡视觉）
   const TILE_BARREL = 5;           // 可爆炸油桶（子弹命中即引爆，可连锁）
+  const TILE_ELEC   = 6;           // 电网（可穿越,敌人站立受电击）—— v1.2.119
   const TILE_PORTAL = 6;           // 传送门（成对出现，进入即传送）
 
   // 八方向（0=上，顺时针每 45° 一档）：斜向分量为 ±√2/2，合速度与正向一致
@@ -2055,6 +2057,10 @@
     repair: { color: '#7ee0c2', label: '维修' },   // —— v1.2.36 基地维修 ——
     guard:  { color: '#ffe28a', label: '护垒' },   // —— v1.2.42 基地护垒 ——
     gold:   { color: '#ffd75e', label: '金袋' },   // —— v1.2.51 金币袋 ——
+    armor:  { color: '#c7d2fe', label: '护甲片' },   // —— v1.2.115 护甲片 ——
+    spread: { color: '#ffd166', label: '霰弹' },   // —— v1.2.116 霰弹 ——
+    homing: { color: '#7bf1a8', label: '追踪弹' },   // —— v1.2.117 追踪弹 ——
+    rico:   { color: '#b5e0ff', label: '弹射弹' },   // —— v1.2.118 弹射弹 ——
   };
   const POWERUP_LIST = Object.keys(POWERUP_DEF);
 
@@ -2837,7 +2843,7 @@
   let combo = 0, comboTimer = 0;
   let comboShield = true;                // —— v1.2.18 连击护盾：每局一枚 ——
   let comboWindowMax = 0;   // —— v0.6.10 连击窗口峰值（进度条分母） ——
-  let fx = { rapid: 0, double: 0, freeze: 0, pierce: 0, slow: 0 };   // —— v1.2.23 穿甲增益 · v1.2.32 缓速 ——
+  let fx = { rapid: 0, double: 0, freeze: 0, pierce: 0, slow: 0, spread: 0, homing: 0, rico: 0 };   // —— v1.2.23 穿甲 · v1.2.32 缓速 · v1.2.116~118 ——
 
   // 打击感 / 提示
   let hurtFlash = 0;   // 受击红边渐隐
@@ -2910,6 +2916,8 @@
   let levelKills = 0;                // —— v0.2.6 本关击杀数（结算界面） ——
   let lvShots = 0, lvHits = 0, lvAccBonus = 0;   // —— v1.2.95 本关射击命中统计 ——
   let lvRankS = 0, lastInterest = 0, weather = 'clear', firstWinDayK = '', lvNewRec = false, streakHoldT = 0, luckyLevel = false;   // —— v1.2.102~110 系统波状态 ——
+  let critCount = 0, critForce = false, playerArmor = 0, chargeT = 0, chargeFired = 0;   // —— v1.2.112~121 波10状态 ——
+  let killFeed = [];   // —— v1.2.113 击杀播报 ——
   try {
     const c = healedJson(LS_CAREER, {});   // —— v1.2.77 存档自愈加载 ——
     if (c && typeof c === 'object') {
@@ -3711,6 +3719,7 @@
           else if (r < 0.24) map[y][x] = TILE_STEEL;
           else if (r < 0.30) map[y][x] = TILE_WATER;
           else if (r < 0.38) map[y][x] = TILE_TREE;
+          else if (r < 0.40) map[y][x] = TILE_ELEC;   // —— v1.2.119 电网 ——
         }
       // 关键枢纽清障：基地护墙外圈 / 玩家出生区 / 三个敌人出生带（护墙本身由 decorateMap 后画，不受影响）
       clearHub(BASE.x, BASE.y, 2);
@@ -4287,6 +4296,7 @@
     } else {
       shoot(cx, cy, tank.dir);
     }
+    if (isP && fx.spread > 0) { shoot(cx, cy, (tank.dir + 7) % 8); shoot(cx, cy, (tank.dir + 1) % 8); }   // —— v1.2.116 霰弹 ——
     // 三向散射强化：沿两侧 ±s 方向追加斜射弹（每层 +1 对）
     if (isP && (upgrades.spread || 0) > 0) {
       for (let s = 1; s <= (upgrades.spread || 0); s++) {
@@ -4421,7 +4431,13 @@
 
   // ===== 敌人 AI =====
   // 目标倾向：按兵种返回 'player' / 'base' / null（null=随机游走）
+  function playerInBush() {   // —— v1.2.120 草丛隐身 ——
+    if (!player || player.dead) return false;
+    const gx = Math.floor((player.x + TANK_SIZE / 2) / TILE), gy = Math.floor((player.y + TANK_SIZE / 2) / TILE);
+    return inside(gx, gy) && map[gy][gx] === TILE_TREE;
+  }
   function enemyTarget(e) {
+    if (playerInBush()) return rng() < 0.2 ? 'base' : null;   // —— v1.2.120 草丛隐身：索不到玩家改打基地 ——
     const r = rng();
     switch (e.type) {
       case 'elite':    return r < 0.16 ? 'player' : r < 0.26 ? 'base' : null;
@@ -4491,6 +4507,9 @@
       for (let i = 0; i < stepN; i++) pushTankSafe(e, sx, sy);
       return;
     }
+    { const gx = Math.floor((e.x + e.size / 2) / TILE), gy = Math.floor((e.y + e.size / 2) / TILE);   // —— v1.2.119 电网电击(先于冻结判定,冻住也挨电) ——
+      if (inside(gx, gy) && map[gy][gx] === TILE_ELEC) { e.elecT = (e.elecT || 0) + k; if (e.elecT >= 50) { e.elecT = 0; runDmgAdd(1); e.hp -= 1; e.hitFlash = 4; spawnParticles(e.x + e.size / 2, e.y + e.size / 2, '#7df9ff', 5); if (e.hp <= 0) { e.dead = true; onEnemyKilled(e); return; } } }
+      else e.elecT = 0; }
     if (e.freezeT > 0) { e.freezeT -= k; if (e.freezeT <= 0) e.freezeT = 0; return; }  // 冰冻子弹：单兵冻结中不动不射
     if (e.isBoss) { updateBoss(e, k); return; }
     if (e.type === 'sniper')  { updateSniper(e, k); return; }    // 狙击：远处压制
@@ -4510,7 +4529,8 @@
     // 分层目标锁定：精英追玩家，装甲/工兵直冲基地，快速游走
     // —— v0.2.7 双人：目标锁定最近存活玩家 ——
     const tgt = enemyTarget(e);
-    if (tgt === 'player') { const tp = nearestPlayerTo(e.x, e.y); if (tp) e.dir = dirFromVec(tp.x - e.x, tp.y - e.y); }
+    if (tgt === 'player' && playerInBush()) { /* —— v1.2.120 草丛隐身：放弃索敌 —— */ }
+    else if (tgt === 'player') { const tp = nearestPlayerTo(e.x, e.y); if (tp) e.dir = dirFromVec(tp.x - e.x, tp.y - e.y); }
     else if (tgt === 'base' && baseAlive) e.dir = dirFromVec(BASE.x * TILE - e.x, BASE.y * TILE - e.y);
 
     if (!moveTank(e, k)) {
@@ -4682,6 +4702,11 @@
 
   // ===== 子弹更新 =====
   function updateBullet(b, k) {
+    if (b.owner && b.owner.isPlayer && fx.homing > 0 && !b.dead) {   // —— v1.2.117 追踪弹 ——
+      let tgt = null, td = 1e18;
+      for (const e of enemies) { if (e.dead) continue; const d = (e.x - b.x) * (e.x - b.x) + (e.y - b.y) * (e.y - b.y); if (d < td) { td = d; tgt = e; } }
+      if (tgt) b.dir = dirFromVec(tgt.x - b.x, tgt.y - b.y);
+    }
     const dist = b.speed * k;
     const steps = Math.max(1, Math.ceil(dist));
     const stepLen = dist / steps;
@@ -4692,6 +4717,18 @@
 
       if (b.x < 0 || b.y < 0 || b.x + b.size > W || b.y + b.size > H) { b.dead = true; return; }
       if (isBlocked(b.x, b.y, b.size, true)) {
+        if (b.owner.isPlayer && fx.rico > 0 && !b.ricoUsed) {   // —— v1.2.118 钢墙弹射 ——
+          let steelHit = false;
+          { const x0 = Math.floor(b.x / TILE), x1 = Math.floor((b.x + b.size - 0.01) / TILE), y0 = Math.floor(b.y / TILE), y1 = Math.floor((b.y + b.size - 0.01) / TILE);
+            for (let yy = y0; yy <= y1 && !steelHit; yy++) for (let xx = x0; xx <= x1; xx++) if (inside(xx, yy) && map[yy][xx] === TILE_STEEL) { steelHit = true; break; } }
+          if (steelHit) {
+            b.ricoUsed = true;
+            const ax = Math.abs(DX[b.dir]), ay = Math.abs(DY[b.dir]);
+            b.dir = ax === ay ? (b.dir + 4) % 8 : ax > ay ? (8 - b.dir) % 8 : (4 - b.dir + 8) % 8;
+            spawnParticles(cx, cy, '#b5e0ff', 4); sfxHit();
+            continue;
+          }
+        }
         damageTile(cx, cy);
         // 沿运动方向补刀相邻格（斜向子弹两轴都补）
         if (DY[b.dir] < 0) damageTile(cx, b.y);
@@ -4723,8 +4760,11 @@
             // 巨弹头强化：对多血敌人额外 -1 伤害
             const extra = ((upgrades.bigbullet || 0) > 0 && e.hp > 1) ? 1 : 0;
             const weak97 = e.isBoss && b.dir === e.dir;   // —— v1.2.97 背后弱点 ——
-            runDmgAdd(1 + extra + (weak97 ? 1 : 0));
-            e.hp -= 1 + extra + (weak97 ? 1 : 0); e.hitFlash = 6;
+            const crit112 = critForce || rng() < 0.10;   // —— v1.2.112 暴击弹 ——
+            const dmg112 = ((b.charged ? 3 : 1) + extra + (weak97 ? 1 : 0)) * (crit112 ? 2 : 1);   // —— v1.2.121 蓄力弹伤3 ——
+            if (crit112) { critCount++; addText(cx, cy - 26, '⚡ 暴击', '#ffe600'); }
+            runDmgAdd(dmg112);
+            e.hp -= dmg112; e.hitFlash = 6;
             if (weak97) addText(cx, cy - 26, '💥 弱点', '#ffe600');
             dmgNum(cx, cy - 14, 1 + extra);   // —— v1.2.69 ——
             // 冰冻子弹：命中几率冻住 1 秒（每层 +15% 概率）
@@ -4829,9 +4869,21 @@
         player.y = ny;
       clampPlayer();
     }
-    if (keys[' '] || keys['Space'] || keys['j'] || keys['J']) fire(player);
+    if (keys[' '] || keys['Space'] || keys['j'] || keys['J']) { fire(player); chargeT = Math.min(chargeT + k, 120); }
+    else if (chargeT >= 60) { chargeShot(); chargeT = 0; }
+    else chargeT = 0;   // —— v1.2.121 蓄力炮 ——
     if (player.portalCd > 0) player.portalCd -= k;
     checkPortal(player);
+  }
+
+  // —— v1.2.121 蓄力炮：松开开火键时若蓄满发射高伤穿透弹 ——
+  function chargeShot() {
+    if (!player || player.dead) return;
+    const cx = player.x + TANK_SIZE / 2, cy = player.y + TANK_SIZE / 2;
+    const b = perfPoolSpawn(cx - 4, cy - 4, 8, player.dir, BULLET_SPEED * 1.2, player, 99, false);
+    b.charged = true; chargeFired++;
+    spawnParticles(cx, cy, '#9be7ff', 12); sfxUltimate();
+    addText(cx, cy - 16, '🔋 蓄力炮', '#9be7ff');
   }
 
   // ===== v0.2.7 近战大招（E 键）：冷却 + 近战 AOE =====
@@ -4992,6 +5044,7 @@
   function killPlayer(p) {
     p = p || player;
     if (!p || p.dead) return;
+    if (p === player && playerArmor > 0 && multiMode !== 2) { playerArmor = 0; p.spawnInv = Math.max(p.spawnInv || 0, 90); addText(p.x + TANK_SIZE / 2, p.y - 10, '🛡 护甲抵消', '#c7d2fe'); sfxPickup(); return; }   // —— v1.2.115 护甲片挡死 ——
     const isP2 = p === player2;
     p.dead = true;
     stat.deaths++;
@@ -5114,6 +5167,8 @@
 
   function onEnemyKilled(e) {
     sfxBoom();
+    killFeed.push({ s: '✖ 击毁 ' + (e.isBoss ? 'Boss' : (ENEMY_TYPES[e.type] || {}).label || e.type), t: animTime });
+    if (killFeed.length > 3) killFeed.shift();   // —— v1.2.113 击杀播报 ——
     petReact('kill');   // —— v0.3.3 宠物击杀欢跳 ——
     todayAdd('kills', 1);   // —— v1.2.71 今日击杀 ——
     hitStop = reduced() ? 0 : (e.isBoss ? 0.06 : 0.03);   // 击杀定格（减弱动效时关闭；Boss 用慢动作替代长定格）
@@ -5357,6 +5412,10 @@
       case 'repair': rebuildBaseWalls(); break;   // —— v1.2.36 基地维修 ——
       case 'guard':  baseGuard = 8; break;   // —— v1.2.42 护垒 8s ——
       case 'gold':   addGold(25); break;   // —— v1.2.51 金袋 +25🪙 ——
+      case 'armor':  playerArmor = 1; break;   // —— v1.2.115 护甲片 ——
+      case 'spread': fx.spread = 8; break;   // —— v1.2.116 霰弹 8s ——
+      case 'homing': fx.homing = 8; break;   // —— v1.2.117 追踪弹 8s ——
+      case 'rico':   fx.rico = 8; break;   // —— v1.2.118 弹射弹 8s ——
     }
     if (player) addText(clamp(player.x + TANK_SIZE / 2, 84, W - 84), player.y - 6, pickupEffectText(type, pickBefore, pickupState()) || def.label, def.color);
     runPowerups++;
@@ -5680,6 +5739,7 @@
     levelSecs = 0; levelKills = 0; blitzDone = false;   // —— v0.2.6 本关计时与击杀重置 · v1.2.34 ——
     lvShots = 0; lvHits = 0; lvAccBonus = 0;   // —— v1.2.95 ——
     lvRankS = 0; lvNewRec = false; streakHoldT = 0; killStreak = 0;   // —— v1.2.102/108/109 ——
+    critCount = 0; playerArmor = 0; chargeT = 0; chargeFired = 0; killFeed = [];   // —— v1.2.112/113/115/121 ——
     enemiesSpawned = 0;
     airDropT = 20;   // —— v1.2.93 空投重置 ——
     weather = __testMode ? 'clear' : ['clear', 'rain', 'snow', 'wind'][randInt(0, 3)];   // —— v1.2.104 战地天气（测试态默认晴,weatherSetNow 强制）——
@@ -5700,7 +5760,7 @@
     bullets = []; enemies = []; recycleParticles(); texts = []; powerups = []; mines = []; coinDrops = []; wrecks.length = 0;   // —— v1.2.30 换关清空散币 ——
     lasers = [];                 // —— v0.2.5 Boss 多样化：换关清空激光 ——
     baseAlive = true;
-    fx = { rapid: 0, double: 0, freeze: 0, pierce: 0, slow: 0 }; baseGuard = 0;
+    fx = { rapid: 0, double: 0, freeze: 0, pierce: 0, slow: 0, spread: 0, homing: 0, rico: 0 }; baseGuard = 0;
     combo = 0; comboTimer = 0; comboWindowMax = 0;
     bossHp = 0; bossMaxHp = 0;
     generateMap();
@@ -5888,6 +5948,9 @@
     if (fx.pierce > 0) { fx.pierce -= dt; if (fx.pierce <= 0) buffEndNote('pierce'); }   // —— v1.2.23 ——
     if (fx.freeze > 0) { fx.freeze -= dt; if (fx.freeze <= 0) buffEndNote('freeze'); }
     if (fx.slow > 0) { fx.slow -= dt; if (fx.slow <= 0) buffEndNote('slow'); }   // —— v1.2.32 ——
+    if (fx.spread > 0) fx.spread -= dt;   // —— v1.2.116 ——
+    if (fx.homing > 0) fx.homing -= dt;   // —— v1.2.117 ——
+    if (fx.rico > 0) fx.rico -= dt;   // —— v1.2.118 ——
     if (baseGuard > 0) { baseGuard -= dt; if (baseGuard <= 0) buffEndNote('guard'); }   // —— v1.2.42 ——
     if (streakHoldT > 0) { streakHoldT -= dt; if (streakHoldT <= 0 && killStreak > 0) { killStreak = 0; fieldNoteShow('⚔ 连杀中断', 'info', 1400, 1); } }   // —— v1.2.109 ——
     if (comboTimer > 0) { comboTimer -= dt; if (comboTimer <= 0) { if (comboShield && combo >= 3) { comboShield = false; comboTimer = 1.5; comboWindowMax = Math.max(comboWindowMax, 1.5); fieldNoteShow('🛡 连击护盾 · 宽限 1.5 秒', 'warn', 1600, 1); } else { fieldNoteShow(comboEndText(combo, stat.maxCombo), 'info', 1600, 1); combo = 0; } } }   // —— v1.2.18 连击护盾宽限 ——
@@ -6204,6 +6267,7 @@
           else if (t === TILE_STEEL) drawSteel(x * TILE, y * TILE);
           else if (t === TILE_WATER) drawWater(x * TILE, y * TILE);
           else if (t === TILE_BARREL || t === TILE_PORTAL) animatedTiles.push({ t, x:x * TILE, y:y * TILE });
+          else if (t === TILE_ELEC) { ctx.fillStyle = '#0a2233'; ctx.fillRect(x * TILE, y * TILE, TILE, TILE); ctx.strokeStyle = '#7df9ff'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.moveTo(x * TILE + 13, y * TILE + 3); ctx.lineTo(x * TILE + 8, y * TILE + 13); ctx.lineTo(x * TILE + 14, y * TILE + 12); ctx.lineTo(x * TILE + 10, y * TILE + 21); ctx.stroke(); }   // —— v1.2.119 电网绘制 ——
           else if (t === TILE_TREE) treeTiles.push({ x:x * TILE, y:y * TILE });
         }
     } finally { ctx = prev; }
@@ -6360,6 +6424,7 @@
     if (player && !player.dead) drawFireCd(player);
     drawFoesBadge();
     drawSniperAims();
+    drawKillFeed();   // —— v1.2.113 ——
     drawBlastRings();
     drawBaseAlert();
     drawEnemyIntroMark();
@@ -24678,6 +24743,12 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     }
     return out;
   }
+  function drawKillFeed() {
+    if (!killFeed.length) return;
+    ctx.save(); ctx.font = '10px monospace'; ctx.textAlign = 'left';
+    for (let i = 0; i < killFeed.length; i++) { ctx.globalAlpha = Math.max(0.25, 1 - (animTime - killFeed[i].t) / 240); ctx.fillStyle = '#ffd75e'; ctx.fillText(killFeed[i].s, 8, 14 + i * 12); }
+    ctx.restore();
+  }
   function drawSniperAims() {
     for (const a of sniperAims()) {
       ctx.save();
@@ -25882,7 +25953,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     if (paused) pausedAt = performance.now();
     pauseBtn.textContent = pauseIconText(paused);
     setBgm(paused ? 'calm' : computeTargetBgm());   // v0.2.9 恢复时按 Boss/波次选曲
-    if (paused) showOverlay('paused'); else hideOverlay();
+    if (paused) { const ps = $('pauseStatLine'); if (ps) { ps.hidden = false; ps.textContent = '📊 本局 击杀 ' + stat.kills + ' · 命中 ' + (lvShots ? Math.round(lvHits / lvShots * 100) : 0) + '% · 用时 ' + Math.floor(levelSecs) + 's'; } showOverlay('paused'); } else hideOverlay();   // —— v1.2.114 暂停简报 ——
   }
 
   function applyMuteLabel() {
@@ -27309,7 +27380,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     // —— v0.2.5 Boss 多样化：退出回菜单重置轮换与激光 ——
     bossType = BOSS_TYPES[0]; bossCount = 0; lasers = [];
     baseAlive = true;
-    fx = { rapid: 0, double: 0, freeze: 0, pierce: 0, slow: 0 }; baseGuard = 0;
+    fx = { rapid: 0, double: 0, freeze: 0, pierce: 0, slow: 0, spread: 0, homing: 0, rico: 0 }; baseGuard = 0;
     upgrades = {}; upgTotal = 0; upgradeOpen = false;
     dailyMode = false; dailyMods = { _names: [] };
     customMode = false; customMap = null;   // v0.2.7 自制关卡：退出回菜单重置
@@ -27494,7 +27565,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.111', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.121', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -27773,7 +27844,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
 
   window.addEventListener('keydown', (e) => {
     if (isTypingTarget(e.target)) return;   // —— v1.1.234 打字不进 keys、不吞空格/方向键、不触发快捷键 ——
-    if ((e.key === 'r' || e.key === 'R') && gameOver) { ensureAudio(); start(dailyMode); return; }   // —— v1.2.106 R 键快捷重开 ——
+    if ((e.key === 'r' || e.key === 'R') && gameOver) { ensureAudio(); start(dailyMode, undefined, true); return; }   // —— v1.2.106 R 键快捷重开 · v1.2.114 败局重开绕过防抖(刻意操作) ——
     if (panelOpen()) return;   // —— v1.2.9 弹层开着时快捷键不进游戏 ——
     // —— v1.2.21 过关转换弹层键盘直达：Enter/空格继续结算，Enter 领内测金币，1/2/3 选强化卡 ——
     if (lvResultPending) {
@@ -28156,6 +28227,15 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       luckyNow: () => luckyLevel, dropRateNow: () => (dailyMods.doublePU || luckyLevel ? 0.30 : 0.15),
       achPointsNow: () => achUnlocked.size * 10,
       lvRankNow: () => lvRankS, interestNow: () => lastInterest,
+      critNow: () => critCount, critForceNow: (v) => { critForce = !!v; return critForce; },
+      killFeedNow: () => killFeed.map(k => k.s), armorNow: () => playerArmor,
+      spreadNow: () => fx.spread || 0, homingNow: () => fx.homing || 0, ricoNow: () => fx.rico || 0,
+      fxSetNow: (k, v) => { fx[k] = Number(v) || 0; return fx[k]; },
+      elecTileNow: () => TILE_ELEC, bushNow: () => playerInBush(),
+      eTargetNow: () => { const e = enemies.find(z => !z.dead); return e ? enemyTarget(e) : null; },
+      chargeNow: () => chargeT, chargeSetNow: (v) => { chargeT = Number(v) || 0; return chargeT; }, chargeFiredNow: () => chargeFired,
+      bulletsInfoNow: () => bullets.map(b => ({ x: Math.round(b.x), y: Math.round(b.y), dir: b.dir, size: b.size, own: !!(b.owner && b.owner.isPlayer), dead: !!b.dead })),
+      pauseStatNow: () => { const e = $('pauseStatLine'); return e ? e.textContent : null; },
       endNow: (w) => { endGame(!!w); return gameOver; },
       spawnBlockNow: () => spawnBlockT,
       baseRectNow: () => ({ x: BASE.x * TILE, y: BASE.y * TILE, w: TILE }),
