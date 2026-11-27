@@ -30888,6 +30888,36 @@ async function main() {
     return ok === true || 'apply failed';
   });
 
+  // U9806–U9808: 连锁闪电
+  await senseCheck("U9806 连锁闪电跳转伤害近敌", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'armored');
+    T.spawnFoeNow(360, 100, 'armored');
+    const es = T.r18enNow().filter(x => !x.dead);
+    es.forEach(x => { x.freezeT = 1e9; });
+    const hp1 = es.length > 1 ? es[1].hp : 0;
+    T.applyPowerupNow('chain');
+    if (es.length) T.spawnBulletNow(es[0].x, es[0].y + 40, 0, false);
+    for (let i = 0; i < 30; i++) { await Z(70); if (es.length > 1 && es[1].hp < hp1) break; }
+    const hurt = es.length > 1 && (es[1].hp < hp1 || es[1].dead);
+    T.quit();
+    return hurt === true || JSON.stringify({ hp1, hp: es[1] && es[1].hp });
+  });
+  await senseCheck("U9807 连锁闪电计时器启动", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.applyPowerupNow('chain');
+    const v = T.fxValNow('chain');
+    T.quit();
+    return v > 0 || JSON.stringify({ v });
+  });
+  await senseCheck("U9808 连锁闪电道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('chain');
+    T.quit();
+    return ok === true || 'apply failed';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
