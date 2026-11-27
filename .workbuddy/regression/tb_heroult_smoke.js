@@ -29964,6 +29964,43 @@ async function main() {
     return (dChill < dNormal * 0.8) || JSON.stringify({ dNormal, dChill });
   });
 
+  // U9722–U9724: 吸血
+  await senseCheck("U9722 吸血敌命中玩家回血", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap();
+    for (let i = 0; i < 30 && T.spawnInvNow() > 0; i++) await Z(100);
+    T.spawnFoeNow(300, 100, 'vampire');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9;
+    const hp0 = e.hp;
+    const p = T.r18posNow();
+    T.spawnEBulletAt(p.px - 2, p.py - 30, 4);
+    for (let i = 0; i < 25 && e.hp <= hp0; i++) await Z(80);
+    const hp1 = e.hp;
+    T.quit();
+    return hp1 > hp0 || JSON.stringify({ hp0, hp1 });
+  });
+  await senseCheck("U9723 吸血飘字出现", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap();
+    for (let i = 0; i < 30 && T.spawnInvNow() > 0; i++) await Z(100);
+    T.spawnFoeNow(300, 100, 'vampire');
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.freezeT = 1e9;
+    const p = T.r18posNow();
+    T.spawnEBulletAt(p.px - 2, p.py - 30, 4);
+    let seen = false;
+    for (let i = 0; i < 25 && !seen; i++) { await Z(80); seen = T.floatTextsNow().some(x => x.indexOf('吸血') >= 0); }
+    T.quit();
+    return seen === true || JSON.stringify({ ts: T.floatTextsNow() });
+  });
+  await senseCheck("U9724 吸血敌类型已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'vampire');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const ok = e && e.type === 'vampire' && e.speed > 1.1;
+    T.quit();
+    return ok === true || JSON.stringify({ t: e && e.type, sp: e && e.speed });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
