@@ -31345,6 +31345,45 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (rb && rb.dir >= 3 && rb.dir <= 5) || JSON.stringify({ rb });
   });
 
+  // U9845–U9847: 召唤者
+  await senseCheck("U9845 召唤者类型已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'summoner');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const ok = !!(e && e.type === 'summoner');
+    T.quit();
+    return ok === true || JSON.stringify({ t: e && e.type });
+  });
+  await senseCheck("U9846 召唤者召唤小兵", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'summoner');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no summoner'; }
+    e.sumT = 359;
+    let n = 0;
+    for (let i = 0; i < 18; i++) {
+      await Z(90);
+      n = T.r18enNow().filter(x => !x.dead && x.type === 'normal').length;
+      if (n > 0) break;
+    }
+    T.quit();
+    return (n > 0) || 'no minion summoned';
+  });
+  await senseCheck("U9847 召唤上限3名", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'summoner');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no summoner'; }
+    e.sumN = 3; e.sumT = 359;
+    const n0 = T.r18enNow().filter(x => !x.dead).length;
+    for (let i = 0; i < 15; i++) await Z(90);
+    const n1 = T.r18enNow().filter(x => !x.dead).length;
+    T.quit();
+    return (n1 === n0) || JSON.stringify({ n0, n1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
