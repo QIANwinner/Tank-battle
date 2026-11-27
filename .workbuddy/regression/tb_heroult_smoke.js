@@ -30062,6 +30062,29 @@ async function main() {
     return sum < 150 || JSON.stringify({ sum, px: [corner[0], corner[1], corner[2]] });
   });
 
+  // U9731–U9733: 敌潮
+  await senseCheck("U9731 第3关敌潮激活", (T,$) => {
+    T.startAtLevel(3); T.skipIntro();
+    const h = T.hordeNow(), tot = T.enemiesTotalNow();
+    T.quit();
+    return (h > 0 && tot >= 18) || JSON.stringify({ h, tot });
+  });
+  await senseCheck("U9732 第4关非敌潮", (T,$) => {
+    T.startAtLevel(4); T.skipIntro();
+    const h = T.hordeNow(), tot = T.enemiesTotalNow();
+    T.quit();
+    return (h <= 0 && tot < 18) || JSON.stringify({ h, tot });
+  });
+  await senseCheck("U9733 敌潮击杀赏金", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.hordeSetNow(500);
+    T.spawnFoeNow(300, 100, 'normal');
+    T.kill();
+    const seen = T.floatTextsNow().some(x => x.indexOf('敌潮赏金') >= 0);
+    T.quit();
+    return seen === true || JSON.stringify({ ts: T.floatTextsNow() });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
