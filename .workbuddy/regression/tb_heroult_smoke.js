@@ -30918,6 +30918,39 @@ async function main() {
     return ok === true || 'apply failed';
   });
 
+  // U9809–U9811: 燃烧弹
+  await senseCheck("U9809 燃烧弹命中附加灼烧", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'armored');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (e) e.freezeT = 1e9;
+    T.applyPowerupNow('burn');
+    if (e) T.spawnBulletNow(e.x, e.y + 40, 0, false);
+    let bt = 0;
+    for (let i = 0; i < 25 && !bt; i++) { await Z(70); bt = e && e.burnT || 0; }
+    T.quit();
+    return bt > 0 || JSON.stringify({ bt });
+  });
+  await senseCheck("U9810 灼烧持续掉血", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'armored');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (e) { e.freezeT = 1e9; e.burnT = 180; }
+    const hp0 = e ? e.hp : 0;
+    for (let i = 0; i < 40; i++) { await Z(90); if (!e || e.dead || e.hp < hp0) break; }
+    const hurt = !e || e.dead === true || e.hp < hp0;
+    T.quit();
+    return hurt === true || JSON.stringify({ hp0, hp: e && e.hp });
+  });
+  await senseCheck("U9811 燃烧弹道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('burn');
+    T.quit();
+    return ok === true || 'apply failed';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
