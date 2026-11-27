@@ -30544,6 +30544,42 @@ async function main() {
     return (mS === 0.5 && mD === 1.7) || JSON.stringify({ mS, mD });
   });
 
+  // U9776–U9778: 传送带
+  await senseCheck("U9776 传送带上玩家被右推", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p0 = T.r18posNow();
+    for (let gx = 0; gx < 26; gx++) for (let gy = 0; gy < 26; gy++) T.setTile(gx, gy, 10);
+    T.renderOnce();
+    await Z(500);
+    const p1 = T.r18posNow();
+    T.quit();
+    return p1.px > p0.px + 5 || JSON.stringify({ x0: p0.px, x1: p1.px });
+  });
+  await senseCheck("U9777 非传送带不推送", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p0 = T.r18posNow();
+    await Z(400);
+    const p1 = T.r18posNow();
+    T.quit();
+    return Math.abs(p1.px - p0.px) < 3 || JSON.stringify({ x0: p0.px, x1: p1.px });
+  });
+  await senseCheck("U9778 敌人站传送带也被右推", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(200, 300, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (e) e.freezeT = 1e9;
+    for (let gx = 0; gx < 26; gx++) for (let gy = 0; gy < 26; gy++) T.setTile(gx, gy, 10);
+    T.renderOnce();
+    const x0 = e ? e.x : 0;
+    await Z(500);
+    const x1 = e ? e.x : 0;
+    T.quit();
+    return x1 > x0 + 3 || JSON.stringify({ x0, x1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
