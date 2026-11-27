@@ -30399,6 +30399,43 @@ async function main() {
     return seen === true || 'never re-targeted';
   });
 
+  // U9764–U9766: 双倍积分
+  await senseCheck("U9764 双倍积分道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('score2');
+    const v = T.score2Now();
+    T.quit();
+    return (ok && v > 0) === true || JSON.stringify({ ok, v });
+  });
+  await senseCheck("U9765 双倍积分期间击杀得分翻倍", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    const killOne = async (useBuff) => {
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+      if (useBuff) T.fxSetNow('score2', 8);
+      const s0 = T.scoreNow();
+      T.spawnFoeNow(300, 100, 'normal');
+      const e = T.r18enNow().filter(x => !x.dead).pop();
+      if (e) { e.freezeT = 1e9; e.hp = 1; }
+      T.spawnBulletNow(e.x + e.size / 2 - 2, e.y + e.size + 6, 0, false);
+      for (let i = 0; i < 30 && !(e.dead); i++) await Z(60);
+      const gain = T.scoreNow() - s0;
+      T.quit();
+      return gain;
+    };
+    const gA = await killOne(false);
+    const gB = await killOne(true);
+    return (gA > 0 && gB === gA * 2) || JSON.stringify({ gA, gB });
+  });
+  await senseCheck("U9766 双倍积分计时衰减", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.fxSetNow('score2', 0.6);
+    for (let i = 0; i < 30 && T.score2Now() > 0; i++) await Z(100);
+    const v = T.score2Now();
+    T.quit();
+    return v <= 0 || JSON.stringify({ v });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
