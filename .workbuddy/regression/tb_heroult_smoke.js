@@ -30860,6 +30860,34 @@ async function main() {
     return ok === true || 'apply failed';
   });
 
+  // U9803–U9805: 分裂弹
+  await senseCheck("U9803 分裂弹命中裂解小子弹", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'armored');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (e) e.freezeT = 1e9;
+    T.applyPowerupNow('split');
+    if (e) T.spawnBulletNow(e.x + 8, e.y + 60, 0, false);
+    let small = 0;
+    for (let i = 0; i < 25 && !small; i++) { await Z(70); small = T.bulletsInfoNow().filter(b => !b.dead && b.size <= 3).length; }
+    T.quit();
+    return small >= 1 || JSON.stringify({ small });
+  });
+  await senseCheck("U9804 分裂弹计时器启动", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.applyPowerupNow('split');
+    const v = T.fxValNow('split');
+    T.quit();
+    return v > 0 || JSON.stringify({ v });
+  });
+  await senseCheck("U9805 分裂弹道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('split');
+    T.quit();
+    return ok === true || 'apply failed';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
