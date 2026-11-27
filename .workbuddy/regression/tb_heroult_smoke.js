@@ -31047,6 +31047,34 @@ async function main() {
     return ok === true || 'apply failed';
   });
 
+  // U9821–U9823: 时间缓流
+  await senseCheck("U9821 时间缓流敌人减速", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.applyPowerupNow('timewarp');
+    const v = T.fxValNow('timewarp');
+    T.quit();
+    return v > 0 || JSON.stringify({ v });
+  });
+  await senseCheck("U9822 时间缓流不影响玩家", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.applyPowerupNow('timewarp');
+    const p0 = T.r18posNow();
+    T.keySet('a', true);
+    await Z(400);
+    T.keySet('a', false);
+    const p1 = T.r18posNow();
+    T.quit();
+    return p1.px < p0.px - 10 || JSON.stringify({ x0: p0.px, x1: p1.px });
+  });
+  await senseCheck("U9823 时间缓流道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('timewarp');
+    T.quit();
+    return ok === true || 'apply failed';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
