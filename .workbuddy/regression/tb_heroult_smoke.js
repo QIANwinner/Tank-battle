@@ -29919,6 +29919,51 @@ async function main() {
     return l1 < l0 || JSON.stringify({ l0, l1 });
   });
 
+  // U9719–U9721: 寒冰
+  await senseCheck("U9719 靠近寒冰敌人获得寒意", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.spawnFoeNow(p.px - 10, p.py - 60, 'frost');
+    let c = 0;
+    for (let i = 0; i < 15 && c <= 0; i++) { await Z(80); c = T.chillNow(); }
+    T.quit();
+    return c > 0 || JSON.stringify({ c });
+  });
+  await senseCheck("U9720 远离后寒意衰减", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.spawnFoeNow(p.px - 10, p.py - 60, 'frost');
+    for (let i = 0; i < 15 && T.chillNow() <= 0; i++) await Z(80);
+    T.kill();
+    let c1 = 99;
+    for (let i = 0; i < 25 && c1 > 0; i++) { await Z(80); c1 = T.chillNow(); }
+    T.quit();
+    return c1 <= 0 || JSON.stringify({ c1 });
+  });
+  await senseCheck("U9721 寒意中位移减慢", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p0 = T.r18posNow();
+    T.keySet('w', true);
+    for (let i = 0; i < 10; i++) await Z(50);
+    T.keySet('w', false);
+    const dNormal = Math.abs(T.r18posNow().py - p0.py);
+    T.quit();
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p1 = T.r18posNow();
+    T.spawnFoeNow(p1.px - 10, p1.py - 60, 'frost');
+    for (let i = 0; i < 15 && T.chillNow() <= 0; i++) await Z(80);
+    const p2 = T.r18posNow();
+    T.keySet('w', true);
+    for (let i = 0; i < 10; i++) await Z(50);
+    T.keySet('w', false);
+    const dChill = Math.abs(T.r18posNow().py - p2.py);
+    T.quit();
+    return (dChill < dNormal * 0.8) || JSON.stringify({ dNormal, dChill });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
