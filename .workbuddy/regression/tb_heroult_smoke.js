@@ -29883,6 +29883,42 @@ async function main() {
     return seen === true || JSON.stringify({ ts: T.floatTextsNow() });
   });
 
+  // U9716–U9718: 毒雾
+  await senseCheck("U9716 毒雾敌死亡留雾", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'plague');
+    T.kill();
+    const n = T.cloudsNow().length;
+    T.quit();
+    return n >= 1 || JSON.stringify({ n });
+  });
+  await senseCheck("U9717 玩家滞留毒雾中毒累积", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'plague');
+    T.kill();
+    const c = T.cloudsNow()[0];
+    if (c) T.tp(c.x - 10, c.y - 10);
+    let pt = 0;
+    for (let i = 0; i < 20 && pt <= 0; i++) { await Z(80); pt = T.poisonNow(); }
+    T.quit();
+    return pt > 0 || JSON.stringify({ pt, c });
+  });
+  await senseCheck("U9718 中毒满则阵亡扣命", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap();
+    for (let i = 0; i < 30 && T.spawnInvNow() > 0; i++) await Z(100);
+    T.spawnFoeNow(300, 100, 'plague');
+    T.kill();
+    const c = T.cloudsNow()[0];
+    if (c) T.tp(c.x - 10, c.y - 10);
+    const l0 = T.livesNow();
+    for (let i = 0; i < 40 && T.livesNow() >= l0; i++) await Z(100);
+    const l1 = T.livesNow();
+    T.quit();
+    return l1 < l0 || JSON.stringify({ l0, l1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
