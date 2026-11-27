@@ -30165,6 +30165,36 @@ async function main() {
     return dead === true || 'contact no kill';
   });
 
+  // U9740–U9742: 定时炸弹
+  await senseCheck("U9740 定时炸弹道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('timebomb');
+    T.quit();
+    return ok === true || JSON.stringify({ ok });
+  });
+  await senseCheck("U9741 拾取后脚下埋弹", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const n0 = T.timebombsNow().length;
+    T.pickupApplyNow('timebomb');
+    const n1 = T.timebombsNow().length;
+    T.quit();
+    return n1 === n0 + 1 || JSON.stringify({ n0, n1 });
+  });
+  await senseCheck("U9742 三秒后爆炸伤敌", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.pickupApplyNow('timebomb');
+    T.spawnFoeNow(p.px - 10, p.py - 40, 'armored');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (e) e.freezeT = 1e9;
+    const hp0 = e ? e.hp : 0;
+    for (let i = 0; i < 60; i++) { await Z(80); if (!e || e.dead || e.hp < hp0) break; }
+    const hurt = !e || e.dead === true || e.hp < hp0;
+    T.quit();
+    return hurt === true || JSON.stringify({ hp0, hp: e && e.hp, dead: e && e.dead });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
