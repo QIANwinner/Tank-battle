@@ -30688,6 +30688,44 @@ async function main() {
     return v === 13 || JSON.stringify({ v });
   });
 
+  // U9788–U9790: 弹跳弹墙
+  await senseCheck("U9788 子弹命中弹墙反射", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.setTile(13, 8, 14);
+    T.renderOnce();
+    T.spawnBulletNow(13 * 24 + 10, 8 * 24 + 40, 0, false);
+    let d = -1;
+    for (let i = 0; i < 25 && d !== 4; i++) { await Z(40); const bs = T.bulletsInfoNow().filter(b => !b.dead); if (bs.length) d = bs[0].dir; }
+    T.quit();
+    return d === 4 || JSON.stringify({ d });
+  });
+  await senseCheck("U9789 弹墙不销毁子弹", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.setTile(13, 8, 14);
+    T.renderOnce();
+    T.spawnBulletNow(13 * 24 + 10, 8 * 24 + 40, 0, false);
+    await Z(300);
+    const n = T.bulletsInfoNow().filter(b => !b.dead).length;
+    T.quit();
+    return n >= 1 || JSON.stringify({ n });
+  });
+  await senseCheck("U9790 弹墙阻挡坦克通行", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    const gx = Math.floor(p.px / 24), gy = Math.floor((p.py - 26) / 24);
+    T.setTile(gx, gy, 14);
+    T.renderOnce();
+    T.keySet('w', true);
+    await Z(500);
+    T.keySet('w', false);
+    const p1 = T.r18posNow();
+    T.quit();
+    return p1.py > p.py - 26 || JSON.stringify({ y0: p.py, y1: p1.py });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
