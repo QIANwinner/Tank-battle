@@ -30371,6 +30371,34 @@ async function main() {
     return seen === false || 'mastery fired at 2';
   });
 
+  // U9761–U9763: 迷彩道具
+  await senseCheck("U9761 迷彩道具已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('camo');
+    const v = T.camoNow();
+    T.quit();
+    return (ok && v > 0) === true || JSON.stringify({ ok, v });
+  });
+  await senseCheck("U9762 迷彩期间敌人不索敌", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(400, 100, 'elite');
+    T.pickupApplyNow('camo');
+    let seen = false;
+    for (let i = 0; i < 60; i++) if (T.eTargetNow() === 'player') { seen = true; break; }
+    T.quit();
+    return seen === false || 'camo still targeted';
+  });
+  await senseCheck("U9763 迷彩结束恢复索敌", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(400, 100, 'elite');
+    T.pickupApplyNow('camo');
+    T.fxSetNow('camo', 0);
+    let seen = false;
+    for (let i = 0; i < 200; i++) if (T.eTargetNow() === 'player') { seen = true; break; }
+    T.quit();
+    return seen === true || 'never re-targeted';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
