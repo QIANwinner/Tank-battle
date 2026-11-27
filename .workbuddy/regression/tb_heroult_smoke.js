@@ -30259,6 +30259,29 @@ async function main() {
     return seen === true || 'no warn text';
   });
 
+  // U9749–U9751: 迷雾战争关
+  await senseCheck("U9749 第4关为迷雾关", (T,$) => {
+    T.startAtLevel(4); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const v = T.fogNow();
+    T.quit();
+    return v === true || JSON.stringify({ v });
+  });
+  await senseCheck("U9750 第8关非迷雾关", (T,$) => {
+    T.startAtLevel(8); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const v = T.fogNow();
+    T.quit();
+    return v === false || JSON.stringify({ v });
+  });
+  await senseCheck("U9751 迷雾关角落画面压暗", (T,$) => {
+    T.startAtLevel(4); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.renderOnce();
+    const cv = $('game'), cx2 = cv.getContext('2d');
+    const corner = cx2.getImageData(4, 4, 1, 1).data;
+    const sum = corner[0] + corner[1] + corner[2];
+    T.quit();
+    return sum < 150 || JSON.stringify({ sum, px: [corner[0], corner[1], corner[2]] });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
