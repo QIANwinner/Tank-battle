@@ -31420,6 +31420,49 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return changed === true || JSON.stringify({ d0, d: e.dir });
   });
 
+  // U9851–U9853: 毒蛛
+  await senseCheck("U9851 毒蛛类型已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'venom');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const ok = !!(e && e.type === 'venom');
+    T.quit();
+    return ok === true || JSON.stringify({ t: e && e.type });
+  });
+  await senseCheck("U9852 毒蛛留下毒迹", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'venom');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no venom'; }
+    e.venomT = 29;
+    let n = 0;
+    for (let i = 0; i < 15; i++) {
+      await Z(80);
+      n = T.venomTrailNow().length;
+      if (n > 0) break;
+    }
+    T.quit();
+    return (n > 0) || 'no trail';
+  });
+  await senseCheck("U9853 毒迹3秒消散", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'venom');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no venom'; }
+    e.venomT = 29;
+    for (let i = 0; i < 15; i++) { await Z(80); if (T.venomTrailNow().length > 0) break; }
+    e.freezeT = 99999;
+    let gone = false;
+    for (let i = 0; i < 60; i++) {
+      await Z(120);
+      if (T.venomTrailNow().length === 0) { gone = true; break; }
+    }
+    T.quit();
+    return gone === true || 'trail never decayed';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
