@@ -30580,6 +30580,46 @@ async function main() {
     return x1 > x0 + 3 || JSON.stringify({ x0, x1 });
   });
 
+  // U9779–U9781: 地刺
+  await senseCheck("U9779 敌人站地刺持续受伤", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'armored');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (e) e.freezeT = 1e9;
+    const hp0 = e ? e.hp : 0;
+    if (e) T.setTile(Math.floor((e.x + e.size / 2) / 24), Math.floor((e.y + e.size / 2) / 24), 11);
+    T.renderOnce();
+    for (let i = 0; i < 50; i++) { await Z(80); if (!e || e.dead || e.hp < hp0) break; }
+    const hurt = !e || e.dead === true || e.hp < hp0;
+    T.quit();
+    return hurt === true || JSON.stringify({ hp0, hp: e && e.hp });
+  });
+  await senseCheck("U9780 玩家站地刺只警告不阵亡", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.stopSpawn(); T.clearMap();
+    for (let i = 0; i < 40 && T.spawnInvNow() > 0; i++) await Z(80);
+    const p = T.r18posNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 11);
+    T.renderOnce();
+    const l0 = T.livesNow();
+    await Z(1500);
+    const l1 = T.livesNow();
+    T.quit();
+    return l1 >= l0 || JSON.stringify({ l0, l1 });
+  });
+  await senseCheck("U9781 地刺警告飘字出现", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.r18posNow();
+    T.setTile(Math.floor(p.px / 24), Math.floor(p.py / 24), 11);
+    T.renderOnce();
+    let seen = false;
+    for (let i = 0; i < 25 && !seen; i++) { await Z(90); seen = T.floatTextsNow().some(x => x.indexOf('地刺') >= 0); }
+    T.quit();
+    return seen === true || 'no spike warn';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
