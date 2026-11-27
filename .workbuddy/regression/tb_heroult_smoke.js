@@ -31384,6 +31384,42 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (n1 === n0) || JSON.stringify({ n0, n1 });
   });
 
+  // U9848–U9850: 疾风兵
+  await senseCheck("U9848 疾风兵类型已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'swift');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const ok = !!(e && e.type === 'swift');
+    T.quit();
+    return ok === true || JSON.stringify({ t: e && e.type });
+  });
+  await senseCheck("U9849 疾风兵极速", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'swift');
+    T.spawnFoeNow(400, 100, 'normal');
+    const es = T.r18enNow().filter(x => !x.dead);
+    const s = es.find(x => x.type === 'swift'), n = es.find(x => x.type === 'normal');
+    const ok = !!(s && n && s.speed > n.speed * 1.6);
+    T.quit();
+    return ok === true || JSON.stringify({ ss: s && s.speed, ns: n && n.speed });
+  });
+  await senseCheck("U9850 疾风蛇形变向", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 100, 'swift');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return 'no swift'; }
+    e.zagT = 44;
+    const d0 = e.dir;
+    let changed = false;
+    for (let i = 0; i < 15; i++) {
+      await Z(90);
+      if (e.dir !== d0) { changed = true; break; }
+    }
+    T.quit();
+    return changed === true || JSON.stringify({ d0, d: e.dir });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
