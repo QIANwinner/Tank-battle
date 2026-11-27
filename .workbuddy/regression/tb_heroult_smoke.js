@@ -30001,6 +30001,44 @@ async function main() {
     return ok === true || JSON.stringify({ t: e && e.type, sp: e && e.speed });
   });
 
+  // U9725–U9727: 词缀
+  await senseCheck("U9725 坚韧词缀生命+1", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.affixForceNow('tough');
+    T.spawnFoeNow(300, 100, 'armored');
+    T.affixForceNow(null);
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    const ok = e.affix === 'tough' && e.maxHp >= 3;
+    T.quit();
+    return ok === true || JSON.stringify({ af: e.affix, hp: e.hp, maxHp: e.maxHp });
+  });
+  await senseCheck("U9726 急速词缀移速+35%", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.affixForceNow('haste');
+    T.spawnFoeNow(300, 100, 'fast');
+    T.affixForceNow(null);
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    T.spawnFoeNow(400, 100, 'fast');
+    const es = T.r18enNow().filter(x => !x.dead);
+    const plain = es[es.length - 1];
+    const ok = e.affix === 'haste' && e.speed > plain.speed * 1.2;
+    T.quit();
+    return ok === true || JSON.stringify({ s1: e.speed, s0: plain.speed });
+  });
+  await senseCheck("U9727 击杀词缀敌额外赏金", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.affixForceNow('tough');
+    T.spawnFoeNow(300, 100, 'normal');
+    T.affixForceNow(null);
+    const e = T.r18enNow().filter(x => !x.dead).pop(); e.hp = 1;
+    const c0 = T.coins();
+    T.kill();
+    const d = T.coins() - c0;
+    const has15 = T.floatTextsNow().some(x => x.indexOf('词缀赏金') >= 0);
+    T.quit();
+    return (e.affix === 'tough' && has15) || JSON.stringify({ d, has15 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

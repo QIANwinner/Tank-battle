@@ -1878,7 +1878,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.127</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.128</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -4240,6 +4240,15 @@
       g100.golden = true; g100.hp += 2; g100.maxHp += 2; g100.color = '#ffd75e';
       addText(g100.x + g100.size / 2, g100.y - 10, '👑 精英敌将', '#ffd75e');
     }
+    // —— v1.2.128 词缀:急速/坚韧/狂怒 ——
+    { const af128 = enemies[enemies.length - 1];
+      const roll = affixForce || (rng() < 0.18 ? ['haste', 'tough', 'fury'][randInt(0, 2)] : null);
+      if (roll && type !== 'boss' && !af128.isBoss) {
+        af128.affix = roll;
+        if (roll === 'haste') af128.speed *= 1.35;
+        else if (roll === 'tough') { af128.hp += 1; af128.maxHp += 1; }
+        else if (roll === 'fury') af128.fury = true;
+      } }
     enemyIntroQueue(type);
   }
 
@@ -4558,7 +4567,7 @@
     const shootMin = Math.max(22, 60 - level * 4);
     const shootMax = Math.max(80, 150 - level * 6);
     if ((e.shootTimer -= k) <= 0) {
-      e.shootTimer = randInt(shootMin, shootMax);
+      e.shootTimer = Math.round(randInt(shootMin, shootMax) * (e.fury ? 0.55 : 1));   // —— v1.2.128 狂怒射速 ——
       fire(e);
     }
     // 分层目标锁定：精英追玩家，装甲/工兵直冲基地，快速游走
@@ -5234,6 +5243,7 @@
     if (e.type === 'elite') { addText(e.x + e.size / 2, e.y - 10, '👑 精英击破', '#ffd75e'); showToast('👑 精英击破 · 敌方精锐 -1'); }   // —— v1.2.44 精英击破播报 ——
     if (e.bounty > 0) { const bg94 = addGold(e.bounty, e.x + e.size / 2, e.y - 26); addText(e.x + e.size / 2, e.y - 26, '💰 悬赏 +' + bg94 + '🪙', '#ffd75e'); showToast('💰 复仇悬赏 +' + bg94 + '🪙'); }   // —— v1.2.94 ——
     if (e.golden) { const gg100 = addGold(30, e.x + e.size / 2, e.y - 38); spawnPowerup(e.x + e.size / 2, e.y + e.size / 2); addText(e.x + e.size / 2, e.y - 38, '👑 敌将伏法 +' + gg100 + '🪙', '#ffd75e'); }   // —— v1.2.100 ——
+    if (e.affix) { const ag128 = addGold(15, e.x + e.size / 2, e.y - 50); addText(e.x + e.size / 2, e.y - 50, '🏷 词缀赏金 +' + ag128 + '🪙', '#ffb14d'); }   // —— v1.2.128 ——
     if (e.isBoss) { stat.bossKills++; missionBump('boss', 1); }   // —— v1.2.2 每日任务 ——
     addKillScore(e);
     // 金币掉落：不同敌人金币不同，受金运加成
@@ -27642,7 +27652,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.127', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.128', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
