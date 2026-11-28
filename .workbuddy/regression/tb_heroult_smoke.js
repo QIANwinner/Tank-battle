@@ -32818,6 +32818,52 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return hurt2 || JSON.stringify({ hp1: e1.hp, hp2: e2.hp });
   });
 
+  // U9953–U9955: 激光流派
+  await senseCheck("U9953 激光流派切换", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('laser');
+    const lo = T.loadoutNow();
+    T.quit();
+    return (ok && lo.t === 'laser') || JSON.stringify({ ok, lo });
+  });
+  await senseCheck("U9954 激光穿透加成", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('laser');
+    const p = T.playerRefNow();
+    T.spawnFoeNow(300, 200, 'normal');
+    T.spawnFoeNow(300, 260, 'normal');
+    const en = T.r18enNow().filter(x => !x.dead);
+    if (en.length < 2 || !p) { T.quit(); return JSON.stringify({ nofoe: en.length }); }
+    const e1 = en[en.length - 2], e2 = en[en.length - 1];
+    e1.enterT = 0; e1.hp = 1; e1.maxHp = 1; e1.freezeT = 9999; e1.x = 300; e1.y = 200;
+    e2.enterT = 0; e2.hp = 1; e2.maxHp = 1; e2.freezeT = 9999; e2.x = 300; e2.y = 248;
+    p.x = e1.x - p.size / 2 + e1.size / 2 - 2; p.y = e1.y - 110; p.dir = 4;
+    T.firePlayerNow();
+    let dead2 = false;
+    for (let i = 0; i < 50; i++) { await Z(50); if (e2.dead) { dead2 = true; break; } }
+    T.quit();
+    return dead2 || JSON.stringify({ d1: e1.dead, d2: e2.dead });
+  });
+  await senseCheck("U9955 激光烧穿格挡", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('laser');
+    const p = T.playerRefNow();
+    T.spawnFoeNow(300, 200, 'guardian');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e || !p) { T.quit(); return JSON.stringify({ noent: 1 }); }
+    e.enterT = 0; e.hp = 6; e.maxHp = 6; e.freezeT = 9999; e.x = 300; e.y = 200; e.dir = 4;
+    p.x = e.x - p.size / 2 + e.size / 2 - 2; p.y = e.y + e.size + 40; p.dir = 0;
+    const hp0 = e.hp;
+    T.firePlayerNow();
+    let hurt = false;
+    for (let i = 0; i < 40; i++) { await Z(50); if (e.hp < hp0 || e.dead) { hurt = true; break; } }
+    T.quit();
+    return hurt || JSON.stringify({ hp: e.hp, hp0 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
