@@ -32373,6 +32373,46 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (en.length >= 3) || JSON.stringify({ n: en.length });
   });
 
+  // U9923–U9925: 队长强化
+  await senseCheck("U9923 队长血量强化", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const leader = en.find(x => x.isLeader);
+    T.quit();
+    return (leader && leader.maxHp >= 4) || JSON.stringify({ hp: leader && leader.maxHp });
+  });
+  await senseCheck("U9924 队长速度强化", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const leader = en.find(x => x.isLeader);
+    const mate = en.find(x => !x.isLeader && leader && x.type === leader.type);
+    const base = mate ? mate.speed : (leader ? leader.speed / 1.2 : 1);
+    T.quit();
+    return (leader && leader.speed >= base * 1.1) || JSON.stringify({ ls: leader && leader.speed, base });
+  });
+  await senseCheck("U9925 斩首悬赏金币", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const g0 = T.coinsNow();
+    const leader = T.r18enNow().find(x => !x.dead && x.isLeader);
+    if (!leader) { T.quit(); return JSON.stringify({ noleader: 1 }); }
+    leader.hp = 1; leader.freezeT = 9999;
+    T.spawnBulletNow(leader.x + leader.size / 2 - 3, leader.y - 40, 4, false);
+    let dead = false;
+    for (let i = 0; i < 40; i++) { await Z(50); if (leader.dead) { dead = true; break; } }
+    const g1 = T.coinsNow();
+    T.quit();
+    return (dead && g1 > g0) || JSON.stringify({ dead, g0, g1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
