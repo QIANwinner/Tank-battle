@@ -32643,6 +32643,51 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (started && y1 < y0 - 5) || JSON.stringify({ started, y0: Math.round(y0), y1: Math.round(y1) });
   });
 
+  // U9941–U9943: 混乱弹
+  await senseCheck("U9941 混乱弹生效", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const ok = T.applyPowerupNow('chaos');
+    const mem = T.r18enNow().find(x => !x.dead && x.squadId && !x.isLeader);
+    const ct = mem ? (mem.chaosT || 0) : 0;
+    T.quit();
+    return (ok && ct > 0) || JSON.stringify({ ok, ct });
+  });
+  await senseCheck("U9942 混乱驱散队形", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const leader = en.find(x => x.isLeader);
+    const mem = en.find(x => !x.isLeader);
+    if (!leader || !mem) { T.quit(); return JSON.stringify({ nopair: 1 }); }
+    leader.freezeT = 9999;
+    T.applyPowerupNow('chaos');
+    mem.x = leader.x + 260; mem.y = leader.y + 230; mem.enterT = 0; mem.freezeT = 0;
+    const d0 = Math.hypot(mem.x - leader.x, mem.y - leader.y);
+    await Z(1000);
+    const d1 = Math.hypot(mem.x - leader.x, mem.y - leader.y);
+    T.quit();
+    return (d1 > d0 - 80) || JSON.stringify({ d0: Math.round(d0), d1: Math.round(d1) });
+  });
+  await senseCheck("U9943 混乱计时衰减", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const mem = T.r18enNow().find(x => !x.dead && x.squadId && !x.isLeader);
+    if (!mem) { T.quit(); return JSON.stringify({ nomem: 1 }); }
+    mem.chaosT = 40; mem.freezeT = 0;
+    const c0 = mem.chaosT;
+    await Z(600);
+    const c1 = mem.chaosT;
+    T.quit();
+    return (c1 < c0) || JSON.stringify({ c0, c1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
