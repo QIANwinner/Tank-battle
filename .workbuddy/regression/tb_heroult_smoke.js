@@ -32064,6 +32064,59 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return chilled || JSON.stringify({ chill: T.chillNow() });
   });
 
+  // U9899–U9901: 寒潮
+  await senseCheck("U9899 寒潮激活", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.coldSetNow(5);
+    let act = 0;
+    for (let i = 0; i < 60; i++) { await Z(50); const c = T.coldNow(); if (c.act > 0) { act = c.act; break; } }
+    T.quit();
+    return act > 0 || JSON.stringify({ act });
+  });
+  await senseCheck("U9900 寒潮减速玩家", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    await Z(300);
+    const p0 = T.r18posNow();
+    T.keyDown('d'); await Z(500); T.keyUp('d');
+    const p1 = T.r18posNow();
+    const dWarm = Math.hypot(p1.px - p0.px, p1.py - p0.py);
+    await Z(200);
+    T.coldSetNow(5);
+    let coldOn = false;
+    for (let i = 0; i < 60; i++) { await Z(50); if (T.coldNow().act > 0) { coldOn = true; break; } }
+    if (!coldOn) { T.quit(); return JSON.stringify({ nocold: 1 }); }
+    await Z(200);
+    const p2 = T.r18posNow();
+    T.keyDown('d'); await Z(500); T.keyUp('d');
+    const p3 = T.r18posNow();
+    const dCold = Math.hypot(p3.px - p2.px, p3.py - p2.py);
+    T.quit();
+    return (dWarm > 8 && dCold < dWarm * 0.75) || JSON.stringify({ dWarm: Math.round(dWarm), dCold: Math.round(dCold) });
+  });
+  await senseCheck("U9901 寒潮减速敌人", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(120, 300, 'fast');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return JSON.stringify({ nofoe: 1 }); }
+    e.enterT = 0;
+    const x0 = e.x, y0 = e.y;
+    await Z(600);
+    const dWarm = Math.abs(e.x - x0) + Math.abs(e.y - y0);
+    e.x = 120; e.y = 300;
+    T.coldSetNow(5);
+    let coldOn = false;
+    for (let i = 0; i < 60; i++) { await Z(50); if (T.coldNow().act > 0) { coldOn = true; break; } }
+    if (!coldOn) { T.quit(); return JSON.stringify({ nocold: 1 }); }
+    const x1 = e.x, y1 = e.y;
+    await Z(600);
+    const dCold = Math.abs(e.x - x1) + Math.abs(e.y - y1);
+    T.quit();
+    return (dWarm > 4 && dCold < dWarm * 0.8) || JSON.stringify({ dWarm: Math.round(dWarm), dCold: Math.round(dCold) });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
