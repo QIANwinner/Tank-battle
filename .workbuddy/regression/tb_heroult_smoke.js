@@ -32302,6 +32302,39 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return drain > 40 || JSON.stringify({ t0, t1, drain });
   });
 
+  // U9917–U9919: 编队生成
+  await senseCheck("U9917 编队整队生成", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const n = T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(150);
+    const sq = T.squadNow();
+    T.quit();
+    return (n >= 4 && sq.length >= 1 && sq[0].total >= 4) || JSON.stringify({ n, sq });
+  });
+  await senseCheck("U9918 队长标记存在", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const leaders = en.filter(x => x.isLeader);
+    const members = en.filter(x => !x.isLeader);
+    T.quit();
+    return (leaders.length === 1 && members.length >= 3) || JSON.stringify({ l: leaders.length, m: members.length });
+  });
+  await senseCheck("U9919 编队共享squadId", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const ids = en.map(x => x.squadId);
+    const same = ids.length >= 4 && ids.every(v => v === ids[0]);
+    T.quit();
+    return same || JSON.stringify({ ids });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
