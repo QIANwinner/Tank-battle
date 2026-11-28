@@ -32155,6 +32155,62 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return moved > 4 || JSON.stringify({ moved: Math.round(moved) });
   });
 
+  // U9905–U9907: 沙暴
+  await senseCheck("U9905 沙暴激活", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.sandSetNow(5);
+    let act = 0;
+    for (let i = 0; i < 60; i++) { await Z(50); const s = T.sandNow(); if (s.act > 0) { act = s.act; break; } }
+    T.quit();
+    return act > 0 || JSON.stringify({ act });
+  });
+  await senseCheck("U9906 沙暴减缓弹速", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    await Z(200);
+    const cvb = $('game');
+    const by188 = Math.floor(cvb.height / 2);
+    const measure = async () => {
+      T.spawnBulletNow(30, by188, 2, false);
+      await Z(60);
+      const arr1 = T.bulletsInfoNow().filter(b => !b.dead && b.dir === 2);
+      if (!arr1.length) return -1;
+      const x1 = arr1[arr1.length - 1].x;
+      await Z(200);
+      const arr2 = T.bulletsInfoNow().filter(b => !b.dead && b.dir === 2);
+      if (!arr2.length) return -1;
+      const x2 = arr2[arr2.length - 1].x;
+      return x2 - x1;
+    };
+    const warm = await measure();
+    for (const b of (T.bulletsInfoNow() || [])) b.dead = true;
+    T.sandSetNow(5);
+    let coldOn = false;
+    for (let i = 0; i < 60; i++) { await Z(50); if (T.sandNow().act > 0) { coldOn = true; break; } }
+    if (!coldOn) { T.quit(); return JSON.stringify({ nosand: 1 }); }
+    const cold = await measure();
+    T.quit();
+    return (warm > 10 && cold > 0 && cold < warm * 0.88) || JSON.stringify({ warm, cold });
+  });
+  await senseCheck("U9907 沙暴幕染黄画面", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.renderOnce();
+    const cv = $('game'), cx2 = cv.getContext('2d');
+    const before = cx2.getImageData(6, 6, 1, 1).data;
+    T.sandSetNow(5);
+    let coldOn = false;
+    for (let i = 0; i < 60; i++) { await Z(50); if (T.sandNow().act > 0) { coldOn = true; break; } }
+    if (!coldOn) { T.quit(); return JSON.stringify({ nosand: 1 }); }
+    await Z(150);
+    T.renderOnce();
+    const after = cx2.getImageData(6, 6, 1, 1).data;
+    const dr = after[0] - before[0];
+    T.quit();
+    return dr > 6 || JSON.stringify({ dr, b: [before[0], before[1], before[2]], a: [after[0], after[1], after[2]] });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
