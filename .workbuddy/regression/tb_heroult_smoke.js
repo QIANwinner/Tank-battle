@@ -32276,6 +32276,32 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return txt === '—' || JSON.stringify({ txt });
   });
 
+  // U9914–U9916: 天灾关
+  await senseCheck("U9914 第9关为天灾关", (T,$) => {
+    T.startAtLevel(9); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const v = T.apocNow();
+    T.quit();
+    return v === true || JSON.stringify({ v });
+  });
+  await senseCheck("U9915 第8关非天灾关", (T,$) => {
+    T.startAtLevel(8); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const v = T.apocNow();
+    T.quit();
+    return v === false || JSON.stringify({ v });
+  });
+  await senseCheck("U9916 天灾关灾害加速流逝", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startAtLevel(9); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.meteorSetNow(9000);
+    await Z(150);
+    const t0 = T.disasterNow().meteorT;
+    await Z(500);
+    const t1 = T.disasterNow().meteorT;
+    const drain = t0 - t1;
+    T.quit();
+    return drain > 40 || JSON.stringify({ t0, t1, drain });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
