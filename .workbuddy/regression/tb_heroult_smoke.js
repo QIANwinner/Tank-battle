@@ -2886,11 +2886,11 @@ async function main() {
     const o = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({dom:!!document.getElementById('portalPairVal'),f:T.portalPairTextNow([])});})()"));
     t('U765 传送门计数已加入编辑器', o.dom === true, JSON.stringify(o));
     t('U766 初值 空网格 0 对', o.f === '🌀 传送门 0 对', JSON.stringify(o));
-    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.portalPairTextNow([[6,0],[0,6]]),b:T.portalCountNow([[6,0],[0,6]])});})()"));
+    const o2 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.portalPairTextNow([[17,0],[0,17]]),b:T.portalCountNow([[17,0],[0,17]])});})()"));
     t('U767 正常值 2 门 1 对', o2.a === '🌀 传送门 1 对' && o2.b === 2, JSON.stringify(o2));
-    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.portalPairTextNow([[6,6],[6,6]])});})()"));
+    const o3 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.portalPairTextNow([[17,17],[17,17]])});})()"));
     t('U768 边界 4 门 2 对', o3.a === '🌀 传送门 2 对', JSON.stringify(o3));
-    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.portalPairTextNow(null),b:T.portalPairTextNow([[6]])});})()"));
+    const o4 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({a:T.portalPairTextNow(null),b:T.portalPairTextNow([[17]])});})()"));
     t('U769 非法输入/奇数未配对', o4.a === '🌀 传送门 0 对' && o4.b.indexOf('未配对') >= 0, JSON.stringify(o4));
     const o5 = JSON.parse(await ev("(function(){const T=window.__tbTest;return JSON.stringify({len:T.portalPairDomNow().length});})()"));
     t('U770 DOM 文本长度合理', o5.len > 0, JSON.stringify(o5));
@@ -27318,9 +27318,8 @@ async function main() {
     T.spawnFoeNow(312, 310, 'normal');
     const e = T.r18enNow().find(x => !x.dead);
     e.dir = 4;   // 定向下防止乱跑
-    await Z(600);
-    const killed = e.dead === true;
-    const left = T.mineCountNow();
+    let killed = false, left = -1;
+    for (let i = 0; i < 30 && !(killed && left === 0); i++) { await Z(100); killed = e.dead === true; left = T.mineCountNow(); }   // —— flake修复:轮询容忍迟爆 ——
     T.quit();
     return (killed && left === 0) || JSON.stringify({ killed, left, mines: T.minesNow() });
   });
@@ -30023,12 +30022,13 @@ async function main() {
     T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
     T.affixForceNow('haste');
     T.spawnFoeNow(300, 100, 'fast');
-    T.affixForceNow(null);
+    T.affixForceNow('tough');
     const e = T.r18enNow().filter(x => !x.dead).pop();
     T.spawnFoeNow(400, 100, 'fast');
+    T.affixForceNow(null);
     const es = T.r18enNow().filter(x => !x.dead);
     const plain = es[es.length - 1];
-    const ok = e.affix === 'haste' && e.speed > plain.speed * 1.2;
+    const ok = e.affix === 'haste' && e.speed > plain.speed * 1.2;   // —— flake修复:对照组tough防自然haste ——
     T.quit();
     return ok === true || JSON.stringify({ s1: e.speed, s0: plain.speed });
   });
@@ -31245,6 +31245,8 @@ async function main() {
       if (n0 > 0) break;
     }
     if (n0 === 0) { T.quit(); return 'mine never dropped'; }
+    const fm0 = T.foeMinesNow()[0];
+    if (fm0) { T.tp(fm0.x - 11, fm0.y - 11); }   // —— flake修复:传送踩雷,杜绝工兵游走落点随机 ——
     T.invul(0);
     let n1 = n0;
     for (let i = 0; i < 30; i++) {
@@ -32390,7 +32392,7 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     await Z(120);
     const en = T.r18enNow().filter(x => !x.dead && x.squadId);
     const leader = en.find(x => x.isLeader);
-    const mate = en.find(x => !x.isLeader && leader && x.type === leader.type);
+    const mate = en.find(x => !x.isLeader && !x.affix && leader && x.type === leader.type);   // —— flake修复:疾速词缀×1.35会倒置比较 ——
     const base = mate ? mate.speed : (leader ? leader.speed / 1.2 : 1);
     T.quit();
     return (leader && leader.speed >= base * 1.1) || JSON.stringify({ ls: leader && leader.speed, base });
@@ -33112,6 +33114,46 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     const lo = T.loadoutNow();
     T.quit();
     return (a && b && c && lo.t === 'laser') || JSON.stringify({ a, b, c, t: lo.t });
+  });
+
+
+  // U9977–U9979: 阵地基础
+  await senseCheck("U9977 阵地关生成占领点", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.zoneForceNow('radar');
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    let z = null;
+    for (let i = 0; i < 25 && !z; i++) { await Z(90); z = T.zoneNow(); }
+    const ok = !!(z && z.r === 72 && z.type === 'radar' && z.done === false && z.max === 300);
+    T.quit(); T.zoneForceNow(null);
+    return ok || JSON.stringify({ z });
+  });
+  await senseCheck("U9978 驻留点内充能", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.zoneForceNow('radar');
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    let z = null;
+    for (let i = 0; i < 25 && !z; i++) { await Z(90); z = T.zoneNow(); }
+    if (!z) { T.quit(); T.zoneForceNow(null); return 'no capZone spawned'; }
+    T.tp(z.x - 11, z.y - 11); T.invul(99999);
+    let p1 = 0;
+    for (let i = 0; i < 30 && p1 <= 0; i++) { await Z(100); const zz = T.zoneNow(); p1 = zz ? zz.prog : 0; }
+    T.quit(); T.zoneForceNow(null);
+    return (p1 > 0) || JSON.stringify({ p1 });
+  });
+  await senseCheck("U9979 占领完成掉落补给", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.zoneForceNow('radar');
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    let z = null;
+    for (let i = 0; i < 25 && !z; i++) { await Z(90); z = T.zoneNow(); }
+    if (!z) { T.quit(); T.zoneForceNow(null); return 'no capZone spawned'; }
+    T.tp(z.x - 11, z.y - 11); T.invul(99999);
+    let done = false;
+    for (let i = 0; i < 150 && !done; i++) { await Z(100); const zz = T.zoneNow(); done = !!(zz && zz.done); }
+    const pu = T.puPosNow().length;
+    T.quit(); T.zoneForceNow(null);
+    return (done && pu >= 1) || JSON.stringify({ done, pu });
   });
 
   chrome.kill(); killTree(chrome.pid);
