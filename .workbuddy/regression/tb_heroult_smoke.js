@@ -31638,6 +31638,44 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (dirs.size >= 4) || JSON.stringify({ dirs: dirs.size });
   });
 
+  // U9866–U9868: 闪现者
+  await senseCheck("U9866 闪现者Boss已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const id = T.spawnBossAsNow('blinker');
+    T.quit();
+    return (id === 'blinker') || JSON.stringify({ id });
+  });
+  await senseCheck("U9867 闪现改变位置", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('blinker');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    let lx = b.x, ly = b.y, jumped = 0;
+    for (let i = 0; i < 18; i++) {
+      await Z(90);
+      const step = Math.hypot(b.x - lx, b.y - ly);
+      if (step > jumped) jumped = step;
+      lx = b.x; ly = b.y;
+      if (jumped > 64) break;
+    }
+    T.quit();
+    return (jumped > 64) || JSON.stringify({ jumped: Math.round(jumped) });
+  });
+  await senseCheck("U9868 闪现后位置合法", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('blinker');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    for (let i = 0; i < 15; i++) await Z(90);
+    const inBounds = b.x >= 0 && b.y >= 0 && b.x < 26 * 32 && b.y < 26 * 32;
+    T.quit();
+    return inBounds === true || JSON.stringify({ x: Math.round(b.x), y: Math.round(b.y) });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
