@@ -32736,6 +32736,42 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (g1 < g0 + 30) || JSON.stringify({ g0, g1 });
   });
 
+  // U9947–U9949: 机枪流派
+  await senseCheck("U9947 机枪流派切换", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('machine');
+    const lo = T.loadoutNow();
+    T.quit();
+    return (ok && lo.t === 'machine') || JSON.stringify({ ok, lo });
+  });
+  await senseCheck("U9948 机枪射速翻倍", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.playerRefNow();
+    if (!p) { T.quit(); return JSON.stringify({ nop: 1 }); }
+    T.loadoutSetNow(null);
+    T.firePlayerNow();
+    const cd0 = p.cdMax || p.cooldown;
+    await Z(150);
+    T.loadoutSetNow('machine');
+    T.firePlayerNow();
+    const cd1 = p.cdMax || p.cooldown;
+    T.quit();
+    return (cd1 > 0 && cd1 <= cd0 * 0.7) || JSON.stringify({ cd0, cd1 });
+  });
+  await senseCheck("U9949 机枪弹头标记", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('machine');
+    T.firePlayerNow();
+    await Z(80);
+    const bl = T.liveBulletsNow().filter(x => !x.dead && x.owner && x.owner.isPlayer);
+    const last = bl[bl.length - 1];
+    T.quit();
+    return (last && last.loadout === 'machine') || JSON.stringify({ lo: last && last.loadout });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
