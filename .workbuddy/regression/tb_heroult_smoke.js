@@ -31918,6 +31918,40 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (reflected > 0) || 'no reflected bullet';
   });
 
+  // U9887–U9889: 天灾系统+陨石
+  await senseCheck("U9887 灾害系统钩子就绪", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const d = T.disasterNow();
+    T.quit();
+    return (d && d.meteorT >= 99999 && typeof d.quakeT === 'number' && typeof d.volcanoT === 'number') || JSON.stringify(d);
+  });
+  await senseCheck("U9888 陨石预警触发", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.meteorSetNow(5);
+    let warn = 0;
+    for (let i = 0; i < 60; i++) { await Z(50); const m = T.meteorNow(); if (m.warn > 0) { warn = m.warn; break; } }
+    T.quit();
+    return warn > 0 || JSON.stringify({ warn });
+  });
+  await senseCheck("U9889 陨石撞击伤敌", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.meteorSetNow(5);
+    let m = null;
+    for (let i = 0; i < 60; i++) { await Z(50); m = T.meteorNow(); if (m.warn > 0) break; }
+    if (!(m && m.warn > 0)) { T.quit(); return JSON.stringify({ nowarn: m }); }
+    T.spawnFoeNow(m.x - 14, m.y - 14, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return JSON.stringify({ nofoe: 1 }); }
+    e.x = m.x - e.size / 2; e.y = m.y - e.size / 2; e.enterT = 0; e.hp = 5; e.maxHp = 5; e.freezeT = 9999;
+    let hits = 0;
+    for (let i = 0; i < 80; i++) { await Z(50); const mm = T.meteorNow(); if (mm.hits > 0) { hits = mm.hits; break; } if (mm.warn <= 0 && i > 30) break; }
+    const dead = e.dead || e.hp < 5;
+    T.quit();
+    return (hits > 0 || dead) || JSON.stringify({ hits, dead });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
