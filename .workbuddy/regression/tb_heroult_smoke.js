@@ -32592,6 +32592,57 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return still || JSON.stringify({ sid: mem.squadId });
   });
 
+  // U9938–U9940: 败退重组
+  await senseCheck("U9938 全灭触发败退", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(340, 200, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const leader = en.find(x => x.isLeader);
+    if (!leader) { T.quit(); return JSON.stringify({ noleader: 1 }); }
+    leader.hp = Math.min(leader.hp, 2);
+    for (const m of en) { if (!m.isLeader) m.dead = true; }
+    let rt = 0;
+    for (let i = 0; i < 40; i++) { await Z(50); if ((leader.retreatT || 0) > 0) { rt = leader.retreatT; break; } }
+    T.quit();
+    return (rt > 0) || JSON.stringify({ rt });
+  });
+  await senseCheck("U9939 败退修复回血", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(340, 200, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const leader = en.find(x => x.isLeader);
+    if (!leader) { T.quit(); return JSON.stringify({ noleader: 1 }); }
+    leader.hp = 1;
+    const hp0 = leader.hp;
+    for (const m of en) { if (!m.isLeader) m.dead = true; }
+    let hp1 = hp0;
+    for (let i = 0; i < 40; i++) { await Z(50); if ((leader.retreatT || 0) > 0) { hp1 = leader.hp; break; } }
+    T.quit();
+    return (hp1 > hp0) || JSON.stringify({ hp0, hp1 });
+  });
+  await senseCheck("U9940 败退北移撤离", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(340, 300, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const leader = en.find(x => x.isLeader);
+    if (!leader) { T.quit(); return JSON.stringify({ noleader: 1 }); }
+    leader.x = 340; leader.y = 300; leader.enterT = 0; leader.freezeT = 0;
+    for (const m of en) { if (!m.isLeader) m.dead = true; }
+    let started = false;
+    for (let i = 0; i < 40; i++) { await Z(50); if ((leader.retreatT || 0) > 0) { started = true; break; } }
+    const y0 = leader.y;
+    await Z(700);
+    const y1 = leader.y;
+    T.quit();
+    return (started && y1 < y0 - 5) || JSON.stringify({ started, y0: Math.round(y0), y1: Math.round(y1) });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
