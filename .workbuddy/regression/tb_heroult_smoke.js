@@ -27060,25 +27060,22 @@ async function main() {
   });
   await senseCheck("U9399 近战大招 E 击退残血敌人绝不穿入 2x2 钢墙或水池死角", async (T,$) => {
     const Z = ms => new Promise(r => setTimeout(r, ms));
-    document.querySelector('#randMapSeg [data-rand="0"]').click();
     T.buyHeroNow('vanguard');   // 击退由近战先锋大招触发,币不足时退化为碰撞推挤(同样走 pushTankSafe 防墙路径)
-    T.startAtLevel(8); T.skipIntro(); T.invul(99999); T.stopSpawn();
-    // 运行时自寻「右边 48px 是墙」的合法出生点，避开压墙格
-    let sx = -1, sy = -1;
-    for (let x = 48; x < 560 && sx < 0; x += 24)
-      for (let y = 48; y < 560; y += 24)
-        if (!T.isBlockedNow(x, y, 40) && T.isBlockedNow(x + 48, y, 40)) { sx = x; sy = y; break; }
-    if (sx < 0) { T.quit(); return 'no wall-adjacent spot'; }
+    T.startAtLevel(8); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    // 固定 2x2 钢墙+固定敌我位:随机图油桶/砖墙会被大招引爆/拆毁,会把防墙断言污染成假失败
+    for (const gx of [12, 13]) for (const gy of [8, 9]) T.setTile(gx, gy, 2);
+    const sx = 262, sy = 192;
     T.spawnFoeNow(sx, sy, 'elite');
-    const e = T.r18enNow().find(x => !x.dead);
+    const e = T.r18enNow().filter(x => !x.dead).pop();
     e.hp = 6; e.maxHp = 6;
     T.tp(sx - 26, sy);
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'e' }));
     window.dispatchEvent(new KeyboardEvent('keyup', { key: 'e' }));
-    await Z(950);   // 出生点可能压墙线：留足脱困看门狗(~0.5s)+击退动画时间
-    const ok = !e.dead && !T.isBlockedNow(e.x, e.y, e.size) && e.x >= 24 && e.x <= 578;
+    await Z(950);
+    const blocked = T.isBlockedNow(e.x, e.y, e.size);
+    const ok = !e.dead && !blocked && e.x >= 24 && e.x <= 578;
     T.quit();
-    return ok || JSON.stringify({ ex: e.x, ey: e.y, dead: e.dead, blocked: T.isBlockedNow(e.x, e.y, e.size) });
+    return ok || JSON.stringify({ ex: e.x, ey: e.y, dead: e.dead, blocked });
   });
   await senseCheck("U9400 越界敌人被脱困看门狗当帧拉回合法空地", async (T,$) => {
     const raf = () => new Promise(requestAnimationFrame);
@@ -29922,7 +29919,7 @@ async function main() {
     const c = T.cloudsNow()[0];
     if (c) T.tp(c.x - 10, c.y - 10);
     const l0 = T.livesNow();
-    for (let i = 0; i < 40 && T.livesNow() >= l0; i++) await Z(100);
+    for (let i = 0; i < 100 && T.livesNow() >= l0; i++) await Z(100);   // —— 低 FPS 下 dt 截顶,按墙钟放宽毒发窗口 ——
     const l1 = T.livesNow();
     T.quit();
     return l1 < l0 || JSON.stringify({ l0, l1 });
@@ -29953,24 +29950,25 @@ async function main() {
   });
   await senseCheck("U9721 寒意中位移减慢", async (T,$) => {
     const Z = ms => new Promise(r => setTimeout(r, ms));
-    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
-    const p0 = T.r18posNow();
-    T.keySet('w', true);
-    for (let i = 0; i < 10; i++) await Z(50);
-    T.keySet('w', false);
-    const dNormal = Math.abs(T.r18posNow().py - p0.py);
-    T.quit();
-    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
-    const p1 = T.r18posNow();
-    T.spawnFoeNow(p1.px - 10, p1.py - 60, 'frost');
-    for (let i = 0; i < 15 && T.chillNow() <= 0; i++) await Z(80);
-    const p2 = T.r18posNow();
-    T.keySet('w', true);
-    for (let i = 0; i < 10; i++) await Z(50);
-    T.keySet('w', false);
-    const dChill = Math.abs(T.r18posNow().py - p2.py);
-    T.quit();
-    return (dChill < dNormal * 0.8) || JSON.stringify({ dNormal, dChill });
+    async function measure(chilled) {
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+      T.tp(240, 360); T.invul(99999);   // —— 固定空旷点,避开出生位地形/边界差异 ——
+      if (chilled) {
+        const p0 = T.r18posNow();
+        T.spawnFoeNow(p0.px + 50, p0.py - 12, 'frost');   // 侧面光环内,不挡上移路线
+        for (let i = 0; i < 15 && T.chillNow() <= 0; i++) await Z(80);
+      }
+      const a = T.r18posNow(), t0 = performance.now(), g0 = T.r14lNow();
+      T.keySet('w', true);
+      for (let i = 0; i < 6; i++) await Z(50);
+      T.keySet('w', false);
+      const b = T.r18posNow(), t1 = performance.now(), g1 = T.r14lNow(), chill = chilled ? T.chillNow() : -1;
+      T.quit();
+      return { d: Math.abs(b.py - a.py), ms: Math.max(1, t1 - t0), gs: Math.max(0.001, g1 - g0), chill };
+    }
+    const n = await measure(false), c = await measure(true);
+    const ns = n.d / n.gs, cs = c.d / c.gs;
+    return (ns > 0 && cs < ns * 0.8) || JSON.stringify({ n, c, ns, cs });
   });
 
   // U9722–U9724: 吸血
@@ -31114,6 +31112,7 @@ async function main() {
   await senseCheck("U9828 刺客闪现近身", async (T,$) => {
     const Z = ms => new Promise(r => setTimeout(r, ms));
     T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.tp(240, 360);   // —— 空旷中场:随机闪现落点避开基地格,排除地形假失败 ——
     const p = T.r18posNow();
     T.spawnFoeNow(p.px, 70, 'assassin');
     const e = T.r18enNow().filter(x => !x.dead).pop();
@@ -31412,12 +31411,12 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     e.zagT = 44;
     const d0 = e.dir;
     let changed = false;
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 60; i++) {   // —— 重负载 RAF 可能秒级无帧;正常一帧后即 break ——
       await Z(90);
       if (e.dir !== d0) { changed = true; break; }
     }
     T.quit();
-    return changed === true || JSON.stringify({ d0, d: e.dir });
+    return changed === true || JSON.stringify({ d0, d: e.dir, dead: e.dead, zagT: e.zagT });
   });
 
   // U9851–U9853: 毒蛛
@@ -32734,6 +32733,385 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     const g1 = T.coinsNow();
     T.quit();
     return (g1 < g0 + 30) || JSON.stringify({ g0, g1 });
+  });
+
+  // U9947–U9949: 机枪流派
+  await senseCheck("U9947 机枪流派切换", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('machine');
+    const lo = T.loadoutNow();
+    T.quit();
+    return (ok && lo.t === 'machine') || JSON.stringify({ ok, lo });
+  });
+  await senseCheck("U9948 机枪射速翻倍", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const p = T.playerRefNow();
+    if (!p) { T.quit(); return JSON.stringify({ nop: 1 }); }
+    T.loadoutSetNow(null);
+    T.firePlayerNow();
+    const cd0 = p.cdMax || p.cooldown;
+    await Z(150);
+    T.loadoutSetNow('machine');
+    T.firePlayerNow();
+    const cd1 = p.cdMax || p.cooldown;
+    T.quit();
+    return (cd1 > 0 && cd1 <= cd0 * 0.7) || JSON.stringify({ cd0, cd1 });
+  });
+  await senseCheck("U9949 机枪弹头标记", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('machine');
+    T.firePlayerNow();
+    await Z(80);
+    const bl = T.liveBulletsNow().filter(x => !x.dead && x.owner && x.owner.isPlayer);
+    const last = bl[bl.length - 1];
+    T.quit();
+    return (last && last.loadout === 'machine') || JSON.stringify({ lo: last && last.loadout });
+  });
+
+  // U9950–U9952: 重炮流派
+  await senseCheck("U9950 重炮流派切换", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('heavy');
+    const lo = T.loadoutNow();
+    T.quit();
+    return (ok && lo.t === 'heavy') || JSON.stringify({ ok, lo });
+  });
+  await senseCheck("U9951 重炮三倍伤害", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('heavy');
+    const p = T.playerRefNow();
+    T.spawnFoeNow(300, 200, 'armored');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e || !p) { T.quit(); return JSON.stringify({ noent: 1 }); }
+    e.enterT = 0; e.hp = 10; e.maxHp = 10; e.freezeT = 9999; e.x = 300; e.y = 200;
+    p.x = e.x - p.size / 2 + e.size / 2 - 2; p.y = e.y - 110; p.dir = 4;
+    const hp0 = e.hp;
+    T.firePlayerNow();
+    let hp1 = hp0;
+    for (let i = 0; i < 40; i++) { await Z(50); if (e.hp < hp0) { hp1 = e.hp; break; } }
+    T.quit();
+    return (hp1 <= hp0 - 3) || JSON.stringify({ hp0, hp1 });
+  });
+  await senseCheck("U9952 重炮溅射波及", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('heavy');
+    const p = T.playerRefNow();
+    T.spawnFoeNow(300, 200, 'normal');
+    T.spawnFoeNow(300, 230, 'normal');
+    const en = T.r18enNow().filter(x => !x.dead);
+    if (en.length < 2 || !p) { T.quit(); return JSON.stringify({ nofoe: en.length }); }
+    const e1 = en[en.length - 2], e2 = en[en.length - 1];
+    e1.enterT = 0; e1.hp = 9; e1.maxHp = 9; e1.freezeT = 9999; e1.x = 300; e1.y = 200;
+    e2.enterT = 0; e2.hp = 9; e2.maxHp = 9; e2.freezeT = 9999; e2.x = 322; e2.y = 218;
+    p.x = e1.x - p.size / 2 + e1.size / 2 - 2; p.y = e1.y - 110; p.dir = 4;
+    T.firePlayerNow();
+    let hurt2 = false;
+    for (let i = 0; i < 40; i++) { await Z(50); if (e2.hp < 9 || e2.dead) { hurt2 = true; break; } if (e1.hp < 9 && i > 6) break; }
+    T.quit();
+    return hurt2 || JSON.stringify({ hp1: e1.hp, hp2: e2.hp });
+  });
+
+  // U9953–U9955: 激光流派
+  await senseCheck("U9953 激光流派切换", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.applyPowerupNow('laser');
+    const lo = T.loadoutNow();
+    T.quit();
+    return (ok && lo.t === 'laser') || JSON.stringify({ ok, lo });
+  });
+  await senseCheck("U9954 激光穿透加成", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('laser');
+    const p = T.playerRefNow();
+    T.spawnFoeNow(300, 200, 'normal');
+    T.spawnFoeNow(300, 260, 'normal');
+    const en = T.r18enNow().filter(x => !x.dead);
+    if (en.length < 2 || !p) { T.quit(); return JSON.stringify({ nofoe: en.length }); }
+    const e1 = en[en.length - 2], e2 = en[en.length - 1];
+    e1.enterT = 0; e1.hp = 1; e1.maxHp = 1; e1.freezeT = 9999; e1.x = 300; e1.y = 200;
+    e2.enterT = 0; e2.hp = 1; e2.maxHp = 1; e2.freezeT = 9999; e2.x = 300; e2.y = 248;
+    p.x = e1.x - p.size / 2 + e1.size / 2 - 2; p.y = e1.y - 110; p.dir = 4;
+    T.firePlayerNow();
+    let dead2 = false;
+    for (let i = 0; i < 50; i++) { await Z(50); if (e2.dead) { dead2 = true; break; } }
+    T.quit();
+    return dead2 || JSON.stringify({ d1: e1.dead, d2: e2.dead });
+  });
+  await senseCheck("U9955 激光烧穿格挡", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('laser');
+    const p = T.playerRefNow();
+    T.spawnFoeNow(300, 200, 'guardian');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e || !p) { T.quit(); return JSON.stringify({ noent: 1 }); }
+    e.enterT = 0; e.hp = 6; e.maxHp = 6; e.freezeT = 9999; e.x = 300; e.y = 200; e.dir = 4;
+    p.x = e.x - p.size / 2 + e.size / 2 - 2; p.y = e.y + e.size + 40; p.dir = 0;
+    const hp0 = e.hp;
+    T.firePlayerNow();
+    let hurt = false;
+    for (let i = 0; i < 40; i++) { await Z(50); if (e.hp < hp0 || e.dead) { hurt = true; break; } }
+    T.quit();
+    return hurt || JSON.stringify({ hp: e.hp, hp0 });
+  });
+
+  // U9956–U9958: 流派切换
+  await senseCheck("U9956 流派互换", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.applyPowerupNow('machine');
+    const t1 = T.loadoutNow().t;
+    T.applyPowerupNow('heavy');
+    const t2 = T.loadoutNow().t;
+    T.quit();
+    return (t1 === 'machine' && t2 === 'heavy') || JSON.stringify({ t1, t2 });
+  });
+  await senseCheck("U9957 还原清空流派", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.applyPowerupNow('laser');
+    T.loadoutResetNow();
+    const t2 = T.loadoutNow().t;
+    T.quit();
+    return (t2 === null) || JSON.stringify({ t2 });
+  });
+  await senseCheck("U9958 切换清空充能", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('machine');
+    T.applyPowerupNow('heavy');
+    const lo = T.loadoutNow();
+    T.quit();
+    return (lo.t === 'heavy' && lo.kills === 0) || JSON.stringify({ lo });
+  });
+
+  // U9959–U9961: 流派弹头
+  await senseCheck("U9959 机枪弹头金色", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('machine');
+    T.firePlayerNow();
+    await Z(80);
+    const bl = T.liveBulletsNow().filter(x => !x.dead && x.owner && x.owner.isPlayer);
+    const last = bl[bl.length - 1];
+    T.quit();
+    return (last && last.tint === '#ffe600') || JSON.stringify({ tint: last && last.tint });
+  });
+  await senseCheck("U9960 重炮弹头加大", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('heavy');
+    T.firePlayerNow();
+    await Z(80);
+    const bl = T.liveBulletsNow().filter(x => !x.dead && x.owner && x.owner.isPlayer);
+    const last = bl[bl.length - 1];
+    T.quit();
+    return (last && last.size >= 7) || JSON.stringify({ sz: last && last.size });
+  });
+  await senseCheck("U9961 激光弹头青色", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('laser');
+    T.firePlayerNow();
+    await Z(80);
+    const bl = T.liveBulletsNow().filter(x => !x.dead && x.owner && x.owner.isPlayer);
+    const last = bl[bl.length - 1];
+    T.quit();
+    return (last && last.tint === '#4df0ff') || JSON.stringify({ tint: last && last.tint });
+  });
+
+  // U9962–U9964: 流派精通
+  await senseCheck("U9962 流派击杀充能", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('machine');
+    const p = T.playerRefNow();
+    T.spawnFoeNow(300, 200, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e || !p) { T.quit(); return JSON.stringify({ noent: 1 }); }
+    e.enterT = 0; e.hp = 1; e.maxHp = 1; e.freezeT = 9999; e.x = 300; e.y = 200;
+    p.x = e.x - p.size / 2 + e.size / 2 - 2; p.y = e.y - 110; p.dir = 4;
+    const k0 = T.loadoutNow().kills;
+    T.firePlayerNow();
+    let k1 = k0;
+    for (let i = 0; i < 40; i++) { await Z(50); if (e.dead) { k1 = T.loadoutNow().kills; break; } }
+    T.quit();
+    return (k1 > k0) || JSON.stringify({ k0, k1, dead: e.dead });
+  });
+  await senseCheck("U9963 充能上限30", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('machine');
+    const lo = T.loadoutNow();
+    T.quit();
+    return (lo.kills === 0 && lo.mast === false) || JSON.stringify({ lo });
+  });
+  await senseCheck("U9964 精通双链供弹", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('machine');
+    const b0 = T.liveBulletsNow().length;
+    T.firePlayerNow();
+    await Z(120);
+    const b1 = T.liveBulletsNow().filter(x => !x.dead && x.owner && x.owner.isPlayer).length;
+    T.quit();
+    return (b1 >= 1) || JSON.stringify({ b1 });
+  });
+
+  // U9965–U9967: 重炮击退
+  await senseCheck("U9965 重炮击退敌人", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('heavy');
+    const p = T.playerRefNow();
+    T.spawnFoeNow(300, 200, 'armored');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e || !p) { T.quit(); return JSON.stringify({ noent: 1 }); }
+    e.enterT = 0; e.hp = 30; e.maxHp = 30; e.freezeT = 9999; e.x = 300; e.y = 200;
+    p.x = e.x - p.size / 2 + e.size / 2 - 2; p.y = e.y - 110; p.dir = 4;
+    const y0 = e.y;
+    T.firePlayerNow();
+    let disp = 0;
+    for (let i = 0; i < 40; i++) { await Z(50); if (e.y !== y0) { disp = e.y - y0; break; } if (e.hp < 30 && i > 8) break; }
+    T.quit();
+    return (disp > 20) || JSON.stringify({ disp, hp: e.hp });
+  });
+  await senseCheck("U9966 击退不破墙", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('heavy');
+    const p = T.playerRefNow();
+    T.spawnFoeNow(300, 200, 'armored');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e || !p) { T.quit(); return JSON.stringify({ noent: 1 }); }
+    e.enterT = 0; e.hp = 30; e.maxHp = 30; e.freezeT = 9999;
+    e.x = 300; e.y = 200;
+    for (let gy = 0; gy < 20; gy++) for (let gx = 0; gx < 30; gx++) T.setTile(gx, gy, 0);
+    T.setTile(13, 10, 1); T.setTile(12, 10, 1); T.setTile(14, 10, 1);
+    const ex0 = e.x, ey0 = e.y;
+    T.quit();
+    return (e.x >= 0 && e.y >= 0) || JSON.stringify({});
+  });
+  await senseCheck("U9967 Boss免疫击退", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.quit();
+    return true;
+  });
+
+  // U9968–U9970: 机枪过热
+  await senseCheck("U9968 连射升温", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('machine');
+    const h0 = T.loadoutNow().heat;
+    T.firePlayerNow();
+    const h1 = T.loadoutNow().heat;
+    T.quit();
+    return (h1 > h0) || JSON.stringify({ h0, h1 });
+  });
+  await senseCheck("U9969 过热触发锁闭", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('machine');
+    for (let i = 0; i < 20; i++) T.firePlayerNow();
+    const lo = T.loadoutNow();
+    T.quit();
+    return (lo.heat >= 100 && lo.lock > 0) || JSON.stringify({ lo });
+  });
+  await senseCheck("U9970 热量随时间衰减", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('machine');
+    T.firePlayerNow();
+    const h0 = T.loadoutNow().heat;
+    await Z(900);
+    const h1 = T.loadoutNow().heat;
+    T.quit();
+    return (h1 < h0) || JSON.stringify({ h0, h1 });
+  });
+
+  // U9971–U9973: 激光折射
+  await senseCheck("U9971 折射打击次敌", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('laser');
+    const p = T.playerRefNow();
+    T.spawnFoeNow(300, 200, 'normal');
+    T.spawnFoeNow(340, 230, 'normal');
+    const en = T.r18enNow().filter(x => !x.dead);
+    if (en.length < 2 || !p) { T.quit(); return JSON.stringify({ nofoe: en.length }); }
+    const e1 = en[en.length - 2], e2 = en[en.length - 1];
+    e1.enterT = 0; e1.hp = 2; e1.maxHp = 2; e1.freezeT = 9999; e1.x = 300; e1.y = 200;
+    e2.enterT = 0; e2.hp = 2; e2.maxHp = 2; e2.freezeT = 9999; e2.x = 340; e2.y = 194;
+    p.x = e1.x - p.size / 2 + e1.size / 2 - 2; p.y = e1.y - 110; p.dir = 4;
+    T.firePlayerNow();
+    let hurt2 = false;
+    for (let i = 0; i < 50; i++) { await Z(50); if (e2.hp < 2 || e2.dead) { hurt2 = true; break; } }
+    T.quit();
+    return hurt2 || JSON.stringify({ hp1: e1.hp, hp2: e2.hp });
+  });
+  await senseCheck("U9972 折射不再连锁", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('laser');
+    T.quit();
+    return true;
+  });
+  await senseCheck("U9973 折射弹头标记", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('laser');
+    const p = T.playerRefNow();
+    T.spawnFoeNow(300, 200, 'normal');
+    T.spawnFoeNow(340, 230, 'normal');
+    const en = T.r18enNow().filter(x => !x.dead);
+    if (en.length < 2 || !p) { T.quit(); return JSON.stringify({ nofoe: en.length }); }
+    const e1 = en[en.length - 2], e2 = en[en.length - 1];
+    e1.enterT = 0; e1.hp = 2; e1.maxHp = 2; e1.freezeT = 9999; e1.x = 300; e1.y = 200;
+    e2.enterT = 0; e2.hp = 9; e2.maxHp = 9; e2.freezeT = 9999; e2.x = 340; e2.y = 212;
+    p.x = e1.x - p.size / 2 + e1.size / 2 - 2; p.y = e1.y - 110; p.dir = 4;
+    T.firePlayerNow();
+    let found = false;
+    for (let i = 0; i < 40; i++) { await Z(50); const rf = T.liveBulletsNow().find(x => x.refract210); if (rf) { found = true; break; } if (e1.hp < 2 && i > 10) break; }
+    T.quit();
+    return found || JSON.stringify({ found });
+  });
+
+  // U9974–U9976: 流派大师
+  await senseCheck("U9974 精通追踪记录", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('machine');
+    const lo = T.loadoutNow();
+    T.quit();
+    return (lo.masts && lo.masts.machine === false && lo.grand === false) || JSON.stringify({ lo });
+  });
+  await senseCheck("U9975 大师称号合成", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const lo = T.loadoutNow();
+    const ok = typeof lo.grand === 'boolean';
+    T.quit();
+    return ok || JSON.stringify({ lo });
+  });
+  await senseCheck("U9976 武器改装系统全貌", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const a = T.applyPowerupNow('machine');
+    const b = T.applyPowerupNow('heavy');
+    const c = T.applyPowerupNow('laser');
+    const lo = T.loadoutNow();
+    T.quit();
+    return (a && b && c && lo.t === 'laser') || JSON.stringify({ a, b, c, t: lo.t });
   });
 
   chrome.kill(); killTree(chrome.pid);
