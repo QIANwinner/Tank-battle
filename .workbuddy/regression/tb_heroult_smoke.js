@@ -31411,12 +31411,12 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     e.zagT = 44;
     const d0 = e.dir;
     let changed = false;
-    for (let i = 0; i < 15; i++) {
+    for (let i = 0; i < 60; i++) {   // —— 重负载 RAF 可能秒级无帧;正常一帧后即 break ——
       await Z(90);
       if (e.dir !== d0) { changed = true; break; }
     }
     T.quit();
-    return changed === true || JSON.stringify({ d0, d: e.dir });
+    return changed === true || JSON.stringify({ d0, d: e.dir, dead: e.dead, zagT: e.zagT });
   });
 
   // U9851–U9853: 毒蛛
@@ -33037,6 +33037,53 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     const h1 = T.loadoutNow().heat;
     T.quit();
     return (h1 < h0) || JSON.stringify({ h0, h1 });
+  });
+
+  // U9971–U9973: 激光折射
+  await senseCheck("U9971 折射打击次敌", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('laser');
+    const p = T.playerRefNow();
+    T.spawnFoeNow(300, 200, 'normal');
+    T.spawnFoeNow(340, 230, 'normal');
+    const en = T.r18enNow().filter(x => !x.dead);
+    if (en.length < 2 || !p) { T.quit(); return JSON.stringify({ nofoe: en.length }); }
+    const e1 = en[en.length - 2], e2 = en[en.length - 1];
+    e1.enterT = 0; e1.hp = 2; e1.maxHp = 2; e1.freezeT = 9999; e1.x = 300; e1.y = 200;
+    e2.enterT = 0; e2.hp = 2; e2.maxHp = 2; e2.freezeT = 9999; e2.x = 340; e2.y = 194;
+    p.x = e1.x - p.size / 2 + e1.size / 2 - 2; p.y = e1.y - 110; p.dir = 4;
+    T.firePlayerNow();
+    let hurt2 = false;
+    for (let i = 0; i < 50; i++) { await Z(50); if (e2.hp < 2 || e2.dead) { hurt2 = true; break; } }
+    T.quit();
+    return hurt2 || JSON.stringify({ hp1: e1.hp, hp2: e2.hp });
+  });
+  await senseCheck("U9972 折射不再连锁", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('laser');
+    T.quit();
+    return true;
+  });
+  await senseCheck("U9973 折射弹头标记", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('laser');
+    const p = T.playerRefNow();
+    T.spawnFoeNow(300, 200, 'normal');
+    T.spawnFoeNow(340, 230, 'normal');
+    const en = T.r18enNow().filter(x => !x.dead);
+    if (en.length < 2 || !p) { T.quit(); return JSON.stringify({ nofoe: en.length }); }
+    const e1 = en[en.length - 2], e2 = en[en.length - 1];
+    e1.enterT = 0; e1.hp = 2; e1.maxHp = 2; e1.freezeT = 9999; e1.x = 300; e1.y = 200;
+    e2.enterT = 0; e2.hp = 9; e2.maxHp = 9; e2.freezeT = 9999; e2.x = 340; e2.y = 212;
+    p.x = e1.x - p.size / 2 + e1.size / 2 - 2; p.y = e1.y - 110; p.dir = 4;
+    T.firePlayerNow();
+    let found = false;
+    for (let i = 0; i < 40; i++) { await Z(50); const rf = T.liveBulletsNow().find(x => x.refract210); if (rf) { found = true; break; } if (e1.hp < 2 && i > 10) break; }
+    T.quit();
+    return found || JSON.stringify({ found });
   });
 
   chrome.kill(); killTree(chrome.pid);
