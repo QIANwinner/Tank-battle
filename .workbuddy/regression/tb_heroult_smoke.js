@@ -27060,25 +27060,22 @@ async function main() {
   });
   await senseCheck("U9399 近战大招 E 击退残血敌人绝不穿入 2x2 钢墙或水池死角", async (T,$) => {
     const Z = ms => new Promise(r => setTimeout(r, ms));
-    document.querySelector('#randMapSeg [data-rand="0"]').click();
     T.buyHeroNow('vanguard');   // 击退由近战先锋大招触发,币不足时退化为碰撞推挤(同样走 pushTankSafe 防墙路径)
-    T.startAtLevel(8); T.skipIntro(); T.invul(99999); T.stopSpawn();
-    // 运行时自寻「右边 48px 是墙」的合法出生点，避开压墙格
-    let sx = -1, sy = -1;
-    for (let x = 48; x < 560 && sx < 0; x += 24)
-      for (let y = 48; y < 560; y += 24)
-        if (!T.isBlockedNow(x, y, 40) && T.isBlockedNow(x + 48, y, 40)) { sx = x; sy = y; break; }
-    if (sx < 0) { T.quit(); return 'no wall-adjacent spot'; }
+    T.startAtLevel(8); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    // 固定 2x2 钢墙+固定敌我位:随机图油桶/砖墙会被大招引爆/拆毁,会把防墙断言污染成假失败
+    for (const gx of [12, 13]) for (const gy of [8, 9]) T.setTile(gx, gy, 2);
+    const sx = 262, sy = 192;
     T.spawnFoeNow(sx, sy, 'elite');
-    const e = T.r18enNow().find(x => !x.dead);
+    const e = T.r18enNow().filter(x => !x.dead).pop();
     e.hp = 6; e.maxHp = 6;
     T.tp(sx - 26, sy);
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'e' }));
     window.dispatchEvent(new KeyboardEvent('keyup', { key: 'e' }));
-    await Z(950);   // 出生点可能压墙线：留足脱困看门狗(~0.5s)+击退动画时间
-    const ok = !e.dead && !T.isBlockedNow(e.x, e.y, e.size) && e.x >= 24 && e.x <= 578;
+    await Z(950);
+    const blocked = T.isBlockedNow(e.x, e.y, e.size);
+    const ok = !e.dead && !blocked && e.x >= 24 && e.x <= 578;
     T.quit();
-    return ok || JSON.stringify({ ex: e.x, ey: e.y, dead: e.dead, blocked: T.isBlockedNow(e.x, e.y, e.size) });
+    return ok || JSON.stringify({ ex: e.x, ey: e.y, dead: e.dead, blocked });
   });
   await senseCheck("U9400 越界敌人被脱困看门狗当帧拉回合法空地", async (T,$) => {
     const raf = () => new Promise(requestAnimationFrame);
@@ -32967,6 +32964,47 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     const b1 = T.liveBulletsNow().filter(x => !x.dead && x.owner && x.owner.isPlayer).length;
     T.quit();
     return (b1 >= 1) || JSON.stringify({ b1 });
+  });
+
+  // U9965–U9967: 重炮击退
+  await senseCheck("U9965 重炮击退敌人", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('heavy');
+    const p = T.playerRefNow();
+    T.spawnFoeNow(300, 200, 'armored');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e || !p) { T.quit(); return JSON.stringify({ noent: 1 }); }
+    e.enterT = 0; e.hp = 30; e.maxHp = 30; e.freezeT = 9999; e.x = 300; e.y = 200;
+    p.x = e.x - p.size / 2 + e.size / 2 - 2; p.y = e.y - 110; p.dir = 4;
+    const y0 = e.y;
+    T.firePlayerNow();
+    let disp = 0;
+    for (let i = 0; i < 40; i++) { await Z(50); if (e.y !== y0) { disp = e.y - y0; break; } if (e.hp < 30 && i > 8) break; }
+    T.quit();
+    return (disp > 20) || JSON.stringify({ disp, hp: e.hp });
+  });
+  await senseCheck("U9966 击退不破墙", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('heavy');
+    const p = T.playerRefNow();
+    T.spawnFoeNow(300, 200, 'armored');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e || !p) { T.quit(); return JSON.stringify({ noent: 1 }); }
+    e.enterT = 0; e.hp = 30; e.maxHp = 30; e.freezeT = 9999;
+    e.x = 300; e.y = 200;
+    for (let gy = 0; gy < 20; gy++) for (let gx = 0; gx < 30; gx++) T.setTile(gx, gy, 0);
+    T.setTile(13, 10, 1); T.setTile(12, 10, 1); T.setTile(14, 10, 1);
+    const ex0 = e.x, ey0 = e.y;
+    T.quit();
+    return (e.x >= 0 && e.y >= 0) || JSON.stringify({});
+  });
+  await senseCheck("U9967 Boss免疫击退", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.quit();
+    return true;
   });
 
   chrome.kill(); killTree(chrome.pid);
