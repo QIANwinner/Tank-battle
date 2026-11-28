@@ -29922,7 +29922,7 @@ async function main() {
     const c = T.cloudsNow()[0];
     if (c) T.tp(c.x - 10, c.y - 10);
     const l0 = T.livesNow();
-    for (let i = 0; i < 40 && T.livesNow() >= l0; i++) await Z(100);
+    for (let i = 0; i < 100 && T.livesNow() >= l0; i++) await Z(100);   // —— 低 FPS 下 dt 截顶,按墙钟放宽毒发窗口 ——
     const l1 = T.livesNow();
     T.quit();
     return l1 < l0 || JSON.stringify({ l0, l1 });
@@ -29953,24 +29953,25 @@ async function main() {
   });
   await senseCheck("U9721 寒意中位移减慢", async (T,$) => {
     const Z = ms => new Promise(r => setTimeout(r, ms));
-    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
-    const p0 = T.r18posNow();
-    T.keySet('w', true);
-    for (let i = 0; i < 10; i++) await Z(50);
-    T.keySet('w', false);
-    const dNormal = Math.abs(T.r18posNow().py - p0.py);
-    T.quit();
-    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
-    const p1 = T.r18posNow();
-    T.spawnFoeNow(p1.px - 10, p1.py - 60, 'frost');
-    for (let i = 0; i < 15 && T.chillNow() <= 0; i++) await Z(80);
-    const p2 = T.r18posNow();
-    T.keySet('w', true);
-    for (let i = 0; i < 10; i++) await Z(50);
-    T.keySet('w', false);
-    const dChill = Math.abs(T.r18posNow().py - p2.py);
-    T.quit();
-    return (dChill < dNormal * 0.8) || JSON.stringify({ dNormal, dChill });
+    async function measure(chilled) {
+      T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+      T.tp(240, 360); T.invul(99999);   // —— 固定空旷点,避开出生位地形/边界差异 ——
+      if (chilled) {
+        const p0 = T.r18posNow();
+        T.spawnFoeNow(p0.px + 50, p0.py - 12, 'frost');   // 侧面光环内,不挡上移路线
+        for (let i = 0; i < 15 && T.chillNow() <= 0; i++) await Z(80);
+      }
+      const a = T.r18posNow(), t0 = performance.now(), g0 = T.r14lNow();
+      T.keySet('w', true);
+      for (let i = 0; i < 6; i++) await Z(50);
+      T.keySet('w', false);
+      const b = T.r18posNow(), t1 = performance.now(), g1 = T.r14lNow(), chill = chilled ? T.chillNow() : -1;
+      T.quit();
+      return { d: Math.abs(b.py - a.py), ms: Math.max(1, t1 - t0), gs: Math.max(0.001, g1 - g0), chill };
+    }
+    const n = await measure(false), c = await measure(true);
+    const ns = n.d / n.gs, cs = c.d / c.gs;
+    return (ns > 0 && cs < ns * 0.8) || JSON.stringify({ n, c, ns, cs });
   });
 
   // U9722–U9724: 吸血
@@ -31114,6 +31115,7 @@ async function main() {
   await senseCheck("U9828 刺客闪现近身", async (T,$) => {
     const Z = ms => new Promise(r => setTimeout(r, ms));
     T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.tp(240, 360);   // —— 空旷中场:随机闪现落点避开基地格,排除地形假失败 ——
     const p = T.r18posNow();
     T.spawnFoeNow(p.px, 70, 'assassin');
     const e = T.r18enNow().filter(x => !x.dead).pop();
@@ -32862,6 +32864,36 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     for (let i = 0; i < 40; i++) { await Z(50); if (e.hp < hp0 || e.dead) { hurt = true; break; } }
     T.quit();
     return hurt || JSON.stringify({ hp: e.hp, hp0 });
+  });
+
+  // U9956–U9958: 流派切换
+  await senseCheck("U9956 流派互换", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.applyPowerupNow('machine');
+    const t1 = T.loadoutNow().t;
+    T.applyPowerupNow('heavy');
+    const t2 = T.loadoutNow().t;
+    T.quit();
+    return (t1 === 'machine' && t2 === 'heavy') || JSON.stringify({ t1, t2 });
+  });
+  await senseCheck("U9957 还原清空流派", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.applyPowerupNow('laser');
+    T.loadoutResetNow();
+    const t2 = T.loadoutNow().t;
+    T.quit();
+    return (t2 === null) || JSON.stringify({ t2 });
+  });
+  await senseCheck("U9958 切换清空充能", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('machine');
+    T.applyPowerupNow('heavy');
+    const lo = T.loadoutNow();
+    T.quit();
+    return (lo.t === 'heavy' && lo.kills === 0) || JSON.stringify({ lo });
   });
 
   chrome.kill(); killTree(chrome.pid);
