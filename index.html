@@ -1879,7 +1879,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.191</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.201</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2100,6 +2100,7 @@
     homing: { color: '#7bf1a8', label: '追踪弹' },   // —— v1.2.117 追踪弹 ——
     rico:   { color: '#b5e0ff', label: '弹射弹' },   // —— v1.2.118 弹射弹 ——
     star:   { color: '#fff59d', label: '无敌星' },   // —— v1.2.132 ——
+    chaos:  { color: '#c86bff', label: '混乱弹' },   // —— v1.2.200 混乱弹 ——
     timebomb: { color: '#ff8a65', label: '定时炸弹' },   // —— v1.2.133 ——
     sentry: { color: '#90caf9', label: '自动炮台' },   // —— v1.2.134 ——
     camo:   { color: '#a5d6a7', label: '迷彩' },   // —— v1.2.140 ——
@@ -4228,6 +4229,32 @@
 
   function levelSpeedMul() { return Math.min(1 + (level - 1) * 0.06, 1.6); }
 
+  // —— v1.2.192 编队系统:小队状态 ——
+  let squads = [], squadSeq = 0;
+  function formationOffset(formation, idx) {
+    if (formation === 'pincer') return [(idx % 2 === 0 ? 1 : -1) * Math.ceil(idx / 2) * TILE * 2.2, -TILE * (1 + (idx % 2))];   // —— v1.2.197 合围两翼 ——
+    if (formation === 'line') return [(idx - 1.5) * TILE * 1.6, -TILE * 1.5];
+    if (formation === 'column') return [0, -idx * TILE * 1.6];
+    const w192 = [[0, 0], [-TILE * 1.5, -TILE * 1.5], [TILE * 1.5, -TILE * 1.5], [-TILE * 3, -TILE * 3], [TILE * 3, -TILE * 3]];
+    return w192[idx] || [0, -idx * TILE * 1.6];
+  }
+  function spawnSquad(x, y, type, n) {
+    squadSeq++;
+    const sq = { id: squadSeq, members: [], formation: ['wedge', 'line', 'column', 'pincer'][squadSeq % 4], reinforceUsed: false };   // —— v1.2.197 合围入轮换 ——
+    squads.push(sq);
+    if (squads.length > 8) squads.shift();
+    for (let i192 = 0; i192 < n; i192++) {
+      const off192 = formationOffset(sq.formation, i192);
+      const mx192 = clamp(x + off192[0], 0, W - TANK_SIZE), my192 = clamp(y + TILE * (i192 % 2), 0, H - TANK_SIZE);
+      spawnEnemy(mx192, my192, i192 === 0 ? type : pickEnemyType());
+      const m192 = enemies[enemies.length - 1];
+      m192.squadId = sq.id; m192.formIdx = i192;
+      if (i192 === 0) { m192.isLeader = true; sq.leader = m192; m192.hp += 3; m192.maxHp += 3; m192.speed *= 1.2; m192.leaderBounty = 20; }   // —— v1.2.194 队长强化 ——
+      sq.members.push(m192);
+      enemiesSpawned++;
+    }
+    return sq;
+  }
   function pickEnemyType() {
     const r = rng();
     // 每日词条：疾风骤雨（只出快速）/ 狙击天团（大量狙击）
@@ -4844,7 +4871,7 @@
     const shootMin = Math.max(22, 60 - level * 4);
     const shootMax = Math.max(80, 150 - level * 6);
     if ((e.shootTimer -= k) <= 0) {
-      e.shootTimer = Math.round(randInt(shootMin, shootMax) * (e.fury ? 0.55 : 1));   // —— v1.2.128 狂怒射速 ——
+      e.shootTimer = Math.round(randInt(shootMin, shootMax) * (e.fury ? 0.55 : 1) * (e.rageT > 0 ? 0.5 : 1));   // —— v1.2.128 狂怒射速 ——
       fire(e);
     }
     // 分层目标锁定：精英追玩家，装甲/工兵直冲基地，快速游走
@@ -4854,6 +4881,61 @@
     else if (tgt === 'player') { const tp = nearestPlayerTo(e.x, e.y); if (tp) e.dir = dirFromVec(tp.x - e.x, tp.y - e.y); }
     else if (tgt === 'base' && baseAlive) e.dir = dirFromVec(BASE.x * TILE - e.x, BASE.y * TILE - e.y);
 
+    if (e.chaosT > 0) e.chaosT = Math.max(0, e.chaosT - k);   // —— v1.2.200 混乱衰减 ——
+    if (e.rageT > 0) e.rageT = Math.max(0, e.rageT - k);   // —— v1.2.195 狂暴衰减 ——
+    if (e.isLeader && e.squadId && !e.dead) {   // —— v1.2.199 败退重组 ——
+      const sq199 = squads.find(sq => sq.id === e.squadId);
+      if (sq199 && !sq199.retreatUsed) {
+        const others199 = sq199.members.filter(m199 => !m199.dead && m199 !== e).length;
+        if (others199 === 0 && sq199.members.length >= 3) {
+          sq199.retreatUsed = true;
+          e.retreatT = 240;
+          e.hp = Math.min(e.maxHp, e.hp + 2);
+          spawnParticles(e.x + e.size / 2, e.y + e.size / 2, '#7dffb0', 10);
+          addText(e.x + e.size / 2, e.y - 12, '🔧 败退修复', '#7dffb0');
+        }
+      }
+    }
+    if (e.retreatT > 0) {   // —— v1.2.199 败退北撤 ——
+      e.retreatT = Math.max(0, e.retreatT - k);
+      e.dir = 0;
+      moveTank(e, k);
+    }
+    if (e.isLeader && e.squadId && !e.dead) {   // —— v1.2.196 编队增援 ——
+      const sq196 = squads.find(sq => sq.id === e.squadId);
+      if (sq196 && !sq196.reinforceUsed) {
+        const alive196 = sq196.members.filter(m196 => !m196.dead).length;
+        if (alive196 <= Math.ceil(sq196.members.length / 2) && enemies.length < 10) {
+          sq196.reinforceUsed = true;
+          let added196 = 0;
+          for (let r196 = 0; r196 < 2; r196++) {
+            const pt196 = spawnPoints[randInt(0, 2)];
+            spawnEnemy(pt196[0], pt196[1], pickEnemyType());
+            const nm196 = enemies[enemies.length - 1];
+            nm196.squadId = sq196.id; nm196.formIdx = sq196.members.length;
+            sq196.members.push(nm196);
+            enemiesSpawned++;
+            added196++;
+          }
+          if (added196) { showToast('📻 敌方呼叫增援！'); beep(320, 0.15, 'square', 0.05); }
+        }
+      }
+    }
+    // —— v1.2.193 编队跟随:队员向队形位聚拢 ——
+    if (e.squadId && !e.isLeader && !(e.rageT > 0) && !(e.chaosT > 0) && !e.dead) {
+      const sq193 = squads.find(sq => sq.id === e.squadId);
+      if (sq193 && sq193.leader && !sq193.leader.dead) {
+        const off193 = formationOffset(sq193.formation, e.formIdx || 1);
+        // —— v1.2.198 盾卫掩护:前出侧翼掩护位 ——
+        const tx193 = e.type === 'guardian' ? sq193.leader.x + (e.formIdx % 2 === 0 ? 1 : -1) * TILE * 1.8 : sq193.leader.x + off193[0];
+        const ty193 = e.type === 'guardian' ? sq193.leader.y + TILE * 1.2 : sq193.leader.y + off193[1];
+        const d193 = Math.hypot(tx193 - e.x, ty193 - e.y);
+        if (d193 > TILE * 1.2) {
+          e.dir = dirFromVec(tx193 - e.x, ty193 - e.y);
+          moveTank(e, k);
+        }
+      }
+    }
     if (!moveTank(e, k)) {
       e.changeTimer = Math.min(e.changeTimer, 20);
       e.dir = pickFreeDir(e, chaseChance(e));
@@ -5675,6 +5757,30 @@
     if (e.type === 'elite') { addText(e.x + e.size / 2, e.y - 10, '👑 精英击破', '#ffd75e'); showToast('👑 精英击破 · 敌方精锐 -1'); }   // —— v1.2.44 精英击破播报 ——
     if (e.bounty > 0) { const bg94 = addGold(e.bounty, e.x + e.size / 2, e.y - 26); addText(e.x + e.size / 2, e.y - 26, '💰 悬赏 +' + bg94 + '🪙', '#ffd75e'); showToast('💰 复仇悬赏 +' + bg94 + '🪙'); }   // —— v1.2.94 ——
     if (e.golden) { const gg100 = addGold(30, e.x + e.size / 2, e.y - 38); spawnPowerup(e.x + e.size / 2, e.y + e.size / 2); addText(e.x + e.size / 2, e.y - 38, '👑 敌将伏法 +' + gg100 + '🪙', '#ffd75e'); }   // —— v1.2.100 ——
+    if (e.leaderBounty > 0) { const lg194 = addGold(e.leaderBounty, e.x + e.size / 2, e.y - 86); addText(e.x + e.size / 2, e.y - 86, '🎖 斩首悬赏 +' + lg194 + '🪙', '#ffd75e'); }   // —— v1.2.194 斩首悬赏 ——
+    if (e.squadId) {   // —— v1.2.201 灭队嘉奖 ——
+      const sq201 = squads.find(sq => sq.id === e.squadId);
+      if (sq201 && !sq201.wipePaid) {
+        const alive201 = sq201.members.filter(m201 => !m201.dead && m201 !== e).length;
+        if (alive201 === 0) {
+          sq201.wipePaid = true;
+          const wg201 = addGold(30, e.x + e.size / 2, e.y - 98);
+          addText(e.x + e.size / 2, e.y - 98, '🏆 灭队嘉奖 +' + wg201 + '🪙', '#ffd75e');
+          showToast('🏆 整队歼灭！灭队嘉奖 +' + wg201 + '🪙');
+        }
+      }
+    }
+    if (e.isLeader && e.squadId) {   // —— v1.2.195 队长亡:队员狂暴 ——
+      const sq195 = squads.find(sq => sq.id === e.squadId);
+      if (sq195) {
+        for (const m195 of sq195.members) {
+          if (m195.dead || m195 === e) continue;
+          m195.rageT = 600; m195.speed *= 1.3;
+          spawnParticles(m195.x + m195.size / 2, m195.y + m195.size / 2, '#ff4d4d', 8);
+        }
+        showToast('😡 敌方残部狂暴了！');
+      }
+    }
     if (e.affix) { const ag128 = addGold(15, e.x + e.size / 2, e.y - 50); addText(e.x + e.size / 2, e.y - 50, '🏷 词缀赏金 +' + ag128 + '🪙', '#ffb14d'); }   // —— v1.2.128 ——
     if (hordeT > 0 && !e.isBoss) { const hg130 = addGold(10, e.x + e.size / 2, e.y - 62); addText(e.x + e.size / 2, e.y - 62, '🌊 敌潮赏金 +' + hg130 + '🪙', '#6bd8ff'); }   // —— v1.2.130 ——
     if (goldLevel && !e.isBoss) { const gg137 = addGold(6, e.x + e.size / 2, e.y - 74); addText(e.x + e.size / 2, e.y - 74, '🪙 淘金赏金 +' + gg137 + '🪙', '#ffe082'); }   // —— v1.2.137 ——
@@ -5917,6 +6023,16 @@
       case 'homing': fx.homing = 8; break;   // —— v1.2.117 追踪弹 8s ——
       case 'rico':   fx.rico = 8; break;   // —— v1.2.118 弹射弹 8s ——
       case 'star':   fx.star = 8; break;   // —— v1.2.132 无敌星 8s ——
+      case 'chaos': {   // —— v1.2.200 混乱弹:全场编队混乱10s ——
+        let cnt200 = 0;
+        for (const m200 of enemies) {
+          if (m200.dead || !m200.squadId) continue;
+          m200.chaosT = 600; cnt200++;
+          spawnParticles(m200.x + m200.size / 2, m200.y + m200.size / 2, '#c86bff', 6);
+        }
+        showToast('⚡ 电磁干扰！敌方编队混乱' + (cnt200 ? '（' + cnt200 + '辆）' : ''));
+        break;
+      }
       case 'timebomb': if (player) timebombs.push({ x: player.x + TANK_SIZE / 2, y: player.y + TANK_SIZE / 2, t: 180 }); break;   // —— v1.2.133 ——
       case 'sentry': if (player) sentries.push({ x: player.x + TANK_SIZE / 2, y: player.y + TANK_SIZE / 2, life: 1200, cd: 0 }); break;   // —— v1.2.134 ——
       case 'camo':   fx.camo = 8; break;   // —— v1.2.140 迷彩 8s ——
@@ -6277,6 +6393,7 @@
     meteorT = __testMode ? 999999 : 1500 + rng() * 900; meteorWarnT = 0; meteorHits = 0; quakeT = __testMode ? 999999 : 2100 + rng() * 1200; quakeActT = 0; thunderT = __testMode ? 999999 : 1800 + rng() * 1200; thunderActT = 0; thunderStrikes = []; acidRainT = __testMode ? 999999 : 2400 + rng() * 1200; acidActT = 0; coldSnapT = __testMode ? 999999 : 2700 + rng() * 1500; coldActT = 0; tideT = __testMode ? 999999 : 2200 + rng() * 1200; tideActT = 0; sandStormT = __testMode ? 999999 : 3000 + rng() * 1500; sandActT = 0; volcanoT = __testMode ? 999999 : 3300 + rng() * 1500; lavaPools = [];   // —— v1.2.182~191 ——
     timebombs = []; sentries = []; stormT = __testMode ? 999999 : 2700 + rng() * 1800; stormWarnT = 0; baseHp = 2;   // 测试态不自动风暴   // —— v1.2.132~138(fog/gold 在 startLevel 另置) ——
     enemiesSpawned = 0;
+    squads = []; squadSeq = 0;   // —— v1.2.192 编队重置 ——
     airDropT = 20;   // —— v1.2.93 空投重置 ——
     weather = __testMode ? 'clear' : ['clear', 'rain', 'snow', 'wind'][randInt(0, 3)];   // —— v1.2.104 战地天气（测试态默认晴,weatherSetNow 强制）——
     luckyLevel = !bossLevel && level % 7 === 0;   // —— v1.2.110 幸运关 ——
@@ -6354,9 +6471,15 @@
     }
     spawnWarnPt = null;
     if (pt) {
-      spawnEnemy(pt[0], pt[1], pickEnemyType());
-      enemiesSpawned++;
-      spawnBlockT = 0;
+      // —— v1.2.192 编队出击:3关起35%整队生成 ——
+      if (!bossLevel && level >= 3 && multiMode !== 2 && !__testMode && rng() < 0.35 && enemiesSpawned + 4 <= enemiesTotal) {   // —— 测试态不自然编队(防存量断言干扰) ——
+        spawnSquad(pt[0], pt[1], pickEnemyType(), 3 + randInt(0, 2));
+        spawnBlockT = 0;
+      } else {
+        spawnEnemy(pt[0], pt[1], pickEnemyType());
+        enemiesSpawned++;
+        spawnBlockT = 0;
+      }
     } else if (++spawnBlockT >= 16) {
       // —— v1.2.20 出生点看门狗：三点全堵约 8 秒强制补刷，防永远刷不满软锁 ——
       spawnBlockT = 0;
@@ -7234,6 +7357,16 @@
 
     // 敌人
     for (const e of enemies) drawTank(e);
+    if (running) {   // —— v1.2.194 队长金环 ——
+      ctx.save();
+      for (const e194 of enemies) {
+        if (e194.dead || !e194.isLeader) continue;
+        ctx.strokeStyle = 'rgba(255,215,94,0.85)';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(e194.x + e194.size / 2, e194.y + e194.size / 2, e194.size * 0.72 + Math.sin(animTime * 4) * 2, 0, Math.PI * 2); ctx.stroke();
+      }
+      ctx.restore();
+    }
 
     // 玩家（无敌闪烁）—— v0.2.7 双人：P1/P2 同屏渲染
     for (const p of [player, player2]) {
@@ -28614,7 +28747,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.191', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.201', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -29959,7 +30092,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       bossAliveTextNow: (arr) => bossAliveText(arr), bossAliveDomNow: () => { const e = $('bossAliveVal'); return e ? e.textContent : null; }, r15enNow: () => enemies,
       baseBesiegedTextNow: (arr) => baseBesiegedText(arr), baseBesiegedDomNow: () => { const e = $('baseBesiegedVal'); return e ? e.textContent : null; }, r16enNow: () => enemies,
       noHurtLvTextNow: (hurt) => noHurtLvText(hurt), noHurtDomNow: () => { const e = $('noHurtVal'); return e ? e.textContent : null; }, r17hNow: () => tookHitThisLevel,
-      bossDistCalcNow: (arr, px, py) => bossDistCalc(arr, px, py), bossDistTextNow: (d) => bossDistText(d), bossDistDomNow: () => { const e = $('bossDistVal'); return e ? e.textContent : null; }, r18posNow: () => { const p = player; return p ? { px: p.x + TILE / 2, py: p.y + TILE / 2 } : { px: 0, py: 0 }; }, r18enNow: () => enemies,
+      bossDistCalcNow: (arr, px, py) => bossDistCalc(arr, px, py), bossDistTextNow: (d) => bossDistText(d), bossDistDomNow: () => { const e = $('bossDistVal'); return e ? e.textContent : null; }, r18posNow: () => { const p = player; return p ? { px: p.x + TILE / 2, py: p.y + TILE / 2 } : { px: 0, py: 0 }; }, r18enNow: () => enemies, squadNow: () => squads.map(s192 => ({ id: s192.id, formation: s192.formation, leaderDead: !!(s192.leader && s192.leader.dead), alive: s192.members.filter(m192 => !m192.dead).length, total: s192.members.length, reinforceUsed: !!s192.reinforceUsed })), spawnSquadNow: (x, y, type, n, formation) => { const sq = spawnSquad(x, y, type || 'normal', n || 4); if (formation) sq.formation = formation; return sq.members.length; },   // —— v1.2.197 队形可控 ——
       spawnInvTextNow: (f) => spawnInvText(f), spawnInvDomNow: () => { const e = $('spawnInvVal'); return e ? e.textContent : null; }, r19svNow: () => player ? player.spawnInv : 0,
       snipeReadyTextNow: (r) => snipeReadyText(r), snipeReadyDomNow: () => { const e = $('snipeReadyVal'); return e ? e.textContent : null; }, r20srNow: () => !!(player && player.ultSnipe),
       atkCdTextNow: (f) => atkCdText(f), atkCdDomNow: () => { const e = $('atkCdVal'); return e ? e.textContent : null; }, r21cdNow: () => player ? player.cooldown : 0,

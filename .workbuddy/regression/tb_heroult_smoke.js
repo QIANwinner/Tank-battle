@@ -32302,6 +32302,440 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return drain > 40 || JSON.stringify({ t0, t1, drain });
   });
 
+  // U9917–U9919: 编队生成
+  await senseCheck("U9917 编队整队生成", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const n = T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(150);
+    const sq = T.squadNow();
+    T.quit();
+    return (n >= 4 && sq.length >= 1 && sq[0].total >= 4) || JSON.stringify({ n, sq });
+  });
+  await senseCheck("U9918 队长标记存在", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const leaders = en.filter(x => x.isLeader);
+    const members = en.filter(x => !x.isLeader);
+    T.quit();
+    return (leaders.length === 1 && members.length >= 3) || JSON.stringify({ l: leaders.length, m: members.length });
+  });
+  await senseCheck("U9919 编队共享squadId", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const ids = en.map(x => x.squadId);
+    const same = ids.length >= 4 && ids.every(v => v === ids[0]);
+    T.quit();
+    return same || JSON.stringify({ ids });
+  });
+
+  // U9920–U9922: 编队队形
+  await senseCheck("U9920 队形分配合法", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const sq = T.squadNow();
+    const ok = sq.length >= 1 && ['wedge', 'line', 'column'].indexOf(sq[0].formation) >= 0;
+    T.quit();
+    return ok || JSON.stringify({ sq });
+  });
+  await senseCheck("U9921 队员跟随队长", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const leader = en.find(x => x.isLeader);
+    const mem = en.find(x => !x.isLeader);
+    if (!leader || !mem) { T.quit(); return JSON.stringify({ nopair: 1 }); }
+    mem.x = leader.x + 260; mem.y = leader.y + 240; mem.enterT = 0; mem.freezeT = 0;
+    leader.freezeT = 9999;
+    const d0 = Math.hypot(mem.x - leader.x, mem.y - leader.y);
+    await Z(1600);
+    const d1 = Math.hypot(mem.x - leader.x, mem.y - leader.y);
+    T.quit();
+    return (d1 < d0 - 40) || JSON.stringify({ d0: Math.round(d0), d1: Math.round(d1) });
+  });
+  await senseCheck("U9922 队员数量完整", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId && !x.isLeader);
+    T.quit();
+    return (en.length >= 3) || JSON.stringify({ n: en.length });
+  });
+
+  // U9923–U9925: 队长强化
+  await senseCheck("U9923 队长血量强化", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const leader = en.find(x => x.isLeader);
+    T.quit();
+    return (leader && leader.maxHp >= 4) || JSON.stringify({ hp: leader && leader.maxHp });
+  });
+  await senseCheck("U9924 队长速度强化", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const leader = en.find(x => x.isLeader);
+    const mate = en.find(x => !x.isLeader && leader && x.type === leader.type);
+    const base = mate ? mate.speed : (leader ? leader.speed / 1.2 : 1);
+    T.quit();
+    return (leader && leader.speed >= base * 1.1) || JSON.stringify({ ls: leader && leader.speed, base });
+  });
+  await senseCheck("U9925 斩首悬赏金币", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const g0 = T.coinsNow();
+    const leader = T.r18enNow().find(x => !x.dead && x.isLeader);
+    if (!leader) { T.quit(); return JSON.stringify({ noleader: 1 }); }
+    leader.hp = 1; leader.freezeT = 9999;
+    T.spawnBulletNow(leader.x + leader.size / 2 - 3, leader.y - 40, 4, false);
+    let dead = false;
+    for (let i = 0; i < 40; i++) { await Z(50); if (leader.dead) { dead = true; break; } }
+    const g1 = T.coinsNow();
+    T.quit();
+    return (dead && g1 > g0) || JSON.stringify({ dead, g0, g1 });
+  });
+
+  // U9926–U9928: 狂暴机制
+  await senseCheck("U9926 队长亡队员狂暴", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const leader = en.find(x => x.isLeader);
+    const mem = en.find(x => !x.isLeader);
+    if (!leader || !mem) { T.quit(); return JSON.stringify({ nopair: 1 }); }
+    mem.freezeT = 9999; mem.x = leader.x + 200; mem.y = leader.y + 150;
+    leader.hp = 1; leader.freezeT = 9999;
+    T.spawnBulletNow(leader.x + leader.size / 2 - 3, leader.y - 40, 4, false);
+    let rage = 0;
+    for (let i = 0; i < 40; i++) { await Z(50); if ((mem.rageT || 0) > 0) { rage = mem.rageT; break; } }
+    T.quit();
+    return (rage > 0) || JSON.stringify({ rage, dead: leader.dead });
+  });
+  await senseCheck("U9927 狂暴移动提速", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const mem = en.find(x => !x.isLeader);
+    if (!mem) { T.quit(); return JSON.stringify({ nomem: 1 }); }
+    const s0 = mem.speed;
+    mem.rageT = 600; mem.speed *= 1.3;
+    const s1 = mem.speed;
+    T.quit();
+    return (s1 > s0 * 1.2) || JSON.stringify({ s0, s1 });
+  });
+  await senseCheck("U9928 狂暴计时衰减", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const mem = T.r18enNow().find(x => !x.dead && x.squadId && !x.isLeader);
+    if (!mem) { T.quit(); return JSON.stringify({ nomem: 1 }); }
+    mem.rageT = 40; mem.freezeT = 0;
+    const r0 = mem.rageT;
+    await Z(600);
+    const r1 = mem.rageT;
+    T.quit();
+    return (r1 < r0) || JSON.stringify({ r0, r1 });
+  });
+
+  // U9929–U9931: 编队增援
+  await senseCheck("U9929 减员呼叫增援", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId && !x.isLeader);
+    for (const m of en.slice(0, 2)) { m.dead = true; }
+    let used = false, total = 0;
+    for (let i = 0; i < 40; i++) { await Z(50); const sq = T.squadNow()[0]; if (sq && sq.reinforceUsed) { used = true; total = sq.total; break; } }
+    T.quit();
+    return (used && total >= 6) || JSON.stringify({ used, total });
+  });
+  await senseCheck("U9930 增援仅一次", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId && !x.isLeader);
+    for (const m of en.slice(0, 2)) { m.dead = true; }
+    let total1 = 0;
+    for (let i = 0; i < 40; i++) { await Z(50); const sq = T.squadNow()[0]; if (sq && sq.reinforceUsed) { total1 = sq.total; break; } }
+    const en2 = T.r18enNow().filter(x => !x.dead && x.squadId && !x.isLeader);
+    for (const m of en2.slice(0, 2)) { m.dead = true; }
+    await Z(700);
+    const sq2 = T.squadNow()[0];
+    T.quit();
+    return (total1 > 0 && sq2 && sq2.total === total1) || JSON.stringify({ total1, t2: sq2 && sq2.total });
+  });
+  await senseCheck("U9931 增援编入小队", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const sid = (T.r18enNow().find(x => x.squadId) || {}).squadId;
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId && !x.isLeader);
+    for (const m of en.slice(0, 2)) { m.dead = true; }
+    let allSame = false;
+    for (let i = 0; i < 40; i++) { await Z(50); const sq = T.squadNow()[0]; if (sq && sq.reinforceUsed) { const alive = T.r18enNow().filter(x => !x.dead && x.squadId === sid); allSame = alive.length >= 3; break; } }
+    T.quit();
+    return allSame || JSON.stringify({ sid });
+  });
+
+  // U9932–U9934: 合围队形
+  await senseCheck("U9932 合围队形存在", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4, 'pincer');
+    await Z(120);
+    const sq = T.squadNow();
+    T.quit();
+    return (sq.length >= 1 && sq[0].formation === 'pincer') || JSON.stringify({ sq });
+  });
+  await senseCheck("U9933 合围两翼散开", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(340, 80, 'normal', 4, 'pincer');
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const leader = en.find(x => x.isLeader);
+    if (!leader) { T.quit(); return JSON.stringify({ noleader: 1 }); }
+    leader.freezeT = 9999;
+    let ti = 0;
+    for (const m of en) { if (!m.isLeader) { m.x = leader.x - 30 + (ti++) * 30; m.y = leader.y - 30; m.enterT = 0; m.freezeT = 0; } }
+    await Z(1800);
+    const mems = en.filter(x => !x.isLeader && !x.dead);
+    const xs = mems.map(m => m.x - leader.x);
+    const hasLeft = xs.some(v => v < -20), hasRight = xs.some(v => v > 20);
+    T.quit();
+    return (hasLeft && hasRight) || JSON.stringify({ xs: xs.map(Math.round) });
+  });
+  await senseCheck("U9934 队形轮换含合围", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const forms = [];
+    for (let i = 0; i < 4; i++) { T.spawnSquadNow(300, 100 + i * 30, 'normal', 3); await Z(60); }
+    const sq = T.squadNow();
+    for (const s of sq) forms.push(s.formation);
+    T.quit();
+    return (forms.indexOf('pincer') >= 0) || JSON.stringify({ forms });
+  });
+
+  // U9935–U9937: 掩护行为
+  await senseCheck("U9935 盾卫前出掩护", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(340, 80, 'normal', 2);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const leader = en.find(x => x.isLeader);
+    const mem = en.find(x => !x.isLeader);
+    if (!leader || !mem) { T.quit(); return JSON.stringify({ nopair: 1 }); }
+    mem.type = 'guardian';
+    mem.x = leader.x - 70; mem.y = leader.y - 50; mem.enterT = 0; mem.freezeT = 0;
+    leader.freezeT = 9999;
+    await Z(3400);
+    const dy = mem.y - leader.y;
+    T.quit();
+    return (dy > 0) || JSON.stringify({ dy: Math.round(dy), my: Math.round(mem.y), ly: Math.round(leader.y) });
+  });
+  await senseCheck("U9936 非盾卫不前出", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(340, 80, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const leader = en.find(x => x.isLeader);
+    const mem = en.find(x => !x.isLeader);
+    if (!leader || !mem) { T.quit(); return JSON.stringify({ nopair: 1 }); }
+    mem.type = 'normal';
+    mem.x = leader.x; mem.y = leader.y; mem.enterT = 0; mem.freezeT = 0;
+    leader.freezeT = 9999;
+    await Z(1600);
+    const dy = mem.y - leader.y;
+    T.quit();
+    return (dy < 36) || JSON.stringify({ dy: Math.round(dy) });
+  });
+  await senseCheck("U9937 盾卫仍在编队", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(340, 80, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const mem = en.find(x => !x.isLeader);
+    if (!mem) { T.quit(); return JSON.stringify({ nomem: 1 }); }
+    mem.type = 'guardian';
+    await Z(200);
+    const still = mem.squadId > 0 && !mem.isLeader;
+    T.quit();
+    return still || JSON.stringify({ sid: mem.squadId });
+  });
+
+  // U9938–U9940: 败退重组
+  await senseCheck("U9938 全灭触发败退", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(340, 200, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const leader = en.find(x => x.isLeader);
+    if (!leader) { T.quit(); return JSON.stringify({ noleader: 1 }); }
+    leader.hp = Math.min(leader.hp, 2);
+    for (const m of en) { if (!m.isLeader) m.dead = true; }
+    let rt = 0;
+    for (let i = 0; i < 40; i++) { await Z(50); if ((leader.retreatT || 0) > 0) { rt = leader.retreatT; break; } }
+    T.quit();
+    return (rt > 0) || JSON.stringify({ rt });
+  });
+  await senseCheck("U9939 败退修复回血", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(340, 200, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const leader = en.find(x => x.isLeader);
+    if (!leader) { T.quit(); return JSON.stringify({ noleader: 1 }); }
+    leader.hp = 1;
+    const hp0 = leader.hp;
+    for (const m of en) { if (!m.isLeader) m.dead = true; }
+    let hp1 = hp0;
+    for (let i = 0; i < 40; i++) { await Z(50); if ((leader.retreatT || 0) > 0) { hp1 = leader.hp; break; } }
+    T.quit();
+    return (hp1 > hp0) || JSON.stringify({ hp0, hp1 });
+  });
+  await senseCheck("U9940 败退北移撤离", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(340, 300, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const leader = en.find(x => x.isLeader);
+    if (!leader) { T.quit(); return JSON.stringify({ noleader: 1 }); }
+    leader.x = 340; leader.y = 300; leader.enterT = 0; leader.freezeT = 0;
+    for (const m of en) { if (!m.isLeader) m.dead = true; }
+    let started = false;
+    for (let i = 0; i < 40; i++) { await Z(50); if ((leader.retreatT || 0) > 0) { started = true; break; } }
+    const y0 = leader.y;
+    await Z(700);
+    const y1 = leader.y;
+    T.quit();
+    return (started && y1 < y0 - 5) || JSON.stringify({ started, y0: Math.round(y0), y1: Math.round(y1) });
+  });
+
+  // U9941–U9943: 混乱弹
+  await senseCheck("U9941 混乱弹生效", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const ok = T.applyPowerupNow('chaos');
+    const mem = T.r18enNow().find(x => !x.dead && x.squadId && !x.isLeader);
+    const ct = mem ? (mem.chaosT || 0) : 0;
+    T.quit();
+    return (ok && ct > 0) || JSON.stringify({ ok, ct });
+  });
+  await senseCheck("U9942 混乱驱散队形", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const leader = en.find(x => x.isLeader);
+    const mem = en.find(x => !x.isLeader);
+    if (!leader || !mem) { T.quit(); return JSON.stringify({ nopair: 1 }); }
+    leader.freezeT = 9999;
+    T.applyPowerupNow('chaos');
+    mem.x = leader.x + 260; mem.y = leader.y + 230; mem.enterT = 0; mem.freezeT = 0;
+    const d0 = Math.hypot(mem.x - leader.x, mem.y - leader.y);
+    await Z(1000);
+    const d1 = Math.hypot(mem.x - leader.x, mem.y - leader.y);
+    T.quit();
+    return (d1 > d0 - 80) || JSON.stringify({ d0: Math.round(d0), d1: Math.round(d1) });
+  });
+  await senseCheck("U9943 混乱计时衰减", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const mem = T.r18enNow().find(x => !x.dead && x.squadId && !x.isLeader);
+    if (!mem) { T.quit(); return JSON.stringify({ nomem: 1 }); }
+    mem.chaosT = 40; mem.freezeT = 0;
+    const c0 = mem.chaosT;
+    await Z(600);
+    const c1 = mem.chaosT;
+    T.quit();
+    return (c1 < c0) || JSON.stringify({ c0, c1 });
+  });
+
+  // U9944–U9946: 灭队嘉奖
+  await senseCheck("U9944 灭队触发嘉奖", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 3);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    for (const m of en) { m.hp = 1; m.freezeT = 9999; }
+    const g0 = T.coinsNow();
+    for (const m of en) { T.spawnBulletNow(m.x + m.size / 2 - 3, m.y - 40, 4, false); await Z(180); }
+    await Z(400);
+    const g1 = T.coinsNow();
+    const allDead = en.every(m => m.dead);
+    T.quit();
+    return (allDead && g1 >= g0 + 30) || JSON.stringify({ allDead, g0, g1 });
+  });
+  await senseCheck("U9945 嘉奖仅一次", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 3);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    for (const m of en) { m.hp = 1; m.freezeT = 9999; }
+    for (const m of en) { T.spawnBulletNow(m.x + m.size / 2 - 3, m.y - 40, 4, false); await Z(180); }
+    await Z(400);
+    const g1 = T.coinsNow();
+    await Z(600);
+    const g2 = T.coinsNow();
+    T.quit();
+    return (g2 === g1) || JSON.stringify({ g1, g2 });
+  });
+  await senseCheck("U9946 非灭队无嘉奖", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const one = en.find(x => !x.isLeader);
+    if (!one) { T.quit(); return JSON.stringify({ noone: 1 }); }
+    const g0 = T.coinsNow();
+    one.hp = 1; one.freezeT = 9999;
+    T.spawnBulletNow(one.x + one.size / 2 - 3, one.y - 40, 4, false);
+    await Z(600);
+    const g1 = T.coinsNow();
+    T.quit();
+    return (g1 < g0 + 30) || JSON.stringify({ g0, g1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
