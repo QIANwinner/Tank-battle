@@ -32117,6 +32117,44 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (dWarm > 4 && dCold < dWarm * 0.8) || JSON.stringify({ dWarm: Math.round(dWarm), dCold: Math.round(dCold) });
   });
 
+  // U9902–U9904: 潮汐
+  await senseCheck("U9902 潮汐激活", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.tideSetNow(5);
+    let act = 0;
+    for (let i = 0; i < 60; i++) { await Z(50); const t = T.tideNow(); if (t.act > 0) { act = t.act; break; } }
+    T.quit();
+    return act > 0 || JSON.stringify({ act });
+  });
+  await senseCheck("U9903 潮汐推送敌人向中心", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(30, 30, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return JSON.stringify({ nofoe: 1 }); }
+    e.enterT = 0; e.freezeT = 9999;
+    const cv187 = $('game');
+    const ccx = cv187.width / 2, ccy = cv187.height / 2;
+    const d0 = Math.hypot(e.x + e.size / 2 - ccx, e.y + e.size / 2 - ccy);
+    T.tideSetNow(5);
+    let d1 = d0;
+    for (let i = 0; i < 160; i++) { await Z(60); if (T.tideNow().act > 0 && i > 8) { d1 = Math.hypot(e.x + e.size / 2 - ccx, e.y + e.size / 2 - ccy); if (d1 < d0 - 8) break; } if (T.tideNow().act <= 0 && i > 20) break; }
+    T.quit();
+    return d1 < d0 - 4 || JSON.stringify({ d0: Math.round(d0), d1: Math.round(d1) });
+  });
+  await senseCheck("U9904 潮汐推送玩家", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    await Z(200);
+    const p0 = T.r18posNow();
+    T.tideSetNow(5);
+    let moved = 0;
+    for (let i = 0; i < 120; i++) { await Z(60); const p1 = T.r18posNow(); moved = Math.hypot(p1.px - p0.px, p1.py - p0.py); if (moved > 6) break; if (T.tideNow().act <= 0 && i > 20) break; }
+    T.quit();
+    return moved > 4 || JSON.stringify({ moved: Math.round(moved) });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
