@@ -31833,6 +31833,47 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (dirs.size >= 3) || JSON.stringify({ dirs: dirs.size });
   });
 
+  // U9881–U9883: 隐身者
+  await senseCheck("U9881 隐身者Boss已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const id = T.spawnBossAsNow('stalker');
+    T.quit();
+    return (id === 'stalker') || JSON.stringify({ id });
+  });
+  await senseCheck("U9882 隐身技能激活", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('stalker');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    let st = 0;
+    for (let i = 0; i < 15; i++) {
+      await Z(90);
+      st = b.stalkT || 0;
+      if (st > 0) break;
+    }
+    T.quit();
+    return (st > 0) || 'stalk never active';
+  });
+  await senseCheck("U9883 隐身中子弹穿透无伤", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('stalker');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    for (let i = 0; i < 15; i++) { await Z(90); if ((b.stalkT || 0) > 0) break; }
+    if (!(b.stalkT > 0)) { T.quit(); return 'no stalk'; }
+    b.freezeT = 9999;
+    const hp0 = b.hp;
+    T.spawnBulletNow(b.x + 8, b.y - 30, 4, false);
+    for (let i = 0; i < 15; i++) await Z(80);
+    const hp1 = b.hp;
+    T.quit();
+    return (hp1 === hp0) || JSON.stringify({ hp0, hp1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
