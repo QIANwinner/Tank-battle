@@ -32211,6 +32211,46 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return dr > 6 || JSON.stringify({ dr, b: [before[0], before[1], before[2]], a: [after[0], after[1], after[2]] });
   });
 
+  // U9908–U9910: 火山
+  await senseCheck("U9908 火山喷发成池", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.volcanoSetNow(5);
+    let n = 0;
+    for (let i = 0; i < 80; i++) { await Z(50); const lp = T.lavaPoolsNow(); if (lp.length) { n = lp.length; break; } }
+    T.quit();
+    return n >= 3 || JSON.stringify({ n });
+  });
+  await senseCheck("U9909 岩浆灼烧敌人", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.volcanoSetNow(5);
+    let lp = null;
+    for (let i = 0; i < 80; i++) { await Z(50); const l = T.lavaPoolsNow(); if (l.length) { lp = l[0]; break; } }
+    if (!lp) { T.quit(); return JSON.stringify({ nolava: 1 }); }
+    T.spawnFoeNow(lp.x - 14, lp.y - 14, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return JSON.stringify({ nofoe: 1 }); }
+    e.enterT = 0; e.hp = 9; e.maxHp = 9; e.freezeT = 9999;
+    e.x = lp.x - e.size / 2; e.y = lp.y - e.size / 2;
+    let hurt = false;
+    for (let i = 0; i < 120; i++) { await Z(60); e.x = lp.x - e.size / 2; e.y = lp.y - e.size / 2; if (e.hp < 9 || e.dead) { hurt = true; break; } if (!T.lavaPoolsNow().length) break; }
+    T.quit();
+    return hurt || JSON.stringify({ hp: e.hp });
+  });
+  await senseCheck("U9910 岩浆池衰减消散", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.volcanoSetNow(5);
+    let l0 = 0;
+    for (let i = 0; i < 80; i++) { await Z(50); const l = T.lavaPoolsNow(); if (l.length) { l0 = l[0].life; break; } }
+    await Z(600);
+    const l1arr = T.lavaPoolsNow();
+    const l1 = l1arr.length ? l1arr[0].life : -1;
+    T.quit();
+    return (l0 > 0 && l1 >= 0 && l1 < l0) || JSON.stringify({ l0, l1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
