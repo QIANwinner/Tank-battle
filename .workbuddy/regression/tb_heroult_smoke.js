@@ -31309,7 +31309,7 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     const Z = ms => new Promise(r => setTimeout(r, ms));
     T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
     const p = T.r18posNow();
-    T.spawnFoeNow(p.px - 14, p.py - 120, 'mirror');
+    T.spawnFoeNow(p.px, p.py - 120, 'mirror');   // —— flake修复:对齐弹道中线,原-14偏移致边缘命中不稳定 ——
     const e = T.r18enNow().filter(x => !x.dead).pop();
     if (!e) { T.quit(); return 'no mirror'; }
     e.freezeT = 9999;
@@ -31329,7 +31329,7 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     const Z = ms => new Promise(r => setTimeout(r, ms));
     T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
     const p = T.r18posNow();
-    T.spawnFoeNow(p.px - 14, p.py - 120, 'mirror');
+    T.spawnFoeNow(p.px, p.py - 120, 'mirror');   // —— flake修复:对齐弹道中线,原-14偏移致边缘命中不稳定 ——
     const e = T.r18enNow().filter(x => !x.dead).pop();
     if (!e) { T.quit(); return 'no mirror'; }
     e.freezeT = 9999;
@@ -33154,6 +33154,67 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     const pu = T.puPosNow().length;
     T.quit(); T.zoneForceNow(null);
     return (done && pu >= 1) || JSON.stringify({ done, pu });
+  });
+
+
+  // U9980–U9982: 阵地争夺
+  await senseCheck("U9980 敌在点内充能暂停", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.zoneForceNow('radar');
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    let z = null;
+    for (let i = 0; i < 25 && !z; i++) { await Z(90); z = T.zoneNow(); }
+    if (!z) { T.quit(); T.zoneForceNow(null); return 'no capZone spawned'; }
+    T.tp(z.x - 11, z.y - 11); T.invul(99999);
+    for (let i = 0; i < 15; i++) await Z(80);
+    T.spawnFoeNow(z.x - 11, z.y - 11, 'normal');
+    const foe = T.r18enNow().filter(x => !x.dead).pop();
+    if (foe) foe.freezeT = 1e9;
+    await Z(300);
+    const pa = (T.zoneNow() || {}).prog || 0;
+    for (let i = 0; i < 10; i++) await Z(90);
+    const pb = (T.zoneNow() || {}).prog || 0;
+    T.quit(); T.zoneForceNow(null);
+    return (pb <= pa + 1) || JSON.stringify({ pa, pb });
+  });
+  await senseCheck("U9981 敌在点内进度倒退", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.zoneForceNow('radar');
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    let z = null;
+    for (let i = 0; i < 25 && !z; i++) { await Z(90); z = T.zoneNow(); }
+    if (!z) { T.quit(); T.zoneForceNow(null); return 'no capZone spawned'; }
+    T.tp(z.x - 11, z.y - 11); T.invul(99999);
+    let p0 = 0;
+    for (let i = 0; i < 40 && p0 < 30; i++) { await Z(100); p0 = (T.zoneNow() || {}).prog || 0; }
+    T.spawnFoeNow(z.x - 11, z.y - 11, 'normal');
+    const foe = T.r18enNow().filter(x => !x.dead).pop();
+    if (foe) foe.freezeT = 1e9;
+    await Z(200);
+    const pa = (T.zoneNow() || {}).prog || 0;
+    for (let i = 0; i < 20; i++) await Z(100);
+    const pb = (T.zoneNow() || {}).prog || 0;
+    T.quit(); T.zoneForceNow(null);
+    return (pb < pa) || JSON.stringify({ p0, pa, pb });
+  });
+  await senseCheck("U9982 清场后恢复充能", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.zoneForceNow('radar');
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    let z = null;
+    for (let i = 0; i < 25 && !z; i++) { await Z(90); z = T.zoneNow(); }
+    if (!z) { T.quit(); T.zoneForceNow(null); return 'no capZone spawned'; }
+    T.tp(z.x - 11, z.y - 11); T.invul(99999);
+    T.spawnFoeNow(z.x - 11, z.y - 11, 'normal');
+    const foe = T.r18enNow().filter(x => !x.dead).pop();
+    if (foe) foe.freezeT = 1e9;
+    await Z(400);
+    const pc = (T.zoneNow() || {}).prog || 0;
+    if (foe) foe.dead = true;
+    let pd = pc;
+    for (let i = 0; i < 30 && pd <= pc; i++) { await Z(100); pd = (T.zoneNow() || {}).prog || 0; }
+    T.quit(); T.zoneForceNow(null);
+    return (pd > pc) || JSON.stringify({ pc, pd });
   });
 
   chrome.kill(); killTree(chrome.pid);
