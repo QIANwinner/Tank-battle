@@ -939,9 +939,10 @@ async function main() {
     try {
       const bt = T.bossTypesNow();
       t('X8 Boss 三种类型(血条样式+技能各异)',
-        bt.length === 3 &&
+        bt.length >= 3 &&
         bt[0].skill === 'scatter' && bt[1].skill === 'laser' && bt[2].skill === 'split' &&
-        new Set(bt.map(b => b.bar)).size === 3 && new Set(bt.map(b => b.skill)).size === 3,
+        new Set(bt.map(b => b.skill)).size === bt.length &&
+        bt.every(b => ['solid', 'segment', 'drain'].includes(b.bar)),
         bt.map(b => b.id + '/' + b.bar + '/' + b.skill).join(','));
     } catch (e) { t('X8 Boss 类型定义', false, e.message); }
 

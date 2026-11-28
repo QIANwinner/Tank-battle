@@ -31517,6 +31517,407 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (sl && sl.size < e.size && sl.speed > 1.2) || JSON.stringify({ sl: sl && { size: sl.size, speed: sl.speed }, es: e.size });
   });
 
+  // U9857–U9859: 冲锋者
+  await senseCheck("U9857 冲锋者Boss已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const id = T.spawnBossAsNow('charger');
+    const bt = T.bossTypeNow();
+    T.quit();
+    return (id === 'charger' && bt.id === 'charger') || JSON.stringify({ id, bt });
+  });
+  await senseCheck("U9858 冲锋技能进入预警", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('charger');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    let st = '';
+    for (let i = 0; i < 15; i++) {
+      await Z(90);
+      st = b.state;
+      if (st === 'charge_warn' || st === 'charge') break;
+    }
+    T.quit();
+    return (st === 'charge_warn' || st === 'charge') || JSON.stringify({ st });
+  });
+  await senseCheck("U9859 冲锋产生位移", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('charger');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    for (let i = 0; i < 15; i++) { await Z(90); if (b.state === 'charge') break; }
+    if (b.state !== 'charge') { T.quit(); return 'never charged: ' + b.state; }
+    const x0 = b.x, y0 = b.y;
+    for (let i = 0; i < 8; i++) await Z(80);
+    const moved = Math.hypot(b.x - x0, b.y - y0);
+    T.quit();
+    return (moved > 20) || JSON.stringify({ moved: Math.round(moved), st: b.state });
+  });
+
+  // U9860–U9862: 盾卫王
+  await senseCheck("U9860 盾卫王Boss已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const id = T.spawnBossAsNow('aegis');
+    T.quit();
+    return (id === 'aegis') || JSON.stringify({ id });
+  });
+  await senseCheck("U9861 护盾技能激活", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('aegis');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    let st = 0;
+    for (let i = 0; i < 15; i++) {
+      await Z(90);
+      st = b.shieldT || 0;
+      if (st > 0) break;
+    }
+    T.quit();
+    return (st > 0) || 'shield never active';
+  });
+  await senseCheck("U9862 护盾格挡子弹", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('aegis');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    for (let i = 0; i < 15; i++) { await Z(90); if ((b.shieldT || 0) > 0) break; }
+    if (!(b.shieldT > 0)) { T.quit(); return 'no shield'; }
+    b.freezeT = 9999;
+    const hp0 = b.hp;
+    T.spawnBulletNow(b.x + 8, b.y - 30, 4, false);
+    for (let i = 0; i < 15; i++) await Z(80);
+    const hp1 = b.hp;
+    T.quit();
+    return (hp1 === hp0) || JSON.stringify({ hp0, hp1 });
+  });
+
+  // U9863–U9865: 螺旋者
+  await senseCheck("U9863 螺旋者Boss已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const id = T.spawnBossAsNow('spiraler');
+    T.quit();
+    return (id === 'spiraler') || JSON.stringify({ id });
+  });
+  await senseCheck("U9864 螺旋弹幕放量", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('spiraler');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    let n = 0;
+    for (let i = 0; i < 15; i++) {
+      await Z(90);
+      n = T.bulletsInfoNow().filter(x => !x.own && !x.dead).length;
+      if (n >= 10) break;
+    }
+    T.quit();
+    return (n >= 10) || JSON.stringify({ n });
+  });
+  await senseCheck("U9865 螺旋弹幕多方向", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('spiraler');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    let dirs = new Set();
+    for (let i = 0; i < 12; i++) {
+      await Z(90);
+      T.bulletsInfoNow().filter(x => !x.own && !x.dead).forEach(x => dirs.add(x.dir));
+      if (dirs.size >= 4) break;
+    }
+    T.quit();
+    return (dirs.size >= 4) || JSON.stringify({ dirs: dirs.size });
+  });
+
+  // U9866–U9868: 闪现者
+  await senseCheck("U9866 闪现者Boss已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const id = T.spawnBossAsNow('blinker');
+    T.quit();
+    return (id === 'blinker') || JSON.stringify({ id });
+  });
+  await senseCheck("U9867 闪现改变位置", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('blinker');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    let lx = b.x, ly = b.y, jumped = 0;
+    for (let i = 0; i < 18; i++) {
+      await Z(90);
+      const step = Math.hypot(b.x - lx, b.y - ly);
+      if (step > jumped) jumped = step;
+      lx = b.x; ly = b.y;
+      if (jumped > 64) break;
+    }
+    T.quit();
+    return (jumped > 64) || JSON.stringify({ jumped: Math.round(jumped) });
+  });
+  await senseCheck("U9868 闪现后位置合法", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('blinker');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    for (let i = 0; i < 15; i++) await Z(90);
+    const inBounds = b.x >= 0 && b.y >= 0 && b.x < 26 * 32 && b.y < 26 * 32;
+    T.quit();
+    return inBounds === true || JSON.stringify({ x: Math.round(b.x), y: Math.round(b.y) });
+  });
+
+  // U9869–U9871: 主宰
+  await senseCheck("U9869 主宰Boss已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const id = T.spawnBossAsNow('overmind');
+    T.quit();
+    return (id === 'overmind') || JSON.stringify({ id });
+  });
+  await senseCheck("U9870 主宰召唤小兵", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('overmind');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    const n0 = T.r18enNow().filter(x => !x.dead && !x.isBoss).length;
+    let dn = 0;
+    for (let i = 0; i < 15; i++) {
+      await Z(90);
+      dn = T.r18enNow().filter(x => !x.dead && !x.isBoss).length - n0;
+      if (dn >= 2) break;
+    }
+    T.quit();
+    return (dn >= 2) || JSON.stringify({ n0, dn });
+  });
+  await senseCheck("U9871 主宰召唤计时复位", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('overmind');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    for (let i = 0; i < 15; i++) { await Z(90); if (b.skillTimer > 100) break; }
+    const st = b.skillTimer;
+    T.quit();
+    return (st > 100) || JSON.stringify({ st });
+  });
+
+  // U9872–U9874: 引力者
+  await senseCheck("U9872 引力者Boss已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const id = T.spawnBossAsNow('gravitor');
+    T.quit();
+    return (id === 'gravitor') || JSON.stringify({ id });
+  });
+  await senseCheck("U9873 引力场激活", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('gravitor');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    let gt = 0;
+    for (let i = 0; i < 15; i++) {
+      await Z(90);
+      gt = b.gravT || 0;
+      if (gt > 0) break;
+    }
+    T.quit();
+    return (gt > 0) || 'gravity never active';
+  });
+  await senseCheck("U9874 引力拉拽玩家", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('gravitor');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    const pp0 = T.r18posNow();
+    b.enterT = 0; b.x = pp0.px - 22; b.y = pp0.py - 180; b.skillTimer = 1;
+    for (let i = 0; i < 15; i++) { await Z(90); if ((b.gravT || 0) > 0) break; }
+    if (!(b.gravT > 0)) { T.quit(); return 'no gravity'; }
+    const p0b = T.r18posNow();
+    for (let i = 0; i < 20; i++) await Z(100);
+    const p1b = T.r18posNow();
+    const pmoved = Math.hypot(p1b.px - p0b.px, p1b.py - p0b.py);
+    T.quit();
+    return (pmoved > 25) || JSON.stringify({ pmoved: Math.round(pmoved) });
+  });
+
+  // U9875–U9877: 狂暴者
+  await senseCheck("U9875 狂暴者Boss已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const id = T.spawnBossAsNow('berserker');
+    T.quit();
+    return (id === 'berserker') || JSON.stringify({ id });
+  });
+  await senseCheck("U9876 低血射速狂化", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('berserker');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200;
+    b.hp = Math.floor(b.maxHp * 0.2);
+    b.shootTimer = 1;
+    await Z(400);
+    let maxT = 0;
+    for (let i = 0; i < 25; i++) {
+      await Z(60);
+      if (b.shootTimer > maxT) maxT = b.shootTimer;
+    }
+    T.quit();
+    return (maxT > 0 && maxT <= 26) || JSON.stringify({ maxT });
+  });
+  await senseCheck("U9877 怒吼技能放环形弹", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('berserker');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    let n = 0;
+    for (let i = 0; i < 15; i++) {
+      await Z(90);
+      n = T.bulletsInfoNow().filter(x => !x.own && !x.dead).length;
+      if (n >= 6) break;
+    }
+    T.quit();
+    return (n >= 6) || JSON.stringify({ n });
+  });
+
+  // U9878–U9880: 堡垒王
+  await senseCheck("U9878 堡垒王Boss已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const id = T.spawnBossAsNow('fortress');
+    T.quit();
+    return (id === 'fortress') || JSON.stringify({ id });
+  });
+  await senseCheck("U9879 堡垒王不动", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('fortress');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200;
+    const x0 = b.x, y0 = b.y;
+    for (let i = 0; i < 18; i++) await Z(100);
+    const moved = Math.hypot(b.x - x0, b.y - y0);
+    T.quit();
+    return (moved < 3) || JSON.stringify({ moved: Math.round(moved) });
+  });
+  await senseCheck("U9880 堡垒炮塔旋转", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('fortress');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200;
+    const dirs = new Set();
+    for (let i = 0; i < 25; i++) {
+      await Z(90);
+      dirs.add(b.dir);
+      if (dirs.size >= 3) break;
+    }
+    T.quit();
+    return (dirs.size >= 3) || JSON.stringify({ dirs: dirs.size });
+  });
+
+  // U9881–U9883: 隐身者
+  await senseCheck("U9881 隐身者Boss已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const id = T.spawnBossAsNow('stalker');
+    T.quit();
+    return (id === 'stalker') || JSON.stringify({ id });
+  });
+  await senseCheck("U9882 隐身技能激活", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('stalker');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    let st = 0;
+    for (let i = 0; i < 15; i++) {
+      await Z(90);
+      st = b.stalkT || 0;
+      if (st > 0) break;
+    }
+    T.quit();
+    return (st > 0) || 'stalk never active';
+  });
+  await senseCheck("U9883 隐身中子弹穿透无伤", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('stalker');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    for (let i = 0; i < 15; i++) { await Z(90); if ((b.stalkT || 0) > 0) break; }
+    if (!(b.stalkT > 0)) { T.quit(); return 'no stalk'; }
+    b.freezeT = 9999;
+    const hp0 = b.hp;
+    T.spawnBulletNow(b.x + 8, b.y - 30, 4, false);
+    for (let i = 0; i < 15; i++) await Z(80);
+    const hp1 = b.hp;
+    T.quit();
+    return (hp1 === hp0) || JSON.stringify({ hp0, hp1 });
+  });
+
+  // U9884–U9886: 镜像王
+  await senseCheck("U9884 镜像王Boss已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const id = T.spawnBossAsNow('mirrorboss');
+    T.quit();
+    return (id === 'mirrorboss') || JSON.stringify({ id });
+  });
+  await senseCheck("U9885 镜面护盾激活", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('mirrorboss');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    let mt = 0;
+    for (let i = 0; i < 15; i++) {
+      await Z(90);
+      mt = b.mirrorT || 0;
+      if (mt > 0) break;
+    }
+    T.quit();
+    return (mt > 0) || 'mirror never active';
+  });
+  await senseCheck("U9886 镜面反弹玩家子弹", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('mirrorboss');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    for (let i = 0; i < 15; i++) { await Z(90); if ((b.mirrorT || 0) > 0) break; }
+    if (!(b.mirrorT > 0)) { T.quit(); return 'no mirror'; }
+    b.freezeT = 9999;
+    T.spawnBulletNow(b.x + 8, b.y - 30, 4, false);
+    let reflected = 0;
+    for (let i = 0; i < 15; i++) {
+      await Z(80);
+      reflected = T.bulletsInfoNow().filter(x => !x.own && !x.dead).length;
+      if (reflected > 0) break;
+    }
+    T.quit();
+    return (reflected > 0) || 'no reflected bullet';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
