@@ -32896,6 +32896,41 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (lo.t === 'heavy' && lo.kills === 0) || JSON.stringify({ lo });
   });
 
+  // U9959–U9961: 流派弹头
+  await senseCheck("U9959 机枪弹头金色", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('machine');
+    T.firePlayerNow();
+    await Z(80);
+    const bl = T.liveBulletsNow().filter(x => !x.dead && x.owner && x.owner.isPlayer);
+    const last = bl[bl.length - 1];
+    T.quit();
+    return (last && last.tint === '#ffe600') || JSON.stringify({ tint: last && last.tint });
+  });
+  await senseCheck("U9960 重炮弹头加大", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('heavy');
+    T.firePlayerNow();
+    await Z(80);
+    const bl = T.liveBulletsNow().filter(x => !x.dead && x.owner && x.owner.isPlayer);
+    const last = bl[bl.length - 1];
+    T.quit();
+    return (last && last.size >= 7) || JSON.stringify({ sz: last && last.size });
+  });
+  await senseCheck("U9961 激光弹头青色", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('laser');
+    T.firePlayerNow();
+    await Z(80);
+    const bl = T.liveBulletsNow().filter(x => !x.dead && x.owner && x.owner.isPlayer);
+    const last = bl[bl.length - 1];
+    T.quit();
+    return (last && last.tint === '#4df0ff') || JSON.stringify({ tint: last && last.tint });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
