@@ -32413,6 +32413,53 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (dead && g1 > g0) || JSON.stringify({ dead, g0, g1 });
   });
 
+  // U9926–U9928: 狂暴机制
+  await senseCheck("U9926 队长亡队员狂暴", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const leader = en.find(x => x.isLeader);
+    const mem = en.find(x => !x.isLeader);
+    if (!leader || !mem) { T.quit(); return JSON.stringify({ nopair: 1 }); }
+    mem.freezeT = 9999; mem.x = leader.x + 200; mem.y = leader.y + 150;
+    leader.hp = 1; leader.freezeT = 9999;
+    T.spawnBulletNow(leader.x + leader.size / 2 - 3, leader.y - 40, 4, false);
+    let rage = 0;
+    for (let i = 0; i < 40; i++) { await Z(50); if ((mem.rageT || 0) > 0) { rage = mem.rageT; break; } }
+    T.quit();
+    return (rage > 0) || JSON.stringify({ rage, dead: leader.dead });
+  });
+  await senseCheck("U9927 狂暴移动提速", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const mem = en.find(x => !x.isLeader);
+    if (!mem) { T.quit(); return JSON.stringify({ nomem: 1 }); }
+    const s0 = mem.speed;
+    mem.rageT = 600; mem.speed *= 1.3;
+    const s1 = mem.speed;
+    T.quit();
+    return (s1 > s0 * 1.2) || JSON.stringify({ s0, s1 });
+  });
+  await senseCheck("U9928 狂暴计时衰减", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const mem = T.r18enNow().find(x => !x.dead && x.squadId && !x.isLeader);
+    if (!mem) { T.quit(); return JSON.stringify({ nomem: 1 }); }
+    mem.rageT = 40; mem.freezeT = 0;
+    const r0 = mem.rageT;
+    await Z(600);
+    const r1 = mem.rageT;
+    T.quit();
+    return (r1 < r0) || JSON.stringify({ r0, r1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
