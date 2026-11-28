@@ -31713,6 +31713,47 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (st > 100) || JSON.stringify({ st });
   });
 
+  // U9872–U9874: 引力者
+  await senseCheck("U9872 引力者Boss已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const id = T.spawnBossAsNow('gravitor');
+    T.quit();
+    return (id === 'gravitor') || JSON.stringify({ id });
+  });
+  await senseCheck("U9873 引力场激活", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('gravitor');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    let gt = 0;
+    for (let i = 0; i < 15; i++) {
+      await Z(90);
+      gt = b.gravT || 0;
+      if (gt > 0) break;
+    }
+    T.quit();
+    return (gt > 0) || 'gravity never active';
+  });
+  await senseCheck("U9874 引力拉拽玩家", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('gravitor');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    const pp0 = T.r18posNow();
+    b.enterT = 0; b.x = pp0.px - 22; b.y = pp0.py - 180; b.skillTimer = 1;
+    for (let i = 0; i < 15; i++) { await Z(90); if ((b.gravT || 0) > 0) break; }
+    if (!(b.gravT > 0)) { T.quit(); return 'no gravity'; }
+    const p0b = T.r18posNow();
+    for (let i = 0; i < 20; i++) await Z(100);
+    const p1b = T.r18posNow();
+    const pmoved = Math.hypot(p1b.px - p0b.px, p1b.py - p0b.py);
+    T.quit();
+    return (pmoved > 25) || JSON.stringify({ pmoved: Math.round(pmoved) });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
