@@ -32460,6 +32460,49 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (r1 < r0) || JSON.stringify({ r0, r1 });
   });
 
+  // U9929–U9931: 编队增援
+  await senseCheck("U9929 减员呼叫增援", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId && !x.isLeader);
+    for (const m of en.slice(0, 2)) { m.dead = true; }
+    let used = false, total = 0;
+    for (let i = 0; i < 40; i++) { await Z(50); const sq = T.squadNow()[0]; if (sq && sq.reinforceUsed) { used = true; total = sq.total; break; } }
+    T.quit();
+    return (used && total >= 6) || JSON.stringify({ used, total });
+  });
+  await senseCheck("U9930 增援仅一次", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId && !x.isLeader);
+    for (const m of en.slice(0, 2)) { m.dead = true; }
+    let total1 = 0;
+    for (let i = 0; i < 40; i++) { await Z(50); const sq = T.squadNow()[0]; if (sq && sq.reinforceUsed) { total1 = sq.total; break; } }
+    const en2 = T.r18enNow().filter(x => !x.dead && x.squadId && !x.isLeader);
+    for (const m of en2.slice(0, 2)) { m.dead = true; }
+    await Z(700);
+    const sq2 = T.squadNow()[0];
+    T.quit();
+    return (total1 > 0 && sq2 && sq2.total === total1) || JSON.stringify({ total1, t2: sq2 && sq2.total });
+  });
+  await senseCheck("U9931 增援编入小队", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const sid = (T.r18enNow().find(x => x.squadId) || {}).squadId;
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId && !x.isLeader);
+    for (const m of en.slice(0, 2)) { m.dead = true; }
+    let allSame = false;
+    for (let i = 0; i < 40; i++) { await Z(50); const sq = T.squadNow()[0]; if (sq && sq.reinforceUsed) { const alive = T.r18enNow().filter(x => !x.dead && x.squadId === sid); allSame = alive.length >= 3; break; } }
+    T.quit();
+    return allSame || JSON.stringify({ sid });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
