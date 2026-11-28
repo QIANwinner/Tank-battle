@@ -31952,6 +31952,44 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (hits > 0 || dead) || JSON.stringify({ hits, dead });
   });
 
+  // U9890–U9892: 地震
+  await senseCheck("U9890 地震触发震屏", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.quakeSetNow(5);
+    let act = 0, sh = 0;
+    for (let i = 0; i < 60; i++) { await Z(50); const q = T.quakeNow(); if (q.act > 0) { act = q.act; sh = T.r40shNow(); break; } }
+    T.quit();
+    return (act > 0 && sh >= 8) || JSON.stringify({ act, sh });
+  });
+  await senseCheck("U9891 地震崩裂砖墙", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    for (const [bx, by] of [[4, 4], [6, 4], [8, 4], [10, 4], [5, 6], [7, 6]]) T.setTile(bx, by, 1);
+    const b0 = T.bricksNow();
+    T.quakeSetNow(5);
+    let fired = false;
+    for (let i = 0; i < 60; i++) { await Z(50); if (T.quakeNow().act > 0) { fired = true; break; } }
+    await Z(300);
+    const b1 = T.bricksNow();
+    T.quit();
+    return (fired && b1 < b0) || JSON.stringify({ fired, b0, b1 });
+  });
+  await senseCheck("U9892 地震震位移", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(400, 240, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    let ex0 = -1, ey0 = -1;
+    if (e) { e.x = 400; e.y = 240; e.enterT = 0; e.freezeT = 9999; e.hp = 99; e.maxHp = 99; ex0 = e.x; ey0 = e.y; }
+    const p0 = T.r18posNow();
+    T.quakeSetNow(5);
+    let moved = 0, emoved = 0;
+    for (let i = 0; i < 50; i++) { await Z(50); if (T.quakeNow().act > 0) { await Z(120); const p1 = T.r18posNow(); moved = Math.hypot(p1.px - p0.px, p1.py - p0.py); if (e) emoved = Math.hypot(e.x - ex0, e.y - ey0); break; } }
+    T.quit();
+    return (moved > 1 || emoved > 1) || JSON.stringify({ moved, emoved });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

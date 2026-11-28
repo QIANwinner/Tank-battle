@@ -1878,7 +1878,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.182</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.183</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -6584,6 +6584,36 @@
     } else poisonT = 0;
     // —— v1.2.126 寒冰减速衰减 ——
     if (chillT > 0) chillT = Math.max(0, chillT - k);
+    // —— v1.2.183 地震:震屏+崩墙+移位 ——
+    if (quakeT > 0 && multiMode !== 2) {
+      quakeT -= k;
+      if (quakeT <= 0) {
+        quakeT = 0; quakeActT = 180;
+        shake = Math.max(shake, 16);
+        if (player) addText(clamp(player.x + TANK_SIZE / 2, 84, W - 84), player.y - 40, '🌋 地震!', '#c8a86a');
+        showToast('🌋 地震来袭！大地在颤抖');
+        beep(70, 0.5, 'sawtooth', 0.08);
+        const bricks183 = [];
+        for (let qy = 1; qy < ROWS - 1; qy++) for (let qx = 1; qx < COLS - 1; qx++) if (map[qy] && map[qy][qx] === TILE_BRICK && !isBaseWallTile(qx, qy)) bricks183.push(qy * COLS + qx);
+        let brk183 = 0;
+        while (brk183 < 4 && bricks183.length) {
+          const pick183 = bricks183.splice(Math.floor(rng() * bricks183.length), 1)[0];
+          map[Math.floor(pick183 / COLS)][pick183 % COLS] = 0; brk183++;
+        }
+        if (brk183) markMapDirty();
+        for (const e of enemies) {
+          if (e.dead || e.enterT > 0) continue;
+          const nx183 = clamp(e.x + (rng() - 0.5) * 40, 0, W - e.size), ny183 = clamp(e.y + (rng() - 0.5) * 40, 0, H - e.size);
+          if (!isBlocked(nx183, ny183, e.size)) { e.x = nx183; e.y = ny183; }
+        }
+        if (player && !player.dead) {
+          const px183 = clamp(player.x + (rng() - 0.5) * 40, 0, W - TANK_SIZE), py183 = clamp(player.y + (rng() - 0.5) * 40, 0, H - TANK_SIZE);
+          if (!isBlocked(px183, player.y, TANK_SIZE)) player.x = px183;
+          if (!isBlocked(player.x, py183, TANK_SIZE)) player.y = py183;
+        }
+      }
+    }
+    if (quakeActT > 0) { quakeActT -= k; shake = Math.max(shake, 8); if (quakeActT <= 0) quakeT = __testMode ? 999999 : 2100 + rng() * 1200; }
     // —— v1.2.182 陨石:倒计时→红圈预警→坠落撞击 ——
     if (meteorT > 0 && multiMode !== 2) {
       meteorT -= k;
@@ -28337,7 +28367,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.182', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.183', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
