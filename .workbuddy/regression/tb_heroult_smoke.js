@@ -32503,6 +32503,45 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return allSame || JSON.stringify({ sid });
   });
 
+  // U9932–U9934: 合围队形
+  await senseCheck("U9932 合围队形存在", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4, 'pincer');
+    await Z(120);
+    const sq = T.squadNow();
+    T.quit();
+    return (sq.length >= 1 && sq[0].formation === 'pincer') || JSON.stringify({ sq });
+  });
+  await senseCheck("U9933 合围两翼散开", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(340, 80, 'normal', 4, 'pincer');
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const leader = en.find(x => x.isLeader);
+    if (!leader) { T.quit(); return JSON.stringify({ noleader: 1 }); }
+    leader.freezeT = 9999;
+    let ti = 0;
+    for (const m of en) { if (!m.isLeader) { m.x = leader.x - 30 + (ti++) * 30; m.y = leader.y - 30; m.enterT = 0; m.freezeT = 0; } }
+    await Z(1800);
+    const mems = en.filter(x => !x.isLeader && !x.dead);
+    const xs = mems.map(m => m.x - leader.x);
+    const hasLeft = xs.some(v => v < -20), hasRight = xs.some(v => v > 20);
+    T.quit();
+    return (hasLeft && hasRight) || JSON.stringify({ xs: xs.map(Math.round) });
+  });
+  await senseCheck("U9934 队形轮换含合围", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const forms = [];
+    for (let i = 0; i < 4; i++) { T.spawnSquadNow(300, 100 + i * 30, 'normal', 3); await Z(60); }
+    const sq = T.squadNow();
+    for (const s of sq) forms.push(s.formation);
+    T.quit();
+    return (forms.indexOf('pincer') >= 0) || JSON.stringify({ forms });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
