@@ -31754,6 +31754,48 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (pmoved > 25) || JSON.stringify({ pmoved: Math.round(pmoved) });
   });
 
+  // U9875–U9877: 狂暴者
+  await senseCheck("U9875 狂暴者Boss已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const id = T.spawnBossAsNow('berserker');
+    T.quit();
+    return (id === 'berserker') || JSON.stringify({ id });
+  });
+  await senseCheck("U9876 低血射速狂化", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('berserker');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200;
+    b.hp = Math.floor(b.maxHp * 0.2);
+    b.shootTimer = 1;
+    await Z(400);
+    let maxT = 0;
+    for (let i = 0; i < 25; i++) {
+      await Z(60);
+      if (b.shootTimer > maxT) maxT = b.shootTimer;
+    }
+    T.quit();
+    return (maxT > 0 && maxT <= 26) || JSON.stringify({ maxT });
+  });
+  await senseCheck("U9877 怒吼技能放环形弹", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('berserker');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    let n = 0;
+    for (let i = 0; i < 15; i++) {
+      await Z(90);
+      n = T.bulletsInfoNow().filter(x => !x.own && !x.dead).length;
+      if (n >= 6) break;
+    }
+    T.quit();
+    return (n >= 6) || JSON.stringify({ n });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
