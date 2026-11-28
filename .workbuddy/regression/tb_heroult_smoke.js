@@ -31874,6 +31874,50 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (hp1 === hp0) || JSON.stringify({ hp0, hp1 });
   });
 
+  // U9884–U9886: 镜像王
+  await senseCheck("U9884 镜像王Boss已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const id = T.spawnBossAsNow('mirrorboss');
+    T.quit();
+    return (id === 'mirrorboss') || JSON.stringify({ id });
+  });
+  await senseCheck("U9885 镜面护盾激活", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('mirrorboss');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    let mt = 0;
+    for (let i = 0; i < 15; i++) {
+      await Z(90);
+      mt = b.mirrorT || 0;
+      if (mt > 0) break;
+    }
+    T.quit();
+    return (mt > 0) || 'mirror never active';
+  });
+  await senseCheck("U9886 镜面反弹玩家子弹", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('mirrorboss');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    for (let i = 0; i < 15; i++) { await Z(90); if ((b.mirrorT || 0) > 0) break; }
+    if (!(b.mirrorT > 0)) { T.quit(); return 'no mirror'; }
+    b.freezeT = 9999;
+    T.spawnBulletNow(b.x + 8, b.y - 30, 4, false);
+    let reflected = 0;
+    for (let i = 0; i < 15; i++) {
+      await Z(80);
+      reflected = T.bulletsInfoNow().filter(x => !x.own && !x.dead).length;
+      if (reflected > 0) break;
+    }
+    T.quit();
+    return (reflected > 0) || 'no reflected bullet';
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
