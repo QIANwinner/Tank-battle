@@ -32542,6 +32542,56 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (forms.indexOf('pincer') >= 0) || JSON.stringify({ forms });
   });
 
+  // U9935–U9937: 掩护行为
+  await senseCheck("U9935 盾卫前出掩护", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(340, 80, 'normal', 2);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const leader = en.find(x => x.isLeader);
+    const mem = en.find(x => !x.isLeader);
+    if (!leader || !mem) { T.quit(); return JSON.stringify({ nopair: 1 }); }
+    mem.type = 'guardian';
+    mem.x = leader.x - 70; mem.y = leader.y - 50; mem.enterT = 0; mem.freezeT = 0;
+    leader.freezeT = 9999;
+    await Z(3400);
+    const dy = mem.y - leader.y;
+    T.quit();
+    return (dy > 0) || JSON.stringify({ dy: Math.round(dy), my: Math.round(mem.y), ly: Math.round(leader.y) });
+  });
+  await senseCheck("U9936 非盾卫不前出", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(340, 80, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const leader = en.find(x => x.isLeader);
+    const mem = en.find(x => !x.isLeader);
+    if (!leader || !mem) { T.quit(); return JSON.stringify({ nopair: 1 }); }
+    mem.type = 'normal';
+    mem.x = leader.x; mem.y = leader.y; mem.enterT = 0; mem.freezeT = 0;
+    leader.freezeT = 9999;
+    await Z(1600);
+    const dy = mem.y - leader.y;
+    T.quit();
+    return (dy < 36) || JSON.stringify({ dy: Math.round(dy) });
+  });
+  await senseCheck("U9937 盾卫仍在编队", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(340, 80, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const mem = en.find(x => !x.isLeader);
+    if (!mem) { T.quit(); return JSON.stringify({ nomem: 1 }); }
+    mem.type = 'guardian';
+    await Z(200);
+    const still = mem.squadId > 0 && !mem.isLeader;
+    T.quit();
+    return still || JSON.stringify({ sid: mem.squadId });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
