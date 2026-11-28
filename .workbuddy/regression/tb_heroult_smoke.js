@@ -31676,6 +31676,43 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return inBounds === true || JSON.stringify({ x: Math.round(b.x), y: Math.round(b.y) });
   });
 
+  // U9869–U9871: 主宰
+  await senseCheck("U9869 主宰Boss已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const id = T.spawnBossAsNow('overmind');
+    T.quit();
+    return (id === 'overmind') || JSON.stringify({ id });
+  });
+  await senseCheck("U9870 主宰召唤小兵", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('overmind');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    const n0 = T.r18enNow().filter(x => !x.dead && !x.isBoss).length;
+    let dn = 0;
+    for (let i = 0; i < 15; i++) {
+      await Z(90);
+      dn = T.r18enNow().filter(x => !x.dead && !x.isBoss).length - n0;
+      if (dn >= 2) break;
+    }
+    T.quit();
+    return (dn >= 2) || JSON.stringify({ n0, dn });
+  });
+  await senseCheck("U9871 主宰召唤计时复位", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('overmind');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200; b.skillTimer = 1;
+    for (let i = 0; i < 15; i++) { await Z(90); if (b.skillTimer > 100) break; }
+    const st = b.skillTimer;
+    T.quit();
+    return (st > 100) || JSON.stringify({ st });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
