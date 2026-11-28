@@ -248,6 +248,7 @@
     <div class="pill m-hide" id="bossCntWrap"><span class="k">BOSS数</span><span class="v" id="bossCntVal">—</span></div>
     <div class="pill m-hide" id="maxLivesWrap"><span class="k">生命</span><span class="v" id="maxLivesVal">—</span></div>
     <div class="pill m-hide" id="shakeWrap"><span class="k">震屏</span><span class="v" id="shakeVal">—</span></div>
+    <div class="pill m-hide" id="disasterWrap"><span class="k">天灾</span><span class="v" id="disasterVal">—</span></div>   <!-- —— v1.2.190 天灾预警仪 —— -->
     <div class="pill m-hide" id="lvIntroWrap"><span class="k">进场</span><span class="v" id="lvIntroVal">—</span></div>
     <div class="pill m-hide" id="bombLvWrap"><span class="k">爆破</span><span class="v" id="bombLvVal">—</span></div>
     <div class="pill m-hide" id="hitStopWrap"><span class="k">定格</span><span class="v" id="hitStopVal">—</span></div>
@@ -1878,7 +1879,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.181</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.191</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -2880,6 +2881,7 @@
   ];
 
   let bossLevel = false;           // 本关是否 Boss 关
+  let apocLevel = false;           // —— v1.2.191 本关是否天灾关 ——
   let bossHp = 0, bossMaxHp = 0;   // Boss 血条
   // —— v0.2.5 Boss 多样化：当前 Boss 类型 + 出场计数（轮换）+ 激光实体 ——
   let bossType = BOSS_TYPES[0];    // 当前关 Boss 类型（血条样式/专属技能）
@@ -2971,6 +2973,7 @@
   let critCount = 0, critForce = false, playerArmor = 0, chargeT = 0, chargeFired = 0;   // —— v1.2.112~121 波10状态 ——
   let poisonClouds = [], chillT = 0, poisonT = 0, nightLevel = false, hordeT = 0, affixForce = null;   // —— v1.2.122~131 波11状态 ——
   let jamT = 0, foeMines = [], venomTrail = [];   // —— v1.2.162~171 波15状态 ——
+  let meteorT = 0, meteorWarnT = 0, meteorX = 0, meteorY = 0, meteorHits = 0, quakeT = 0, quakeActT = 0, thunderT = 0, thunderActT = 0, thunderStrikes = [], acidRainT = 0, acidActT = 0, coldSnapT = 0, coldActT = 0, tideT = 0, tideActT = 0, sandStormT = 0, sandActT = 0, volcanoT = 0, lavaPools = [];   // —— v1.2.182~191 波17状态 ——
   let timebombs = [], sentries = [], stormT = 0, stormWarnT = 0, fogLevel = false, goldLevel = false, baseHp = 2;   // —— v1.2.132~141 波12状态 ——
   let gateOpen = true, gateT = 0;   // —— v1.2.151 定时门 ——
   let blackholes = [], recallT = 0, recallPos = null;   // —— v1.2.158/159 黑洞·回溯 ——
@@ -4637,7 +4640,7 @@
     if (!isBlocked(bx, t.y, t.size) && !tankHitsTank(bx, t.y, t.size, t)) t.x = bx;
   }
   function moveTank(t, k) {
-    const spd142 = t.speed * tileSpeedMulEnt(t) * (!t.isPlayer && fx.timewarp > 0 ? 0.5 : 1);   // —— v1.2.142 地形倍率 · v1.2.160 时间缓流 ——
+    const spd142 = t.speed * tileSpeedMulEnt(t) * (!t.isPlayer && fx.timewarp > 0 ? 0.5 : 1) * (coldActT > 0 ? 0.5 : 1);   // —— v1.2.142 地形倍率 · v1.2.160 时间缓流 · v1.2.186 寒潮 ——
     const nx = t.x + DX[t.dir] * spd142 * k;
     const ny = t.y + DY[t.dir] * spd142 * k;
     let moved = false;
@@ -5058,7 +5061,7 @@
       for (const e of enemies) { if (e.dead) continue; const d = (e.x - b.x) * (e.x - b.x) + (e.y - b.y) * (e.y - b.y); if (d < td) { td = d; tgt = e; } }
       if (tgt) b.dir = dirFromVec(tgt.x - b.x, tgt.y - b.y);
     }
-    const dist = b.speed * k;
+    const dist = b.speed * k * (sandActT > 0 ? 0.8 : 1);   // —— v1.2.188 沙暴弹速 ——
     const steps = Math.max(1, Math.ceil(dist));
     const stepLen = dist / steps;
     for (let s = 0; s < steps; s++) {
@@ -5318,7 +5321,7 @@
     if (mx !== 0 || my !== 0) {
       player.dir = dirFromVec(mx, my);
       // 斜向走 1/√2 速度，保证各方向合速度一致；疾速履带强化 +15%/层；永久加成移速 +5%/级
-      const spd = player.speed * (1 + 0.15 * (upgrades.speed || 0)) * (1 + 0.05 * (bonus.spd || 0)) * (chillT > 0 ? 0.55 : 1) * tileSpeedMulEnt(player);   // —— v1.2.126 寒冰减速 + v1.2.142 地形倍率 ——
+      const spd = player.speed * (1 + 0.15 * (upgrades.speed || 0)) * (1 + 0.05 * (bonus.spd || 0)) * (chillT > 0 ? 0.55 : 1) * tileSpeedMulEnt(player) * (coldActT > 0 ? 0.5 : 1);   // —— v1.2.126 寒冰减速 + v1.2.142 地形倍率 + v1.2.186 寒潮 ——
       const step = spd * k * ((mx !== 0 && my !== 0) ? Math.SQRT1_2 : 1);
       const nx = player.x + mx * step;
       const ny = player.y + my * step;
@@ -6258,6 +6261,8 @@
     bossLevel = (level % 5 === 0);
     nightLevel = !bossLevel && level % 4 === 2;   // —— v1.2.129 夜战关 ——
     fogLevel = !bossLevel && level % 11 === 4;   // —— v1.2.136 迷雾关 ——
+    apocLevel = !bossLevel && level % 17 === 9;   // —— v1.2.191 天灾关 ——
+    if (apocLevel) { showToast('☠ 天灾关！灾害三倍频发'); }
     goldLevel = !bossLevel && level % 9 === 6;   // —— v1.2.137 淘金关 ——
     if (bossLevel) { const bt = BOSS_TYPES[bossCount % BOSS_TYPES.length]; if (bt) setTimeout(() => { try { showToast('⚠️ Boss「' + bt.name + '」来袭 · ' + bt.desc); } catch (e) { /* 忽略 */ } }, 1200); }   // —— v1.2.48 Boss 弱点提示 ——
     tookHitThisLevel = false; lvPerfGold = 0; lvWingBonus = 0; lvFastBonus = 0;   // —— v1.2.22 新关清零表现奖励 · v1.2.33 · v1.2.46 ——
@@ -6269,6 +6274,7 @@
     critCount = 0; playerArmor = 0; chargeT = 0; chargeFired = 0; killFeed = [];   // —— v1.2.112/113/115/121 ——
     poisonClouds = []; chillT = 0; poisonT = 0; hordeT = 0; affixForce = null;   // —— v1.2.122~131(nightLevel 在 startLevel 另置) ——
     jamT = 0; foeMines = []; venomTrail = [];   // —— v1.2.162~171 ——
+    meteorT = __testMode ? 999999 : 1500 + rng() * 900; meteorWarnT = 0; meteorHits = 0; quakeT = __testMode ? 999999 : 2100 + rng() * 1200; quakeActT = 0; thunderT = __testMode ? 999999 : 1800 + rng() * 1200; thunderActT = 0; thunderStrikes = []; acidRainT = __testMode ? 999999 : 2400 + rng() * 1200; acidActT = 0; coldSnapT = __testMode ? 999999 : 2700 + rng() * 1500; coldActT = 0; tideT = __testMode ? 999999 : 2200 + rng() * 1200; tideActT = 0; sandStormT = __testMode ? 999999 : 3000 + rng() * 1500; sandActT = 0; volcanoT = __testMode ? 999999 : 3300 + rng() * 1500; lavaPools = [];   // —— v1.2.182~191 ——
     timebombs = []; sentries = []; stormT = __testMode ? 999999 : 2700 + rng() * 1800; stormWarnT = 0; baseHp = 2;   // 测试态不自动风暴   // —— v1.2.132~138(fog/gold 在 startLevel 另置) ——
     enemiesSpawned = 0;
     airDropT = 20;   // —— v1.2.93 空投重置 ——
@@ -6582,6 +6588,238 @@
     } else poisonT = 0;
     // —— v1.2.126 寒冰减速衰减 ——
     if (chillT > 0) chillT = Math.max(0, chillT - k);
+    // —— v1.2.191 天灾关:灾害倒计时三倍速 ——
+    if (apocLevel && running && multiMode !== 2) {
+      const boost191 = k * 2;
+      if (meteorT > 0) meteorT -= boost191;
+      if (quakeT > 0) quakeT -= boost191;
+      if (thunderT > 0) thunderT -= boost191;
+      if (acidRainT > 0) acidRainT -= boost191;
+      if (coldSnapT > 0) coldSnapT -= boost191;
+      if (tideT > 0) tideT -= boost191;
+      if (sandStormT > 0) sandStormT -= boost191;
+      if (volcanoT > 0) volcanoT -= boost191;
+    }
+    // —— v1.2.189 火山:岩浆池生成+灼烧 ——
+    if (volcanoT > 0 && multiMode !== 2) {
+      volcanoT -= k;
+      if (volcanoT <= 0) {
+        volcanoT = 0;
+        const n189 = 3 + Math.floor(rng() * 3);
+        for (let i189 = 0; i189 < n189; i189++) {
+          lavaPools.push({ x: 60 + rng() * (W - 120), y: 60 + rng() * (H - 120), life: 600, r: 34 });
+        }
+        shake = Math.max(shake, 10);
+        if (player) addText(clamp(player.x + TANK_SIZE / 2, 84, W - 84), player.y - 40, '🌋 火山喷发!', '#ff5f2a');
+        showToast('🌋 火山喷发！岩浆池灼烧战场');
+        beep(85, 0.5, 'sawtooth', 0.07);
+        volcanoT = __testMode ? 999999 : 3300 + rng() * 1500;
+      }
+    }
+    if (lavaPools.length) {
+      for (const lp of lavaPools) {
+        lp.life -= k;
+        if (lp.life % 45 < k) {
+          for (const e of enemies) {
+            if (e.dead || e.enterT > 0) continue;
+            if (Math.hypot((e.x + e.size / 2) - lp.x, (e.y + e.size / 2) - lp.y) <= lp.r + e.size / 2) { e.hp -= 1; e.hitFlash = 4; spawnParticles(e.x + e.size / 2, e.y + e.size / 2, '#ff5f2a', 3); if (e.hp <= 0) { e.dead = true; onEnemyKilled(e); } }
+          }
+          if (player && !player.dead && !(player.spawnInv > 0) && Math.hypot((player.x + TANK_SIZE / 2) - lp.x, (player.y + TANK_SIZE / 2) - lp.y) <= lp.r + TANK_SIZE / 2) { lastHit = { how: 'lava', by: '岩浆' }; killPlayer(player); }
+        }
+      }
+      lavaPools = lavaPools.filter(lp => lp.life > 0);
+    }
+    // —— v1.2.188 沙暴:8秒黄沙+弹速减缓 ——
+    if (sandStormT > 0 && multiMode !== 2) {
+      sandStormT -= k;
+      if (sandStormT <= 0) {
+        sandStormT = 0; sandActT = 480;
+        if (player) addText(clamp(player.x + TANK_SIZE / 2, 84, W - 84), player.y - 40, '🌪 沙暴!', '#d8b86a');
+        showToast('🌪 沙暴来袭！弹速减缓');
+        beep(130, 0.4, 'sawtooth', 0.05);
+      }
+    }
+    if (sandActT > 0) { sandActT -= k; if (sandActT <= 0) sandStormT = __testMode ? 999999 : 3000 + rng() * 1500; }
+    // —— v1.2.187 潮汐:5秒周期推向中心 ——
+    if (tideT > 0 && multiMode !== 2) {
+      tideT -= k;
+      if (tideT <= 0) {
+        tideT = 0; tideActT = 300;
+        if (player) addText(clamp(player.x + TANK_SIZE / 2, 84, W - 84), player.y - 40, '🌊 潮汐!', '#4dd0e1');
+        showToast('🌊 潮汐来袭！被推向中心');
+        beep(160, 0.35, 'sine', 0.06);
+      }
+    }
+    if (tideActT > 0) {
+      const tdPrev187 = tideActT;
+      tideActT -= k;
+      if (Math.floor(tdPrev187 / 25) !== Math.floor(tideActT / 25)) {
+        const cx187 = W / 2, cy187 = H / 2;
+        for (const e of enemies) {
+          if (e.dead || e.enterT > 0) continue;
+          const ex187 = e.x + e.size / 2, ey187 = e.y + e.size / 2;
+          const nx187 = clamp(e.x + Math.sign(cx187 - ex187) * 4, 0, W - e.size), ny187 = clamp(e.y + Math.sign(cy187 - ey187) * 4, 0, H - e.size);
+          if (!isBlocked(nx187, e.y, e.size)) e.x = nx187;
+          if (!isBlocked(e.x, ny187, e.size)) e.y = ny187;
+        }
+        if (player && !player.dead) {
+          const px187 = player.x + TANK_SIZE / 2, py187 = player.y + TANK_SIZE / 2;
+          const pnx187 = clamp(player.x + Math.sign(cx187 - px187) * 4, 0, W - TANK_SIZE), pny187 = clamp(player.y + Math.sign(cy187 - py187) * 4, 0, H - TANK_SIZE);
+          if (!isBlocked(pnx187, player.y, TANK_SIZE)) player.x = pnx187;
+          if (!isBlocked(player.x, pny187, TANK_SIZE)) player.y = pny187;
+        }
+        spawnParticles(cx187 + (rng() - 0.5) * W * 0.7, cy187 + (rng() - 0.5) * H * 0.7, '#4dd0e1', 2);
+      }
+      if (tideActT <= 0) tideT = __testMode ? 999999 : 2200 + rng() * 1200;
+    }
+    // —— v1.2.186 寒潮:8秒全场减速 ——
+    if (coldSnapT > 0 && multiMode !== 2) {
+      coldSnapT -= k;
+      if (coldSnapT <= 0) {
+        coldSnapT = 0; coldActT = 480;
+        if (player) addText(clamp(player.x + TANK_SIZE / 2, 84, W - 84), player.y - 40, '❄ 寒潮!', '#7df9ff');
+        showToast('❄ 寒潮来袭！全场减速');
+        beep(90, 0.4, 'sine', 0.06);
+      }
+    }
+    if (coldActT > 0) { coldActT -= k; if (coldActT <= 0) coldSnapT = __testMode ? 999999 : 2700 + rng() * 1500; }
+    // —— v1.2.185 酸雨:6秒腐蚀 ——
+    if (acidRainT > 0 && multiMode !== 2) {
+      acidRainT -= k;
+      if (acidRainT <= 0) {
+        acidRainT = 0; acidActT = 360;
+        if (player) addText(clamp(player.x + TANK_SIZE / 2, 84, W - 84), player.y - 40, '🌧 酸雨!', '#8ce040');
+        showToast('🌧 酸雨降临！腐蚀全场');
+        beep(220, 0.3, 'triangle', 0.05);
+      }
+    }
+    if (acidActT > 0) {
+      const acPrev185 = acidActT;
+      acidActT -= k;
+      if (Math.floor(acPrev185 / 60) !== Math.floor(acidActT / 60)) {
+        for (const e of enemies) {
+          if (e.dead || e.enterT > 0) continue;
+          e.hp -= 1; e.hitFlash = 4; spawnParticles(e.x + e.size / 2, e.y + e.size / 2, '#8ce040', 3);
+          if (e.hp <= 0) { e.dead = true; onEnemyKilled(e); }
+        }
+        if (player && !player.dead) chillT = Math.max(chillT, 40);
+        let erode185 = 0, try185 = 0;
+        while (erode185 < 1 && try185 < 40) {
+          try185++;
+          const ax = randInt(1, COLS - 2), ay = randInt(1, ROWS - 2);
+          if (map[ay] && map[ay][ax] === TILE_BRICK && !isBaseWallTile(ax, ay) && rng() < 0.4) { map[ay][ax] = 0; erode185++; }
+        }
+        if (erode185) markMapDirty();
+      }
+      if (acidActT <= 0) acidRainT = __testMode ? 999999 : 2400 + rng() * 1200;
+    }
+    // —— v1.2.184 雷暴:5秒8连落雷 ——
+    if (thunderT > 0 && multiMode !== 2) {
+      thunderT -= k;
+      if (thunderT <= 0) {
+        thunderT = 0; thunderActT = 300; thunderStrikes = [];
+        if (player) addText(clamp(player.x + TANK_SIZE / 2, 84, W - 84), player.y - 40, '⚡ 雷暴!', '#ffe95e');
+        showToast('⚡ 雷暴来袭！注意落雷闪光');
+        beep(180, 0.2, 'square', 0.05);
+      }
+    }
+    if (thunderActT > 0) {
+      const thPrev184 = thunderActT;
+      thunderActT -= k;
+      if (Math.floor(thPrev184 / 37) !== Math.floor(thunderActT / 37) && thunderStrikes.length < 8) {
+        const sx184 = clamp((player ? player.x + TANK_SIZE / 2 : W / 2) + (rng() - 0.5) * 420, 40, W - 40), sy184 = clamp((player ? player.y + TANK_SIZE / 2 : H / 2) + (rng() - 0.5) * 420, 40, H - 40);
+        thunderStrikes.push({ x: sx184, y: sy184, t: 14, warn: 22 });
+        spawnParticles(sx184, sy184, '#ffe95e', 4);
+      }
+      for (const s184 of thunderStrikes) {
+        if (s184.warn > 0) {
+          s184.warn -= k;
+          if (s184.warn <= 0) {
+            shake = Math.max(shake, 5);
+            beep(1400, 0.06, 'square', 0.04);
+            spawnParticles(s184.x, s184.y, '#ffe95e', 10);
+            for (const e of enemies) {
+              if (e.dead) continue;
+              if (Math.hypot((e.x + e.size / 2) - s184.x, (e.y + e.size / 2) - s184.y) <= 44) { e.hp -= 2; e.hitFlash = 6; e.freezeT = Math.max(e.freezeT || 0, 40); if (e.hp <= 0) { e.dead = true; onEnemyKilled(e); } }
+            }
+            if (player && !player.dead && !(player.spawnInv > 0) && Math.hypot((player.x + TANK_SIZE / 2) - s184.x, (player.y + TANK_SIZE / 2) - s184.y) <= 44) { lastHit = { how: 'thunder', by: '落雷' }; killPlayer(player); }
+          }
+          continue;
+        }
+        s184.t -= k;
+      }
+      if (thunderActT <= 0) { thunderStrikes = []; thunderT = __testMode ? 999999 : 1800 + rng() * 1200; }
+    }
+    // —— v1.2.183 地震:震屏+崩墙+移位 ——
+    if (quakeT > 0 && multiMode !== 2) {
+      quakeT -= k;
+      if (quakeT <= 0) {
+        quakeT = 0; quakeActT = 180;
+        shake = Math.max(shake, 16);
+        if (player) addText(clamp(player.x + TANK_SIZE / 2, 84, W - 84), player.y - 40, '🌋 地震!', '#c8a86a');
+        showToast('🌋 地震来袭！大地在颤抖');
+        beep(70, 0.5, 'sawtooth', 0.08);
+        const bricks183 = [];
+        for (let qy = 1; qy < ROWS - 1; qy++) for (let qx = 1; qx < COLS - 1; qx++) if (map[qy] && map[qy][qx] === TILE_BRICK && !isBaseWallTile(qx, qy)) bricks183.push(qy * COLS + qx);
+        let brk183 = 0;
+        while (brk183 < 4 && bricks183.length) {
+          const pick183 = bricks183.splice(Math.floor(rng() * bricks183.length), 1)[0];
+          map[Math.floor(pick183 / COLS)][pick183 % COLS] = 0; brk183++;
+        }
+        if (brk183) markMapDirty();
+        for (const e of enemies) {
+          if (e.dead || e.enterT > 0) continue;
+          const nx183 = clamp(e.x + (rng() - 0.5) * 40, 0, W - e.size), ny183 = clamp(e.y + (rng() - 0.5) * 40, 0, H - e.size);
+          if (!isBlocked(nx183, ny183, e.size)) { e.x = nx183; e.y = ny183; }
+        }
+        if (player && !player.dead) {
+          const px183 = clamp(player.x + (rng() - 0.5) * 40, 0, W - TANK_SIZE), py183 = clamp(player.y + (rng() - 0.5) * 40, 0, H - TANK_SIZE);
+          if (!isBlocked(px183, player.y, TANK_SIZE)) player.x = px183;
+          if (!isBlocked(player.x, py183, TANK_SIZE)) player.y = py183;
+        }
+      }
+    }
+    if (quakeActT > 0) { quakeActT -= k; shake = Math.max(shake, 8); if (quakeActT <= 0) quakeT = __testMode ? 999999 : 2100 + rng() * 1200; }
+    // —— v1.2.182 陨石:倒计时→红圈预警→坠落撞击 ——
+    if (meteorT > 0 && multiMode !== 2) {
+      meteorT -= k;
+      if (meteorT <= 0) {
+        meteorT = 0;
+        const tgp = player && !player.dead ? player : null;
+        meteorX = clamp((tgp ? tgp.x + TANK_SIZE / 2 : W / 2) + (rng() - 0.5) * 260, 90, W - 90);
+        meteorY = clamp((tgp ? tgp.y + TANK_SIZE / 2 : H / 2) + (rng() - 0.5) * 260, 90, H - 90);
+        meteorWarnT = 90;
+        if (player) addText(clamp(player.x + TANK_SIZE / 2, 84, W - 84), player.y - 40, '☄ 陨石预警!', '#ff9f43');
+        showToast('☄ 陨石坠落预警！远离红圈');
+        beep(110, 0.3, 'sawtooth', 0.06);
+      }
+    }
+    if (meteorWarnT > 0) {
+      meteorWarnT -= k;
+      if (meteorWarnT <= 0) {
+        meteorHits = 0;
+        shake = Math.max(shake, 12);
+        sfxBoom();
+        spawnParticles(meteorX, meteorY, '#ff9f43', 18);
+        spawnParticles(meteorX, meteorY, '#ff4d2a', 12);
+        for (const e of enemies) {
+          if (e.dead) continue;
+          const d182 = Math.hypot((e.x + e.size / 2) - meteorX, (e.y + e.size / 2) - meteorY);
+          if (d182 <= 78) { e.hp -= 3; e.hitFlash = 6; meteorHits++; if (e.hp <= 0) { e.dead = true; onEnemyKilled(e); } }
+        }
+        if (player && !player.dead && !(player.spawnInv > 0)) {
+          const pd182 = Math.hypot((player.x + TANK_SIZE / 2) - meteorX, (player.y + TANK_SIZE / 2) - meteorY);
+          if (pd182 <= 78) { lastHit = { how: 'meteor', by: '陨石' }; killPlayer(player); }
+        }
+        let brk182 = 0;
+        for (let gy182 = Math.floor((meteorY - 78) / TILE); gy182 <= Math.floor((meteorY + 78) / TILE); gy182++) for (let gx182 = Math.floor((meteorX - 78) / TILE); gx182 <= Math.floor((meteorX + 78) / TILE); gx182++) {
+          if (!inside(gx182, gy182)) continue;
+          if (map[gy182][gx182] === TILE_BRICK && Math.hypot(gx182 * TILE + TILE / 2 - meteorX, gy182 * TILE + TILE / 2 - meteorY) <= 78) { map[gy182][gx182] = 0; brk182++; }
+        }
+        if (brk182) markMapDirty();
+        meteorT = __testMode ? 999999 : 1500 + rng() * 900;
+      }
+    }
     // —— v1.2.130 敌潮计时衰减 ——
     if (hordeT > 0) hordeT = Math.max(0, hordeT - k);
     { gateT += k; if (gateT >= 300) { gateT = 0; gateOpen = !gateOpen; markMapDirty(); } }   // —— v1.2.151 定时门开闭 ——
@@ -7096,6 +7334,82 @@
     }
     // —— w12deploys 链式锚点 ——
     drawNightVeil();   // —— v1.2.129 夜战帷幕 ——
+    drawMeteorWarn();   // —— v1.2.182 陨石预警圈 ——
+    if (running && lavaPools.length) {   // —— v1.2.189 岩浆池 ——
+      ctx.save();
+      for (const lpd of lavaPools) {
+        const pulse189 = 0.7 + 0.3 * Math.sin(lpd.life * 0.12);
+        ctx.fillStyle = 'rgba(255,95,42,0.42)';
+        ctx.beginPath(); ctx.arc(lpd.x, lpd.y, lpd.r * pulse189, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(255,200,60,0.55)';
+        ctx.beginPath(); ctx.arc(lpd.x, lpd.y, lpd.r * 0.45 * pulse189, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+    }
+    if (running && sandActT > 0) {   // —— v1.2.188 沙暴幕 ——
+      ctx.save();
+      ctx.fillStyle = 'rgba(194,164,96,0.13)';
+      ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = 'rgba(216,184,106,0.20)';
+      ctx.lineWidth = 2;
+      const off188 = (480 - sandActT) * 3;
+      for (let ry188 = 30; ry188 < H; ry188 += 70) {
+        ctx.beginPath(); ctx.moveTo(-40 + (off188 % 120), ry188); ctx.lineTo(W, ry188 + 14); ctx.stroke();
+      }
+      ctx.restore();
+    }
+    if (running && tideActT > 0) {   // —— v1.2.187 潮汐水纹 ——
+      ctx.save();
+      ctx.strokeStyle = 'rgba(77,208,225,0.22)';
+      ctx.lineWidth = 2;
+      const off187 = (300 - tideActT) * 2.2;
+      for (let rw187 = 0; rw187 < 4; rw187++) {
+        const rr187 = (off187 + rw187 * 130) % 520;
+        ctx.beginPath(); ctx.arc(W / 2, H / 2, Math.max(8, 520 - rr187), 0, Math.PI * 2); ctx.stroke();
+      }
+      ctx.restore();
+    }
+    if (running && coldActT > 0) {   // —— v1.2.186 寒潮霜雾 ——
+      ctx.save();
+      ctx.fillStyle = 'rgba(125,249,255,0.06)';
+      ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = 'rgba(200,245,255,0.16)';
+      ctx.lineWidth = 1;
+      for (let cy186 = 20; cy186 < H; cy186 += 60) {
+        ctx.beginPath(); ctx.moveTo(0, cy186 + Math.sin(coldActT * 0.05 + cy186) * 6); ctx.lineTo(W, cy186 + Math.cos(coldActT * 0.04 + cy186) * 6); ctx.stroke();
+      }
+      ctx.restore();
+    }
+    if (running && acidActT > 0) {   // —— v1.2.185 酸雨幕 ——
+      ctx.save();
+      ctx.fillStyle = 'rgba(140,224,64,0.07)';
+      ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = 'rgba(140,224,64,0.28)';
+      ctx.lineWidth = 1;
+      const off185 = (acidActT * 7) % 24;
+      for (let rx185 = 0; rx185 < W; rx185 += 26) {
+        ctx.beginPath(); ctx.moveTo(rx185, -24 + off185); ctx.lineTo(rx185 - 8, 8 + off185); ctx.stroke();
+      }
+      ctx.restore();
+    }
+    if (running && thunderStrikes.length) {   // —— v1.2.184 落雷闪光 ——
+      ctx.save();
+      for (const s184d of thunderStrikes) {
+        if (s184d.warn > 0) {
+          ctx.strokeStyle = 'rgba(255,240,120,' + (0.4 + 0.6 * Math.abs(Math.sin(s184d.warn * 0.5))) + ')';
+          ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.arc(s184d.x, s184d.y, 44, 0, Math.PI * 2); ctx.stroke();
+          continue;
+        }
+        if (s184d.t <= 0) continue;
+        ctx.strokeStyle = 'rgba(255,240,120,' + Math.min(1, s184d.t / 8) + ')';
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(s184d.x + (s184d.t % 3) * 2, 0); ctx.lineTo(s184d.x, s184d.y); ctx.stroke();
+        ctx.fillStyle = 'rgba(255,240,120,0.35)';
+        ctx.beginPath(); ctx.arc(s184d.x, s184d.y, 20, 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+    }
     drawFogVeil();   // —— v1.2.136 迷雾帷幕 ——
 
     // 道具
@@ -7584,6 +7898,17 @@
     ctx.fillStyle = 'rgba(6,8,14,0.95)';
     ctx.fillRect(0, 0, W, Math.max(0, pcy - 140)); ctx.fillRect(0, Math.min(H, pcy + 140), W, H);
     ctx.fillRect(0, 0, Math.max(0, pcx - 140), H); ctx.fillRect(Math.min(W, pcx + 140), 0, W, H);
+    ctx.restore();
+  }
+  function drawMeteorWarn() {   // —— v1.2.182 陨石预警圈 ——
+    if (!running || meteorWarnT <= 0) return;
+    ctx.save();
+    const pulse182 = 0.5 + 0.5 * Math.sin(meteorWarnT * 0.35);
+    ctx.strokeStyle = 'rgba(255,80,40,' + (0.55 + 0.4 * pulse182) + ')';
+    ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(meteorX, meteorY, 78, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,80,40,0.12)';
+    ctx.beginPath(); ctx.arc(meteorX, meteorY, 78, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
   function drawNightVeil() {
@@ -8550,6 +8875,12 @@ function maxComboText(n) { return '×' + fmtNum(Math.max(0, Math.floor(Number(n)
     const r38bv = $('bossCntVal'); if (r38bv) r38bv.textContent = bossCountText(bossCount);
     const r39ml = $('maxLivesVal'); if (r39ml) r39ml.textContent = maxLivesText(3, upgrades.hp || 0);
     const r40sv = $('shakeVal'); if (r40sv) r40sv.textContent = shakeText(shake);
+    const r40dv = $('disasterVal'); if (r40dv) {   // —— v1.2.190 天灾预警仪刷新 ——
+      const dlist190 = [['☄', meteorT], ['🌋', quakeT], ['⚡', thunderT], ['🌧', acidRainT], ['❄', coldSnapT], ['🌊', tideT], ['🌪', sandStormT], ['🌋', volcanoT]];
+      let best190 = null, bt190 = 1e18;
+      for (const [icon190, tt190] of dlist190) { if (tt190 > 0 && tt190 < bt190) { bt190 = tt190; best190 = icon190; } }
+      r40dv.textContent = (best190 && bt190 < 90000) ? best190 + ' ' + Math.ceil(bt190 / 60) + 's' : '—';
+    }
     const r41lv = $('lvIntroVal'); if (r41lv) r41lv.textContent = lvIntroText(lvIntroT);
     const r42bl = $('bombLvVal'); if (r42bl) r42bl.textContent = bombLvText(upgrades.bomb || 0);
     const r43hs = $('hitStopVal'); if (r43hs) r43hs.textContent = hitStopText(hitStop);
@@ -28283,7 +28614,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.181', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.191', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
@@ -28965,6 +29296,20 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
       jamNow: () => (typeof jamT === 'undefined' ? 0 : jamT),
       foeMinesNow: () => (typeof foeMines === 'undefined' ? [] : foeMines.map(m => ({ x: Math.round(m.x), y: Math.round(m.y) }))),
       venomTrailNow: () => (typeof venomTrail === 'undefined' ? [] : venomTrail.map(v => ({ x: Math.round(v.x), y: Math.round(v.y), t: Math.round(v.t) }))),
+      // —— v1.2.182~191 波17钩子 ——
+      disasterNow: () => ({ meteorT: Math.round(meteorT), meteorWarnT: Math.round(meteorWarnT), quakeT: Math.round(quakeT), thunderT: Math.round(thunderT), acidRainT: Math.round(acidRainT), acidActT: Math.round(acidActT), coldSnapT: Math.round(coldSnapT), coldActT: Math.round(coldActT), tideT: Math.round(tideT), tideActT: Math.round(tideActT), sandStormT: Math.round(sandStormT), sandActT: Math.round(sandActT), volcanoT: Math.round(volcanoT) }),
+      meteorSetNow: (v) => { meteorT = Number(v) || 0; return meteorT; },
+      meteorNow: () => ({ x: Math.round(meteorX), y: Math.round(meteorY), warn: Math.round(meteorWarnT), hits: meteorHits }),
+      quakeSetNow: (v) => { quakeT = Number(v) || 0; return quakeT; }, quakeNow: () => ({ t: Math.round(quakeT), act: Math.round(quakeActT) }),
+      thunderSetNow: (v) => { thunderT = Number(v) || 0; return thunderT; }, thunderNow: () => ({ t: Math.round(thunderT), act: Math.round(thunderActT), strikes: thunderStrikes.map(s => ({ x: Math.round(s.x), y: Math.round(s.y) })) }),
+      acidSetNow: (v) => { acidRainT = Number(v) || 0; return acidRainT; }, acidNow: () => ({ t: Math.round(acidRainT), act: Math.round(acidActT) }),
+      coldSetNow: (v) => { coldSnapT = Number(v) || 0; return coldSnapT; }, coldNow: () => ({ t: Math.round(coldSnapT), act: Math.round(coldActT) }),
+      tideSetNow: (v) => { tideT = Number(v) || 0; return tideT; }, tideNow: () => ({ t: Math.round(tideT), act: Math.round(tideActT) }),
+      sandSetNow: (v) => { sandStormT = Number(v) || 0; return sandStormT; }, sandNow: () => ({ t: Math.round(sandStormT), act: Math.round(sandActT) }),
+      volcanoSetNow: (v) => { volcanoT = Number(v) || 0; return volcanoT; }, lavaPoolsNow: () => lavaPools.map(p => ({ x: Math.round(p.x), y: Math.round(p.y), life: Math.round(p.life) })),
+      bricksNow: () => { let bn17 = 0; for (let by17 = 0; by17 < ROWS; by17++) for (let bx17 = 0; bx17 < COLS; bx17++) if (map[by17] && map[by17][bx17] === TILE_BRICK) bn17++; return bn17; },
+      disasterPillNow: () => { const e = $('disasterVal'); return e ? e.textContent : null; }, disasterPillWrapNow: () => !!$('disasterWrap'),
+      apocNow: () => apocLevel,
       // —— v1.2.172~181 波16钩子 ——
       spawnBossAsNow: (id) => { const i = BOSS_TYPES.findIndex(x => x.id === id); if (i < 0) return null; bossCount = i % BOSS_TYPES.length; spawnBoss(); return bossType.id; },
       bossNow: () => { const b = enemies.find(x => x.isBoss && !x.dead); return b || null; },

@@ -31918,6 +31918,390 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (reflected > 0) || 'no reflected bullet';
   });
 
+  // U9887–U9889: 天灾系统+陨石
+  await senseCheck("U9887 灾害系统钩子就绪", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const d = T.disasterNow();
+    T.quit();
+    return (d && d.meteorT >= 99999 && typeof d.quakeT === 'number' && typeof d.volcanoT === 'number') || JSON.stringify(d);
+  });
+  await senseCheck("U9888 陨石预警触发", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.meteorSetNow(5);
+    let warn = 0;
+    for (let i = 0; i < 60; i++) { await Z(50); const m = T.meteorNow(); if (m.warn > 0) { warn = m.warn; break; } }
+    T.quit();
+    return warn > 0 || JSON.stringify({ warn });
+  });
+  await senseCheck("U9889 陨石撞击伤敌", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.meteorSetNow(5);
+    let m = null;
+    for (let i = 0; i < 60; i++) { await Z(50); m = T.meteorNow(); if (m.warn > 0) break; }
+    if (!(m && m.warn > 0)) { T.quit(); return JSON.stringify({ nowarn: m }); }
+    T.spawnFoeNow(m.x - 14, m.y - 14, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return JSON.stringify({ nofoe: 1 }); }
+    e.x = m.x - e.size / 2; e.y = m.y - e.size / 2; e.enterT = 0; e.hp = 5; e.maxHp = 5; e.freezeT = 9999;
+    let hits = 0;
+    for (let i = 0; i < 80; i++) { await Z(50); const mm = T.meteorNow(); if (mm.hits > 0) { hits = mm.hits; break; } if (mm.warn <= 0 && i > 30) break; }
+    const dead = e.dead || e.hp < 5;
+    T.quit();
+    return (hits > 0 || dead) || JSON.stringify({ hits, dead });
+  });
+
+  // U9890–U9892: 地震
+  await senseCheck("U9890 地震触发震屏", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.quakeSetNow(5);
+    let act = 0, sh = 0;
+    for (let i = 0; i < 60; i++) { await Z(50); const q = T.quakeNow(); if (q.act > 0) { act = q.act; sh = T.r40shNow(); break; } }
+    T.quit();
+    return (act > 0 && sh >= 8) || JSON.stringify({ act, sh });
+  });
+  await senseCheck("U9891 地震崩裂砖墙", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    for (const [bx, by] of [[4, 4], [6, 4], [8, 4], [10, 4], [5, 6], [7, 6]]) T.setTile(bx, by, 1);
+    const b0 = T.bricksNow();
+    T.quakeSetNow(5);
+    let fired = false;
+    for (let i = 0; i < 60; i++) { await Z(50); if (T.quakeNow().act > 0) { fired = true; break; } }
+    await Z(300);
+    const b1 = T.bricksNow();
+    T.quit();
+    return (fired && b1 < b0) || JSON.stringify({ fired, b0, b1 });
+  });
+  await senseCheck("U9892 地震震位移", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(400, 240, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    let ex0 = -1, ey0 = -1;
+    if (e) { e.x = 400; e.y = 240; e.enterT = 0; e.freezeT = 9999; e.hp = 99; e.maxHp = 99; ex0 = e.x; ey0 = e.y; }
+    const p0 = T.r18posNow();
+    T.quakeSetNow(5);
+    let moved = 0, emoved = 0;
+    for (let i = 0; i < 50; i++) { await Z(50); if (T.quakeNow().act > 0) { await Z(120); const p1 = T.r18posNow(); moved = Math.hypot(p1.px - p0.px, p1.py - p0.py); if (e) emoved = Math.hypot(e.x - ex0, e.y - ey0); break; } }
+    T.quit();
+    return (moved > 1 || emoved > 1) || JSON.stringify({ moved, emoved });
+  });
+
+  // U9893–U9895: 雷暴
+  await senseCheck("U9893 雷暴激活", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.thunderSetNow(5);
+    let act = 0;
+    for (let i = 0; i < 60; i++) { await Z(50); const t = T.thunderNow(); if (t.act > 0) { act = t.act; break; } }
+    T.quit();
+    return act > 0 || JSON.stringify({ act });
+  });
+  await senseCheck("U9894 落雷计数增加", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.thunderSetNow(5);
+    let n = 0;
+    for (let i = 0; i < 200; i++) { await Z(60); const t = T.thunderNow(); if (t.strikes.length > n) n = t.strikes.length; if (n >= 3) break; if (t.act <= 0 && i > 20) break; }
+    T.quit();
+    return n >= 2 || JSON.stringify({ n });
+  });
+  await senseCheck("U9895 落雷伤害麻痹敌人", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 200, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return JSON.stringify({ nofoe: 1 }); }
+    e.enterT = 0; e.hp = 9; e.maxHp = 9; e.freezeT = 0;
+    T.thunderSetNow(5);
+    let hurt = false, froze = false;
+    for (let i = 0; i < 300; i++) {
+      await Z(50);
+      const t = T.thunderNow();
+      if (t.strikes.length) { const s = t.strikes[t.strikes.length - 1]; e.x = s.x - e.size / 2; e.y = s.y - e.size / 2; }
+      if (e.hp < 9) hurt = true;
+      if ((e.freezeT || 0) > 0) froze = true;
+      if (hurt && froze) break;
+      if (t.act <= 0 && i > 30) break;
+    }
+    T.quit();
+    return (hurt && froze) || JSON.stringify({ hurt, froze, hp: e.hp, fz: e.freezeT });
+  });
+
+  // U9896–U9898: 酸雨
+  await senseCheck("U9896 酸雨激活", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.acidSetNow(5);
+    let act = 0;
+    for (let i = 0; i < 60; i++) { await Z(50); const a = T.acidNow(); if (a.act > 0) { act = a.act; break; } }
+    T.quit();
+    return act > 0 || JSON.stringify({ act });
+  });
+  await senseCheck("U9897 酸雨腐蚀敌人", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 200, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return JSON.stringify({ nofoe: 1 }); }
+    e.enterT = 0; e.hp = 9; e.maxHp = 9; e.freezeT = 9999;
+    T.acidSetNow(5);
+    let hurt = false;
+    for (let i = 0; i < 160; i++) { await Z(60); if (e.hp < 9 || e.dead) { hurt = true; break; } if (T.acidNow().act <= 0 && i > 30) break; }
+    T.quit();
+    return hurt || JSON.stringify({ hp: e.hp, dead: e.dead });
+  });
+  await senseCheck("U9898 酸雨迟滞玩家", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.acidSetNow(5);
+    let chilled = false;
+    for (let i = 0; i < 120; i++) { await Z(60); if (T.chillNow() > 0) { chilled = true; break; } if (T.acidNow().act <= 0 && i > 20) break; }
+    T.quit();
+    return chilled || JSON.stringify({ chill: T.chillNow() });
+  });
+
+  // U9899–U9901: 寒潮
+  await senseCheck("U9899 寒潮激活", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.coldSetNow(5);
+    let act = 0;
+    for (let i = 0; i < 60; i++) { await Z(50); const c = T.coldNow(); if (c.act > 0) { act = c.act; break; } }
+    T.quit();
+    return act > 0 || JSON.stringify({ act });
+  });
+  await senseCheck("U9900 寒潮减速玩家", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    await Z(300);
+    const p0 = T.r18posNow();
+    T.keyDown('d'); await Z(500); T.keyUp('d');
+    const p1 = T.r18posNow();
+    const dWarm = Math.hypot(p1.px - p0.px, p1.py - p0.py);
+    await Z(200);
+    T.coldSetNow(5);
+    let coldOn = false;
+    for (let i = 0; i < 60; i++) { await Z(50); if (T.coldNow().act > 0) { coldOn = true; break; } }
+    if (!coldOn) { T.quit(); return JSON.stringify({ nocold: 1 }); }
+    await Z(200);
+    const p2 = T.r18posNow();
+    T.keyDown('d'); await Z(500); T.keyUp('d');
+    const p3 = T.r18posNow();
+    const dCold = Math.hypot(p3.px - p2.px, p3.py - p2.py);
+    T.quit();
+    return (dWarm > 8 && dCold < dWarm * 0.75) || JSON.stringify({ dWarm: Math.round(dWarm), dCold: Math.round(dCold) });
+  });
+  await senseCheck("U9901 寒潮减速敌人", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(120, 300, 'fast');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return JSON.stringify({ nofoe: 1 }); }
+    e.enterT = 0;
+    const x0 = e.x, y0 = e.y;
+    await Z(600);
+    const dWarm = Math.abs(e.x - x0) + Math.abs(e.y - y0);
+    e.x = 120; e.y = 300;
+    T.coldSetNow(5);
+    let coldOn = false;
+    for (let i = 0; i < 60; i++) { await Z(50); if (T.coldNow().act > 0) { coldOn = true; break; } }
+    if (!coldOn) { T.quit(); return JSON.stringify({ nocold: 1 }); }
+    const x1 = e.x, y1 = e.y;
+    await Z(600);
+    const dCold = Math.abs(e.x - x1) + Math.abs(e.y - y1);
+    T.quit();
+    return (dWarm > 4 && dCold < dWarm * 0.8) || JSON.stringify({ dWarm: Math.round(dWarm), dCold: Math.round(dCold) });
+  });
+
+  // U9902–U9904: 潮汐
+  await senseCheck("U9902 潮汐激活", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.tideSetNow(5);
+    let act = 0;
+    for (let i = 0; i < 60; i++) { await Z(50); const t = T.tideNow(); if (t.act > 0) { act = t.act; break; } }
+    T.quit();
+    return act > 0 || JSON.stringify({ act });
+  });
+  await senseCheck("U9903 潮汐推送敌人向中心", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(30, 30, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return JSON.stringify({ nofoe: 1 }); }
+    e.enterT = 0; e.freezeT = 9999;
+    const cv187 = $('game');
+    const ccx = cv187.width / 2, ccy = cv187.height / 2;
+    const d0 = Math.hypot(e.x + e.size / 2 - ccx, e.y + e.size / 2 - ccy);
+    T.tideSetNow(5);
+    let d1 = d0;
+    for (let i = 0; i < 160; i++) { await Z(60); if (T.tideNow().act > 0 && i > 8) { d1 = Math.hypot(e.x + e.size / 2 - ccx, e.y + e.size / 2 - ccy); if (d1 < d0 - 8) break; } if (T.tideNow().act <= 0 && i > 20) break; }
+    T.quit();
+    return d1 < d0 - 4 || JSON.stringify({ d0: Math.round(d0), d1: Math.round(d1) });
+  });
+  await senseCheck("U9904 潮汐推送玩家", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    await Z(200);
+    const p0 = T.r18posNow();
+    T.tideSetNow(5);
+    let moved = 0;
+    for (let i = 0; i < 120; i++) { await Z(60); const p1 = T.r18posNow(); moved = Math.hypot(p1.px - p0.px, p1.py - p0.py); if (moved > 6) break; if (T.tideNow().act <= 0 && i > 20) break; }
+    T.quit();
+    return moved > 4 || JSON.stringify({ moved: Math.round(moved) });
+  });
+
+  // U9905–U9907: 沙暴
+  await senseCheck("U9905 沙暴激活", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.sandSetNow(5);
+    let act = 0;
+    for (let i = 0; i < 60; i++) { await Z(50); const s = T.sandNow(); if (s.act > 0) { act = s.act; break; } }
+    T.quit();
+    return act > 0 || JSON.stringify({ act });
+  });
+  await senseCheck("U9906 沙暴减缓弹速", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    await Z(200);
+    const cvb = $('game');
+    const by188 = Math.floor(cvb.height / 2);
+    const measure = async () => {
+      T.spawnBulletNow(30, by188, 2, false);
+      await Z(60);
+      const arr1 = T.bulletsInfoNow().filter(b => !b.dead && b.dir === 2);
+      if (!arr1.length) return -1;
+      const x1 = arr1[arr1.length - 1].x;
+      await Z(200);
+      const arr2 = T.bulletsInfoNow().filter(b => !b.dead && b.dir === 2);
+      if (!arr2.length) return -1;
+      const x2 = arr2[arr2.length - 1].x;
+      return x2 - x1;
+    };
+    const warm = await measure();
+    for (const b of (T.bulletsInfoNow() || [])) b.dead = true;
+    T.sandSetNow(5);
+    let coldOn = false;
+    for (let i = 0; i < 60; i++) { await Z(50); if (T.sandNow().act > 0) { coldOn = true; break; } }
+    if (!coldOn) { T.quit(); return JSON.stringify({ nosand: 1 }); }
+    const cold = await measure();
+    T.quit();
+    return (warm > 10 && cold > 0 && cold < warm * 0.88) || JSON.stringify({ warm, cold });
+  });
+  await senseCheck("U9907 沙暴幕染黄画面", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.renderOnce();
+    const cv = $('game'), cx2 = cv.getContext('2d');
+    const before = cx2.getImageData(6, 6, 1, 1).data;
+    T.sandSetNow(5);
+    let coldOn = false;
+    for (let i = 0; i < 60; i++) { await Z(50); if (T.sandNow().act > 0) { coldOn = true; break; } }
+    if (!coldOn) { T.quit(); return JSON.stringify({ nosand: 1 }); }
+    await Z(150);
+    T.renderOnce();
+    const after = cx2.getImageData(6, 6, 1, 1).data;
+    const dr = after[0] - before[0];
+    T.quit();
+    return dr > 6 || JSON.stringify({ dr, b: [before[0], before[1], before[2]], a: [after[0], after[1], after[2]] });
+  });
+
+  // U9908–U9910: 火山
+  await senseCheck("U9908 火山喷发成池", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.volcanoSetNow(5);
+    let n = 0;
+    for (let i = 0; i < 80; i++) { await Z(50); const lp = T.lavaPoolsNow(); if (lp.length) { n = lp.length; break; } }
+    T.quit();
+    return n >= 3 || JSON.stringify({ n });
+  });
+  await senseCheck("U9909 岩浆灼烧敌人", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.volcanoSetNow(5);
+    let lp = null;
+    for (let i = 0; i < 80; i++) { await Z(50); const l = T.lavaPoolsNow(); if (l.length) { lp = l[0]; break; } }
+    if (!lp) { T.quit(); return JSON.stringify({ nolava: 1 }); }
+    T.spawnFoeNow(lp.x - 14, lp.y - 14, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return JSON.stringify({ nofoe: 1 }); }
+    e.enterT = 0; e.hp = 9; e.maxHp = 9; e.freezeT = 9999;
+    e.x = lp.x - e.size / 2; e.y = lp.y - e.size / 2;
+    let hurt = false;
+    for (let i = 0; i < 120; i++) { await Z(60); e.x = lp.x - e.size / 2; e.y = lp.y - e.size / 2; if (e.hp < 9 || e.dead) { hurt = true; break; } if (!T.lavaPoolsNow().length) break; }
+    T.quit();
+    return hurt || JSON.stringify({ hp: e.hp });
+  });
+  await senseCheck("U9910 岩浆池衰减消散", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.volcanoSetNow(5);
+    let l0 = 0;
+    for (let i = 0; i < 80; i++) { await Z(50); const l = T.lavaPoolsNow(); if (l.length) { l0 = l[0].life; break; } }
+    await Z(600);
+    const l1arr = T.lavaPoolsNow();
+    const l1 = l1arr.length ? l1arr[0].life : -1;
+    T.quit();
+    return (l0 > 0 && l1 >= 0 && l1 < l0) || JSON.stringify({ l0, l1 });
+  });
+
+  // U9911–U9913: 天灾预警仪
+  await senseCheck("U9911 预警仪灯牌存在", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.disasterPillWrapNow();
+    T.quit();
+    return ok === true || JSON.stringify({ ok });
+  });
+  await senseCheck("U9912 预警仪显示陨石倒计时", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.meteorSetNow(300);
+    let txt = null;
+    for (let i = 0; i < 40; i++) { await Z(60); txt = T.disasterPillNow(); if (txt && txt.indexOf('☄') >= 0) break; }
+    T.quit();
+    return (txt && txt.indexOf('☄') >= 0) || JSON.stringify({ txt });
+  });
+  await senseCheck("U9913 预警仪无灾显横杠", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    let txt = null;
+    for (let i = 0; i < 40; i++) { await Z(80); txt = T.disasterPillNow(); if (txt === '—') break; }
+    T.quit();
+    return txt === '—' || JSON.stringify({ txt });
+  });
+
+  // U9914–U9916: 天灾关
+  await senseCheck("U9914 第9关为天灾关", (T,$) => {
+    T.startAtLevel(9); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const v = T.apocNow();
+    T.quit();
+    return v === true || JSON.stringify({ v });
+  });
+  await senseCheck("U9915 第8关非天灾关", (T,$) => {
+    T.startAtLevel(8); T.skipIntro(); T.invul(99999); T.stopSpawn();
+    const v = T.apocNow();
+    T.quit();
+    return v === false || JSON.stringify({ v });
+  });
+  await senseCheck("U9916 天灾关灾害加速流逝", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startAtLevel(9); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.meteorSetNow(9000);
+    await Z(150);
+    const t0 = T.disasterNow().meteorT;
+    await Z(500);
+    const t1 = T.disasterNow().meteorT;
+    const drain = t0 - t1;
+    T.quit();
+    return drain > 40 || JSON.stringify({ t0, t1, drain });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
