@@ -33086,6 +33086,34 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return found || JSON.stringify({ found });
   });
 
+  // U9974–U9976: 流派大师
+  await senseCheck("U9974 精通追踪记录", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('machine');
+    const lo = T.loadoutNow();
+    T.quit();
+    return (lo.masts && lo.masts.machine === false && lo.grand === false) || JSON.stringify({ lo });
+  });
+  await senseCheck("U9975 大师称号合成", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const lo = T.loadoutNow();
+    const ok = typeof lo.grand === 'boolean';
+    T.quit();
+    return ok || JSON.stringify({ lo });
+  });
+  await senseCheck("U9976 武器改装系统全貌", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const a = T.applyPowerupNow('machine');
+    const b = T.applyPowerupNow('heavy');
+    const c = T.applyPowerupNow('laser');
+    const lo = T.loadoutNow();
+    T.quit();
+    return (a && b && c && lo.t === 'laser') || JSON.stringify({ a, b, c, t: lo.t });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
