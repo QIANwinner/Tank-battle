@@ -32335,6 +32335,44 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return same || JSON.stringify({ ids });
   });
 
+  // U9920–U9922: 编队队形
+  await senseCheck("U9920 队形分配合法", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const sq = T.squadNow();
+    const ok = sq.length >= 1 && ['wedge', 'line', 'column'].indexOf(sq[0].formation) >= 0;
+    T.quit();
+    return ok || JSON.stringify({ sq });
+  });
+  await senseCheck("U9921 队员跟随队长", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const leader = en.find(x => x.isLeader);
+    const mem = en.find(x => !x.isLeader);
+    if (!leader || !mem) { T.quit(); return JSON.stringify({ nopair: 1 }); }
+    mem.x = leader.x + 260; mem.y = leader.y + 240; mem.enterT = 0; mem.freezeT = 0;
+    leader.freezeT = 9999;
+    const d0 = Math.hypot(mem.x - leader.x, mem.y - leader.y);
+    await Z(1600);
+    const d1 = Math.hypot(mem.x - leader.x, mem.y - leader.y);
+    T.quit();
+    return (d1 < d0 - 40) || JSON.stringify({ d0: Math.round(d0), d1: Math.round(d1) });
+  });
+  await senseCheck("U9922 队员数量完整", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId && !x.isLeader);
+    T.quit();
+    return (en.length >= 3) || JSON.stringify({ n: en.length });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
