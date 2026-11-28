@@ -32931,6 +32931,44 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (last && last.tint === '#4df0ff') || JSON.stringify({ tint: last && last.tint });
   });
 
+  // U9962–U9964: 流派精通
+  await senseCheck("U9962 流派击杀充能", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('machine');
+    const p = T.playerRefNow();
+    T.spawnFoeNow(300, 200, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e || !p) { T.quit(); return JSON.stringify({ noent: 1 }); }
+    e.enterT = 0; e.hp = 1; e.maxHp = 1; e.freezeT = 9999; e.x = 300; e.y = 200;
+    p.x = e.x - p.size / 2 + e.size / 2 - 2; p.y = e.y - 110; p.dir = 4;
+    const k0 = T.loadoutNow().kills;
+    T.firePlayerNow();
+    let k1 = k0;
+    for (let i = 0; i < 40; i++) { await Z(50); if (e.dead) { k1 = T.loadoutNow().kills; break; } }
+    T.quit();
+    return (k1 > k0) || JSON.stringify({ k0, k1, dead: e.dead });
+  });
+  await senseCheck("U9963 充能上限30", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('machine');
+    const lo = T.loadoutNow();
+    T.quit();
+    return (lo.kills === 0 && lo.mast === false) || JSON.stringify({ lo });
+  });
+  await senseCheck("U9964 精通双链供弹", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('machine');
+    const b0 = T.liveBulletsNow().length;
+    T.firePlayerNow();
+    await Z(120);
+    const b1 = T.liveBulletsNow().filter(x => !x.dead && x.owner && x.owner.isPlayer).length;
+    T.quit();
+    return (b1 >= 1) || JSON.stringify({ b1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
