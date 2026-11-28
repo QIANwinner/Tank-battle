@@ -32688,6 +32688,54 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (c1 < c0) || JSON.stringify({ c0, c1 });
   });
 
+  // U9944–U9946: 灭队嘉奖
+  await senseCheck("U9944 灭队触发嘉奖", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 3);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    for (const m of en) { m.hp = 1; m.freezeT = 9999; }
+    const g0 = T.coinsNow();
+    for (const m of en) { T.spawnBulletNow(m.x + m.size / 2 - 3, m.y - 40, 4, false); await Z(180); }
+    await Z(400);
+    const g1 = T.coinsNow();
+    const allDead = en.every(m => m.dead);
+    T.quit();
+    return (allDead && g1 >= g0 + 30) || JSON.stringify({ allDead, g0, g1 });
+  });
+  await senseCheck("U9945 嘉奖仅一次", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 3);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    for (const m of en) { m.hp = 1; m.freezeT = 9999; }
+    for (const m of en) { T.spawnBulletNow(m.x + m.size / 2 - 3, m.y - 40, 4, false); await Z(180); }
+    await Z(400);
+    const g1 = T.coinsNow();
+    await Z(600);
+    const g2 = T.coinsNow();
+    T.quit();
+    return (g2 === g1) || JSON.stringify({ g1, g2 });
+  });
+  await senseCheck("U9946 非灭队无嘉奖", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnSquadNow(300, 100, 'normal', 4);
+    await Z(120);
+    const en = T.r18enNow().filter(x => !x.dead && x.squadId);
+    const one = en.find(x => !x.isLeader);
+    if (!one) { T.quit(); return JSON.stringify({ noone: 1 }); }
+    const g0 = T.coinsNow();
+    one.hp = 1; one.freezeT = 9999;
+    T.spawnBulletNow(one.x + one.size / 2 - 3, one.y - 40, 4, false);
+    await Z(600);
+    const g1 = T.coinsNow();
+    T.quit();
+    return (g1 < g0 + 30) || JSON.stringify({ g0, g1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
