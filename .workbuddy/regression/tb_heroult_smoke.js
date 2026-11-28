@@ -32031,6 +32031,39 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (hurt && froze) || JSON.stringify({ hurt, froze, hp: e.hp, fz: e.freezeT });
   });
 
+  // U9896–U9898: 酸雨
+  await senseCheck("U9896 酸雨激活", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.acidSetNow(5);
+    let act = 0;
+    for (let i = 0; i < 60; i++) { await Z(50); const a = T.acidNow(); if (a.act > 0) { act = a.act; break; } }
+    T.quit();
+    return act > 0 || JSON.stringify({ act });
+  });
+  await senseCheck("U9897 酸雨腐蚀敌人", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnFoeNow(300, 200, 'normal');
+    const e = T.r18enNow().filter(x => !x.dead).pop();
+    if (!e) { T.quit(); return JSON.stringify({ nofoe: 1 }); }
+    e.enterT = 0; e.hp = 9; e.maxHp = 9; e.freezeT = 9999;
+    T.acidSetNow(5);
+    let hurt = false;
+    for (let i = 0; i < 160; i++) { await Z(60); if (e.hp < 9 || e.dead) { hurt = true; break; } if (T.acidNow().act <= 0 && i > 30) break; }
+    T.quit();
+    return hurt || JSON.stringify({ hp: e.hp, dead: e.dead });
+  });
+  await senseCheck("U9898 酸雨迟滞玩家", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.acidSetNow(5);
+    let chilled = false;
+    for (let i = 0; i < 120; i++) { await Z(60); if (T.chillNow() > 0) { chilled = true; break; } if (T.acidNow().act <= 0 && i > 20) break; }
+    T.quit();
+    return chilled || JSON.stringify({ chill: T.chillNow() });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;

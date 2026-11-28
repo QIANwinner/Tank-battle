@@ -1878,7 +1878,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.184</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.185</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -6584,6 +6584,36 @@
     } else poisonT = 0;
     // —— v1.2.126 寒冰减速衰减 ——
     if (chillT > 0) chillT = Math.max(0, chillT - k);
+    // —— v1.2.185 酸雨:6秒腐蚀 ——
+    if (acidRainT > 0 && multiMode !== 2) {
+      acidRainT -= k;
+      if (acidRainT <= 0) {
+        acidRainT = 0; acidActT = 360;
+        if (player) addText(clamp(player.x + TANK_SIZE / 2, 84, W - 84), player.y - 40, '🌧 酸雨!', '#8ce040');
+        showToast('🌧 酸雨降临！腐蚀全场');
+        beep(220, 0.3, 'triangle', 0.05);
+      }
+    }
+    if (acidActT > 0) {
+      const acPrev185 = acidActT;
+      acidActT -= k;
+      if (Math.floor(acPrev185 / 60) !== Math.floor(acidActT / 60)) {
+        for (const e of enemies) {
+          if (e.dead || e.enterT > 0) continue;
+          e.hp -= 1; e.hitFlash = 4; spawnParticles(e.x + e.size / 2, e.y + e.size / 2, '#8ce040', 3);
+          if (e.hp <= 0) { e.dead = true; onEnemyKilled(e); }
+        }
+        if (player && !player.dead) chillT = Math.max(chillT, 40);
+        let erode185 = 0, try185 = 0;
+        while (erode185 < 1 && try185 < 40) {
+          try185++;
+          const ax = randInt(1, COLS - 2), ay = randInt(1, ROWS - 2);
+          if (map[ay] && map[ay][ax] === TILE_BRICK && !isBaseWallTile(ax, ay) && rng() < 0.4) { map[ay][ax] = 0; erode185++; }
+        }
+        if (erode185) markMapDirty();
+      }
+      if (acidActT <= 0) acidRainT = __testMode ? 999999 : 2400 + rng() * 1200;
+    }
     // —— v1.2.184 雷暴:5秒8连落雷 ——
     if (thunderT > 0 && multiMode !== 2) {
       thunderT -= k;
@@ -7206,6 +7236,18 @@
     // —— w12deploys 链式锚点 ——
     drawNightVeil();   // —— v1.2.129 夜战帷幕 ——
     drawMeteorWarn();   // —— v1.2.182 陨石预警圈 ——
+    if (running && acidActT > 0) {   // —— v1.2.185 酸雨幕 ——
+      ctx.save();
+      ctx.fillStyle = 'rgba(140,224,64,0.07)';
+      ctx.fillRect(0, 0, W, H);
+      ctx.strokeStyle = 'rgba(140,224,64,0.28)';
+      ctx.lineWidth = 1;
+      const off185 = (acidActT * 7) % 24;
+      for (let rx185 = 0; rx185 < W; rx185 += 26) {
+        ctx.beginPath(); ctx.moveTo(rx185, -24 + off185); ctx.lineTo(rx185 - 8, 8 + off185); ctx.stroke();
+      }
+      ctx.restore();
+    }
     if (running && thunderStrikes.length) {   // —— v1.2.184 落雷闪光 ——
       ctx.save();
       for (const s184d of thunderStrikes) {
@@ -28422,7 +28464,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.184', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.185', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';
