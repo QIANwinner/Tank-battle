@@ -33007,6 +33007,38 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return true;
   });
 
+  // U9968–U9970: 机枪过热
+  await senseCheck("U9968 连射升温", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('machine');
+    const h0 = T.loadoutNow().heat;
+    T.firePlayerNow();
+    const h1 = T.loadoutNow().heat;
+    T.quit();
+    return (h1 > h0) || JSON.stringify({ h0, h1 });
+  });
+  await senseCheck("U9969 过热触发锁闭", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('machine');
+    for (let i = 0; i < 20; i++) T.firePlayerNow();
+    const lo = T.loadoutNow();
+    T.quit();
+    return (lo.heat >= 100 && lo.lock > 0) || JSON.stringify({ lo });
+  });
+  await senseCheck("U9970 热量随时间衰减", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.loadoutSetNow('machine');
+    T.firePlayerNow();
+    const h0 = T.loadoutNow().heat;
+    await Z(900);
+    const h1 = T.loadoutNow().heat;
+    T.quit();
+    return (h1 < h0) || JSON.stringify({ h0, h1 });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
