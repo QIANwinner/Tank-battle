@@ -32251,6 +32251,31 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (l0 > 0 && l1 >= 0 && l1 < l0) || JSON.stringify({ l0, l1 });
   });
 
+  // U9911–U9913: 天灾预警仪
+  await senseCheck("U9911 预警仪灯牌存在", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const ok = T.disasterPillWrapNow();
+    T.quit();
+    return ok === true || JSON.stringify({ ok });
+  });
+  await senseCheck("U9912 预警仪显示陨石倒计时", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.meteorSetNow(300);
+    let txt = null;
+    for (let i = 0; i < 40; i++) { await Z(60); txt = T.disasterPillNow(); if (txt && txt.indexOf('☄') >= 0) break; }
+    T.quit();
+    return (txt && txt.indexOf('☄') >= 0) || JSON.stringify({ txt });
+  });
+  await senseCheck("U9913 预警仪无灾显横杠", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    let txt = null;
+    for (let i = 0; i < 40; i++) { await Z(80); txt = T.disasterPillNow(); if (txt === '—') break; }
+    T.quit();
+    return txt === '—' || JSON.stringify({ txt });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
