@@ -1878,7 +1878,7 @@
       <button id="errReload">立即刷新</button>
     </div>
   </div>
-  <div id="mark">DESIGNED BY QIAN · V1.2.178</div>
+  <div id="mark">DESIGNED BY QIAN · V1.2.179</div>
 
   <div id="upgradeBox">
     <div class="upTitle">关卡完成 · 强化三选一</div>
@@ -4546,6 +4546,12 @@
     shake = Math.max(shake, 8);
     showToast(bossSkillMsg('😡', '狂暴怒吼'));
   }
+  // —— v1.2.179 堡垒王:全环扫射(被动旋转在updateBoss) ——
+  function fortressSkill(e) {
+    ringShot(e);
+    spawnParticles(e.x + e.size / 2, e.y + e.size / 2, '#8fa3bf', 8);
+    showToast(bossSkillMsg('🏰', '全环扫射'));
+  }
   function summonMinions(e) {
     const n = level >= 15 ? 2 : 1;
     let added = 0;
@@ -4936,10 +4942,14 @@
     }
     // 追踪玩家（v0.2.7 双人：锁定最近玩家）
     const tp = nearestPlayerTo(e.x, e.y);
-    if (tp) {
+    if (tp && e.bossId !== 'fortress') {   // —— v1.2.179 堡垒王不追踪 ——
       e.dir = dirFromVec(
         (tp.x + TANK_SIZE / 2) - (e.x + e.size / 2),
         (tp.y + TANK_SIZE / 2) - (e.y + e.size / 2));
+    }
+    if (e.bossId === 'fortress') {   // —— v1.2.179 堡垒旋转扫射 ——
+      e.fortT = (e.fortT || 0) + k;
+      if (e.fortT >= 30) { e.fortT = 0; e.dir = (e.dir + 1) % 8; }
     }
     e.speed = e.phase >= 1 ? bossType.speed * 1.4 : bossType.speed;   // 类型基准速度 × 狂暴加速
     if (!moveTank(e, k)) e.dir = pickFreeDir(e);
@@ -28250,7 +28260,7 @@ function dangerClass(lives) { return lives <= 1 ? 'danger' : ''; }
     g.fillStyle = _gl; roundRect(g, W2 / 2 - 140, H2 - 126, 280, 10, 5); g.fill();
     g.fillStyle = '#0a0e1a'; g.font = '800 15px "Segoe UI", sans-serif';
     g.fillText('生涯评级 ' + _grade, W2 / 2, H2 - 100);
-    g.fillText('DESIGNED BY QIAN · V1.2.178', W2 / 2, H2 - 78);
+    g.fillText('DESIGNED BY QIAN · V1.2.179', W2 / 2, H2 - 78);
     const d = new Date(S.date || Date.now());
     const ds = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
     g.fillStyle = 'rgba(90, 106, 138, 0.7)';

@@ -31796,6 +31796,43 @@ await senseCheck("U9841 干扰下射速减半", async (T,$) => {
     return (n >= 6) || JSON.stringify({ n });
   });
 
+  // U9878–U9880: 堡垒王
+  await senseCheck("U9878 堡垒王Boss已注册", (T,$) => {
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    const id = T.spawnBossAsNow('fortress');
+    T.quit();
+    return (id === 'fortress') || JSON.stringify({ id });
+  });
+  await senseCheck("U9879 堡垒王不动", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('fortress');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200;
+    const x0 = b.x, y0 = b.y;
+    for (let i = 0; i < 18; i++) await Z(100);
+    const moved = Math.hypot(b.x - x0, b.y - y0);
+    T.quit();
+    return (moved < 3) || JSON.stringify({ moved: Math.round(moved) });
+  });
+  await senseCheck("U9880 堡垒炮塔旋转", async (T,$) => {
+    const Z = ms => new Promise(r => setTimeout(r, ms));
+    T.startGame(); T.skipIntro(); T.invul(99999); T.stopSpawn(); T.clearMap();
+    T.spawnBossAsNow('fortress');
+    const b = T.bossNow();
+    if (!b) { T.quit(); return 'no boss'; }
+    b.enterT = 0; b.y = 200;
+    const dirs = new Set();
+    for (let i = 0; i < 25; i++) {
+      await Z(90);
+      dirs.add(b.dir);
+      if (dirs.size >= 3) break;
+    }
+    T.quit();
+    return (dirs.size >= 3) || JSON.stringify({ dirs: dirs.size });
+  });
+
   chrome.kill(); killTree(chrome.pid);
 
   let pass = 0, fail = 0;
